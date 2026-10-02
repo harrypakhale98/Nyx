@@ -1,0 +1,71 @@
+{
+  "build": {
+    "actionTitle": "Testing project Nyx with scheme Nyx",
+    "analyzerWarningCount": 0,
+    "analyzerWarnings": [],
+    "destination": {
+      "architecture": "arm64",
+      "deviceId": "4B98F460-8228-4B8B-8626-2BE43641E876",
+      "deviceName": "iPhone 17 Pro",
+      "modelName": "iPhone 17 Pro",
+      "osBuildNumber": "23F73",
+      "osVersion": "26.5",
+      "platform": "iOS Simulator"
+    },
+    "endTime": 1790983524.151,
+    "errorCount": 0,
+    "errors": [],
+    "startTime": 1790983396.191,
+    "status": "succeeded",
+    "warningCount": 0,
+    "warnings": []
+  },
+  "tests": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "4B98F460-8228-4B8B-8626-2BE43641E876",
+          "deviceName": "iPhone 17 Pro",
+          "modelName": "iPhone 17 Pro",
+          "osBuildNumber": "23F73",
+          "osVersion": "26.5",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 17,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "Nyx \u00b7 Built with macOS 27.2",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1790983524.151,
+    "passedTests": 17,
+    "result": "Passed",
+    "runtimeWarnings": [],
+    "skippedTests": 0,
+    "startTime": 1790983396.191,
+    "statistics": [
+      {
+        "subtitle": "1 test run",
+        "title": "1 test collected performance metrics"
+      }
+    ],
+    "testFailures": [],
+    "title": "Test - Nyx",
+    "topInsights": [
+      {
+        "category": "Longest Test Runs",
+        "impact": "42% of duration",
+        "text": "1 longest test run with outlier durations exceeding 0.12s (three standard deviations)"
+      }
+    ],
+    "totalTestCount": 17
+  }
+}

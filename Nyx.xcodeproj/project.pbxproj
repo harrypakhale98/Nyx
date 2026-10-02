@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		026AB131C2647FF749083BC7 /* NyxIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */; };
+		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
@@ -20,6 +21,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1042073ABA0CEA0053190CA6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0A5547B7F4020EE942D01DA6;
+			remoteInfo = Nyx;
+		};
 		8D553FD79B3891F7AB06AE98 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
@@ -54,12 +62,14 @@
 		0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0B8CFEEF4D0FA553056E4D4D /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = parks.json; sourceTree = "<group>"; };
 		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightWidgetView.swift; sourceTree = "<group>"; };
 		7A820E0228800E1EC62C207A /* SkyConditions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyConditions.swift; sourceTree = "<group>"; };
 		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
 		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyxIntents.swift; sourceTree = "<group>"; };
 		E051542A3954F87E88506B77 /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,17 +78,38 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7A5BE32B9081D66DE8C152A9 /* Nyx */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = Nyx;
 			sourceTree = "<group>";
 		};
 		7FBCE4E226E945E14F5B033B /* NyxWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = NyxWidgets;
 			sourceTree = "<group>";
 		};
 		91BEC42ACC3D532DD1C25BC2 /* NyxTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = NyxTests;
+			sourceTree = "<group>";
+		};
+		C9A570BE0B74B70D0E2873A4 /* NyxUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -107,9 +138,10 @@
 		569B78DBBD2892F506E07B16 = {
 			isa = PBXGroup;
 			children = (
-				572A8226324E98790B53E82D /* Nyx */,
 				7A5BE32B9081D66DE8C152A9 /* Nyx */,
+				572A8226324E98790B53E82D /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
+				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
 				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
 				C6C977DAF6E4DA8EAE489090 /* Products */,
 			);
@@ -118,6 +150,7 @@
 		572A8226324E98790B53E82D /* Nyx */ = {
 			isa = PBXGroup;
 			children = (
+				BA145519602F4507E881CF90 /* DesignSystem */,
 				7A67972A0617F309B1FD0407 /* Intents */,
 				760258CCF55DD0094C511477 /* Models */,
 				3012C7130E736DD7E6A0B52B /* Resources */,
@@ -143,11 +176,20 @@
 			path = Intents;
 			sourceTree = "<group>";
 		};
+		BA145519602F4507E881CF90 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
 		C6C977DAF6E4DA8EAE489090 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				AA589DE85797E6C559AB746B /* Nyx.app */,
 				3883DF0B22709FB826986A9C /* NyxTests.xctest */,
+				C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */,
 				FA5B722D8576099210CEB8CA /* NyxWidgets.appex */,
 			);
 			name = Products;
@@ -200,6 +242,28 @@
 			productReference = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		35EEA7F15A5144F18CBA3158 /* NyxUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED4CF400F3DBEF5B4643E617 /* Build configuration list for PBXNativeTarget "NyxUITests" */;
+			buildPhases = (
+				E86B5928E777CA9F5C1DB1CF /* Sources */,
+				6D98CEA6E9B261416440E889 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F517AB2382ED8132739B40A7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
+			);
+			name = NyxUITests;
+			packageProductDependencies = (
+			);
+			productName = NyxUITests;
+			productReference = C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		854F1CAF019EEA9E852C4585 /* NyxTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 95D139A2BAA0499000AEA765 /* Build configuration list for PBXNativeTarget "NyxTests" */;
@@ -239,6 +303,11 @@
 						DevelopmentTeam = DUHVN68KBA;
 						ProvisioningStyle = Automatic;
 					};
+					35EEA7F15A5144F18CBA3158 = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 0A5547B7F4020EE942D01DA6;
+					};
 					854F1CAF019EEA9E852C4585 = {
 						DevelopmentTeam = DUHVN68KBA;
 						ProvisioningStyle = Automatic;
@@ -262,11 +331,19 @@
 				0A5547B7F4020EE942D01DA6 /* Nyx */,
 				1C08AA3770ABC4BE10D980C7 /* NyxWidgets */,
 				854F1CAF019EEA9E852C4585 /* NyxTests */,
+				35EEA7F15A5144F18CBA3158 /* NyxUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6D98CEA6E9B261416440E889 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		764F4B1206D3D4F22ABA4C57 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,6 +395,14 @@
 				F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */,
 				F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */,
 				7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */,
+				177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E86B5928E777CA9F5C1DB1CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +418,11 @@
 			isa = PBXTargetDependency;
 			target = 0A5547B7F4020EE942D01DA6 /* Nyx */;
 			targetProxy = E3EC165FDA5FCED4094FB540 /* PBXContainerItemProxy */;
+		};
+		F517AB2382ED8132739B40A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0A5547B7F4020EE942D01DA6 /* Nyx */;
+			targetProxy = 1042073ABA0CEA0053190CA6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -364,7 +454,7 @@
 				PRODUCT_NAME = Nyx;
 				SDKROOT = iphoneos;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -395,7 +485,7 @@
 				PRODUCT_NAME = Nyx;
 				SDKROOT = iphoneos;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -411,7 +501,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nyx.app/Nyx";
 			};
 			name = Debug;
@@ -424,16 +514,46 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		83E045E4B4896DCF84D38C73 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Nyx;
+			};
+			name = Debug;
+		};
+		9AF55E08FC048C0E40968C66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Nyx;
 			};
 			name = Release;
 		};
@@ -449,7 +569,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nyx.app/Nyx";
 			};
 			name = Release;
@@ -605,16 +725,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -653,6 +769,15 @@
 			buildConfigurations = (
 				311460C3516466BB9AB49E67 /* Debug */,
 				1DF95B234AD110CC5265BE3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ED4CF400F3DBEF5B4643E617 /* Build configuration list for PBXNativeTarget "NyxUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83E045E4B4896DCF84D38C73 /* Debug */,
+				9AF55E08FC048C0E40968C66 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

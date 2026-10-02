@@ -5,7 +5,9 @@ struct NyxPalette {
     let highContrast: Bool
     var ink: Color { nightVision ? .white : Color(red:0.961,green:0.945,blue:0.902) }
     var accent: Color { nightVision ? ink : Color(red:1,green:0.706,blue:0.329) }
-    var muted: Color { ink.opacity(highContrast || nightVision ? 0.9 : 0.72) }
+    // Filled tracks must remain distinct from the white system thumb after the red filter.
+    var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
+    var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
     var panel: Color { nightVision ? Color(red:0.07,green:0.008,blue:0.005) : Color(red:0.043,green:0.063,blue:0.149) }
     var line: Color { ink.opacity(highContrast ? 0.6 : 0.22) }
 }
@@ -29,9 +31,10 @@ struct Panel<Content: View>: View {
     }
 }
 struct Eyebrow: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
-    var body: some View { Text(text).font(.caption.weight(.medium)).tracking(2.4).textCase(.uppercase).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
+    var body: some View { Text(text).font(.caption.weight(.medium)).tracking(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
 }
 struct NightBackground: View {
     var seed: String="nyx"
@@ -57,7 +60,7 @@ struct CalmState: View {
 struct NightVisionFilter: ViewModifier {
     let enabled:Bool
     @ViewBuilder func body(content:Content)->some View {
-        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? Color(red:1,green:0.56,blue:0.51) : .white)
+        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? Color(red:1,green:0.27,blue:0.23) : .white)
     }
 }
 

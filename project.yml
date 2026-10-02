@@ -40,6 +40,7 @@ targets:
       - target: NyxWidgets
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
         PRODUCT_NAME: Nyx
         GENERATE_INFOPLIST_FILE: YES
@@ -62,6 +63,7 @@ targets:
     platform: iOS
     sources:
       - path: NyxWidgets
+      - path: Nyx/DesignSystem/TonightWidgetView.swift
       - path: Nyx/Models/Park.swift
       - path: Nyx/Models/SkyConditions.swift
       - path: Nyx/Services/AstronomyEngine.swift
@@ -78,6 +80,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.widgets
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
@@ -95,17 +98,33 @@ targets:
       - target: Nyx
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.tests
         GENERATE_INFOPLIST_FILE: YES
+  NyxUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: NyxUITests
+    dependencies:
+      - target: Nyx
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Nyx
 schemes:
   Nyx:
     build:
       targets:
         Nyx: all
         NyxTests: [test]
+        NyxUITests: [test]
     test:
       targets:
         - NyxTests
+        - NyxUITests
     run:
       config: Debug
     archive:

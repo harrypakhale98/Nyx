@@ -4,7 +4,10 @@ struct ShareCard:View {
     let night:Night
     var body:some View {
         ZStack { NightBackground(seed:night.park.id);VStack(spacing:18) { Text("NYX").font(.caption).tracking(7);CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast);Text(night.park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center);Text(night.park.dayLabel(night.id)).font(.subheadline);Text(night.score.hasForecast ? String(localized:"Forecast included · conditions may change") : String(localized:"Moon and darkness only · clouds unknown")).font(.caption).multilineTextAlignment(.center) }.padding(40) }.frame(width:420,height:580)
+            // This is fixed-size exported artwork, with a complete spoken alternative.
+            .dynamicTypeSize(.large).accessibilityElement(children:.ignore).accessibilityLabel(summary)
     }
+    var summary:String { String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included · conditions may change") : String(localized:"Moon and darkness only · clouds unknown"))") }
 }
 struct ShareCardButton:View {
     @Environment(\.nyx) private var palette
@@ -14,7 +17,7 @@ struct ShareCardButton:View {
         Group {
             if let rendered { ShareLink(item:rendered,preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:rendered)) { Label("Share this night",systemImage:"square.and.arrow.up") } }
             else { Button("Prepare share card") { render() } }
-        }.buttonStyle(.bordered).task(id:night.id.description+String(night.score.value)+String(palette.nightVision)) { render() }
+        }.buttonStyle(.bordered).accessibilityValue(ShareCard(night:night).summary).task(id:night.id.description+String(night.score.value)+String(palette.nightVision)) { render() }
     }
     private func render() {
         let card=ShareCard(night:night).environment(\.nyx,palette).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark)

@@ -1,0 +1,43 @@
+{
+  "scenario": "iOS 26.5 / iPhone 17 Pro, Debug detail, offline, static interaction, decorative animation active",
+  "traceDurationSeconds": 15.794002,
+  "nyxSamples": 3571,
+  "nyxMainThreadSamples": 1853,
+  "sampledCPUSeconds": 3.571,
+  "hangEventsOver250ms": 0,
+  "topLeafFrames": [
+    [
+      "vSepConvolveARGB8bgf_vec",
+      1326
+    ],
+    [
+      "start_wqthread",
+      190
+    ],
+    [
+      "mach_msg2_trap",
+      143
+    ],
+    [
+      "vVertical_Shear_ARGB_8888",
+      134
+    ],
+    [
+      "argb32_sample_argb32",
+      129
+    ],
+    [
+      "objc_msgSend",
+      81
+    ],
+    [
+      "vHorizontal_Shear_ARGB_8888",
+      67
+    ],
+    [
+      "madvise",
+      62
+    ]
+  ],
+  "limitations": "Sampling estimate, no scrolling/scrubbing exercised, no hardware FPS or energy conclusion"
+}

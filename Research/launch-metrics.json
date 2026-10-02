@@ -1,0 +1,30 @@
+{
+  "26": {
+    "metric": "ApplicationFirstFramePresentationResponsive",
+    "averageSeconds": 2.179,
+    "valuesSeconds": [
+      2.135947,
+      2.251374,
+      2.150919
+    ],
+    "configuration": "Debug, offline in-memory SwiftData, Reduce Motion review override",
+    "unitTests": 15,
+    "UITests": 2,
+    "buildWarnings": 0,
+    "failures": 0
+  },
+  "27": {
+    "metric": "ApplicationFirstFramePresentationResponsive",
+    "averageSeconds": 3.756,
+    "valuesSeconds": [
+      3.731682,
+      3.693452,
+      3.842412
+    ],
+    "configuration": "Debug, offline in-memory SwiftData, Reduce Motion review override",
+    "unitTests": 15,
+    "UITests": 2,
+    "buildWarnings": 0,
+    "failures": 0
+  }
+}

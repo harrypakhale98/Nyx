@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Project a lit sphere. cos(phase angle) gives the terminator ellipse;
 /// strips preserve the crescent/gibbous geometry, including both hemispheres.
-struct MoonDisc: View {
+struct MoonDisc: View, Animatable {
+    var animatableData: Double { get { illumination } set { illumination=newValue } }
     @Environment(\.nyx) private var palette
     var illumination: Double
     var waxing: Bool

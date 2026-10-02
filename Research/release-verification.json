@@ -1,0 +1,16 @@
+{
+  "deviceFamily": [
+    1
+  ],
+  "version": "1.0",
+  "build": "1",
+  "bundledManifests": 2,
+  "runtimeHTTPHosts": [
+    "developer.nps.gov",
+    "api.open-meteo.com"
+  ],
+  "runtimePackages": 0,
+  "catalogKeys": 325,
+  "privacyDeclaration": "UNRESOLVED \u2014 publisher review required",
+  "signing": "development-signed Release; App Store export/validation pending"
+}

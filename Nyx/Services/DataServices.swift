@@ -48,6 +48,8 @@ nonisolated struct Forecast: Codable, Sendable {
     /// Overlap-weighted hourly mean; a partial forecast is never treated as full.
     func mean(from start: Date?, to end: Date?, now: Date = .now) -> Double? {
         guard let start, let end, end>start, now.timeIntervalSince(updated)<36*3600 else { return nil }
+        guard times.count==clouds.count, times.allSatisfy(\.isFinite),
+              zip(times,times.dropFirst()).allSatisfy({ abs($1-$0-3600)<0.1 }) else { return nil }
         var weight = 0.0, sum = 0.0
         for (i,t) in times.enumerated() where i<clouds.count {
             let overlap = min(end.timeIntervalSince1970,t+3600)-max(start.timeIntervalSince1970,t)

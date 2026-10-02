@@ -13,6 +13,7 @@ struct RootView:View {
     @AppStorage("onboardingComplete") private var onboarded=false
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @State private var savedUpdating=false
     @State private var tab=0
     @State private var intro=false
@@ -54,10 +55,10 @@ struct RootView:View {
             intro = !onboarded && DebugScenario.screen == nil
             coldReveal = !systemReduceMotion && !DebugScenario.isEnabled("reduce-motion")
             try? await Task.sleep(for:.milliseconds(900));withAnimation(systemReduceMotion ? nil : NyxMotion.spring) { coldReveal=false }
-            await SpotlightIndexer.index(model.parks)
-            await updateSaved()
+            if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
         .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await updateSaved() } } }
+        .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             launchParkID=activity.userInfo?[CSSearchableItemActivityIdentifier] as? String
@@ -77,8 +78,10 @@ struct RootView:View {
         case "data": AboutDataView()
         case "article": EssayView(essay:.darkness)
         case "ask": GuideView(mode:.planning)
-        case "skyarc": if let park=model.home { Panel { SkyArc(night:model.night(park)) }.padding(24).background(NightBackground()) }
-        case "river": if let park=model.home { Panel { TimeRiver(nights:model.nights(park,from:model.today,count:30),selected:.constant(model.today)) }.padding(24).background(NightBackground()) }
+        case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false))
+        case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
+        case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park)) }.padding(24) }.background(NightBackground()) }
+        case "river": if let park=model.home { ScrollView { Panel { TimeRiver(nights:DebugScenario.state=="empty" ? [] : model.nights(park,from:model.today,count:30),selected:.constant(model.today)) }.padding(24) }.background(NightBackground()) }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())
@@ -96,16 +99,25 @@ struct RootView:View {
         return renderer.uiImage.map{Image(uiImage:$0).renderingMode(.template)} ?? Image(systemName:"moon")
     }
     private func updateSaved() async {
-        guard !savedUpdating else { return };savedUpdating=true;defer { savedUpdating=false }
+        guard DebugScenario.screen == nil, !savedUpdating else { return }
+        let initialIDs=saved.map(\.parkID)
+        savedUpdating=true
+        defer {
+            savedUpdating=false
+            if saved.map(\.parkID) != initialIDs { Task { await updateSaved() } }
+        }
         let parks=saved.compactMap{model.park($0.parkID)}
         await model.refresh(parks)
-        SharedSettings.write(SavedSkySnapshot(parks:parks,forecasts:model.forecasts))
+        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts)
+        SharedSettings.write(snapshot)
         WidgetCenter.shared.reloadAllTimelines()
-        if UserDefaults.standard.bool(forKey:"notificationsEnabled") {
-            let nights=parks.flatMap{model.nights($0,from:model.today,count:14)}
+        if notificationsEnabled {
+            let today=model.today
+            let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
+            guard notificationsEnabled else { return }
             let scheduler=NotificationScheduler()
             await scheduler.reschedule(nights:nights)
-            if let first=scheduler.plans(nights:nights).first, OnDeviceGuide.available {
+            if let first=scheduler.plans(nights:nights).first, OnDeviceGuide.available, await SystemNotifications().pendingIDs().contains(first.id) {
                 let quiet=await OnDeviceGuide.reminderStyle(parkName:model.park(first.parkID)?.shortName ?? "")
                 if quiet,UserDefaults.standard.bool(forKey:"notificationsEnabled") {
                     let title=String(localized:"A night to consider at \(model.park(first.parkID)?.shortName ?? "")")

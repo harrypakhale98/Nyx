@@ -1,0 +1,20 @@
+[
+  {
+    "palette": "Normal",
+    "primaryOnPanel": 16.66,
+    "secondaryOnPanel": 8.89,
+    "primaryOnBlack": 18.61
+  },
+  {
+    "palette": "Night vision",
+    "primaryOnPanel": 5.62,
+    "secondaryOnPanel": 5.26,
+    "primaryOnBlack": 6.16
+  },
+  {
+    "palette": "Filled controls",
+    "blackOnAmber": 11.91,
+    "blackOnSignalRed": 6.16,
+    "redThumbOnDarkTrack": 4.95
+  }
+]

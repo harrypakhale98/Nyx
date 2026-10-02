@@ -11,7 +11,41 @@ struct CelestialGauge: View {
     @State private var shown=0
     @State private var milestone=0
     var body: some View {
-        ZStack {
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(spacing:16) {
+                    ZStack { orbit; numeral }.frame(width:220,height:220)
+                    band
+                    units
+                }.frame(maxWidth:.infinity)
+            } else {
+                ZStack { orbit;VStack(spacing:5) { numeral;band;units.padding(.top,8) } }
+                    .frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
+            }
+        }
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"Moon and darkness only. Cloud forecast unavailable."))")
+        .task(id:score) {
+            if reduceMotion { shown=score; return }
+            shown=0
+            for value in stride(from:0,through:score,by:2) {
+                if Task.isCancelled { return }
+                withAnimation(NyxMotion.spring) { shown=value }
+                if value==70 || value==90 { milestone=value }
+                try? await Task.sleep(for:.milliseconds(12))
+            }
+            withAnimation(NyxMotion.spring) { shown=score }
+        }
+        .sensoryFeedback(.impact(weight:.medium),trigger:milestone)
+    }
+    private var numeral:some View {
+        Text(reduceMotion ? score : shown,format:.number)
+            .font(.system(size:typeSize.isAccessibilitySize ? 82 : 108,weight:.light,design:.serif)).tracking(-5)
+            .foregroundStyle(palette.accent).contentTransition(.numericText())
+    }
+    private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    private var orbit:some View {
             TimelineView(.animation(minimumInterval:1/20,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
                 Canvas { context,size in
                     let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
@@ -37,29 +71,11 @@ struct CelestialGauge: View {
                     }
                 }
             }.accessibilityHidden(true)
-            VStack(spacing:5) {
-                Text(reduceMotion ? score : shown,format:.number).font(.system(size:typeSize.isAccessibilitySize ? 82 : 108,weight:.light,design:.serif)).tracking(-5)
-                    .foregroundStyle(palette.accent).contentTransition(.numericText())
-                Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-                Text("DARKNESS / 100").font(.caption2).tracking(2.5).foregroundStyle(palette.muted).padding(.top,8)
-            }
-        }.frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
-        .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"Moon and darkness only. Cloud forecast unavailable."))")
-        .task(id:score) {
-            if reduceMotion { shown=score; return }
-            shown=0
-            for value in stride(from:0,through:score,by:2) {
-                if Task.isCancelled { return }
-                withAnimation(NyxMotion.spring) { shown=value }
-                if value==70 || value==90 { milestone=value }
-                try? await Task.sleep(for:.milliseconds(12))
-            }
-            withAnimation(NyxMotion.spring) { shown=score }
-        }
-        .sensoryFeedback(.impact(weight:.medium),trigger:milestone)
     }
+
 }
 #Preview("Pristine") { CelestialGauge(score:94).background(.black) }
 #Preview("No forecast • still • AX5") { CelestialGauge(score:82,hasForecast:false).environment(\.nyxReduceMotion,true).dynamicTypeSize(.accessibility5).background(.black) }
 #Preview("Poor") { CelestialGauge(score:23).background(.black) }
+
+#Preview("Good • Fair") { HStack { CelestialGauge(score:65);CelestialGauge(score:45,hasForecast:false) }.environment(\.nyxReduceMotion,true).background(.black) }

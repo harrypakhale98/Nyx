@@ -15,9 +15,9 @@ struct JournalView: View {
             VStack(alignment:.leading,spacing:24) {
                 Eyebrow(text:"Keep a little of the night")
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
-                if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).frame(maxWidth:.infinity) }
+                if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
                 else {
-                    ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(entry.date,format:.dateTime.month(.abbreviated).day().year()).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } }
+                    ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } }
                     if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
                 }
             }.padding(24)
@@ -37,7 +37,13 @@ struct JournalView: View {
     var loadingPhotos=false
     var error:String?
     var saved=false
-    init(entry:JournalEntry?=nil) { if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos } }
+    init(entry:JournalEntry?=nil) {
+        if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos }
+        #if DEBUG
+        if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
+        if DebugScenario.state=="photo",let image=UIImage(named:"LaunchStars")?.pngData() { photos=[image] }
+        #endif
+    }
     func load(_ items:[PhotosPickerItem]) async {
         loadingPhotos=true;defer { loadingPhotos=false }
         for item in items.prefix(max(0,4-photos.count)) {
@@ -67,21 +73,23 @@ struct JournalEditorView:View {
         @Bindable var editor=editor
         Form {
             Section("The night") {
-                DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date)
+                DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
                 Picker("Park",selection:$editor.parkID) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
-                Stepper("Observed Bortle: \(editor.observedBortle)",value:$editor.observedBortle,in:1...9)
+                Stepper(value:$editor.observedBortle,in:1...9) {
+                    Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
+                }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
                 Text("Your estimate of artificial sky brightness. Class 1 is darkest.").font(.caption).foregroundStyle(palette.muted)
             }
             Section("What you noticed") { TextEditor(text:$editor.notes).frame(minHeight:160).accessibilityLabel("Observation notes") }
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
-                    HStack { if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFill().frame(width:80,height:80).clipped().accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(index+1)") };Spacer();Button("Remove photo",role:.destructive) { editor.photos.remove(at:index) } }
+                    HStack { if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFill().frame(width:80,height:80).clipped().accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(index+1)") };Spacer();Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent) } }
                 }
                 if editor.loadingPhotos { ProgressView("Adding photo") }
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,4-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=4 || editor.loadingPhotos)
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone.").foregroundStyle(palette.muted) }
-            if let error=editor.error { Section { Text(error).foregroundStyle(.red) } }
-        }.navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+            if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
+        }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { dismiss() } }.disabled(editor.loadingPhotos) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
@@ -93,7 +101,7 @@ struct JournalDetailView:View {
     let entry:JournalEntry
     @State private var editing=false
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(entry.date,format:.dateTime.month(.wide).day().year());Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } } }.sheet(isPresented:$editing) { NavigationStack { JournalEditorView(existing:entry) }.nyxPresentation() }
     }
 }
