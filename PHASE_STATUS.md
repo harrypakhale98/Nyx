@@ -1,21 +1,37 @@
 # Nyx handoff — 2026-10-02
 
-## Integrated checkpoint: Phases 0–6b
+## Engineering checkpoint: Phases 0–7 implemented
 
-Implemented the 63-park inventory, offline astronomy and score engines, native five-tab app, celestial components, calendar/time river, saved parks, local reminders, SwiftData journal/photos, onboarding, settings/privacy/data screens, Learn essays, share cards, App Intents/Spotlight, widgets/Control Center, and availability-gated Foundation Models enhancements. XcodeGen remains the project source of truth. App and extension use only Apple frameworks.
+The source app and widget extension are complete for release review. The integrated feature checkpoint is `5b94bfe`; audit commit `778b3fb` contains final repairs, test evidence, screenshot artwork and submission documentation. This is not yet authorization to submit: the publisher and physical-device gates below remain open.
 
-Both requested simulator test runs pass: iOS 26.5 / iPhone 17 Pro and iOS 27.0 / iPhone 18 Pro, 12 Swift Testing tests, zero compiler warnings. Independent USNO fixtures: solar/civil twilight maximum error 0.47 minutes; moonrise/set maximum error 3.72 minutes. See `Research/accuracy.md` for individual cases and limits.
+Implemented: all 63 national parks; offline astronomy and Darkness Score; native five-tab navigation; celestial gauge, moon, sky arc, calendar and time river; manual/location-based Tonight planning; saved parks and local reminders; SwiftData journal with selected photos; onboarding; privacy/data/settings; three Learn essays; share cards; widgets and Control Center control; App Intents/Spotlight; availability-gated on-device Foundation Models. XcodeGen remains the project source of truth. There are no third-party runtime dependencies or remote AI calls.
 
-Initial screenshot critique fixed three weaknesses: Tonight's park identity appeared below its score; the phase tab icon had an opaque full-disc silhouette; calendar cells were too compact at AX5. Further fixes cover the radius picker, red native controls and calendar sheet theme, reduced-transparency panels, and park-local calendar headings.
+## Final verification
 
-## Deliberate limitations / human gates
+| Gate | Evidence |
+|---|---|
+| iPhone 17 Pro / iOS 26.5 | 15 Swift Testing + 2 native UI tests pass; zero failures and build/analyzer warnings |
+| iPhone 18 Pro / iOS 27.0 | Same 17 tests pass; zero failures and build/analyzer warnings |
+| Release | Development-signed archive succeeds; signatures validate; app and widget contain the correct App Group and privacy manifests; iPhone portrait only |
+| Astronomy | 27 solar/civil-twilight samples: max 0.47 min error; 18 lunar rise/set samples: max 3.72 min; explicit polar/tropical/DST tests. Astronomical twilight has no separate independent published fixture |
+| Visual review | 182 QA captures across both runtimes; actual Simulator AX5 and Increase Contrast; loading, empty, error, offline, unknown clouds, polar, red and reduced-motion review states |
+| Store artwork | Six visually reviewed native 1320×2868 drafts; illustrative journal and real computed scores with uncertainty retained |
+| Performance | Native launch means 2.179 s / 3.756 s in the documented Debug review scenario; 15.794 s active-animation profiler reports zero >250 ms hangs; allocations recording retained locally. These do not establish hardware frame rates or absence of leaks |
+| Privacy | Exact two-host transport allowlist and independent network toggles verified. Provider retention / App Store label remains unresolved |
 
-- No NPS key committed. Alerts/programs use an honest unchecked state until the owner supplies a free key; cached data survives failures.
-- Verified viewing spots are present only where the checked NPS sources support them. Other parks offer honest ranger guidance rather than invented coordinates.
-- A working raster app icon and layered SVG sources exist. Final Icon Composer export needs the owner.
-- VoiceOver interaction, actual system Reduce Motion/Transparency/Bold Text/Smart Invert, hardware haptics/ProMotion, and available Foundation Models require device review. Screenshot overrides are not evidence of those interactions.
-- Privacy label target is “Data Not Collected,” but Open-Meteo's published 90-day API logs require publisher review against Apple's collection definition before submission. This is not certified resolved.
+See `AUDIT.md`, `Research/accuracy.md`, `Research/performance.md`, `Research/test-26.json`, `Research/test-27.json`, and `Research/release-verification.json` for measured limits. The final development archive is `/tmp/NyxSigned.xcarchive`; rebuild/export instructions are in README and SUBMISSION. Raw Instruments traces are local and Git-ignored.
 
-## Exact next step
+The final critique repaired access guidance placement, red native-control contrast, park-local journal/program dates, reminder preference races, malformed forecast coverage, AX5 gauge/arc/river/calendar layouts, widget text fitting and settled screenshot timing. These choices are recorded in `DECISIONS.md`.
 
-Proceed directly to Phase 7: finish the whole-app critique (access warning placement, park-local journal dates, notification-setting races), final screenshot matrix on both simulators, Instruments/Release checks, `AUDIT.md`, `PRIVACY.md`, `SUBMISSION.md`, README, and an ordered owner-only `INPUT_NEEDED.md`. Do not mark submission ready while the device and privacy gates remain open.
+## Deliberate limitations and release gates
+
+- Current privacy label is a draft. Open-Meteo's published API-log retention and NPS/API.gov processing need authoritative publisher review; do not claim “Data Not Collected” until resolved. See `PRIVACY.md`.
+- No NPS key is committed. Core planning works without it; live closures/programs show an honest unchecked state. A free public-app key is optional, but required for live NPS QA.
+- Named viewing spots appear only where checked NPS sources support them. Other parks give ranger guidance instead of invented coordinates. Bortle values remain clearly labeled estimates.
+- A working raster icon and original layered SVG assets ship in source. Final native Icon Composer export is pending GUI review.
+- VoiceOver interaction, actual system Reduce Motion/Transparency/Bold Text/Smart Invert, PhotosPicker/system permissions, actual widget/control/Siri integration, available-model behavior, hardware haptics/performance and dark-field usability require physical review. Screenshot overrides and widget content previews do not certify these gates.
+- The Release archive uses development signing. App Store distribution export, hosted privacy/support pages, account metadata, TestFlight and final submission require the owner.
+
+## Exact next starting point
+
+Start with **item 1 in INPUT_NEEDED.md**: resolve provider retention and the accurate App Store privacy declaration, recording written guidance in `PRIVACY.md`. Then complete the ordered physical review, icon and distribution steps. Do not add features before those release gates close. If review finds a defect, fix it, rerun both simulator suites, recapture affected states, archive again and update this handoff before submission.
