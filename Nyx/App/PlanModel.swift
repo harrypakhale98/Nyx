@@ -20,6 +20,7 @@ import CoreLocation
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
     var today: Date {
         #if DEBUG
+        if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
         if DebugScenario.state=="polar" { return Date(timeIntervalSince1970:1782086400) }
         #endif
         return .now
@@ -35,6 +36,7 @@ import CoreLocation
         #if DEBUG
         if DebugScenario.screen != nil { homeID="jotr" }
         if DebugScenario.state=="polar" { homeID="dena" }
+        if DebugScenario.state=="polar-night" { homeID="gaar" }
         #endif
     }
     var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
@@ -65,10 +67,11 @@ import CoreLocation
     func refresh(_ parks:[Park],force:Bool=false) async {
         activeRefreshes+=1; defer { activeRefreshes-=1 }
         for park in parks {
+            if DebugScenario.state=="no-forecast" { forecasts[park.id]=nil;continue }
             if Task.isCancelled { return }
-            let network=weatherEnabled && DebugScenario.state != "offline" && DebugScenario.state != "error"
+            let network=weatherEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live")
             forecasts[park.id]=await weather.forecast(for:park,network:network,force:force)
-            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && DebugScenario.state != "offline" && DebugScenario.state != "error",force:force)
+            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live"),force:force)
         }
     }
     func alertSummary(_ park:Park)->String {

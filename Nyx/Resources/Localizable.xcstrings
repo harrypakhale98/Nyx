@@ -67,6 +67,17 @@
         }
       }
     },
+    "%@, %@, darkness score %lld out of 100. %@. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@, darkness score %lld out of 100. %@. %@"
+          }
+        }
+      }
+    },
     "%@, %@. Darkness score %lld, %@. %@": {
       "extractionState": "manual",
       "localizations": {
@@ -74,6 +85,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@. Darkness score %lld, %@. %@"
+          }
+        }
+      }
+    },
+    "%@, %lld out of 100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld out of 100"
           }
         }
       }
@@ -393,6 +415,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A score never confirms that a road or park is open. Alerts and ranger programs require an NPS key and are cached. Their update time is shown. Check with the park before traveling, especially when Nyx has not checked alerts."
+          }
+        }
+      }
+    },
+    "A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts."
           }
         }
       }
@@ -782,6 +815,17 @@
         }
       }
     },
+    "Content preview. Check the actual Home and Lock Screen hosts on device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Content preview. Check the actual Home and Lock Screen hosts on device."
+          }
+        }
+      }
+    },
     "Continue": {
       "extractionState": "manual",
       "localizations": {
@@ -1020,6 +1064,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Estimate"
+          }
+        }
+      }
+    },
+    "Example score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example score"
           }
         }
       }
@@ -1284,6 +1339,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "In the five-night moon window."
+          }
+        }
+      }
+    },
+    "In the five-night moon window. Opens score breakdown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the five-night moon window. Opens score breakdown."
           }
         }
       }
@@ -1596,6 +1662,17 @@
         }
       }
     },
+    "Moon and darkness only. Clouds unknown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon and darkness only. Clouds unknown."
+          }
+        }
+      }
+    },
     "Moon and twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -1816,6 +1893,17 @@
         }
       }
     },
+    "No nights available": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No nights available"
+          }
+        }
+      }
+    },
     "No parks in this sky": {
       "extractionState": "manual",
       "localizations": {
@@ -2025,6 +2113,17 @@
         }
       }
     },
+    "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
+          }
+        }
+      }
+    },
     "Open-Meteo · updated %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2223,6 +2322,17 @@
         }
       }
     },
+    "Programs are not checked yet. Ask at the visitor center for current night-sky programs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programs are not checked yet. Ask at the visitor center for current night-sky programs."
+          }
+        }
+      }
+    },
     "Programs are not checked yet. Ask at the visitor center or add an NPS key during setup.": {
       "extractionState": "manual",
       "localizations": {
@@ -2406,6 +2516,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save a park in Nyx"
+          }
+        }
+      }
+    },
+    "Save a park in Nyx. Your next dark sky will appear here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a park in Nyx. Your next dark sky will appear here."
           }
         }
       }
@@ -2630,6 +2751,17 @@
         }
       }
     },
+    "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. Times in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. Times in %@."
+          }
+        }
+      }
+    },
     "TONIGHT'S SKY": {
       "extractionState": "manual",
       "localizations": {
@@ -2648,6 +2780,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "That park could not be found in the bundled library."
+          }
+        }
+      }
+    },
+    "The Sun stays below the horizon today.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Sun stays below the horizon today."
           }
         }
       }
@@ -2971,6 +3114,17 @@
         }
       }
     },
+    "True darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness from %@ to %@."
+          }
+        }
+      }
+    },
     "Try another name or widen your filters.": {
       "extractionState": "manual",
       "localizations": {
@@ -3169,6 +3323,17 @@
         }
       }
     },
+    "When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address."
+          }
+        }
+      }
+    },
     "Where the sky\nis darkest": {
       "extractionState": "manual",
       "localizations": {
@@ -3209,6 +3374,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Why this score"
+          }
+        }
+      }
+    },
+    "Widget content review": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget content review"
           }
         }
       }

@@ -43,9 +43,21 @@ struct CalendarView: View {
                 let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
                 let bestStart=bestWindow(nights)
                 VStack(alignment:.leading,spacing:24) {
-                    Eyebrow(text:"Make time for the night")
-                    Text("Choose your night").font(.system(.largeTitle,design:.serif))
-                    Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }.pickerStyle(.menu)
+                    if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
+                    Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                    if typeSize.isAccessibilitySize {
+                        Menu {
+                            Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+                        } label: {
+                            HStack(alignment:.firstTextBaseline) {
+                                Text(park.shortName).font(.body).fixedSize(horizontal:false,vertical:true)
+                                Spacer(minLength:8)
+                                Image(systemName:"chevron.up.chevron.down").font(.title3)
+                            }.padding(.vertical,8).foregroundStyle(palette.accent)
+                        }.accessibilityLabel("Park").accessibilityValue(park.shortName)
+                    } else {
+                        Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }.pickerStyle(.menu)
+                    }
                     HStack {
                         Button { move(-1) } label:{ Image(systemName:"chevron.left").frame(width:44,height:44) }.accessibilityLabel("Previous month")
                         Spacer(minLength:0)
@@ -54,7 +66,17 @@ struct CalendarView: View {
                         Button { move(1) } label:{ Image(systemName:"chevron.right").frame(width:44,height:44) }.accessibilityLabel("Next month")
                     }
                     if typeSize.isAccessibilitySize {
-                        LazyVStack { ForEach(Array(nights.enumerated()),id:\.element.id) { i,night in Button { chosen=night } label:{ HStack(alignment:.top) { Text(park.dayLabel(night.id));Spacer();Text("\(night.score.value) · \(night.score.band.label)") }.padding(.vertical,14) }.buttonStyle(.plain).accessibilityHint((bestStart..<(bestStart+5)).contains(i) ? "In the five-night moon window." : "Opens score breakdown.") } }
+                        LazyVStack(alignment:.leading,spacing:20) { ForEach(Array(nights.enumerated()),id:\.element.id) { i,night in
+                            Button { chosen=night } label:{
+                                VStack(alignment:.leading,spacing:8) {
+                                    Text(park.dayLabel(night.id)).font(.headline)
+                                    Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+                                    Text(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+                                }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
+                            }.buttonStyle(.plain).accessibilityElement(children:.ignore)
+                                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))")
+                                .accessibilityHint((bestStart..<(bestStart+5)).contains(i) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
+                        } }
                     } else {
                         LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
                             ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
@@ -84,3 +106,5 @@ struct CalendarView: View {
     }
 }
 #Preview("Calendar") { NavigationStack { CalendarView() }.environment(PlanModel()).preferredColorScheme(.dark) }
+
+#Preview("Night cell • forecast / unknown / moon window") { let m=PlanModel();if let p=m.home { let n=m.night(p);HStack { NightCell(night:n);NightCell(night:n,highlighted:true) }.frame(width:150).padding().background(.black) } }

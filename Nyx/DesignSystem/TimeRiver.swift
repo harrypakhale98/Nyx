@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TimeRiver: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -12,6 +13,7 @@ struct TimeRiver: View {
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"Follow the darker nights")
+            if !typeSize.isAccessibilitySize {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal) {
                     HStack(spacing:2) {
@@ -41,12 +43,15 @@ struct TimeRiver: View {
                 }.scrollIndicators(.hidden)
                     .onChange(of:index) { _,new in withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(new,anchor:.center) } }
             }
+            }
             Stepper(value:Binding(get:{index},set:choose),in:0...max(0,nights.count-1)) {
-                Text("\(nights.first?.park.dayLabel(selected) ?? "") · \(nights.indices.contains(index) ? nights[index].score.value : 0)/100").font(.subheadline)
-            }.accessibilityLabel("Selected night").accessibilityHint("Adjust to move one night at a time.")
-            Text("Hollow stars: moon and darkness only.").font(.caption).foregroundStyle(palette.muted)
+                Text(nights.isEmpty ? String(localized:"No nights available") : String(localized:"\(nights.first?.park.dayLabel(selected) ?? "") · \(nights.indices.contains(index) ? nights[index].score.value : 0)/100")).font(.subheadline).foregroundStyle(palette.ink)
+            }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint).disabled(nights.isEmpty).accessibilityLabel("Selected night").accessibilityValue("\(nights.first?.park.dayLabel(selected) ?? ""), \(nights.indices.contains(index) ? nights[index].score.value : 0) out of 100").accessibilityHint("Adjust to move one night at a time.")
+            Text(typeSize.isAccessibilitySize ? (nights.indices.contains(index) && nights[index].score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")) : String(localized:"Hollow stars: moon and darkness only.")).font(.caption).foregroundStyle(palette.muted)
         }.sensoryFeedback(.selection,trigger:detent)
     }
-    private func choose(_ value:Int) { guard nights.indices.contains(value) else { return }; selected=nights[value].id;detent=value }
+    private func choose(_ value:Int) { guard nights.indices.contains(value) else { return }; withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=nights[value].id };detent=value }
 }
 #Preview("River") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(.now)).padding().background(.black) } }
+
+#Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }

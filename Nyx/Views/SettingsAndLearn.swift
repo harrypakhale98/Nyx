@@ -10,9 +10,9 @@ struct SettingsView:View {
     @State private var replay=false
     var body:some View {
         Form {
-            Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision);Text("A red palette reduces glare. Lower the screen brightness too; Nyx does not change it for you.").font(.caption).foregroundStyle(palette.muted) }
+            Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too; Nyx does not change it for you.").font(.caption).foregroundStyle(palette.muted) }
             Section("Saved parks") {
-                Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } }))
+                Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
                 Text("Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.").font(.caption).foregroundStyle(palette.muted)
                 if let permissionMessage { Text(permissionMessage).font(.caption) }
             }
@@ -34,10 +34,10 @@ struct PrivacyView:View {
         Form {
             Section { Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif));Text("Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.") }
             Section("Optional data updates") {
-                Toggle("Cloud forecasts",isOn:$model.weatherEnabled)
+                Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
                 Text("Requests go to api.open-meteo.com using the park's coordinates, never your device location. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
-                Toggle("Park alerts and programs",isOn:$model.npsEnabled)
-                Text("With an NPS key, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
+                Text("When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
             Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders are local.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
@@ -50,13 +50,13 @@ struct AboutDataView:View {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
             block("The score","Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40.")
             block("Moon and twilight","Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times.")
-            block("Forecasts","Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0.")
+            block("Forecasts","Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.")
             block("Parks and skyglow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Designations are checked against the NPS dark-sky list. Viewing coordinates are approximate, not directions. Park data: National Park Service.")
-            block("Access comes first","A score never confirms that a road or park is open. Alerts and ranger programs require an NPS key and are cached. Their update time is shown. Check with the park before traveling, especially when Nyx has not checked alerts.")
+            block("Access comes first","A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts.")
             block("Park-local time","Each park has an IANA time zone. A night runs from local noon to the following local noon. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.")
         }.padding(24) }.background(NightBackground()).navigationTitle("About the data").navigationBarTitleDisplayMode(.inline)
     }
-    private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif));Text(content).font(.body).lineSpacing(4).foregroundStyle(palette.muted) } }
+    private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif));Text(content).font(.body).lineSpacing(4).textSelection(.enabled).foregroundStyle(palette.muted) } }
 }
 enum Essay: String,CaseIterable,Identifiable {
     case darkness,bortle,etiquette
@@ -80,21 +80,24 @@ struct EssayView:View {
     }
 }
 struct OnboardingView:View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var page=0
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
+    @State private var page=DebugScenario.onboardingPage
     let finish:()->Void
     private let titles:[LocalizedStringKey]=["Make room\nfor the night","A darker sky.\nA clearer plan.","The night is yours."]
     private let messages:[LocalizedStringKey]=["Find the national parks and nights that give the stars their best chance.","Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.","Nyx has no account, no ads, no tracking. Your journal never leaves this phone."]
     var body:some View {
         ScrollView { VStack(spacing:28) {
             HStack { Text("NYX").font(.caption).tracking(8);Spacer();Button("Skip") { finish() } }.padding(.bottom,14)
-            if page==1 { CelestialGauge(score:94,hasForecast:false).frame(height:240) }
+            if page==1 { VStack(spacing:8) { CelestialGauge(score:94,hasForecast:false).frame(height:typeSize.isAccessibilitySize ? nil : 240);Text("Example score").font(.caption).foregroundStyle(palette.muted) } }
             else { MoonDisc(illumination:page==0 ? 0.18 : 0.06,waxing:true).frame(width:170,height:170).padding(.vertical,35) }
             Text(titles[page]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
             Text(messages[page]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4)
             HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Circle().fill(i==page ? palette.accent : palette.line).frame(width:5,height:5) } }.accessibilityLabel("Introduction, page \(page+1) of 3")
-            Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }.buttonStyle(.borderedProminent).controlSize(.large)
+            Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
         }.padding(28) }.background(NightBackground()).foregroundStyle(palette.ink)
     }
 }

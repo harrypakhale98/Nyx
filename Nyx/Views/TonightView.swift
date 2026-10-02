@@ -17,9 +17,9 @@ struct TonightView: View {
     var body: some View {
         @Bindable var model=model
         ScrollView {
-            VStack(alignment:.leading,spacing:26) {
+            VStack(alignment:.leading,spacing:22) {
                 HStack(alignment:.top) {
-                    VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text("Where the sky\nis darkest").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true) }
+                    VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text("Where the sky\nis darkest").font(.system(.title,design:.serif)).fixedSize(horizontal:false,vertical:true) }
                     Spacer(minLength:8)
                     if let home=model.home { MoonDisc(illumination:model.night(home).sky.moon.illumination,waxing:model.night(home).sky.moon.waxing).frame(width:40,height:40).padding(.top,8) }
                 }
@@ -43,9 +43,9 @@ struct TonightView: View {
                     VStack(spacing:10) {
                         Eyebrow(text:"Your darkest nearby sky")
                         NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline) }.padding(.vertical,14).padding(.horizontal,22).glassEffect() }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
-                        CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:260)
-                        Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                         Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
+                        CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : 240)
+                        Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                     }.frame(maxWidth:.infinity)
                     if best.count>1 {
                         Eyebrow(text:"More skies within reach")
@@ -96,7 +96,7 @@ struct PermissionExplainer: View {
     let action:LocalizedStringKey
     let proceed:()->Void
     var body: some View {
-        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).buttonStyle(.borderedProminent);Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
+        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).buttonStyle(.borderedProminent).foregroundStyle(Color.black);Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
     }
 }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }

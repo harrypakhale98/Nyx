@@ -85,6 +85,7 @@ struct ParkDetailView: View {
                     Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
                     CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
                         .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
+                    if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
                     if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude.").font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
                     if !night.score.hasForecast { Text(night.id.timeIntervalSince(.now)>16*86400 ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
                     Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil ? ScoreTip() : nil)
@@ -95,7 +96,7 @@ struct ParkDetailView: View {
                             ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
                         }
                     }
-                     if let data=model.enrichments[park.id] { Text("Park update: \(data.updated.formatted(date:.abbreviated,time:.shortened))").font(.caption).foregroundStyle(palette.muted) } } }
+                     if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
                 Panel { SkyArc(night:night) }
                 Panel {
                     VStack(alignment:.leading,spacing:18) {
@@ -112,7 +113,7 @@ struct ParkDetailView: View {
                 Panel { VStack(alignment:.leading,spacing:16) {
                     Eyebrow(text:"What the sky may hold")
                     LabeledContent("Cloud cover",value:night.cloudCover.map{String(localized:"\(Int($0.rounded()))% average")} ?? String(localized:"Unavailable"))
-                    if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(updated.formatted(date:.abbreviated,time:.shortened))").font(.caption).foregroundStyle(palette.muted) }
+                    if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted) }
                     LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
                     Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
                     Divider().overlay(palette.line)
@@ -129,9 +130,10 @@ struct ParkDetailView: View {
                 Panel { VStack(alignment:.leading,spacing:14) {
                     Eyebrow(text:"Ranger night-sky programs")
                     if let data=model.enrichments[park.id] {
-                        if data.programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
-                        ForEach(data.programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(program.date).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
-                    } else { Text("Programs are not checked yet. Ask at the visitor center or add an NPS key during setup.").foregroundStyle(palette.muted) }
+                        let programs=data.programs.filter{$0.date>=park.isoDay(model.today)}
+                        if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
+                        ForEach(programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(program.date).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
+                    } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
                 } }
                 ShareCardButton(night:night)
                 Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
@@ -169,6 +171,7 @@ struct ScoreBreakdownView: View {
             if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
             if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude. The score is capped below 40.").foregroundStyle(palette.accent) }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
+            ShareCardButton(night:night)
         }.padding(24) }.background(Color.black).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
     }

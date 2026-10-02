@@ -1,6 +1,7 @@
 import AppIntents
 import Foundation
 import Testing
+import SwiftData
 @testable import Nyx
 
 struct NyxTests {
@@ -66,6 +67,34 @@ struct NyxTests {
         #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==50)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(8000))==nil)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600),now:now.addingTimeInterval(40*3600))==nil)
+    }
+    @Test func malformedForecastCannotFillGaps() {
+        let now=Date.now, t=now.timeIntervalSince1970
+        let duplicated=Forecast(updated:now,times:[t,t],clouds:[0,0])
+        #expect(duplicated.mean(from:now,to:now.addingTimeInterval(7200))==nil)
+        let reordered=Forecast(updated:now,times:[t+3600,t],clouds:[0,0])
+        #expect(reordered.mean(from:now,to:now.addingTimeInterval(7200))==nil)
+    }
+    @Test func parkLocalDateBoundary() throws {
+        let samoa=try park("npsa"), canyon=try park("grca")
+        let instant=try #require(ISO8601DateFormatter().date(from:"2026-10-02T05:00:00Z"))
+        #expect(samoa.isoDay(instant)=="2026-10-01")
+        #expect(canyon.isoDay(instant)=="2026-10-01")
+        let midnight=try date("2026-10-01 00:00",park:samoa)
+        #expect(samoa.isoDay(midnight)=="2026-10-01")
+    }
+    @MainActor @Test func journalPersistsSelectedPhotoAndEdits() throws {
+        let config=ModelConfiguration(isStoredInMemoryOnly:true)
+        let container=try ModelContainer(for:SavedPark.self,JournalEntry.self,configurations:config)
+        let context=ModelContext(container)
+        let entry=JournalEntry(date:.now,parkID:"jotr",notes:"A quiet sky.")
+        entry.photos=[Data([0,1,2,3])]
+        context.insert(entry);context.insert(SavedPark(parkID:"jotr"));try context.save()
+        let stored=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
+        #expect(stored.photos==[Data([0,1,2,3])]);#expect(stored.notes=="A quiet sky.")
+        stored.notes="The Moon rose late.";try context.save()
+        #expect(try context.fetch(FetchDescriptor<JournalEntry>()).count==1)
+        #expect(try context.fetch(FetchDescriptor<SavedPark>()).first?.parkID=="jotr")
     }
     @Test func publishedRiseSet() throws {
         struct Reference:Decodable { let park:String; let date:String; let tz:Int; let reference:Response }

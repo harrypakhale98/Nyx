@@ -16,6 +16,13 @@ enum DebugScenario {
         return nil
         #endif
     }
+    static var onboardingPage:Int {
+        #if DEBUG
+        return min(2,max(0,Int(argument("-nyx-onboarding-page") ?? "0") ?? 0))
+        #else
+        return 0
+        #endif
+    }
     static func isEnabled(_ value: String) -> Bool {
         #if DEBUG
         return ProcessInfo.processInfo.arguments.contains("-nyx-"+value)

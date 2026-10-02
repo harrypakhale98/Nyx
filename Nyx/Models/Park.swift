@@ -43,6 +43,16 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         format.timeZone = timeZone
         return date.formatted(format)
     }
+    func dateLabel(_ date: Date) -> String {
+        var format = Date.FormatStyle.dateTime.month(.wide).day().year()
+        format.timeZone = timeZone
+        return date.formatted(format)
+    }
+    func timestamp(_ date: Date) -> String {
+        var format = Date.FormatStyle.dateTime.month(.abbreviated).day().hour().minute()
+        format.timeZone = timeZone
+        return date.formatted(format)
+    }
     func monthLabel(_ date: Date) -> String {
         var format = Date.FormatStyle.dateTime.month(.wide).year()
         format.timeZone = timeZone

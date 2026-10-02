@@ -20,7 +20,7 @@ struct GuideView:View {
             let best=Array(model.ranked(model.nearby(latitude:nil,longitude:nil)).prefix(3))
             return best.flatMap { park in model.nights(park,from:model.today,count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + ["Starting park: \(home.shortName). Distances are straight-line estimates."]
         case .recap:
-            return entries.prefix(8).map { "\(model.park($0.parkID)?.shortName ?? "Park"); \($0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \($0.notes.prefix(250))" }
+            return entries.prefix(8).map { "\(model.park($0.parkID)?.shortName ?? "Park"); \(model.park($0.parkID)?.dateLabel($0.date) ?? $0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \($0.notes.prefix(250))" }
         case .learn(let essay): return [String(essay.content.prefix(6500))]
         }
     }
@@ -34,7 +34,7 @@ struct GuideView:View {
             Text(mode.title).font(.system(.largeTitle,design:.serif))
             Text("This optional explanation stays on your iPhone. Check the source records before making plans.").font(.caption).foregroundStyle(palette.muted)
             TextField("What would you like to understand?",text:$question,axis:.vertical).textFieldStyle(.roundedBorder).lineLimit(2...5)
-            Button("Ask using these records") { requestID+=1 }.buttonStyle(.borderedProminent).disabled(guide.loading || records.isEmpty)
+            Button("Ask using these records") { requestID+=1 }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).disabled(guide.loading || records.isEmpty)
             if guide.loading { ConstellationLoader().frame(maxWidth:.infinity) }
             if !guide.text.isEmpty { Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6); Text("Sources: \(guide.citations.map{String($0+1)}.joined(separator:", "))").font(.caption).foregroundStyle(palette.muted) }
             if let error=guide.error { Text(error).foregroundStyle(palette.muted) }
