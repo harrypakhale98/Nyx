@@ -10,4 +10,5 @@ One line per decision, with reasoning. Newest at the bottom.
 - App target uses Swift 6, default actor isolation MainActor, approachable concurrency — matches the current Xcode app template.
 - `ITSAppUsesNonExemptEncryption = NO` — the app only uses HTTPS via URLSession, which is exempt.
 - SwiftData container not created in the shell — Phase-owned models add it; avoids the template's throwaway `Item` model.
-- Built with the installed Xcode 27.0 against an iOS 26.0 deployment target — the brief names Xcode 26; the deployment target, not the Xcode version, is what matters. Do not use APIs newer than iOS 26.
+- Built with the installed Xcode 27.0 against an iOS 26.0 deployment target — the brief names Xcode 26; the deployment target, not the Xcode version, is what matters. iOS 27+ APIs are allowed behind availability checks with a first-class iOS 26 fallback.
+- Spec updated by the owner: support iOS 26 and every later release, aim for an Apple Design Award (product brief §16), and give the builder broad creative freedom with a short list of fixed guardrails (§17).
