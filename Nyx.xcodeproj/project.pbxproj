@@ -7,7 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		026AB131C2647FF749083BC7 /* NyxIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */; };
+		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
+		8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
+		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
+		C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
+		EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976C9F1742C2EE997BBE289E /* DataServices.swift */; };
+		F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
+		F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E051542A3954F87E88506B77 /* SharedSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,50 +51,96 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		0B8CFEEF4D0FA553056E4D4D /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = parks.json; sourceTree = "<group>"; };
 		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A820E0228800E1EC62C207A /* SkyConditions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyConditions.swift; sourceTree = "<group>"; };
+		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
+		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
+		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
+		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyxIntents.swift; sourceTree = "<group>"; };
+		E051542A3954F87E88506B77 /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7A5BE32B9081D66DE8C152A9 /* Nyx */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = Nyx;
 			sourceTree = "<group>";
 		};
 		7FBCE4E226E945E14F5B033B /* NyxWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = NyxWidgets;
 			sourceTree = "<group>";
 		};
 		91BEC42ACC3D532DD1C25BC2 /* NyxTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = NyxTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
+		08FE558036932661F8C0CE92 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */,
+				976C9F1742C2EE997BBE289E /* DataServices.swift */,
+				A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */,
+				E051542A3954F87E88506B77 /* SharedSettings.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3012C7130E736DD7E6A0B52B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */,
+				0B8CFEEF4D0FA553056E4D4D /* parks.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		569B78DBBD2892F506E07B16 = {
 			isa = PBXGroup;
 			children = (
+				572A8226324E98790B53E82D /* Nyx */,
 				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
 				C6C977DAF6E4DA8EAE489090 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		572A8226324E98790B53E82D /* Nyx */ = {
+			isa = PBXGroup;
+			children = (
+				7A67972A0617F309B1FD0407 /* Intents */,
+				760258CCF55DD0094C511477 /* Models */,
+				3012C7130E736DD7E6A0B52B /* Resources */,
+				08FE558036932661F8C0CE92 /* Services */,
+			);
+			path = Nyx;
+			sourceTree = "<group>";
+		};
+		760258CCF55DD0094C511477 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7B2DDCA9223A4636BA869DB4 /* Park.swift */,
+				7A820E0228800E1EC62C207A /* SkyConditions.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7A67972A0617F309B1FD0407 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		C6C977DAF6E4DA8EAE489090 /* Products */ = {
@@ -216,6 +271,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */,
+				4F83D43656FA1ABA1181846D /* parks.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +311,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */,
+				EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */,
+				026AB131C2647FF749083BC7 /* NyxIntents.swift in Sources */,
+				AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */,
+				F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */,
+				F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */,
+				7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,8 +346,11 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Nyx-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NPS_API_KEY = "$(NPS_API_KEY)";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -310,8 +377,11 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Nyx-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NPS_API_KEY = "$(NPS_API_KEY)";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -354,10 +424,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -428,7 +503,7 @@
 					"$(inherited)",
 					"DEBUG=1",
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -443,11 +518,12 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -496,7 +572,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -510,11 +586,12 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -528,10 +605,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;

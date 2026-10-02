@@ -1,0 +1,178 @@
+import SwiftUI
+import SwiftData
+import TipKit
+
+struct ParkRow: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let night: Night
+    var body: some View {
+        ViewThatFits(in:.horizontal) {
+            HStack(spacing:16) { names; Spacer(minLength:8); number }
+            VStack(alignment:.leading,spacing:14) { names; number }
+        }.padding(.vertical,14)
+            .accessibilityElement(children:.ignore)
+            .accessibilityLabel("\(night.park.shortName), \(night.park.state). Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only."))")
+    }
+    private var names: some View {
+        VStack(alignment:.leading,spacing:6) {
+            Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+            Text("\(night.park.state)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark-Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
+        }
+    }
+    private var number: some View {
+        VStack(alignment:.trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }
+    }
+}
+struct ParksView: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
+    @State private var search=""
+    @State private var darkOnly=false
+    @State private var savedOnly=false
+    @Namespace private var zoom
+    private var filtered:[Park] {
+        model.parks.filter { p in (!darkOnly || p.darkSkyDesignated) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || (p.name+" "+p.state).localizedStandardContains(search)) }
+    }
+    var body: some View {
+        ScrollView {
+            VStack(alignment:.leading,spacing:18) {
+                Eyebrow(text:"63 places to look up")
+                Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
+                Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted)
+                if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
+                else if filtered.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
+                else {
+                    if !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly {
+                        Eyebrow(text:"Saved for later")
+                        ForEach(model.parks.filter{p in saved.contains{$0.parkID==p.id}}) { p in link(p) }
+                        Eyebrow(text:"All national parks")
+                    }
+                    LazyVStack(spacing:0) { ForEach(filtered.filter { p in !( !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
+                }
+            }.padding(24)
+        }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
+            .searchable(text:$search,prompt:"Park name or state")
+            .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Filter parks") } }
+            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
+    }
+    private func link(_ park:Park)->some View {
+        NavigationLink(value:park) { ParkRow(night:model.night(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+    }
+}
+struct ParkDetailView: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @Query private var saved:[SavedPark]
+    let park:Park
+    var initialDate:Date?=nil
+    @State private var selected:Date?
+    @State private var breakdown=false
+    @State private var persistenceError=false
+    private var night:Night { model.night(park,on:selected ?? initialDate ?? model.today) }
+    private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
+    var body: some View {
+        ScrollView {
+            VStack(spacing:26) {
+                VStack(spacing:12) {
+                    Eyebrow(text:"A night beneath the stars")
+                    Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
+                    Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                    CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
+                        .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
+                    if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude.").font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+                    if !night.score.hasForecast { Text(night.id.timeIntervalSince(.now)>16*86400 ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+                    Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil ? ScoreTip() : nil)
+                }
+                Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
+                    if let data=model.enrichments[park.id],!data.alerts.isEmpty {
+                        DisclosureGroup("All park alerts (\(data.alerts.count))") {
+                            ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
+                        }
+                    }
+                     if let data=model.enrichments[park.id] { Text("Park update: \(data.updated.formatted(date:.abbreviated,time:.shortened))").font(.caption).foregroundStyle(palette.muted) } } }
+                Panel { SkyArc(night:night) }
+                Panel {
+                    VStack(alignment:.leading,spacing:18) {
+                        Eyebrow(text:"Moonlight")
+                        HStack(alignment:.center,spacing:24) {
+                            MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:park.latitude<0).frame(width:70,height:70)
+                            VStack(alignment:.leading,spacing:6) { Text(night.sky.moon.name).font(.system(.title3,design:.serif));Text("\(Int((night.sky.moon.illumination*100).rounded()))% illuminated").font(.subheadline).foregroundStyle(palette.muted) }
+                        }
+                        LabeledContent("Moonrise",value:park.time(night.sky.moonrise))
+                        LabeledContent("Moonset",value:park.time(night.sky.moonset))
+                        Text("Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.").font(.caption).foregroundStyle(palette.muted)
+                    }
+                }
+                Panel { VStack(alignment:.leading,spacing:16) {
+                    Eyebrow(text:"What the sky may hold")
+                    LabeledContent("Cloud cover",value:night.cloudCover.map{String(localized:"\(Int($0.rounded()))% average")} ?? String(localized:"Unavailable"))
+                    if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(updated.formatted(date:.abbreviated,time:.shortened))").font(.caption).foregroundStyle(palette.muted) }
+                    LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
+                    Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
+                    Divider().overlay(palette.line)
+                    Text(AstronomyEngine().milkyWayGuidance(for:park,on:night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                } }
+                Panel { TimeRiver(nights:model.nights(park,from:model.today,count:30),selected:Binding(get:{selected ?? initialDate ?? model.today},set:{selected=$0})) }
+                Panel { VStack(alignment:.leading,spacing:18) {
+                    Eyebrow(text:"Places to settle in")
+                    if park.viewingSpots.isEmpty { Text("Ask a ranger for a permitted viewing area with an open horizon. Nyx has no verified viewing spot for this park yet.").foregroundStyle(palette.muted) }
+                    ForEach(park.viewingSpots,id:\.name) { spot in
+                        VStack(alignment:.leading,spacing:6) { Text(spot.name).font(.system(.title3,design:.serif)); Text("\(spot.latitude.formatted(.number.precision(.fractionLength(3)))), \(spot.longitude.formatted(.number.precision(.fractionLength(3)))) · approximate").font(.caption).foregroundStyle(palette.muted); Text(spot.note).font(.caption).foregroundStyle(palette.muted) }
+                    }
+                } }
+                Panel { VStack(alignment:.leading,spacing:14) {
+                    Eyebrow(text:"Ranger night-sky programs")
+                    if let data=model.enrichments[park.id] {
+                        if data.programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
+                        ForEach(data.programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(program.date).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
+                    } else { Text("Programs are not checked yet. Ask at the visitor center or add an NPS key during setup.").foregroundStyle(palette.muted) }
+                } }
+                ShareCardButton(night:night)
+                Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
+                NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
+            }.padding(24)
+        }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
+            .toolbar { saveToolbar }
+            .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night) }.nyxPresentation().presentationDetents([.large]) }
+            .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
+            .task { await model.refresh([park]) }
+            .refreshable { await model.refresh([park],force:true) }
+    }
+    @ToolbarContentBuilder private var saveToolbar: some ToolbarContent {
+        if #available(iOS 27.0,*) {
+            ToolbarItem(placement:.topBarPinnedTrailing) { saveButton }
+        } else { ToolbarItem(placement:.topBarTrailing) { saveButton } }
+    }
+    private var saveButton:some View {
+        Button { if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
+            .accessibilityLabel(isSaved ? "Unsave park" : "Save park")
+    }
+}
+struct ScoreBreakdownView: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dismiss) private var dismiss
+    let night:Night
+    var body: some View {
+        ScrollView { VStack(alignment:.leading,spacing:24) {
+            Text("A number with a reason").font(.system(.largeTitle,design:.serif))
+            Text("\(night.score.value)/100 · \(night.score.band.label)").font(.system(.title,design:.serif)).foregroundStyle(palette.accent)
+            row("Moonlight",points:night.score.moonPoints,detail:String(localized:"Illumination and the part of true darkness when the Moon is below the horizon."))
+            if let cloud=night.score.cloudPoints { row("Cloud cover",points:cloud,detail:String(localized:"The hourly forecast averaged over the complete dark window.")) }
+            row("Light pollution",points:night.score.bortlePoints,detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
+            row("Length of darkness",points:night.score.lengthPoints,detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
+            if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
+            if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude. The score is capped below 40.").foregroundStyle(palette.accent) }
+            Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
+        }.padding(24) }.background(Color.black).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+    }
+    private func row(_ title:LocalizedStringKey,points:Double,detail:String)->some View { VStack(alignment:.leading,spacing:8) { HStack { Text(title).font(.headline);Spacer();Text(points,format:.number.precision(.fractionLength(1))).foregroundStyle(palette.accent) };Text(detail).font(.subheadline).foregroundStyle(palette.muted) } }
+}
+#Preview("Park row") { if let p=PlanModel().home { ParkRow(night:PlanModel().night(p)).padding().background(.black) } }
+#Preview("Detail") { let m=PlanModel();if let p=m.home { NavigationStack { ParkDetailView(park:p) }.environment(m).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) } }
