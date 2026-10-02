@@ -1,0 +1,659 @@
+[
+  {
+    "park": "grca",
+    "date": "2026-01-15",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-01-15&coords=36.0001165336,-112.121516363&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -112.121516,
+          36.000117
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 1,
+            "phase": "New Moon",
+            "time": "12:52",
+            "year": 2026
+          },
+          "curphase": "Waning Crescent",
+          "day": 15,
+          "day_of_week": "Thursday",
+          "fracillum": "9%",
+          "isdst": false,
+          "label": null,
+          "month": 1,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "05:27"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "10:05"
+            },
+            {
+              "phen": "Set",
+              "time": "14:43"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "07:10"
+            },
+            {
+              "phen": "Rise",
+              "time": "07:38"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:38"
+            },
+            {
+              "phen": "Set",
+              "time": "17:38"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "18:06"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "grca",
+    "date": "2026-03-20",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-20&coords=36.0001165336,-112.121516363&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -112.121516,
+          36.000117
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 3,
+            "phase": "New Moon",
+            "time": "18:23",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 20,
+          "day_of_week": "Friday",
+          "fracillum": "4%",
+          "isdst": false,
+          "label": null,
+          "month": 3,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "07:13"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "13:59"
+            },
+            {
+              "phen": "Set",
+              "time": "20:56"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "06:06"
+            },
+            {
+              "phen": "Rise",
+              "time": "06:32"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:36"
+            },
+            {
+              "phen": "Set",
+              "time": "18:40"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "19:06"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "grca",
+    "date": "2026-07-15",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-07-15&coords=36.0001165336,-112.121516363&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -112.121516,
+          36.000117
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 14,
+            "month": 7,
+            "phase": "New Moon",
+            "time": "02:43",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 15,
+          "day_of_week": "Wednesday",
+          "fracillum": "3%",
+          "isdst": false,
+          "label": null,
+          "month": 7,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "06:45"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "14:00"
+            },
+            {
+              "phen": "Set",
+              "time": "21:05"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "04:54"
+            },
+            {
+              "phen": "Rise",
+              "time": "05:23"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:35"
+            },
+            {
+              "phen": "Set",
+              "time": "19:45"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "20:15"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "grba",
+    "date": "2026-01-15",
+    "tz": -8,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-01-15&coords=38.94617378,-114.2579782&tz=-8",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -114.257978,
+          38.946174
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 1,
+            "phase": "New Moon",
+            "time": "11:52",
+            "year": 2026
+          },
+          "curphase": "Waning Crescent",
+          "day": 15,
+          "day_of_week": "Thursday",
+          "fracillum": "9%",
+          "isdst": false,
+          "label": null,
+          "month": 1,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "04:47"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "09:14"
+            },
+            {
+              "phen": "Set",
+              "time": "13:40"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "06:25"
+            },
+            {
+              "phen": "Rise",
+              "time": "06:54"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "11:47"
+            },
+            {
+              "phen": "Set",
+              "time": "16:39"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "17:08"
+            }
+          ],
+          "tz": -8.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "grba",
+    "date": "2026-03-20",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-20&coords=38.94617378,-114.2579782&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -114.257978,
+          38.946174
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 3,
+            "phase": "New Moon",
+            "time": "18:23",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 20,
+          "day_of_week": "Friday",
+          "fracillum": "4%",
+          "isdst": false,
+          "label": null,
+          "month": 3,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "07:18"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "14:08"
+            },
+            {
+              "phen": "Set",
+              "time": "21:11"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "06:14"
+            },
+            {
+              "phen": "Rise",
+              "time": "06:40"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:44"
+            },
+            {
+              "phen": "Set",
+              "time": "18:49"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "19:16"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "grba",
+    "date": "2026-07-15",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-07-15&coords=38.94617378,-114.2579782&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -114.257978,
+          38.946174
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 14,
+            "month": 7,
+            "phase": "New Moon",
+            "time": "02:43",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 15,
+          "day_of_week": "Wednesday",
+          "fracillum": "3%",
+          "isdst": false,
+          "label": null,
+          "month": 7,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "06:46"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "14:09"
+            },
+            {
+              "phen": "Set",
+              "time": "21:19"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "04:53"
+            },
+            {
+              "phen": "Rise",
+              "time": "05:24"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:43"
+            },
+            {
+              "phen": "Set",
+              "time": "20:02"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "20:33"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "jotr",
+    "date": "2026-01-15",
+    "tz": -8,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-01-15&coords=33.91418525,-115.8398125&tz=-8",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -115.839812,
+          33.914185
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 1,
+            "phase": "New Moon",
+            "time": "11:52",
+            "year": 2026
+          },
+          "curphase": "Waning Crescent",
+          "day": 15,
+          "day_of_week": "Thursday",
+          "fracillum": "9%",
+          "isdst": false,
+          "label": null,
+          "month": 1,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "04:35"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "09:21"
+            },
+            {
+              "phen": "Set",
+              "time": "14:05"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "06:21"
+            },
+            {
+              "phen": "Rise",
+              "time": "06:48"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "11:53"
+            },
+            {
+              "phen": "Set",
+              "time": "16:58"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "17:25"
+            }
+          ],
+          "tz": -8.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "jotr",
+    "date": "2026-03-20",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-20&coords=33.91418525,-115.8398125&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -115.839812,
+          33.914185
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 18,
+            "month": 3,
+            "phase": "New Moon",
+            "time": "18:23",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 20,
+          "day_of_week": "Friday",
+          "fracillum": "4%",
+          "isdst": false,
+          "label": null,
+          "month": 3,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "07:31"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "14:14"
+            },
+            {
+              "phen": "Set",
+              "time": "21:09"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "06:22"
+            },
+            {
+              "phen": "Rise",
+              "time": "06:47"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:51"
+            },
+            {
+              "phen": "Set",
+              "time": "18:55"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "19:20"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  },
+  {
+    "park": "jotr",
+    "date": "2026-07-15",
+    "tz": -7,
+    "sourceURL": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-07-15&coords=33.91418525,-115.8398125&tz=-7",
+    "reference": {
+      "apiversion": "4.0.1",
+      "geometry": {
+        "coordinates": [
+          -115.839812,
+          33.914185
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "data": {
+          "closestphase": {
+            "day": 14,
+            "month": 7,
+            "phase": "New Moon",
+            "time": "02:43",
+            "year": 2026
+          },
+          "curphase": "Waxing Crescent",
+          "day": 15,
+          "day_of_week": "Wednesday",
+          "fracillum": "3%",
+          "isdst": false,
+          "label": null,
+          "month": 7,
+          "moondata": [
+            {
+              "phen": "Rise",
+              "time": "07:05"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "14:16"
+            },
+            {
+              "phen": "Set",
+              "time": "21:16"
+            }
+          ],
+          "sundata": [
+            {
+              "phen": "Begin Civil Twilight",
+              "time": "05:15"
+            },
+            {
+              "phen": "Rise",
+              "time": "05:44"
+            },
+            {
+              "phen": "Upper Transit",
+              "time": "12:49"
+            },
+            {
+              "phen": "Set",
+              "time": "19:55"
+            },
+            {
+              "phen": "End Civil Twilight",
+              "time": "20:23"
+            }
+          ],
+          "tz": -7.0,
+          "year": 2026
+        }
+      },
+      "type": "Feature"
+    }
+  }
+]

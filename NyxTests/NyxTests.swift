@@ -1,8 +1,97 @@
+import AppIntents
+import Foundation
 import Testing
 @testable import Nyx
 
 struct NyxTests {
-    @Test func appModuleLoads() {
-        #expect(Bool(true))
+    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
+    func date(_ string:String,park:Park) throws -> Date {
+        let f=DateFormatter(); f.dateFormat="yyyy-MM-dd HH:mm"; f.timeZone=park.timeZone
+        return try #require(f.date(from:string))
+    }
+    @Test func inventory() throws {
+        let parks=try ParkData.load()
+        #expect(parks.count==63); #expect(Set(parks.map(\.id)).count==63)
+        #expect(parks.filter { $0.latitude<0 }.count==1)
+        #expect(parks.filter { $0.state.contains("AK") }.count==8)
+        for p in parks {
+            #expect((-90...90).contains(p.latitude)); #expect((-180...180).contains(p.longitude))
+            #expect(TimeZone(identifier:p.timeZoneID) != nil); #expect(!p.description.isEmpty)
+            #expect((1...9).contains(p.bortleEstimate)); #expect(p.sourceURL.hasPrefix("https://www.nps.gov/"))
+        }
+    }
+    @Test func polarAndTropical() throws {
+        let engine=AstronomyEngine(), denali=try park("dena"), gates=try park("gaar"), samoa=try park("npsa")
+        let summer=engine.conditions(for:denali,on:try date("2026-06-21 12:00",park:denali))
+        #expect(summer.darkHours==0); #expect(summer.moonBelowFraction==0)
+        #expect(ScoreEngine().score(sky:summer,bortle:1,cloudCover:0).value<40)
+        let winter=engine.conditions(for:gates,on:try date("2026-12-21 12:00",park:gates))
+        #expect(winter.state == .polarNight); #expect(winter.darkHours>10)
+        for month in ["01","07"] {
+            let night=engine.conditions(for:samoa,on:try date("2026-\(month)-15 12:00",park:samoa))
+            #expect((8...12).contains(night.darkHours)); #expect(night.state == .normal)
+        }
+    }
+    @Test func timeZones() throws {
+        let p=try park("grca"), jt=try park("jotr")
+        #expect(p.timeZone.secondsFromGMT(for:try date("2026-03-08 12:00",park:p)) == -7*3600)
+        #expect(p.timeZone.secondsFromGMT(for:try date("2026-11-01 12:00",park:p)) == -7*3600)
+        let engine=AstronomyEngine()
+        for day in ["2026-03-07","2026-10-31"] {
+            let sky=engine.conditions(for:jt,on:try date(day+" 12:00",park:jt))
+            #expect(sky.end.timeIntervalSince(sky.evening) == (day.contains("03") ? 23 : 25)*3600)
+        }
+    }
+    @Test func formula() throws {
+        let p=try park("jotr"), sky=AstronomyEngine().conditions(for:p,on:try date("2026-10-10 12:00",park:p))
+        let engine=ScoreEngine(), full=engine.score(sky:sky,bortle:2,cloudCover:0), absent=engine.score(sky:sky,bortle:2,cloudCover:nil)
+        #expect(full.cloudPoints==25); #expect(absent.cloudPoints==nil)
+        #expect(abs(absent.moonPoints-full.moonPoints/0.75)<0.0001)
+        #expect(engine.score(sky:sky,bortle:2,cloudCover:.nan).cloudPoints==nil)
+        #expect(engine.score(sky:sky,bortle:2,cloudCover:100).value<=full.value)
+        for (s,b) in [(0,ScoreBand.poor),(39,.poor),(40,.fair),(59,.fair),(60,.good),(74,.good),(75,.excellent),(89,.excellent),(90,.pristine),(100,.pristine)] { #expect(ScoreBand.band(s)==b) }
+    }
+    @Test func publishedMoonPhases() throws {
+        let dates=[("2026-01-18T19:52:00Z",0.0),("2026-03-03T11:38:00Z",0.5),("2026-10-10T15:50:00Z",0.0)]
+        for (text,expected) in dates {
+            let date=try #require(ISO8601DateFormatter().date(from:text))
+            let actual=AstronomyEngine().moonPhase(at:date).fraction
+            let delta=min(abs(actual-expected),1-abs(actual-expected))
+            #expect(delta*AstronomyEngine.synodicDays*24<12)
+        }
+    }
+    @Test func forecastCoverage() {
+        let now=Date.now
+        let forecast=Forecast(updated:now,times:[now.timeIntervalSince1970,now.timeIntervalSince1970+3600],clouds:[20,80])
+        #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==50)
+        #expect(forecast.mean(from:now,to:now.addingTimeInterval(8000))==nil)
+        #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600),now:now.addingTimeInterval(40*3600))==nil)
+    }
+    @Test func publishedRiseSet() throws {
+        struct Reference:Decodable { let park:String; let date:String; let tz:Int; let reference:Response }
+        struct Response:Decodable { struct Properties:Decodable { struct Info:Decodable {
+            struct Event:Decodable { let phen:String; let time:String }
+            let sundata:[Event]; let moondata:[Event]
+        }; let data:Info }; let properties:Properties }
+        let bundle=Bundle(for:BundleAnchor.self)
+        let url=try #require(bundle.url(forResource:"usno-reference",withExtension:"json"))
+        let cases=try JSONDecoder().decode([Reference].self,from:Data(contentsOf:url))
+        let engine=AstronomyEngine()
+        for ref in cases {
+            let p=try park(ref.park), day=try date(ref.date+" 12:00",park:p)
+            let sky=engine.conditions(for:p,on:day), previous=engine.conditions(for:p,on:p.date(day,addingDays:-1))
+            for event in ref.reference.properties.data.sundata {
+                let predicted:Date?
+                switch event.phen { case "Rise": predicted=previous.sunrise; case "Set": predicted=sky.sunset; case "End Civil Twilight": predicted=sky.civilDusk; default: continue }
+                let actual=try date(ref.date+" "+event.time,park:p)
+                #expect(abs(try #require(predicted).timeIntervalSince(actual))<120,"\(p.id) \(ref.date) \(event.phen)")
+            }
+            for event in ref.reference.properties.data.moondata where ["Rise","Set"].contains(event.phen) {
+                let actual=try date(ref.date+" "+event.time,park:p)
+                let predictions=(event.phen=="Rise" ? [previous.moonrise,sky.moonrise] : [previous.moonset,sky.moonset]).compactMap{$0}
+                #expect(predictions.contains { abs($0.timeIntervalSince(actual))<900 },"Moon \(p.id) \(ref.date) \(event.phen)")
+            }
+        }
     }
 }
+final class BundleAnchor: NSObject {}

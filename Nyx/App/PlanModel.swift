@@ -1,0 +1,109 @@
+import Foundation
+import Observation
+import CoreLocation
+
+@MainActor @Observable final class PlanModel {
+    let parks: [Park]
+    let loadError: Bool
+    private let astronomy: any AstronomyProviding
+    private let scoring: any ScoreProviding
+    private let weather: any WeatherProviding
+    private let parkStore: any ParkProviding
+    @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
+    var forecasts: [String:Forecast] = [:]
+    var enrichments: [String:ParkEnrichment] = [:]
+    private var activeRefreshes=0
+    var refreshing:Bool { activeRefreshes>0 }
+    var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
+    var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
+    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
+    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
+    var today: Date {
+        #if DEBUG
+        if DebugScenario.state=="polar" { return Date(timeIntervalSince1970:1782086400) }
+        #endif
+        return .now
+    }
+    init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
+         weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore()) {
+        do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
+        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore
+        homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
+        radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
+        weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
+        npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
+        #if DEBUG
+        if DebugScenario.screen != nil { homeID="jotr" }
+        if DebugScenario.state=="polar" { homeID="dena" }
+        #endif
+    }
+    var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
+    func park(_ id:String)->Park? { parks.first { $0.id==id } }
+    func night(_ park:Park,on date:Date?=nil)->Night {
+        let evening=park.evening(date ?? today)
+        let sky:SkyConditions
+        if let cached=conditions[park.id]?[evening] { sky=cached } else {
+            sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
+        }
+        let forecast=forecasts[park.id]
+        let clouds=forecast?.mean(from:sky.darkStart,to:sky.darkEnd)
+        return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
+    }
+    func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
+    func nearby(latitude:Double?,longitude:Double?)->[Park] {
+        guard let home else { return [] }
+        let lat=latitude ?? home.latitude, lon=longitude ?? home.longitude
+        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=radiusMiles*1609.344 }
+    }
+    func ranked(_ candidates:[Park])->[Park] {
+        candidates.sorted { a,b in
+            let first=night(a).score.value, second=night(b).score.value
+            return first==second ? a.name<b.name : first>second
+        }
+    }
+    var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    func refresh(_ parks:[Park],force:Bool=false) async {
+        activeRefreshes+=1; defer { activeRefreshes-=1 }
+        for park in parks {
+            if Task.isCancelled { return }
+            let network=weatherEnabled && DebugScenario.state != "offline" && DebugScenario.state != "error"
+            forecasts[park.id]=await weather.forecast(for:park,network:network,force:force)
+            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && DebugScenario.state != "offline" && DebugScenario.state != "error",force:force)
+        }
+    }
+    func alertSummary(_ park:Park)->String {
+        guard let data=enrichments[park.id] else { return String(localized:"Access not checked. Confirm closures with the park.") }
+        if let closure=data.alerts.first(where:{$0.category.lowercased().contains("closure")}) { return closure.title }
+        if let first=data.alerts.first { return first.title }
+        return String(localized:"No alerts in the last park update. Confirm access before travel.")
+    }
+}
+@MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {
+    var latitude:Double?
+    var longitude:Double?
+    var denied=false
+    var locating=false
+    var message:String?
+    private let manager=CLLocationManager()
+    override init() { super.init(); manager.delegate=self; manager.desiredAccuracy=kCLLocationAccuracyThreeKilometers }
+    func request() {
+        locating=true
+        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways { manager.requestLocation() }
+        else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted { denied=true; locating=false }
+        else { manager.requestWhenInUseAuthorization() }
+    }
+    func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse,.authorizedAlways: if locating { manager.requestLocation() }
+        case .denied,.restricted: denied=true; locating=false
+        default: break
+        }
+    }
+    func locationManager(_ manager:CLLocationManager,didUpdateLocations locations:[CLLocation]) {
+        guard let location=locations.last else { locating=false; return }
+        latitude=location.coordinate.latitude; longitude=location.coordinate.longitude; locating=false; message=nil
+    }
+    func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
+        locating=false; message=String(localized:"Location is unavailable. Choose a starting park instead.")
+    }
+}

@@ -1,0 +1,102 @@
+import SwiftUI
+
+struct TonightView: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @State private var shooting=0.0
+    @State private var refreshed=0
+    @State private var location=LocationService()
+    @State private var explainLocation=false
+    @State private var chooseHome=false
+    @Namespace private var zoom
+    private var candidates:[Park] { model.nearby(latitude:location.latitude,longitude:location.longitude) }
+    private var best:[Park] { Array(model.ranked(candidates).prefix(5)) }
+    var body: some View {
+        @Bindable var model=model
+        ScrollView {
+            VStack(alignment:.leading,spacing:26) {
+                HStack(alignment:.top) {
+                    VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text("Where the sky\nis darkest").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true) }
+                    Spacer(minLength:8)
+                    if let home=model.home { MoonDisc(illumination:model.night(home).sky.moon.illumination,waxing:model.night(home).sky.moon.waxing).frame(width:40,height:40).padding(.top,8) }
+                }
+                Panel { VStack(alignment:.leading,spacing:12) {
+                    HStack(alignment:.firstTextBaseline) {
+                        Button { chooseHome=true } label:{ Label(location.latitude==nil ? String(localized:"From \(model.home?.shortName ?? "")") : String(localized:"From your location"),systemImage:"location") }.font(.subheadline)
+                        Spacer(minLength:8)
+                        if location.locating { ProgressView() } else { Button { explainLocation=true } label:{ Image(systemName:"location.circle").frame(minWidth:44,minHeight:44) }.accessibilityLabel("Use my location") }
+                    }
+                    ViewThatFits(in:.horizontal) {
+                        HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
+                        VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
+                    }
+                    if location.denied || DebugScenario.state=="no-location" { Text("Location is off. A starting park works just as well.").font(.caption).foregroundStyle(palette.muted) }
+                    if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
+                } }
+                if DebugScenario.state=="loading" { ConstellationLoader().frame(maxWidth:.infinity) }
+                else if best.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.") }
+                else if let park=best.first {
+                    let night=model.night(park)
+                    VStack(spacing:10) {
+                        Eyebrow(text:"Your darkest nearby sky")
+                        NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline) }.padding(.vertical,14).padding(.horizontal,22).glassEffect() }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+                        CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:260)
+                        Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                        Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
+                    }.frame(maxWidth:.infinity)
+                    if best.count>1 {
+                        Eyebrow(text:"More skies within reach")
+                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
+                    }
+                    Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
+                }
+                if DebugScenario.state=="error" || DebugScenario.state=="offline" { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+                if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
+            }.padding(24)
+        }.background(NightBackground(seed:model.homeID)).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
+            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
+            .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:$model.homeID) }.nyxPresentation().presentationDetents([.large]) }
+            .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
+            .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
+            .sensoryFeedback(.selection,trigger:refreshed)
+            .refreshable {
+                if !systemReduceMotion && !forcedReduceMotion { shooting=0;withAnimation(NyxMotion.spring) { shooting=1 } }
+                await model.refresh(candidates,force:true);refreshed+=1
+            }
+    }
+    private var radiusPicker:some View {
+        @Bindable var model=model
+        return Picker("Radius",selection:$model.radiusMiles) {
+            ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).fixedSize().tag(miles) }
+        }.pickerStyle(.menu).fixedSize(horizontal:true,vertical:false)
+    }
+}
+struct ParkPickerView: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection:String
+    @State private var search=""
+    var body: some View {
+        List(model.parks.filter { search.isEmpty || ($0.name+" "+$0.state).localizedStandardContains(search) }) { park in
+            Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark") } } }.tint(.primary)
+        }.searchable(text:$search,prompt:"Park name or state").navigationTitle("Starting park")
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
+    }
+}
+struct PermissionExplainer: View {
+    @Environment(\.dismiss) private var dismiss
+    let symbol:String
+    let title:LocalizedStringKey
+    let message:LocalizedStringKey
+    let action:LocalizedStringKey
+    let proceed:()->Void
+    var body: some View {
+        NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).buttonStyle(.borderedProminent);Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
+    }
+}
+#Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }

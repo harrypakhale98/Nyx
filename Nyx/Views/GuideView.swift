@@ -1,0 +1,46 @@
+import SwiftUI
+import SwiftData
+
+enum GuideMode {
+    case planning,recap,learn(Essay)
+    var title:String { switch self { case .planning:String(localized:"Ask Nyx");case .recap:String(localized:"Your season under the stars");case .learn:String(localized:"Another way to see it") } }
+}
+struct GuideView:View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Query(sort:\JournalEntry.date,order:.reverse) private var entries:[JournalEntry]
+    let mode:GuideMode
+    @State private var guide=OnDeviceGuide()
+    @State private var question=""
+    @State private var requestID=0
+    private var records:[String] {
+        switch mode {
+        case .planning:
+            guard let home=model.home else { return [] }
+            let best=Array(model.ranked(model.nearby(latitude:nil,longitude:nil)).prefix(3))
+            return best.flatMap { park in model.nights(park,from:model.today,count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + ["Starting park: \(home.shortName). Distances are straight-line estimates."]
+        case .recap:
+            return entries.prefix(8).map { "\(model.park($0.parkID)?.shortName ?? "Park"); \($0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \($0.notes.prefix(250))" }
+        case .learn(let essay): return [String(essay.content.prefix(6500))]
+        }
+    }
+    private var prompt:String {
+        if !question.isEmpty { return question }
+        switch mode { case .planning:return String(localized:"Which of these parks and nights looks most promising, and what is still uncertain?");case .recap:return String(localized:"Reflect on patterns in these observations without inventing observations.");case .learn:return String(localized:"Explain the main idea in plain language for someone new to stargazing.") }
+    }
+    var body:some View {
+        ScrollView { VStack(alignment:.leading,spacing:24) {
+            Eyebrow(text:"An on-device perspective")
+            Text(mode.title).font(.system(.largeTitle,design:.serif))
+            Text("This optional explanation stays on your iPhone. Check the source records before making plans.").font(.caption).foregroundStyle(palette.muted)
+            TextField("What would you like to understand?",text:$question,axis:.vertical).textFieldStyle(.roundedBorder).lineLimit(2...5)
+            Button("Ask using these records") { requestID+=1 }.buttonStyle(.borderedProminent).disabled(guide.loading || records.isEmpty)
+            if guide.loading { ConstellationLoader().frame(maxWidth:.infinity) }
+            if !guide.text.isEmpty { Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6); Text("Sources: \(guide.citations.map{String($0+1)}.joined(separator:", "))").font(.caption).foregroundStyle(palette.muted) }
+            if let error=guide.error { Text(error).foregroundStyle(palette.muted) }
+            Eyebrow(text:"The original records")
+            ForEach(Array(records.enumerated()),id:\.offset) { index,record in Panel { Text("\(index+1). \(record)").font(.subheadline) } }
+        }.padding(24) }.background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
+            .task(id:requestID) { guard requestID>0 else { return };let records=records;await guide.answer(question:prompt,context:records.enumerated().map{"ID \($0.offset): \($0.element)"}.joined(separator:"\n"),validIDs:Set(records.indices)) }
+    }
+}

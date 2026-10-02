@@ -1,0 +1,17 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSLocationWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
