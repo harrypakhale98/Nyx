@@ -13,6 +13,8 @@ import SwiftData
     var observedBortle: Int
     var notes: String
     @Attribute(.externalStorage) var photos: [Data]
+    /// A small JPEG of the first photo, so the journal list never loads full photos.
+    var thumbnail: Data? = nil
     init(date: Date, parkID: String, observedBortle: Int = 3, notes: String = "", photos: [Data] = []) {
         id=UUID(); self.date=date; self.parkID=parkID; self.observedBortle=observedBortle; self.notes=notes; self.photos=photos
     }

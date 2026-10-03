@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import ImageIO
 
 struct JournalView: View {
     @Environment(PlanModel.self) private var model
@@ -17,7 +18,7 @@ struct JournalView: View {
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
                 if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
                 else {
-                    ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { if let first=entry.photos.first { JournalThumbnail(data:first).padding(.bottom,6) };Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } }
+                    LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { if let thumbnail=entry.thumbnail { JournalThumbnail(data:thumbnail).padding(.bottom,6) };Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
                     if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
                 }
             }.padding(24)
@@ -28,24 +29,46 @@ struct JournalView: View {
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
     }
 }
-/// A journal card's photo, downsampled off the main thread so a long journal scrolls smoothly.
-struct JournalThumbnail:View {
+/// Image I/O downsampling: decodes straight to the target size, never the full photo.
+nonisolated enum PhotoScaling {
+    static func image(_ data:Data,maxPixels:Int)->CGImage? {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return nil }
+        let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,
+                                    kCGImageSourceThumbnailMaxPixelSize:maxPixels,kCGImageSourceShouldCacheImmediately:true]
+        return CGImageSourceCreateThumbnailAtIndex(source,0,options as CFDictionary)
+    }
+    /// Journal photos are keepsakes, not originals: JPEG, at most `maxPixels` on the long edge.
+    static func jpeg(_ data:Data,maxPixels:Int)->Data? {
+        image(data,maxPixels:maxPixels).flatMap { UIImage(cgImage:$0).jpegData(compressionQuality:0.85) }
+    }
+}
+/// A stored photo, decoded off the main thread at the size it is shown.
+struct PhotoView:View {
     let data:Data
+    let maxPixels:Int
+    var fill=false
     @State private var image:UIImage?
     var body:some View {
-        Color.black.frame(height:150).overlay { if let image { Image(uiImage:image).resizable().scaledToFill().transition(.opacity) } }
+        Group {
+            if let image {
+                if fill { Image(uiImage:image).resizable().scaledToFill() } else { Image(uiImage:image).resizable().scaledToFit() }
+            } else { Color.black.aspectRatio(fill ? 1 : 4/3,contentMode:.fit) }
+        }
+        .accessibilityIgnoresInvertColors()
+        .task(id:data.count ^ data.prefix(64).hashValue) {
+            let data=data, size=maxPixels
+            let decoded=await Task.detached(priority:.utility) { PhotoScaling.image(data,maxPixels:size).map { UIImage(cgImage:$0) } }.value
+            withAnimation(.easeOut(duration:0.25)) { image=decoded }
+        }
+    }
+}
+/// A journal card's photo: the stored small thumbnail, so a long journal scrolls smoothly.
+struct JournalThumbnail:View {
+    let data:Data
+    var body:some View {
+        Color.black.frame(height:150).overlay { PhotoView(data:data,maxPixels:900,fill:true) }
             .clipShape(RoundedRectangle(cornerRadius:16))
-            .accessibilityIgnoresInvertColors()
             .accessibilityHidden(true)
-            .task(id:data.count) {
-                let data=data
-                let thumbnail=await Task.detached(priority:.utility) { () -> UIImage? in
-                    guard let full=UIImage(data:data),full.size.width>0 else { return nil }
-                    let scale=min(1,900/full.size.width)
-                    return full.preparingThumbnail(of:CGSize(width:full.size.width*scale,height:full.size.height*scale))
-                }.value
-                withAnimation(.easeOut(duration:0.25)) { image=thumbnail }
-            }
     }
 }
 @MainActor @Observable final class JournalEditorModel {
@@ -69,25 +92,18 @@ struct JournalThumbnail:View {
         loadingPhotos=true;defer { loadingPhotos=false }
         for item in items.prefix(max(0,4-photos.count)) {
             do {
-                if let data=try await item.loadTransferable(type:Data.self), data.count<=40_000_000 { photos.append(Self.downscaled(data)) }
+                if let data=try await item.loadTransferable(type:Data.self), data.count<=40_000_000 {
+                    // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded.
+                    photos.append(await Task.detached(priority:.userInitiated) { PhotoScaling.jpeg(data,maxPixels:2400) ?? data }.value)
+                }
                 else { error=String(localized:"This photo is too large. Choose a smaller image.") }
             } catch { self.error=String(localized:"The photo could not be loaded. Try choosing it again.") }
         }
     }
-    /// Journal photos are keepsakes, not originals: at most 2400 px on the long edge, JPEG.
-    private static func downscaled(_ data:Data)->Data {
-        guard let image=UIImage(data:data) else { return data }
-        let longest=max(image.size.width,image.size.height)*image.scale
-        guard longest>2400 else { return image.jpegData(compressionQuality:0.85) ?? data }
-        let factor=2400/longest
-        let size=CGSize(width:image.size.width*image.scale*factor,height:image.size.height*image.scale*factor)
-        let format=UIGraphicsImageRendererFormat(); format.scale=1
-        let resized=UIGraphicsImageRenderer(size:size,format:format).image { _ in image.draw(in:CGRect(origin:.zero,size:size)) }
-        return resized.jpegData(compressionQuality:0.85) ?? data
-    }
     func save(context:ModelContext,existing:JournalEntry?) -> Bool {
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
         entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
+        entry.thumbnail=photos.first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) }
         if existing==nil { context.insert(entry) }
         do { try context.save();saved=true;return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
     }
@@ -115,7 +131,13 @@ struct JournalEditorView:View {
             Section("What you noticed") { TextEditor(text:$editor.notes).frame(minHeight:160).accessibilityLabel("Observation notes") }
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
-                    HStack { if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFill().frame(width:80,height:80).clipped().accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(index+1)") };Spacer();Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent) } }
+                    HStack {
+                        PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10)).accessibilityLabel("Journal photo \(index+1)")
+                        Spacer()
+                        // Borderless, so only the button removes the photo, not a tap anywhere in the row.
+                        Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent) }
+                            .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
+                    }
                 }
                 if editor.loadingPhotos { ProgressView("Adding photo") }
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,4-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=4 || editor.loadingPhotos)
@@ -139,7 +161,7 @@ struct JournalDetailView:View {
     /// Set before deleting, so the closing animation never reads a deleted model.
     @State private var removed=false
     var body:some View {
-        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) } }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") } }.padding(24) } }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }

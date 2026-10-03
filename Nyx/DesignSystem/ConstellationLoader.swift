@@ -41,8 +41,8 @@ struct ConstellationLoader: View {
             }.frame(width:150,height:70).accessibilityHidden(true)
             ProgressView("Reading the night").tint(palette.accent)
         }.padding(40)
-            .task {
-                guard !reduceMotion else { return }
+            .task(id:reduceMotion) {
+                guard !reduceMotion else { progress=1; return }
                 // Trace a figure, hold it, then move on to the next one.
                 while !Task.isCancelled {
                     withAnimation(.spring(response:1.4,dampingFraction:1)) { progress=1 }

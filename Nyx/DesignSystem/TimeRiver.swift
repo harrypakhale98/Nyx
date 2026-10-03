@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// True while a horizontal scrub is under way, so the page can hold still instead of drifting.
+struct RiverScrubbingKey:PreferenceKey {
+    static let defaultValue=false
+    static func reduce(value:inout Bool,nextValue:()->Bool) { value = value || nextValue() }
+}
 /// Thirty nights as one flowing line. Drag across it (or swipe up/down with VoiceOver)
 /// to scrub; the moon above the selected night morphs as you go. Nights beyond the cloud
 /// forecast are dashed and hollow, and the best nights glow amber.
@@ -13,7 +18,10 @@ struct TimeRiver: View {
     @Binding var selected: Date
     /// False when the river starts on a chosen night instead of tonight.
     var startsTonight=true
-    @State private var scrubbing: Bool?
+    /// Whether the current drag is a horizontal scrub; reset by the system even when a drag is cancelled.
+    @GestureState private var scrubbing: Bool?=nil
+    /// Haptic ticks follow a person's choice, never a data refresh.
+    @State private var detents=0
     private var index:Int { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) ?? 0 }
     private var current:Night? { nights.indices.contains(index) ? nights[index] : nil }
     /// The three highest-scoring nights, at least Good, receive the amber glow.
@@ -35,7 +43,8 @@ struct TimeRiver: View {
             }
             Text(legend).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
-        .sensoryFeedback(.selection,trigger:index)
+        .sensoryFeedback(.selection,trigger:detents)
+        .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
     }
 
     private var river: some View {
@@ -53,10 +62,11 @@ struct TimeRiver: View {
             }
             .contentShape(Rectangle())
             // Scrub only on mostly-horizontal drags, so the page above still scrolls freely.
-            .simultaneousGesture(DragGesture(minimumDistance:6).onChanged { drag in
-                if scrubbing==nil { scrubbing=abs(drag.translation.width)>abs(drag.translation.height) }
-                if scrubbing==true { choose(nearest(drag.location.x,width:width)) }
-            }.onEnded { _ in scrubbing=nil })
+            .simultaneousGesture(DragGesture(minimumDistance:6).updating($scrubbing) { drag,state,_ in
+                if state==nil { state=abs(drag.translation.width)>abs(drag.translation.height) }
+            }.onChanged { drag in
+                if scrubbing ?? (abs(drag.translation.width)>abs(drag.translation.height)) { choose(nearest(drag.location.x,width:width)) }
+            })
             .onTapGesture { location in choose(nearest(location.x,width:width)) }
         }
         .frame(height:150)
@@ -113,6 +123,7 @@ struct TimeRiver: View {
     private func choose(_ value:Int) {
         guard nights.indices.contains(value), value != index else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=nights[value].id }
+        detents+=1
     }
 
     private func draw(in context:inout GraphicsContext,size:CGSize) {

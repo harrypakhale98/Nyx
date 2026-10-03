@@ -1,6 +1,7 @@
 import AppIntents
 import Foundation
 import Testing
+import UIKit
 import SwiftData
 @testable import Nyx
 
@@ -135,6 +136,25 @@ struct NyxTests {
         stored.notes="The Moon rose late.";try context.save()
         #expect(try context.fetch(FetchDescriptor<JournalEntry>()).count==1)
         #expect(try context.fetch(FetchDescriptor<SavedPark>()).first?.parkID=="jotr")
+    }
+    /// Photos are decoded straight to their stored size; the journal keeps a small list thumbnail.
+    @MainActor @Test func journalPhotosAreDownscaled() throws {
+        let size=CGSize(width:4000,height:3000)
+        let format=UIGraphicsImageRendererFormat(); format.scale=1
+        let big=try #require(UIGraphicsImageRenderer(size:size,format:format).image { context in
+            UIColor.systemIndigo.setFill(); context.fill(CGRect(origin:.zero,size:size))
+        }.jpegData(compressionQuality:0.9))
+        let stored=try #require(PhotoScaling.jpeg(big,maxPixels:2400))
+        let image=try #require(UIImage(data:stored))
+        #expect(max(image.size.width,image.size.height)<=2400)
+        #expect(abs(image.size.width/image.size.height-4.0/3.0)<0.01)
+        let container=try ModelContainer(for:SavedPark.self,JournalEntry.self,configurations:ModelConfiguration(isStoredInMemoryOnly:true))
+        let editor=JournalEditorModel()
+        editor.photos=[stored]
+        #expect(editor.save(context:ModelContext(container),existing:nil))
+        let entry=try #require(try ModelContext(container).fetch(FetchDescriptor<JournalEntry>()).first)
+        let thumbnail=try #require(entry.thumbnail.flatMap { UIImage(data:$0) })
+        #expect(max(thumbnail.size.width,thumbnail.size.height)<=900)
     }
     @Test func publishedRiseSet() throws {
         struct Reference:Decodable { let park:String; let date:String; let tz:Int; let reference:Response }

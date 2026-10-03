@@ -46,7 +46,7 @@ struct PrivacyView:View {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
                 Text("Requests go to api.open-meteo.com using the park's coordinates, never your device location. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
-                Text("When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
             Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders are local.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
@@ -59,8 +59,8 @@ struct AboutDataView:View {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
             block("The score","Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40, and the cap lifts gradually over the first three hours of true darkness.")
             block("Moon and twilight","Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times.")
-            block("Forecasts","Open-Meteo forecasts cover up to 16 days and are requested for all parks at once, using park coordinates only. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.")
-            block("Parks and skyglow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Designations are checked against the NPS dark-sky list. Viewing coordinates are approximate, not directions. Park data: National Park Service.")
+            block("Forecasts","Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.")
+            block("Parks and skyglow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications, cross-checked against the NPS list. Viewing coordinates are approximate, not directions. Park data: National Park Service.")
             block("Access comes first","A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts.")
             block("Park-local time","Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.")
         }.padding(24) }.background(NightBackground()).navigationTitle("About the data").navigationBarTitleDisplayMode(.inline)
@@ -68,14 +68,14 @@ struct AboutDataView:View {
     private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif));Text(content).font(.body).lineSpacing(4).textSelection(.enabled).foregroundStyle(palette.muted) } }
 }
 enum Essay: String,CaseIterable,Identifiable {
-    case darkness,bortle,etiquette
+    case darkness,milkyway,bortle,etiquette
     var id:String { rawValue }
-    var title:String { switch self { case .darkness:String(localized:"A sky worth protecting");case .bortle:String(localized:"Reading the Bortle scale");case .etiquette:String(localized:"Sharing the night") } }
-    var subtitle:String { switch self { case .darkness:String(localized:"Why darkness deserves care");case .bortle:String(localized:"Understand artificial sky brightness");case .etiquette:String(localized:"Leave room for everyone to look up") } }
-    var symbol:String { switch self { case .darkness:"sparkles";case .bortle:"circle.lefthalf.filled";case .etiquette:"moon.stars" } }
+    var title:String { switch self { case .darkness:String(localized:"A sky worth protecting");case .milkyway:String(localized:"Finding the Milky Way");case .bortle:String(localized:"Reading the Bortle scale");case .etiquette:String(localized:"Sharing the night") } }
+    var subtitle:String { switch self { case .darkness:String(localized:"Why darkness deserves care");case .milkyway:String(localized:"When, where and how to look");case .bortle:String(localized:"Understand artificial sky brightness");case .etiquette:String(localized:"Leave room for everyone to look up") } }
+    var symbol:String { switch self { case .darkness:"sparkles";case .milkyway:"sparkle";case .bortle:"circle.lefthalf.filled";case .etiquette:"moon.stars" } }
     /// About 200 words a minute, never less than one.
     var minutes:Int { max(1,Int((Double(content.split(whereSeparator:\.isWhitespace).count)/200).rounded())) }
-    var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette") } }
+    var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .milkyway:String(localized:"essay.milkyway");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette") } }
 }
 struct LearnView:View {
     @Environment(\.nyx) private var palette
