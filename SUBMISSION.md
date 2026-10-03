@@ -9,8 +9,8 @@
 - Primary category: Travel. Secondary: Weather.
 - Price: Free; no subscriptions, ads or in-app purchases. This is required by the chosen Open-Meteo free/non-commercial service.
 - Language: English. iPhone only, portrait, iOS 26.0 and later.
-- Keywords: `stargazing,national parks,moon,dark sky,astronomy,Milky Way,night,calendar,travel`
-- Copyright: 2026, publisher's legal name (owner confirms before entry).
+- Keywords (95/100; the name already covers "Nyx", "dark", "sky", "planner"): `stargazing,national parks,moon phase,astronomy,milky way,night sky,bortle,camping,meteor,aurora`
+- Copyright: `2026 Hardik Pakhale`
 - Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/`. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.
 
 ### Description
@@ -27,7 +27,7 @@ Moon and twilight calculations, the park library, calendar, journal and saved pa
 
 Nyx has no account, advertising or tracking. Device location stays on your iPhone. Optional weather and park updates contact their respective data providers; see the privacy policy for those requests and provider processing.
 
-Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Forecasts do not include smoke, haze or telescope seeing. Live park alerts and ranger programs depend on data availability and publisher NPS configuration.
+Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Forecasts do not include smoke, haze or telescope seeing. Park alerts and ranger programs come from the National Park Service and may be unavailable.
 
 Weather data: Open-Meteo, CC BY 4.0. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service.
 
