@@ -11,7 +11,7 @@
 - Language: English. iPhone only, portrait, iOS 26.0 and later.
 - Keywords: `stargazing,national parks,moon,dark sky,astronomy,Milky Way,night,calendar,travel`
 - Copyright: 2026, publisher's legal name (owner confirms before entry).
-- Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/` once the repo is public. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.
+- Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/`. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.
 
 ### Description
 
@@ -87,7 +87,7 @@ Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolut
 | Actual widgets/control/Siri/available AI | OPEN — content compiles/previews; device integration review required |
 | Icon Composer native icon | DONE — `AppIcon.icon` compiled by actool; Default, Dark, Tinted and Clear renditions checked |
 | Development-signed archive | PASS locally — signatures/App Group verified; distribution export pending |
-| Hosted privacy/support pages | READY — `docs/` site; live once the repo is public and Pages is on |
+| Hosted privacy/support pages | LIVE — https://harrypakhale98.github.io/Nyx/privacy.html and /support.html |
 | App Store export and account metadata | OPEN — publisher account workflow |
 
 The strongest current work is honest offline astronomy presented with native glass navigation and a coherent moon/score language. A further week would be best spent in real parks with VoiceOver users and two or three stargazers, expanding verified viewing spots and tuning scrub/motion/haptics from observation. Those evaluations cannot be replaced by simulator screenshots.
