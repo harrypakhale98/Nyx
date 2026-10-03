@@ -12,14 +12,22 @@ struct NightCell: View {
                 .foregroundStyle(isTonight ? palette.accent : isPast ? palette.muted : palette.ink)
                 .overlay(alignment:.bottom) { if isTonight { Capsule().fill(palette.accent).frame(width:12,height:2).offset(y:4) } }
             Canvas { context,size in
-                let center=CGPoint(x:size.width/2,y:size.height/2),radius=2+Double(night.score.value)/18
-                if highlighted { context.stroke(Path(ellipseIn:CGRect(x:center.x-11,y:center.y-11,width:22,height:22)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7) }
+                // Size follows the score on a curve, so a 95 night reads clearly larger than a 70.
+                let center=CGPoint(x:size.width/2,y:size.height/2),radius=1.5+8*pow(Double(night.score.value)/100,1.5)
+                if highlighted {
+                    context.stroke(Path(ellipseIn:CGRect(x:center.x-12.5,y:center.y-12.5,width:25,height:25)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7)
+                    // A soft halo: the new-moon window glows a little, like a dark sky does.
+                    context.drawLayer { glow in
+                        glow.addFilter(.blur(radius:5))
+                        glow.fill(Path(ellipseIn:CGRect(x:center.x-9,y:center.y-9,width:18,height:18)),with:.color(palette.accent.opacity(0.22*(isPast ? 0.35 : 1))))
+                    }
+                }
                 let circle=Path(ellipseIn:CGRect(x:center.x-radius,y:center.y-radius,width:2*radius,height:2*radius))
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
                 if night.score.hasForecast { context.fill(circle,with:.color(palette.accent.opacity((0.45+Double(night.score.value)/200)*fade))) }
                 else { context.stroke(circle,with:.color(palette.accent.opacity(fade)),lineWidth:1.1) }
-            }.frame(height:26).accessibilityHidden(true)
+            }.frame(height:28).accessibilityHidden(true)
             if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78).contentShape(Rectangle())
