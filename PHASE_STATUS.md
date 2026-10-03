@@ -1,4 +1,18 @@
-# Nyx handoff — 2026-10-03 (award polish)
+# Nyx handoff — 2026-10-03 (depth and realism, build 3)
+
+Every item in `Research/depth-and-realism-audit.md` is implemented, at the owner's request, before the first release:
+
+- **Icon:** the Dial (score arc and leading star around a sphere-shaded, earthlit crescent), three depth groups. Earlier concepts in `IconSources/Concepts/`.
+- **Moon:** a Metal shader lights NASA's lunar map on a sphere (Lommel–Seeliger), tilted as seen from the park at the Moon's highest point that night, with libration and earthshine. Test: the bright limb points at the Sun's real bearing within 3° in six parks. Share cards use it; widgets get pre-rendered pictures from the app.
+- **Sky:** 904 Yale Bright Star Catalogue stars in their true colours, projected for each park and night, with the Milky Way along the galactic plane, on three tilt-parallax layers. Test: the galactic core sits low in the south on a July night at Joshua Tree.
+- **Instrument and glass:** the gauge has an open-arc Liquid Glass rim, inner shadow and a tilt glint; cards are tinted Liquid Glass; hero gauges float on scroll; the sky arc has a per-park ridge. Solid fallbacks under Reduce Transparency, Increase Contrast and night vision; motion off under Reduce Motion and Low Power Mode.
+- Build number **3** (`project.yml`). Builds 1 and 2 in App Store Connect predate this work.
+
+**Verified 2026-10-03:** zero warnings; on iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5, all 28 Swift Testing tests, both accessibility audits (17 screens × standard and night vision) and both UI tests pass. Store screenshots recaptured (live data, no alpha).
+
+---
+
+# Earlier handoff — 2026-10-03 (award polish)
 
 ## Award polish
 

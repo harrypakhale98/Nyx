@@ -1,6 +1,6 @@
 # Depth and realism audit
 
-*Nyx · October 3, 2026 · scope: the icon, the app's drawn objects, and everything that could gain depth or physical realism*
+*Nyx · October 3, 2026 · **Status: all items implemented in build 3** (see `DECISIONS.md`, "Depth and realism") · scope: the icon, the app's drawn objects, and everything that could gain depth or physical realism*
 
 ## Verdict
 
