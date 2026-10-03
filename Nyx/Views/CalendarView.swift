@@ -51,7 +51,7 @@ struct NightPeek: View {
     var body:some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(alignment:.center,spacing:16) {
-                MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0).frame(width:56,height:56)
+                MoonView(geometry:AstronomyEngine().moon(for:night).geometry).frame(width:56,height:56)
                 VStack(alignment:.leading,spacing:4) {
                     Text(night.park.dayLabel(night.id)).font(.headline).foregroundStyle(palette.ink)
                     Text(night.sky.moon.name).font(.subheadline).foregroundStyle(palette.muted)
