@@ -11,7 +11,10 @@ struct ShareCard:View {
                 // ImageRenderer proposes no size; an unsized gauge collapses and truncates the score.
                 CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(width:300,height:300)
                 Text(night.park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
-                Text(night.park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.ink)
+                HStack(spacing:10) {
+                    MoonView(geometry:AstronomyEngine().moon(for:night).geometry).frame(width:26,height:26)
+                    Text(night.park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.ink)
+                }
                 Text(night.score.hasForecast ? String(localized:"Forecast included · conditions may change") : String(localized:"Moon and darkness only · clouds unknown")).font(.caption).multilineTextAlignment(.center).foregroundStyle(palette.muted)
             }.padding(40)
         }.frame(width:420,height:580)

@@ -2,6 +2,7 @@ import AppIntents
 import Foundation
 import Testing
 import UIKit
+import SwiftUI
 import SwiftData
 @testable import Nyx
 
@@ -89,6 +90,20 @@ struct NyxTests {
         #expect(abs(point.x)<0.6)          // roughly due south
         #expect(point.y < -0.2)            // below the 45° centre of the view, near the horizon
         #expect(sky.faint.count+sky.middle.count+sky.bright.count>300)
+    }
+    /// Whether ImageRenderer runs the Moon's Metal shader: the lit limb must come out bright.
+    @MainActor @Test func moonShaderRendersToImage() throws {
+        let engine=AstronomyEngine(), p=try park("jotr")
+        let geometry=engine.moonGeometry(for:p,at:try date("2026-10-26 23:00",park:p))
+        let renderer=ImageRenderer(content:MoonView(geometry:geometry).frame(width:100,height:100))
+        renderer.scale=1
+        let image=try #require(renderer.cgImage)
+        let context=try #require(CGContext(data:nil,width:100,height:100,bitsPerComponent:8,bytesPerRow:400,space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue))
+        context.draw(image,in:CGRect(x:0,y:0,width:100,height:100))
+        let pixels=try #require(context.data).assumingMemoryBound(to:UInt8.self)
+        let centre=pixels[(50*100+50)*4]
+        print("MOON-SHADER-CENTRE", centre)
+        #expect(centre>60)
     }
     @Test func moonGeometryMatchesPhase() throws {
         let engine=AstronomyEngine(), p=try park("jotr")
