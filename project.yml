@@ -71,6 +71,9 @@ targets:
       - path: Nyx/DesignSystem/MoonDisc.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
+      - path: Nyx/DesignSystem/RealSky.swift
+      - path: Nyx/DesignSystem/MotionTilt.swift
+      - path: Nyx/Resources/stars.json
       - path: Nyx/Models/Park.swift
       - path: Nyx/Models/SkyConditions.swift
       - path: Nyx/Services/AstronomyEngine.swift

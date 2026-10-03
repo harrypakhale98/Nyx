@@ -78,6 +78,18 @@ struct NyxTests {
             #expect(difference<3,"\(id) \(stamp): drawn \(drawn/r)°, sun bearing \(bearing/r)°")
         }
     }
+    /// On a July midnight at Joshua Tree the galactic core sits low in the south: the band must
+    /// pass near the bottom centre of the southward view, and Antares and the core stay above it.
+    @MainActor @Test func milkyWayCoreInTheSouthInSummer() throws {
+        let p=try park("jotr")
+        let sky=SkyProjection.shared.sky(for:p,night:try date("2026-07-15 12:00",park:p))
+        #expect(sky.dark)
+        let core=sky.galaxy.flatMap { $0 }.max { $0.brightness<$1.brightness }
+        let point=try #require(core).position
+        #expect(abs(point.x)<0.6)          // roughly due south
+        #expect(point.y < -0.2)            // below the 45° centre of the view, near the horizon
+        #expect(sky.faint.count+sky.middle.count+sky.bright.count>300)
+    }
     @Test func moonGeometryMatchesPhase() throws {
         let engine=AstronomyEngine(), p=try park("jotr")
         let full=engine.moonGeometry(for:p,at:try date("2026-10-26 12:00",park:p))

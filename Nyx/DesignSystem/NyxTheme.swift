@@ -37,12 +37,26 @@ struct Eyebrow: View {
     var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
 }
 struct NightBackground: View {
+    @Environment(\.skyHome) private var home
     var seed: String="nyx"
     /// The night's score, when the screen is about one night; stars twinkle harder as it rises.
     var score: Int?=nil
+    /// The park and night whose real sky to show; otherwise the starting park tonight.
+    var park: Park?=nil
+    var night: Date?=nil
     var body: some View {
-        ZStack { Color.black; Starfield(seed:seed,twinkle:score.map { pow(Double($0)/100,2) } ?? 0.3) }.ignoresSafeArea().accessibilityHidden(true)
+        let twinkle=score.map { pow(Double($0)/100,2) } ?? 0.3
+        ZStack {
+            Color.black
+            if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle) }
+            else { Starfield(seed:seed,twinkle:twinkle) }
+        }.ignoresSafeArea().accessibilityHidden(true)
     }
+}
+private struct SkyHomeKey: EnvironmentKey { static let defaultValue:Park?=nil }
+extension EnvironmentValues {
+    /// The starting park, whose sky stands behind screens that are not about one park.
+    var skyHome: Park? { get { self[SkyHomeKey.self] } set { self[SkyHomeKey.self]=newValue } }
 }
 struct CalmState: View {
     @Environment(\.nyx) private var palette

@@ -161,7 +161,7 @@ struct CalendarView: View {
                     Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies.").font(.caption).foregroundStyle(palette.muted)
                 }.padding(24).clipped()
             }
-        }.background(NightBackground(seed:park?.id ?? "nyx"))
+        }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .task(id:park?.id) { if let park { await model.refresh([park]) } }.navigationTitle("Calendar").navigationBarTitleDisplayMode(.inline)
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night) } }.nyxPresentation() }
     }
