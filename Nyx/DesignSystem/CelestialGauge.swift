@@ -6,6 +6,7 @@ struct CelestialGauge: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let score: Int
     var hasForecast: Bool=true
     @State private var shown=0
@@ -15,12 +16,12 @@ struct CelestialGauge: View {
         Group {
             if typeSize.isAccessibilitySize {
                 VStack(spacing:16) {
-                    ZStack { orbit; numeral }.frame(width:220,height:220)
+                    ZStack { bezel; orbit; numeral }.frame(width:220,height:220)
                     band
                     units
                 }.frame(maxWidth:.infinity)
             } else {
-                ZStack { orbit;VStack(spacing:5) { numeral;band;units.padding(.top,8) } }
+                ZStack { bezel; orbit;VStack(spacing:5) { numeral;band;units.padding(.top,8) } }
                     .frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
             }
         }
@@ -41,6 +42,8 @@ struct CelestialGauge: View {
             withAnimation(NyxMotion.spring) { shown=score }
         }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone)
+        .onAppear { MotionTilt.shared.start(reduceMotion:reduceMotion) }
+        .onDisappear { MotionTilt.shared.stop() }
     }
     private var numeral:some View {
         Text(reduceMotion ? score : shown,format:.number)
@@ -49,6 +52,16 @@ struct CelestialGauge: View {
     }
     private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    /// The instrument's body: a ring of Liquid Glass the arc runs along, so the dial reads as an
+    /// object, not a chart. Solid and dark under Reduce Transparency and in night vision, where
+    /// glass would flatten toward the text colour.
+    @ViewBuilder private var bezel:some View {
+        if reduceTransparency || palette.nightVision || palette.highContrast {
+            DialRing().fill(palette.panel.opacity(0.9)).overlay(DialRing().stroke(palette.line,lineWidth:0.5))
+        } else {
+            Color.clear.glassEffect(.clear,in:DialRing())
+        }
+    }
     /// The dial (track, glow, arc, ticks) redraws only when the shown score changes; the
     /// orbiting stars and the pulsing leading star are the only per-frame drawing.
     private var orbit:some View {
@@ -56,6 +69,9 @@ struct CelestialGauge: View {
             Canvas { context,size in
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
                 let displayed = reduceMotion ? score : shown
+                // A soft inner shadow: the numeral sits inside the instrument, not on top of the sky.
+                let well=radius-14
+                context.fill(Path(ellipseIn:CGRect(x:center.x-well,y:center.y-well,width:2*well,height:2*well)),with:.radialGradient(Gradient(stops:[.init(color:.black.opacity(0.55),location:0),.init(color:.black.opacity(0.35),location:0.8),.init(color:.black.opacity(0.6),location:1)]),center:center,startRadius:0,endRadius:well))
                 let start=Angle.degrees(140), end=Angle.degrees(400)
                 var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
                 context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
@@ -85,6 +101,14 @@ struct CelestialGauge: View {
                     let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
                     let displayed = reduceMotion ? score : shown
                     let tip=Angle.degrees(140+260*Double(displayed)/100)
+                    // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
+                    if !reduceMotion && !palette.nightVision {
+                        let tilt=MotionTilt.shared
+                        let mid=(-90+tilt.x*55-tilt.y*12)*Double.pi/180, half=22*Double.pi/180
+                        var glint=Path(); glint.addArc(center:center,radius:radius+11,startAngle:.radians(mid-half),endAngle:.radians(mid+half),clockwise:false)
+                        let from=CGPoint(x:center.x+cos(mid-half)*radius,y:center.y+sin(mid-half)*radius), to=CGPoint(x:center.x+cos(mid+half)*radius,y:center.y+sin(mid+half)*radius)
+                        context.stroke(glint,with:.linearGradient(Gradient(colors:[.white.opacity(0),.white.opacity(0.35),.white.opacity(0)]),startPoint:from,endPoint:to),style:StrokeStyle(lineWidth:2.5,lineCap:.round))
+                    }
                     // The leading star: where tonight's score has reached.
                     if displayed>0 {
                         let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
@@ -111,6 +135,18 @@ struct CelestialGauge: View {
         }.accessibilityHidden(true)
     }
 
+}
+/// The glass rim the arc runs along: a band 26 pt wide centred on the arc's radius.
+nonisolated struct DialRing:Shape {
+    func path(in rect:CGRect)->Path {
+        let center=CGPoint(x:rect.midX,y:rect.midY), radius=min(rect.width,rect.height)/2-18
+        var path=Path()
+        path.addArc(center:center,radius:radius+13,startAngle:.zero,endAngle:.degrees(360),clockwise:false)
+        path.closeSubpath()
+        path.addArc(center:center,radius:radius-13,startAngle:.zero,endAngle:.degrees(-360),clockwise:true)
+        path.closeSubpath()
+        return path
+    }
 }
 #Preview("Pristine") { CelestialGauge(score:94).background(.black) }
 #Preview("No forecast • still • AX5") { CelestialGauge(score:82,hasForecast:false).environment(\.nyxReduceMotion,true).dynamicTypeSize(.accessibility5).background(.black) }
