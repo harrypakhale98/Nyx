@@ -32,15 +32,38 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
         try await UNUserNotificationCenter.current().add(request)
     }
 }
+/// Every reminder ID Nyx has handed to iOS. iOS forgets a notification once it is tapped or
+/// cleared, so this ledger is what guarantees a night is announced at most once.
+nonisolated struct ReminderLedger:Sendable {
+    /// A suite name for tests; nil is the app's standard defaults.
+    let suite:String?
+    init(suite:String?=nil) { self.suite=suite }
+    private var defaults:UserDefaults { suite.flatMap { UserDefaults(suiteName:$0) } ?? .standard }
+    var ids:Set<String> { Set(defaults.stringArray(forKey:"issuedReminders") ?? []) }
+    func record(_ issued:Set<String>,now:Date) {
+        // Forget nights that ended more than two days ago; their IDs can never be planned again.
+        let kept=issued.filter { id in
+            guard let stamp=id.split(separator:"-").last.flatMap({ Double($0) }) else { return false }
+            return stamp>now.timeIntervalSince1970-3*86400
+        }
+        defaults.set(Array(kept).sorted(),forKey:"issuedReminders")
+    }
+}
 nonisolated struct NotificationScheduler {
     let center:any LocalNotificationCenter
-    init(center:any LocalNotificationCenter=SystemNotifications()) { self.center=center }
+    let ledger:ReminderLedger
+    init(center:any LocalNotificationCenter=SystemNotifications(),ledger:ReminderLedger=ReminderLedger()) { self.center=center;self.ledger=ledger }
     func requestAuthorization() async -> Bool { await center.request() }
-    func remove() async { await center.remove(await center.pendingIDs().filter{$0.hasPrefix("nyx-night-")}) }
+    /// Cancels every pending reminder. Cancelled ones were never seen, so they may be planned again later.
+    func remove() async {
+        let ours=Set(await center.pendingIDs().filter{$0.hasPrefix("nyx-night-")})
+        await center.remove(ours.sorted())
+        ledger.record(ledger.ids.subtracting(ours),now:.now)
+    }
     /// Only full forecasts can trigger a 'pristine' reminder. No fabricated clouds.
     /// Reminders fire at 18:00 park time the evening before. When that moment has passed
     /// (tonight, or tomorrow opened late), they fire in a minute instead, as long as true
-    /// darkness has not begun; a reminder already delivered is never repeated.
+    /// darkness has not begun; a reminder already issued is never repeated.
     func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[])->[NightReminder] {
         var seen=Set<String>()
         return nights.filter { $0.score.value>=90 && $0.score.hasForecast && $0.sky.darkHours>0 }
@@ -51,18 +74,37 @@ nonisolated struct NotificationScheduler {
                 let soon=now.addingTimeInterval(60), deadline=night.sky.darkStart ?? night.sky.sunset ?? night.id.addingTimeInterval(6*3600)
                 let fire=evening>now ? evening : soon
                 guard fire<deadline else { return nil }
-                let identifier="nyx-night-\(park.id)-\(Int(night.id.timeIntervalSince1970))"
+                let identifier=Self.identifier(park:park,night:night.id)
                 guard !delivered.contains(identifier), seen.insert(identifier).inserted else { return nil }
                 return NightReminder(id:identifier,parkID:park.id,title:String(localized:"A promising night at \(park.shortName)"),body:String(localized:"\(park.dayLabel(night.id)): \(night.score.value)/100, \(night.score.band.label). Forecasts can change. Confirm park access before traveling."),fireDate:fire,timeZone:park.timeZone)
             }.prefix(max(0,min(60,limit))).map{$0}
     }
-    func reschedule(nights:[Night],now:Date = .now) async {
+    static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
+    /// Replans reminders. A pending reminder whose time is fixed (18:00 the evening before) is
+    /// refreshed with the latest score; one already due "in a minute" is left alone, so opening
+    /// Nyx again never pushes it back. `retitle` may offer a calmer title for newly added reminders.
+    func reschedule(nights:[Night],now:Date = .now,retitle:(@Sendable (NightReminder) async -> String?)?=nil) async {
         guard await center.authorized() else { return }
         let pending=await center.pendingIDs()
-        await center.remove(pending.filter{$0.hasPrefix("nyx-night-")})
+        let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
+        let issued=ledger.ids
+        // Issued before and no longer pending: it was delivered, tapped or cleared.
+        let finished=issued.subtracting(ours).union(await center.deliveredIDs())
         let available=max(0,64-pending.filter{!$0.hasPrefix("nyx-night-")}.count)
-        let delivered=Set(await center.deliveredIDs())
-        for plan in plans(nights:nights,now:now,limit:available,delivered:delivered) { try? await center.add(plan) }
+        let planned=plans(nights:nights,now:now,limit:available,delivered:finished)
+        let plannedIDs=Set(planned.map(\.id))
+        await center.remove(ours.subtracting(plannedIDs).sorted())
+        var added=issued
+        for plan in planned {
+            let isPending=ours.contains(plan.id)
+            if isPending && plan.fireDate<=now.addingTimeInterval(60) { continue }
+            var reminder=plan
+            if !isPending, let title=await retitle?(plan) {
+                reminder=NightReminder(id:plan.id,parkID:plan.parkID,title:title,body:plan.body,fireDate:plan.fireDate,timeZone:plan.timeZone)
+            }
+            if (try? await center.add(reminder)) != nil { added.insert(plan.id) }
+        }
+        ledger.record(added,now:now)
     }
 }
 

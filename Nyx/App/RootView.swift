@@ -65,7 +65,11 @@ struct RootView:View {
             else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
             if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
-        .onChange(of:scenePhase) { _,phase in if phase == .active { moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() } } }
+        .onChange(of:scenePhase) { _,phase in if phase == .active { model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() } } }
+        .task {
+            // Keep "tonight" honest on a screen left open through sunrise.
+            while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
+        }
         .onChange(of:nightVision) { _,_ in
             // Keep the Control Center toggle and widgets in step with the in-app switch.
             WidgetCenter.shared.reloadAllTimelines()
@@ -76,7 +80,10 @@ struct RootView:View {
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             launchParkID=activity.userInfo?[CSSearchableItemActivityIdentifier] as? String
         }
-        .onOpenURL { url in if url.scheme=="nyx",url.host=="park" { launchParkID=url.lastPathComponent } }
+        .onOpenURL { url in
+            guard url.scheme=="nyx" else { return }
+            if url.host=="park" { launchParkID=url.lastPathComponent } else if url.host=="tonight" { tab=0 }
+        }
     }
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
         #if DEBUG
@@ -128,14 +135,11 @@ struct RootView:View {
             let today=model.today
             let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
             guard notificationsEnabled else { return }
-            let scheduler=NotificationScheduler()
-            await scheduler.reschedule(nights:nights)
-            if let first=scheduler.plans(nights:nights).first, OnDeviceGuide.available, await SystemNotifications().pendingIDs().contains(first.id) {
-                let quiet=await OnDeviceGuide.reminderStyle(parkName:model.park(first.parkID)?.shortName ?? "")
-                if quiet,UserDefaults.standard.bool(forKey:"notificationsEnabled") {
-                    let title=String(localized:"A night to consider at \(model.park(first.parkID)?.shortName ?? "")")
-                    try? await SystemNotifications().add(NightReminder(id:first.id,parkID:first.parkID,title:title,body:first.body,fireDate:first.fireDate,timeZone:first.timeZone))
-                }
+            let names=Dictionary(parks.map { ($0.id,$0.shortName) },uniquingKeysWith:{ first,_ in first })
+            await NotificationScheduler().reschedule(nights:nights) { plan in
+                // The on-device model may only choose between two vetted titles; it never writes forecasts.
+                guard let name=names[plan.parkID], await OnDeviceGuide.reminderStyle(parkName:name) else { return nil }
+                return String(localized:"A night to consider at \(name)")
             }
         }
     }

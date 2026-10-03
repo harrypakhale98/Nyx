@@ -8,7 +8,8 @@ struct TonightView: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @State private var shooting=0.0
     @State private var refreshed=0
-    @State private var location=LocationService()
+    @Environment(\.openURL) private var openURL
+    private var location:LocationService { model.location }
     @State private var explainLocation=false
     @State private var chooseHome=false
     @Namespace private var zoom
@@ -32,6 +33,7 @@ struct TonightView: View {
                         }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
                         Spacer(minLength:8)
                         if location.locating { ProgressView() }
+                        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings") }
                         else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
                     }
                     ViewThatFits(in:.horizontal) {
@@ -58,7 +60,7 @@ struct TonightView: View {
                     }
                     Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
                 }
-                if DebugScenario.state=="error" || DebugScenario.state=="offline" { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+                if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
                 if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
             }.padding(24)
         }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)

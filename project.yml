@@ -74,7 +74,7 @@ targets:
       - path: Nyx/Services/ScoreEngine.swift
       - path: Nyx/Services/DataServices.swift
       - path: Nyx/Services/SharedSettings.swift
-      - path: Nyx/Intents/NyxIntents.swift
+      - path: Nyx/Intents/NightVisionIntent.swift
       - path: Nyx/Resources/parks.json
       - path: Nyx/Resources/Localizable.xcstrings
     info:

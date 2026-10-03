@@ -8,6 +8,7 @@ struct SettingsView:View {
     @State private var explainNotifications=false
     @State private var permissionMessage:String?
     @State private var replay=false
+    @Environment(\.scenePhase) private var scenePhase
     var body:some View {
         Form {
             Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too; Nyx does not change it for you.").font(.caption).foregroundStyle(palette.muted) }
@@ -24,6 +25,14 @@ struct SettingsView:View {
                 Task { notifications=await NotificationScheduler().requestAuthorization(); if !notifications { permissionMessage=String(localized:"Reminders are off. You can enable them in iPhone Settings.") } }
             }.nyxPresentation() }
             .sheet(isPresented:$replay) { OnboardingView { replay=false }.nyxPresentation() }
+            .task { await syncPermission() }
+            .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await syncPermission() } } }
+    }
+    /// If reminders were turned off in iPhone Settings, say so instead of showing a switch that lies.
+    private func syncPermission() async {
+        guard notifications, DebugScenario.screen == nil, !(await SystemNotifications().authorized()) else { return }
+        notifications=false
+        permissionMessage=String(localized:"Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.")
     }
 }
 struct PrivacyView:View {

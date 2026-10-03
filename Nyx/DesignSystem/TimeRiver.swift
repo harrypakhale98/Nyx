@@ -11,6 +11,8 @@ struct TimeRiver: View {
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let nights: [Night]
     @Binding var selected: Date
+    /// False when the river starts on a chosen night instead of tonight.
+    var startsTonight=true
     @State private var scrubbing: Bool?
     private var index:Int { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) ?? 0 }
     private var current:Night? { nights.indices.contains(index) ? nights[index] : nil }
@@ -154,7 +156,7 @@ struct TimeRiver: View {
         // Sparse date labels: tonight, the first night of each week, and the selected night.
         let labeled=nights.indices.filter { i in i==0 || i==index || (startsWeek(i) && abs(i-index)>2 && i>2) }
         for i in labeled {
-            let label=i==0 ? String(localized:"Tonight") : "\(nights[i].park.calendar.component(.day,from:nights[i].id))"
+            let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : "\(nights[i].park.calendar.component(.day,from:nights[i].id))"
             let text=context.resolve(Text(label).font(.caption2.weight(i==index ? .semibold : .regular)).foregroundStyle(i==index ? palette.ink : palette.muted))
             let measured=text.measure(in:size)
             let cx=min(max(x(i,width:size.width),measured.width/2),size.width-measured.width/2)

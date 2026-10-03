@@ -82,8 +82,9 @@ struct CalendarView: View {
                 let nights=model.nights(park,from:month,count:count)
                 let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
                 let tonight=park.evening(model.tonight(park))
-                let firstFuture=nights.firstIndex { $0.id>=tonight } ?? nights.count
-                let bestStart=bestWindow(nights,from:firstFuture)
+                // The window may reach into the neighbouring months: a new moon on the 1st still gets five nights.
+                let window=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+8),month:nights,after:tonight)
+                let inWindow=Set(window.map(\.id))
                 VStack(alignment:.leading,spacing:24) {
                     if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
                     Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
@@ -108,7 +109,7 @@ struct CalendarView: View {
                         Button { move(1) } label:{ Image(systemName:"chevron.right").frame(width:44,height:44) }.accessibilityLabel("Next month")
                     }
                     if typeSize.isAccessibilitySize {
-                        LazyVStack(alignment:.leading,spacing:20) { ForEach(Array(nights.enumerated()),id:\.element.id) { i,night in
+                        LazyVStack(alignment:.leading,spacing:20) { ForEach(nights) { night in
                             Button { chosen=night } label:{
                                 VStack(alignment:.leading,spacing:8) {
                                     Text(park.dayLabel(night.id)).font(.headline)
@@ -117,14 +118,14 @@ struct CalendarView: View {
                                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
                             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
                                 .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))")
-                                .accessibilityHint((bestStart..<(bestStart+5)).contains(i) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
+                                .accessibilityHint(inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
                         } }
                     } else {
                         LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
                             ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
                             ForEach(0..<lead,id:\.self) { _ in Color.clear.frame(height:78) }
-                            ForEach(Array(nights.enumerated()),id:\.element.id) { i,night in
-                                Button { chosen=night } label:{ NightCell(night:night,highlighted:(bestStart..<(bestStart+5)).contains(i),isTonight:night.id==tonight,isPast:night.id<tonight) }.buttonStyle(.plain)
+                            ForEach(nights) { night in
+                                Button { chosen=night } label:{ NightCell(night:night,highlighted:inWindow.contains(night.id),isTonight:night.id==tonight,isPast:night.id<tonight) }.buttonStyle(.plain)
                                     .contextMenu {
                                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
@@ -141,11 +142,11 @@ struct CalendarView: View {
                     }
                     Panel { VStack(alignment:.leading,spacing:10) {
                         Label("Five nights near the new moon",systemImage:"circle.circle").font(.subheadline)
-                        if nights.indices.contains(bestStart),nights.indices.contains(bestStart+4) {
-                            Text("\(park.dayLabel(nights[bestStart].id)) – \(park.dayLabel(nights[bestStart+4].id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+                        if let first=window.first,let last=window.last {
+                            Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
                             Text("The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.").font(.caption).foregroundStyle(palette.muted)
                         } else {
-                            Text("Fewer than five nights remain this month. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
+                            Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
                         }
                     } }
                     Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies.").font(.caption).foregroundStyle(palette.muted)
@@ -156,10 +157,15 @@ struct CalendarView: View {
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night) } }.nyxPresentation() }
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
-    /// The five consecutive nights with the least moonlight, ignoring nights already past.
-    private func bestWindow(_ nights:[Night],from start:Int)->Int {
-        guard nights.count-start>=5 else { return nights.count }
-        return (start...(nights.count-5)).min { a,b in nights[a..<(a+5)].reduce(0){$0+$1.sky.moon.illumination} < nights[b..<(b+5)].reduce(0){$0+$1.sky.moon.illumination} } ?? nights.count
+    /// The five consecutive nights with the least moonlight that touch this month, ignoring nights already past.
+    private func bestWindow(_ nights:[Night],month:[Night],after tonight:Date)->ArraySlice<Night> {
+        guard let first=month.first?.id,let last=month.last?.id else { return [] }
+        let starts=nights.indices.filter { i in
+            i+5<=nights.count && nights[i].id>=tonight && nights[i].id<=last && nights[i+4].id>=first
+        }
+        func light(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }
+        guard let best=starts.min(by:{ light($0)<light($1) }) else { return [] }
+        return nights[best..<(best+5)]
     }
 }
 #Preview("Calendar") { NavigationStack { CalendarView() }.environment(PlanModel()).preferredColorScheme(.dark) }

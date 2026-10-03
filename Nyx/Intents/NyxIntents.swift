@@ -1,6 +1,5 @@
 import AppIntents
 import Foundation
-import WidgetKit
 
 struct ParkEntity:AppEntity {
     static let typeDisplayRepresentation=TypeDisplayRepresentation(name:"National park")
@@ -34,17 +33,5 @@ struct DarknessIntent:AppIntent {
 struct NyxShortcuts:AppShortcutsProvider {
     static var appShortcuts:[AppShortcut] {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
-    }
-}
-struct NightVisionIntent:SetValueIntent {
-    static let title:LocalizedStringResource="Set night vision"
-    @Parameter(title:"Enabled") var value:Bool
-    init() {}
-    init(value:Bool) { self.value=value }
-    func perform() async throws -> some IntentResult {
-        SharedSettings.defaults.set(value,forKey:"nightVision")
-        WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadAllControls()
-        return .result()
     }
 }

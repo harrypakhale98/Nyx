@@ -11,6 +11,10 @@ import CoreLocation
     private let parkStore: any ParkProviding
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
     var forecasts: [String:Forecast] = [:]
+    /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
+    var staleForecasts: Set<String> = []
+    /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
+    let location=LocationService()
     var enrichments: [String:ParkEnrichment] = [:]
     private var activeRefreshes=0
     var refreshing:Bool { activeRefreshes>0 }
@@ -23,7 +27,14 @@ import CoreLocation
         if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
         if DebugScenario.state=="polar" { return Date(timeIntervalSince1970:1782086400) }
         #endif
-        return .now
+        return clock
+    }
+    /// The moment "tonight" is judged from. Advanced only when some park's night turns over
+    /// (at its sunrise or local noon), so open screens move on without constant redraws.
+    private(set) var clock=Date.now
+    func tick(_ now:Date = .now) {
+        guard parks.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
+        clock=now
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore()) {
@@ -79,7 +90,11 @@ import CoreLocation
             if DebugScenario.state=="no-forecast" { forecasts[park.id]=nil;continue }
             if Task.isCancelled { return }
             let network=weatherEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live")
-            forecasts[park.id]=await weather.forecast(for:park,network:network,force:force)
+            let forecast=await weather.forecast(for:park,network:network,force:force)
+            forecasts[park.id]=forecast
+            if network {
+                if let forecast,Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
+            }
             enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live"),force:force)
         }
     }
@@ -114,7 +129,7 @@ import CoreLocation
     }
     func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
         switch manager.authorizationStatus {
-        case .authorizedWhenInUse,.authorizedAlways: if locating { manager.requestLocation() }
+        case .authorizedWhenInUse,.authorizedAlways: denied=false; if locating { manager.requestLocation() }
         case .denied,.restricted: denied=true; locating=false
         default: break
         }

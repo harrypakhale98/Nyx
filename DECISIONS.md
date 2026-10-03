@@ -91,3 +91,18 @@ One line per decision, with reasoning. Newest at the bottom.
 - The owner's NPS key is in git-ignored `Config/Secrets.xcconfig`; verified against the live API.
 - App Store name is "Nyx: Dark Sky Planner" because "Nyx" is taken in App Store Connect; the owner chose this over the Noctis fallback to keep the brand. The Home Screen name stays "Nyx".
 - Build 1.0 (1) archived with App Store distribution signing and uploaded on 2026-10-03; it includes the owner's NPS key. App Store Connect app ID 6818817800.
+
+## Award polish — 2026-10-03
+
+- Fix: a reminder came back a minute after it was tapped or cleared (iOS forgets those notifications). `ReminderLedger` records every issued ID; a pending "in a minute" reminder is never pushed back by reopening Nyx; turning reminders off forgets only cancelled ones. The on-device title is chosen once, when a reminder is first added.
+- Fix: "Tonight" now turns over at the park's sunrise, not local noon; at 08:00 a planner sees the coming night. Polar night (no sunrise) still switches at noon. The app clock advances whenever any park's night turns over, so open screens and the hourly widget timeline follow.
+- Fix: Open-Meteo requests include `past_days=1`; hours start at 00:00 UTC, so eastern parks lost tonight's clouds after about 20:00 local.
+- Fix: the score cap for zero darkness now lifts smoothly over the first three hours of true darkness (39 → 100). Twenty minutes of darkness scored 83 the night after a capped 39. The breakdown says when a short night holds the score down.
+- Fix: NPS alerts are saved as soon as they arrive; a failing events or park request keeps the last programs/description instead of discarding fresh closures.
+- Fix: the five-night window may reach into neighbouring months; a past month says its nights have passed.
+- Fix: a calendar night outside the 30-night river starts the river at that night (it showed tonight's moon beside another night's score).
+- Fix: Ask Nyx uses the same device location as Tonight (`PlanModel.location`). Denied location offers a Settings button and clears once permission returns. The reminders switch turns off, with a message, when notifications are disabled in iPhone Settings.
+- Fix: deleting a journal entry no longer reads the deleted model during the pop; new entries default to the starting park; `nyx://tonight` (widget empty state) opens the Tonight tab; the widget extension compiles only the night-vision intent, not a second copy of the Siri shortcuts.
+- Fix: release builds now say when forecasts could not update ("Offline calculations are ready…"), not only debug scenarios.
+- Moon disc rebuilt as true vector curves (limb semicircle + terminator half-ellipse) with limb darkening, a soft terminator, low-contrast maria rotated for the southern sky, and a glow that scales with illumination drawn in an unclipped background layer. The old 160-strip raster showed stair-steps at hero sizes.
+- Celestial gauge: soft glow under the arc, lit ticks up to the score, a pulsing leading star at the arc tip, and a 28-star orbit that swirls and twinkles harder as the score rises (static under Reduce Motion).
