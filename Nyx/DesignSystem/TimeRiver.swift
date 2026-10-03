@@ -54,7 +54,7 @@ struct TimeRiver: View {
                 Canvas { context,size in draw(in:&context,size:size) }
                     .accessibilityHidden(true)
                 if let current {
-                    MoonDisc(illumination:current.sky.moon.illumination,waxing:current.sky.moon.waxing,southern:current.park.latitude<0)
+                    MoonView(geometry:AstronomyEngine().moon(for:current).geometry)
                         .frame(width:moonSize,height:moonSize)
                         .offset(x:x(index,width:width)-moonSize/2,y:0)
                         .accessibilityHidden(true)

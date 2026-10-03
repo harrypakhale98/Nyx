@@ -128,7 +128,8 @@ struct ParkDetailView: View {
                     VStack(alignment:.leading,spacing:18) {
                         Eyebrow(text:"Moonlight")
                         HStack(alignment:.center,spacing:24) {
-                            MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:park.latitude<0).frame(width:70,height:70)
+                            let moon=AstronomyEngine().moon(for:night)
+                            MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:70,height:70)
                             VStack(alignment:.leading,spacing:6) { Text(night.sky.moon.name).font(.system(.title3,design:.serif));Text("\(Int((night.sky.moon.illumination*100).rounded()))% illuminated").font(.subheadline).foregroundStyle(palette.muted) }
                         }
                         LabeledContent("Moonrise",value:park.time(night.sky.moonrise))

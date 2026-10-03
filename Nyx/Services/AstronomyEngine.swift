@@ -9,6 +9,19 @@ nonisolated protocol AstronomyProviding: Sendable {
 /// Lunar position: truncated Meeus periodic series plus topocentric parallax.
 /// Roots bracketed every 5 minutes, bisected to <1 second. Terrain/refraction are
 /// not modeled. Target: Sun ±2 min, Moon ±15 min; see Research/accuracy.md.
+/// The Moon as seen from one place and moment. Angles are radians; screen angles are measured
+/// counterclockwise from "up", where up is the observer's zenith.
+nonisolated struct MoonGeometry: Sendable, Equatable {
+    /// 0 at full moon, π at new moon.
+    let phaseAngle: Double
+    /// Direction of the bright limb on screen.
+    let brightLimb: Double
+    /// Direction of the Moon's north pole on screen.
+    let north: Double
+    let librationLongitude: Double
+    let librationLatitude: Double
+    var illumination: Double { (1+cos(phaseAngle))/2 }
+}
 nonisolated struct AstronomyEngine: AstronomyProviding {
     static let synodicDays = 29.530588853
     static let epoch = Date(timeIntervalSince1970: 947_182_440) // 2000-01-06 18:14 UTC
@@ -70,25 +83,32 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
     private func normalized(_ value: Double) -> Double { value - floor(value/360)*360 }
     private func sinD(_ a: Double) -> Double { sin(a*rad) }
     private func cosD(_ a: Double) -> Double { cos(a*rad) }
-    private func altitude(date: Date, park: Park, ra: Double, dec: Double) -> Double {
+    /// Local hour angle (radians) of a body at right ascension `ra` (radians).
+    private func hourAngle(date: Date, park: Park, ra: Double) -> Double {
         let jd = julian(date)
         let t = (jd-2451545)/36525
         let sidereal = normalized(280.46061837 + 360.98564736629*(jd-2451545) + 0.000387933*t*t - t*t*t/38710000)
-        let h = (sidereal + park.longitude)*rad - ra
+        return (sidereal + park.longitude)*rad - ra
+    }
+    /// Altitude and azimuth (degrees; azimuth from north through east) of an equatorial position.
+    func horizontal(date: Date, park: Park, ra: Double, dec: Double) -> (altitude: Double, azimuth: Double) {
+        let h = hourAngle(date: date, park: park, ra: ra), lat = park.latitude*rad
+        let alt = asin(max(-1,min(1,sin(lat)*sin(dec)+cos(lat)*cos(dec)*cos(h))))
+        let az = atan2(-sin(h)*cos(dec), cos(lat)*sin(dec)-sin(lat)*cos(dec)*cos(h))
+        return (alt/rad, normalized(az/rad))
+    }
+    private func altitude(date: Date, park: Park, ra: Double, dec: Double) -> Double {
+        let h = hourAngle(date: date, park: park, ra: ra)
         let lat = park.latitude*rad
         return asin(max(-1,min(1,sin(lat)*sin(dec)+cos(lat)*cos(dec)*cos(h))))/rad
     }
     func solarAltitude(at date: Date, park: Park) -> Double {
-        let t = (julian(date)-2451545)/36525
-        let l = normalized(280.46646 + t*(36000.76983 + t*0.0003032))
-        let m = 357.52911 + t*(35999.05029-0.0001537*t)
-        let c = sinD(m)*(1.914602-t*(0.004817+0.000014*t)) + sinD(2*m)*(0.019993-0.000101*t)+sinD(3*m)*0.000289
-        let omega = 125.04-1934.136*t
-        let lambda = (l+c-0.00569-0.00478*sinD(omega))*rad
-        let epsilon = (23+(26+(21.448-t*(46.815+t*(0.00059-t*0.001813)))/60)/60+0.00256*cosD(omega))*rad
-        return altitude(date: date, park: park, ra: atan2(cos(epsilon)*sin(lambda),cos(lambda)), dec: asin(sin(epsilon)*sin(lambda)))
+        let sun = solarPosition(at: date)
+        return altitude(date: date, park: park, ra: sun.ra, dec: sun.dec)
     }
-    func lunarAltitude(at date: Date, park: Park) -> Double {
+    /// Geocentric lunar position: ecliptic longitude/latitude (degrees), right ascension and
+    /// declination (radians), distance (km) and the argument of latitude F (degrees).
+    private func lunarPosition(at date: Date) -> (lon: Double, lat: Double, ra: Double, dec: Double, distance: Double, f: Double, t: Double) {
         let t = (julian(date)-2451545)/36525
         let l = normalized(218.3164477 + 481267.88123421*t - 0.0015786*t*t)
         let d = normalized(297.8501921 + 445267.1114034*t - 0.0018819*t*t)
@@ -107,8 +127,70 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         let x = cosD(lon)*cosD(lat)
         let y = sinD(lon)*cosD(lat)*cos(eps)-sinD(lat)*sin(eps)
         let z = sinD(lon)*cosD(lat)*sin(eps)+sinD(lat)*cos(eps)
-        let geo = altitude(date: date, park: park, ra: atan2(y,x), dec: asin(z))
-        return geo - asin(6378.14/distance)/rad * cosD(geo)
+        return (lon, lat, atan2(y,x), asin(z), distance, f, t)
+    }
+    /// Apparent solar ecliptic longitude (radians) and equatorial coordinates (radians).
+    private func solarPosition(at date: Date) -> (lambda: Double, ra: Double, dec: Double, epsilon: Double) {
+        let t = (julian(date)-2451545)/36525
+        let l = normalized(280.46646 + t*(36000.76983 + t*0.0003032))
+        let m = 357.52911 + t*(35999.05029-0.0001537*t)
+        let c = sinD(m)*(1.914602-t*(0.004817+0.000014*t)) + sinD(2*m)*(0.019993-0.000101*t)+sinD(3*m)*0.000289
+        let omega = 125.04-1934.136*t
+        let lambda = (l+c-0.00569-0.00478*sinD(omega))*rad
+        let epsilon = (23+(26+(21.448-t*(46.815+t*(0.00059-t*0.001813)))/60)/60+0.00256*cosD(omega))*rad
+        return (lambda, atan2(cos(epsilon)*sin(lambda),cos(lambda)), asin(sin(epsilon)*sin(lambda)), epsilon)
+    }
+    /// Geocentric right ascension and declination (radians) of the Sun and the Moon.
+    func equatorial(of body: Body, at date: Date) -> (ra: Double, dec: Double) {
+        switch body {
+        case .sun: let sun = solarPosition(at: date); return (sun.ra, sun.dec)
+        case .moon: let moon = lunarPosition(at: date); return (moon.ra, moon.dec)
+        }
+    }
+    enum Body { case sun, moon }
+    func lunarAltitude(at date: Date, park: Park) -> Double {
+        let moon = lunarPosition(at: date)
+        let geo = altitude(date: date, park: park, ra: moon.ra, dec: moon.dec)
+        return geo - asin(6378.14/moon.distance)/rad * cosD(geo)
+    }
+    /// How the Moon looks from a park at a moment: its phase angle, where its bright limb and its
+    /// north pole point on screen (with the zenith up), and its optical libration.
+    /// Bright limb: Meeus (48.5); parallactic angle: Meeus (14.1); axis and libration: Meeus ch. 53,
+    /// optical terms only (physical libration is under 0.04°).
+    func moonGeometry(for park: Park, at date: Date) -> MoonGeometry {
+        let moon = lunarPosition(at: date), sun = solarPosition(at: date)
+        let beta = moon.lat*rad, lambda = moon.lon*rad
+        let elongation = acos(max(-1,min(1,cos(beta)*cos(lambda-sun.lambda))))
+        let phaseAngle = atan2(149_597_870*sin(elongation), moon.distance-149_597_870*cos(elongation))
+        let chi = atan2(cos(sun.dec)*sin(sun.ra-moon.ra), sin(sun.dec)*cos(moon.dec)-cos(sun.dec)*sin(moon.dec)*cos(sun.ra-moon.ra))
+        let h = hourAngle(date: date, park: park, ra: moon.ra), phi = park.latitude*rad
+        let q = atan2(sin(h), tan(phi)*cos(moon.dec)-sin(moon.dec)*cos(h))
+        let inclination = 1.54242*rad
+        let node = normalized(125.0445479-1934.1362891*moon.t)*rad
+        let w = lambda-node
+        let a = atan2(sin(w)*cos(beta)*cos(inclination)-sin(beta)*sin(inclination), cos(w)*cos(beta))
+        var lPrime = a-moon.f*rad
+        lPrime = atan2(sin(lPrime), cos(lPrime))
+        let bPrime = asin(max(-1,min(1,-sin(w)*cos(beta)*sin(inclination)-sin(beta)*cos(inclination))))
+        let x = sin(inclination)*sin(node)
+        let y = sin(inclination)*cos(node)*cos(sun.epsilon)-cos(inclination)*sin(sun.epsilon)
+        let omega = atan2(x, y)
+        let axis = asin(max(-1,min(1,sqrt(x*x+y*y)*cos(moon.ra-omega)/cos(bPrime))))
+        return MoonGeometry(phaseAngle: phaseAngle, brightLimb: chi-q, north: axis-q, librationLongitude: lPrime, librationLatitude: bPrime)
+    }
+    /// The moment a night's Moon is best seen: its highest point between sunset and sunrise
+    /// (or the local 22:00–02:00 window under the midnight sun). Used for its drawn orientation.
+    func moonViewTime(for sky: SkyConditions, park: Park) -> Date {
+        var start = sky.cloudWindow.start, end = sky.cloudWindow.end
+        if let sunset = sky.sunset, let sunrise = sky.sunrise, sunrise > sunset { start = sunset; end = sunrise }
+        var best = start, highest = -Double.infinity
+        var moment = start
+        while moment <= end {
+            let altitude = lunarAltitude(at: moment, park: park)
+            if altitude > highest { highest = altitude; best = moment }
+            moment = moment.addingTimeInterval(1800)
+        }
+        return best
     }
     func milkyWayGuidance(for park: Park, on date: Date) -> String {
         let month = park.calendar.component(.month, from: date)

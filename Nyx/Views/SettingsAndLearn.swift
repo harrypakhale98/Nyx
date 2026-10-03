@@ -58,7 +58,7 @@ struct AboutDataView:View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
             block("The score","Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40, and the cap lifts gradually over the first three hours of true darkness.")
-            block("Moon and twilight","Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times.")
+            block("Moon and twilight","Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map (NASA's Scientific Visualization Studio, CGI Moon Kit), lit from the Sun's real direction and tilted as it appears from the park at its highest point that night.")
             block("Forecasts","Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.")
             block("Parks and skyglow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications, cross-checked against the NPS list. Viewing coordinates are approximate, not directions. Park data: National Park Service.")
             block("Access comes first","A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts.")
@@ -126,10 +126,29 @@ struct OnboardingView:View {
     }
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
-        case 0: MoonDisc(illumination:0.18,waxing:true).frame(width:170,height:170).padding(.vertical,24)
+        case 0: OnboardingMoon(daysAfterNew:3).frame(width:170,height:170).padding(.vertical,24)
         case 1: ScoreAnatomy(active:page==1)
-        default: MoonDisc(illumination:0,waxing:true).frame(width:170,height:170).padding(.vertical,24)
+        default: OnboardingMoon(daysAfterNew:0).frame(width:170,height:170).padding(.vertical,24)
         }
+    }
+}
+/// A real Moon over the starting park: a young crescent, or the new Moon's earthlit disc.
+/// Computed from the coming new moon, so the art always matches this month's sky.
+private struct OnboardingMoon:View {
+    @Environment(PlanModel.self) private var model
+    let daysAfterNew:Double
+    var body:some View {
+        let engine=AstronomyEngine(), park=model.home
+        // Walk forward to the next new moon (phase fraction wraps past 0), then add the offset.
+        let now=Date.now, fraction=engine.moonPhase(at:now).fraction
+        let newMoon=now.addingTimeInterval((1-fraction)*AstronomyEngine.synodicDays*86400)
+        let evening=newMoon.addingTimeInterval(daysAfterNew*86400)
+        if let park {
+            let sky=engine.conditions(for:park,on:park.evening(evening))
+            // A young crescent is seen low in the west after sunset, not at its highest (often in daylight).
+            let at=daysAfterNew>0 ? (sky.sunset ?? evening).addingTimeInterval(3600) : engine.moonViewTime(for:sky,park:park)
+            MoonView(geometry:engine.moonGeometry(for:park,at:at))
+        } else { MoonDisc(illumination:daysAfterNew>0 ? 0.18 : 0,waxing:true) }
     }
 }
 /// The four parts of the Darkness Score filling in, one after another, as the example score counts up.

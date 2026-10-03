@@ -18,7 +18,7 @@ struct SkyArc: View {
         VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"The shape of the night")
             Canvas { context,size in draw(in:&context,size:size) } symbols: {
-                MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
+                MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
                     .frame(width:20,height:20).tag("moon")
             }
             .frame(height:168)

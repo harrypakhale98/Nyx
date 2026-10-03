@@ -62,6 +62,29 @@ struct NyxTests {
         #expect(ScoreEngine.cap(darkHours:1.5)>ScoreEngine.cap(darkHours:0.5))
         #expect(ScoreEngine.cap(darkHours:3)==100)
     }
+    /// The drawn bright limb must point at the Sun as the observer sees it: compare it with the
+    /// great-circle bearing from the Moon to the Sun in that park's sky (zenith up, clockwise
+    /// toward increasing azimuth, so the drawn counterclockwise angle is its negative).
+    @Test func moonBrightLimbFacesTheSun() throws {
+        let engine=AstronomyEngine()
+        for (id,stamp) in [("jotr","2026-10-12 19:30"),("jotr","2026-10-22 22:00"),("acad","2026-03-24 20:00"),("dena","2026-01-27 18:00"),("npsa","2026-10-14 20:00"),("ever","2026-11-01 05:30")] {
+            let p=try park(id), at=try date(stamp,park:p)
+            let sun=engine.equatorial(of:.sun,at:at), moon=engine.equatorial(of:.moon,at:at)
+            let s=engine.horizontal(date:at,park:p,ra:sun.ra,dec:sun.dec), m=engine.horizontal(date:at,park:p,ra:moon.ra,dec:moon.dec)
+            let r=Double.pi/180, dAz=(s.azimuth-m.azimuth)*r
+            let bearing=atan2(sin(dAz)*cos(s.altitude*r),cos(m.altitude*r)*sin(s.altitude*r)-sin(m.altitude*r)*cos(s.altitude*r)*cos(dAz))
+            let drawn=engine.moonGeometry(for:p,at:at).brightLimb
+            let difference=abs(atan2(sin(drawn+bearing),cos(drawn+bearing)))/r
+            #expect(difference<3,"\(id) \(stamp): drawn \(drawn/r)°, sun bearing \(bearing/r)°")
+        }
+    }
+    @Test func moonGeometryMatchesPhase() throws {
+        let engine=AstronomyEngine(), p=try park("jotr")
+        let full=engine.moonGeometry(for:p,at:try date("2026-10-26 12:00",park:p))
+        let new=engine.moonGeometry(for:p,at:try date("2026-10-10 00:00",park:p))
+        #expect(full.illumination>0.97); #expect(new.illumination<0.03)
+        #expect(abs(full.librationLongitude)<8*Double.pi/180); #expect(abs(full.librationLatitude)<7*Double.pi/180)
+    }
     @Test func polarAndTropical() throws {
         let engine=AstronomyEngine(), denali=try park("dena"), gates=try park("gaar"), samoa=try park("npsa")
         let summer=engine.conditions(for:denali,on:try date("2026-06-21 12:00",park:denali))
