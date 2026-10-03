@@ -9,7 +9,7 @@ Everything else is built, verified and documented. Each step below needs your Ap
    - Paste the description, keywords, subtitle and URLs from `SUBMISSION.md`.
    - App Privacy: "No, we do not collect data from this app". Reasoning is in `PRIVACY.md`.
    - Upload the six screenshots in `Store/Screenshots/` (6.9-inch).
-   - In Xcode: Product → Archive → Distribute App → App Store Connect → Upload.
+   - Build 1.0 (1) is already uploaded and attached to the version (uploaded 2026-10-03 from this Mac). Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, regenerate, then Product → Archive → Distribute App → App Store Connect → Upload.
    - When the build finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
 
 ## Done

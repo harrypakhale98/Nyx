@@ -90,3 +90,4 @@ One line per decision, with reasoning. Newest at the bottom.
 - Public privacy, support and landing pages live in `docs/` for GitHub Pages; contact harry.pakhale98@gmail.com (owner's choice).
 - The owner's NPS key is in git-ignored `Config/Secrets.xcconfig`; verified against the live API.
 - App Store name is "Nyx: Dark Sky Planner" because "Nyx" is taken in App Store Connect; the owner chose this over the Noctis fallback to keep the brand. The Home Screen name stays "Nyx".
+- Build 1.0 (1) archived with App Store distribution signing and uploaded on 2026-10-03; it includes the owner's NPS key. App Store Connect app ID 6818817800.
