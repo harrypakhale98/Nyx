@@ -71,6 +71,8 @@ actor WeatherService: WeatherProviding {
     private let transport: any HTTPTransport
     private let persist:Bool
     private var memory: [String: Forecast] = [:]
+    /// Requests already on their way, so Tonight, Parks and saved parks never fetch the same park twice at once.
+    private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
     init(transport: any HTTPTransport = SafeHTTP(),persist:Bool=true) { self.transport=transport;self.persist=persist }
     /// Cached forecasts for every park, refreshed in as few requests as possible: Open-Meteo
     /// accepts many coordinates at once, so all 63 parks cost one request, not 63.
@@ -81,15 +83,33 @@ actor WeatherService: WeatherProviding {
         for park in parks {
             let cached = memory[park.id] ?? (persist ? CacheDirectory.read(Forecast.self, name: "weather-\(park.id)") : nil)
             if let cached { memory[park.id]=cached; result[park.id]=cached }
-            if network && (force || cached.map { Date.now.timeIntervalSince($0.updated)>=6*3600 } ?? true) { due.append(park) }
+            // A forced refresh still waits ten minutes between requests for the same park.
+            let age=cached.map { Date.now.timeIntervalSince($0.updated) } ?? .infinity
+            if network && (age>=6*3600 || (force && age>=600)) { due.append(park) }
         }
-        for start in stride(from: 0, to: due.count, by: 50) {
-            let chunk = Array(due[start..<min(due.count, start+50)])
-            for (park, forecast) in await fetch(chunk) {
-                memory[park.id]=forecast; result[park.id]=forecast
-                if persist { CacheDirectory.write(forecast,name:"weather-\(park.id)") }
+        var waits: [Task<[String: Forecast], Never>] = due.compactMap { inFlight[$0.id] }
+        let fresh = due.filter { inFlight[$0.id] == nil }
+        for start in stride(from: 0, to: fresh.count, by: 50) {
+            let chunk = Array(fresh[start..<min(fresh.count, start+50)])
+            let task = Task { () -> [String: Forecast] in
+                var fetched: [String: Forecast] = [:]
+                for (park, forecast) in await self.fetch(chunk) { fetched[park.id]=forecast }
+                return fetched
+            }
+            for park in chunk { inFlight[park.id]=task }
+            waits.append(task)
+        }
+        var seen = Set<Task<[String: Forecast], Never>>()
+        for task in waits where seen.insert(task).inserted {
+            for (id, forecast) in await task.value {
+                if memory[id].map({ $0.updated < forecast.updated }) ?? true {
+                    memory[id]=forecast
+                    if persist, let park=due.first(where: { $0.id == id }) { CacheDirectory.write(forecast,name:"weather-\(park.id)") }
+                }
+                if due.contains(where: { $0.id == id }) { result[id]=memory[id] }
             }
         }
+        for park in fresh where inFlight[park.id] != nil { inFlight[park.id]=nil }
         return result
     }
     private func fetch(_ parks: [Park]) async -> [(Park, Forecast)] {
@@ -119,6 +139,9 @@ nonisolated struct ParkEnrichment: Codable, Sendable {
     let alerts: [ParkAlert]
     let programs: [RangerProgram]
     let description: String?
+    /// When programs were last fetched successfully; nil if they never were. Optional so
+    /// caches written before this field still decode.
+    var programsUpdated: Date?=nil
 }
 nonisolated protocol ParkProviding: Sendable {
     func enrichment(for park: Park, key: String, network: Bool, force: Bool) async -> ParkEnrichment?
@@ -131,7 +154,8 @@ actor ParkStore: ParkProviding {
     func enrichment(for park: Park, key: String, network: Bool, force: Bool = false) async -> ParkEnrichment? {
         let cached=memory[park.id] ?? (persist ? CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") : nil)
         guard network, !key.isEmpty, !key.contains("$(") else { return cached }
-        if !force, let cached, Date.now.timeIntervalSince(cached.updated)<6*3600 { return cached }
+        // Fresh only when both alerts and programs are: a failed events request retries next time.
+        if !force, let cached, Date.now.timeIntervalSince(min(cached.updated,cached.programsUpdated ?? .distantPast))<6*3600 { return cached }
         func url(_ path: String, page:Int=1) throws -> URL {
             var c=URLComponents(); c.scheme="https"; c.host="developer.nps.gov"; c.path="/api/v1/\(path)"
             c.queryItems=[URLQueryItem(name:"parkCode",value:park.apiCode),URLQueryItem(name:"api_key",value:key),URLQueryItem(name:"limit",value:"100")]
@@ -150,6 +174,7 @@ actor ParkStore: ParkProviding {
         guard let alerts=try? JSONDecoder().decode(AlertResponse.self,from:await transport.get(url("alerts"))).data else { return cached }
         let today=park.isoDay(.now)
         var programs=(cached?.programs ?? []).filter { $0.date >= today }
+        var programsUpdated=cached?.programsUpdated
         if let firstPage=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events"))) {
             var events:[EventResponse.Event]?=firstPage.data
             let pages=min(10,Int(ceil((Double(firstPage.total ?? "0") ?? 0)/100)))
@@ -166,10 +191,11 @@ actor ParkStore: ParkProviding {
                 }.flatMap { event in
                     (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id:event.id+day,title:event.title,date:day,description:Self.plain(event.description)) }
                 }.sorted { $0.date<$1.date }
+                programsUpdated = .now
             }
         }
         let info=try? JSONDecoder().decode(ParkResponse.self,from:await transport.get(url("parks"))).data
-        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:info?.first?.description ?? cached?.description)
+        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:info?.first?.description ?? cached?.description,programsUpdated:programsUpdated)
         memory[park.id]=result; if persist { CacheDirectory.write(result,name:"park-\(park.id)") }; return result
     }
     private static func plain(_ html:String)->String {

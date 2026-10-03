@@ -98,7 +98,7 @@ struct RootView:View {
         case "data": AboutDataView()
         case "article": EssayView(essay:.darkness)
         case "ask": GuideView(mode:.planning)
-        case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false))
+        case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park)) }.padding(24) }.background(NightBackground()) }
         case "river": if let park=model.home { ScrollView { Panel { TimeRiver(nights:DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30),selected:.constant(model.tonight(park))) }.padding(24) }.background(NightBackground()) }

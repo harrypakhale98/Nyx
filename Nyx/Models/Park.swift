@@ -68,6 +68,11 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         format.timeZone = timeZone
         return date.formatted(format)
     }
+    func weekdayInitial(_ date: Date) -> String {
+        var format = Date.FormatStyle.dateTime.weekday(.narrow)
+        format.timeZone = timeZone
+        return date.formatted(format)
+    }
     func dayLabel(_ date: Date) -> String {
         var format = Date.FormatStyle.dateTime.weekday(.abbreviated).month(.abbreviated).day()
         format.timeZone = timeZone

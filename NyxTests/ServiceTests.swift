@@ -82,6 +82,7 @@ struct ServiceTests {
         let result=await ParkStore(transport:http,persist:false).enrichment(for:p,key:"test",network:true,force:true)
         #expect(result?.alerts.first?.title == "Road closed")
         #expect(result?.programs.isEmpty == true)
+        #expect(result?.programsUpdated == nil)
     }
     @Test func rejectsOtherHosts() async {
         guard let url=URL(string:"https://example.com/forecast") else { Issue.record("Bad fixture URL");return }

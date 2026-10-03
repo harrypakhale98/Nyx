@@ -21,15 +21,18 @@ struct TonightProvider:TimelineProvider {
         completion(Timeline(entries:entries,policy:.after(hour.addingTimeInterval(23*3600))))
     }
     private func entry(at date:Date,snapshot:SavedSkySnapshot?,cache:inout [String:SkyConditions])->TonightEntry {
-        let nights=(snapshot?.parks ?? []).map { park in
-            let evening=park.currentNight(at:date), key="\(park.id)-\(evening.timeIntervalSince1970)"
+        func night(_ park:Park,_ evening:Date)->Night {
+            let key="\(park.id)-\(evening.timeIntervalSince1970)"
             let sky=cache[key] ?? AstronomyEngine().conditions(for:park,on:evening)
             cache[key]=sky
             let forecast=snapshot?.forecasts[park.id]
             let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:date)
-            return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:forecast?.updated)
+            return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
         }
-        return TonightEntry(date:date,night:nights.max{$0.score.value<$1.score.value},nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
+        let nights=(snapshot?.parks ?? []).map { night($0,$0.currentNight(at:date)) }
+        let best=nights.max{$0.score.value<$1.score.value}
+        let week=best.map { tonight in (0..<7).map { night(tonight.park,tonight.park.date(tonight.id,addingDays:$0)) } } ?? []
+        return TonightEntry(date:date,night:best,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),week:week)
     }
 }
 struct TonightWidget:Widget {
