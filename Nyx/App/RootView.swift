@@ -17,8 +17,12 @@ struct RootView:View {
     @State private var savedUpdating=false
     @State private var tab=0
     @State private var intro=false
-    @State private var coldReveal=false
+    /// Cold launch: the launch screen's starfield paints first, then the app settles in.
+    /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
+    @State private var revealed=DebugScenario.screen != nil
     @State private var launchParkID:String?
+    /// The Tonight tab icon is today's real moon phase; refreshed whenever Nyx returns.
+    @State private var moonIcon=RootView.currentMoonIcon()
     private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision",highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
     var body:some View {
         Group {
@@ -26,12 +30,16 @@ struct RootView:View {
             else if let screen=DebugScenario.screen,screen != "tonight",screen != "parks",screen != "calendar",screen != "journal",screen != "learn" {
                 NavigationStack { debugScreen(screen) }
             } else {
+                ZStack {
+                NightBackground().opacity(revealed ? 0 : 1)
                 TabView(selection:$tab) {
-                    Tab(value:0) { NavigationStack { TonightView() } } label:{ Label { Text("Tonight") } icon:{ currentMoonIcon } }
+                    Tab(value:0) { NavigationStack { TonightView() } } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
                     Tab("Parks",systemImage:"mountain.2",value:1) { NavigationStack { ParksView() } }
                     Tab("Calendar",systemImage:"calendar",value:2) { NavigationStack { CalendarView() } }
                     Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() } }
                     Tab("Learn",systemImage:"sparkles",value:4) { NavigationStack { LearnView() } }
+                }
+                .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
                 }
             }
         }
@@ -40,10 +48,10 @@ struct RootView:View {
         .modifier(DebugTypeSize())
         .modifier(NightVisionFilter(enabled:palette.nightVision))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
-        .overlay(alignment:.top) { if coldReveal { Text("NYX").font(.caption2).tracking(7).foregroundStyle(palette.muted).padding(10).allowsHitTesting(false).accessibilityHidden(true) } }
-        .sheet(isPresented:$intro) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
+        .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in NavigationStack { ParkDetailView(park:park) }.nyxPresentation() }
         .task {
+            NotificationRouter.shared.connect { parkID in launchParkID=parkID }
             if let screen=DebugScenario.screen { tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
             #if DEBUG
             if DebugScenario.state=="populated" {
@@ -53,11 +61,16 @@ struct RootView:View {
             }
             #endif
             intro = !onboarded && DebugScenario.screen == nil
-            coldReveal = !systemReduceMotion && !DebugScenario.isEnabled("reduce-motion")
-            try? await Task.sleep(for:.milliseconds(900));withAnimation(systemReduceMotion ? nil : NyxMotion.spring) { coldReveal=false }
+            if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
+            else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
             if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
-        .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await updateSaved() } } }
+        .onChange(of:scenePhase) { _,phase in if phase == .active { moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() } } }
+        .onChange(of:nightVision) { _,_ in
+            // Keep the Control Center toggle and widgets in step with the in-app switch.
+            WidgetCenter.shared.reloadAllTimelines()
+            ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
+        }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
@@ -81,7 +94,7 @@ struct RootView:View {
         case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false))
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park)) }.padding(24) }.background(NightBackground()) }
-        case "river": if let park=model.home { ScrollView { Panel { TimeRiver(nights:DebugScenario.state=="empty" ? [] : model.nights(park,from:model.today,count:30),selected:.constant(model.today)) }.padding(24) }.background(NightBackground()) }
+        case "river": if let park=model.home { ScrollView { Panel { TimeRiver(nights:DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30),selected:.constant(model.tonight(park))) }.padding(24) }.background(NightBackground()) }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())
@@ -92,7 +105,7 @@ struct RootView:View {
         TonightView()
         #endif
     }
-    private var currentMoonIcon:Image {
+    private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)
         let renderer=ImageRenderer(content:MoonDisc(illumination:moon.illumination,waxing:moon.waxing,iconMode:true).frame(width:24,height:24))
         renderer.scale=3

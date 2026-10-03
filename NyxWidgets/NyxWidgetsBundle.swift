@@ -16,9 +16,9 @@ struct TonightProvider:TimelineProvider {
     private func entry(at date:Date)->TonightEntry {
         let snapshot=SharedSettings.read()
         let nights=(snapshot?.parks ?? []).map { park in
-            let sky=AstronomyEngine().conditions(for:park,on:date)
+            let sky=AstronomyEngine().conditions(for:park,on:park.currentNight(at:date))
             let forecast=snapshot?.forecasts[park.id]
-            let clouds=forecast?.mean(from:sky.darkStart,to:sky.darkEnd,now:date)
+            let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:date)
             return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:forecast?.updated)
         }
         return TonightEntry(date:date,night:nights.max{$0.score.value<$1.score.value},nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))

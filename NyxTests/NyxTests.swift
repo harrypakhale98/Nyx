@@ -21,6 +21,28 @@ struct NyxTests {
             #expect((1...9).contains(p.bortleEstimate)); #expect(p.sourceURL.hasPrefix("https://www.nps.gov/"))
         }
     }
+    @Test func nightInProgressRunsUntilLocalNoon() throws {
+        let tree=try park("jotr")
+        let small=try date("2026-10-03 01:30",park:tree), noon=try date("2026-10-03 12:00",park:tree)
+        #expect(tree.currentNight(at:small)==tree.evening(try date("2026-10-02 18:00",park:tree)))
+        #expect(tree.currentNight(at:noon)==noon)
+    }
+    @Test func searchForgivesSpelling() throws {
+        #expect(try park("havo").matches("Hawaii Volcanoes"))
+        #expect(try park("wrst").matches("Wrangell St Elias"))
+        #expect(try park("grsm").matches("smokies"))
+        #expect(try !park("jotr").matches("Yellowstone"))
+    }
+    @Test func midnightSunStillUsesItsForecast() throws {
+        let denali=try park("dena")
+        let sky=AstronomyEngine().conditions(for:denali,on:try date("2026-06-21 12:00",park:denali))
+        #expect(sky.darkStart==nil)
+        let window=sky.cloudWindow
+        #expect(window.end>window.start)
+        let hours=stride(from:sky.evening.timeIntervalSince1970,to:sky.end.timeIntervalSince1970,by:3600).map { $0 }
+        let forecast=Forecast(updated:sky.evening,times:hours,clouds:hours.map { _ in 30 })
+        #expect(forecast.mean(from:window.start,to:window.end,now:sky.evening)==30)
+    }
     @Test func polarAndTropical() throws {
         let engine=AstronomyEngine(), denali=try park("dena"), gates=try park("gaar"), samoa=try park("npsa")
         let summer=engine.conditions(for:denali,on:try date("2026-06-21 12:00",park:denali))

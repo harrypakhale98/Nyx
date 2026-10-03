@@ -1,0 +1,6 @@
+// Optional free NPS key for live alerts and ranger programs (developer.nps.gov).
+// Nyx works fully without it. Never commit a key: put the line
+//   NPS_API_KEY = your_key
+// in Config/Secrets.xcconfig, which is git-ignored.
+NPS_API_KEY =
+#include? "Secrets.xcconfig"

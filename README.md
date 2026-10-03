@@ -12,7 +12,7 @@ Core planning, calendar, saved parks, Learn and the journal work on first launch
 
 ### Optional NPS key
 
-Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/). In the Nyx target's local Build Settings, add a user-defined `NPS_API_KEY`, or pass `NPS_API_KEY=your_key` to xcodebuild. The Info.plist expands it at build time. Do not commit a key. It will be visible in the distributed app, so do not treat it as a secret credential. The shipped source has no key; alerts/programs show **access not checked** until configured.
+Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/). Create `Config/Secrets.xcconfig` (git-ignored) containing one line, `NPS_API_KEY = your_key`, then build. `Config/Nyx.xcconfig` includes it and the app's Info.plist carries it as `NPS_API_KEY`. Without the file the key is empty and Nyx says plainly that park access was not checked. The key ships inside the app binary, so use a public-app key and treat it as identifiable, not secret.
 
 The two independent network toggles are in Tonight → Settings → Your privacy. They stop new requests without deleting cached data. Only `developer.nps.gov` and `api.open-meteo.com` are reachable through the transport; redirects are rejected. Location remains on-device. PhotosPicker sees only selected photos. Reminders are local.
 
@@ -46,7 +46,7 @@ Launch with `-nyx-screen detail -nyx-state offline`, or run `python3 Scripts/cap
 
 SwiftUI + @Observable state; injectable astronomy/weather/park/notification protocols; SwiftData journal and saved parks; external-storage selected photos. Canvas draws seeded stars, a sphere-projected moon, gauge, solar/lunar paths, and calendar/timeline marks. Native navigation, glass controls, sheets, search and accessibility adjustments carry the rest.
 
-On iOS 27, Save uses the pinned trailing toolbar placement; iOS 26 retains a complete native fallback. Foundation Models entry points require actual model availability and use only injected source records. AI never computes astronomy or blocks core planning/reminders. The scheme runs 15 Swift Testing tests and two native XCTest UI tests (offline tab navigation and launch responsiveness). Actual Simulator AX5/contrast captures use `Scripts/capture_system_accessibility.py SIMULATOR_ID 26`; that script restores the prior settings. `Scripts/capture_store.py` produces native-resolution artwork drafts. See `Research/performance.md` for measured results and their limits.
+On iOS 27, Save uses the pinned trailing toolbar placement; iOS 26 retains a complete native fallback. Foundation Models entry points require actual model availability and use only injected source records. AI never computes astronomy or blocks core planning/reminders. The scheme runs the Swift Testing suite and two native XCTest UI tests (offline tab navigation and launch responsiveness). Actual Simulator AX5/contrast captures use `Scripts/capture_system_accessibility.py SIMULATOR_ID 26`; that script restores the prior settings. `Scripts/capture_store.py` produces native-resolution artwork drafts. See `Research/performance.md` for measured results and their limits.
 
 Widgets and intents compute locally from the shared cached snapshot; they do not fetch network data.
 
@@ -60,4 +60,4 @@ Widgets and intents compute locally from the shared cached snapshot; they do not
 
 ## Release handoff
 
-Read [PHASE_STATUS.md](PHASE_STATUS.md), [AUDIT.md](AUDIT.md), [PRIVACY.md](PRIVACY.md), [SUBMISSION.md](SUBMISSION.md), and the ordered [INPUT_NEEDED.md](INPUT_NEEDED.md). The working raster icon has layered sources in `IconSources/`; final Icon Composer export remains an owner task. Physical accessibility/performance review and the provider-retention privacy decision are release gates, not completed certifications.
+Read [PHASE_STATUS.md](PHASE_STATUS.md), [AUDIT.md](AUDIT.md), [PRIVACY.md](PRIVACY.md), [SUBMISSION.md](SUBMISSION.md), and the ordered [INPUT_NEEDED.md](INPUT_NEEDED.md). The app icon is a native Icon Composer document, `Nyx/Resources/AppIcon.icon` (layers mirrored in `IconSources/`); preview it with Icon Composer's `ictool --export-image`. Physical accessibility/performance review and the provider-retention privacy decision are release gates, not completed certifications.

@@ -35,6 +35,14 @@ nonisolated struct SkyConditions: Sendable {
     let moonset: Date?
     let moonBelowFraction: Double
     let darkHours: Double
+    /// The hours whose clouds matter. True darkness when there is any; otherwise sunset
+    /// to sunrise, or local 22:00–02:00 under the midnight sun, so an Alaska summer night
+    /// still reports its forecast instead of looking like it has none.
+    var cloudWindow: (start: Date, end: Date) {
+        if let darkStart, let darkEnd, darkEnd > darkStart { return (darkStart, darkEnd) }
+        if let sunset, let sunrise, sunrise > sunset { return (sunset, sunrise) }
+        return (evening.addingTimeInterval(10*3600), evening.addingTimeInterval(14*3600))
+    }
 }
 nonisolated enum ScoreBand: String, Codable, CaseIterable, Sendable {
     case pristine, excellent, good, fair, poor

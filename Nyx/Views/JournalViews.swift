@@ -48,10 +48,21 @@ struct JournalView: View {
         loadingPhotos=true;defer { loadingPhotos=false }
         for item in items.prefix(max(0,4-photos.count)) {
             do {
-                if let data=try await item.loadTransferable(type:Data.self), data.count<=20_000_000 { photos.append(data) }
+                if let data=try await item.loadTransferable(type:Data.self), data.count<=40_000_000 { photos.append(Self.downscaled(data)) }
                 else { error=String(localized:"This photo is too large. Choose a smaller image.") }
             } catch { self.error=String(localized:"The photo could not be loaded. Try choosing it again.") }
         }
+    }
+    /// Journal photos are keepsakes, not originals: at most 2400 px on the long edge, JPEG.
+    private static func downscaled(_ data:Data)->Data {
+        guard let image=UIImage(data:data) else { return data }
+        let longest=max(image.size.width,image.size.height)*image.scale
+        guard longest>2400 else { return image.jpegData(compressionQuality:0.85) ?? data }
+        let factor=2400/longest
+        let size=CGSize(width:image.size.width*image.scale*factor,height:image.size.height*image.scale*factor)
+        let format=UIGraphicsImageRendererFormat(); format.scale=1
+        let resized=UIGraphicsImageRenderer(size:size,format:format).image { _ in image.draw(in:CGRect(origin:.zero,size:size)) }
+        return resized.jpegData(compressionQuality:0.85) ?? data
     }
     func save(context:ModelContext,existing:JournalEntry?) -> Bool {
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
@@ -98,11 +109,25 @@ struct JournalEditorView:View {
 struct JournalDetailView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     let entry:JournalEntry
     @State private var editing=false
+    @State private var confirmDelete=false
+    @State private var deleteFailed=false
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } } }.sheet(isPresented:$editing) { NavigationStack { JournalEditorView(existing:entry) }.nyxPresentation() }
+            .toolbar {
+                ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
+                ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }
+            }
+            .confirmationDialog("Delete this night?",isPresented:$confirmDelete,titleVisibility:.visible) {
+                Button("Delete entry",role:.destructive) {
+                    context.delete(entry)
+                    do { try context.save(); dismiss() } catch { context.rollback(); deleteFailed=true }
+                }
+            } message:{ Text("The notes and photos are removed from this iPhone.") }
+            .alert("Unable to delete",isPresented:$deleteFailed) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }.sheet(isPresented:$editing) { NavigationStack { JournalEditorView(existing:entry) }.nyxPresentation() }
     }
 }
 #Preview("Empty journal") { NavigationStack { JournalView() }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) }

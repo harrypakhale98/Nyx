@@ -12,7 +12,7 @@ struct ParkEntity:AppEntity {
 struct ParkQuery:EntityStringQuery {
     func entities(for identifiers:[String]) async throws -> [ParkEntity] { try ParkData.load().filter{identifiers.contains($0.id)}.map{ParkEntity(id:$0.id,name:$0.shortName)} }
     func suggestedEntities() async throws -> [ParkEntity] { try ParkData.load().map{ParkEntity(id:$0.id,name:$0.shortName)} }
-    func entities(matching string:String) async throws -> [ParkEntity] { try ParkData.load().filter{($0.name+" "+$0.state).localizedStandardContains(string)}.map{ParkEntity(id:$0.id,name:$0.shortName)} }
+    func entities(matching string:String) async throws -> [ParkEntity] { try ParkData.load().filter{$0.matches(string)}.map{ParkEntity(id:$0.id,name:$0.shortName)} }
 }
 struct DarknessIntent:AppIntent {
     static let title:LocalizedStringResource="Tonight's darkness score"
@@ -22,9 +22,9 @@ struct DarknessIntent:AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let parks=try ParkData.load()
         guard let selected=parks.first(where:{$0.id==park.id}) else { return .result(dialog:"That park could not be found in the bundled library.") }
-        let sky=AstronomyEngine().conditions(for:selected,on:.now)
+        let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:.now))
         let forecast=SharedSettings.read()?.forecasts[selected.id]
-        let clouds=forecast?.mean(from:sky.darkStart,to:sky.darkEnd)
+        let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
         let score=ScoreEngine().score(sky:sky,bortle:selected.bortleEstimate,cloudCover:clouds)
         if sky.darkHours==0 { return .result(dialog:"No true darkness tonight at \(selected.shortName). The darkness score is \(score.value) out of 100.") }
         if clouds==nil { return .result(dialog:"\(selected.shortName): \(score.value) out of 100, \(score.band.label). Moon and darkness only. Clouds and park access are unknown.") }

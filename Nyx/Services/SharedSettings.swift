@@ -21,9 +21,9 @@ nonisolated struct SavedSkySnapshot:Codable,Sendable {
     func nights(from date:Date,count:Int,forecastAsOf:Date = .now)->[Night] {
         let astronomy=AstronomyEngine(),scoring=ScoreEngine()
         return parks.flatMap { park in (0..<max(0,count)).map { offset in
-            let sky=astronomy.conditions(for:park,on:park.date(date,addingDays:offset))
+            let sky=astronomy.conditions(for:park,on:park.date(park.currentNight(at:date),addingDays:offset))
             let forecast=forecasts[park.id]
-            let cloud=forecast?.mean(from:sky.darkStart,to:sky.darkEnd,now:forecastAsOf)
+            let cloud=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:forecastAsOf)
             return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:cloud),cloudCover:cloud,forecastUpdated:cloud==nil ? nil : forecast?.updated)
         } }
     }

@@ -5,3 +5,4 @@ build/
 *.xcuserstate
 *.xcresult
 Research/Traces/*.trace/
+Config/Secrets.xcconfig

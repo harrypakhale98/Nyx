@@ -17,7 +17,7 @@ struct SettingsView:View {
                 if let permissionMessage { Text(permissionMessage).font(.caption) }
             }
             Section("Your iPhone") { NavigationLink("Your privacy") { PrivacyView() };NavigationLink("About the data") { AboutDataView() };LabeledContent("Distance units",value:String(localized:"Device locale"));Text("Distances use your region's units. Radius is always a straight line.").font(.caption).foregroundStyle(palette.muted) }
-            Section { Button("Replay the introduction") { replay=true };LabeledContent("Version",value:"1.0") }
+            Section { Button("Replay the introduction") { replay=true };LabeledContent("Version",value:Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "") }
         }.navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented:$explainNotifications) { PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
                 explainNotifications=false
@@ -64,12 +64,14 @@ enum Essay: String,CaseIterable,Identifiable {
     var title:String { switch self { case .darkness:String(localized:"A sky worth protecting");case .bortle:String(localized:"Reading the Bortle scale");case .etiquette:String(localized:"Sharing the night") } }
     var subtitle:String { switch self { case .darkness:String(localized:"Why darkness deserves care");case .bortle:String(localized:"Understand artificial sky brightness");case .etiquette:String(localized:"Leave room for everyone to look up") } }
     var symbol:String { switch self { case .darkness:"sparkles";case .bortle:"circle.lefthalf.filled";case .etiquette:"moon.stars" } }
+    /// About 200 words a minute, never less than one.
+    var minutes:Int { max(1,Int((Double(content.split(whereSeparator:\.isWhitespace).count)/200).rounded())) }
     var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette") } }
 }
 struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:22) { Image(systemName:essay.symbol).font(.system(size:28,weight:.ultraLight)).foregroundStyle(palette.accent);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted);HStack { Text("4 minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right") }.foregroundStyle(palette.muted) } } }.buttonStyle(.plain) };NavigationLink("About the data") { AboutDataView() } }.padding(24) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:22) { Image(systemName:essay.symbol).font(.system(size:28,weight:.ultraLight)).foregroundStyle(palette.accent);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right") }.foregroundStyle(palette.muted) } } }.buttonStyle(.plain) };NavigationLink("About the data") { AboutDataView() } }.padding(24) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {
@@ -90,15 +92,73 @@ struct OnboardingView:View {
     private let titles:[LocalizedStringKey]=["Make room\nfor the night","A darker sky.\nA clearer plan.","The night is yours."]
     private let messages:[LocalizedStringKey]=["Find the national parks and nights that give the stars their best chance.","Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.","Nyx has no account, no ads, no tracking. Your journal never leaves this phone."]
     var body:some View {
-        ScrollView { VStack(spacing:28) {
-            HStack { Text("NYX").font(.caption).tracking(8);Spacer();Button("Skip") { finish() } }.padding(.bottom,14)
-            if page==1 { VStack(spacing:8) { CelestialGauge(score:94,hasForecast:false).frame(height:typeSize.isAccessibilitySize ? nil : 240);Text("Example score").font(.caption).foregroundStyle(palette.muted) } }
-            else { MoonDisc(illumination:page==0 ? 0.18 : 0.06,waxing:true).frame(width:170,height:170).padding(.vertical,35) }
-            Text(titles[page]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
-            Text(messages[page]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4)
-            HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Circle().fill(i==page ? palette.accent : palette.line).frame(width:5,height:5) } }.accessibilityLabel("Introduction, page \(page+1) of 3")
-            Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
-        }.padding(28) }.background(NightBackground()).foregroundStyle(palette.ink)
+        VStack(spacing:0) {
+            HStack { Text("NYX").font(.caption).tracking(8).accessibilityHidden(true);Spacer();Button("Skip") { finish() } }.padding(.horizontal,28).padding(.top,28)
+            TabView(selection:$page) {
+                ForEach(0..<3,id:\.self) { index in
+                    ScrollView {
+                        VStack(spacing:28) {
+                            art(index)
+                            Text(titles[index]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                            Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
+                        }.padding(28).frame(maxWidth:.infinity)
+                    }.scrollBounceBehavior(.basedOnSize).tag(index)
+                }
+            }.tabViewStyle(.page(indexDisplayMode:.never))
+            VStack(spacing:20) {
+                HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
+                    .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
+                    .accessibilityElement().accessibilityLabel("Introduction, page \(page+1) of 3")
+                Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
+                    .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
+            }.padding(.bottom,28)
+        }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
+    }
+    @ViewBuilder private func art(_ index:Int)->some View {
+        switch index {
+        case 0: MoonDisc(illumination:0.18,waxing:true).frame(width:170,height:170).padding(.vertical,24)
+        case 1: ScoreAnatomy(active:page==1)
+        default: MoonDisc(illumination:0,waxing:true).frame(width:170,height:170).padding(.vertical,24)
+        }
+    }
+}
+/// The four parts of the Darkness Score filling in, one after another, as the example score counts up.
+private struct ScoreAnatomy:View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    let active:Bool
+    @State private var filled=0
+    private let parts:[(LocalizedStringKey,Int,Int)]=[("Moonlight",40,38),("Clouds",25,24),("Light pollution",20,18),("Length of darkness",15,14)]
+    var body:some View {
+        VStack(spacing:18) {
+            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 210) // fresh count-up each time the page arrives
+            VStack(spacing:10) {
+                ForEach(parts.indices,id:\.self) { i in
+                    VStack(alignment:.leading,spacing:5) {
+                        HStack { Text(parts[i].0).font(.caption);Spacer();Text("\(parts[i].1)%").font(.caption.monospacedDigit()).foregroundStyle(palette.muted) }
+                        GeometryReader { proxy in
+                            ZStack(alignment:.leading) {
+                                Capsule().fill(palette.line)
+                                Capsule().fill(palette.accent).frame(width:i<filled ? proxy.size.width*Double(parts[i].2)/Double(parts[i].1) : 0)
+                            }
+                        }.frame(height:3)
+                    }
+                }
+            }.frame(maxWidth:320)
+            Text("Example night").font(.caption).foregroundStyle(palette.muted)
+        }
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel("Example score 94 out of 100. Moonlight counts for 40 percent, clouds 25, light pollution 20, and the length of darkness 15.")
+        .task(id:active) {
+            guard active else { filled=0; return }
+            if systemReduceMotion || forcedReduceMotion { filled=parts.count; return }
+            for i in 1...parts.count {
+                try? await Task.sleep(for:.milliseconds(260))
+                withAnimation(NyxMotion.spring) { filled=i }
+            }
+        }
     }
 }
 #Preview("Learn") { NavigationStack { LearnView() }.preferredColorScheme(.dark) }

@@ -46,9 +46,9 @@ struct SkyArc: View {
                     VStack(alignment:.leading,spacing:12) { timeLabel("True darkness",time:night.sky.darkStart); timeLabel("Dawn",time:night.sky.darkEnd) }
                 }
             }
-            Text("Times in \(night.park.timeZoneID)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text("Times in \(night.park.timeZoneName)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }.accessibilityElement(children:.ignore)
-            .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? String(localized:"No true darkness tonight at this latitude.") : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). Times in \(night.park.timeZoneID).")
+            .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? String(localized:"No true darkness tonight at this latitude.") : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). Times in \(night.park.timeZoneName).")
     }
     @ViewBuilder private var legend:some View { Label("Sun",systemImage:"sun.max").foregroundStyle(palette.accent);Label("Moon · dashed",systemImage:"moon") }
     private func timeLabel(_ title:LocalizedStringKey,time:Date?)->some View {

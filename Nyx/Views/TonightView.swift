@@ -24,10 +24,15 @@ struct TonightView: View {
                     if let home=model.home { MoonDisc(illumination:model.night(home).sky.moon.illumination,waxing:model.night(home).sky.moon.waxing).frame(width:40,height:40).padding(.top,8) }
                 }
                 Panel { VStack(alignment:.leading,spacing:12) {
-                    HStack(alignment:.firstTextBaseline) {
-                        Button { chooseHome=true } label:{ Label(location.latitude==nil ? String(localized:"From \(model.home?.shortName ?? "")") : String(localized:"From your location"),systemImage:"location") }.font(.subheadline)
+                    HStack(alignment:.center) {
+                        // The starting point is either a chosen park or the device location, never both.
+                        Button { chooseHome=true } label:{
+                            if location.latitude==nil { Label(String(localized:"From \(model.home?.shortName ?? "")"),systemImage:"mappin.and.ellipse") }
+                            else { Label("From your location",systemImage:"location.fill") }
+                        }.font(.subheadline).accessibilityHint("Choose a starting park")
                         Spacer(minLength:8)
-                        if location.locating { ProgressView() } else { Button { explainLocation=true } label:{ Image(systemName:"location.circle").frame(minWidth:44,minHeight:44) }.accessibilityLabel("Use my location") }
+                        if location.locating { ProgressView() }
+                        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
                     }
                     ViewThatFits(in:.horizontal) {
                         HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
@@ -49,23 +54,25 @@ struct TonightView: View {
                     }.frame(maxWidth:.infinity)
                     if best.count>1 {
                         Eyebrow(text:"More skies within reach")
-                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
+                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
                     }
                     Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
                 }
                 if DebugScenario.state=="error" || DebugScenario.state=="offline" { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
                 if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
             }.padding(24)
-        }.background(NightBackground(seed:model.homeID)).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+        }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
-            .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:$model.homeID) }.nyxPresentation().presentationDetents([.large]) }
+            .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
             .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .refreshable {
-                if !systemReduceMotion && !forcedReduceMotion { shooting=0;withAnimation(NyxMotion.spring) { shooting=1 } }
+                if !systemReduceMotion && !forcedReduceMotion && shooting==0 {
+                    withAnimation(.spring(response:0.9,dampingFraction:1)) { shooting=1 } completion:{ shooting=0 }
+                }
                 await model.refresh(candidates,force:true);refreshed+=1
             }
     }
@@ -82,7 +89,7 @@ struct ParkPickerView: View {
     @Binding var selection:String
     @State private var search=""
     var body: some View {
-        List(model.parks.filter { search.isEmpty || ($0.name+" "+$0.state).localizedStandardContains(search) }) { park in
+        List(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
             Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark") } } }.tint(.primary)
         }.searchable(text:$search,prompt:"Park name or state").navigationTitle("Starting park")
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }

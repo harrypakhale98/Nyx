@@ -18,7 +18,7 @@ struct GuideView:View {
         case .planning:
             guard let home=model.home else { return [] }
             let best=Array(model.ranked(model.nearby(latitude:nil,longitude:nil)).prefix(3))
-            return best.flatMap { park in model.nights(park,from:model.today,count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + ["Starting park: \(home.shortName). Distances are straight-line estimates."]
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + ["Starting park: \(home.shortName). Distances are straight-line estimates."]
         case .recap:
             return entries.prefix(8).map { "\(model.park($0.parkID)?.shortName ?? "Park"); \(model.park($0.parkID)?.dateLabel($0.date) ?? $0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \($0.notes.prefix(250))" }
         case .learn(let essay): return [String(essay.content.prefix(6500))]
@@ -38,8 +38,13 @@ struct GuideView:View {
             if guide.loading { ConstellationLoader().frame(maxWidth:.infinity) }
             if !guide.text.isEmpty { Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6); Text("Sources: \(guide.citations.map{String($0+1)}.joined(separator:", "))").font(.caption).foregroundStyle(palette.muted) }
             if let error=guide.error { Text(error).foregroundStyle(palette.muted) }
-            Eyebrow(text:"The original records")
-            ForEach(Array(records.enumerated()),id:\.offset) { index,record in Panel { Text("\(index+1). \(record)").font(.subheadline) } }
+            if case .learn = mode {
+                // The source is the essay the reader just left; don't print it twice.
+                Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
+            } else {
+                Eyebrow(text:"The original records")
+                ForEach(Array(records.enumerated()),id:\.offset) { index,record in Panel { Text("\(index+1). \(record)").font(.subheadline) } }
+            }
         }.padding(24) }.background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
             .task(id:requestID) { guard requestID>0 else { return };let records=records;await guide.answer(question:prompt,context:records.enumerated().map{"ID \($0.offset): \($0.element)"}.joined(separator:"\n"),validIDs:Set(records.indices)) }
     }
