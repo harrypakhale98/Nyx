@@ -31,8 +31,8 @@ struct Panel<Content: View>: View {
         let shape=RoundedRectangle(cornerRadius:24)
         let solid=reduceTransparency || palette.highContrast || palette.nightVision
         content.padding(20).frame(maxWidth:.infinity,alignment:.leading)
-            .background { if solid { shape.fill(palette.panel) } else { shape.fill(palette.panel.opacity(0.62)) } }
-            .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.35)),in:shape)
+            .background { if solid { shape.fill(palette.panel) } else { shape.fill(palette.panel.opacity(0.8)) } }
+            .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.5)),in:shape)
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
     }
 }

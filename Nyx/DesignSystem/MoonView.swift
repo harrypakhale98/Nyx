@@ -34,7 +34,7 @@ struct MoonView: View {
         return SIMD3(sin(i) * -sin(a), sin(i)*cos(a), cos(i))
     }
     /// Earth as seen from the Moon is full when the Moon is new: the night side glows most then.
-    private var earthshine:Double { 0.05*(1-cos(geometry.phaseAngle))/2 }
+    private var earthshine:Double { 0.09*(1-cos(geometry.phaseAngle))/2 }
     private func halo(side:Double)->some View {
         // Fades out well inside its frame, so no container can clip it into a visible square.
         Circle().fill(RadialGradient(colors:[palette.ink.opacity(0.08+0.12*geometry.illumination),.clear],center:.center,startRadius:side*0.46,endRadius:side*0.68))
