@@ -31,7 +31,8 @@ struct ShareCardButton:View {
             if let rendered { ShareLink(item:rendered,preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:rendered)) { Label("Share this night",systemImage:"square.and.arrow.up") } }
             else { Button("Prepare share card") { render() } }
         }.buttonStyle(.bordered).accessibilityValue(ShareCard(night:night).summary).task(id:night.id.description+String(night.score.value)+String(palette.nightVision)) {
-            // Settle first: scrubbing the time river changes the night many times a second.
+            // Never offer the previous night's card. Settle first: scrubbing the river changes the night many times a second.
+            rendered=nil
             try? await Task.sleep(for:.milliseconds(450)); if !Task.isCancelled { render() }
         }
     }

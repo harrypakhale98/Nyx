@@ -89,6 +89,7 @@ struct ParkDetailView: View {
     @State private var selected:Date?
     @State private var breakdown=false
     @State private var persistenceError=false
+    @State private var scrubbing=false
     private var night:Night { model.night(park,on:selected ?? initialDate ?? model.tonight(park)) }
     private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
     /// The river covers tonight and the next 29 nights, or starts at a night chosen outside that span.
@@ -143,6 +144,7 @@ struct ParkDetailView: View {
                     Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
                     Divider().overlay(palette.line)
                     Text(AstronomyEngine().milkyWayGuidance(for:park,on:night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                    NavigationLink { EssayView(essay:.milkyway) } label:{ Label("Finding the Milky Way",systemImage:"sparkle").font(.subheadline) }
                 } }
                 Panel { VStack(alignment:.leading,spacing:18) {
                     Eyebrow(text:"Places to settle in")
@@ -164,7 +166,8 @@ struct ParkDetailView: View {
                 Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
                 NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
             }.padding(24)
-        }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
+        }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { saveToolbar }
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night) }.nyxPresentation().presentationDetents([.large]) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }

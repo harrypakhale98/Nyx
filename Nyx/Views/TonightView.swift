@@ -19,11 +19,12 @@ struct TonightView: View {
         @Bindable var model=model
         ScrollView {
             VStack(alignment:.leading,spacing:22) {
-                HStack(alignment:.top) {
+                // Decorative at accessibility sizes, where it would push the answer below the fold.
+                if !typeSize.isAccessibilitySize { HStack(alignment:.top) {
                     VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text("Where the sky\nis darkest").font(.system(.title,design:.serif)).fixedSize(horizontal:false,vertical:true) }
                     Spacer(minLength:8)
                     if let home=model.home { MoonDisc(illumination:model.night(home).sky.moon.illumination,waxing:model.night(home).sky.moon.waxing).frame(width:40,height:40).padding(.top,8) }
-                }
+                } }
                 if DebugScenario.state=="loading" { ConstellationLoader().frame(maxWidth:.infinity) }
                 else if best.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.");startingPoint }
                 else if let park=best.first {

@@ -1266,6 +1266,17 @@
         }
       }
     },
+    "Finding the Milky Way": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding the Milky Way"
+          }
+        }
+      }
+    },
     "First quarter": {
       "extractionState": "manual",
       "localizations": {
@@ -3587,6 +3598,17 @@
         }
       }
     },
+    "When, where and how to look": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When, where and how to look"
+          }
+        }
+      }
+    },
     "Where the sky\nis darkest": {
       "extractionState": "manual",
       "localizations": {
@@ -3792,6 +3814,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sharing the night\n\nA quiet place under the stars is often a shared place. Some visitors have brought telescopes. Some are making photographs. Others are seeing the Milky Way for the first time. A little care helps everyone keep the darkness they came to find, and helps the park remain a home for wildlife after the daytime crowds leave.\n\nBegin by checking access. A park may be open at night while a particular road, overlook or visitor facility is closed. Seasonal conditions can change what is safe to reach. Read current alerts and ask a ranger before your trip. Nyx may have cached information, so a score never confirms that a road is open. If conditions are uncertain, choose a familiar, permitted viewing area rather than improvising a route in the dark.\n\nBring a small red light and use the lowest useful brightness. Even red light can be disruptive if it is aimed directly into someone's eyes. Point it at the ground when you need to move. Let your eyes adjust gradually. Avoid checking a bright phone screen; if you use Nyx's night-vision mode, also lower the device brightness to a comfortable level before you start observing.\n\nArrive before darkness when you can. It is easier to understand a parking area, find the path and notice changes in the ground while you can still see them clearly. Once safely parked, switch off lights you do not need. If you must leave during a star party, let people nearby know before turning on your headlights. Safety comes first, and a little notice protects everyone's patience.\n\nKeep voices low and give other observers room. Ask before touching a telescope or stepping into a photographer's setup. A tripod can be difficult to see at night. If someone offers a look through their eyepiece, follow their instructions and take your time. Many people who love the sky also enjoy helping someone else find their first planet or star cluster.\n\nStay on permitted surfaces. Desert soils, dune plants and cultural sites can be damaged by footsteps, even when the damage is difficult to see. Darkness is not permission to leave a trail. Do not approach wildlife or use a flashlight to hold an animal in view. Take your food, wrappers and other belongings with you.\n\nPrepare for the temperature to change, and carry what you need to be comfortable without relying on a phone connection. A plan shared with someone at home is useful when reception is poor. Let the night be unhurried. You do not need to see everything, and a cloudy evening can still offer quiet, cool air and the sound of the landscape. Leave the place ready for the next person to look up."
+          }
+        }
+      }
+    },
+    "essay.milkyway": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding the Milky Way\n\nThe Milky Way is our own galaxy seen from the inside: a band of light from countless distant stars, crossed by dark lanes of dust. Its brightest part, the galactic center, lies toward the constellations Sagittarius and Scorpius. Seeing it well depends on four things Nyx already weighs: a dark site, a dark Moon, clear air and enough true darkness.\n\nSeason matters most. From the United States the bright center rises before dawn in early spring, stands highest in the southern sky through June, July and August, and sinks into the southwest soon after dusk by October. From November through January it is close to the Sun and out of the night sky. In American Samoa, south of the equator, the center climbs nearly overhead in the same months. The fainter band still arches across the winter sky, through Cassiopeia and past Orion, and it rewards a dark night too.\n\nThe Moon decides which nights are worth the drive. A bright Moon washes out the faint glow, even at the darkest park. Look for nights near the new moon, or nights when the Moon sets early or rises late and leaves hours of true darkness. The calendar's ringed nights and the lighter, moonlit stretches of the sky arc show both.\n\nGive your eyes time. Full dark adaptation takes twenty to thirty minutes, and one glance at a bright screen undoes much of it. Turn on night-vision mode, lower your screen brightness, and use a dim red light on the trail.\n\nIn summer, look low and to the south, and choose a place with an open southern horizon: a desert flat, a ridgeline overlook, a lake shore. Cliffs, trees and canyon walls can hide the brightest part even under a perfect sky. Haze and wildfire smoke dim it as surely as clouds do, which is one reason no forecast can promise what you will see.\n\nPhotographs show more color and detail than the eye can. To the eye, the Milky Way is a soft, silvery river with darker gaps. That is not a disappointment. It is the real thing: light that has travelled for thousands of years to reach you."
           }
         }
       }

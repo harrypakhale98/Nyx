@@ -22,7 +22,8 @@ struct DarknessIntent:AppIntent {
         let parks=try ParkData.load()
         guard let selected=parks.first(where:{$0.id==park.id}) else { return .result(dialog:"That park could not be found in the bundled library.") }
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:.now))
-        let forecast=SharedSettings.read()?.forecasts[selected.id]
+        // Saved parks share their forecast with the widget; any other park uses the app's own cache.
+        let forecast=SharedSettings.read()?.forecasts[selected.id] ?? CacheDirectory.read(Forecast.self,name:"weather-\(selected.id)")
         let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
         let score=ScoreEngine().score(sky:sky,bortle:selected.bortleEstimate,cloudCover:clouds)
         if sky.darkHours==0 { return .result(dialog:"No true darkness tonight at \(selected.shortName). The darkness score is \(score.value) out of 100.") }

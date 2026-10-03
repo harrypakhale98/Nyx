@@ -51,7 +51,7 @@ struct RootView:View {
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in NavigationStack { ParkDetailView(park:park) }.nyxPresentation() }
         .task {
-            NotificationRouter.shared.connect { parkID in launchParkID=parkID }
+            NotificationRouter.shared.connect { parkID in open(parkID) }
             if let screen=DebugScenario.screen { tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
             #if DEBUG
             if DebugScenario.state=="populated" {
@@ -78,11 +78,11 @@ struct RootView:View {
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
-            launchParkID=activity.userInfo?[CSSearchableItemActivityIdentifier] as? String
+            open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
         }
         .onOpenURL { url in
             guard url.scheme=="nyx" else { return }
-            if url.host=="park" { launchParkID=url.lastPathComponent } else if url.host=="tonight" { tab=0 }
+            if url.host=="park" { open(url.lastPathComponent) } else if url.host=="tonight" { tab=0 }
         }
     }
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
@@ -111,6 +111,20 @@ struct RootView:View {
         #else
         TonightView()
         #endif
+    }
+    /// Opens a park from a reminder, Spotlight or a widget. When another sheet is already up
+    /// (a journal draft, a breakdown), the park is presented above it instead of waiting or
+    /// dismissing it, so nothing the person was doing is lost.
+    private func open(_ parkID:String?) {
+        guard let parkID,let park=model.park(parkID) else { return }
+        let root=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows).first(where:\.isKeyWindow)?.rootViewController
+        guard var top=root?.presentedViewController else { launchParkID=parkID; return }
+        while let next=top.presentedViewController { top=next }
+        let detail=NavigationStack { ParkDetailView(park:park) }
+            .environment(model).modelContainer(context.container)
+            .environment(\.nyx,palette).nyxPresentation()
+        top.present(UIHostingController(rootView:detail),animated:true)
     }
     private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)
