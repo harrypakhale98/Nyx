@@ -57,7 +57,7 @@ Widgets and intents compute locally from the shared cached snapshot; they do not
 - NOAA/Meeus solar coordinates; local-noon-to-noon nights through DST. Polar results are explicit.
 - Truncated Meeus lunar position with parallax; illumination corrects the mean synodic epoch cycle with calculated elongation.
 - USNO reference results in [Research/accuracy.md](Research/accuracy.md). Rise/set approximations exclude terrain/refraction variation; allow roughly ±15 minutes for lunar timing and more at difficult horizons.
-- Open-Meteo hourly clouds: complete overlap-weighted dark-window average, six-hour refresh, 36-hour expiry, no partial coverage treated as clear.
+- Open-Meteo hourly clouds: one request for many parks (comma-separated coordinates, plus the previous day so eastern nights stay covered), complete overlap-weighted dark-window average, six-hour refresh, 36-hour expiry, no partial coverage treated as clear.
 - Bundled NPS inventory and sourced viewing spots. Bortle values are conservative planning estimates, not measurements. Some parks have no verified viewing spot and say so. Weather attribution: [Open-Meteo](https://open-meteo.com/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Park descriptions/data: National Park Service. No NPS endorsement is implied.
 
 ## Release handoff

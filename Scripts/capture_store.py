@@ -12,6 +12,12 @@ try:
   run('launch','--terminate-running-process',sim,'com.harrypakhale.nyx','-nyx-screen',screen,'-nyx-state',state,'-nyx-reduce-motion')
   time.sleep(14 if state=='live' else 8)
   path=folder/f'{index:02d}-{screen}-6.9.png'
-  run('io',sim,'screenshot',str(path));print(path,flush=True)
+  run('io',sim,'screenshot',str(path))
+  # App Store Connect rejects screenshots with an alpha channel: flatten through JPEG.
+  flat=path.with_suffix('.flat.jpg')
+  subprocess.run(['sips','-s','format','jpeg','-s','formatOptions','100',str(path),'--out',str(flat)],check=True,capture_output=True)
+  subprocess.run(['sips','-s','format','png',str(flat),'--out',str(path)],check=True,capture_output=True)
+  flat.unlink()
+  print(path,flush=True)
 finally:
  run('status_bar',sim,'clear')
