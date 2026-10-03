@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><defs>
+<radialGradient id="mw" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(470 470) rotate(-56) scale(560 120)">
+<stop offset="0" stop-color="#E9E2F5" stop-opacity="0.42"/><stop offset="0.45" stop-color="#B8A6E0" stop-opacity="0.2"/><stop offset="1" stop-color="#2A1B4E" stop-opacity="0"/></radialGradient>
+<radialGradient id="core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(330 640) rotate(-56) scale(230 110)">
+<stop offset="0" stop-color="#FFE7C2" stop-opacity="0.5"/><stop offset="0.5" stop-color="#E7C9A8" stop-opacity="0.18"/><stop offset="1" stop-color="#E7C9A8" stop-opacity="0"/></radialGradient>
+<radialGradient id="dust" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(460 480) rotate(-56) scale(470 22)">
+<stop offset="0" stop-color="#0E0A22" stop-opacity="0.55"/><stop offset="1" stop-color="#0E0A22" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#mw)"/><rect width="1024" height="1024" fill="url(#core)"/><rect width="1024" height="1024" fill="url(#dust)"/></svg>

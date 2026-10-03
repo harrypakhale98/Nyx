@@ -1,0 +1,12 @@
+{
+  "fill" : { "linear-gradient" : [ "srgb:0.02000,0.02000,0.06000,1.00000", "srgb:0.16471,0.10588,0.30588,1.00000" ] },
+  "groups" : [
+    { "layers" : [ { "glass" : true, "image-name" : "NearRidge.svg", "name" : "Near ridge" } ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
+    { "layers" : [ { "glass" : true, "image-name" : "FarRidge.svg", "name" : "Far ridge" } ],
+      "shadow" : { "kind" : "none", "opacity" : 0.5 }, "translucency" : { "enabled" : true, "value" : 0.2 } },
+    { "layers" : [ { "glass" : false, "image-name" : "Stars.svg", "name" : "Stars" }, { "glass" : false, "image-name" : "MilkyWay.svg", "name" : "Milky Way" } ],
+      "shadow" : { "kind" : "none", "opacity" : 0.5 }, "translucency" : { "enabled" : false, "value" : 0.5 } }
+  ],
+  "supported-platforms" : { "squares" : "shared" }
+}
