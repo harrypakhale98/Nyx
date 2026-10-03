@@ -57,7 +57,7 @@ struct ParksView: View {
                 }
             }.padding(24)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
-            .searchable(text:$search,prompt:"Park name or state")
+            .searchable(text:$search,prompt:"Park or state")
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Filter parks") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
     }

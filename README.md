@@ -18,6 +18,8 @@ The two independent network toggles are in Tonight → Settings → Your privacy
 
 ## Verify
 
+The scheme's tests include `NyxUITests/AccessibilityAuditTests`, Apple's automated accessibility audit on 17 screens in both palettes; set `TEST_RUNNER_NYX_AUDIT_SCREENS=parks,detail` to audit a few. Run one simulator at a time; parallel simulators can overload the Mac.
+
 ```sh
 xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
   -destination 'platform=iOS Simulator,id=4B98F460-8228-4B8B-8626-2BE43641E876' \

@@ -4,7 +4,7 @@ sim=sys.argv[1] if len(sys.argv)>1 else '2E90D43E-75AD-44AA-AA66-44A4F5155CF5'
 def run(*args): return subprocess.run(['xcrun','simctl',*args],check=True,capture_output=True)
 subprocess.run(['xcrun','simctl','boot',sim],capture_output=True)
 run('bootstatus',sim,'-b')
-run('install',sim,'/tmp/NyxBuild/Build/Products/Debug-iphonesimulator/Nyx.app')
+run('install',sim,(sys.argv[2] if len(sys.argv)>2 else '/tmp/NyxBuild')+'/Build/Products/Debug-iphonesimulator/Nyx.app')
 folder=pathlib.Path('Store/Screenshots');folder.mkdir(parents=True,exist_ok=True)
 run('status_bar',sim,'override','--time','9:41','--batteryState','charged','--batteryLevel','100','--wifiMode','active','--wifiBars','3','--cellularMode','active','--cellularBars','4')
 try:

@@ -3,14 +3,22 @@ import json,pathlib,glob,sys
 path=pathlib.Path('Nyx/Resources/Localizable.xcstrings')
 catalog=json.loads(path.read_text())
 strings=catalog['strings']
-for filename in glob.glob('/tmp/NyxBuild/Build/Intermediates.noindex/Nyx.build/Debug-iphonesimulator/*/Objects-normal/arm64/*.stringsdata'):
+build=sys.argv[1] if len(sys.argv)>1 else '/tmp/NyxBuild'
+extracted=set()
+for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-iphonesimulator/*/Objects-normal/arm64/*.stringsdata'):
  try: data=json.load(open(filename))
  except (ValueError,OSError): continue
  for item in data.get('tables',{}).get('Localizable',[]):
   key=item['key']
+  extracted.add(key)
   if key in strings: continue
   strings[key]={'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':key}}}}
   if item.get('comment'): strings[key]['comment']=item['comment']
+# Drop copy that no longer appears in code. Only auto-added entries (value == key) are pruned;
+# hand-written entries such as the Learn essays (essay.*) are never touched.
+if extracted:
+ for key in [k for k,v in strings.items() if k not in extracted and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
+  del strings[key]
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
 info={'sourceLanguage':'en','strings':{'NSLocationWhenInUseUsageDescription':{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':'Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service.'}}}}},'version':'1.0'}

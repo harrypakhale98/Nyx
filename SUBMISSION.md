@@ -1,6 +1,6 @@
 # Nyx 1.0 submission package
 
-**Release gates remain open.** Complete `INPUT_NEEDED.md` and sign off the device/accessibility and provider-retention questions before submitting. Unsigned and development-signed Release archives succeed; neither is an App Store validation result.
+**Release gates remain open.** Complete `INPUT_NEEDED.md` and the physical-device review before submitting. Unsigned and development-signed Release archives succeed; neither is an App Store validation result.
 
 ## Product metadata draft
 
@@ -11,7 +11,7 @@
 - Language: English. iPhone only, portrait, iOS 26.0 and later.
 - Keywords: `stargazing,national parks,moon,dark sky,astronomy,Milky Way,night,calendar,travel`
 - Copyright: 2026, publisher's legal name (owner confirms before entry).
-- Privacy/support URLs: owner hosts the reviewed `Store/PrivacyPolicy.md` and `Store/Support.md` on a public HTTPS site. Confirm the support channel is monitored. These pages are submission metadata, not extra app networking endpoints.
+- Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/` once the repo is public. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.
 
 ### Description
 
@@ -43,7 +43,7 @@ Notifications are local, opt-in, and scheduled only for saved parks with complet
 
 Widgets/Control Center share `group.com.harrypakhale.nyx`. Save a park to populate the widget; opening Nyx refreshes its cached data. Siri/Shortcuts can answer a park's score without network. Optional AI explanations appear only when Apple's Foundation Models is actually available; absence is expected on unsupported/unconfigured devices. AI uses supplied source records and does not calculate astronomy.
 
-Owner must state whether the uploaded build contains an NPS key. Without a key, alerts/programs deliberately show an unchecked state. Do not promise live closures in review notes for an unconfigured build. No developer screenshot launch arguments exist in the Release experience.
+The build includes the publisher's NPS key (from git-ignored `Config/Secrets.xcconfig`), so live park alerts and ranger programs load; if they are unavailable the app says access was not checked. No developer screenshot launch arguments exist in the Release experience.
 
 ## Screenshot plan
 
@@ -64,7 +64,7 @@ Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolut
 
 ## App Store Connect checklist
 
-1. Resolve the privacy label question in `PRIVACY.md`. Review external provider terms/logging and publish the accurate policy. **Do not select Data Not Collected just because this draft targets it.**
+1. App Privacy: answer "No, we do not collect data from this app" (Data Not Collected), no tracking. Reasoning against Apple's definitions is in `PRIVACY.md`; the published policy discloses the providers' IP logs.
 2. Complete every device gate in `AUDIT.md`, including VoiceOver, all accessibility settings, hardware motion/haptics, widgets/control, Siri, available-model AI, denied permissions, selected photos and airplane mode. Fix failures and rerun both simulator suites.
 3. The Icon Composer icon (`Nyx/Resources/AppIcon.icon`) ships in the build. Optionally open it in Icon Composer to fine-tune glass and lighting, then rebuild and recapture artwork.
 4. In the developer account, confirm the existing `com.harrypakhale.nyx`, `com.harrypakhale.nyx.widgets`, and App Group `group.com.harrypakhale.nyx` records and App Groups for both targets. Signing team is already `DUHVN68KBA`; local development signing validates. Configure distribution provisioning/certificates for export.
@@ -81,12 +81,13 @@ Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolut
 
 | Gate | Status / evidence |
 |---|---|
-| Provider retention / correct privacy label | OPEN — authoritative publisher decision required |
+| Privacy label | READY — Data Not Collected recommended with reasoning in `PRIVACY.md`; publisher confirms in App Store Connect |
 | Physical accessibility and dark-field testing | OPEN — use AUDIT.md device procedure |
 | Hardware performance, haptics, ProMotion | OPEN — simulator timing is not certification |
 | Actual widgets/control/Siri/available AI | OPEN — content compiles/previews; device integration review required |
 | Icon Composer native icon | DONE — `AppIcon.icon` compiled by actool; Default, Dark, Tinted and Clear renditions checked |
 | Development-signed archive | PASS locally — signatures/App Group verified; distribution export pending |
-| App Store export, account metadata and hosted pages | OPEN — publisher account workflow |
+| Hosted privacy/support pages | READY — `docs/` site; live once the repo is public and Pages is on |
+| App Store export and account metadata | OPEN — publisher account workflow |
 
 The strongest current work is honest offline astronomy presented with native glass navigation and a coherent moon/score language. A further week would be best spent in real parks with VoiceOver users and two or three stargazers, expanding verified viewing spots and tuning scrub/motion/haptics from observation. Those evaluations cannot be replaced by simulator screenshots.

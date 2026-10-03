@@ -1,3 +1,5 @@
+> Published version: `docs/support.html` → https://harrypakhale98.github.io/Nyx/support.html. Edit the HTML page; this Markdown is the earlier draft.
+
 # Nyx support
 
 Nyx helps compare national parks and nights for stargazing. Scores are planning estimates. Confirm park access before traveling; forecasts do not cover smoke, haze or telescope seeing.

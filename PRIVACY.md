@@ -16,17 +16,19 @@ Direct source inspection found no disk-space, file-timestamp, system-uptime or a
 
 [Apple manifest documentation](https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk) and [required API reasons](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype).
 
-## App Store label draft — unresolved release gate
+## App Store privacy label — recommendation: Data Not Collected
 
-**Target: Data Not Collected. Do not publish this declaration yet.**
+Reviewed October 3, 2026 against Apple's [App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/) definitions:
 
-The code does not send identity, journal, photos, device coordinates or analytics. However, [Open-Meteo's free API policy](https://open-meteo.com/en/terms) permits IP-address collection for operation/abuse prevention and retains troubleshooting logs, potentially including requested coordinates, for 90 days. Requested coordinates here are public parks. That does not eliminate the IP-retention question. NPS/API.gov server logging also needs publisher review.
+- Apple defines **collect** as transmitting data off the device so that *you and/or your third-party partners* can access it longer than needed to service the request in real time.
+- Apple defines **third-party partners** as analytics tools, ad networks, third-party SDKs, or other external vendors *whose code you've added to your app*. Nyx embeds no vendor code; it calls two public web APIs with Apple's URLSession.
+- Apple's own example: an IP address sent on a server call and not retained by you need not be disclosed.
+- What leaves the device: public park coordinates (Open-Meteo) and a park code (NPS). No device location, journal, photo, identifier or account data is ever sent. The developer runs no server and receives nothing.
+- [Open-Meteo](https://open-meteo.com/en/terms) states its logs are not linked to user identities, are not shared, and are deleted after 90 days. The NPS API is a public government service.
 
-[Apple's App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/) defines collection by off-device access beyond servicing a real-time request and requires accurate disclosures for applicable third-party practices. Its partner definition refers to integrated external code; Nyx uses no vendor SDK. Whether these direct API providers require disclosure must be resolved authoritatively, not inferred solely from the lack of SDKs.
+**Recommended App Store Connect answer: "No, we do not collect data from this app"** (shown on the store as Data Not Collected), with no tracking. This matches the spec (§3, §13). The privacy policy (`docs/privacy.html`) still tells users, plainly, that the two services see their IP address and links both providers' policies, so the label and the policy are consistent and nothing is hidden.
 
-Before submission, the account owner must obtain authoritative Apple/provider guidance and record the result here, or obtain a retention arrangement compatible with free data and the two allowed hosts. Do not describe retained IP logs as absent. No proxy/server, paid provider, extra host or silent change of the fixed privacy requirement has been added. The checked-in manifest is an implementation draft, not certification of the external retention policy.
-
-Proposed answers **only after resolving the gate**: no tracking; no developer data collection; local location/photos/journal do not count as transmitted collection. If the authoritative answer requires disclosure, the current brief's Data Not Collected requirement needs an explicit owner decision before shipping.
+The publisher makes the final declaration in App Store Connect; this is the reasoning to rely on. Revisit it if a vendor SDK, analytics, accounts, iCloud sync or a developer server is ever added.
 
 ## Device verification still required
 

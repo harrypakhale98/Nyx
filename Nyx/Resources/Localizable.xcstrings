@@ -12,17 +12,6 @@
         }
       }
     },
-    "%@ · %lld/100": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld/100"
-          }
-        }
-      }
-    },
     "%@ · forecast included": {
       "extractionState": "manual",
       "localizations": {
@@ -78,24 +67,13 @@
         }
       }
     },
-    "%@, %@. Darkness score %lld, %@. %@": {
+    "%@, %@. Darkness score %lld, %@. %@ %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@. Darkness score %lld, %@. %@"
-          }
-        }
-      }
-    },
-    "%@, %lld out of 100": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld out of 100"
+            "value": "%@, %@. Darkness score %lld, %@. %@ %@"
           }
         }
       }
@@ -107,28 +85,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %lld out of 100, %@. %@"
-          }
-        }
-      }
-    },
-    "%@, score %lld, %@. %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, score %lld, %@. %@"
-          }
-        }
-      }
-    },
-    "%@. %lld, %@. %@ %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@. %lld, %@. %@ %@"
           }
         }
       }
@@ -177,6 +133,28 @@
         }
       }
     },
+    "%lld minute read": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld minute read"
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld"
+          }
+        }
+      }
+    },
     "%lld · %@": {
       "extractionState": "manual",
       "localizations": {
@@ -184,6 +162,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld · %@"
+          }
+        }
+      }
+    },
+    "%lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%%"
           }
         }
       }
@@ -206,6 +195,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld%% illuminated"
+          }
+        }
+      }
+    },
+    "%lld, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, %@"
           }
         }
       }
@@ -239,17 +239,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld/100 · %@"
-          }
-        }
-      }
-    },
-    "4 minute read": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "4 minute read"
           }
         }
       }
@@ -404,17 +393,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "A red palette reduces glare. Lower the screen brightness too; Nyx does not change it for you."
-          }
-        }
-      }
-    },
-    "A score never confirms that a road or park is open. Alerts and ranger programs require an NPS key and are cached. Their update time is shown. Check with the park before traveling, especially when Nyx has not checked alerts.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A score never confirms that a road or park is open. Alerts and ranger programs require an NPS key and are cached. Their update time is shown. Check with the park before traveling, especially when Nyx has not checked alerts."
           }
         }
       }
@@ -672,13 +650,13 @@
         }
       }
     },
-    "Check access in Nyx": {
+    "Choose a starting park": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Check access in Nyx"
+            "value": "Choose a starting park"
           }
         }
       }
@@ -749,6 +727,17 @@
         }
       }
     },
+    "Closure alert: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure alert: %@"
+          }
+        }
+      }
+    },
     "Cloud cover": {
       "extractionState": "manual",
       "localizations": {
@@ -789,6 +778,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cloud forecasts"
+          }
+        }
+      }
+    },
+    "Clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds"
+          }
+        }
+      }
+    },
+    "Clouds %lld percent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds %lld percent"
+          }
+        }
+      }
+    },
+    "Clouds %lld%% on average": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds %lld%% on average"
           }
         }
       }
@@ -991,6 +1013,17 @@
         }
       }
     },
+    "Drag along the river. Dashed, hollow nights are moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag along the river. Dashed, hollow nights are moon and darkness only."
+          }
+        }
+      }
+    },
     "Each park has an IANA time zone. A night runs from local noon to the following local noon. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.": {
       "extractionState": "manual",
       "localizations": {
@@ -1068,13 +1101,24 @@
         }
       }
     },
-    "Example score": {
+    "Example night": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Example score"
+            "value": "Example night"
+          }
+        }
+      }
+    },
+    "Example score 94 out of 100. Moonlight counts for 40 percent, clouds 25, light pollution 20, and the length of darkness 15.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example score 94 out of 100. Moonlight counts for 40 percent, clouds 25, light pollution 20, and the length of darkness 15."
           }
         }
       }
@@ -1119,6 +1163,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fair"
+          }
+        }
+      }
+    },
+    "Fewer than five nights remain this month. Look ahead to the next new moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fewer than five nights remain this month. Look ahead to the next new moon."
           }
         }
       }
@@ -1233,17 +1288,6 @@
         }
       }
     },
-    "Forecast included.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forecast included."
-          }
-        }
-      }
-    },
     "Forecasts": {
       "extractionState": "manual",
       "localizations": {
@@ -1299,13 +1343,13 @@
         }
       }
     },
-    "Hollow stars: moon and darkness only.": {
+    "Hollow nights have no cloud forecast yet.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hollow stars: moon and darkness only."
+            "value": "Hollow nights have no cloud forecast yet."
           }
         }
       }
@@ -1332,13 +1376,13 @@
         }
       }
     },
-    "In the five-night moon window.": {
+    "In the five-night moon window": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "In the five-night moon window."
+            "value": "In the five-night moon window"
           }
         }
       }
@@ -1794,6 +1838,17 @@
         }
       }
     },
+    "Near me": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Near me"
+          }
+        }
+      }
+    },
     "New moon": {
       "extractionState": "manual",
       "localizations": {
@@ -1856,17 +1911,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No cloud forecast"
-          }
-        }
-      }
-    },
-    "No cloud forecast.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cloud forecast."
           }
         }
       }
@@ -2102,13 +2146,13 @@
         }
       }
     },
-    "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0.": {
+    "Open this night": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0."
+            "value": "Open this night"
           }
         }
       }
@@ -2179,13 +2223,13 @@
         }
       }
     },
-    "Park name or state": {
+    "Park or state": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Park name or state"
+            "value": "Park or state"
           }
         }
       }
@@ -2234,13 +2278,13 @@
         }
       }
     },
-    "Peek at this night": {
+    "Past night": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Peek at this night"
+            "value": "Past night"
           }
         }
       }
@@ -2329,17 +2373,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Programs are not checked yet. Ask at the visitor center for current night-sky programs."
-          }
-        }
-      }
-    },
-    "Programs are not checked yet. Ask at the visitor center or add an NPS key during setup.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Programs are not checked yet. Ask at the visitor center or add an NPS key during setup."
           }
         }
       }
@@ -2696,6 +2729,17 @@
         }
       }
     },
+    "Source: the essay you were reading.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: the essay you were reading."
+          }
+        }
+      }
+    },
     "Sources: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2762,6 +2806,17 @@
         }
       }
     },
+    "Swipe up or down to move one night at a time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe up or down to move one night at a time."
+          }
+        }
+      }
+    },
     "TONIGHT'S SKY": {
       "extractionState": "manual",
       "localizations": {
@@ -2795,17 +2850,6 @@
         }
       }
     },
-    "The bright center is out of the evening sky this season. Winter constellations still reward a dark night.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The bright center is out of the evening sky this season. Winter constellations still reward a dark night."
-          }
-        }
-      }
-    },
     "The bright center is out of the night sky this season. Bright constellations still reward a dark night.": {
       "extractionState": "manual",
       "localizations": {
@@ -2824,17 +2868,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bright center may be visible late at night or near dusk. Timing and terrain matter."
-          }
-        }
-      }
-    },
-    "The bright center may be visible. Look toward the southern horizon; timing and terrain matter.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The bright center may be visible. Look toward the southern horizon; timing and terrain matter."
           }
         }
       }
@@ -2938,6 +2971,17 @@
         }
       }
     },
+    "The notes and photos are removed from this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The notes and photos are removed from this iPhone."
+          }
+        }
+      }
+    },
     "The original records": {
       "extractionState": "manual",
       "localizations": {
@@ -3011,6 +3055,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The shape of the night"
+          }
+        }
+      }
+    },
+    "Thirty-night darkness timeline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thirty-night darkness timeline"
           }
         }
       }
@@ -3103,6 +3158,17 @@
         }
       }
     },
+    "Tonight, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight, %@"
+          }
+        }
+      }
+    },
     "True darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -3110,6 +3176,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "True darkness"
+          }
+        }
+      }
+    },
+    "True darkness %@ – %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness %@ – %@"
           }
         }
       }
@@ -3385,17 +3462,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Widget content review"
-          }
-        }
-      }
-    },
-    "With an NPS key, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "With an NPS key, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address."
           }
         }
       }

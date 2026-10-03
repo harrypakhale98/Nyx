@@ -1,10 +1,24 @@
-# Input needed — owner release gates
+# Input needed — the only steps left, in order
 
-1. **Resolve the App Store privacy label before submitting.** Open-Meteo's free API policy says it retains troubleshooting logs, potentially including IP addresses and requested coordinates, for 90 days. Read `PRIVACY.md`. Sign in to Apple Developer Support and ask whether direct weather/NPS API calls with no vendor SDK require disclosure when providers retain operational IP logs. Attach the two provider policies and describe that only public park coordinates/codes are transmitted. Ask the providers to confirm retention/de-identification; record the written result in `PRIVACY.md`, or obtain a zero-retention arrangement preserving the brief's free-data/two-host guardrails. This review cannot attest to a provider's retention or make the publisher's declaration. Do not select “Data Not Collected” without resolving this.
-2. **Review on physical iPhones before release.** Simulators cannot establish night-adapted usability, haptics or physical frame rates. Follow `AUDIT.md` and `Research/performance.md`: VoiceOver, AX5, Reduce Motion/Transparency, Increase Contrast, Bold Text, Smart Invert, photos, denied permissions, widgets/Control Center, Siri, Foundation Models if available, and flight mode. Include two or three park visitors; record and fix failures before submission.
-3. **Add a free NPS key so closures and ranger programs load (strongly recommended before release).** Register at developer.nps.gov, then create `Config/Secrets.xcconfig` containing `NPS_API_KEY = your_key` and rebuild. The file is git-ignored; never commit the key. Nyx works without it, but then every park honestly says access was not checked. The key is embedded in distributed builds, so use a public-app key and watch its quota.
-4. **Complete owner-controlled distribution setup.** Signing team `DUHVN68KBA` is already configured. A development-signed Release archive and App Group entitlement validation succeeded locally. Confirm those existing app/extension/group records in the Apple developer account; publish privacy/support pages; create the Nyx App Store Connect record; export the final archive for App Store distribution, validate it and complete TestFlight and submission checklist in `SUBMISSION.md`. Account authentication, agreements, naming and the final privacy declaration require the publisher. Once configured, Xcode can perform signing/validation/upload; follow the exact steps in `SUBMISSION.md`.
+Everything else is built, verified and documented. Each step below needs your Apple ID, your accounts, or your own eyes on a real iPhone.
 
-## Done in the completion review
-- App icon: native Icon Composer document `Nyx/Resources/AppIcon.icon` ships in the build (see `IconSources/README.md`).
-- NPS key plumbing fixed; only the key itself is needed (item 3).
+1. **Make the repo public, then turn on GitHub Pages** (about 2 minutes). GitHub → harrypakhale98/Nyx → Settings → General → Danger Zone → Change visibility → Public. Then Settings → Pages → Build and deployment → Deploy from a branch → `main`, folder `/docs` → Save. The site appears at https://harrypakhale98.github.io/Nyx/ within a few minutes; the privacy policy and support URLs in `SUBMISSION.md` point there. The history was checked: no keys, passwords or tokens are in it.
+
+2. **Try Nyx on your iPhone, ideally at night.** Plug it in, pick it as the run destination in Xcode, press Run. Check: VoiceOver on the gauge, time river and calendar; haptics while scrubbing the river; night vision from Control Center; the Tonight widget on the Home and Lock Screen; "Hey Siri, what is the darkness score at Joshua Tree in Nyx"; "Near me" with location allowed and denied; adding journal photos; Airplane Mode. The automated accessibility audit already passes on every screen in the simulator (`NyxUITests/AccessibilityAuditTests.swift`); this is the human pass. Note anything odd and ask for a fix.
+
+3. **Publish on the App Store** (follow `SUBMISSION.md`, which has every field filled in):
+   - App Store Connect → My Apps → + New App: iOS, name **Nyx** (fallback **Noctis**), bundle ID `com.harrypakhale.nyx`, SKU `nyx-ios`.
+   - Paste the description, keywords, subtitle and URLs from `SUBMISSION.md`.
+   - App Privacy: "No, we do not collect data from this app". Reasoning is in `PRIVACY.md`.
+   - Upload the six screenshots in `Store/Screenshots/` (6.9-inch).
+   - In Xcode: Product → Archive → Distribute App → App Store Connect → Upload.
+   - When the build finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
+
+## Done
+- App icon: native Icon Composer document `Nyx/Resources/AppIcon.icon`.
+- NPS key installed in `Config/Secrets.xcconfig` (git-ignored, on this Mac only) and verified with live Joshua Tree alerts. Building on another Mac? Copy that file over first.
+- Privacy label decision: Data Not Collected, reasoned in `PRIVACY.md`.
+- Public privacy policy and support pages: `docs/` (go live with step 1).
+- App Store screenshots recaptured with the current design: `Store/Screenshots/`.
+- Automated accessibility audit passes on every screen in both palettes.
+- Signing team `DUHVN68KBA` configured; Release archive builds and signs locally.

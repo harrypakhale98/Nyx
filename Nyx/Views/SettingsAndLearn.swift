@@ -108,6 +108,7 @@ struct OnboardingView:View {
             VStack(spacing:20) {
                 HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
                     .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
+                    .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
                     .accessibilityElement().accessibilityLabel("Introduction, page \(page+1) of 3")
                 Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
                     .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)

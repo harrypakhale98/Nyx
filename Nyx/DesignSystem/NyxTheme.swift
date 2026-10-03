@@ -34,7 +34,7 @@ struct Eyebrow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
-    var body: some View { Text(text).font(.caption.weight(.medium)).tracking(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
+    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
 }
 struct NightBackground: View {
     var seed: String="nyx"
@@ -52,7 +52,7 @@ struct CalmState: View {
     var body: some View {
         VStack(spacing:20) {
             Image(systemName:symbol).font(.system(size:36,weight:.ultraLight)).foregroundStyle(palette.accent).padding(26)
-                .background(Circle().stroke(palette.line,lineWidth:0.5))
+                .background(Circle().stroke(palette.line,lineWidth:0.5)).accessibilityHidden(true)
             Text(title).font(.system(.title2,design:.serif)).multilineTextAlignment(.center)
             Text(message).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center)
         }.frame(maxWidth:.infinity).padding(.vertical,38).padding(.horizontal,24)

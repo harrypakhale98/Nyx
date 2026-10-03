@@ -1,3 +1,5 @@
+> Published version: `docs/privacy.html` → https://harrypakhale98.github.io/Nyx/privacy.html. Edit the HTML page; this Markdown is the earlier draft.
+
 # Nyx privacy policy
 
 Draft for the publisher to review and host before release. Updated October 2, 2026.

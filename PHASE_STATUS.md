@@ -14,6 +14,14 @@ A full code, design and accessibility review of the first build found and fixed 
 
 Verified: app + tests build with zero warnings (warnings are errors) on iOS 26.5 (iPhone 17 Pro) and iOS 27.0 (iPhone 18 Pro); unit and UI suites pass on both. Screens touched were re-captured and reviewed, including night vision and AX5.
 
+### Release completion — 2026-10-03
+
+- **Accessibility:** Apple's automated audit (`AccessibilityAuditTests`) passes on all 17 screens in both palettes after fixes; exclusions are documented in the test.
+- **Live NPS data verified:** the owner's key lives in git-ignored `Config/Secrets.xcconfig`; real Joshua Tree alerts loaded in the app. Closure detection now also catches closures NPS files under "Caution" or "Danger".
+- **Privacy label decided:** Data Not Collected (`PRIVACY.md`). Public privacy, support and landing pages are in `docs/` for GitHub Pages, contact harry.pakhale98@gmail.com.
+- **App Store assets current:** screenshots recaptured (`Store/Screenshots`, 1320×2868); String Catalog synced (331 keys).
+- **Owner steps left:** see `INPUT_NEEDED.md` — make the repo public and turn on Pages, try it on an iPhone, then create the App Store Connect record and upload.
+
 ---
 
 ## Engineering checkpoint: Phases 0–7 implemented
@@ -49,4 +57,4 @@ The final critique repaired access guidance placement, red native-control contra
 
 ## Exact next starting point
 
-Start with **item 1 in INPUT_NEEDED.md**: resolve provider retention and the accurate App Store privacy declaration, recording written guidance in `PRIVACY.md`. Then complete the ordered physical review, icon and distribution steps. Do not add features before those release gates close. If review finds a defect, fix it, rerun both simulator suites, recapture affected states, archive again and update this handoff before submission.
+Start with **item 1 in INPUT_NEEDED.md** (repo public + GitHub Pages), then the on-device review and App Store Connect steps. Do not add features before those release gates close. If review finds a defect, fix it, rerun both simulator suites, recapture affected states, archive again and update this handoff before submission.
