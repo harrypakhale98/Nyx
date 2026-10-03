@@ -168,7 +168,7 @@ struct ParkDetailView: View {
                 NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
             }.padding(24)
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
-        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { saveToolbar }
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night) }.nyxPresentation().presentationDetents([.large]) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }

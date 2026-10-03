@@ -5,7 +5,7 @@ struct ShareCard:View {
     let night:Night
     var body:some View {
         ZStack {
-            NightBackground(seed:night.park.id,score:night.score.value)
+            NightBackground(seed:night.park.id,score:night.score.value,park:night.park,night:night.id)
             VStack(spacing:18) {
                 Text("NYX").font(.caption).tracking(7).foregroundStyle(palette.muted)
                 // ImageRenderer proposes no size; an unsized gauge collapses and truncates the score.

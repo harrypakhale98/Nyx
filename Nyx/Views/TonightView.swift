@@ -47,7 +47,7 @@ struct TonightView: View {
                 if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
                 if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
             }.padding(24)
-        }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+        }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
             .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }

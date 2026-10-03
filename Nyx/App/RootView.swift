@@ -43,7 +43,7 @@ struct RootView:View {
                 }
             }
         }
-        .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion"))
+        .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(DebugTypeSize())
         .modifier(NightVisionFilter(enabled:palette.nightVision))
