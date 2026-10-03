@@ -19,9 +19,9 @@ Make time for a darker sky.
 
 Nyx compares nights across the 63 US national parks. Moonlight, cloud cover, estimated artificial light and the length of true darkness become one Darkness Score, with a breakdown that explains it.
 
-Find nearby parks using a straight-line radius or choose a starting park yourself. Explore the calendar and five-night moon window. Follow changing conditions along a thirty-night timeline. Park-local times help you plan the evening without converting time zones.
+Find nearby parks using a straight-line radius or choose a starting park yourself, or sort every park by tonight's darkness. Explore the calendar and five-night moon window. Follow changing conditions along a thirty-night timeline. Park-local times help you plan the evening without converting time zones.
 
-Save parks, receive optional local reminders for promising nights, and keep a private journal with notes and selected photos. Home and Lock Screen widgets show the best sky among your saved parks. Night-vision mode uses a red palette; Learn offers short essays on skyglow and sharing the night.
+Save parks, receive optional local reminders for promising nights, and keep a private journal with notes and selected photos. Home and Lock Screen widgets show the best sky among your saved parks and the week ahead. Night-vision mode uses a red palette; Learn offers short essays on finding the Milky Way, reading the Bortle scale, skyglow and sharing the night.
 
 Moon and twilight calculations, the park library, calendar, journal and saved parks work offline. Cloud forecasts extend roughly sixteen days. When clouds are unknown, Nyx says so and recalculates the estimate without them. Bortle classes are conservative estimates, not measurements. Lunar rise and set times are approximate and can vary with terrain.
 

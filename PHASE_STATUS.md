@@ -9,9 +9,9 @@ Two independent audits (astronomy/score, app flows) and a screen-by-screen visua
 - **Visuals:** vector moon disc (limb darkening, soft terminator, maria, glow); gauge with glowing arc, leading star and visible orbit; sky arc rebuilt with altitude-true twilight colour, moonlit-hours wash, true-darkness bracket, hour labels and Now marker; medium widget gains a seven-night strip, moon phase and a seeded sky; journal cards show a photo.
 - Build number is now **2** (`project.yml`). Build 1 in App Store Connect predates these fixes.
 
-**Verified 2026-10-03:** app, widget and tests build with zero warnings; on iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5, all 23 Swift Testing tests, both accessibility audits (17 screens × standard and night vision) and both UI tests pass. Every touched screen was captured and reviewed, including night vision and polar states. Store screenshots recaptured with live data and flattened (no alpha).
+**Verified 2026-10-03 (final):** app, widget and tests build with zero warnings; on iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5, all 24 Swift Testing tests, both accessibility audits (17 screens × standard and night vision) and both UI tests pass. Three independent code audits and one self-review were run; every confirmed finding is fixed and logged in `DECISIONS.md`. Touched screens were captured and reviewed, including night vision, AX5 and polar states; river scrubbing and park links over an open sheet were exercised in the simulator. Store screenshots recaptured with live data and flattened (no alpha).
 
-**Known, deliberately left:** a reminder, Spotlight or widget link that arrives while another sheet is open (journal editor, breakdown) does not present the park until that sheet closes; dismissing it automatically could discard a journal draft. Ask Nyx's source records are English data, not catalog strings.
+**Known limits:** Ask Nyx's source records are English data, not catalog strings. Hardware haptics, real widgets, Siri, VoiceOver by ear and dark-adapted readability still need the on-device night review.
 
 **Next starting point:** upload build 1.0 (2) (INPUT_NEEDED 2), then the on-device night review (INPUT_NEEDED 1).
 
