@@ -124,3 +124,10 @@ One line per decision, with reasoning. Newest at the bottom.
 - Ask Nyx's displayed source records are now catalog strings like the rest of the UI.
 - Performance: the gauge's dial (track, blurred glow, arc, ticks) is a static Canvas that redraws only when the score changes; the per-frame TimelineView layer draws only the orbiting stars and the leading star, whose glow is a radial gradient instead of a blur filter. Two blur passes per frame at display rate were the costliest drawing in the app on an iPhone 12.
 - Build 1.0 (2) archived with App Store distribution signing (automatic, team DUHVN68KBA) and uploaded on 2026-10-03 via `xcodebuild -exportArchive` (destination upload); includes the owner's NPS key and the widget extension at build 2.
+
+## Depth and realism — 2026-10-03
+
+Implementing every item in `Research/depth-and-realism-audit.md` before the first release, at the owner's request.
+
+- App icon is now the "Dial" concept: the score arc and its leading star around a sphere-shaded crescent with earthshine, in three depth groups (star, arc, moon). The arc stays non-glass so its amber stays luminous; glass made it read as a hollow tube. The original moon-and-orbit icon and the Milky Way "Horizon" draft are kept in `IconSources/Concepts/`.
+- The celestial gauge is now an instrument: a Liquid Glass bezel ring (`DialRing`) under the arc, a soft inner shadow so the numeral sits inside the dial, and a specular glint on the rim that slides with the phone's tilt (`MotionTilt`, gravity only, 30 Hz, only while a gauge is on screen, never under Reduce Motion or Low Power Mode). Solid dark ring under Reduce Transparency, Increase Contrast and night vision.
