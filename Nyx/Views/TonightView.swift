@@ -24,36 +24,19 @@ struct TonightView: View {
                     Spacer(minLength:8)
                     if let home=model.home { MoonDisc(illumination:model.night(home).sky.moon.illumination,waxing:model.night(home).sky.moon.waxing).frame(width:40,height:40).padding(.top,8) }
                 }
-                Panel { VStack(alignment:.leading,spacing:12) {
-                    HStack(alignment:.center) {
-                        // The starting point is either a chosen park or the device location, never both.
-                        Button { chooseHome=true } label:{
-                            if location.latitude==nil { Label(String(localized:"From \(model.home?.shortName ?? "")"),systemImage:"mappin.and.ellipse") }
-                            else { Label("From your location",systemImage:"location.fill") }
-                        }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
-                        Spacer(minLength:8)
-                        if location.locating { ProgressView() }
-                        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings") }
-                        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
-                    }
-                    ViewThatFits(in:.horizontal) {
-                        HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
-                        VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
-                    }
-                    if location.denied || DebugScenario.state=="no-location" { Text("Location is off. A starting park works just as well.").font(.caption).foregroundStyle(palette.muted) }
-                    if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
-                } }
                 if DebugScenario.state=="loading" { ConstellationLoader().frame(maxWidth:.infinity) }
-                else if best.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.") }
+                else if best.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.");startingPoint }
                 else if let park=best.first {
                     let night=model.night(park)
                     VStack(spacing:10) {
                         Eyebrow(text:"Your darkest nearby sky")
                         NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline) }.padding(.vertical,14).padding(.horizontal,22).glassEffect() }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
-                        Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
                         CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : 240)
                         Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                        if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
+                        else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
                     }.frame(maxWidth:.infinity)
+                    startingPoint
                     if best.count>1 {
                         Eyebrow(text:"More skies within reach")
                         ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
@@ -77,6 +60,27 @@ struct TonightView: View {
                 }
                 await model.refresh(candidates,force:true);refreshed+=1
             }
+    }
+    /// The starting point is either a chosen park or the device location, never both.
+    private var startingPoint:some View {
+        Panel { VStack(alignment:.leading,spacing:12) {
+            HStack(alignment:.center) {
+                Button { chooseHome=true } label:{
+                    if location.latitude==nil { Label(String(localized:"From \(model.home?.shortName ?? "")"),systemImage:"mappin.and.ellipse") }
+                    else { Label("From your location",systemImage:"location.fill") }
+                }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
+                Spacer(minLength:8)
+                if location.locating { ProgressView() }
+                else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings") }
+                else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
+            }
+            ViewThatFits(in:.horizontal) {
+                HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
+                VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
+            }
+            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. A starting park works just as well.").font(.caption).foregroundStyle(palette.muted) }
+            if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
+        } }
     }
     private var radiusPicker:some View {
         @Bindable var model=model

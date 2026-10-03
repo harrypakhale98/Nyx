@@ -60,30 +60,58 @@ nonisolated struct Forecast: Codable, Sendable {
     }
 }
 nonisolated protocol WeatherProviding: Sendable {
-    func forecast(for park: Park, network: Bool, force: Bool) async -> Forecast?
+    func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast]
+}
+extension WeatherProviding {
+    func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
+        await forecasts(for: [park], network: network, force: force)[park.id]
+    }
 }
 actor WeatherService: WeatherProviding {
     private let transport: any HTTPTransport
     private let persist:Bool
     private var memory: [String: Forecast] = [:]
     init(transport: any HTTPTransport = SafeHTTP(),persist:Bool=true) { self.transport=transport;self.persist=persist }
-    func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
-        let cached = memory[park.id] ?? (persist ? CacheDirectory.read(Forecast.self, name: "weather-\(park.id)") : nil)
-        if !network || (!force && cached.map { Date.now.timeIntervalSince($0.updated)<6*3600 } == true) { return cached }
+    /// Cached forecasts for every park, refreshed in as few requests as possible: Open-Meteo
+    /// accepts many coordinates at once, so all 63 parks cost one request, not 63.
+    /// A failed request keeps the last forecast; nothing is ever filled in as clear.
+    func forecasts(for parks: [Park], network: Bool, force: Bool = false) async -> [String: Forecast] {
+        var result: [String: Forecast] = [:]
+        var due: [Park] = []
+        for park in parks {
+            let cached = memory[park.id] ?? (persist ? CacheDirectory.read(Forecast.self, name: "weather-\(park.id)") : nil)
+            if let cached { memory[park.id]=cached; result[park.id]=cached }
+            if network && (force || cached.map { Date.now.timeIntervalSince($0.updated)>=6*3600 } ?? true) { due.append(park) }
+        }
+        for start in stride(from: 0, to: due.count, by: 50) {
+            let chunk = Array(due[start..<min(due.count, start+50)])
+            for (park, forecast) in await fetch(chunk) {
+                memory[park.id]=forecast; result[park.id]=forecast
+                if persist { CacheDirectory.write(forecast,name:"weather-\(park.id)") }
+            }
+        }
+        return result
+    }
+    private func fetch(_ parks: [Park]) async -> [(Park, Forecast)] {
+        guard !parks.isEmpty else { return [] }
         var parts = URLComponents()
         parts.scheme="https"; parts.host="api.open-meteo.com"; parts.path="/v1/forecast"
-        parts.queryItems=[URLQueryItem(name:"latitude",value:String(park.latitude)),URLQueryItem(name:"longitude",value:String(park.longitude)),
-            URLQueryItem(name:"hourly",value:"cloud_cover"),URLQueryItem(name:"forecast_days",value:"16"),URLQueryItem(name:"past_days",value:"1"),URLQueryItem(name:"timeformat",value:"unixtime"),URLQueryItem(name:"timezone",value:"GMT")]
         // Hours start at 00:00 UTC; yesterday's hours keep an eastern park's night in progress covered.
-        guard let url=parts.url else { return cached }
+        parts.queryItems=[URLQueryItem(name:"latitude",value:parks.map { String($0.latitude) }.joined(separator:",")),
+            URLQueryItem(name:"longitude",value:parks.map { String($0.longitude) }.joined(separator:",")),
+            URLQueryItem(name:"hourly",value:"cloud_cover"),URLQueryItem(name:"forecast_days",value:"16"),URLQueryItem(name:"past_days",value:"1"),
+            URLQueryItem(name:"timeformat",value:"unixtime"),URLQueryItem(name:"timezone",value:"GMT")]
+        guard let url=parts.url else { return [] }
         struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
-        do {
-            let result = try JSONDecoder().decode(Response.self, from: await transport.get(url))
-            guard result.hourly.time.count == result.hourly.cloud_cover.count else { return cached }
-            let forecast=Forecast(updated:.now,times:result.hourly.time,clouds:result.hourly.cloud_cover)
-            memory[park.id]=forecast; if persist { CacheDirectory.write(forecast,name:"weather-\(park.id)") }
-            return forecast
-        } catch { return cached }
+        guard let data=try? await transport.get(url) else { return [] }
+        // One coordinate returns an object; several return an array in request order.
+        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+        guard decoded.count == parks.count else { return [] }
+        let now=Date.now
+        return zip(parks, decoded).compactMap { park, response in
+            guard response.hourly.time.count == response.hourly.cloud_cover.count, !response.hourly.time.isEmpty else { return nil }
+            return (park, Forecast(updated:now,times:response.hourly.time,clouds:response.hourly.cloud_cover))
+        }
     }
 }
 nonisolated struct ParkEnrichment: Codable, Sendable {

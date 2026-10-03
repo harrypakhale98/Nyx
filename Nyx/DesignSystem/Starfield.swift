@@ -36,3 +36,13 @@ struct Starfield: View {
 #Preview("Living") { Starfield(seed:"jotr").background(.black) }
 #Preview("Pristine night") { Starfield(seed:"jotr",twinkle:1).background(.black) }
 #Preview("Still") { Starfield(seed:"jotr").environment(\.nyxReduceMotion,true).background(.black) }
+
+/// Same seed, same sky: a small deterministic generator for decorative stars.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+    init(seed: String) { state=seed.utf8.reduce(UInt64(5381)) { ($0 &* 33) &+ UInt64($1) } }
+    mutating func next() -> UInt64 {
+        state=state &* 6364136223846793005 &+ 1442695040888963407
+        return state
+    }
+}
