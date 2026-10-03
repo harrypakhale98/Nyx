@@ -22,6 +22,8 @@ struct Starfield: View {
             Canvas { context,size in
                 let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
                 let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
+                // Night vision keeps stars faint: kinder to dark-adapted eyes and to the text above them.
+                let strength=palette.nightVision ? strength*0.45 : strength
                 for star in stars {
                     let shimmer=0.55+amplitude*sin(t*speed+star.phase)
                     let point=CGRect(x:star.x*size.width,y:star.y*size.height,width:star.radius*2,height:star.radius*2)

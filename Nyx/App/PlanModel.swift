@@ -85,11 +85,15 @@ import CoreLocation
     }
     /// A closure from the last park update, if any. Shown beside every score for that park.
     func closure(_ park:Park)->String? {
-        enrichments[park.id]?.alerts.first { $0.category.lowercased().contains("closure") }?.title
+        // NPS files some closures under "Caution"; a closure or danger anywhere in the alert counts.
+        enrichments[park.id]?.alerts.first { alert in
+            let text=(alert.category+" "+alert.title).lowercased()
+            return ["closure","closed","danger"].contains { text.contains($0) }
+        }?.title
     }
     func alertSummary(_ park:Park)->String {
         guard let data=enrichments[park.id] else { return String(localized:"Access not checked. Confirm closures with the park.") }
-        if let closure=data.alerts.first(where:{$0.category.lowercased().contains("closure")}) { return closure.title }
+        if let closure=closure(park) { return closure }
         if let first=data.alerts.first { return first.title }
         return String(localized:"No alerts in the last park update. Confirm access before travel.")
     }

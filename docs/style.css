@@ -1,0 +1,40 @@
+:root {
+  --void: #000000; --indigo: #0B1026; --violet: #2A1B4E;
+  --ink: #F5F1E6; --muted: rgba(245, 241, 230, 0.74); --line: rgba(245, 241, 230, 0.18);
+  --amber: #FFB454;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--void); }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink);
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  background:
+    radial-gradient(1px 1px at 12% 18%, rgba(245,241,230,.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 9%, rgba(245,241,230,.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 31%, rgba(245,241,230,.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 27% 62%, rgba(245,241,230,.45) 50%, transparent 51%),
+    radial-gradient(1px 1px at 91% 77%, rgba(245,241,230,.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 6% 88%, rgba(245,241,230,.55) 50%, transparent 51%),
+    radial-gradient(ellipse at 50% -20%, var(--violet) 0%, var(--indigo) 38%, var(--void) 75%);
+  background-attachment: fixed;
+}
+main { max-width: 680px; margin: 0 auto; padding: 56px 20px 80px; }
+.eyebrow { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h1, h2 { font-family: "New York", "Iowan Old Style", Georgia, serif; font-weight: 400; line-height: 1.2; }
+h1 { font-size: clamp(34px, 8vw, 48px); margin: 0 0 18px; }
+h2 { font-size: 24px; margin: 40px 0 10px; }
+p, li { color: var(--muted); }
+strong { color: var(--ink); font-weight: 600; }
+a { color: var(--amber); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+ul { padding-left: 20px; }
+li { margin: 8px 0; }
+.panel { background: rgba(11, 16, 38, .85); border: 1px solid var(--line); border-radius: 22px; padding: 22px 24px; margin: 28px 0; }
+.lead { font-size: 20px; color: var(--ink); }
+.moon { width: 72px; height: 72px; border-radius: 50%; margin-bottom: 26px;
+  background: radial-gradient(circle at 70% 50%, var(--ink) 0 47%, transparent 48%), #10142E;
+  box-shadow: inset -26px 0 0 0 var(--ink), 0 0 0 1px var(--line); }
+nav { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 30px; }
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { a { transition: color .2s; } }

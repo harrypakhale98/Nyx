@@ -29,7 +29,7 @@ struct TonightView: View {
                         Button { chooseHome=true } label:{
                             if location.latitude==nil { Label(String(localized:"From \(model.home?.shortName ?? "")"),systemImage:"mappin.and.ellipse") }
                             else { Label("From your location",systemImage:"location.fill") }
-                        }.font(.subheadline).accessibilityHint("Choose a starting park")
+                        }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
                         Spacer(minLength:8)
                         if location.locating { ProgressView() }
                         else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
@@ -91,7 +91,7 @@ struct ParkPickerView: View {
     var body: some View {
         List(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
             Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark") } } }.tint(.primary)
-        }.searchable(text:$search,prompt:"Park name or state").navigationTitle("Starting park")
+        }.searchable(text:$search,prompt:"Park or state").navigationTitle("Starting park")
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
     }
 }
