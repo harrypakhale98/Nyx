@@ -9,9 +9,11 @@ struct ParkRow: View {
     var closure: String?=nil
     var body: some View {
         VStack(alignment:.leading,spacing:8) {
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:16) { names; Spacer(minLength:8); number }
-                VStack(alignment:.leading,spacing:14) { names; number }
+            // Long names wrap beside the score; only accessibility sizes stack them.
+            if typeSize.isAccessibilitySize {
+                VStack(alignment:.leading,spacing:14) { names; number }.frame(maxWidth:.infinity,alignment:.leading)
+            } else {
+                HStack(alignment:.center,spacing:16) { names.layoutPriority(1); Spacer(minLength:8); number }
             }
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
@@ -35,14 +37,16 @@ struct ParksView: View {
     @State private var search=""
     @State private var darkOnly=false
     @State private var savedOnly=false
+    @AppStorage("parksByScore") private var byScore=false
     @Namespace private var zoom
     private var filtered:[Park] {
-        model.parks.filter { p in (!darkOnly || p.darkSkyDesignated) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || p.matches(search)) }
+        let matching=model.parks.filter { p in (!darkOnly || p.darkSkyDesignated) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || p.matches(search)) }
+        return byScore ? model.ranked(matching) : matching
     }
     var body: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
-                Eyebrow(text:"63 places to look up")
+                Eyebrow(text:byScore ? "Darkest tonight first" : "63 places to look up")
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted)
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
@@ -58,7 +62,13 @@ struct ParksView: View {
             }.padding(24)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .searchable(text:$search,prompt:"Park or state")
-            .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Filter parks") } }
+            // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
+            .task { await model.refresh(model.parks,parkUpdates:false) }
+            .refreshable { await model.refresh(model.parks,force:true,parkUpdates:false) }
+            .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu {
+                Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) }
+                Section { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) }
+            } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Sort and filter parks") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
     }
     private func link(_ park:Park)->some View {

@@ -78,24 +78,33 @@ import CoreLocation
         return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=radiusMiles*1609.344 }
     }
     func ranked(_ candidates:[Park])->[Park] {
-        candidates.sorted { a,b in
-            let first=night(a).score.value, second=night(b).score.value
+        let scores=Dictionary(candidates.map { ($0.id,night($0).score.value) },uniquingKeysWith:{ first,_ in first })
+        return candidates.sorted { a,b in
+            let first=scores[a.id] ?? 0, second=scores[b.id] ?? 0
             return first==second ? a.name<b.name : first>second
         }
     }
     var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
-    func refresh(_ parks:[Park],force:Bool=false) async {
+    /// Forecasts for every park arrive together in one request; park updates (alerts and
+    /// programs) follow park by park, and only when asked for.
+    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true) async {
         activeRefreshes+=1; defer { activeRefreshes-=1 }
-        for park in parks {
-            if DebugScenario.state=="no-forecast" { forecasts[park.id]=nil;continue }
-            if Task.isCancelled { return }
-            let network=weatherEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live")
-            let forecast=await weather.forecast(for:park,network:network,force:force)
-            forecasts[park.id]=forecast
-            if network {
-                if let forecast,Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil } }
+        else {
+            let network=weatherEnabled && live
+            let fresh=await weather.forecasts(for:parks,network:network,force:force)
+            for park in parks {
+                forecasts[park.id]=fresh[park.id]
+                if network {
+                    if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
+                }
             }
-            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live"),force:force)
+        }
+        guard parkUpdates else { return }
+        for park in parks {
+            if Task.isCancelled { return }
+            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && live,force:force)
         }
     }
     /// A closure from the last park update, if any. Shown beside every score for that park.

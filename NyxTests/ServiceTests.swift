@@ -48,6 +48,18 @@ struct ServiceTests {
         #expect(await service.forecast(for:p,network:false,force:true)?.updated == first?.updated)
         #expect(await http.urls.allSatisfy{$0.host=="api.open-meteo.com"})
     }
+    /// All parks share one request; each gets its own hours, in request order.
+    @Test func manyParksInOneRequest() async throws {
+        let parks=Array(try ParkData.load().prefix(3))
+        let body="["+(0..<3).map { "{\"hourly\":{\"time\":[1700000000,1700003600],\"cloud_cover\":[\($0*10),\($0*10+5)]}}" }.joined(separator:",")+"]"
+        let http=StubHTTP(["/v1/forecast":body])
+        let result=await WeatherService(transport:http,persist:false).forecasts(for:parks,network:true,force:true)
+        #expect(await http.urls.count==1)
+        #expect(result[parks[2].id]?.clouds == [20,25])
+        #expect(result[parks[0].id]?.clouds == [0,5])
+        let query=try #require(await http.urls.first?.query)
+        #expect(query.contains("past_days=1"))
+    }
     @Test func closuresSurviveFailureAndEventsFilter() async throws {
         let p=try park()
         let tomorrow=Date.now.addingTimeInterval(86400).formatted(.iso8601.year().month().day().dateSeparator(.dash))
