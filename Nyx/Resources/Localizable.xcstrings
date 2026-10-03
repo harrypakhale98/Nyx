@@ -1101,13 +1101,13 @@
         }
       }
     },
-    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.": {
+    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast."
+            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them."
           }
         }
       }
@@ -1812,6 +1812,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon, %lld percent illuminated, %@"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent illuminated, lit from the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent illuminated, lit from the %@"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent illuminated, lit from the %@, as seen %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent illuminated, lit from the %@, as seen %@"
           }
         }
       }
@@ -2850,13 +2872,13 @@
         }
       }
     },
-    "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times.": {
+    "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map (NASA's Scientific Visualization Studio, CGI Moon Kit), lit from the Sun's real direction and tilted as it appears from the park at its highest point that night.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times."
+            "value": "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map (NASA's Scientific Visualization Studio, CGI Moon Kit), lit from the Sun's real direction and tilted as it appears from the park at its highest point that night."
           }
         }
       }
@@ -3840,6 +3862,28 @@
         }
       }
     },
+    "at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "at %@"
+          }
+        }
+      }
+    },
+    "bottom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bottom"
+          }
+        }
+      }
+    },
     "clouds unknown, moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
@@ -3902,6 +3946,83 @@
           "stringUnit": {
             "state": "translated",
             "value": "forecast included"
+          }
+        }
+      }
+    },
+    "left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "left"
+          }
+        }
+      }
+    },
+    "lower left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lower left"
+          }
+        }
+      }
+    },
+    "lower right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lower right"
+          }
+        }
+      }
+    },
+    "right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "right"
+          }
+        }
+      }
+    },
+    "top": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "top"
+          }
+        }
+      }
+    },
+    "upper left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "upper left"
+          }
+        }
+      }
+    },
+    "upper right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "upper right"
           }
         }
       }

@@ -61,7 +61,7 @@ struct TonightWidgetView:View {
         }.foregroundStyle(ink)
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(entry.night.map(summary) ?? String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
-            .containerBackground(for:.widget) { WidgetSky(seed:entry.night?.park.id ?? "nyx",ink:ink) }
+            .containerBackground(for:.widget) { WidgetSky(seed:entry.night?.park.id ?? "nyx",ink:ink,night:entry.night) }
             .widgetURL(URL(string:entry.night.map{"nyx://park/\($0.park.id)"} ?? "nyx://tonight"))
     }
     private func forecastLabel(_ night:Night)->String { night.score.hasForecast ? night.score.band.label : String(localized:"Clouds unknown") }
@@ -79,9 +79,14 @@ struct TonightWidgetView:View {
             Text(forecastLabel(night)).font(.caption2).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
-    private func moon(_ night:Night)->some View {
-        MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
-            .environment(\.nyx,palette).modifier(NightVisionFilter(enabled:entry.nightVision))
+    /// The app's pre-rendered lit Moon when it exists; the vector Moon otherwise.
+    @ViewBuilder private func moon(_ night:Night)->some View {
+        if let url=SharedSettings.moonImageURL(park:night.park.id,night:night.id),let image=UIImage(contentsOfFile:url.path) {
+            Image(uiImage:image).resizable().scaledToFit().modifier(NightVisionFilter(enabled:entry.nightVision))
+        } else {
+            MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
+                .environment(\.nyx,palette).modifier(NightVisionFilter(enabled:entry.nightVision))
+        }
     }
     /// Seven nights as small skies: the dot grows with the score, the best night gets a ring,
     /// nights without a cloud forecast are hollow.
@@ -125,8 +130,21 @@ struct TonightWidgetView:View {
 struct WidgetSky:View {
     let seed:String
     let ink:Color
+    /// When known, the real stars over that park that night; seeded dots otherwise.
+    var night:Night?=nil
     var body:some View {
         Canvas { context,size in
+            if let night {
+                let sky=SkyProjection.shared.sky(for:night.park,night:night.id)
+                for star in sky.bright+sky.middle+sky.faint {
+                    let p=SkyProjection.screen(star.position,size:CGSize(width:size.width,height:size.height*1.6))
+                    let y=p.y-size.height*0.3
+                    guard p.x>=0,p.x<=size.width,y>=0,y<=size.height else { continue }
+                    let d=star.diameter*0.7
+                    context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:y-d/2,width:d,height:d)),with:.color(star.tint(ink).opacity(star.brightness*0.55)))
+                }
+                return
+            }
             var generator=SeededGenerator(seed:seed)
             for _ in 0..<36 {
                 let d=Double.random(in:0.6..<1.7,using:&generator)

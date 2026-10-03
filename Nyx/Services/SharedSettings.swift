@@ -8,6 +8,11 @@ nonisolated enum SharedSettings {
         guard let url=snapshotURL,let data=try? JSONEncoder().encode(snapshot) else { return }
         try? data.write(to:url,options:.atomic)
     }
+    /// Pre-rendered Moon images for the widget, one per park and night: widgets can't run the
+    /// Moon's Metal shader, so the app draws it and leaves the picture here.
+    static func moonImageURL(park:String,night:Date)->URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:group)?.appendingPathComponent("moon-\(park)-\(Int(night.timeIntervalSince1970)).png")
+    }
     static func read()->SavedSkySnapshot? {
         guard let url=snapshotURL,let data=try? Data(contentsOf:url) else { return nil }
         return try? JSONDecoder().decode(SavedSkySnapshot.self,from:data)

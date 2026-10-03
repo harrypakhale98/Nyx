@@ -126,6 +126,27 @@ struct RootView:View {
             .environment(\.nyx,palette).nyxPresentation()
         top.present(UIHostingController(rootView:detail),animated:true)
     }
+    /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
+    private func renderWidgetMoons(for parks:[Park]) {
+        let engine=AstronomyEngine()
+        var keep=Set<String>()
+        for park in parks {
+            for offset in 0..<2 {
+                let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
+                guard let url=SharedSettings.moonImageURL(park:park.id,night:night.id) else { continue }
+                keep.insert(url.lastPathComponent)
+                if FileManager.default.fileExists(atPath:url.path) { continue }
+                let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,palette))
+                renderer.scale=3
+                try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)
+            }
+        }
+        // Forget pictures of nights that have passed or parks no longer saved.
+        if let folder=SharedSettings.moonImageURL(park:"x",night:.now)?.deletingLastPathComponent(),
+           let files=try? FileManager.default.contentsOfDirectory(atPath:folder.path) {
+            for file in files where file.hasPrefix("moon-") && !keep.contains(file) { try? FileManager.default.removeItem(at:folder.appendingPathComponent(file)) }
+        }
+    }
     private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)
         let renderer=ImageRenderer(content:MoonDisc(illumination:moon.illumination,waxing:moon.waxing,iconMode:true).frame(width:24,height:24))
@@ -144,6 +165,7 @@ struct RootView:View {
         await model.refresh(parks)
         let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts)
         SharedSettings.write(snapshot)
+        renderWidgetMoons(for:parks)
         WidgetCenter.shared.reloadAllTimelines()
         if notificationsEnabled {
             let today=model.today
