@@ -20,14 +20,20 @@ extension EnvironmentValues {
 enum NyxMotion {
     static let spring=Animation.spring(response:0.65,dampingFraction:0.82)
 }
+/// A card of Liquid Glass over the real sky, tinted deep indigo so text keeps its contrast while
+/// the stars glint through the edges. Solid indigo under Reduce Transparency, Increase Contrast
+/// and night vision, where glass would cost legibility.
 struct Panel<Content: View>: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.nyx) private var palette
     @ViewBuilder var content: Content
     var body: some View {
+        let shape=RoundedRectangle(cornerRadius:24)
+        let solid=reduceTransparency || palette.highContrast || palette.nightVision
         content.padding(20).frame(maxWidth:.infinity,alignment:.leading)
-            .background(palette.panel.opacity(reduceTransparency || palette.highContrast ? 1 : 0.85),in:RoundedRectangle(cornerRadius:24))
-            .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
+            .background { if solid { shape.fill(palette.panel) } else { shape.fill(palette.panel.opacity(0.62)) } }
+            .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.35)),in:shape)
+            .overlay(shape.stroke(palette.line,lineWidth:0.5))
     }
 }
 struct Eyebrow: View {
@@ -51,6 +57,22 @@ struct NightBackground: View {
             if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle) }
             else { Starfield(seed:seed,twinkle:twinkle) }
         }.ignoresSafeArea().accessibilityHidden(true)
+    }
+}
+/// A hero object floats on its own plane: as the page scrolls, it lags slightly behind the
+/// text around it, so it reads as nearer than the sky and farther than the page.
+/// Off under Reduce Motion.
+struct DepthParallax: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    let depth: Double
+    func body(content:Content)->some View {
+        if systemReduceMotion || forcedReduceMotion { content }
+        else {
+            content.visualEffect { [depth] view,proxy in
+                view.offset(y:min(0,proxy.frame(in:.scrollView).minY)*(-depth))
+            }
+        }
     }
 }
 private struct SkyHomeKey: EnvironmentKey { static let defaultValue:Park?=nil }

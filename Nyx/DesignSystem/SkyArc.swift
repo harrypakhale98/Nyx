@@ -100,10 +100,19 @@ struct SkyArc: View {
             let d=Double.random(in:0.8..<1.8,using:&generator)
             context.fill(Path(ellipseIn:CGRect(x:sx,y:sy,width:d,height:d)),with:.color(palette.ink.opacity(0.55*fade)))
         }
-        // The ground.
-        context.fill(Path(CGRect(x:0,y:horizon,width:size.width,height:size.height-horizon)),with:.color(.black))
-        var line=Path(); line.move(to:CGPoint(x:0,y:horizon)); line.addLine(to:CGPoint(x:size.width,y:horizon))
-        context.stroke(line,with:.color(palette.line),lineWidth:0.7)
+        // The ground: a low, generic ridge seeded by the park, so each place has its own skyline.
+        // Illustrative only; it never claims to be the park's real horizon.
+        var ridgeGenerator=SeededGenerator(seed:park.id+"-ridge")
+        let peaks=(0...12).map { _ in Double.random(in:0...1,using:&ridgeGenerator) }
+        var ridge=Path(); ridge.move(to:CGPoint(x:0,y:size.height))
+        for i in 0...48 {
+            let u=Double(i)/48, f=u*12, a=Int(f), b=min(12,a+1), w=f-Double(a)
+            let blend=peaks[a]*(1-w)+peaks[b]*w
+            ridge.addLine(to:CGPoint(x:u*size.width,y:horizon-2-7*blend))
+        }
+        ridge.addLine(to:CGPoint(x:size.width,y:size.height)); ridge.closeSubpath()
+        context.fill(ridge,with:.linearGradient(Gradient(colors:[Color(white:0.06),.black]),startPoint:CGPoint(x:0,y:horizon-9),endPoint:CGPoint(x:0,y:horizon+30)))
+        context.stroke(ridge,with:.color(palette.line.opacity(0.8)),lineWidth:0.6)
 
         // Paths: bright above the horizon, a faint trace below it.
         func trace(_ points:[(Date,Double)],color:Color,width:Double) {
