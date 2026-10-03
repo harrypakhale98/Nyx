@@ -136,16 +136,14 @@ struct CelestialGauge: View {
     }
 
 }
-/// The glass rim the arc runs along: a band 26 pt wide centred on the arc's radius.
+/// The glass rim the arc runs along: a band 26 pt wide centred on the arc's radius, open at the
+/// bottom like the dial itself, so the labels inside never sit on glass.
 nonisolated struct DialRing:Shape {
     func path(in rect:CGRect)->Path {
         let center=CGPoint(x:rect.midX,y:rect.midY), radius=min(rect.width,rect.height)/2-18
-        var path=Path()
-        path.addArc(center:center,radius:radius+13,startAngle:.zero,endAngle:.degrees(360),clockwise:false)
-        path.closeSubpath()
-        path.addArc(center:center,radius:radius-13,startAngle:.zero,endAngle:.degrees(-360),clockwise:true)
-        path.closeSubpath()
-        return path
+        var arc=Path()
+        arc.addArc(center:center,radius:radius,startAngle:.degrees(136),endAngle:.degrees(404),clockwise:false)
+        return arc.strokedPath(StrokeStyle(lineWidth:26,lineCap:.round))
     }
 }
 #Preview("Pristine") { CelestialGauge(score:94).background(.black) }
