@@ -1,4 +1,19 @@
-# Nyx handoff — 2026-10-02 (completion review)
+# Nyx handoff — 2026-10-03 (award polish)
+
+## Award polish
+
+Two independent audits (astronomy/score, app flows) and a screen-by-screen visual critique. Everything found is fixed and logged under "Award polish" in `DECISIONS.md`. Highlights:
+
+- **Correctness:** reminders no longer return after being tapped or cleared; "tonight" turns over at sunrise, not noon; eastern parks keep tonight's clouds (`past_days=1`); a few minutes of darkness can no longer score Excellent; fresh closures survive a failing NPS events call; the five-night window crosses month boundaries; Ask Nyx shares Tonight's location; denied location links to Settings; the reminder switch reflects iPhone Settings; safe journal deletion.
+- **Product:** one Open-Meteo request now covers all 63 parks, so the Parks tab shows forecast-backed scores everywhere, with a "Darkest tonight" sort. Tonight leads with the answer.
+- **Visuals:** vector moon disc (limb darkening, soft terminator, maria, glow); gauge with glowing arc, leading star and visible orbit; sky arc rebuilt with altitude-true twilight colour, moonlit-hours wash, true-darkness bracket, hour labels and Now marker; medium widget gains a seven-night strip, moon phase and a seeded sky; journal cards show a photo.
+- Build number is now **2** (`project.yml`). Build 1 in App Store Connect predates these fixes.
+
+Verification for this pass is recorded at the end of this section once both simulator suites finish.
+
+---
+
+# Earlier handoff — 2026-10-02 (completion review)
 
 ## Completion review (after the first build)
 

@@ -80,9 +80,11 @@ nonisolated struct NotificationScheduler {
             }.prefix(max(0,min(60,limit))).map{$0}
     }
     static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
-    /// Replans reminders. A pending reminder whose time is fixed (18:00 the evening before) is
-    /// refreshed with the latest score; one already due "in a minute" is left alone, so opening
-    /// Nyx again never pushes it back. `retitle` may offer a calmer title for newly added reminders.
+    /// Replans reminders. A reminder already pending is left exactly as scheduled, so opening
+    /// Nyx again never pushes it back or replaces its title; one that no longer qualifies is
+    /// cancelled and may be planned again later. `retitle` may offer a calmer title for a newly
+    /// added reminder at a fixed time; reminders due within two minutes skip it, so a slow
+    /// model can never push their trigger into the past.
     func reschedule(nights:[Night],now:Date = .now,retitle:(@Sendable (NightReminder) async -> String?)?=nil) async {
         guard await center.authorized() else { return }
         let pending=await center.pendingIDs()
@@ -93,18 +95,18 @@ nonisolated struct NotificationScheduler {
         let available=max(0,64-pending.filter{!$0.hasPrefix("nyx-night-")}.count)
         let planned=plans(nights:nights,now:now,limit:available,delivered:finished)
         let plannedIDs=Set(planned.map(\.id))
-        await center.remove(ours.subtracting(plannedIDs).sorted())
-        var added=issued
-        for plan in planned {
-            let isPending=ours.contains(plan.id)
-            if isPending && plan.fireDate<=now.addingTimeInterval(60) { continue }
+        let cancelled=ours.subtracting(plannedIDs)
+        await center.remove(cancelled.sorted())
+        var added=ours.intersection(plannedIDs)
+        for plan in planned where !ours.contains(plan.id) {
             var reminder=plan
-            if !isPending, let title=await retitle?(plan) {
+            if plan.fireDate>now.addingTimeInterval(120), let title=await retitle?(plan) {
                 reminder=NightReminder(id:plan.id,parkID:plan.parkID,title:title,body:plan.body,fireDate:plan.fireDate,timeZone:plan.timeZone)
             }
             if (try? await center.add(reminder)) != nil { added.insert(plan.id) }
         }
-        ledger.record(added,now:now)
+        // Read the ledger again: reminders may have been switched off while this ran.
+        ledger.record(ledger.ids.subtracting(cancelled).union(added),now:now)
     }
 }
 

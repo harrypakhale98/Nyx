@@ -9,7 +9,7 @@ Everything else is built, verified and documented. Each step below needs your Ap
    - Paste the description, keywords, subtitle and URLs from `SUBMISSION.md`.
    - App Privacy: "No, we do not collect data from this app". Reasoning is in `PRIVACY.md`.
    - Upload the six screenshots in `Store/Screenshots/` (6.9-inch).
-   - Build 1.0 (1) is already uploaded and attached to the version (uploaded 2026-10-03 from this Mac). Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, regenerate, then Product → Archive → Distribute App → App Store Connect → Upload.
+   - **Upload build 1.0 (2)** before submitting: it contains the award-polish fixes (reminders that repeated, the sunrise turnover, eastern forecasts, closure alerts). Build 1.0 (1) predates them. In Xcode: Product → Archive → Distribute App → App Store Connect → Upload, then select build 2 on the version page. The six screenshots in `Store/Screenshots/` were recaptured for build 2. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, regenerate, then Product → Archive → Distribute App → App Store Connect → Upload.
    - When the build finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
 
 ## Done

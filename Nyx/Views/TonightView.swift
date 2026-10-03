@@ -30,7 +30,7 @@ struct TonightView: View {
                     let night=model.night(park)
                     VStack(spacing:10) {
                         Eyebrow(text:"Your darkest nearby sky")
-                        NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline) }.padding(.vertical,14).padding(.horizontal,22).glassEffect() }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+                        NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline) }.padding(.vertical,14).padding(.horizontal,22).modifier(ParkPill()) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
                         CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : 240)
                         Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                         if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
@@ -87,6 +87,17 @@ struct TonightView: View {
         return Picker("Radius",selection:$model.radiusMiles) {
             ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).fixedSize().tag(miles) }
         }.pickerStyle(.menu).fixedSize(horizontal:true,vertical:false)
+    }
+}
+/// Liquid Glass normally; a solid dark capsule in night vision, where the red filter
+/// flattens glass toward the text colour and costs contrast.
+private struct ParkPill:ViewModifier {
+    @Environment(\.nyx) private var palette
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @ViewBuilder func body(content:Content)->some View {
+        if palette.nightVision || reduceTransparency {
+            content.background(Color.black,in:Capsule()).overlay(Capsule().stroke(palette.line,lineWidth:0.8))
+        } else { content.glassEffect() }
     }
 }
 struct ParkPickerView: View {

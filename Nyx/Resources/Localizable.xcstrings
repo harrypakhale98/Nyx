@@ -606,6 +606,28 @@
         }
       }
     },
+    "Best of the next seven nights: %@, %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best of the next seven nights: %@, %lld."
+          }
+        }
+      }
+    },
+    "Best: %@ · %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best: %@ · %lld"
+          }
+        }
+      }
+    },
     "Bortle estimate": {
       "extractionState": "manual",
       "localizations": {
@@ -903,6 +925,28 @@
         }
       }
     },
+    "Darkest tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest tonight"
+          }
+        }
+      }
+    },
+    "Darkest tonight first": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest tonight first"
+          }
+        }
+      }
+    },
     "Darkness at ${park} tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -910,6 +954,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darkness at ${park} tonight"
+          }
+        }
+      }
+    },
+    "Darkness begins": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness begins"
+          }
+        }
+      }
+    },
+    "Darkness ends": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness ends"
           }
         }
       }
@@ -932,17 +998,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Date"
-          }
-        }
-      }
-    },
-    "Dawn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dawn"
           }
         }
       }
@@ -1024,13 +1079,13 @@
         }
       }
     },
-    "Each park has an IANA time zone. A night runs from local noon to the following local noon. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.": {
+    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast."
+            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast."
           }
         }
       }
@@ -1163,28 +1218,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fair"
-          }
-        }
-      }
-    },
-    "Fewer than five nights remain this month. Look ahead to the next new moon.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fewer than five nights remain this month. Look ahead to the next new moon."
-          }
-        }
-      }
-    },
-    "Filter parks": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter parks"
           }
         }
       }
@@ -1629,6 +1662,17 @@
         }
       }
     },
+    "Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon"
+          }
+        }
+      }
+    },
     "Moon and darkness calculations still work offline.": {
       "extractionState": "manual",
       "localizations": {
@@ -1728,17 +1772,6 @@
         }
       }
     },
-    "Moon · dashed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon · dashed"
-          }
-        }
-      }
-    },
     "Moon, %lld percent illuminated, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1761,13 +1794,13 @@
         }
       }
     },
-    "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40.": {
+    "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40, and the cap lifts gradually over the first three hours of true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40."
+            "value": "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40, and the cap lifts gradually over the first three hours of true darkness."
           }
         }
       }
@@ -1779,6 +1812,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown."
+          }
+        }
+      }
+    },
+    "Moonlit hours are lighter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlit hours are lighter"
           }
         }
       }
@@ -1816,6 +1860,17 @@
         }
       }
     },
+    "NEXT SEVEN NIGHTS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NEXT SEVEN NIGHTS"
+          }
+        }
+      }
+    },
     "NYX": {
       "extractionState": "manual",
       "localizations": {
@@ -1823,6 +1878,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "NYX"
+          }
+        }
+      }
+    },
+    "Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
           }
         }
       }
@@ -2003,6 +2069,28 @@
         }
       }
     },
+    "Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on."
+          }
+        }
+      }
+    },
+    "Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        }
+      }
+    },
     "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.": {
       "extractionState": "manual",
       "localizations": {
@@ -2157,13 +2245,13 @@
         }
       }
     },
-    "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
+    "Open-Meteo forecasts cover up to 16 days and are requested for all parks at once, using park coordinates only. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
+            "value": "Open-Meteo forecasts cover up to 16 days and are requested for all parks at once, using park coordinates only. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
           }
         }
       }
@@ -2373,6 +2461,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Programs are not checked yet. Ask at the visitor center for current night-sky programs."
+          }
+        }
+      }
+    },
+    "Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs."
           }
         }
       }
@@ -2729,6 +2828,28 @@
         }
       }
     },
+    "Sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort"
+          }
+        }
+      }
+    },
+    "Sort and filter parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort and filter parks"
+          }
+        }
+      }
+    },
     "Source: the essay you were reading.": {
       "extractionState": "manual",
       "localizations": {
@@ -2905,6 +3026,17 @@
         }
       }
     },
+    "The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it."
+          }
+        }
+      }
+    },
     "The entry is still here. Try again when space is available.": {
       "extractionState": "manual",
       "localizations": {
@@ -2934,6 +3066,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The hourly forecast averaged over the complete dark window."
+          }
+        }
+      }
+    },
+    "The next five nights near the new moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next five nights near the new moon"
           }
         }
       }
@@ -3055,6 +3198,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The shape of the night"
+          }
+        }
+      }
+    },
+    "These nights have passed. Look ahead to the next new moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These nights have passed. Look ahead to the next new moon."
           }
         }
       }
@@ -3202,6 +3356,17 @@
         }
       }
     },
+    "True darkness lasts only %@ tonight, so the score is held to %lld or less.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness lasts only %@ tonight, so the score is held to %lld or less."
+          }
+        }
+      }
+    },
     "Try another name or widen your filters.": {
       "extractionState": "manual",
       "localizations": {
@@ -3209,6 +3374,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Try another name or widen your filters."
+          }
+        }
+      }
+    },
+    "Turn on location in Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on location in Settings"
           }
         }
       }

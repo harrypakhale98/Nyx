@@ -83,8 +83,9 @@ struct CalendarView: View {
                 let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
                 let tonight=park.evening(model.tonight(park))
                 // The window may reach into the neighbouring months: a new moon on the 1st still gets five nights.
-                let window=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+8),month:nights,after:tonight)
-                let inWindow=Set(window.map(\.id))
+                let found=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+38),month:nights,after:tonight)
+                let window=found.nights
+                let inWindow=found.inMonth ? Set(window.map(\.id)) : []
                 VStack(alignment:.leading,spacing:24) {
                     if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
                     Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
@@ -141,10 +142,10 @@ struct CalendarView: View {
                         })
                     }
                     Panel { VStack(alignment:.leading,spacing:10) {
-                        Label("Five nights near the new moon",systemImage:"circle.circle").font(.subheadline)
+                        Label(found.inMonth || window.isEmpty ? String(localized:"Five nights near the new moon") : String(localized:"The next five nights near the new moon"),systemImage:"circle.circle").font(.subheadline)
                         if let first=window.first,let last=window.last {
                             Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                            Text("The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.").font(.caption).foregroundStyle(palette.muted)
+                            Text(found.inMonth ? String(localized:"The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.") : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted)
                         } else {
                             Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
                         }
@@ -157,15 +158,20 @@ struct CalendarView: View {
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night) } }.nyxPresentation() }
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
-    /// The five consecutive nights with the least moonlight that touch this month, ignoring nights already past.
-    private func bestWindow(_ nights:[Night],month:[Night],after tonight:Date)->ArraySlice<Night> {
-        guard let first=month.first?.id,let last=month.last?.id else { return [] }
-        let starts=nights.indices.filter { i in
-            i+5<=nights.count && nights[i].id>=tonight && nights[i].id<=last && nights[i+4].id>=first
-        }
+    /// The five consecutive nights with the least moonlight, ignoring nights already past. A window
+    /// only counts if it really sits near a new moon (some night under 12% lit): late in a month the
+    /// few windows left may be bright, and those are never called "near the new moon". When no such
+    /// window touches this month, the next one ahead is returned with `inMonth` false.
+    private func bestWindow(_ nights:[Night],month:[Night],after tonight:Date)->(nights:ArraySlice<Night>,inMonth:Bool) {
+        guard let first=month.first?.id,let last=month.last?.id else { return ([],false) }
+        let starts=nights.indices.filter { i in i+5<=nights.count && nights[i].id>=tonight }
         func light(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }
-        guard let best=starts.min(by:{ light($0)<light($1) }) else { return [] }
-        return nights[best..<(best+5)]
+        func nearNew(_ i:Int)->Bool { nights[i..<(i+5)].contains { $0.sky.moon.illumination<0.12 } }
+        let touching=starts.filter { nights[$0].id<=last && nights[$0+4].id>=first && nearNew($0) }
+        if let best=touching.min(by:{ light($0)<light($1) }) { return (nights[best..<(best+5)],true) }
+        let ahead=starts.filter { nights[$0+4].id>last && nearNew($0) }
+        guard let next=ahead.min(by:{ light($0)<light($1) }) else { return ([],false) }
+        return (nights[next..<(next+5)],false)
     }
 }
 #Preview("Calendar") { NavigationStack { CalendarView() }.environment(PlanModel()).preferredColorScheme(.dark) }

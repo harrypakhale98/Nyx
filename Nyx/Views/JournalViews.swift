@@ -17,7 +17,7 @@ struct JournalView: View {
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
                 if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
                 else {
-                    ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } }
+                    ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { if let first=entry.photos.first { JournalThumbnail(data:first).padding(.bottom,6) };Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } }
                     if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
                 }
             }.padding(24)
@@ -26,6 +26,26 @@ struct JournalView: View {
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+    }
+}
+/// A journal card's photo, downsampled off the main thread so a long journal scrolls smoothly.
+struct JournalThumbnail:View {
+    let data:Data
+    @State private var image:UIImage?
+    var body:some View {
+        Color.black.frame(height:150).overlay { if let image { Image(uiImage:image).resizable().scaledToFill().transition(.opacity) } }
+            .clipShape(RoundedRectangle(cornerRadius:16))
+            .accessibilityIgnoresInvertColors()
+            .accessibilityHidden(true)
+            .task(id:data.count) {
+                let data=data
+                let thumbnail=await Task.detached(priority:.utility) { () -> UIImage? in
+                    guard let full=UIImage(data:data),full.size.width>0 else { return nil }
+                    let scale=min(1,900/full.size.width)
+                    return full.preparingThumbnail(of:CGSize(width:full.size.width*scale,height:full.size.height*scale))
+                }.value
+                withAnimation(.easeOut(duration:0.25)) { image=thumbnail }
+            }
     }
 }
 @MainActor @Observable final class JournalEditorModel {

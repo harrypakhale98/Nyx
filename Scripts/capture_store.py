@@ -8,9 +8,9 @@ run('install',sim,(sys.argv[2] if len(sys.argv)>2 else '/tmp/NyxBuild')+'/Build/
 folder=pathlib.Path('Store/Screenshots');folder.mkdir(parents=True,exist_ok=True)
 run('status_bar',sim,'override','--time','9:41','--batteryState','charged','--batteryLevel','100','--wifiMode','active','--wifiBars','3','--cellularMode','active','--cellularBars','4')
 try:
- for index,(screen,state) in enumerate([('tonight','no-forecast'),('detail','no-forecast'),('calendar','no-forecast'),('parks','offline'),('journal','populated'),('learn','night-vision')],1):
+ for index,(screen,state) in enumerate([('tonight','live'),('detail','live'),('calendar','live'),('parks','live'),('journal','populated'),('learn','night-vision')],1):
   run('launch','--terminate-running-process',sim,'com.harrypakhale.nyx','-nyx-screen',screen,'-nyx-state',state,'-nyx-reduce-motion')
-  time.sleep(8)
+  time.sleep(14 if state=='live' else 8)
   path=folder/f'{index:02d}-{screen}-6.9.png'
   run('io',sim,'screenshot',str(path));print(path,flush=True)
 finally:

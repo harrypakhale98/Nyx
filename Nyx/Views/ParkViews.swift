@@ -46,7 +46,7 @@ struct ParksView: View {
     var body: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
-                Eyebrow(text:byScore ? "Darkest tonight first" : "63 places to look up")
+                Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : LocalizedStringKey("63 places to look up"))
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted)
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
@@ -82,6 +82,7 @@ struct ParkDetailView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Query private var saved:[SavedPark]
     let park:Park
     var initialDate:Date?=nil
@@ -104,7 +105,9 @@ struct ParkDetailView: View {
                     Eyebrow(text:"A night beneath the stars")
                     Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
                     Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                    // The dial opens at the bottom; let the lines below tuck into that space.
                     CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
+                        .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
                         .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
                     if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
                     if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude.").font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
@@ -152,7 +155,8 @@ struct ParkDetailView: View {
                     Eyebrow(text:"Ranger night-sky programs")
                     if let data=model.enrichments[park.id] {
                         let programs=data.programs.filter{$0.date>=park.isoDay(model.today)}
-                        if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
+                        if programs.isEmpty && data.programsUpdated == nil { Text("Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
+                        else if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
                         ForEach(programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(park.programDate(program.date)).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
                     } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
                 } }

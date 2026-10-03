@@ -44,7 +44,10 @@ final class AccessibilityAuditTests:XCTestCase {
 
     /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
     private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
-        let visible=frame.isNull ? false : window.contains(frame) && !(tabBar.isNull ? false : frame.intersects(tabBar))
+        // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
+        // scrolling through that band is dimmed by design, whatever the app's colours.
+        let fadeZone=tabBar.isNull ? CGRect.null : tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:-28)
+        let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
         switch issue.auditType {
         case .dynamicType:
             // The share card is fixed-size exported artwork with a full spoken summary. Elsewhere the
