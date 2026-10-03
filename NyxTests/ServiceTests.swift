@@ -26,7 +26,7 @@ actor StubNotifications:LocalNotificationCenter {
     func pendingIDs() async -> [String] { ids+requests.map(\.id) }
     func deliveredIDs() async -> [String] { delivered }
     func remove(_ values:[String]) async { ids.removeAll{values.contains($0)};requests.removeAll{values.contains($0.id)} }
-    func add(_ reminder:NightReminder) async throws { requests.append(reminder) }
+    func add(_ reminder:NightReminder) async throws { requests.removeAll{$0.id==reminder.id};requests.append(reminder) }
 }
 struct ServiceTests {
     func park() throws -> Park { try #require(try ParkData.load().first{$0.id=="jotr"}) }
@@ -63,6 +63,14 @@ struct ServiceTests {
         await http.setFailure()
         #expect(await store.enrichment(for:p,key:"test",network:true,force:true)?.alerts.count==1)
     }
+    /// A slow events endpoint must never hide a new closure.
+    @Test func closuresArriveWhenEventsFail() async throws {
+        let p=try park()
+        let http=StubHTTP(["/api/v1/alerts":"{\"data\":[{\"id\":\"closed\",\"title\":\"Road closed\",\"description\":\"Storm damage\",\"category\":\"Park Closure\"}]}"])
+        let result=await ParkStore(transport:http,persist:false).enrichment(for:p,key:"test",network:true,force:true)
+        #expect(result?.alerts.first?.title == "Road closed")
+        #expect(result?.programs.isEmpty == true)
+    }
     @Test func rejectsOtherHosts() async {
         guard let url=URL(string:"https://example.com/forecast") else { Issue.record("Bad fixture URL");return }
         await #expect(throws:URLError.self) { try await SafeHTTP().get(url) }
@@ -76,7 +84,7 @@ struct ServiceTests {
             nights.append(Night(park:p,sky:sky,score:score,cloudCover:4,forecastUpdated:now))
         }
         let center=StubNotifications(ids:(0..<10).map{"unrelated-\($0)"}+["nyx-night-old"])
-        let scheduler=NotificationScheduler(center:center)
+        let scheduler=NotificationScheduler(center:center,ledger:ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)"))
         await scheduler.reschedule(nights:nights+nights,now:now)
         #expect(await center.requests.count==54)
         #expect(Set(await center.requests.map(\.id)).count==54)
@@ -90,13 +98,31 @@ struct ServiceTests {
         let sky=engine.conditions(for:p,on:evening)
         let night=Night(park:p,sky:sky,score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:evening)
         let afternoon=evening.addingTimeInterval(2*3600)
-        let center=StubNotifications(),scheduler=NotificationScheduler(center:center)
+        let center=StubNotifications(),scheduler=NotificationScheduler(center:center,ledger:ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)"))
         let plan=try #require(scheduler.plans(nights:[night],now:afternoon).first)
         #expect(plan.fireDate==afternoon.addingTimeInterval(60))
         let dark=try #require(sky.darkStart)
         #expect(scheduler.plans(nights:[night],now:dark).isEmpty)
         await center.deliver(plan.id)
         await scheduler.reschedule(nights:[night],now:afternoon)
+        #expect(await center.requests.isEmpty)
+    }
+    /// iOS forgets a notification once it is tapped or cleared; the ledger must still remember it.
+    @Test func tappedReminderNeverReturns() async throws {
+        let p=try park(),engine=AstronomyEngine()
+        let evening=p.evening(Date(timeIntervalSince1970:1790899200))
+        let sky=engine.conditions(for:p,on:evening)
+        let night=Night(park:p,sky:sky,score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:evening)
+        let afternoon=evening.addingTimeInterval(2*3600)
+        let center=StubNotifications(),scheduler=NotificationScheduler(center:center,ledger:ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)"))
+        await scheduler.reschedule(nights:[night],now:afternoon)
+        let first=try #require(await center.requests.first)
+        // Opening Nyx again a moment later keeps the same fire time.
+        await scheduler.reschedule(nights:[night],now:afternoon.addingTimeInterval(30))
+        #expect(await center.requests.map(\.fireDate)==[first.fireDate])
+        // Delivered and tapped: no longer pending, no longer delivered. It must not come back.
+        await center.remove([first.id])
+        await scheduler.reschedule(nights:[night],now:afternoon.addingTimeInterval(120))
         #expect(await center.requests.isEmpty)
     }
 }

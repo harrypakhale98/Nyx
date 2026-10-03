@@ -73,7 +73,8 @@ actor WeatherService: WeatherProviding {
         var parts = URLComponents()
         parts.scheme="https"; parts.host="api.open-meteo.com"; parts.path="/v1/forecast"
         parts.queryItems=[URLQueryItem(name:"latitude",value:String(park.latitude)),URLQueryItem(name:"longitude",value:String(park.longitude)),
-            URLQueryItem(name:"hourly",value:"cloud_cover"),URLQueryItem(name:"forecast_days",value:"16"),URLQueryItem(name:"timeformat",value:"unixtime"),URLQueryItem(name:"timezone",value:"GMT")]
+            URLQueryItem(name:"hourly",value:"cloud_cover"),URLQueryItem(name:"forecast_days",value:"16"),URLQueryItem(name:"past_days",value:"1"),URLQueryItem(name:"timeformat",value:"unixtime"),URLQueryItem(name:"timezone",value:"GMT")]
+        // Hours start at 00:00 UTC; yesterday's hours keep an eastern park's night in progress covered.
         guard let url=parts.url else { return cached }
         struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
         do {
@@ -115,24 +116,33 @@ actor ParkStore: ParkProviding {
             let data:[Event]; let total:String?
         }
         struct ParkResponse: Decodable { struct Info: Decodable { let description:String }; let data:[Info] }
-        do {
-            // All three must succeed before the cache is replaced: a failure never
-            // wipes previously known closures or claims that the park is open.
-            let alerts=try JSONDecoder().decode(AlertResponse.self,from:await transport.get(url("alerts"))).data
-            let firstPage=try JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events")))
-            var events=firstPage.data
+        // Alerts are the safety signal: they are saved as soon as they arrive. A slow or failing
+        // events or park request keeps the last known programs and description instead of
+        // discarding fresh closures. A failed alerts request never wipes known closures.
+        guard let alerts=try? JSONDecoder().decode(AlertResponse.self,from:await transport.get(url("alerts"))).data else { return cached }
+        let today=park.isoDay(.now)
+        var programs=(cached?.programs ?? []).filter { $0.date >= today }
+        if let firstPage=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events"))) {
+            var events:[EventResponse.Event]?=firstPage.data
             let pages=min(10,Int(ceil((Double(firstPage.total ?? "0") ?? 0)/100)))
-            if pages>1 { for page in 2...pages { events += try JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events",page:page))).data } }
-            let info=try JSONDecoder().decode(ParkResponse.self,from:await transport.get(url("parks"))).data
-            let programs=events.filter {
-                let text=($0.title+" "+($0.tags ?? []).joined(separator:" ")).lowercased()
-                return ["astronomy","stargaz","night sky","night-sky","star party"].contains(where:text.contains)
-            }.flatMap { event in
-                (event.dates ?? [event.datestart]).filter { $0 >= park.isoDay(.now) }.map { day in RangerProgram(id:event.id+day,title:event.title,date:day,description:Self.plain(event.description)) }
-            }.sorted { $0.date<$1.date }
-            let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:info.first?.description)
-            memory[park.id]=result; if persist { CacheDirectory.write(result,name:"park-\(park.id)") }; return result
-        } catch { return cached }
+            if pages>1 {
+                for page in 2...pages {
+                    guard let more=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events",page:page))).data else { events=nil;break }
+                    events?.append(contentsOf:more)
+                }
+            }
+            if let events {
+                programs=events.filter {
+                    let text=($0.title+" "+($0.tags ?? []).joined(separator:" ")).lowercased()
+                    return ["astronomy","stargaz","night sky","night-sky","star party"].contains(where:text.contains)
+                }.flatMap { event in
+                    (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id:event.id+day,title:event.title,date:day,description:Self.plain(event.description)) }
+                }.sorted { $0.date<$1.date }
+            }
+        }
+        let info=try? JSONDecoder().decode(ParkResponse.self,from:await transport.get(url("parks"))).data
+        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:info?.first?.description ?? cached?.description)
+        memory[park.id]=result; if persist { CacheDirectory.write(result,name:"park-\(park.id)") }; return result
     }
     private static func plain(_ html:String)->String {
         html.replacingOccurrences(of:"<[^>]+>",with:"",options:.regularExpression)

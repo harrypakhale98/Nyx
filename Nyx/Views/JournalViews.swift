@@ -39,6 +39,7 @@ struct JournalView: View {
     var saved=false
     init(entry:JournalEntry?=nil) {
         if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos }
+        else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
         #if DEBUG
         if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
         if DebugScenario.state=="photo",let image=UIImage(named:"LaunchStars")?.pngData() { photos=[image] }
@@ -115,16 +116,19 @@ struct JournalDetailView:View {
     @State private var editing=false
     @State private var confirmDelete=false
     @State private var deleteFailed=false
+    /// Set before deleting, so the closing animation never reads a deleted model.
+    @State private var removed=false
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in if let image=UIImage(data:data) { Image(uiImage:image).resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius:20)).accessibilityIgnoresInvertColors().accessibilityLabel("Journal photo \(i+1)") } } }.padding(24) } }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }
             }
             .confirmationDialog("Delete this night?",isPresented:$confirmDelete,titleVisibility:.visible) {
                 Button("Delete entry",role:.destructive) {
+                    removed=true
                     context.delete(entry)
-                    do { try context.save(); dismiss() } catch { context.rollback(); deleteFailed=true }
+                    do { try context.save(); dismiss() } catch { context.rollback(); removed=false; deleteFailed=true }
                 }
             } message:{ Text("The notes and photos are removed from this iPhone.") }
             .alert("Unable to delete",isPresented:$deleteFailed) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }.sheet(isPresented:$editing) { NavigationStack { JournalEditorView(existing:entry) }.nyxPresentation() }

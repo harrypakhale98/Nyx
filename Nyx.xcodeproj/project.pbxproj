@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		026AB131C2647FF749083BC7 /* NyxIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */; };
 		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
+		5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
 		8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
@@ -63,15 +63,15 @@
 		0B8CFEEF4D0FA553056E4D4D /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = parks.json; sourceTree = "<group>"; };
 		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightWidgetView.swift; sourceTree = "<group>"; };
+		6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightVisionIntent.swift; sourceTree = "<group>"; };
 		7A820E0228800E1EC62C207A /* SkyConditions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyConditions.swift; sourceTree = "<group>"; };
 		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
 		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
-		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2B255D63E873FD4422C672B /* Nyx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Nyx.xcconfig; sourceTree = "<group>"; };
 		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyxIntents.swift; sourceTree = "<group>"; };
 		E051542A3954F87E88506B77 /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -79,21 +79,37 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7A5BE32B9081D66DE8C152A9 /* Nyx */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = Nyx;
 			sourceTree = "<group>";
 		};
 		7FBCE4E226E945E14F5B033B /* NyxWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = NyxWidgets;
 			sourceTree = "<group>";
 		};
 		91BEC42ACC3D532DD1C25BC2 /* NyxTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = NyxTests;
 			sourceTree = "<group>";
 		};
 		C9A570BE0B74B70D0E2873A4 /* NyxUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = NyxUITests;
 			sourceTree = "<group>";
 		};
@@ -165,7 +181,7 @@
 		7A67972A0617F309B1FD0407 /* Intents */ = {
 			isa = PBXGroup;
 			children = (
-				D4E631A57ADC2BDB68EBEF11 /* NyxIntents.swift */,
+				6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */,
 			);
 			path = Intents;
 			sourceTree = "<group>";
@@ -384,7 +400,7 @@
 			files = (
 				C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */,
 				EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */,
-				026AB131C2647FF749083BC7 /* NyxIntents.swift in Sources */,
+				5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */,
 				AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */,
 				F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */,
 				F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */,
@@ -508,11 +524,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -723,11 +735,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

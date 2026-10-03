@@ -21,11 +21,19 @@ struct NyxTests {
             #expect((1...9).contains(p.bortleEstimate)); #expect(p.sourceURL.hasPrefix("https://www.nps.gov/"))
         }
     }
-    @Test func nightInProgressRunsUntilLocalNoon() throws {
+    @Test func nightInProgressRunsUntilSunrise() throws {
         let tree=try park("jotr")
         let small=try date("2026-10-03 01:30",park:tree), noon=try date("2026-10-03 12:00",park:tree)
-        #expect(tree.currentNight(at:small)==tree.evening(try date("2026-10-02 18:00",park:tree)))
+        let lastNight=tree.evening(try date("2026-10-02 18:00",park:tree))
+        #expect(tree.currentNight(at:small)==lastNight)
+        #expect(tree.currentNight(at:try date("2026-10-03 05:30",park:tree))==lastNight)
+        // Sunrise at Joshua Tree is about 06:35 in early October; a morning planner sees the coming night.
+        #expect(tree.currentNight(at:try date("2026-10-03 08:00",park:tree))==noon)
         #expect(tree.currentNight(at:noon)==noon)
+        // Polar night has no sunrise: the switch waits for local noon.
+        let arctic=try park("gaar")
+        let winter=try date("2026-12-21 10:00",park:arctic)
+        #expect(arctic.currentNight(at:winter)==arctic.evening(try date("2026-12-20 18:00",park:arctic)))
     }
     @Test func searchForgivesSpelling() throws {
         #expect(try park("havo").matches("Hawaii Volcanoes"))
@@ -42,6 +50,16 @@ struct NyxTests {
         let hours=stride(from:sky.evening.timeIntervalSince1970,to:sky.end.timeIntervalSince1970,by:3600).map { $0 }
         let forecast=Forecast(updated:sky.evening,times:hours,clouds:hours.map { _ in 30 })
         #expect(forecast.mean(from:window.start,to:window.end,now:sky.evening)==30)
+    }
+    /// A few minutes of true darkness must not score like a full night (Wrangell–St. Elias, mid-April).
+    @Test func briefDarknessIsCapped() throws {
+        let wrangell=try park("wrst")
+        let sky=AstronomyEngine().conditions(for:wrangell,on:try date("2026-04-16 12:00",park:wrangell))
+        #expect(sky.darkHours>0 && sky.darkHours<1)
+        #expect(ScoreEngine().score(sky:sky,bortle:1,cloudCover:0).value<60)
+        #expect(ScoreEngine.cap(darkHours:0)==39)
+        #expect(ScoreEngine.cap(darkHours:1.5)>ScoreEngine.cap(darkHours:0.5))
+        #expect(ScoreEngine.cap(darkHours:3)==100)
     }
     @Test func polarAndTropical() throws {
         let engine=AstronomyEngine(), denali=try park("dena"), gates=try park("gaar"), samoa=try park("npsa")

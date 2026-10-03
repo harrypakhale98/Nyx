@@ -80,6 +80,13 @@ struct ParkDetailView: View {
     @State private var persistenceError=false
     private var night:Night { model.night(park,on:selected ?? initialDate ?? model.tonight(park)) }
     private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
+    /// The river covers tonight and the next 29 nights, or starts at a night chosen outside that span.
+    private var riverStart:Date {
+        let tonight=model.tonight(park)
+        guard let initialDate else { return tonight }
+        let chosen=park.evening(initialDate)
+        return chosen>=tonight && chosen<park.date(tonight,addingDays:30) ? tonight : chosen
+    }
     var body: some View {
         ScrollView {
             VStack(spacing:26) {
@@ -94,7 +101,7 @@ struct ParkDetailView: View {
                     if !night.score.hasForecast { Text(night.id.timeIntervalSince(.now)>16*86400 ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
                     Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil ? ScoreTip() : nil)
                 }
-                Panel { TimeRiver(nights:model.nights(park,from:model.tonight(park),count:30),selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0})) }
+                Panel { TimeRiver(nights:model.nights(park,from:riverStart,count:30),selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park)) }
                 Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
                     if let data=model.enrichments[park.id],!data.alerts.isEmpty {
                         DisclosureGroup("All park alerts (\(data.alerts.count))") {
@@ -174,6 +181,7 @@ struct ScoreBreakdownView: View {
             row("Length of darkness",points:night.score.lengthPoints,of:15,detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
             if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
             if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude. The score is capped below 40.").foregroundStyle(palette.accent) }
+            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text("True darkness lasts only \(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide))) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.").foregroundStyle(palette.accent) }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
             ShareCardButton(night:night)
         }.padding(24) }.background(Color.black).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)

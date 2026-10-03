@@ -49,10 +49,15 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     func evening(_ date: Date) -> Date {
         calendar.date(bySettingHour: 12, minute: 0, second: 0, of: date) ?? date
     }
-    /// The night someone standing in the park at `now` is in: before local noon it is still last night.
+    /// The night someone standing in the park at `now` is in. After midnight it is still last night,
+    /// until the Sun rises; from sunrise on, "tonight" is the coming evening. Without a sunrise
+    /// (polar night) the switch happens at local noon.
     func currentNight(at now: Date) -> Date {
         let today = evening(now)
-        return now < today ? self.date(today, addingDays: -1) : today
+        guard now < today else { return today }
+        let morning = calendar.component(.hour, from: now) >= 3
+        if morning, AstronomyEngine().solarAltitude(at: now, park: self) > -0.833 { return today }
+        return self.date(today, addingDays: -1)
     }
     func date(_ date: Date, addingDays days: Int) -> Date {
         calendar.date(byAdding: .day, value: days, to: date) ?? date

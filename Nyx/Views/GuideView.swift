@@ -17,8 +17,8 @@ struct GuideView:View {
         switch mode {
         case .planning:
             guard let home=model.home else { return [] }
-            let best=Array(model.ranked(model.nearby(latitude:nil,longitude:nil)).prefix(3))
-            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + ["Starting park: \(home.shortName). Distances are straight-line estimates."]
+            let best=Array(model.ranked(model.nearby(latitude:model.location.latitude,longitude:model.location.longitude)).prefix(3))
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in "\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? "forecast included" : "clouds unknown, moon and darkness only"); \(model.alertSummary(park))" } } + [model.location.latitude == nil ? "Starting park: \(home.shortName). Distances are straight-line estimates." : "Starting point: the device location. Distances are straight-line estimates."]
         case .recap:
             return entries.prefix(8).map { "\(model.park($0.parkID)?.shortName ?? "Park"); \(model.park($0.parkID)?.dateLabel($0.date) ?? $0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \($0.notes.prefix(250))" }
         case .learn(let essay): return [String(essay.content.prefix(6500))]
