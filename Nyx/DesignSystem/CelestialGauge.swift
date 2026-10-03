@@ -49,42 +49,48 @@ struct CelestialGauge: View {
     }
     private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    /// The dial (track, glow, arc, ticks) redraws only when the shown score changes; the
+    /// orbiting stars and the pulsing leading star are the only per-frame drawing.
     private var orbit:some View {
+        ZStack {
+            Canvas { context,size in
+                let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
+                let displayed = reduceMotion ? score : shown
+                let start=Angle.degrees(140), end=Angle.degrees(400)
+                var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
+                context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
+                let tip=Angle.degrees(140+260*Double(displayed)/100)
+                var arc=Path(); arc.addArc(center:center,radius:radius,startAngle:start,endAngle:tip,clockwise:false)
+                let dash:[CGFloat]=hasForecast ? [] : [3,5]
+                // A soft amber glow under the arc, stronger as the score rises.
+                if displayed>0 {
+                    context.drawLayer { glow in
+                        glow.addFilter(.blur(radius:7))
+                        glow.stroke(arc,with:.color(palette.accent.opacity(0.18+0.3*Double(displayed)/100)),style:StrokeStyle(lineWidth:6,lineCap:.round,dash:dash))
+                    }
+                }
+                context.stroke(arc,with:.color(palette.accent),style:StrokeStyle(lineWidth:2.3,lineCap:.round,dash:dash))
+                for tick in 0..<41 {
+                    let a=(140+Double(tick)*6.5)*Double.pi/180
+                    let lit=Double(tick)*2.5<=Double(displayed)
+                    let aPoint=CGPoint(x:center.x+cos(a)*(radius-8),y:center.y+sin(a)*(radius-8))
+                    let bPoint=CGPoint(x:center.x+cos(a)*(radius-(tick%10==0 ? 17 : 12)),y:center.y+sin(a)*(radius-(tick%10==0 ? 17 : 12)))
+                    var line=Path(); line.move(to:aPoint); line.addLine(to:bPoint)
+                    context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:tick%10==0 ? 0.9 : 0.6)
+                }
+            }
             TimelineView(.animation(minimumInterval:nil,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
                 Canvas { context,size in
                     let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
                     let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
                     let displayed = reduceMotion ? score : shown
-                    let start=Angle.degrees(140), end=Angle.degrees(400)
-                    var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
-                    context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
                     let tip=Angle.degrees(140+260*Double(displayed)/100)
-                    var arc=Path(); arc.addArc(center:center,radius:radius,startAngle:start,endAngle:tip,clockwise:false)
-                    let dash:[CGFloat]=hasForecast ? [] : [3,5]
-                    // A soft amber glow under the arc, stronger as the score rises.
-                    if displayed>0 {
-                        context.drawLayer { glow in
-                            glow.addFilter(.blur(radius:7))
-                            glow.stroke(arc,with:.color(palette.accent.opacity(0.18+0.3*Double(displayed)/100)),style:StrokeStyle(lineWidth:6,lineCap:.round,dash:dash))
-                        }
-                    }
-                    context.stroke(arc,with:.color(palette.accent),style:StrokeStyle(lineWidth:2.3,lineCap:.round,dash:dash))
-                    for tick in 0..<41 {
-                        let a=(140+Double(tick)*6.5)*Double.pi/180
-                        let lit=Double(tick)*2.5<=Double(displayed)
-                        let aPoint=CGPoint(x:center.x+cos(a)*(radius-8),y:center.y+sin(a)*(radius-8))
-                        let bPoint=CGPoint(x:center.x+cos(a)*(radius-(tick%10==0 ? 17 : 12)),y:center.y+sin(a)*(radius-(tick%10==0 ? 17 : 12)))
-                        var line=Path(); line.move(to:aPoint); line.addLine(to:bPoint)
-                        context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:tick%10==0 ? 0.9 : 0.6)
-                    }
                     // The leading star: where tonight's score has reached.
                     if displayed>0 {
                         let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                         let pulse=reduceMotion ? 1 : 0.85+0.15*sin(t*2.4)
-                        context.drawLayer { glow in
-                            glow.addFilter(.blur(radius:6))
-                            glow.fill(Path(ellipseIn:CGRect(x:point.x-7,y:point.y-7,width:14,height:14)),with:.color(palette.accent.opacity(0.55*pulse)))
-                        }
+                        // A radial gradient, not a blur: this layer redraws every frame.
+                        context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))
                         context.fill(Path(ellipseIn:CGRect(x:point.x-3.2,y:point.y-3.2,width:6.4,height:6.4)),with:.color(palette.ink))
                     }
                     // Orbiting stars: a loose ring that swirls faster and twinkles harder as the score rises.
@@ -101,7 +107,8 @@ struct CelestialGauge: View {
                         context.fill(Path(ellipseIn:CGRect(x:center.x+cos(a)*orbit-d/2,y:center.y+sin(a)*orbit-d/2,width:d,height:d)),with:.color(palette.ink.opacity((big ? 0.75 : 0.4)*twinkle)))
                     }
                 }
-            }.accessibilityHidden(true)
+            }
+        }.accessibilityHidden(true)
     }
 
 }

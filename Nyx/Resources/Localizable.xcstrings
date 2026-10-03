@@ -122,6 +122,28 @@
         }
       }
     },
+    "%@; %@; observed Bortle %lld; observation: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@; observed Bortle %lld; observation: %@"
+          }
+        }
+      }
+    },
+    "%@; %@; score %lld/100 %@; %@; %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@; score %lld/100 %@; %@; %@"
+          }
+        }
+      }
+    },
     "%lld": {
       "extractionState": "manual",
       "localizations": {
@@ -2256,13 +2278,13 @@
         }
       }
     },
-    "Open-Meteo forecasts cover up to 16 days and are requested for all parks at once, using park coordinates only. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
+    "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days and are requested for all parks at once, using park coordinates only. Clouds are averaged over the complete dark window. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
+            "value": "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
           }
         }
       }
@@ -2619,6 +2641,17 @@
         }
       }
     },
+    "Remove photo %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove photo %lld"
+          }
+        }
+      }
+    },
     "Replay the introduction": {
       "extractionState": "manual",
       "localizations": {
@@ -2905,6 +2938,28 @@
         }
       }
     },
+    "Starting park: %@. Distances are straight-line estimates.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting park: %@. Distances are straight-line estimates."
+          }
+        }
+      }
+    },
+    "Starting point: the device location. Distances are straight-line estimates.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting point: the device location. Distances are straight-line estimates."
+          }
+        }
+      }
+    },
     "Summer favors the bright center. Look toward the southern sky; timing and terrain matter.": {
       "extractionState": "manual",
       "localizations": {
@@ -3015,13 +3070,13 @@
         }
       }
     },
-    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Designations are checked against the NPS dark-sky list. Viewing coordinates are approximate, not directions. Park data: National Park Service.": {
+    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications, cross-checked against the NPS list. Viewing coordinates are approximate, not directions. Park data: National Park Service.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Designations are checked against the NPS dark-sky list. Viewing coordinates are approximate, not directions. Park data: National Park Service."
+            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications, cross-checked against the NPS list. Viewing coordinates are approximate, not directions. Park data: National Park Service."
           }
         }
       }
@@ -3587,13 +3642,13 @@
         }
       }
     },
-    "When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address.": {
+    "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "When park updates are available, requests go to developer.nps.gov for the selected park. The service receives network information such as your IP address."
+            "value": "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address."
           }
         }
       }
@@ -3785,6 +3840,17 @@
         }
       }
     },
+    "clouds unknown, moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "clouds unknown, moon and darkness only"
+          }
+        }
+      }
+    },
     "essay.bortle": {
       "extractionState": "manual",
       "localizations": {
@@ -3825,6 +3891,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Finding the Milky Way\n\nThe Milky Way is our own galaxy seen from the inside: a band of light from countless distant stars, crossed by dark lanes of dust. Its brightest part, the galactic center, lies toward the constellations Sagittarius and Scorpius. Seeing it well depends on four things Nyx already weighs: a dark site, a dark Moon, clear air and enough true darkness.\n\nSeason matters most. From the United States the bright center rises before dawn in early spring, stands highest in the southern sky through June, July and August, and sinks into the southwest soon after dusk by October. From November through January it is close to the Sun and out of the night sky. In American Samoa, south of the equator, the center climbs nearly overhead in the same months. The fainter band still arches across the winter sky, through Cassiopeia and past Orion, and it rewards a dark night too.\n\nThe Moon decides which nights are worth the drive. A bright Moon washes out the faint glow, even at the darkest park. Look for nights near the new moon, or nights when the Moon sets early or rises late and leaves hours of true darkness. The calendar's ringed nights and the lighter, moonlit stretches of the sky arc show both.\n\nGive your eyes time. Full dark adaptation takes twenty to thirty minutes, and one glance at a bright screen undoes much of it. Turn on night-vision mode, lower your screen brightness, and use a dim red light on the trail.\n\nIn summer, look low and to the south, and choose a place with an open southern horizon: a desert flat, a ridgeline overlook, a lake shore. Cliffs, trees and canyon walls can hide the brightest part even under a perfect sky. Haze and wildfire smoke dim it as surely as clouds do, which is one reason no forecast can promise what you will see.\n\nPhotographs show more color and detail than the eye can. To the eye, the Milky Way is a soft, silvery river with darker gaps. That is not a disappointment. It is the real thing: light that has travelled for thousands of years to reach you."
+          }
+        }
+      }
+    },
+    "forecast included": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forecast included"
           }
         }
       }
