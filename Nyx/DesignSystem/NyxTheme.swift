@@ -38,7 +38,11 @@ struct Eyebrow: View {
 }
 struct NightBackground: View {
     var seed: String="nyx"
-    var body: some View { ZStack { Color.black; Starfield(seed:seed) }.ignoresSafeArea().accessibilityHidden(true) }
+    /// The night's score, when the screen is about one night; stars twinkle harder as it rises.
+    var score: Int?=nil
+    var body: some View {
+        ZStack { Color.black; Starfield(seed:seed,twinkle:score.map { pow(Double($0)/100,2) } ?? 0.3) }.ignoresSafeArea().accessibilityHidden(true)
+    }
 }
 struct CalmState: View {
     @Environment(\.nyx) private var palette

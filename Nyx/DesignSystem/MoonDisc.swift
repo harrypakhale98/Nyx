@@ -27,7 +27,9 @@ struct MoonDisc: View, Animatable {
                     context.fill(Path(rect),with:.color(palette.ink.opacity(shade)))
                 }
             }
-            if !iconMode { context.stroke(circle,with:.color(palette.line),lineWidth:0.6) }
+            // In the tab bar the limb is always outlined, so a new moon is a ring, not nothing.
+            let limb=iconMode ? max(1,diameter/16) : 0.6
+            context.stroke(Path(ellipseIn:CGRect(x:center.x-r,y:center.y-r,width:diameter,height:diameter).insetBy(dx:limb/2,dy:limb/2)),with:.color(iconMode ? palette.ink : palette.line),lineWidth:limb)
             // Fixed, subtle mare texture, clipped to the disc. Never a photograph.
             var texture=context; texture.clip(to:circle)
             for (x,y,s) in [(0.32,0.31,0.18),(0.57,0.46,0.21),(0.37,0.67,0.12),(0.7,0.26,0.09)] {

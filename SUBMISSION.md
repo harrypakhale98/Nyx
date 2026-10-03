@@ -66,7 +66,7 @@ Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolut
 
 1. Resolve the privacy label question in `PRIVACY.md`. Review external provider terms/logging and publish the accurate policy. **Do not select Data Not Collected just because this draft targets it.**
 2. Complete every device gate in `AUDIT.md`, including VoiceOver, all accessibility settings, hardware motion/haptics, widgets/control, Siri, available-model AI, denied permissions, selected photos and airplane mode. Fix failures and rerun both simulator suites.
-3. Finish Icon Composer layers/export using `IconSources/README.md`; rebuild and recapture artwork. Confirm all appearances and small sizes.
+3. The Icon Composer icon (`Nyx/Resources/AppIcon.icon`) ships in the build. Optionally open it in Icon Composer to fine-tune glass and lighting, then rebuild and recapture artwork.
 4. In the developer account, confirm the existing `com.harrypakhale.nyx`, `com.harrypakhale.nyx.widgets`, and App Group `group.com.harrypakhale.nyx` records and App Groups for both targets. Signing team is already `DUHVN68KBA`; local development signing validates. Configure distribution provisioning/certificates for export.
 5. Configure the optional public NPS key locally; test live alert and recurring-program decoding plus failure/cached states. Never commit credentials. If distributing without the key, keep the unchecked UX and remove unsupported live-data marketing promises.
 6. Create the App Store Connect app record under the owner's legal account. Verify Nyx name availability, SKU/bundle ID, agreements and regional availability. If Nyx conflicts, apply Noctis coherently through `project.yml`, catalogs, metadata and icon sources and rebuild.
@@ -85,7 +85,7 @@ Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolut
 | Physical accessibility and dark-field testing | OPEN — use AUDIT.md device procedure |
 | Hardware performance, haptics, ProMotion | OPEN — simulator timing is not certification |
 | Actual widgets/control/Siri/available AI | OPEN — content compiles/previews; device integration review required |
-| Icon Composer native export | OPEN — working PNG and original layer sources supplied |
+| Icon Composer native icon | DONE — `AppIcon.icon` compiled by actool; Default, Dark, Tinted and Clear renditions checked |
 | Development-signed archive | PASS locally — signatures/App Group verified; distribution export pending |
 | App Store export, account metadata and hosted pages | OPEN — publisher account workflow |
 

@@ -10,6 +10,7 @@ struct CelestialGauge: View {
     var hasForecast: Bool=true
     @State private var shown=0
     @State private var milestone=0
+    @State private var revealed=false
     var body: some View {
         Group {
             if typeSize.isAccessibilitySize {
@@ -26,7 +27,10 @@ struct CelestialGauge: View {
         .accessibilityElement(children:.ignore)
         .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"Moon and darkness only. Cloud forecast unavailable."))")
         .task(id:score) {
-            if reduceMotion { shown=score; return }
+            // Count up once per appearance; later changes (scrubbing nights) glide on the spring.
+            if reduceMotion { shown=score; revealed=true; return }
+            if revealed { withAnimation(NyxMotion.spring) { shown=score }; return }
+            revealed=true
             shown=0
             for value in stride(from:0,through:score,by:2) {
                 if Task.isCancelled { return }
@@ -46,7 +50,7 @@ struct CelestialGauge: View {
     private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     private var orbit:some View {
-            TimelineView(.animation(minimumInterval:1/20,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+            TimelineView(.animation(minimumInterval:nil,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
                 Canvas { context,size in
                     let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
                     let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
@@ -64,7 +68,7 @@ struct CelestialGauge: View {
                         context.stroke(line,with:.color(palette.line),lineWidth:0.6)
                     }
                     for i in 0..<12 {
-                        let a=Double(i)*2*Double.pi/12+t*(0.025+Double(score)/5000)
+                        let a=Double(i)*2*Double.pi/12+t*(0.02+0.2*pow(Double(score)/100,3))
                         let orbit=radius+10+Double(i%3)*2
                         let point=CGRect(x:center.x+cos(a)*orbit-1,y:center.y+sin(a)*orbit-1,width:i%3==0 ? 3 : 1.5,height:i%3==0 ? 3 : 1.5)
                         context.fill(Path(ellipseIn:point),with:.color(palette.ink.opacity(i%3==0 ? 0.7 : 0.35)))

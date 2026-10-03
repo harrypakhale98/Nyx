@@ -26,6 +26,10 @@ spots={
 
 'acad':[('Seawall',44.239,-68.304,'https://www.nps.gov/acad/planyourvisit/stargazing.htm')]
 }
+# Researched NPS-sourced spots (with provenance) fill parks the table above does not cover.
+researched=json.loads(pathlib.Path('Research/viewing-spots.json').read_text()) if pathlib.Path('Research/viewing-spots.json').exists() else {}
+for ident,entries in researched.items():
+    spots.setdefault(ident,[(e['name'],e['latitude'],e['longitude'],e['sourceURL']) for e in entries])
 parks=[]
 for p in source:
  code=p['parkCode']
@@ -33,7 +37,7 @@ for p in source:
  entries=[(code,p['fullName'],float(p['latitude']),float(p['longitude']))]
  if code=='seki': entries=[('sequ','Sequoia National Park',36.486,-118.565),('kica','Kings Canyon National Park',36.887,-118.555)]
  for ident,name,lat,lon in entries:
-  parks.append(dict(id=ident,apiCode=code,name=name.replace('Of The','of the').replace('Wrangell - St Elias','Wrangell–St. Elias'),state=p['states'],latitude=lat,longitude=lon,timeZoneID=zones[code],hemisphere='south' if lat<0 else 'north',darkSkyDesignated=code in designated,bortleEstimate=bortle.get(code,2),description=p['description'] or 'Yellowstone protects geysers, hot springs, mountain landscapes and wildlife. Stay on designated routes, including after dark.',sourceURL=p['url'],sourceNote='NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).',viewingSpots=[dict(name=n,latitude=a,longitude=b,sourceURL=u,note='Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.') for n,a,b,u in spots.get(code,[])]))
+  parks.append(dict(id=ident,apiCode=code,name=name.replace('Of The','of the').replace('Wrangell - St Elias','Wrangell–St. Elias'),state=p['states'],latitude=lat,longitude=lon,timeZoneID=zones[code],hemisphere='south' if lat<0 else 'north',darkSkyDesignated=code in designated,bortleEstimate=bortle.get(code,2),description=p['description'] or 'Yellowstone protects geysers, hot springs, mountain landscapes and wildlife. Stay on designated routes, including after dark.',sourceURL=p['url'],sourceNote='NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).',viewingSpots=[dict(name=n,latitude=a,longitude=b,sourceURL=u,note='Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.') for n,a,b,u in spots.get(ident,spots.get(code,[]))]))
 assert len(parks)==63,len(parks)
 pathlib.Path('Nyx/Resources/parks.json').write_text(json.dumps(sorted(parks,key=lambda p:p['name']),indent=2,ensure_ascii=False)+'\n')
 print('Wrote',len(parks),'parks')

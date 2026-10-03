@@ -18,10 +18,13 @@ actor StubHTTP:HTTPTransport {
 actor StubNotifications:LocalNotificationCenter {
     var requests:[NightReminder]=[]
     var ids:[String]
+    var delivered:[String]=[]
     init(ids:[String]=[]) { self.ids=ids }
+    func deliver(_ id:String) { delivered.append(id) }
     func authorized() async -> Bool { true }
     func request() async -> Bool { true }
     func pendingIDs() async -> [String] { ids+requests.map(\.id) }
+    func deliveredIDs() async -> [String] { delivered }
     func remove(_ values:[String]) async { ids.removeAll{values.contains($0)};requests.removeAll{values.contains($0.id)} }
     func add(_ reminder:NightReminder) async throws { requests.append(reminder) }
 }
@@ -80,5 +83,20 @@ struct ServiceTests {
         #expect(await center.ids.count==10)
         let noCloud=Night(park:p,sky:nights[0].sky,score:DarknessScore(value:94,moonPoints:53,cloudPoints:nil,bortlePoints:24,lengthPoints:17),cloudCover:nil,forecastUpdated:nil)
         #expect(scheduler.plans(nights:[noCloud],now:now).isEmpty)
+    }
+    @Test func tonightStillGetsAReminderOnce() async throws {
+        let p=try park(),engine=AstronomyEngine()
+        let evening=p.evening(Date(timeIntervalSince1970:1790899200))
+        let sky=engine.conditions(for:p,on:evening)
+        let night=Night(park:p,sky:sky,score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:evening)
+        let afternoon=evening.addingTimeInterval(2*3600)
+        let center=StubNotifications(),scheduler=NotificationScheduler(center:center)
+        let plan=try #require(scheduler.plans(nights:[night],now:afternoon).first)
+        #expect(plan.fireDate==afternoon.addingTimeInterval(60))
+        let dark=try #require(sky.darkStart)
+        #expect(scheduler.plans(nights:[night],now:dark).isEmpty)
+        await center.deliver(plan.id)
+        await scheduler.reschedule(nights:[night],now:afternoon)
+        #expect(await center.requests.isEmpty)
     }
 }

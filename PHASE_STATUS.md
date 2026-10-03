@@ -1,4 +1,20 @@
-# Nyx handoff — 2026-10-02
+# Nyx handoff — 2026-10-02 (completion review)
+
+## Completion review (after the first build)
+
+A full code, design and accessibility review of the first build found and fixed the issues listed under "Completion review" in `DECISIONS.md`. The most important:
+
+- **Live park alerts and ranger programs could never load**: the NPS key was dropped from Info.plist. Fixed via `Config/Nyx.xcconfig` + git-ignored `Config/Secrets.xcconfig`; only the key itself is still needed (INPUT_NEEDED 3).
+- **"Tonight" after midnight showed the next night** in the app, widget and Siri. Fixed (`Park.currentNight(at:)`).
+- **Reminders for tonight were never sent**; tapping a reminder did nothing. Fixed, with a delivered-once guarantee.
+- **Share cards exported with invisible text.** Fixed.
+- **Signature motion and interaction** finished to the spec: rebuilt time river under the gauge, calendar peek and directional months, self-drawing constellation loader, score-reactive starfield and gauge orbit, onboarding that builds the score, cold-launch reveal.
+- **App icon** is now a native Icon Composer document (`Nyx/Resources/AppIcon.icon`).
+- **Viewing spots** researched from NPS pages for the parks that had none (see `Research/viewing-spots.json` for sources and evidence).
+
+Verified: app + tests build with zero warnings (warnings are errors) on iOS 26.5 (iPhone 17 Pro) and iOS 27.0 (iPhone 18 Pro); unit and UI suites pass on both. Screens touched were re-captured and reviewed, including night vision and AX5.
+
+---
 
 ## Engineering checkpoint: Phases 0–7 implemented
 
@@ -26,9 +42,8 @@ The final critique repaired access guidance placement, red native-control contra
 ## Deliberate limitations and release gates
 
 - Current privacy label is a draft. Open-Meteo's published API-log retention and NPS/API.gov processing need authoritative publisher review; do not claim “Data Not Collected” until resolved. See `PRIVACY.md`.
-- No NPS key is committed. Core planning works without it; live closures/programs show an honest unchecked state. A free public-app key is optional, but required for live NPS QA.
-- Named viewing spots appear only where checked NPS sources support them. Other parks give ranger guidance instead of invented coordinates. Bortle values remain clearly labeled estimates.
-- A working raster icon and original layered SVG assets ship in source. Final native Icon Composer export is pending GUI review.
+- No NPS key is committed. Core planning works without it; live closures/programs show an honest unchecked state. Add one in `Config/Secrets.xcconfig` (INPUT_NEEDED 3); it is strongly recommended for release because closures are the app's most important safety signal.
+- Named viewing spots (50 of 63 parks) appear only where nps.gov pages support them; see `Research/viewing-spots.json`. The other 13 parks give ranger guidance instead of invented coordinates. Bortle values remain clearly labeled estimates.
 - VoiceOver interaction, actual system Reduce Motion/Transparency/Bold Text/Smart Invert, PhotosPicker/system permissions, actual widget/control/Siri integration, available-model behavior, hardware haptics/performance and dark-field usability require physical review. Screenshot overrides and widget content previews do not certify these gates.
 - The Release archive uses development signing. App Store distribution export, hosted privacy/support pages, account metadata, TestFlight and final submission require the owner.
 

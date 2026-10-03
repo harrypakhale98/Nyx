@@ -1,13 +1,23 @@
 # Nyx icon layers
 
-The app currently includes an original 1024×1024 PNG in `Nyx/Resources/Assets.xcassets/AppIcon.appiconset`. The SVGs here separate Background, Moon, and Orbit on a 1024×1024 canvas. No borrowed imagery or logos are used.
+The shipping icon is the Icon Composer document `Nyx/Resources/AppIcon.icon`. Xcode compiles it into the asset catalog (`ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon`). The SVGs here are the same layers, kept for editing:
 
-Final Liquid Glass export is an owner step in Icon Composer.
+- `Disc.svg` — the moon's unlit disc (earthshine), a glass layer.
+- `Moon.svg` — the lit crescent, a glass layer above it.
+- `Orbit.svg` — a thin amber orbit with one amber "star particle" and a few starlight dots, echoing the celestial gauge. Not glass.
 
-1. Open Xcode → Open Developer Tool → Icon Composer (or the installed Icon Composer app).
-2. Create an iOS icon named **AppIcon**. Import Background.svg as the background, Moon.svg above it, Orbit.svg as the shallow foreground accent. Keep the supplied positioning and generous margins.
-3. Give Moon a restrained glass material; keep the background opaque and dark. Keep Orbit low contrast and avoid a glow that erases the crescent at small sizes. Preview Default, Dark and Tinted appearances and multiple lighting directions.
-4. Save the native `.icon` document. Add it to Nyx's synchronized source folder as `AppIcon.icon`; resolve the existing AppIcon asset name conflict using Xcode's current Icon Composer integration instructions. If project settings must change, edit `project.yml` and regenerate with XcodeGen.
-5. Build both simulator versions and a signed device archive. Confirm the crescent remains recognizable at Home Screen and Spotlight sizes. Recapture store images after finalizing it.
+The background is the document's own fill: a linear gradient from nebula violet `#2A1B4E` to void black.
 
-The PNG is a functional fallback, not a claim that the native Icon Composer export has been completed. Layer depths/material choices need a visual judgment in the actual tool. Do not fabricate an `.icon` bundle or hand-edit the Xcode project.
+## Preview from the command line
+
+```sh
+"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool" \
+  Nyx/Resources/AppIcon.icon --export-image --output-file /tmp/nyx-icon.png \
+  --platform iOS --rendition Default --width 1024 --height 1024 --scale 1
+```
+
+Renditions: `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight`, `ClearDark`. Check the crescent stays recognizable at 60 px.
+
+## Editing
+
+Open `AppIcon.icon` in Icon Composer (Xcode → Open Developer Tool → Icon Composer) to adjust glass, translucency or lighting; save in place. No project change is needed.

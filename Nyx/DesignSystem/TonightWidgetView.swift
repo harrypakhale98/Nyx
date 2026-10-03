@@ -18,10 +18,12 @@ struct TonightWidgetView:View {
         Group {
             if let night=entry.night {
                 if family == .accessoryCircular {
-                    VStack(spacing:0) {
-                        Text("\(night.score.value)").font(.system(size:26,weight:.light,design:.serif))
-                        Image(systemName:night.score.hasForecast ? "moon.stars" : "questionmark").font(.system(size:12))
-                    }
+                    // The Lock Screen ring echoes the app's celestial gauge.
+                    Gauge(value:Double(night.score.value),in:0...100) {
+                        Image(systemName:"moon.stars")
+                    } currentValueLabel: {
+                        Text("\(night.score.value)").font(.system(.title3,design:.serif))
+                    }.gaugeStyle(.accessoryCircular)
                 } else if family == .accessoryRectangular {
                     // Lock Screen dimensions are fixed. Keep the complete spoken summary
                     // while bounding this compact visual annotation to the host's height.

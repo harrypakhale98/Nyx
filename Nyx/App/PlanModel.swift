@@ -33,6 +33,13 @@ import CoreLocation
         radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
+        // Show the last forecasts and park updates immediately, offline included; refreshes replace them.
+        if DebugScenario.screen == nil {
+            for park in parks {
+                if let cached=CacheDirectory.read(Forecast.self,name:"weather-\(park.id)") { forecasts[park.id]=cached }
+                if let cached=CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") { enrichments[park.id]=cached }
+            }
+        }
         #if DEBUG
         if DebugScenario.screen != nil { homeID="jotr" }
         if DebugScenario.state=="polar" { homeID="dena" }
@@ -40,15 +47,17 @@ import CoreLocation
         #endif
     }
     var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
+    /// The park-local night in progress (or about to begin) right now.
+    func tonight(_ park:Park)->Date { park.currentNight(at:today) }
     func park(_ id:String)->Park? { parks.first { $0.id==id } }
     func night(_ park:Park,on date:Date?=nil)->Night {
-        let evening=park.evening(date ?? today)
+        let evening=park.evening(date ?? tonight(park))
         let sky:SkyConditions
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
         }
         let forecast=forecasts[park.id]
-        let clouds=forecast?.mean(from:sky.darkStart,to:sky.darkEnd)
+        let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
         return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
     }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
@@ -73,6 +82,10 @@ import CoreLocation
             forecasts[park.id]=await weather.forecast(for:park,network:network,force:force)
             enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && (DebugScenario.screen == nil || DebugScenario.state == "live"),force:force)
         }
+    }
+    /// A closure from the last park update, if any. Shown beside every score for that park.
+    func closure(_ park:Park)->String? {
+        enrichments[park.id]?.alerts.first { $0.category.lowercased().contains("closure") }?.title
     }
     func alertSummary(_ park:Park)->String {
         guard let data=enrichments[park.id] else { return String(localized:"Access not checked. Confirm closures with the park.") }
@@ -106,6 +119,8 @@ import CoreLocation
         guard let location=locations.last else { locating=false; return }
         latitude=location.coordinate.latitude; longitude=location.coordinate.longitude; locating=false; message=nil
     }
+    /// Return to the chosen starting park.
+    func clear() { latitude=nil; longitude=nil; message=nil }
     func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
         locating=false; message=String(localized:"Location is unavailable. Choose a starting park instead.")
     }

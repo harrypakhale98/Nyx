@@ -1,0 +1,776 @@
+{
+  "bibe": [
+    {
+      "name": "Fossil Discovery Exhibit",
+      "latitude": 29.4189,
+      "longitude": -103.1371,
+      "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+      "coordinateSource": "OpenStreetMap way 761105844 (Fossil Discovery Exhibit building)",
+      "evidence": "Ranger recommendation for stargazing: the Fossil Discovery Exhibit.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 16.2
+    },
+    {
+      "name": "Sotol Vista Overlook",
+      "latitude": 29.2147,
+      "longitude": -103.3774,
+      "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+      "coordinateSource": "OpenStreetMap node 5760901565 (Sotol Vista Overlook viewpoint)",
+      "evidence": "Ranger-recommended stargazing spot on the Ross Maxwell Scenic Drive.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 17.1
+    },
+    {
+      "name": "Rio Grande Overlook",
+      "latitude": 29.2003,
+      "longitude": -102.9743,
+      "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+      "coordinateSource": "OpenStreetMap node 1859663831 (Rio Grande Overlook viewpoint)",
+      "evidence": "Listed among ranger-recommended stargazing locations.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 27.1
+    }
+  ],
+  "cave": [
+    {
+      "name": "Visitor Center East Parking Lot",
+      "latitude": 32.1751,
+      "longitude": -104.4426,
+      "sourceURL": "https://www.nps.gov/cave/learn/news/star-party-august.htm",
+      "coordinateSource": "OpenStreetMap way 155098220 (surface parking east of visitor center building way 193241914)",
+      "evidence": "Rangers set up telescopes for star parties in the visitor center's east main parking lot.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 11.1
+    }
+  ],
+  "crla": [
+    {
+      "name": "Rim Village (Community House)",
+      "latitude": 42.9115,
+      "longitude": -122.1466,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=5E614D39-E5BC-FBE8-CD19F14DC58C8034",
+      "coordinateSource": "OpenStreetMap node 1796629388 / Wikidata Q7334341 (Rim Village)",
+      "evidence": "Night sky slideshow at the Rim Village Community House, then outdoor telescope viewing.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 3.4
+    }
+  ],
+  "drto": [
+    {
+      "name": "Garden Key Campground",
+      "latitude": 24.6271,
+      "longitude": -82.873,
+      "sourceURL": "https://www.nps.gov/drto/learn/nature/lightscape.htm",
+      "coordinateSource": "OpenStreetMap way 493346007 (Garden Key Campsite)",
+      "evidence": "Camping on Garden Key gives all-night access to skies far from urban light.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 0.2
+    }
+  ],
+  "jeff": [
+    {
+      "name": "Arch Visitor Center West Entrance Plaza",
+      "latitude": 38.625,
+      "longitude": -90.1866,
+      "sourceURL": "https://www.nps.gov/jeff/learn/news/star-gaze-this-summer-during-gateway-to-the-stars-events-at-gateway-arch-national-park.htm",
+      "coordinateSource": "OpenStreetMap way 1265941497 / node 11759467935 (Visitor Center entrance)",
+      "evidence": "Gateway to the Stars telescope viewing held inside the Arch Visitor Center or on the West Entrance Plaza.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 0.2
+    }
+  ],
+  "grte": [
+    {
+      "name": "Craig Thomas Discovery and Visitor Center",
+      "latitude": 43.6533,
+      "longitude": -110.7187,
+      "sourceURL": "https://www.nps.gov/grte/learn/news/star-party-scheduled-for-october-28.htm",
+      "coordinateSource": "OpenStreetMap way 325323599",
+      "evidence": "Ranger and Wyoming Stargazing star party hosted at the Craig Thomas Discovery and Visitor Center in Moose.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 18.4
+    },
+    {
+      "name": "Colter Bay Amphitheater",
+      "latitude": 43.9037,
+      "longitude": -110.645,
+      "sourceURL": "https://www.nps.gov/grte/learn/news/night-sky-festival-underway-this-weekend-at-colter-bay.htm",
+      "coordinateSource": "OpenStreetMap node 1224831780 (Colter Bay Amphitheatre)",
+      "evidence": "Night Sky Festival evening ranger astronomy programs at the Colter Bay Amphitheater.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 10.6
+    }
+  ],
+  "hale": [
+    {
+      "name": "Haleakalā Visitor Center",
+      "latitude": 20.7151,
+      "longitude": -156.2498,
+      "sourceURL": "https://www.nps.gov/hale/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 241071269",
+      "evidence": "Page promotes summit stargazing; photo shows a ranger viewing the night sky at Haleakalā Visitor Center.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 9.5
+    },
+    {
+      "name": "Hosmer Grove Campground",
+      "latitude": 20.7685,
+      "longitude": -156.2377,
+      "sourceURL": "https://www.nps.gov/hale/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap node 571276260 (Hosmer Grove camp_site)",
+      "evidence": "Stargazing page: overnight stays allowed only in campgrounds such as Hosmer Grove in the summit district.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 10.7
+    }
+  ],
+  "indu": [
+    {
+      "name": "Kemil Beach Parking Lot",
+      "latitude": 41.6774,
+      "longitude": -87.0095,
+      "sourceURL": "https://www.nps.gov/indu/learn/news/stargazing-jan-20.htm",
+      "coordinateSource": "NPS news release (41.677427, -87.009529); consistent with OpenStreetMap Kemil Beach way 470584524",
+      "evidence": "Kemil Beach is one of the park's darkest locations and ideal for stargazing; telescope programs held there.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 8.5
+    }
+  ],
+  "meve": [
+    {
+      "name": "Morefield Campground Amphitheater",
+      "latitude": 37.3053,
+      "longitude": -108.4183,
+      "sourceURL": "https://www.nps.gov/meve/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 210106617 ('Mesa Verde Amphitheater', adjacent to Morefield Campground way 580984785)",
+      "evidence": "Night Sky program and star parties held at the Morefield Campground amphitheater.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 8.3
+    },
+    {
+      "name": "Far View Lodge",
+      "latitude": 37.2582,
+      "longitude": -108.4938,
+      "sourceURL": "https://www.nps.gov/meve/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 231492260 (Far View Lodge)",
+      "evidence": "Far View Lodge and the surrounding area offer great stargazing opportunities.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 3.5
+    }
+  ],
+  "neri": [
+    {
+      "name": "New River Gorge Bridge Overlook (Canyon Rim Visitor Center)",
+      "latitude": 38.07,
+      "longitude": -81.0784,
+      "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+      "coordinateSource": "OpenStreetMap viewpoint nodes on Canyon Rim boardwalk (e.g. 1566299328), beside visitor center way 143120820",
+      "evidence": "Listed as a recommended stargazing and astrophotography location.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 23.4
+    },
+    {
+      "name": "Grandview Main Overlook",
+      "latitude": 37.8309,
+      "longitude": -81.0613,
+      "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+      "coordinateSource": "OpenStreetMap node 2916754062 (Main Overlook viewpoint, Grandview)",
+      "evidence": "Listed as a recommended stargazing and astrophotography location.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 6.9
+    },
+    {
+      "name": "Meadow Creek Campground",
+      "latitude": 37.7979,
+      "longitude": -80.9207,
+      "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+      "coordinateSource": "OpenStreetMap node 8907778132 (Meadow Creek Campground)",
+      "evidence": "Listed as a recommended stargazing and astrophotography location.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 10.5
+    }
+  ],
+  "pefo": [
+    {
+      "name": "Kachina Point",
+      "latitude": 35.0845,
+      "longitude": -109.7881,
+      "sourceURL": "https://www.nps.gov/pefo/learn/news/stargazing-at-petrified-forest-national-park.htm",
+      "coordinateSource": "OpenStreetMap node 359247431 (Kachina Point viewpoint)",
+      "evidence": "Ranger 'Stories in the Stars' star party held at Kachina Point after park closing.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 11.2
+    },
+    {
+      "name": "Chinde Point Picnic Area",
+      "latitude": 35.0867,
+      "longitude": -109.7959,
+      "sourceURL": "https://www.nps.gov/pefo/learn/news/nightsky101915.htm",
+      "coordinateSource": "OpenStreetMap node 359244291 (Chinde Point viewpoint)",
+      "evidence": "Ranger-led overnight night-sky viewing event held at Chinde Point picnic area.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 11.5
+    }
+  ],
+  "romo": [
+    {
+      "name": "Park & Ride (Bear Lake Road)",
+      "latitude": 40.3298,
+      "longitude": -105.6014,
+      "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+      "coordinateSource": "OpenStreetMap relation 5405117 (Park & Ride parking)",
+      "evidence": "Astronomy in the Park telescope program held at the Park & Ride parking area on Bear Lake Road.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 8.6
+    },
+    {
+      "name": "Upper Beaver Meadows Trailhead",
+      "latitude": 40.3729,
+      "longitude": -105.6141,
+      "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+      "coordinateSource": "OpenStreetMap node 1852394569 ('Beaver Meadows Trailhead' at end of Upper Beaver Meadows Road)",
+      "evidence": "Ranger and volunteer astronomer night sky program meets at Upper Beaver Meadows Trailhead.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 7.3
+    },
+    {
+      "name": "Holzwarth Historic Site Parking Area",
+      "latitude": 40.3729,
+      "longitude": -105.8545,
+      "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+      "coordinateSource": "OpenStreetMap way 172932660 (Holzwarth Historic Area parking)",
+      "evidence": "West-side telescope astronomy program meets at the Holzwarth Historic Site parking area.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 13.5
+    }
+  ],
+  "shen": [
+    {
+      "name": "Big Meadows",
+      "latitude": 38.5265,
+      "longitude": -78.4397,
+      "sourceURL": "https://www.nps.gov/shen/learn/nature/nightsky.htm",
+      "coordinateSource": "OpenStreetMap node 158421207 (Big Meadows)",
+      "evidence": "Big Meadows, near Rapidan Fire Road, is a good stargazing place and a popular destination.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 4.6
+    },
+    {
+      "name": "Skyland Amphitheater",
+      "latitude": 38.5902,
+      "longitude": -78.3841,
+      "sourceURL": "https://www.nps.gov/shen/learn/nature/nightsky.htm",
+      "coordinateSource": "OpenStreetMap node 2971016158 (Amphitheater, Skyland)",
+      "evidence": "The amphitheater in the Skyland area is also appropriate for stargazing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 13.2
+    }
+  ],
+  "voya": [
+    {
+      "name": "Rainy Lake Visitor Center Upper Parking Lot",
+      "latitude": 48.5848,
+      "longitude": -93.1611,
+      "sourceURL": "https://www.nps.gov/voya/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 489663689 (Rainy Lake Visitor Center building)",
+      "evidence": "Upper parking lot at Rainy Lake Visitor Center is a designated dark sky area.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 26.3
+    },
+    {
+      "name": "Kabetogama Lake Visitor Center",
+      "latitude": 48.445,
+      "longitude": -93.03,
+      "sourceURL": "https://www.nps.gov/voya/learn/news/2026-08-11-voyageurs-national-park-sixth-annual-star-party.htm",
+      "coordinateSource": "OpenStreetMap node 7578518938 (Lake Kabetogama Visitors Center)",
+      "evidence": "Annual Voyageurs Star Party held at the Kabetogama Visitor Center.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 14.8
+    }
+  ],
+  "bisc": [
+    {
+      "name": "Dante Fascell Visitor Center (Convoy Point)",
+      "latitude": 25.4645,
+      "longitude": -80.3348,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=DE30BE1E-FDF7-0433-7CC1BE9D5DAE87E3",
+      "coordinateSource": "NPS event page lat/long (25.464501, -80.334784); matches OSM way 371401206",
+      "evidence": "Park After Dark event: telescope stargazing on the quay by the marina at the visitor center.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 12.8
+    }
+  ],
+  "cuva": [
+    {
+      "name": "Pine Hollow Trailhead (Quick Road)",
+      "latitude": 41.214,
+      "longitude": -81.5314,
+      "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+      "coordinateSource": "OpenStreetMap node 5220789447 (highway=trailhead, Pine Hollow Trailhead, Quick Road)",
+      "evidence": "Parking area on Quick Road with northern views; the best place in the park for aurora.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 6.2
+    },
+    {
+      "name": "Oak Hill Trailhead (Oak Hill Road)",
+      "latitude": 41.2194,
+      "longitude": -81.5771,
+      "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+      "coordinateSource": "OpenStreetMap way 466935819 (amenity=parking, Oak Hill Trailhead)",
+      "evidence": "Darkest skies in the park; ideal for meteor showers and pre-dawn events.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 4.6
+    },
+    {
+      "name": "Horseshoe Pond (Major Road)",
+      "latitude": 41.2334,
+      "longitude": -81.5691,
+      "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+      "coordinateSource": "OpenStreetMap way 499729261 (Horseshoe Pond Trailhead Parking, Major Road)",
+      "evidence": "Recommended for summer and heavy-dew nights; its higher banks avoid lowland dew.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 3.1
+    }
+  ],
+  "ever": [
+    {
+      "name": "Flamingo – Guy Bradley Visitor Center",
+      "latitude": 25.1412,
+      "longitude": -80.924,
+      "sourceURL": "https://www.nps.gov/ever/planyourvisit/everglades-dark-sky-celebration.htm",
+      "coordinateSource": "OpenStreetMap way 49876136 (Guy Bradley Visitor Center)",
+      "evidence": "Dark Sky Celebration in Flamingo: park at Guy Bradley Visitor Center for telescope viewing and night-sky programs.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 26.1
+    },
+    {
+      "name": "Shark Valley Visitor Center",
+      "latitude": 25.7569,
+      "longitude": -80.7654,
+      "sourceURL": "https://www.nps.gov/ever/planyourvisit/everglades-dark-sky-celebration.htm",
+      "coordinateSource": "OpenStreetMap way 721615042 (Shark Valley Visitor Center)",
+      "evidence": "Dark Sky Celebration night programs and a night photography workshop are held at Shark Valley.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 44.3
+    },
+    {
+      "name": "Mahogany Hammock",
+      "latitude": 25.3236,
+      "longitude": -80.8321,
+      "sourceURL": "https://www.nps.gov/ever/learn/news/newmoonstargazingeverpr032112.htm",
+      "coordinateSource": "OpenStreetMap node 1518015361 (Mahogany Hammock Boardwalk Trailhead)",
+      "evidence": "Ranger-led new-moon constellation and telescope program held at Mahogany Hammock (archived 2012 release).",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 7.4
+    }
+  ],
+  "grsm": [
+    {
+      "name": "Cades Cove Orientation Shelter (Loop Road entrance)",
+      "latitude": 35.6065,
+      "longitude": -83.7765,
+      "sourceURL": "https://www.nps.gov/grsm/learn/news/park-hosts-star-gazing-event-at-cades-cove.htm",
+      "coordinateSource": "OpenStreetMap way 1356462527 (Cades Cove Kiosk Parking at start of Cades Cove Loop Road)",
+      "evidence": "Star parties meet at the orientation shelter, then rangers walk a third of a mile to a viewing field.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 24.3
+    },
+    {
+      "name": "Purchase Knob – Appalachian Highlands Science Learning Center",
+      "latitude": 35.586,
+      "longitude": -83.0732,
+      "sourceURL": "https://www.nps.gov/grsm/learn/news/park-hosts-star-gazing-event-at-purchase-knob.htm",
+      "coordinateSource": "OpenStreetMap way 237614966 (Appalachian Highlands Science Learning Center)",
+      "evidence": "Park stargazing event at 5,000 ft with a 260-degree unobstructed sky view.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 39.4
+    }
+  ],
+  "havo": [
+    {
+      "name": "Kīlauea Overlook",
+      "latitude": 19.4239,
+      "longitude": -155.2846,
+      "sourceURL": "https://www.nps.gov/havo/learn/news/20180327_pr_national_park_week.htm",
+      "coordinateSource": "OpenStreetMap way 437967743 (amenity=parking, Kilauea Overlook, Crater Rim Drive)",
+      "evidence": "Ranger stargazing program with telescope above Halemaʻumaʻu crater met at Kīlauea Overlook.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 21.8
+    }
+  ],
+  "lavo": [
+    {
+      "name": "Bumpass Hell parking area",
+      "latitude": 40.4658,
+      "longitude": -121.5145,
+      "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 258457823 (Bumpass Hell Parking)",
+      "evidence": "Listed trailhead parking for stargazing; Dark Sky Festival telescopes set up here.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 9.6
+    },
+    {
+      "name": "Kohm Yah-mah-nee Visitor Center",
+      "latitude": 40.4378,
+      "longitude": -121.5338,
+      "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 168951567 (Kohm Yah-mah-nee Visitor Center)",
+      "evidence": "Visitor center parking area listed as easy-access stargazing spot.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 12.3
+    },
+    {
+      "name": "Loomis Museum / Manzanita Lake",
+      "latitude": 40.5362,
+      "longitude": -121.563,
+      "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way 168951563 (Loomis Museum, Manzanita Lake)",
+      "evidence": "Loomis Museum parking and Manzanita Lake shore listed for stargazing; festival telescopes set up here.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 14.0
+    }
+  ],
+  "mora": [
+    {
+      "name": "Paradise – Jackson Visitor Center plaza",
+      "latitude": 46.7859,
+      "longitude": -121.7367,
+      "sourceURL": "https://www.nps.gov/thingstodo/stargazing-in-paradise-stevens-canyon.htm",
+      "coordinateSource": "NPS event page lat/long (46.785858, -121.736708); matches OSM way 180649580",
+      "evidence": "Rangers host night sky programs in the visitor center plaza in July through September.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 8.7
+    },
+    {
+      "name": "Sunrise Point",
+      "latitude": 46.9174,
+      "longitude": -121.5884,
+      "sourceURL": "https://www.nps.gov/thingstodo/star-gazing-at-sunrise.htm",
+      "coordinateSource": "OpenStreetMap way 179063686 (amenity=parking, Sunrise Point)",
+      "evidence": "Away from visitor center lights, less light pollution, easy roadside parking for stargazing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 10.8
+    },
+    {
+      "name": "Inspiration Point (Stevens Canyon Road)",
+      "latitude": 46.7734,
+      "longitude": -121.7444,
+      "sourceURL": "https://www.nps.gov/thingstodo/stargazing-in-paradise-stevens-canyon.htm",
+      "coordinateSource": "OpenStreetMap node 3743711746 (tourism=viewpoint, Inspiration Point)",
+      "evidence": "Darker than the visitor center yet accessible; views of Rainier and southern constellations.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 10.2
+    }
+  ],
+  "noca": [
+    {
+      "name": "Diablo Lake Overlook",
+      "latitude": 48.7098,
+      "longitude": -121.0972,
+      "sourceURL": "https://www.nps.gov/noca/planyourvisit/evening-explorations.htm",
+      "coordinateSource": "OpenStreetMap node 2508614467 (tourism=viewpoint, Diablo Lake Overlook)",
+      "evidence": "Ranger telescope night-sky program and Milky Way photography class met here at 10 pm.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 8.1
+    }
+  ],
+  "pinn": [
+    {
+      "name": "Bacon Ranch",
+      "latitude": 36.4957,
+      "longitude": -121.1425,
+      "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+      "coordinateSource": "OpenStreetMap ways 139640287/139640389 (Bacon House / Bacon Barn, historic ranch buildings)",
+      "evidence": "East-side area free of obstructions named for night sky viewing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 3.5
+    },
+    {
+      "name": "Peaks View Parking Area",
+      "latitude": 36.4825,
+      "longitude": -121.1619,
+      "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+      "coordinateSource": "OpenStreetMap way 131327172 (amenity=parking, Peaks View Area)",
+      "evidence": "East-side parking area named as a best location for night sky viewing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 1.9
+    },
+    {
+      "name": "Chaparral Parking Area",
+      "latitude": 36.4918,
+      "longitude": -121.2097,
+      "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+      "coordinateSource": "OpenStreetMap way 200501687 (amenity=parking, Chaparral Parking Area)",
+      "evidence": "West-side location named for night sky viewing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 2.5
+    }
+  ],
+  "sagu": [
+    {
+      "name": "Red Hills Visitor Center (Tucson Mountain District)",
+      "latitude": 32.2545,
+      "longitude": -111.1973,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=8B44213A-EF79-CCD8-3E421265E6BA3B41",
+      "coordinateSource": "NPS event page lat/long (32.254482, -111.197318); matches OSM way 234956671",
+      "evidence": "West District star party with telescopes and ranger programs at the visitor center.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 41.7
+    },
+    {
+      "name": "Rincon Mountain Visitor Center (Rincon Mountain District)",
+      "latitude": 32.1801,
+      "longitude": -110.736,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=92598C53-9F71-1AE6-FFC430D08EC83D77",
+      "coordinateSource": "NPS event page lat/long (32.180120, -110.736034); matches OSM way 234432481",
+      "evidence": "East District star party with Tucson Amateur Astronomy Association telescopes.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 3.8
+    },
+    {
+      "name": "Loma Alta Trailhead",
+      "latitude": 32.1331,
+      "longitude": -110.6872,
+      "sourceURL": "https://www.nps.gov/sagu/learn/nature/dark-sky.htm",
+      "coordinateSource": "OpenStreetMap node 175207584 (highway=trailhead, 'Camino Loma Alta', end of S Camino Loma Alta at park's south boundary)",
+      "evidence": "At the southern boundary; trailhead and trail are wonderful places to experience darkness.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 10.7
+    }
+  ],
+  "thro": [
+    {
+      "name": "Peaceful Valley Ranch",
+      "latitude": 46.9589,
+      "longitude": -103.5036,
+      "sourceURL": "https://www.nps.gov/thro/learn/nature/dakota-nights-festival.htm",
+      "coordinateSource": "Wikipedia (Peaceful Valley Ranch, NRHP article coordinates)",
+      "evidence": "Festival telescope stargazing location, South Unit Scenic Drive mile 7.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 25.0
+    },
+    {
+      "name": "Buck Hill",
+      "latitude": 46.9256,
+      "longitude": -103.3888,
+      "sourceURL": "https://www.nps.gov/places/buck-hill.htm",
+      "coordinateSource": "OpenStreetMap node 357765274 (natural=peak, Buck Hill, Billings County ND)",
+      "evidence": "One of the park's highest points; a great stargazing place with unobstructed views.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 28.2
+    },
+    {
+      "name": "Oxbow Overlook (North Unit)",
+      "latitude": 47.6028,
+      "longitude": -103.4417,
+      "sourceURL": "https://www.nps.gov/thingstodo/see-the-stars-in-theodore-roosevelt-national-park.htm",
+      "coordinateSource": "OpenStreetMap node 76586931 (tourism=viewpoint, Oxbow Overlook, McKenzie County ND)",
+      "evidence": "Named as a place to set up a telescope for night sky views.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 47.3
+    }
+  ],
+  "whsa": [
+    {
+      "name": "Dunes Drive Amphitheater (Evening Program Area)",
+      "latitude": 32.82,
+      "longitude": -106.2645,
+      "sourceURL": "https://www.nps.gov/whsa/planyourvisit/full-moon-night.htm",
+      "coordinateSource": "OpenStreetMap way 614138072 (amenity=parking, tagged 'Amphatheater', off Dunes Drive loop past Backcountry Camping lot)",
+      "evidence": "Evening night programs held at the amphitheater, about 7 miles past the fee station.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 7.9
+    }
+  ],
+  "yell": [
+    {
+      "name": "Madison Information Station parking lot",
+      "latitude": 44.6429,
+      "longitude": -110.8605,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=C8D5BE8C-C461-9378-F2897B441ACFBC63",
+      "coordinateSource": "NPS event page lat/long (44.642940, -110.860480); near OSM Madison Museum way 198252568",
+      "evidence": "Night sky observing with telescopes; meet in the Madison Information Station parking lot.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 25.3
+    }
+  ],
+  "blca": [
+    {
+      "name": "Chasm View Overlook (South Rim)",
+      "latitude": 38.5814,
+      "longitude": -107.7144,
+      "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+      "coordinateSource": "OpenStreetMap node 1323146992 (tourism=viewpoint 'Chasm View', south rim side)",
+      "evidence": "Listed as a recommended stargazing overlook, shielded from passing car lights.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 0.9
+    },
+    {
+      "name": "Dragon Point Overlook",
+      "latitude": 38.575,
+      "longitude": -107.7259,
+      "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+      "coordinateSource": "OpenStreetMap node 2521820649 (tourism=viewpoint 'Dragon Point')",
+      "evidence": "Listed among South Rim overlooks recommended for night sky viewing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 0.3
+    },
+    {
+      "name": "Sunset View Overlook",
+      "latitude": 38.5693,
+      "longitude": -107.7337,
+      "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+      "coordinateSource": "OpenStreetMap node 1321233334 (tourism=viewpoint 'Sunset View')",
+      "evidence": "Listed among South Rim overlooks recommended for night sky viewing.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 1.3
+    }
+  ],
+  "cong": [
+    {
+      "name": "Harry Hampton Visitor Center",
+      "latitude": 33.8297,
+      "longitude": -80.8234,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=AF2B43F9-B9EE-465F-8BC6823E5AF3134B",
+      "coordinateSource": "OpenStreetMap way 192511458 (Harry Hampton Visitor Center)",
+      "evidence": "NPS Dark Sky Program with telescope sky-viewing stations meets at the Harry Hampton Visitor Center.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 8.1
+    }
+  ],
+  "glac": [
+    {
+      "name": "Logan Pass (visitor center parking lot)",
+      "latitude": 48.6953,
+      "longitude": -113.718,
+      "sourceURL": "https://www.nps.gov/glac/planyourvisit/astronomy-programs.htm",
+      "coordinateSource": "OpenStreetMap 'Logan Pass Visitor Center' (adjacent to lot); Wikipedia Logan Pass 48.6967,-113.7183",
+      "evidence": "Logan Pass Star Parties held in the Logan Pass parking lot with telescopes.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 6.2
+    },
+    {
+      "name": "St. Mary Visitor Center (Dusty Star Observatory)",
+      "latitude": 48.7473,
+      "longitude": -113.439,
+      "sourceURL": "https://www.nps.gov/glac/planyourvisit/astronomy-programs.htm",
+      "coordinateSource": "OpenStreetMap 'Saint Mary Visitor Center' (information=center)",
+      "evidence": "Nightly astronomy programs; Dusty Star Observatory with 20-inch telescope at the visitor center.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 27.5
+    },
+    {
+      "name": "Apgar Visitor Center / Apgar Transit Center",
+      "latitude": 48.5231,
+      "longitude": -113.9885,
+      "sourceURL": "https://www.nps.gov/glac/learn/news/summer-astronomy-program-begins.htm",
+      "coordinateSource": "OpenStreetMap 'Apgar Visitor Center' on Apgar Transit Center bus loop",
+      "evidence": "Evening telescope viewing at the Apgar Transit Center; nightly programs in Apgar.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 22.6
+    }
+  ],
+  "gumo": [
+    {
+      "name": "Pine Springs Amphitheater",
+      "latitude": 31.8969,
+      "longitude": -104.8262,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=F5A2FAAF-E521-4A75-9409FBC270B3202D",
+      "coordinateSource": "NPS event page (31.896902, -104.826211); matches OpenStreetMap node 5747148117",
+      "evidence": "Ranger-facilitated night-sky program meets at Pine Springs Amphitheatre; park at visitor center.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 6.3
+    },
+    {
+      "name": "Salt Basin Dunes Trailhead",
+      "latitude": 31.9235,
+      "longitude": -105.0063,
+      "sourceURL": "https://www.nps.gov/gumo/learn/news/under-the-stars-at-the-salt-basin-dunes.htm",
+      "coordinateSource": "OpenStreetMap node 13121750058 (Salt Basin Dunes Trailhead)",
+      "evidence": "NPS moonlight hike 'Under the Stars' at the dunes, possible Perseid meteor views.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 11.4
+    }
+  ],
+  "maca": [
+    {
+      "name": "Visitor Center bus loop and fields",
+      "latitude": 37.187,
+      "longitude": -86.1012,
+      "sourceURL": "https://www.nps.gov/maca/planyourvisit/stargazing.htm",
+      "coordinateSource": "OpenStreetMap way (Mammoth Cave National Park Visitor's Center, information=national_park)",
+      "evidence": "Grass fields and parking lots near the visitor center give a wide sky view; star party telescopes at bus loop.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 2.9
+    }
+  ],
+  "olym": [
+    {
+      "name": "Hurricane Ridge (visitor center area)",
+      "latitude": 47.9691,
+      "longitude": -123.499,
+      "sourceURL": "https://www.nps.gov/olym/planyourvisit/nightsky.htm",
+      "coordinateSource": "OpenStreetMap node 10877109414 (tourism=viewpoint 'Hurricane Ridge' at end of Hurricane Ridge Road)",
+      "evidence": "Join a Master Observer at Hurricane Ridge for astronomy and stargazing with telescopes.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 22.2
+    }
+  ],
+  "redw": [
+    {
+      "name": "Schoolhouse Peak Fire Lookout (Bald Hills)",
+      "latitude": 41.1514,
+      "longitude": -123.883,
+      "sourceURL": "https://www.nps.gov/redw/learn/news/star-party.htm",
+      "coordinateSource": "OpenStreetMap way 1312719844 (fire_lookout 'Schoolhouse Peak Lookout', Bald Hills Road)",
+      "evidence": "Annual Star Party held at Schoolhouse Peak Fire Lookout in the Bald Hills.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 27.5
+    },
+    {
+      "name": "Redwood Creek Overlook",
+      "latitude": 41.2578,
+      "longitude": -123.9889,
+      "sourceURL": "https://www.nps.gov/places/redwoodcreekoverlook.htm",
+      "coordinateSource": "OpenStreetMap way 307669061 (parking 'Redwood Creek Overlook', Bald Hills Road)",
+      "evidence": "Place page: views of old-growth forest, ocean, sunsets, and stars.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 13.2
+    }
+  ],
+  "sequ": [
+    {
+      "name": "Moro Rock",
+      "latitude": 36.5441,
+      "longitude": -118.7651,
+      "sourceURL": "https://www.nps.gov/seki/planyourvisit/dark-sky-festival.htm",
+      "coordinateSource": "OpenStreetMap node 1751223608 (tourism=viewpoint 'Moro Rock'); parking at 36.5470,-118.7656",
+      "evidence": "Listed under Areas for Star Gazing, with views to the east.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 19.0
+    }
+  ],
+  "viis": [
+    {
+      "name": "Cinnamon Bay Beach",
+      "latitude": 18.3523,
+      "longitude": -64.7541,
+      "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=EB18447A-DCF1-A26C-1F274CFABBE7DEA5",
+      "coordinateSource": "NPS event page (18.352310, -64.754081)",
+      "evidence": "Cinnamon Bay Night Sky Program: ranger and telescope on the beach, every two weeks.",
+      "confidence": "high",
+      "distanceFromParkPointKm": 1.7
+    }
+  ],
+  "wica": [
+    {
+      "name": "Elk Mountain Campground (Elk Mountain trail)",
+      "latitude": 43.5665,
+      "longitude": -103.4925,
+      "sourceURL": "https://www.nps.gov/wica/learn/nature/dark-sky.htm",
+      "coordinateSource": "OpenStreetMap way 232171432 (Elk Mountain Campground, trailhead of Elk Mountain Nature Trail)",
+      "evidence": "New moon constellation hikes and full moon hikes on the Elk Mountain trail.",
+      "confidence": "medium",
+      "distanceFromParkPointKm": 4.5
+    }
+  ]
+}

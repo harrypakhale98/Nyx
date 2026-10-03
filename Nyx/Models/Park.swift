@@ -21,6 +21,26 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
             .replacingOccurrences(of: " National and State Parks", with: "")
     }
     var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .gmt }
+    /// Search should forgive spelling: "Hawaii Volcanoes" finds Hawaiʻi, "Wrangell St Elias" finds the en dash.
+    func matches(_ query: String) -> Bool {
+        let needle = Self.folded(query)
+        guard !needle.isEmpty else { return true }
+        let aliases = Self.aliases[id] ?? []
+        return ([name, state] + aliases).contains { Self.folded($0).contains(needle) }
+    }
+    nonisolated static func folded(_ text: String) -> String {
+        text.replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
+            .replacingOccurrences(of: "&", with: " and ")
+            .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+            .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.joined(separator: " ")
+    }
+    private static let aliases: [String: [String]] = [
+        "grsm": ["Smokies", "Smoky Mountains"], "jeff": ["St. Louis Arch", "Gateway Arch"], "deva": ["Death Valley"],
+        "wrst": ["Wrangell Saint Elias"], "havo": ["Volcanoes", "Kilauea"], "hale": ["Haleakala"], "npsa": ["American Samoa"],
+        "viis": ["Virgin Islands", "St. John"], "thro": ["Teddy Roosevelt", "TR"], "grte": ["Tetons"], "romo": ["Rocky Mountain", "RMNP"],
+        "blca": ["Black Canyon"], "kica": ["Kings Canyon", "Sequoia and Kings Canyon"], "sequ": ["Sequoia and Kings Canyon"],
+        "redw": ["Redwoods"], "neri": ["New River"], "cuva": ["Cuyahoga"], "drto": ["Fort Jefferson"], "jotr": ["Joshua Tree", "JT"],
+    ]
     var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
@@ -28,6 +48,11 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     }
     func evening(_ date: Date) -> Date {
         calendar.date(bySettingHour: 12, minute: 0, second: 0, of: date) ?? date
+    }
+    /// The night someone standing in the park at `now` is in: before local noon it is still last night.
+    func currentNight(at now: Date) -> Date {
+        let today = evening(now)
+        return now < today ? self.date(today, addingDays: -1) : today
     }
     func date(_ date: Date, addingDays days: Int) -> Date {
         calendar.date(byAdding: .day, value: days, to: date) ?? date
@@ -48,6 +73,16 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         format.timeZone = timeZone
         return date.formatted(format)
     }
+    /// NPS event days arrive as "yyyy-MM-dd"; show them as park-local dates.
+    func programDate(_ day: String) -> String {
+        let parts = day.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3, let date = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12)) else { return day }
+        var format = Date.FormatStyle.dateTime.weekday(.wide).month(.wide).day()
+        format.timeZone = timeZone
+        return date.formatted(format)
+    }
+    /// "Pacific Time" rather than "America/Los_Angeles".
+    var timeZoneName: String { timeZone.localizedName(for: .generic, locale: .current) ?? timeZoneID }
     func timestamp(_ date: Date) -> String {
         var format = Date.FormatStyle.dateTime.month(.abbreviated).day().hour().minute()
         format.timeZone = timeZone

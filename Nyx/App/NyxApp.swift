@@ -2,6 +2,7 @@ import AppIntents
 import SwiftUI
 import SwiftData
 import TipKit
+import UserNotifications
 
 @main struct NyxApp: App {
     @State private var model=PlanModel()
@@ -10,6 +11,9 @@ import TipKit
         do { container=try ModelContainer(for:SavedPark.self,JournalEntry.self,configurations:ModelConfiguration(isStoredInMemoryOnly:DebugScenario.screen != nil)) }
         catch { container=nil }
         try? Tips.configure([.datastoreLocation(.applicationDefault)])
+        UNUserNotificationCenter.current().delegate=NotificationRouter.shared
+        // Registers park names as Siri / Shortcuts phrase parameters.
+        NyxShortcuts.updateAppShortcutParameters()
     }
     var body:some Scene {
         WindowGroup {

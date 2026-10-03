@@ -85,7 +85,29 @@
     "description": "There is a place in Far West Texas where night skies are dark as coal and rivers carve temple-like canyons in ancient limestone. Here, at the end of the road, hundreds of bird species take refuge in a solitary mountain range surrounded by weather-beaten desert. Tenacious cactus bloom in sublime southwestern sun, and species diversity is the best in the country. This magical place is Big Bend...",
     "sourceURL": "https://www.nps.gov/bibe/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Fossil Discovery Exhibit",
+        "latitude": 29.4189,
+        "longitude": -103.1371,
+        "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Sotol Vista Overlook",
+        "latitude": 29.2147,
+        "longitude": -103.3774,
+        "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Rio Grande Overlook",
+        "latitude": 29.2003,
+        "longitude": -102.9743,
+        "sourceURL": "https://www.nps.gov/thingstodo/night-sky-big-bend.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "bisc",
@@ -101,7 +123,15 @@
     "description": "Within sight of Miami, yet worlds away, Biscayne protects a rare combination of aquamarine waters, emerald islands, and fish-bejeweled coral reefs. Evidence of 10,000 years of human history is here too; from prehistoric tribes to shipwrecks, and pineapple farmers to presidents. For many, the park is a boating, fishing, and diving destination, while others enjoy a warm breeze and peaceful scenery.",
     "sourceURL": "https://www.nps.gov/bisc/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Dante Fascell Visitor Center (Convoy Point)",
+        "latitude": 25.4645,
+        "longitude": -80.3348,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=DE30BE1E-FDF7-0433-7CC1BE9D5DAE87E3",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "blca",
@@ -117,7 +147,29 @@
     "description": "Big enough to be overwhelming, yet still intimate enough to feel the pulse of time. Come see some of the steepest cliffs, oldest rock, and craggiest spires in North America. Forces of nature and the Gunnison River sculpted this canyon over two million years. The result is a vertical wilderness of rock, water, and sky.",
     "sourceURL": "https://www.nps.gov/blca/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Chasm View Overlook (South Rim)",
+        "latitude": 38.5814,
+        "longitude": -107.7144,
+        "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Dragon Point Overlook",
+        "latitude": 38.575,
+        "longitude": -107.7259,
+        "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Sunset View Overlook",
+        "latitude": 38.5693,
+        "longitude": -107.7337,
+        "sourceURL": "https://www.nps.gov/blca/planyourvisit/astronomy.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "brca",
@@ -205,7 +257,15 @@
     "description": "High ancient sea ledges, deep rocky canyons, flowering cactus, and desert wildlife—treasures above the ground in the Chihuahuan Desert. Hidden beneath the surface are more than 119 caves—formed when sulfuric acid dissolved limestone leaving behind caverns of all sizes.",
     "sourceURL": "https://www.nps.gov/cave/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Visitor Center East Parking Lot",
+        "latitude": 32.1751,
+        "longitude": -104.4426,
+        "sourceURL": "https://www.nps.gov/cave/learn/news/star-party-august.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "chis",
@@ -237,7 +297,15 @@
     "description": "Astonishing biodiversity exists in Congaree National Park, the largest intact expanse of old growth bottomland hardwood forest remaining in the southeastern United States. Waters from the Congaree and Wateree Rivers sweep through the floodplain, carrying nutrients and sediments that nourish and rejuvenate this ecosystem and support the growth of national and state champion trees.",
     "sourceURL": "https://www.nps.gov/cong/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Harry Hampton Visitor Center",
+        "latitude": 33.8297,
+        "longitude": -80.8234,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=AF2B43F9-B9EE-465F-8BC6823E5AF3134B",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "crla",
@@ -253,7 +321,15 @@
     "description": "Crater Lake inspires awe. Native Americans witnessed its formation 7,700 years ago, when a violent eruption triggered the collapse of a tall peak. Scientists marvel at its purity—fed by rain and snow, it’s the deepest lake in the USA and one of the most pristine on Earth. Artists, photographers, and sightseers gaze in wonder at its blue water and stunning setting atop the Cascade Mountain Range.",
     "sourceURL": "https://www.nps.gov/crla/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Rim Village (Community House)",
+        "latitude": 42.9115,
+        "longitude": -122.1466,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=5E614D39-E5BC-FBE8-CD19F14DC58C8034",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "cuva",
@@ -269,7 +345,29 @@
     "description": "Though a short distance from the urban areas of Cleveland and Akron, Cuyahoga Valley National Park seems worlds away. The park is a refuge for native plants and wildlife, and provides routes of discovery for visitors. The winding Cuyahoga River gives way to deep forests, rolling hills, and open farmlands. Walk or ride the Towpath Trail to follow the historic route of the Ohio & Erie Canal.",
     "sourceURL": "https://www.nps.gov/cuva/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Pine Hollow Trailhead (Quick Road)",
+        "latitude": 41.214,
+        "longitude": -81.5314,
+        "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Oak Hill Trailhead (Oak Hill Road)",
+        "latitude": 41.2194,
+        "longitude": -81.5771,
+        "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Horseshoe Pond (Major Road)",
+        "latitude": 41.2334,
+        "longitude": -81.5691,
+        "sourceURL": "https://www.nps.gov/cuva/learn/nature/lightscape.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "deva",
@@ -332,7 +430,15 @@
     "description": "Almost 70 miles (113 km) west of Key West lies the remote Dry Tortugas National Park. This 100-square mile park is mostly open water with seven small islands. Accessible only by boat or seaplane, the park is known the world over as the home of magnificent Fort Jefferson, picturesque blue waters, superlative coral reefs and marine life, and the vast assortment of bird life that frequents the area.",
     "sourceURL": "https://www.nps.gov/drto/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Garden Key Campground",
+        "latitude": 24.6271,
+        "longitude": -82.873,
+        "sourceURL": "https://www.nps.gov/drto/learn/nature/lightscape.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "ever",
@@ -348,7 +454,29 @@
     "description": "Established in 1947 as the first national park created for its biodiversity, Everglades National Park protects 1.5 million acres of wetland, forest, and marine habitats and the native plants and animals that call it home. With several international designations, the park provides a major source of drinking water for local residents of South Florida and recreational opportunities for all.",
     "sourceURL": "https://www.nps.gov/ever/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Flamingo – Guy Bradley Visitor Center",
+        "latitude": 25.1412,
+        "longitude": -80.924,
+        "sourceURL": "https://www.nps.gov/ever/planyourvisit/everglades-dark-sky-celebration.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Shark Valley Visitor Center",
+        "latitude": 25.7569,
+        "longitude": -80.7654,
+        "sourceURL": "https://www.nps.gov/ever/planyourvisit/everglades-dark-sky-celebration.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Mahogany Hammock",
+        "latitude": 25.3236,
+        "longitude": -80.8321,
+        "sourceURL": "https://www.nps.gov/ever/learn/news/newmoonstargazingeverpr032112.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "gaar",
@@ -380,7 +508,15 @@
     "description": "Gateway Arch National Park commemorates President Jefferson’s vision of a continental nation, the individuals and cultural groups who helped shape its history, St. Louis’ role in westward expansion, and Dred and Harriet Scott, who sued for their freedom in the Old Courthouse.",
     "sourceURL": "https://www.nps.gov/jeff/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Arch Visitor Center West Entrance Plaza",
+        "latitude": 38.625,
+        "longitude": -90.1866,
+        "sourceURL": "https://www.nps.gov/jeff/learn/news/star-gaze-this-summer-during-gateway-to-the-stars-events-at-gateway-arch-national-park.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "glba",
@@ -412,7 +548,29 @@
     "description": "A showcase of melting glaciers, alpine meadows, carved valleys, and spectacular lakes. With over 700 miles of trails, Glacier is a paradise for adventurous visitors seeking a landscape steeped in human culture. Relive the days of old through historic chalets, lodges, and the famous Going-to-the-Sun Road.",
     "sourceURL": "https://www.nps.gov/glac/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Logan Pass (visitor center parking lot)",
+        "latitude": 48.6953,
+        "longitude": -113.718,
+        "sourceURL": "https://www.nps.gov/glac/planyourvisit/astronomy-programs.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "St. Mary Visitor Center (Dusty Star Observatory)",
+        "latitude": 48.7473,
+        "longitude": -113.439,
+        "sourceURL": "https://www.nps.gov/glac/planyourvisit/astronomy-programs.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Apgar Visitor Center / Apgar Transit Center",
+        "latitude": 48.5231,
+        "longitude": -113.9885,
+        "sourceURL": "https://www.nps.gov/glac/learn/news/summer-astronomy-program-begins.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "grca",
@@ -452,7 +610,22 @@
     "description": "Soaring over a landscape rich with wildlife, pristine lakes, and majestic alpine vistas, the Teton Range stands as a testament to generations of stewards. For over 11,000 years, communities have thrived in the valley known as Jackson Hole, turning these mountains into more than just peaks—they embody imagination and enduring human connection.",
     "sourceURL": "https://www.nps.gov/grte/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Craig Thomas Discovery and Visitor Center",
+        "latitude": 43.6533,
+        "longitude": -110.7187,
+        "sourceURL": "https://www.nps.gov/grte/learn/news/star-party-scheduled-for-october-28.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Colter Bay Amphitheater",
+        "latitude": 43.9037,
+        "longitude": -110.645,
+        "sourceURL": "https://www.nps.gov/grte/learn/news/night-sky-festival-underway-this-weekend-at-colter-bay.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "grba",
@@ -516,7 +689,22 @@
     "description": "Ridge upon ridge of forest straddles the border between North Carolina and Tennessee in Great Smoky Mountains National Park. World renowned for its diversity of plant and animal life, the beauty of its ancient mountains, and the quality of its remnants of Southern Appalachian mountain culture, this is America's most visited national park. Plan your visit today!",
     "sourceURL": "https://www.nps.gov/grsm/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Cades Cove Orientation Shelter (Loop Road entrance)",
+        "latitude": 35.6065,
+        "longitude": -83.7765,
+        "sourceURL": "https://www.nps.gov/grsm/learn/news/park-hosts-star-gazing-event-at-cades-cove.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Purchase Knob – Appalachian Highlands Science Learning Center",
+        "latitude": 35.586,
+        "longitude": -83.0732,
+        "sourceURL": "https://www.nps.gov/grsm/learn/news/park-hosts-star-gazing-event-at-purchase-knob.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "gumo",
@@ -532,7 +720,22 @@
     "description": "Come experience mountains and canyons, desert and dunes, night skies and spectacular vistas within a place unlike any other. Guadalupe Mountains National Park protects the world's most extensive Permian fossil reef, the four highest peaks in Texas, an environmentally diverse collection of flora and fauna, and the stories of lives shaped through conflict, cooperation and survival.",
     "sourceURL": "https://www.nps.gov/gumo/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Pine Springs Amphitheater",
+        "latitude": 31.8969,
+        "longitude": -104.8262,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=F5A2FAAF-E521-4A75-9409FBC270B3202D",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Salt Basin Dunes Trailhead",
+        "latitude": 31.9235,
+        "longitude": -105.0063,
+        "sourceURL": "https://www.nps.gov/gumo/learn/news/under-the-stars-at-the-salt-basin-dunes.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "hale",
@@ -548,7 +751,22 @@
     "description": "This special place vibrates with stories of ancient and modern Hawaiian culture and protects the bond between the land and its people. The park also cares for endangered species, some of which exist nowhere else. Come visit this special place - renew your spirit amid stark volcanic landscapes and sub-tropical rain forest with an unforgettable hike through the backcountry.",
     "sourceURL": "https://www.nps.gov/hale/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Haleakalā Visitor Center",
+        "latitude": 20.7151,
+        "longitude": -156.2498,
+        "sourceURL": "https://www.nps.gov/hale/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Hosmer Grove Campground",
+        "latitude": 20.7685,
+        "longitude": -156.2377,
+        "sourceURL": "https://www.nps.gov/hale/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "havo",
@@ -564,7 +782,15 @@
     "description": "Hawai‘i Volcanoes National Park protects some of the most unique geological, biological, and cherished cultural landscapes in the world. Extending from sea level to 13,680 feet, the park encompasses the summits of two of the world's most active volcanoes - Kīlauea and Mauna Loa - and is a designated International Biosphere Reserve and UNESCO World Heritage Site.",
     "sourceURL": "https://www.nps.gov/havo/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Kīlauea Overlook",
+        "latitude": 19.4239,
+        "longitude": -155.2846,
+        "sourceURL": "https://www.nps.gov/havo/learn/news/20180327_pr_national_park_week.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "hosp",
@@ -596,7 +822,15 @@
     "description": "Lake Michigan's might has influenced Indiana Dunes for millennia. Wind and waves have shaped the land, leaving a rich mosaic of habitats along these 15 miles of Indiana coast. Over 50 miles of trails lead through shifting sand dunes, quiet woodlands, sunny prairies and lush wetlands. Known for its striking plant and bird diversity, it's easy to find inspiration throughout the park’s 16,000 acres.",
     "sourceURL": "https://www.nps.gov/indu/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Kemil Beach Parking Lot",
+        "latitude": 41.6774,
+        "longitude": -87.0095,
+        "sourceURL": "https://www.nps.gov/indu/learn/news/stargazing-jan-20.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "isro",
@@ -739,7 +973,29 @@
     "description": "Lassen Volcanic National Park is home to steaming fumaroles, meadows freckled with wildflowers, clear mountain lakes, and numerous volcanoes. Jagged peaks tell the story of its eruptive past while hot water continues to shape the land.",
     "sourceURL": "https://www.nps.gov/lavo/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Bumpass Hell parking area",
+        "latitude": 40.4658,
+        "longitude": -121.5145,
+        "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Kohm Yah-mah-nee Visitor Center",
+        "latitude": 40.4378,
+        "longitude": -121.5338,
+        "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Loomis Museum / Manzanita Lake",
+        "latitude": 40.5362,
+        "longitude": -121.563,
+        "sourceURL": "https://www.nps.gov/lavo/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "maca",
@@ -755,7 +1011,15 @@
     "description": "Rolling hills, deep river valleys, and the world's longest known cave system. Mammoth Cave National Park is home to thousands of years of human history and a rich diversity of plant and animal life, earning it the title of UNESCO World Heritage Site and International Biosphere Region.",
     "sourceURL": "https://www.nps.gov/maca/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Visitor Center bus loop and fields",
+        "latitude": 37.187,
+        "longitude": -86.1012,
+        "sourceURL": "https://www.nps.gov/maca/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "meve",
@@ -771,7 +1035,22 @@
     "description": "For over 700 years, the Ancestral Pueblo people built thriving communities on the mesas and in the cliffs of Mesa Verde. Today, the park protects the rich cultural heritage of 27 Pueblos and Tribes and offers visitors a spectacular window into the past. This World Heritage Site and International Dark Sky Park is home to over a thousand species, including several that live nowhere else on earth.",
     "sourceURL": "https://www.nps.gov/meve/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Morefield Campground Amphitheater",
+        "latitude": 37.3053,
+        "longitude": -108.4183,
+        "sourceURL": "https://www.nps.gov/meve/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Far View Lodge",
+        "latitude": 37.2582,
+        "longitude": -108.4938,
+        "sourceURL": "https://www.nps.gov/meve/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "mora",
@@ -787,7 +1066,29 @@
     "description": "Ascending to 14,410 feet above sea level, Mount Rainier stands as an icon in the Washington landscape. An active volcano, Mount Rainier is the most glaciated peak in the contiguous U.S.A., spawning five major rivers. Subalpine wildflower meadows ring the icy volcano while ancient forest cloaks Mount Rainier’s lower slopes. Wildlife abounds in the park’s ecosystems. A lifetime of discovery awaits.",
     "sourceURL": "https://www.nps.gov/mora/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Paradise – Jackson Visitor Center plaza",
+        "latitude": 46.7859,
+        "longitude": -121.7367,
+        "sourceURL": "https://www.nps.gov/thingstodo/stargazing-in-paradise-stevens-canyon.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Sunrise Point",
+        "latitude": 46.9174,
+        "longitude": -121.5884,
+        "sourceURL": "https://www.nps.gov/thingstodo/star-gazing-at-sunrise.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Inspiration Point (Stevens Canyon Road)",
+        "latitude": 46.7734,
+        "longitude": -121.7444,
+        "sourceURL": "https://www.nps.gov/thingstodo/stargazing-in-paradise-stevens-canyon.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "npsa",
@@ -819,7 +1120,29 @@
     "description": "A rugged, whitewater river flowing northward through deep canyons, the New River is among the oldest rivers on the continent. The park encompasses over 70,000 acres of land along the New River, is rich in cultural and natural history, and offers an abundance of scenic and recreational opportunities.",
     "sourceURL": "https://www.nps.gov/neri/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "New River Gorge Bridge Overlook (Canyon Rim Visitor Center)",
+        "latitude": 38.07,
+        "longitude": -81.0784,
+        "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Grandview Main Overlook",
+        "latitude": 37.8309,
+        "longitude": -81.0613,
+        "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Meadow Creek Campground",
+        "latitude": 37.7979,
+        "longitude": -80.9207,
+        "sourceURL": "https://www.nps.gov/neri/planyourvisit/sunsets-and-night-skies.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "noca",
@@ -835,7 +1158,15 @@
     "description": "Less than three hours from Seattle, an alpine landscape beckons. Discover communities of life adapted to moisture in the west and recurring fire in the east. Explore jagged peaks crowned by more than 300 glaciers. Listen to cascading waters in forested valleys. Witness a landscape sensitive to the Earth's changing climate. Help steward the ecological heart of the Cascades.",
     "sourceURL": "https://www.nps.gov/noca/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Diablo Lake Overlook",
+        "latitude": 48.7098,
+        "longitude": -121.0972,
+        "sourceURL": "https://www.nps.gov/noca/planyourvisit/evening-explorations.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "olym",
@@ -851,7 +1182,15 @@
     "description": "With its incredible range of precipitation and elevation, diversity is the hallmark of Olympic National Park. Encompassing nearly a million acres, the park protects a vast wilderness, thousands of years of human history, and several distinctly different ecosystems, including glacier-capped mountains, old-growth temperate rain forests, and over 70 miles of wild coastline. Come explore!",
     "sourceURL": "https://www.nps.gov/olym/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Hurricane Ridge (visitor center area)",
+        "latitude": 47.9691,
+        "longitude": -123.499,
+        "sourceURL": "https://www.nps.gov/olym/planyourvisit/nightsky.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "pefo",
@@ -867,7 +1206,22 @@
     "description": "A landscape where deep time lies fully on display, Petrified Forest National Park blends colorful badlands, vast grasslands, and one of the world’s largest and most vivid collections of petrified wood. Spanning more than 200 million years of geologic history, the park protects ancient fossils, ancestral Puebloan sites, habitat for desert animals, and a sweeping stretch of historic Route 66.",
     "sourceURL": "https://www.nps.gov/pefo/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Kachina Point",
+        "latitude": 35.0845,
+        "longitude": -109.7881,
+        "sourceURL": "https://www.nps.gov/pefo/learn/news/stargazing-at-petrified-forest-national-park.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Chinde Point Picnic Area",
+        "latitude": 35.0867,
+        "longitude": -109.7959,
+        "sourceURL": "https://www.nps.gov/pefo/learn/news/nightsky101915.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "pinn",
@@ -883,7 +1237,29 @@
     "description": "Around 23 million years ago, a series of volcanic eruptions shaped the landscape that is now Pinnacles National Park. The remnants of these ancient eruptions have formed a striking terrain of rocky spires and deep canyons. Visitors can explore diverse environments, from chaparral and oak woodlands to the cool, shaded depths of canyon floors.",
     "sourceURL": "https://www.nps.gov/pinn/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Bacon Ranch",
+        "latitude": 36.4957,
+        "longitude": -121.1425,
+        "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Peaks View Parking Area",
+        "latitude": 36.4825,
+        "longitude": -121.1619,
+        "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Chaparral Parking Area",
+        "latitude": 36.4918,
+        "longitude": -121.2097,
+        "sourceURL": "https://www.nps.gov/thingstodo/pinnacles-night-sky-viewing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "redw",
@@ -899,7 +1275,22 @@
     "description": "Renowned for the world’s tallest trees, Redwood’s landscapes span from open prairies and oak woodlands to pristine rivers and untamed coastline. This ancient home has supported people for thousands of years. The National Park Service and California State Parks now work to safeguard and rejuvenate these lands for everyone’s enjoyment, learning, and inspiration.",
     "sourceURL": "https://www.nps.gov/redw/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Schoolhouse Peak Fire Lookout (Bald Hills)",
+        "latitude": 41.1514,
+        "longitude": -123.883,
+        "sourceURL": "https://www.nps.gov/redw/learn/news/star-party.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Redwood Creek Overlook",
+        "latitude": 41.2578,
+        "longitude": -123.9889,
+        "sourceURL": "https://www.nps.gov/places/redwoodcreekoverlook.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "romo",
@@ -915,7 +1306,29 @@
     "description": "Rocky Mountain National Park's 415 square miles (265,807 acres) encompasses a spectacular range of mountain environments. From meadows found in the montane life zone to glistening alpine lakes and up to the towering mountain peaks, there is something for everyone to discover. Along the way explore over 300 miles of hiking trails and incredible wildlife viewing.",
     "sourceURL": "https://www.nps.gov/romo/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Park & Ride (Bear Lake Road)",
+        "latitude": 40.3298,
+        "longitude": -105.6014,
+        "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Upper Beaver Meadows Trailhead",
+        "latitude": 40.3729,
+        "longitude": -105.6141,
+        "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Holzwarth Historic Site Parking Area",
+        "latitude": 40.3729,
+        "longitude": -105.8545,
+        "sourceURL": "https://www.nps.gov/romo/planyourvisit/astronomy_programs.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "sagu",
@@ -931,7 +1344,29 @@
     "description": "Tucson, Arizona is home to the nation's largest cacti. The giant saguaro is the universal symbol of the American west. These majestic plants, found only in a small portion of the United States, are protected by Saguaro National Park, to the east and west of the modern city of Tucson. Here you have a chance to see these enormous cacti, silhouetted by the beauty of a magnificent desert sunset.",
     "sourceURL": "https://www.nps.gov/sagu/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Red Hills Visitor Center (Tucson Mountain District)",
+        "latitude": 32.2545,
+        "longitude": -111.1973,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=8B44213A-EF79-CCD8-3E421265E6BA3B41",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Rincon Mountain Visitor Center (Rincon Mountain District)",
+        "latitude": 32.1801,
+        "longitude": -110.736,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=92598C53-9F71-1AE6-FFC430D08EC83D77",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Loma Alta Trailhead",
+        "latitude": 32.1331,
+        "longitude": -110.6872,
+        "sourceURL": "https://www.nps.gov/sagu/learn/nature/dark-sky.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "sequ",
@@ -947,7 +1382,15 @@
     "description": "Huge mountains, rugged foothills, deep canyons, vast caverns, and the world’s largest trees exemplify the diversity of landscapes, life, and beauty here. Explore these pages to plan your visit or to learn about the plants and animals here and the threats they face. Ancient giant sequoias may seem invincible, but they, too are vulnerable.",
     "sourceURL": "https://www.nps.gov/seki/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Moro Rock",
+        "latitude": 36.5441,
+        "longitude": -118.7651,
+        "sourceURL": "https://www.nps.gov/seki/planyourvisit/dark-sky-festival.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "shen",
@@ -963,7 +1406,22 @@
     "description": "Just 75 miles from the bustle of Washington, D.C., Shenandoah National Park is a land bursting with cascading waterfalls, spectacular vistas, fields of wildflowers, and quiet wooded hollows. With over 200,000 acres of protected lands that are haven to deer, songbirds, and black bear, there's so much to explore...and your journey begins right here!",
     "sourceURL": "https://www.nps.gov/shen/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Big Meadows",
+        "latitude": 38.5265,
+        "longitude": -78.4397,
+        "sourceURL": "https://www.nps.gov/shen/learn/nature/nightsky.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Skyland Amphitheater",
+        "latitude": 38.5902,
+        "longitude": -78.3841,
+        "sourceURL": "https://www.nps.gov/shen/learn/nature/nightsky.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "thro",
@@ -979,7 +1437,29 @@
     "description": "When Theodore Roosevelt came to Dakota Territory to hunt bison in 1883, he was a skinny, young, spectacled dude from New York. He could not have imagined how his adventure in this remote and unfamiliar place would forever alter the course of the nation. The rugged landscape and strenuous life that TR experienced here would help shape a conservation policy that we still benefit from today.",
     "sourceURL": "https://www.nps.gov/thro/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Peaceful Valley Ranch",
+        "latitude": 46.9589,
+        "longitude": -103.5036,
+        "sourceURL": "https://www.nps.gov/thro/learn/nature/dakota-nights-festival.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Buck Hill",
+        "latitude": 46.9256,
+        "longitude": -103.3888,
+        "sourceURL": "https://www.nps.gov/places/buck-hill.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Oxbow Overlook (North Unit)",
+        "latitude": 47.6028,
+        "longitude": -103.4417,
+        "sourceURL": "https://www.nps.gov/thingstodo/see-the-stars-in-theodore-roosevelt-national-park.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "viis",
@@ -995,7 +1475,15 @@
     "description": "Go beyond Virgin Islands National Park's stunning white-sand beaches. Hike to historic plantation sites to learn about a challenging past when sugar and enslaved labor dominated life on the island. Visit the Indigenous Taino's ancient petroglyphs. Snorkel coral reefs to discover hidden marine life. Two-thirds of the island of St. John is national park, making it a unique destination for visitors.",
     "sourceURL": "https://www.nps.gov/viis/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Cinnamon Bay Beach",
+        "latitude": 18.3523,
+        "longitude": -64.7541,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=EB18447A-DCF1-A26C-1F274CFABBE7DEA5",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "voya",
@@ -1011,7 +1499,22 @@
     "description": "Voyageurs National Park spans 218,000 acres of lakes, forests, and streams in northern Minnesota. Established in 1975, the park is named after the French-Canadian Voyageurs who once navigated these abundant waters. Voyageurs National Park provides exceptional opportunities for recreation and exploration amidst landscapes rich in natural beauty, history, and cultural heritage.",
     "sourceURL": "https://www.nps.gov/voya/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Rainy Lake Visitor Center Upper Parking Lot",
+        "latitude": 48.5848,
+        "longitude": -93.1611,
+        "sourceURL": "https://www.nps.gov/voya/planyourvisit/stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Kabetogama Lake Visitor Center",
+        "latitude": 48.445,
+        "longitude": -93.03,
+        "sourceURL": "https://www.nps.gov/voya/learn/news/2026-08-11-voyageurs-national-park-sixth-annual-star-party.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "whsa",
@@ -1027,7 +1530,15 @@
     "description": "Rising from the heart of the Tularosa Basin is one of the world's great natural wonders - the glistening white sands of New Mexico. Great wave-like dunes of gypsum sand have engulfed 275 square miles of desert, creating the world's largest gypsum dunefield. White Sands National Park preserves a major portion of this unique dunefield, along with the plants and animals that live here.",
     "sourceURL": "https://www.nps.gov/whsa/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Dunes Drive Amphitheater (Evening Program Area)",
+        "latitude": 32.82,
+        "longitude": -106.2645,
+        "sourceURL": "https://www.nps.gov/whsa/planyourvisit/full-moon-night.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "wica",
@@ -1043,7 +1554,15 @@
     "description": "Wind Cave National Park protects two very different worlds - one deep within the earth, the other a sunlit world of many resources. Bison, elk, and other wildlife roam the rolling prairie grasslands and forested hillsides of one of America's oldest national parks. Below the remnant island of intact prairie sits Wind Cave, one of the longest and most complex caves in the world.",
     "sourceURL": "https://www.nps.gov/wica/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Elk Mountain Campground (Elk Mountain trail)",
+        "latitude": 43.5665,
+        "longitude": -103.4925,
+        "sourceURL": "https://www.nps.gov/wica/learn/nature/dark-sky.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "wrst",
@@ -1075,7 +1594,15 @@
     "description": "Yellowstone protects geysers, hot springs, mountain landscapes and wildlife. Stay on designated routes, including after dark.",
     "sourceURL": "https://www.nps.gov/yell/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [
+      {
+        "name": "Madison Information Station parking lot",
+        "latitude": 44.6429,
+        "longitude": -110.8605,
+        "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=C8D5BE8C-C461-9378-F2897B441ACFBC63",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      }
+    ]
   },
   {
     "id": "yose",

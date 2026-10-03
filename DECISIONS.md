@@ -57,3 +57,28 @@ One line per decision, with reasoning. Newest at the bottom.
 - 2026-10-02: Final native-control critique gives filled buttons black text, uses darker toggle tracks, and separates Stepper's primary/secondary/tertiary styles. The earlier all-light hierarchy made both symbols and fills red, erasing control contrast after filtering; recaptured native controls now remain distinct.
 - 2026-10-02: Increase screenshot settling time to eight seconds. Several iOS 27 four-second captures caught launch or count-up frames under simulator load and were invalid evidence; recapture them after settling.
 - 2026-10-02: Verify the locally available development signing profile instead of assuming signing is unavailable. A development-signed Release archive and App Group entitlements validate locally; App Store distribution export still requires the publisher's account workflow.
+
+## Completion review — 2026-10-02
+
+- Fix: the NPS key never reached the app (`INFOPLIST_KEY_*` only expands Apple keys). It now lives in the app Info.plist via `Config/Nyx.xcconfig`, which includes a git-ignored `Config/Secrets.xcconfig`. Without this, closures and ranger programs could never load.
+- Fix: "tonight" now means the park-local night in progress until local noon (`Park.currentNight(at:)`); at 1 a.m. in the field the app, widget and Siri showed the next evening.
+- Fix: clouds are averaged over true darkness, else sunset–sunrise, else local 22:00–02:00 (`SkyConditions.cloudWindow`); Alaska summer nights no longer pretend there is no forecast.
+- Fix: reminders for tonight (or tomorrow, opened after 18:00) fire within a minute while darkness has not begun, and a delivered reminder is never repeated. Tapping one opens its park; reminders show while Nyx is open.
+- Fix: park search and Siri fold the ʻokina, dashes and diacritics and accept common aliases ("Smokies", "Hawaii Volcanoes"); `updateAppShortcutParameters()` runs at launch.
+- Fix: the in-app night-vision switch reloads the Control Center control and widgets.
+- Fix: cached forecasts and park updates load at launch, so offline scores and closures appear immediately.
+- Fix: share-card text had no explicit color and rendered black in `ImageRenderer`; the card now sets every color and renders after scrubbing settles.
+- Fix: choosing a starting park clears device location; previously the choice was silently ignored once location was granted.
+- Fix: onboarding dismissed by swipe counts as finished; the pull-to-refresh shooting star replays every time; ranger program dates and time zones are formatted for people.
+- Time river rebuilt as one non-scrolling Canvas strip: horizontal-only scrubbing (vertical page scroll never changes the night), live morphing moon above the selected night, amber glow on the three best nights, dashed hollow nights past the forecast, VoiceOver adjustable action. It now sits directly under the gauge; a large stepper replaces it at accessibility sizes.
+- The gauge counts up once per appearance; later score changes glide on the spring, so scrubbing no longer re-fires milestone haptics. Orbit speed scales visibly with the score and runs at display rate.
+- Starfield twinkle amplitude and speed follow the night's score; star positions are computed once, not per frame.
+- Calendar: real long-press peek (`contextMenu` preview), directional month slide plus swipe, today marked, past nights dimmed, the five-night window only considers nights still ahead.
+- Score breakdown shows "x of y" with bars; maximums are scaled when clouds are unknown.
+- Onboarding pages swipe; the middle page builds the score from its four weighted parts.
+- Cold launch: the starfield paints first and the tab shell settles in on a spring; no caption, no input blocking, skipped under Reduce Motion.
+- Closure alerts appear on every park row (Parks list and "More skies"), not only beside the top Tonight score.
+- App icon is now a native Icon Composer document (`Nyx/Resources/AppIcon.icon`) built from the layered SVGs via `ictool`; the raster AppIcon set and its generator script are removed.
+- Journal photos are stored downscaled (≤2400 px JPEG); entries can be deleted from their detail page; essay read times are computed; Settings shows the bundle version.
+- Fix: in the exported share card the gauge collapsed (ImageRenderer proposes no size) and the score rendered as "•••"; the card gives the gauge a fixed 300 pt frame. Verified by rendering the PNG.
+- Viewing spots: researched for the 50 parks that had none; kept only places an nps.gov page names for stargazing, ranger astronomy programs or star parties, with coordinates from NPS event pages, OpenStreetMap or Wikipedia. Spots sourced only from a photo caption were dropped. 50 of 63 parks now have spots; the remaining 13 (mostly roadless Alaska parks, Channel Islands, Isle Royale, Hot Springs, American Samoa) keep the ranger-guidance message. Provenance and evidence per spot: `Research/viewing-spots.json`.
