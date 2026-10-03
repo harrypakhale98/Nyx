@@ -89,3 +89,4 @@ One line per decision, with reasoning. Newest at the bottom.
 - Privacy label decided: Data Not Collected. Under Apple's definitions, Open-Meteo and the NPS API are not "third-party partners" (no vendor code in the app), the developer retains nothing, and requests carry only public park coordinates/codes. The policy still discloses the providers' IP logs. Reasoning in `PRIVACY.md`.
 - Public privacy, support and landing pages live in `docs/` for GitHub Pages; contact harry.pakhale98@gmail.com (owner's choice).
 - The owner's NPS key is in git-ignored `Config/Secrets.xcconfig`; verified against the live API.
+- App Store name is "Nyx: Dark Sky Planner" because "Nyx" is taken in App Store Connect; the owner chose this over the Noctis fallback to keep the brand. The Home Screen name stays "Nyx".

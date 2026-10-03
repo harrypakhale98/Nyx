@@ -4,7 +4,7 @@
 
 ## Product metadata draft
 
-- Name: **Nyx** (use until App Store Connect reports a conflict; approved fallback **Noctis**).
+- App Store name: **Nyx: Dark Sky Planner** ("Nyx" alone is taken; chosen by the owner 2026-10-03). Home Screen name stays **Nyx** (`CFBundleDisplayName`). Fallback if this is taken too: **Noctis**.
 - Subtitle: **Plan a darker night**
 - Primary category: Travel. Secondary: Weather.
 - Price: Free; no subscriptions, ads or in-app purchases. This is required by the chosen Open-Meteo free/non-commercial service.
