@@ -4,7 +4,7 @@ A fresh four-part audit (astronomy math against PyEphem, services and concurrenc
 
 **Verified 2026-10-04 on one dedicated simulator (iPhone 17 Pro, iOS 27.0):** zero warnings; 35 Swift Testing tests pass (7 new: PyEphem reference times, pinned formula, Milky Way latitude, polar sunrise, NPS throttling, all-park forecasts, reminder race); both UI tests and the night-vision accessibility audit (17 screens) pass; the standard-palette audit passes on all 17 screens across two runs (a heavily loaded host made one run's audit time out mid-way; every issue it logged is a documented exclusion). Touched screens were captured and reviewed (detail standard and polar, river selection, calendar, Tonight). Not re-run on iOS 26.5 this time (one simulator, at the owner's request); none of the changes touch iOS 26-specific code paths.
 
-**Next starting point:** upload build 1.0 (4), push to publish the privacy page, optionally request a higher NPS limit (INPUT_NEEDED 3–5), then the on-device night review (INPUT_NEEDED 1).
+**Next starting point:** build 1.0 (4) is uploaded and the privacy page is pushed. Test build 4 in TestFlight and submit it (INPUT_NEEDED 2), optionally request a higher NPS limit (INPUT_NEEDED 3), and do the on-device night review (INPUT_NEEDED 1).
 
 ---
 

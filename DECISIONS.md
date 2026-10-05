@@ -166,3 +166,4 @@ Four independent read-only reviews (astronomy and score math checked numerically
 - The real-sky cache holds at most 40 nights and is checked before any astronomy is computed.
 - Theodore Roosevelt's North Unit spot notes that it keeps Central Time. Info.plist versions come from the build settings; verify_release.py now measures what it reports (URL and URLSession use across all sources, version and build against project.yml, NPS key expansion).
 - Not changed: 13 parks without verified viewing spots keep the ranger-guidance empty state (no unverified coordinates invented); the learn/*.md sources stay as the editable originals of the catalog essays.
+- Build 1.0 (4) archived with App Store distribution signing (automatic, team DUHVN68KBA) and uploaded on 2026-10-04 via `xcodebuild -exportArchive` (destination upload); includes the owner's NPS key and the fresh-audit fixes.

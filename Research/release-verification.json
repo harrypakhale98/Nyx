@@ -3,14 +3,15 @@
     1
   ],
   "version": "1.0",
-  "build": "1",
+  "build": "4",
   "bundledManifests": 2,
   "runtimeHTTPHosts": [
-    "developer.nps.gov",
-    "api.open-meteo.com"
+    "api.open-meteo.com",
+    "developer.nps.gov"
   ],
   "runtimePackages": 0,
-  "catalogKeys": 325,
+  "npsKeyEmbedded": true,
+  "catalogKeys": 373,
   "privacyDeclaration": "UNRESOLVED \u2014 publisher review required",
   "signing": "development-signed Release; App Store export/validation pending"
 }
