@@ -11,7 +11,7 @@ A design pass aimed at the Apple Design Award bar: every screen now answers "whe
 
 **Verified 2026-10-05:** zero warnings; iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5 — all 39 tests including both accessibility audits pass (the audit caught a fixed-size numeral in the new breakdown, now Dynamic Type-scaled). Touched screens captured and reviewed: detail (live, no forecast, night vision, AX5), Parks (live, AX5), Tonight, journal list and entry, breakdown (standard and polar), store frames.
 
-**Next starting point:** archive and upload build 1.0 (5) in place of build 4 (INPUT_NEEDED 2), then the on-device night review (INPUT_NEEDED 1).
+**Next starting point:** build 1.0 (5) is uploaded (2026-10-05). Test it in TestFlight and submit it (INPUT_NEEDED 2), with the new frames in `Store/Framed/`; then the on-device night review (INPUT_NEEDED 1).
 
 ---
 

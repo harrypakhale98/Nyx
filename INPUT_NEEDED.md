@@ -9,12 +9,13 @@ Everything else is built, verified and documented. Each step below needs your Ap
    - Paste the description, keywords, subtitle and URLs from `SUBMISSION.md`. If you entered the description before, paste it again; it gained two sentences.
    - App Privacy: "No, we do not collect data from this app". Reasoning is in `PRIVACY.md`.
    - Upload the six 6.9-inch screenshots in `Store/Screenshots/` (no alpha channel), replacing any uploaded earlier.
-   - **Upload build 1.0 (5)** (2026-10-05 design pass: score readout, week strip, fact-based breakdown, journal sky). In Xcode: Product → Archive → Distribute App → App Store Connect → Upload. Builds 1–4 are superseded. When it finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
+   - **Build 1.0 (5) is uploaded** (2026-10-05 design pass: score readout, week strip, fact-based breakdown, journal sky; builds 1–4 are superseded). When it finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
    - Upload the six captioned frames in `Store/Framed/6.9-inch/` (and `6.5-inch/`), recaptured 2026-10-05, replacing earlier ones.
 
 3. **Ask NPS for a higher request limit for the Nyx key** (optional before launch, needed if Nyx grows). Every install shares the one key, and NPS keys default to about 1,000 requests an hour. Nyx now sends only alerts for most screens, at most one request per park every ten minutes, but a popular launch could still reach the limit; Nyx then quietly keeps the last known alerts and says when they were checked. Use the contact link on developer.nps.gov, name the key, and describe the use (a free app reading park alerts and night-sky events). Only the key's owner can ask.
 
 ## Done
+- Build 1.0 (5) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-05.
 - Build 1.0 (4) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-04. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, run `xcodegen generate`, then Product → Archive → Distribute App → App Store Connect → Upload.
 - Privacy page update (forecast and park-alert wording) pushed to GitHub Pages on 2026-10-04.
 - App icon: native Icon Composer document `Nyx/Resources/AppIcon.icon`.
