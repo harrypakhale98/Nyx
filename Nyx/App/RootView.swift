@@ -57,6 +57,11 @@ struct RootView:View {
             #if DEBUG
             if DebugScenario.state=="populated" {
                 context.insert(JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
+                // Illustrative past sessions so store captures show a lived-in journal.
+                let day:TimeInterval=86_400
+                context.insert(JournalEntry(date:.now-24*day,parkID:"grba",observedBortle:1,notes:"No moon. The sky was so full of stars the constellations were hard to find."))
+                context.insert(JournalEntry(date:.now-52*day,parkID:"brca",observedBortle:2,notes:"Ranger astronomy program. Saturn through a telescope, rings and all."))
+                context.insert(JournalEntry(date:.now-81*day,parkID:"deva",observedBortle:2,notes:"Warm wind off the dunes. The galactic core hung low in the south."))
                 context.insert(SavedPark(parkID:model.homeID))
                 try? context.save()
             }
