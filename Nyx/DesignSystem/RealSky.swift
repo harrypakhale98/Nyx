@@ -106,7 +106,11 @@ private struct StarLayer: View, Equatable {
         /// True when the Sun is at least 12° down at the moment shown: the Milky Way is drawn only then.
         let dark: Bool
     }
+    /// Skies by park and night, oldest first out: each holds about 45 KB of stars, and scrubbing
+    /// thirty nights across several parks would otherwise keep every one of them.
     private var cache:[String:Sky]=[:]
+    private var recent:[String]=[]
+    private let capacity=40
     private lazy var catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)]={
         guard let url=Bundle.main.url(forResource:"stars",withExtension:"json"),let data=try? Data(contentsOf:url),
               let rows=try? JSONDecoder().decode([[Double]].self,from:data) else { return [] }
@@ -119,13 +123,14 @@ private struct StarLayer: View, Equatable {
         return CGPoint(x:size.width/2+p.x*scale,y:size.height*0.5-p.y*scale)
     }
     func sky(for park:Park,night:Date)->Sky {
+        // Looked up before any astronomy: this runs whenever a screen behind the stars redraws.
+        let key="\(park.id)-\(Int(park.evening(night).timeIntervalSince1970))"
+        if let cached=cache[key] { return cached }
         let engine=AstronomyEngine()
         let sky=engine.conditions(for:park,on:night)
         // The middle of true darkness; otherwise local midnight.
         let moment:Date
         if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) } else { moment=sky.evening.addingTimeInterval(12*3600) }
-        let key="\(park.id)-\(Int(moment.timeIntervalSince1970/600))"
-        if let cached=cache[key] { return cached }
         let facing=park.latitude<0 ? 0.0 : 180.0, centreAltitude=45.0*Double.pi/180
         func project(_ ra:Double,_ dec:Double)->SIMD2<Double>? {
             let h=engine.horizontal(date:moment,park:park,ra:ra,dec:dec)
@@ -157,6 +162,8 @@ private struct StarLayer: View, Equatable {
         if !current.isEmpty { segments.append(current) }
         let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:engine.solarAltitude(at:moment,park:park) < -12)
         cache[key]=result
+        recent.append(key)
+        if recent.count>capacity { cache[recent.removeFirst()]=nil }
         return result
     }
 }

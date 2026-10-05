@@ -7,6 +7,8 @@ import SwiftUI
 struct SkyArc: View {
     @Environment(\.nyx) private var palette
     let night: Night
+    /// Whether this is tonight's night, for copy that names it.
+    var isTonight=true
     /// Sunset minus an hour to sunrise plus an hour; 18:00–06:00 local when the Sun never crosses.
     private var window:(start:Date,end:Date) {
         if let sunset=night.sky.sunset,let sunrise=night.sky.sunrise,sunrise>sunset {
@@ -23,6 +25,8 @@ struct SkyArc: View {
             }
             .frame(height:168)
             .clipShape(RoundedRectangle(cornerRadius:14))
+            // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
+            .accessibilityIgnoresInvertColors()
             .dynamicTypeSize(...DynamicTypeSize.xxLarge)
             .accessibilityHidden(true)
             ViewThatFits(in:.horizontal) {
@@ -30,7 +34,7 @@ struct SkyArc: View {
                 VStack(alignment:.leading,spacing:8) { legend }
             }.font(.caption).foregroundStyle(palette.muted)
             if night.sky.darkHours==0 {
-                Text("No true darkness tonight at this latitude.").font(.body).foregroundStyle(palette.ink)
+                Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.ink)
             } else {
                 ViewThatFits(in:.horizontal) {
                     HStack { timeLabel("Darkness begins",time:night.sky.darkStart); Spacer(); timeLabel("Darkness ends",time:night.sky.darkEnd) }
@@ -39,7 +43,7 @@ struct SkyArc: View {
             }
             Text("Times in \(night.park.timeZoneName)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }.accessibilityElement(children:.ignore)
-            .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? String(localized:"No true darkness tonight at this latitude.") : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). Times in \(night.park.timeZoneName).")
+            .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). Times in \(night.park.timeZoneName).")
     }
 
     /// Sky colour for a solar altitude: dusk blue, nebula violet at civil twilight,

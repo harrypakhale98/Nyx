@@ -1,3 +1,13 @@
+# Nyx handoff — 2026-10-04 (fresh audit, build 4)
+
+A fresh four-part audit (astronomy math against PyEphem, services and concurrency, UI and accessibility, configuration and release). All confirmed findings are fixed and logged under "Fresh audit" in `DECISIONS.md`. Highlights: Alaska moonrise/moonset accuracy (was up to 41 minutes off), Milky Way guidance at high latitude, a privacy-preserving all-park forecast request, careful use of the shared NPS key, offline data moved out of Caches, reminder calendar and race fixes, and a set of night-vision, VoiceOver and time-river corrections.
+
+**Verified 2026-10-04 on one dedicated simulator (iPhone 17 Pro, iOS 27.0):** zero warnings; 35 Swift Testing tests pass (7 new: PyEphem reference times, pinned formula, Milky Way latitude, polar sunrise, NPS throttling, all-park forecasts, reminder race); both UI tests and the night-vision accessibility audit (17 screens) pass; the standard-palette audit passes on all 17 screens across two runs (a heavily loaded host made one run's audit time out mid-way; every issue it logged is a documented exclusion). Touched screens were captured and reviewed (detail standard and polar, river selection, calendar, Tonight). Not re-run on iOS 26.5 this time (one simulator, at the owner's request); none of the changes touch iOS 26-specific code paths.
+
+**Next starting point:** upload build 1.0 (4), push to publish the privacy page, optionally request a higher NPS limit (INPUT_NEEDED 3–5), then the on-device night review (INPUT_NEEDED 1).
+
+---
+
 # Nyx handoff — 2026-10-03 (depth and realism, build 3)
 
 Every item in `Research/depth-and-realism-audit.md` is implemented, at the owner's request, before the first release:

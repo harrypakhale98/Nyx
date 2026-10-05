@@ -112,9 +112,9 @@ struct ParkDetailView: View {
                         .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
                         .modifier(DepthParallax(depth:0.1))
                     if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-                    if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude.").font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
-                    if !night.score.hasForecast { Text(night.id.timeIntervalSince(.now)>16*86400 ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-                    Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil ? ScoreTip() : nil)
+                    if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+                    if !night.score.hasForecast { Text(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+                    Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
                 }
                 Panel { TimeRiver(nights:model.nights(park,from:riverStart,count:30),selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park)) }
                 Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
@@ -124,7 +124,7 @@ struct ParkDetailView: View {
                         }
                     }
                      if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
-                Panel { SkyArc(night:night) }
+                Panel { SkyArc(night:night,isTonight:night.id==model.tonight(park)) }
                 Panel {
                     VStack(alignment:.leading,spacing:18) {
                         Eyebrow(text:"Moonlight")
@@ -145,7 +145,7 @@ struct ParkDetailView: View {
                     LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
                     Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
                     Divider().overlay(palette.line)
-                    Text(AstronomyEngine().milkyWayGuidance(for:park,on:night.id)).font(.subheadline).foregroundStyle(palette.muted)
+                    Text(AstronomyEngine().milkyWayGuidance(for:night.sky,park:park)).font(.subheadline).foregroundStyle(palette.muted)
                     NavigationLink { EssayView(essay:.milkyway) } label:{ Label("Finding the Milky Way",systemImage:"sparkle").font(.subheadline) }
                 } }
                 Panel { VStack(alignment:.leading,spacing:18) {
@@ -169,12 +169,17 @@ struct ParkDetailView: View {
                 NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
             }.padding(24)
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        // Left open past sunrise, the river moves on to the new tonight; a chosen night that has
+        // dropped off it is released, so the gauge and the river always show the same night.
+        .onChange(of:riverStart) { _,start in
+            if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:30) { selected=nil }
+        }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { saveToolbar }
-            .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night) }.nyxPresentation().presentationDetents([.large]) }
+            .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(park)) }.nyxPresentation().presentationDetents([.large]) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
-            .task { await model.refresh([park]) }
-            .refreshable { await model.refresh([park],force:true) }
+            .task { await model.refresh([park],programs:true) }
+            .refreshable { await model.refresh([park],force:true,programs:true) }
     }
     @ToolbarContentBuilder private var saveToolbar: some ToolbarContent {
         if #available(iOS 27.0,*) {
@@ -190,6 +195,7 @@ struct ScoreBreakdownView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dismiss) private var dismiss
     let night:Night
+    var isTonight=true
     var body: some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Text("A number with a reason").font(.system(.largeTitle,design:.serif))
@@ -199,13 +205,14 @@ struct ScoreBreakdownView: View {
             row("Light pollution",points:night.score.bortlePoints,of:20,detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
             row("Length of darkness",points:night.score.lengthPoints,of:15,detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
             if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
-            if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude. The score is capped below 40.").foregroundStyle(palette.accent) }
-            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text("True darkness lasts only \(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide))) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.").foregroundStyle(palette.accent) }
+            if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
+            else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
             ShareCardButton(night:night)
         }.padding(24) }.background(Color.black).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
     }
+    private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; without clouds the others are scaled up to fill it.
     private func row(_ title:LocalizedStringKey,points:Double,of weight:Double,detail:String)->some View {
         let maximum=night.score.hasForecast ? weight : weight/0.75

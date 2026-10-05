@@ -14,7 +14,7 @@ settings:
     DEVELOPMENT_TEAM: DUHVN68KBA
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "3"
+    CURRENT_PROJECT_VERSION: "4"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -31,6 +31,9 @@ targets:
     info:
       path: Config/Nyx-Info.plist
       properties:
+        # Version keys follow the build settings, so a static plist value can never ship an old build number.
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleURLTypes:
           - CFBundleURLSchemes: [nyx]
         # Custom keys are not expanded from INFOPLIST_KEY_* settings; this one must live in the plist.
@@ -56,7 +59,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Dark
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.
         CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -86,6 +89,8 @@ targets:
     info:
       path: Config/NyxWidgets-Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

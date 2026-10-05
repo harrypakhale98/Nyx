@@ -1,4 +1,6 @@
-"""Reproducible bundled inventory from the public NPS parks response.
+"""Rebuild the bundled inventory from a saved public NPS /parks response (fetch it to
+/tmp/nyx-nps-parks.json first; the snapshot is not kept in the repo). Overwrites parks.json,
+including hand-edited notes, so review the diff before committing.
 Coordinates are NPS park representative coordinates, never navigation directions.
 Viewing coordinates are approximate; access must be checked with the park.
 """

@@ -22,8 +22,10 @@ struct TimeRiver: View {
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
     @State private var detents=0
-    private var index:Int { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) ?? 0 }
-    private var current:Night? { nights.indices.contains(index) ? nights[index] : nil }
+    /// The selected night's position; nil when it is not on the river, which then marks no night
+    /// rather than pretending the first one is chosen.
+    private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
+    private var current:Night? { index.map { nights[$0] } }
     /// The three highest-scoring nights, at least Good, receive the amber glow.
     private var peaks:Set<Int> {
         Set(nights.indices.filter { nights[$0].score.value>=60 }.sorted { nights[$0].score.value>nights[$1].score.value }.prefix(3))
@@ -53,7 +55,7 @@ struct TimeRiver: View {
             ZStack(alignment:.topLeading) {
                 Canvas { context,size in draw(in:&context,size:size) }
                     .accessibilityHidden(true)
-                if let current {
+                if let current,let index {
                     MoonView(geometry:AstronomyEngine().moon(for:current).geometry)
                         .frame(width:moonSize,height:moonSize)
                         .offset(x:x(index,width:width)-moonSize/2,y:0)
@@ -76,8 +78,8 @@ struct TimeRiver: View {
         .accessibilityHint("Swipe up or down to move one night at a time.")
         .accessibilityAdjustableAction { direction in
             switch direction {
-            case .increment: choose(index+1)
-            case .decrement: choose(index-1)
+            case .increment: choose(index.map { $0+1 } ?? 0)
+            case .decrement: choose(index.map { $0-1 } ?? 0)
             @unknown default: break
             }
         }
@@ -96,7 +98,7 @@ struct TimeRiver: View {
 
     /// At accessibility text sizes the drawn river gives way to a plain, large stepper.
     private var stepper: some View {
-        Stepper(value:Binding(get:{index},set:choose),in:0...max(0,nights.count-1)) {
+        Stepper(value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1)) {
             Text(spokenValue).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
         }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
             .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Adjust to move one night at a time.")
@@ -132,8 +134,10 @@ struct TimeRiver: View {
         let lastForecast=nights.lastIndex { $0.score.hasForecast }
 
         // Selected-night hairline, from the moon down to the date row.
-        var hairline=Path(); hairline.move(to:CGPoint(x:x(index,width:size.width),y:moonSize+2)); hairline.addLine(to:CGPoint(x:x(index,width:size.width),y:bottom+4))
-        context.stroke(hairline,with:.color(palette.line),lineWidth:0.6)
+        if let index {
+            var hairline=Path(); hairline.move(to:CGPoint(x:x(index,width:size.width),y:moonSize+2)); hairline.addLine(to:CGPoint(x:x(index,width:size.width),y:bottom+4))
+            context.stroke(hairline,with:.color(palette.line),lineWidth:0.6)
+        }
 
         // A smooth river through every night; the forecast-free stretch is dashed.
         func river(_ range:ClosedRange<Int>)->Path {
@@ -164,13 +168,17 @@ struct TimeRiver: View {
             else { context.fill(dot,with:.color(.black)); context.stroke(dot,with:.color(palette.accent),lineWidth:1.1) }
         }
 
-        // Sparse date labels: tonight, the first night of each week, and the selected night.
-        let labeled=nights.indices.filter { i in i==0 || i==index || (startsWeek(i) && abs(i-index)>2 && i>2) }
-        for i in labeled {
+        // Sparse date labels: the selected night first, then the first night, then the first night
+        // of each week. A label that would touch one already placed is left out.
+        var placed:[CGRect]=[]
+        for i in [index].compactMap({ $0 })+[0]+nights.indices.filter({ startsWeek($0) }) {
             let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : "\(nights[i].park.calendar.component(.day,from:nights[i].id))"
             let text=context.resolve(Text(label).font(.caption2.weight(i==index ? .semibold : .regular)).foregroundStyle(i==index ? palette.ink : palette.muted))
             let measured=text.measure(in:size)
             let cx=min(max(x(i,width:size.width),measured.width/2),size.width-measured.width/2)
+            let frame=CGRect(x:cx-measured.width/2-3,y:size.height-measured.height,width:measured.width+6,height:measured.height)
+            guard !placed.contains(where:{ $0.intersects(frame) }) else { continue }
+            placed.append(frame)
             context.draw(text,at:CGPoint(x:cx,y:size.height-measured.height/2))
         }
     }

@@ -68,6 +68,12 @@ nonisolated struct DarknessScore: Sendable {
     var band: ScoreBand { .band(value) }
     var hasForecast: Bool { cloudPoints != nil }
 }
+extension SkyConditions {
+    /// The spec's wording for tonight; any other night is named as that night.
+    static func noDarknessMessage(tonight: Bool) -> String {
+        tonight ? String(localized: "No true darkness tonight at this latitude.") : String(localized: "No true darkness on this night at this latitude.")
+    }
+}
 nonisolated struct Night: Identifiable, Sendable {
     var id: Date { sky.evening }
     let park: Park

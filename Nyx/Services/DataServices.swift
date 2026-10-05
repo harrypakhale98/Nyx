@@ -28,12 +28,26 @@ nonisolated struct SafeHTTP: HTTPTransport {
         return data
     }
 }
+/// The last forecasts and park updates. Application Support, not Caches: iOS empties Caches when
+/// storage runs low, and these files are what keep clouds and closures available offline. They are
+/// excluded from backup because they can always be fetched again.
 nonisolated enum CacheDirectory {
-    static var url: URL {
+    static let url: URL = {
+        let manager = FileManager.default
+        guard var folder = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("Offline", isDirectory: true),
+              (try? manager.createDirectory(at: folder, withIntermediateDirectories: true)) != nil else { return legacy }
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? folder.setResourceValues(values)
+        return folder
+    }()
+    /// Where earlier versions kept these files; still read until the next successful update.
+    private static var legacy: URL {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
     }
     static func read<T: Decodable>(_ type: T.Type, name: String) -> T? {
-        guard let data = try? Data(contentsOf: url.appendingPathComponent("nyx-\(name).json")) else { return nil }
+        let file = "nyx-\(name).json"
+        guard let data = (try? Data(contentsOf: url.appendingPathComponent(file))) ?? (try? Data(contentsOf: legacy.appendingPathComponent(file))) else { return nil }
         return try? JSONDecoder().decode(type, from: data)
     }
     static func write<T: Encodable>(_ value: T, name: String) {
@@ -144,18 +158,36 @@ nonisolated struct ParkEnrichment: Codable, Sendable {
     var programsUpdated: Date?=nil
 }
 nonisolated protocol ParkProviding: Sendable {
-    func enrichment(for park: Park, key: String, network: Bool, force: Bool) async -> ParkEnrichment?
+    /// `programs` adds the ranger events request; alerts alone are enough wherever programs are not shown.
+    func enrichment(for park: Park, key: String, network: Bool, force: Bool, programs: Bool) async -> ParkEnrichment?
 }
+/// Every install shares one NPS key and its hourly quota, so requests are spent carefully: alerts
+/// only unless programs are on screen, no repeat request for the same park within ten minutes (even
+/// when forced), and one request at a time per park however many screens ask.
 actor ParkStore: ParkProviding {
     private let transport: any HTTPTransport
     private let persist:Bool
     private var memory: [String:ParkEnrichment]=[:]
+    private var inFlight: [String:Task<ParkEnrichment?,Never>]=[:]
     init(transport: any HTTPTransport = SafeHTTP(),persist:Bool=true) { self.transport=transport;self.persist=persist }
-    func enrichment(for park: Park, key: String, network: Bool, force: Bool = false) async -> ParkEnrichment? {
+    func enrichment(for park: Park, key: String, network: Bool, force: Bool = false, programs: Bool = true) async -> ParkEnrichment? {
         let cached=memory[park.id] ?? (persist ? CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") : nil)
         guard network, !key.isEmpty, !key.contains("$(") else { return cached }
-        // Fresh only when both alerts and programs are: a failed events request retries next time.
-        if !force, let cached, Date.now.timeIntervalSince(min(cached.updated,cached.programsUpdated ?? .distantPast))<6*3600 { return cached }
+        if let cached {
+            let now=Date.now
+            if now.timeIntervalSince(cached.updated)<600 { return cached }
+            // Fresh only when everything asked for is: a failed events request retries next time.
+            let oldest=programs ? min(cached.updated,cached.programsUpdated ?? .distantPast) : cached.updated
+            if !force, now.timeIntervalSince(oldest)<6*3600 { return cached }
+        }
+        if let running=inFlight[park.id] { return await running.value }
+        let task=Task { await self.fetch(park,key:key,cached:cached,programs:programs) }
+        inFlight[park.id]=task
+        let result=await task.value
+        inFlight[park.id]=nil
+        return result
+    }
+    private func fetch(_ park: Park, key: String, cached: ParkEnrichment?, programs wanted: Bool) async -> ParkEnrichment? {
         func url(_ path: String, page:Int=1) throws -> URL {
             var c=URLComponents(); c.scheme="https"; c.host="developer.nps.gov"; c.path="/api/v1/\(path)"
             c.queryItems=[URLQueryItem(name:"parkCode",value:park.apiCode),URLQueryItem(name:"api_key",value:key),URLQueryItem(name:"limit",value:"100")]
@@ -167,15 +199,14 @@ actor ParkStore: ParkProviding {
             struct Event: Decodable { let id:String; let title:String; let datestart:String; let description:String; let tags:[String]?; let dates:[String]? }
             let data:[Event]; let total:String?
         }
-        struct ParkResponse: Decodable { struct Info: Decodable { let description:String }; let data:[Info] }
         // Alerts are the safety signal: they are saved as soon as they arrive. A slow or failing
-        // events or park request keeps the last known programs and description instead of
-        // discarding fresh closures. A failed alerts request never wipes known closures.
+        // events request keeps the last known programs instead of discarding fresh closures.
+        // A failed alerts request never wipes known closures.
         guard let alerts=try? JSONDecoder().decode(AlertResponse.self,from:await transport.get(url("alerts"))).data else { return cached }
         let today=park.isoDay(.now)
         var programs=(cached?.programs ?? []).filter { $0.date >= today }
         var programsUpdated=cached?.programsUpdated
-        if let firstPage=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events"))) {
+        if wanted, let firstPage=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events"))) {
             var events:[EventResponse.Event]?=firstPage.data
             let pages=min(10,Int(ceil((Double(firstPage.total ?? "0") ?? 0)/100)))
             if pages>1 {
@@ -194,8 +225,8 @@ actor ParkStore: ParkProviding {
                 programsUpdated = .now
             }
         }
-        let info=try? JSONDecoder().decode(ParkResponse.self,from:await transport.get(url("parks"))).data
-        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:info?.first?.description ?? cached?.description,programsUpdated:programsUpdated)
+        // The park description is bundled in parks.json; it is never fetched.
+        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:cached?.description,programsUpdated:programsUpdated)
         memory[park.id]=result; if persist { CacheDirectory.write(result,name:"park-\(park.id)") }; return result
     }
     private static func plain(_ html:String)->String {

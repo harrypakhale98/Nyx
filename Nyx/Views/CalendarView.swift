@@ -48,6 +48,7 @@ struct NightCell: View {
 struct NightPeek: View {
     @Environment(\.nyx) private var palette
     let night:Night
+    var isTonight=false
     var body:some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(alignment:.center,spacing:16) {
@@ -62,7 +63,7 @@ struct NightPeek: View {
                     Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
-            if night.sky.darkHours==0 { Text("No true darkness tonight at this latitude.").font(.subheadline).foregroundStyle(palette.ink) }
+            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
             else { Text("True darkness \(night.park.time(night.sky.darkStart)) – \(night.park.time(night.sky.darkEnd))").font(.subheadline).foregroundStyle(palette.ink) }
             Text(night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
         }.padding(20).frame(width:320).background(Color.black)
@@ -128,6 +129,11 @@ struct CalendarView: View {
                             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
                                 .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))")
                                 .accessibilityHint(inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
+                                .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
+                                .contextMenu {
+                                    Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
+                                    Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                                }
                         } }
                     } else {
                         LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
@@ -138,7 +144,7 @@ struct CalendarView: View {
                                     .contextMenu {
                                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                                    } preview: { NightPeek(night:night).environment(\.nyx,palette) }
+                                    } preview: { NightPeek(night:night,isTonight:night.id==tonight).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
                             }
                         }
                         .id(monthOffset)
@@ -163,7 +169,7 @@ struct CalendarView: View {
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .task(id:park?.id) { if let park { await model.refresh([park]) } }.navigationTitle("Calendar").navigationBarTitleDisplayMode(.inline)
-            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night) } }.nyxPresentation() }
+            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation() }
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
     /// The five consecutive nights with the least moonlight, ignoring nights already past. A window

@@ -12,6 +12,12 @@ Everything else is built, verified and documented. Each step below needs your Ap
    - **Build 1.0 (3) is uploaded** (2026-10-03, from this Mac, with the NPS key): the new Dial icon, the lit NASA Moon, the real star sky, the glass dial and cards. When it finishes processing, test it in TestFlight and select it on the version page instead of builds 1 or 2. The six screenshots in `Store/Screenshots/` were recaptured for build 3 (no alpha channel); replace the ones already uploaded. The description in `SUBMISSION.md` gained two sentences (sort by darkness, week-ahead widget, Milky Way essay); paste it again if you already entered it. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, regenerate, then Product → Archive → Distribute App → App Store Connect → Upload.
    - When the build finishes processing: test it in TestFlight, select it on the version page, then Submit for Review.
 
+3. **Upload build 1.0 (4)** before submitting. It carries the 2026-10-04 audit fixes (moonrise/moonset accuracy in Alaska, privacy-preserving forecast requests, offline data that survives storage cleanup, reminder fixes). Product → Archive → Distribute App → App Store Connect → Upload, then select build 4 on the version page instead of build 3. Only you can sign in to App Store Connect.
+
+4. **Publish the updated privacy page** by pushing this repository (`git push`): `docs/privacy.html` now describes the forecast and park-alert requests more precisely, and GitHub Pages only updates from the remote. It needs your GitHub credentials.
+
+5. **Ask NPS for a higher request limit for the Nyx key** (optional before launch, needed if Nyx grows). Every install shares the one key, and NPS keys default to about 1,000 requests an hour. Nyx now sends only alerts for most screens, at most one request per park every ten minutes, but a popular launch could still reach the limit; Nyx then quietly keeps the last known alerts and says when they were checked. Use the contact link on developer.nps.gov, name the key, and describe the use (a free app reading park alerts and night-sky events). Only the key's owner can ask.
+
 ## Done
 - App icon: native Icon Composer document `Nyx/Resources/AppIcon.icon`.
 - NPS key installed in `Config/Secrets.xcconfig` (git-ignored, on this Mac only) and verified with live Joshua Tree alerts. Building on another Mac? Copy that file over first.

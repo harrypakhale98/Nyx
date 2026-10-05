@@ -21,6 +21,6 @@ if extracted:
   del strings[key]
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
-info={'sourceLanguage':'en','strings':{'NSLocationWhenInUseUsageDescription':{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':'Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service.'}}}}},'version':'1.0'}
+info={'sourceLanguage':'en','strings':{'NSLocationWhenInUseUsageDescription':{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':'Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.'}}}}},'version':'1.0'}
 path.with_name('InfoPlist.xcstrings').write_text(json.dumps(info,indent=2)+'\n')
 print('Catalog:',len(strings),'keys')
