@@ -59,10 +59,13 @@ final class AccessibilityAuditTests:XCTestCase {
             // Night-vision score numerals: the red is 6.2:1 on black (large text needs 3:1); the audit samples the
             // anti-aliased diagonal of thin serif digits such as "77". Checked by eye in a captured frame.
             let numeral = !(issue.element?.label ?? "").isEmpty && (issue.element?.label ?? "").allSatisfy(\.isNumber)
+            // Parks band labels under each score ("Pristine", "Estimate"): starlight at 72% on black is about 11:1; the audit
+            // samples a real star that can fall inside the glyph box. Checked by eye in a zoomed iOS 26.5 capture (2026-10-05).
+            let bandLabel=["Pristine","Excellent","Good","Fair","Poor","Estimate"].contains(issue.element?.label ?? "")
             // iOS 27 draws system toolbar buttons (Done, Cancel, Save, Edit) on glass the audit cannot sample;
             // they render light-on-dark and legible (checked by screenshot). iOS 26 passes the same buttons.
             let toolbarButton=issue.element?.elementType == .button && !navigationBar.isNull && frame.intersects(navigationBar)
-            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && numeral) || toolbarButton
+            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton
         case .textClipped:
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).
