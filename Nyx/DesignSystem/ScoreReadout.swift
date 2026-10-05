@@ -75,7 +75,7 @@ struct ScoreReadout: View {
                 ZStack(alignment:.leading) {
                     if let fraction {
                         Capsule().fill(palette.line)
-                        Capsule().fill(palette.accent).frame(width:max(3,proxy.size.width*fraction))
+                        Capsule().fill(palette.accent).frame(width:fraction>0 ? max(3,proxy.size.width*fraction) : 0)
                             .shadow(color:palette.nightVision ? .clear : palette.accent.opacity(0.55),radius:3)
                     } else {
                         Capsule().stroke(palette.line,style:StrokeStyle(lineWidth:1,dash:[2,3]))

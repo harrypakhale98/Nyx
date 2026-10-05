@@ -12,6 +12,28 @@
         }
       }
     },
+    "%@ of true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ of true darkness."
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
     "%@ · forecast included": {
       "extractionState": "manual",
       "localizations": {
@@ -107,6 +129,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %lld%% lit"
+          }
+        }
+      }
+    },
+    "%@, %lld%% lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld%% lit."
           }
         }
       }
@@ -239,6 +272,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld%% average"
+          }
+        }
+      }
+    },
+    "%lld%% average cover across the dark window.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover across the dark window."
           }
         }
       }
@@ -734,6 +778,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bortle %lld observed · %@, %lld%% lit"
+          }
+        }
+      }
+    },
+    "Bortle class %lld of 9, estimated.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle class %lld of 9, estimated."
           }
         }
       }
@@ -2168,6 +2223,17 @@
         }
       }
     },
+    "No forecast covers this night yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No forecast covers this night yet."
+          }
+        }
+      }
+    },
     "No national parks fall inside this radius. Widen it or choose a different starting park.": {
       "extractionState": "manual",
       "localizations": {
@@ -2252,6 +2318,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No true darkness tonight at this latitude. The score is capped below 40."
+          }
+        }
+      }
+    },
+    "No true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness."
           }
         }
       }
@@ -4221,6 +4298,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "lower right"
+          }
+        }
+      }
+    },
+    "out of 100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "out of 100"
           }
         }
       }

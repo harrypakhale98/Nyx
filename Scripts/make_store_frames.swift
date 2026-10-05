@@ -21,7 +21,7 @@ let frames = [
     Frame(source: "03-calendar-6.9.png", output: "03-calendar.png",
           eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive."),
     Frame(source: "04-parks-6.9.png", output: "04-parks.png",
-          eyebrow: "63 NATIONAL PARKS", headline: "Every park,\nscored every night."),
+          eyebrow: "63 NATIONAL PARKS", headline: "Every park,\nand its best night this week."),
     Frame(source: "06-learn-6.9.png", output: "05-night-vision.png",
           eyebrow: "NIGHT VISION", headline: "Red light that keeps\nyour eyes dark-adapted.", accent: signalRed),
     Frame(source: "05-journal-6.9.png", output: "06-journal.png",

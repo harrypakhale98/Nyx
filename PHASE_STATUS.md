@@ -1,3 +1,20 @@
+# Nyx handoff — 2026-10-05 (design pass, build 5)
+
+A design pass aimed at the Apple Design Award bar: every screen now answers "when" as well as "where", and every number arrives with its reason. Logged under "Design pass" in `DECISIONS.md`.
+
+- **Park detail:** a four-part score readout (Moon, Clouds, Sky glow, Dark hours) sits under the gauge and glides as nights are scrubbed; it opens the breakdown.
+- **Score breakdown:** each part states the fact it was scored from, over that park's real sky for that night; unknown clouds stay visible as a dashed row.
+- **Parks and Tonight lists:** a seven-night strip per park names its best night ("Best Fri · 94").
+- **Tonight:** "Darker on Wed, Oct 7: 97 at Death Valley" names the best night ahead in reach and opens it.
+- **Journal:** cards show the Moon's phase that night; an entry shows the lit Moon and stands under that park's real stars that night.
+- Store screenshots and captioned frames recaptured with live data. Build number is **5** (`project.yml`); build 4 in App Store Connect predates this pass.
+
+**Verified 2026-10-05:** zero warnings; iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5 — all 39 tests including both accessibility audits pass (the audit caught a fixed-size numeral in the new breakdown, now Dynamic Type-scaled). Touched screens captured and reviewed: detail (live, no forecast, night vision, AX5), Parks (live, AX5), Tonight, journal list and entry, breakdown (standard and polar), store frames.
+
+**Next starting point:** archive and upload build 1.0 (5) in place of build 4 (INPUT_NEEDED 2), then the on-device night review (INPUT_NEEDED 1).
+
+---
+
 # Nyx handoff — 2026-10-04 (fresh audit, build 4)
 
 A fresh four-part audit (astronomy math against PyEphem, services and concurrency, UI and accessibility, configuration and release). All confirmed findings are fixed and logged under "Fresh audit" in `DECISIONS.md`. Highlights: Alaska moonrise/moonset accuracy (was up to 41 minutes off), Milky Way guidance at high latitude, a privacy-preserving all-park forecast request, careful use of the shared NPS key, offline data moved out of Caches, reminder calendar and race fixes, and a set of night-vision, VoiceOver and time-river corrections.

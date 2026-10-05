@@ -202,43 +202,63 @@ struct ScoreBreakdownView: View {
     @Environment(\.dismiss) private var dismiss
     let night:Night
     var isTonight=true
+    @ScaledMetric(relativeTo:.largeTitle) private var numeralSize=72.0
     var body: some View {
-        ScrollView { VStack(alignment:.leading,spacing:24) {
-            Text("A number with a reason").font(.system(.largeTitle,design:.serif))
-            Text("\(night.score.value)/100 · \(night.score.band.label)").font(.system(.title,design:.serif)).foregroundStyle(palette.accent)
-            row("Moonlight",points:night.score.moonPoints,of:40,detail:String(localized:"Illumination and the part of true darkness when the Moon is below the horizon."))
-            if let cloud=night.score.cloudPoints { row("Cloud cover",points:cloud,of:25,detail:String(localized:"The hourly forecast averaged over the complete dark window.")) }
-            row("Light pollution",points:night.score.bortlePoints,of:20,detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
-            row("Length of darkness",points:night.score.lengthPoints,of:15,detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
+        ScrollView { VStack(alignment:.leading,spacing:26) {
+            VStack(alignment:.leading,spacing:10) {
+                Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
+                Text("A number with a reason").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            }
+            HStack(alignment:.firstTextBaseline,spacing:12) {
+                Text("\(night.score.value)").font(.system(size:numeralSize,weight:.light,design:.serif)).tracking(-3).foregroundStyle(palette.accent)
+                VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
+            }
+            .accessibilityElement(children:.combine)
+            row("Moonlight",points:night.score.moonPoints,of:40,fact:moonFact,detail:String(localized:"Illumination and the part of true darkness when the Moon is below the horizon."))
+            row("Cloud cover",points:night.score.cloudPoints,of:25,fact:night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover across the dark window.") } ?? String(localized:"No forecast covers this night yet."),detail:String(localized:"The hourly forecast averaged over the complete dark window."))
+            row("Light pollution",points:night.score.bortlePoints,of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
+            row("Length of darkness",points:night.score.lengthPoints,of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
             if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
             else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
             ShareCardButton(night:night)
-        }.padding(24) }.background(Color.black).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
+        }.padding(24) }
+        .background(NightBackground(score:night.score.value,park:night.park,night:night.id)).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+    }
+    private var moonFact:String {
+        let lit=String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit.")
+        guard night.sky.darkHours>0 else { return lit }
+        return lit+" "+String(localized:"Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.")
     }
     private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; without clouds the others are scaled up to fill it.
-    private func row(_ title:LocalizedStringKey,points:Double,of weight:Double,detail:String)->some View {
-        let maximum=night.score.hasForecast ? weight : weight/0.75
-        return VStack(alignment:.leading,spacing:8) {
+    /// Each part states the fact it was scored from, then how it is scored.
+    private func row(_ title:LocalizedStringKey,points:Double?,of weight:Double,fact:String,detail:String)->some View {
+        let maximum=night.score.hasForecast || points==nil ? weight : weight/0.75
+        return VStack(alignment:.leading,spacing:9) {
             ViewThatFits(in:.horizontal) {
                 HStack(alignment:.firstTextBaseline) { Text(title).font(.headline);Spacer();amount(points,of:maximum) }
                 VStack(alignment:.leading,spacing:4) { Text(title).font(.headline);amount(points,of:maximum) }
             }
             GeometryReader { proxy in
                 ZStack(alignment:.leading) {
-                    Capsule().fill(palette.line)
-                    Capsule().fill(palette.accent).frame(width:proxy.size.width*min(1,max(0,points/maximum)))
+                    if let points {
+                        Capsule().fill(palette.line)
+                        Capsule().fill(palette.accent).frame(width:points>0 ? max(4,proxy.size.width*min(1,points/maximum)) : 0)
+                    } else { Capsule().stroke(palette.line,style:StrokeStyle(lineWidth:1,dash:[2,3])) }
                 }
             }.frame(height:4).accessibilityHidden(true)
-            Text(detail).font(.subheadline).foregroundStyle(palette.muted)
+            Text(fact).font(.system(.body,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            Text(detail).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
+        .padding(.vertical,2)
         .accessibilityElement(children:.combine)
     }
-    private func amount(_ points:Double,of maximum:Double)->some View {
-        Text("\(Int(points.rounded())) of \(Int(maximum.rounded()))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+    @ViewBuilder private func amount(_ points:Double?,of maximum:Double)->some View {
+        if let points { Text("\(Int(points.rounded())) of \(Int(maximum.rounded()))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent) }
+        else { Text("Unknown").font(.system(.title3,design:.serif)).foregroundStyle(palette.muted) }
     }
 }
 #Preview("Park row") { if let p=PlanModel().home { ParkRow(night:PlanModel().night(p)).padding().background(.black) } }
