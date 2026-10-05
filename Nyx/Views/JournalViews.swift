@@ -18,7 +18,7 @@ struct JournalView: View {
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
                 if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
                 else {
-                    LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ Panel { VStack(alignment:.leading,spacing:8) { if let thumbnail=entry.thumbnail { JournalThumbnail(data:thumbnail).padding(.bottom,6) };Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted);Text(entry.notes.isEmpty ? String(localized:"Observed Bortle class \(entry.observedBortle)") : entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.muted) } } }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
+                    LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
                     if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
                 }
             }.padding(24)
@@ -27,6 +27,30 @@ struct JournalView: View {
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+    }
+}
+/// A remembered night, with the Moon as it actually was over that park.
+struct JournalCard:View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    let entry:JournalEntry
+    var body:some View {
+        let park=model.park(entry.parkID)
+        let moon=park.map { model.night($0,on:entry.date).sky.moon }
+        Panel { VStack(alignment:.leading,spacing:10) {
+            if let thumbnail=entry.thumbnail { JournalThumbnail(data:thumbnail).padding(.bottom,4) }
+            HStack(alignment:.top,spacing:12) {
+                VStack(alignment:.leading,spacing:4) {
+                    Text(park?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif))
+                    Text(park?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted)
+                }
+                Spacer(minLength:0)
+                if let moon { MoonDisc(illumination:moon.illumination,waxing:moon.waxing,southern:(park?.latitude ?? 0)<0).frame(width:30,height:30).accessibilityHidden(true) }
+            }
+            if !entry.notes.isEmpty { Text(entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.ink.opacity(0.86)) }
+            Text(moon.map { String(localized:"Bortle \(entry.observedBortle) observed · \($0.name), \(Int(($0.illumination*100).rounded()))% lit") } ?? String(localized:"Observed Bortle class \(entry.observedBortle)"))
+                .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        } }
     }
 }
 /// Image I/O downsampling: decodes straight to the target size, never the full photo.
@@ -161,8 +185,28 @@ struct JournalDetailView:View {
     @State private var deleteFailed=false
     /// Set before deleting, so the closing animation never reads a deleted model.
     @State private var removed=false
+    /// The stars as they stood over that park on that night: under the same sky, literally.
+    private var entrySky:some View {
+        let park=model.park(entry.parkID)
+        return NightBackground(park:park,night:park.map { $0.evening(entry.date) })
+    }
+    /// The lit Moon as it stood over the park that night, beside what was observed.
+    @ViewBuilder private var moonThatNight:some View {
+        if let park=model.park(entry.parkID) {
+            let night=model.night(park,on:entry.date)
+            let moon=AstronomyEngine().moon(for:night)
+            HStack(spacing:18) {
+                MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:64,height:64)
+                VStack(alignment:.leading,spacing:4) {
+                    Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                    Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.system(.title3,design:.serif))
+                    Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted)
+                }
+            }
+        } else { Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted) }
+    }
     var body:some View {
-        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted));Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") } }.padding(24) } }.background(NightBackground()).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") } }.padding(24) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }

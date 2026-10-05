@@ -7,6 +7,8 @@ struct ParkRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     let night: Night
     var closure: String?=nil
+    /// Tonight and the six nights after it, for the week strip.
+    var week: [Night]=[]
     var body: some View {
         VStack(alignment:.leading,spacing:8) {
             // Long names wrap beside the score; only accessibility sizes stack them.
@@ -18,12 +20,13 @@ struct ParkRow: View {
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(night.park.shortName), \(night.park.state). Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
+            .accessibilityLabel("\(night.park.shortName), \(night.park.state). Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             Text("\(night.park.state)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark-Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
+            if week.count>1 { WeekStrip(nights:week).padding(.top,4) }
         }
     }
     private var number: some View {
@@ -48,7 +51,8 @@ struct ParksView: View {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : LocalizedStringKey("63 places to look up"))
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
-                Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted)
+                // Only worth saying when a row actually reads "Estimate".
+                if filtered.contains(where:{ !model.night($0).score.hasForecast }) { Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted) }
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if filtered.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else {
@@ -72,7 +76,7 @@ struct ParksView: View {
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
     }
     private func link(_ park:Park)->some View {
-        NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+        NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
     }
 }
 struct ParkDetailView: View {
@@ -114,7 +118,8 @@ struct ParkDetailView: View {
                     if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
                     if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
                     if !night.score.hasForecast { Text(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-                    Button("Why this score") { breakdown=true }.font(.subheadline).buttonStyle(.bordered).popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+                    ScoreReadout(score:night.score) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+                        .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
                 }
                 Panel { TimeRiver(nights:model.nights(park,from:riverStart,count:30),selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park)) }
                 Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
@@ -152,7 +157,8 @@ struct ParkDetailView: View {
                     Eyebrow(text:"Places to settle in")
                     if park.viewingSpots.isEmpty { Text("Ask a ranger for a permitted viewing area with an open horizon. Nyx has no verified viewing spot for this park yet.").foregroundStyle(palette.muted) }
                     ForEach(park.viewingSpots,id:\.name) { spot in
-                        VStack(alignment:.leading,spacing:6) { Text(spot.name).font(.system(.title3,design:.serif)); Text("\(spot.latitude.formatted(.number.precision(.fractionLength(3)))), \(spot.longitude.formatted(.number.precision(.fractionLength(3)))) · approximate").font(.caption).foregroundStyle(palette.muted); Text(spot.note).font(.caption).foregroundStyle(palette.muted) }
+                        VStack(alignment:.leading,spacing:6) { Text(spot.name).font(.system(.title3,design:.serif)); Text("\(spot.latitude.formatted(.number.precision(.fractionLength(3)))), \(spot.longitude.formatted(.number.precision(.fractionLength(3)))) · approximate").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).textSelection(.enabled)
+                            .contextMenu { Button("Copy coordinates",systemImage:"doc.on.doc") { UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)" } }; Text(spot.note).font(.caption).foregroundStyle(palette.muted) }
                     }
                 } }
                 Panel { VStack(alignment:.leading,spacing:14) {
