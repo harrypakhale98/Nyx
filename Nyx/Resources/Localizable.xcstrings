@@ -2080,6 +2080,28 @@
         }
       }
     },
+    "No true darkness on this night at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness on this night at this latitude."
+          }
+        }
+      }
+    },
+    "No true darkness on this night at this latitude. The score is capped below 40.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness on this night at this latitude. The score is capped below 40."
+          }
+        }
+      }
+    },
     "No true darkness tonight at %@. The darkness score is %lld out of 100.": {
       "extractionState": "manual",
       "localizations": {
@@ -2685,13 +2707,13 @@
         }
       }
     },
-    "Requests go to api.open-meteo.com using the park's coordinates, never your device location. The service receives network information such as your IP address.": {
+    "Requests go to api.open-meteo.com for all 63 parks at once, using park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to api.open-meteo.com using the park's coordinates, never your device location. The service receives network information such as your IP address."
+            "value": "Requests go to api.open-meteo.com for all 63 parks at once, using park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
           }
         }
       }
@@ -3048,6 +3070,17 @@
         }
       }
     },
+    "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
     "The Sun stays below the horizon today.": {
       "extractionState": "manual",
       "localizations": {
@@ -3070,24 +3103,24 @@
         }
       }
     },
-    "The bright center may be visible late at night or near dusk. Timing and terrain matter.": {
+    "The bright center may be visible before dawn or near dusk. Timing and terrain matter.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center may be visible late at night or near dusk. Timing and terrain matter."
+            "value": "The bright center may be visible before dawn or near dusk. Timing and terrain matter."
           }
         }
       }
     },
-    "The bright center stays low on the horizon at this latitude.": {
+    "The bright center stays low on the horizon at this latitude. An open view to the south matters most.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bright center stays low on the horizon at this latitude."
+            "value": "The bright center stays low on the horizon at this latitude. An open view to the south matters most."
           }
         }
       }
@@ -3444,6 +3477,17 @@
         }
       }
     },
+    "True darkness lasts only %@ on this night, so the score is held to %lld or less.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness lasts only %@ on this night, so the score is held to %lld or less."
+          }
+        }
+      }
+    },
     "True darkness lasts only %@ tonight, so the score is held to %lld or less.": {
       "extractionState": "manual",
       "localizations": {
@@ -3664,13 +3708,13 @@
         }
       }
     },
-    "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address.": {
+    "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address."
+            "value": "When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address."
           }
         }
       }
@@ -3737,6 +3781,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Widget content review"
+          }
+        }
+      }
+    },
+    "Without true darkness, the Milky Way stays faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without true darkness, the Milky Way stays faint."
           }
         }
       }

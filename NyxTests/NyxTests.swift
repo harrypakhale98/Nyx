@@ -143,13 +143,68 @@ struct NyxTests {
         #expect(engine.score(sky:sky,bortle:2,cloudCover:100).value<=full.value)
         for (s,b) in [(0,ScoreBand.poor),(39,.poor),(40,.fair),(59,.fair),(60,.good),(74,.good),(75,.excellent),(89,.excellent),(90,.pristine),(100,.pristine)] { #expect(ScoreBand.band(s)==b) }
     }
+    /// Exact points, so a swapped weight or a lost moon bonus cannot pass unnoticed.
+    @Test func formulaPinnedToSpecWeights() {
+        let start=Date(timeIntervalSince1970:1_800_000_000)
+        let sky=SkyConditions(evening:start,end:start.addingTimeInterval(86400),sunset:nil,sunrise:nil,civilDusk:nil,nauticalDusk:nil,
+                              darkStart:start.addingTimeInterval(8*3600),darkEnd:start.addingTimeInterval(16*3600),state:.normal,
+                              moon:MoonPhase(fraction:0.25),moonrise:nil,moonset:nil,moonBelowFraction:0.5,darkHours:8)
+        // Moon 40·(0.5 + 0.5·0.5) = 30, clouds 25·0.6 = 15, Bortle 3 → 20·6/8 = 15, darkness 15·0.8 = 12.
+        let full=ScoreEngine().score(sky:sky,bortle:3,cloudCover:40)
+        #expect(full.value==72); #expect(abs(full.moonPoints-30)<1e-9); #expect(full.cloudPoints.map { abs($0-15)<1e-9 }==true)
+        #expect(abs(full.bortlePoints-15)<1e-9); #expect(abs(full.lengthPoints-12)<1e-9)
+        // Beyond the forecast: (30 + 15 + 12) / 0.75 = 76.
+        #expect(ScoreEngine().score(sky:sky,bortle:3,cloudCover:nil).value==76)
+        #expect(ScoreEngine.cap(darkHours:0)==39); #expect(ScoreEngine.cap(darkHours:1)==59); #expect(ScoreEngine.cap(darkHours:3)==100)
+    }
+    /// Independent reference times (PyEphem; upper limb at -0°34' for rise and set, the Sun's
+    /// centre at -18° for true darkness), including Alaska and American Samoa, where shallow
+    /// paths magnify any error in the horizon convention. nil means no such event that night.
+    @Test func referenceRiseSetAndDarkness() throws {
+        let cases:[(String,String,String?,String?,String?,String?,String?)]=[
+            ("dena","2026-02-10","2026-02-11T02:27:42Z","2026-02-11T05:07:24Z","2026-02-11T15:28:15Z",nil,nil),
+            ("dena","2026-12-21","2026-12-22T00:19:34Z","2026-12-22T03:36:47Z","2026-12-22T16:28:40Z","2026-12-21T21:19:36Z",nil),
+            ("wrst","2026-01-15","2026-01-16T00:51:29Z","2026-01-16T03:37:30Z","2026-01-16T15:42:02Z","2026-01-16T19:19:54Z","2026-01-16T20:51:20Z"),
+            ("wrst","2026-02-10","2026-02-11T02:03:07Z","2026-02-11T04:32:23Z","2026-02-11T14:55:45Z","2026-02-11T16:11:08Z","2026-02-11T17:51:29Z"),
+            ("npsa","2026-06-21","2026-06-22T04:59:52Z","2026-06-22T06:16:20Z","2026-06-22T16:26:31Z","2026-06-21T23:17:03Z","2026-06-22T11:46:21Z"),
+            ("npsa","2026-12-21","2026-12-22T05:46:52Z","2026-12-22T07:06:43Z","2026-12-22T15:29:10Z","2026-12-22T03:46:13Z","2026-12-22T15:16:55Z"),
+            ("grca","2026-10-10","2026-10-11T00:59:08Z","2026-10-11T02:24:09Z","2026-10-11T12:06:51Z","2026-10-11T14:38:27Z","2026-10-11T00:48:19Z"),
+            ("jotr","2026-03-07","2026-03-08T01:44:54Z","2026-03-08T03:07:49Z","2026-03-08T12:40:01Z","2026-03-08T06:15:13Z","2026-03-08T16:32:15Z")
+        ]
+        let engine=AstronomyEngine(), iso=ISO8601DateFormatter()
+        for (id,night,sunset,dusk,dawn,moonrise,moonset) in cases {
+            let p=try park(id), sky=engine.conditions(for:p,on:try date(night+" 12:00",park:p))
+            for (label,predicted,expected,tolerance) in [("sunset",sky.sunset,sunset,120.0),("dusk",sky.darkStart,dusk,120),("dawn",sky.darkEnd,dawn,120),
+                                                          ("moonrise",sky.moonrise,moonrise,300),("moonset",sky.moonset,moonset,300)] {
+                guard let expected else { #expect(predicted==nil,"\(id) \(night) \(label) should not occur"); continue }
+                let reference=try #require(iso.date(from:expected))
+                let actual=try #require(predicted,"\(id) \(night) \(label) missing")
+                #expect(abs(actual.timeIntervalSince(reference))<tolerance,"\(id) \(night) \(label)")
+            }
+        }
+    }
+    @Test func milkyWayGuidanceFollowsLatitude() throws {
+        let engine=AstronomyEngine()
+        let arctic=try park("gaar"), samoa=try park("npsa"), tree=try park("jotr"), kenai=try park("kefj")
+        #expect(engine.milkyWayGuidance(for:engine.conditions(for:arctic,on:try date("2026-12-15 12:00",park:arctic)),park:arctic).contains("at or below"))
+        // Kenai Fjords at midsummer: the core only grazes the horizon and there is no true darkness.
+        #expect(!engine.milkyWayGuidance(for:engine.conditions(for:kenai,on:try date("2026-06-21 12:00",park:kenai)),park:kenai).contains("Summer favors"))
+        #expect(engine.milkyWayGuidance(for:engine.conditions(for:tree,on:try date("2026-07-15 12:00",park:tree)),park:tree).hasPrefix("Summer"))
+        #expect(engine.milkyWayGuidance(for:engine.conditions(for:samoa,on:try date("2026-07-15 12:00",park:samoa)),park:samoa).hasPrefix("Southern winter"))
+    }
+    /// Short polar-winter days: the Sun can rise after local noon; that is not the night's sunrise.
+    @Test func polarWinterSunriseFollowsSunset() throws {
+        let kobuk=try park("kova")
+        let sky=AstronomyEngine().conditions(for:kobuk,on:try date("2026-12-03 12:00",park:kobuk))
+        if let sunset=sky.sunset, let sunrise=sky.sunrise { #expect(sunrise>sunset) }
+    }
     @Test func publishedMoonPhases() throws {
         let dates=[("2026-01-18T19:52:00Z",0.0),("2026-03-03T11:38:00Z",0.5),("2026-10-10T15:50:00Z",0.0)]
         for (text,expected) in dates {
             let date=try #require(ISO8601DateFormatter().date(from:text))
             let actual=AstronomyEngine().moonPhase(at:date).fraction
             let delta=min(abs(actual-expected),1-abs(actual-expected))
-            #expect(delta*AstronomyEngine.synodicDays*24<12)
+            #expect(delta*AstronomyEngine.synodicDays*24<1)
         }
     }
     @Test func forecastCoverage() {

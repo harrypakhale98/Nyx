@@ -28,21 +28,24 @@ struct ShareCard:View {
 struct ShareCardButton:View {
     @Environment(\.nyx) private var palette
     let night:Night
-    @State private var rendered:Image?
+    @Environment(\.displayScale) private var displayScale
+    @State private var rendered:(key:String,image:Image)?
+    private var key:String { night.id.description+String(night.score.value)+String(palette.nightVision) }
     var body:some View {
         Group {
-            if let rendered { ShareLink(item:rendered,preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:rendered)) { Label("Share this night",systemImage:"square.and.arrow.up") } }
+            // While a new night settles, the last card stays in place but cannot be shared, so the
+            // button never jumps between two labels as the river is scrubbed.
+            if let rendered { ShareLink(item:rendered.image,preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:rendered.image)) { Label("Share this night",systemImage:"square.and.arrow.up") }.disabled(rendered.key != key) }
             else { Button("Prepare share card") { render() } }
-        }.buttonStyle(.bordered).accessibilityValue(ShareCard(night:night).summary).task(id:night.id.description+String(night.score.value)+String(palette.nightVision)) {
+        }.buttonStyle(.bordered).accessibilityValue(ShareCard(night:night).summary).task(id:key) {
             // Never offer the previous night's card. Settle first: scrubbing the river changes the night many times a second.
-            rendered=nil
             try? await Task.sleep(for:.milliseconds(450)); if !Task.isCancelled { render() }
         }
     }
     private func render() {
         let card=ShareCard(night:night).environment(\.nyx,palette).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark)
-        let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision)));renderer.scale=2
-        if let image=renderer.uiImage { rendered=Image(uiImage:image) }
+        let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision)));renderer.scale=max(2,displayScale)
+        if let image=renderer.uiImage { rendered=(key,Image(uiImage:image)) }
     }
 }
 #Preview("Share") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p)).environment(\.nyxReduceMotion,true) } }

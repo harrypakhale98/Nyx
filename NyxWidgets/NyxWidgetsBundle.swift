@@ -9,7 +9,12 @@ struct TonightProvider:TimelineProvider {
     func placeholder(in context:Context)->TonightEntry { TonightEntry(date:.now,night:nil,nightVision:false) }
     func getSnapshot(in context:Context,completion:@escaping(TonightEntry)->Void) {
         var cache:[String:SkyConditions]=[:]
-        completion(entry(at:.now,snapshot:SharedSettings.read(),cache:&cache))
+        var snapshot=SharedSettings.read()
+        // The widget gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not "save a park".
+        if context.isPreview, snapshot?.parks.isEmpty ?? true, let sample=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
+            snapshot=SavedSkySnapshot(parks:[sample],forecasts:[:])
+        }
+        completion(entry(at:.now,snapshot:snapshot,cache:&cache))
     }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later.
     /// Each night's sky is computed once and reused across entries.

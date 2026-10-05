@@ -89,7 +89,7 @@ struct JournalThumbnail:View {
         #endif
     }
     func load(_ items:[PhotosPickerItem]) async {
-        loadingPhotos=true;defer { loadingPhotos=false }
+        loadingPhotos=true;error=nil;defer { loadingPhotos=false }
         for item in items.prefix(max(0,4-photos.count)) {
             do {
                 if let data=try await item.loadTransferable(type:Data.self), data.count<=40_000_000 {
@@ -101,6 +101,7 @@ struct JournalThumbnail:View {
         }
     }
     func save(context:ModelContext,existing:JournalEntry?) -> Bool {
+        error=nil
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
         entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
         entry.thumbnail=photos.first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) }

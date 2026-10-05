@@ -24,15 +24,10 @@ nonisolated struct MoonGeometry: Sendable, Equatable {
 }
 nonisolated struct AstronomyEngine: AstronomyProviding {
     static let synodicDays = 29.530588853
-    static let epoch = Date(timeIntervalSince1970: 947_182_440) // 2000-01-06 18:14 UTC
     private let rad = Double.pi / 180
-    /// Start with the synodic epoch cycle, then correct its phase angle with
-    /// Meeus lunar/solar elongation. The uncorrected mean can miss a new Moon
-    /// by >17 hours in 2026, which is too coarse for a date-scrubbing planner.
-    func meanMoonPhase(at date: Date) -> MoonPhase {
-        let cycles = date.timeIntervalSince(Self.epoch) / (86_400 * Self.synodicDays)
-        return MoonPhase(fraction: cycles - floor(cycles))
-    }
+    /// Phase from the Moon's true elongation (Meeus lunar and solar longitudes) rather than the
+    /// mean 29.53-day cycle from the 2000-01-06 18:14 UTC new moon, which can miss a 2026 new
+    /// moon by more than 17 hours: too coarse for a date-scrubbing planner.
     func moonPhase(at date: Date) -> MoonPhase {
         let t=(julian(date)-2451545)/36525
         let l=normalized(218.3164477+481267.88123421*t-0.0015786*t*t)
@@ -63,18 +58,20 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         let sunAlwaysUp = sun.down.isEmpty && sun.up.isEmpty && solarAltitude(at: start, park: park) > -0.833
         let sunAlwaysDown = sun.down.isEmpty && sun.up.isEmpty && solarAltitude(at: start, park: park) <= -0.833
         let state: DarknessState = sunAlwaysUp ? .polarDay : hours == 0 ? .noAstronomicalDarkness : sunAlwaysDown ? .polarNight : .normal
-        let moon = crossings(start: start, end: end) { lunarAltitude(at: $0, park: park) + 0.3 }
+        // The Moon's upper limb on a refracted horizon: topocentric centre at -0.833° (34' refraction
+        // plus the ~16' semidiameter). A higher threshold delays rises by up to 40 min in Alaska.
+        let moon = crossings(start: start, end: end) { lunarAltitude(at: $0, park: park) + 0.833 }
         var below = 0.0
         if let a = darkStart, let b = darkEnd, b > a {
             // Integrate exact horizon-crossing intervals, not a Boolean moon bonus.
             let edges = ([a] + (moon.up + moon.down).filter { $0 > a && $0 < b }.sorted() + [b])
             for index in 0..<(edges.count-1) {
                 let middle = edges[index].addingTimeInterval(edges[index+1].timeIntervalSince(edges[index])/2)
-                if lunarAltitude(at: middle, park: park) < -0.3 { below += edges[index+1].timeIntervalSince(edges[index]) }
+                if lunarAltitude(at: middle, park: park) < -0.833 { below += edges[index+1].timeIntervalSince(edges[index]) }
             }
             below /= b.timeIntervalSince(a)
         }
-        return SkyConditions(evening: start, end: end, sunset: sun.down.first, sunrise: sun.up.first,
+        return SkyConditions(evening: start, end: end, sunset: sun.down.first, sunrise: sun.up.first(where: { $0 > (sun.down.first ?? start) }),
             civilDusk: civil.down.first, nauticalDusk: nautical.down.first, darkStart: darkStart, darkEnd: darkEnd,
             state: state, moon: moonPhase(at: start.addingTimeInterval(10*3600)),
             moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours)
@@ -192,9 +189,15 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         }
         return best
     }
-    func milkyWayGuidance(for park: Park, on date: Date) -> String {
-        let month = park.calendar.component(.month, from: date)
-        if abs(park.latitude)>60 { return String(localized: "The bright center stays low on the horizon at this latitude.") }
+    /// Seasonal guidance for the galactic core (declination about −29°), never a timed forecast.
+    /// Its highest possible altitude is 90° − |latitude + 29°|: below about 3° it never clears the
+    /// horizon (every Alaska park), and below about 10° it only skims the southern horizon.
+    func milkyWayGuidance(for sky: SkyConditions, park: Park) -> String {
+        let peak = 90 - abs(park.latitude + 29)
+        if peak < 3 { return String(localized: "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.") }
+        if sky.darkHours == 0 { return String(localized: "Without true darkness, the Milky Way stays faint.") }
+        if peak < 10 { return String(localized: "The bright center stays low on the horizon at this latitude. An open view to the south matters most.") }
+        let month = park.calendar.component(.month, from: sky.evening)
         // The sky's right ascension gives both hemispheres the same calendar
         // season; its name inverts: June–August is southern winter.
         if (6...8).contains(month) {
@@ -202,8 +205,8 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
                 ? String(localized: "Southern winter favors the bright center. Look toward the southern sky; timing and terrain matter.")
                 : String(localized: "Summer favors the bright center. Look toward the southern sky; timing and terrain matter.")
         }
-        return (3...10).contains(month)
-            ? String(localized: "The bright center may be visible late at night or near dusk. Timing and terrain matter.")
+        return (2...10).contains(month)
+            ? String(localized: "The bright center may be visible before dawn or near dusk. Timing and terrain matter.")
             : String(localized: "The bright center is out of the night sky this season. Bright constellations still reward a dark night.")
     }
     private func crossings(start: Date, end: Date, value: (Date)->Double) -> (up:[Date],down:[Date]) {

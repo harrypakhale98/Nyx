@@ -31,7 +31,8 @@ struct RootView:View {
                 NavigationStack { debugScreen(screen) }
             } else {
                 ZStack {
-                NightBackground().opacity(revealed ? 0 : 1)
+                // Removed once revealed, so its sky stops animating and sensing tilt behind the tabs.
+                if !revealed { NightBackground().transition(.opacity) }
                 TabView(selection:$tab) {
                     Tab(value:0) { NavigationStack { TonightView() } } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
                     Tab("Parks",systemImage:"mountain.2",value:1) { NavigationStack { ParksView() } }
@@ -49,7 +50,7 @@ struct RootView:View {
         .modifier(NightVisionFilter(enabled:palette.nightVision))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
-        .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in NavigationStack { ParkDetailView(park:park) }.nyxPresentation() }
+        .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park) }
         .task {
             NotificationRouter.shared.connect { parkID in open(parkID) }
             if let screen=DebugScenario.screen { tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
@@ -121,9 +122,7 @@ struct RootView:View {
             .flatMap(\.windows).first(where:\.isKeyWindow)?.rootViewController
         guard var top=root?.presentedViewController else { launchParkID=parkID; return }
         while let next=top.presentedViewController { top=next }
-        let detail=NavigationStack { ParkDetailView(park:park) }
-            .environment(model).modelContainer(context.container)
-            .environment(\.nyx,palette).nyxPresentation()
+        let detail=ParkSheet(park:park).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
     /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
@@ -162,22 +161,41 @@ struct RootView:View {
             if saved.map(\.parkID) != initialIDs { Task { await updateSaved() } }
         }
         let parks=saved.compactMap{model.park($0.parkID)}
-        await model.refresh(parks)
-        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts)
+        // The widget and reminders need only forecasts; park alerts follow once they are done,
+        // so a quick visit still leaves both up to date.
+        await model.refreshForecasts(watching:parks)
+        let ids=Set(parks.map(\.id))
+        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) })
         SharedSettings.write(snapshot)
         renderWidgetMoons(for:parks)
         WidgetCenter.shared.reloadAllTimelines()
         if notificationsEnabled {
             let today=model.today
             let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
-            guard notificationsEnabled else { return }
             let names=Dictionary(parks.map { ($0.id,$0.shortName) },uniquingKeysWith:{ first,_ in first })
-            await NotificationScheduler().reschedule(nights:nights) { plan in
+            // Reminders may have been switched off while the nights were computed.
+            if notificationsEnabled { await NotificationScheduler().reschedule(nights:nights) { plan in
                 // The on-device model may only choose between two vetted titles; it never writes forecasts.
                 guard let name=names[plan.parkID], await OnDeviceGuide.reminderStyle(parkName:name) else { return nil }
                 return String(localized:"A night to consider at \(name)")
-            }
+            } }
         }
+        await model.refreshParkUpdates(parks)
+    }
+}
+/// A park opened from a reminder, Spotlight or a widget. It reads night vision and Increase
+/// Contrast itself, so it matches the app (and follows a Control Center switch) wherever it is
+/// presented, including above another sheet.
+private struct ParkSheet:View {
+    let park:Park
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorSchemeContrast) private var contrast
+    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    var body:some View {
+        NavigationStack {
+            ParkDetailView(park:park).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
+        }
+        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)).nyxPresentation()
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }

@@ -7,7 +7,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx uses your location on this iPhone to find nearby national parks. Your location is never sent to a service."
+            "value": "Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service."
           }
         }
       }

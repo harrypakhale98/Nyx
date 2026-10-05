@@ -27,7 +27,8 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
         guard UserDefaults.standard.bool(forKey:"notificationsEnabled") else { throw URLError(.cancelled) }
         let content=UNMutableNotificationContent();content.title=reminder.title;content.body=reminder.body;content.userInfo=["parkID":reminder.parkID];content.sound = .default
         var calendar=Calendar(identifier:.gregorian);calendar.timeZone=reminder.timeZone
-        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute],from:reminder.fireDate);components.timeZone=reminder.timeZone
+        // Gregorian components need their calendar attached, or a device set to another calendar reads 2026 as a different year.
+        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute],from:reminder.fireDate);components.calendar=calendar;components.timeZone=reminder.timeZone
         let request=UNNotificationRequest(identifier:reminder.id,content:content,trigger:UNCalendarNotificationTrigger(dateMatching:components,repeats:false))
         try await UNUserNotificationCenter.current().add(request)
     }
@@ -105,8 +106,10 @@ nonisolated struct NotificationScheduler {
             }
             if (try? await center.add(reminder)) != nil { added.insert(plan.id) }
         }
-        // Read the ledger again: reminders may have been switched off while this ran.
-        ledger.record(ledger.ids.subtracting(cancelled).union(added),now:now)
+        // Read the ledger and the pending list again: reminders may have been switched off while
+        // this ran, and a reminder cancelled that way was never seen, so it must stay plannable.
+        let stillScheduled=Set(await center.pendingIDs()).union(await center.deliveredIDs())
+        ledger.record(ledger.ids.subtracting(cancelled).union(added.intersection(stillScheduled)),now:now)
     }
 }
 

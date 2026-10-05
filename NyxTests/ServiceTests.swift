@@ -84,6 +84,50 @@ struct ServiceTests {
         #expect(result?.programs.isEmpty == true)
         #expect(result?.programsUpdated == nil)
     }
+    /// The shared NPS key is spent carefully: alerts only unless programs are shown, one request
+    /// at a time per park, and no repeat within ten minutes even when forced.
+    @Test func parkUpdatesAreThrottledAndShared() async throws {
+        let p=try park()
+        let http=StubHTTP(["/api/v1/alerts":"{\"data\":[]}","/api/v1/events":"{\"total\":\"0\",\"data\":[]}"])
+        let store=ParkStore(transport:http,persist:false)
+        async let first=store.enrichment(for:p,key:"test",network:true,force:true,programs:false)
+        async let second=store.enrichment(for:p,key:"test",network:true,force:true,programs:false)
+        _=await (first,second)
+        #expect(await http.urls.map(\.path)==["/api/v1/alerts"])
+        #expect(await store.enrichment(for:p,key:"test",network:true,force:true,programs:true) != nil)
+        #expect(await http.urls.count==1)
+        #expect(await http.urls.allSatisfy { $0.path != "/api/v1/parks" })
+    }
+    /// Forecasts are always requested for every park, so the request never reflects where someone is.
+    @MainActor @Test func forecastsAreRequestedForEveryPark() async throws {
+        let http=StubHTTP([:])
+        let model=PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false))
+        model.weatherEnabled=true
+        let nearby=Array(model.parks.prefix(2))
+        await model.refresh(nearby,parkUpdates:false)
+        let counts=await http.urls.map { url in
+            URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems?.first { $0.name=="latitude" }?.value?.split(separator:",").count ?? 0
+        }
+        #expect(counts.reduce(0,+)==model.parks.count)
+    }
+    /// Switching reminders off while a reschedule is still running must not leave its cancelled
+    /// reminders recorded as delivered, or those nights could never be announced again.
+    @Test func remindersCancelledMidRescheduleStayPlannable() async throws {
+        let p=try park(),now=Date(timeIntervalSince1970:1790899200),engine=AstronomyEngine()
+        let nights=(2...3).map { offset in
+            Night(park:p,sky:engine.conditions(for:p,on:p.date(now,addingDays:offset)),score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:now)
+        }
+        let center=StubNotifications(),ledger=ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)")
+        let scheduler=NotificationScheduler(center:center,ledger:ledger)
+        actor Calls { var count=0; func next()->Int { count+=1; return count } }
+        let calls=Calls()
+        await scheduler.reschedule(nights:nights,now:now) { _ in
+            if await calls.next()==2 { await scheduler.remove() }
+            return nil
+        }
+        let first=NotificationScheduler.identifier(park:p,night:nights[0].id)
+        #expect(!ledger.ids.contains(first))
+    }
     @Test func rejectsOtherHosts() async {
         guard let url=URL(string:"https://example.com/forecast") else { Issue.record("Bad fixture URL");return }
         await #expect(throws:URLError.self) { try await SafeHTTP().get(url) }

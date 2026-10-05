@@ -16,8 +16,6 @@ import CoreLocation
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
     let location=LocationService()
     var enrichments: [String:ParkEnrichment] = [:]
-    private var activeRefreshes=0
-    var refreshing:Bool { activeRefreshes>0 }
     var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
@@ -71,6 +69,13 @@ import CoreLocation
         let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
         return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
     }
+    /// True when a night without clouds simply lies past the forecast's last hour (or about two
+    /// weeks out when no forecast has arrived), rather than having a forecast that failed.
+    func beyondForecast(_ night:Night)->Bool {
+        guard !night.score.hasForecast else { return false }
+        if let last=forecasts[night.park.id]?.times.last { return night.sky.cloudWindow.end.timeIntervalSince1970>last+3600 }
+        return night.id.timeIntervalSince(today)>14*86400
+    }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?)->[Park] {
         guard let home else { return [] }
@@ -85,26 +90,30 @@ import CoreLocation
         }
     }
     var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
-    /// Forecasts for every park arrive together in one request; park updates (alerts and
-    /// programs) follow park by park, and only when asked for.
-    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true) async {
-        activeRefreshes+=1; defer { activeRefreshes-=1 }
+    /// Forecasts for every park arrive together (one or two requests); park updates (alerts, and
+    /// ranger programs where they are shown) follow park by park, and only when asked for.
+    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true,programs:Bool=false) async {
+        await refreshForecasts(watching:parks,force:force)
+        if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
+    }
+    /// Always asks for all 63 parks, never only those near the device: it costs the same request,
+    /// and a list of nearby parks would tell the forecast service roughly where you are.
+    func refreshForecasts(watching parks:[Park],force:Bool=false) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
-        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil } }
-        else {
-            let network=weatherEnabled && live
-            let fresh=await weather.forecasts(for:parks,network:network,force:force)
-            for park in parks {
-                forecasts[park.id]=fresh[park.id]
-                if network {
-                    if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
-                }
-            }
+        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil }; return }
+        let network=weatherEnabled && live
+        let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
+        for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        guard network else { return }
+        for park in parks {
+            if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
-        guard parkUpdates else { return }
+    }
+    func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false) async {
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
         for park in parks {
             if Task.isCancelled { return }
-            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && live,force:force)
+            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && live,force:force,programs:programs)
         }
     }
     /// A closure from the last park update, if any. Shown beside every score for that park.

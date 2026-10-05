@@ -44,6 +44,9 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
+        // Weeks begin where the person's region begins them (Monday in much of the world).
+        calendar.locale = .current
+        calendar.firstWeekday = Calendar.current.firstWeekday
         return calendar
     }
     func evening(_ date: Date) -> Date {

@@ -44,9 +44,9 @@ struct PrivacyView:View {
             Section { Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif));Text("Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.") }
             Section("Optional data updates") {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
-                Text("Requests go to api.open-meteo.com using the park's coordinates, never your device location. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Requests go to api.open-meteo.com for all 63 parks at once, using park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
-                Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
             Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders are local.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
@@ -80,14 +80,14 @@ enum Essay: String,CaseIterable,Identifiable {
 struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:22) { Image(systemName:essay.symbol).font(.system(size:28,weight:.ultraLight)).foregroundStyle(palette.accent);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right") }.foregroundStyle(palette.muted) } } }.buttonStyle(.plain) };NavigationLink("About the data") { AboutDataView() } }.padding(24) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:22) { Image(systemName:essay.symbol).font(.system(size:28,weight:.ultraLight)).foregroundStyle(palette.accent).accessibilityHidden(true);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.muted) } } }.buttonStyle(.plain) };NavigationLink("About the data") { AboutDataView() } }.padding(24) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {
     @Environment(\.nyx) private var palette
     let essay:Essay
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:28) { Image(systemName:essay.symbol).font(.system(size:48,weight:.ultraLight)).foregroundStyle(palette.accent);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { _,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:28) { Image(systemName:essay.symbol).font(.system(size:48,weight:.ultraLight)).foregroundStyle(palette.accent).accessibilityHidden(true);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { _,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct OnboardingView:View {
@@ -191,5 +191,5 @@ private struct ScoreAnatomy:View {
     }
 }
 #Preview("Learn") { NavigationStack { LearnView() }.preferredColorScheme(.dark) }
-#Preview("Onboarding") { OnboardingView {}.preferredColorScheme(.dark) }
+#Preview("Onboarding") { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Privacy AX5") { NavigationStack { PrivacyView() }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
