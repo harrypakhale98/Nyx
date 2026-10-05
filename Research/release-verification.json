@@ -3,7 +3,7 @@
     1
   ],
   "version": "1.0",
-  "build": "4",
+  "build": "5",
   "bundledManifests": 2,
   "runtimeHTTPHosts": [
     "api.open-meteo.com",
@@ -11,7 +11,7 @@
   ],
   "runtimePackages": 0,
   "npsKeyEmbedded": true,
-  "catalogKeys": 373,
+  "catalogKeys": 398,
   "privacyDeclaration": "UNRESOLVED \u2014 publisher review required",
-  "signing": "development-signed Release; App Store export/validation pending"
+  "signing": "unsigned archive; distribution validation pending"
 }
