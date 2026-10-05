@@ -67,13 +67,24 @@
         }
       }
     },
-    "%@, %@. Darkness score %lld, %@. %@ %@": {
+    "%@, %@. Darkness score %lld, %@. %@ %@ %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@. Darkness score %lld, %@. %@ %@"
+            "value": "%@, %@. Darkness score %lld, %@. %@ %@ %@"
+          }
+        }
+      }
+    },
+    "%@, %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld of %lld"
           }
         }
       }
@@ -85,6 +96,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %lld out of 100, %@. %@"
+          }
+        }
+      }
+    },
+    "%@, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld%% lit"
+          }
+        }
+      }
+    },
+    "%@, unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, unknown"
           }
         }
       }
@@ -261,6 +294,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld/100 · %@"
+          }
+        }
+      }
+    },
+    "/%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/%lld"
           }
         }
       }
@@ -628,6 +672,28 @@
         }
       }
     },
+    "Best %@ · %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best %@ · %lld"
+          }
+        }
+      }
+    },
+    "Best night this week: %@, %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night this week: %@, %lld."
+          }
+        }
+      }
+    },
     "Best of the next seven nights: %@, %lld.": {
       "extractionState": "manual",
       "localizations": {
@@ -639,6 +705,17 @@
         }
       }
     },
+    "Best tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best tonight"
+          }
+        }
+      }
+    },
     "Best: %@ · %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -646,6 +723,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Best: %@ · %lld"
+          }
+        }
+      }
+    },
+    "Bortle %lld observed · %@, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld observed · %@, %lld%% lit"
           }
         }
       }
@@ -914,6 +1002,17 @@
         }
       }
     },
+    "Copy coordinates": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy coordinates"
+          }
+        }
+      }
+    },
     "DARKNESS / 100": {
       "extractionState": "manual",
       "localizations": {
@@ -921,6 +1020,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "DARKNESS / 100"
+          }
+        }
+      }
+    },
+    "Dark hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark hours"
           }
         }
       }
@@ -943,6 +1053,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dark-Sky designated only"
+          }
+        }
+      }
+    },
+    "Darker on %@: %lld at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker on %@: %lld at %@"
           }
         }
       }
@@ -2355,6 +2476,28 @@
         }
       }
     },
+    "Opens that night at the park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens that night at the park."
+          }
+        }
+      }
+    },
+    "Opens the score breakdown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the score breakdown."
+          }
+        }
+      }
+    },
     "Optional data updates": {
       "extractionState": "manual",
       "localizations": {
@@ -2894,6 +3037,17 @@
         }
       }
     },
+    "Sky glow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow"
+          }
+        }
+      }
+    },
     "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map (NASA's Scientific Visualization Studio, CGI Moon Kit), lit from the Sun's real direction and tilted as it appears from the park at its highest point that night.": {
       "extractionState": "manual",
       "localizations": {
@@ -3077,6 +3231,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
+    "The Moon that night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon that night"
           }
         }
       }
@@ -3411,6 +3576,17 @@
         }
       }
     },
+    "Tonight is the best night this week.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight is the best night this week."
+          }
+        }
+      }
+    },
     "Tonight's darkness score": {
       "extractionState": "manual",
       "localizations": {
@@ -3583,6 +3759,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Understand artificial sky brightness"
+          }
+        }
+      }
+    },
+    "Unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
           }
         }
       }

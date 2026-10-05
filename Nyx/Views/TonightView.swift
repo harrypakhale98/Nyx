@@ -37,11 +37,12 @@ struct TonightView: View {
                         Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                         if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
                         else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
+                        darkerAhead(than:night)
                     }.frame(maxWidth:.infinity)
                     startingPoint
                     if best.count>1 {
                         Eyebrow(text:"More skies within reach")
-                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
+                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
                     }
                     Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
                 }
@@ -62,6 +63,24 @@ struct TonightView: View {
                 }
                 await model.refresh(candidates,force:true);refreshed+=1
             }
+    }
+    /// Tonight answers where; this answers when. The darkest of the next six nights across every
+    /// park in reach, shown only when it is clearly better than tonight's best.
+    @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
+        let ahead=candidates.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) }
+            .reduce(nil as Night?) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night }
+        if let ahead, ahead.score.value>=tonight.score.value+5 {
+            NavigationLink { ParkDetailView(park:ahead.park,initialDate:ahead.id) } label:{
+                HStack(spacing:8) {
+                    Image(systemName:"moon.stars").imageScale(.small).accessibilityHidden(true)
+                    Text("Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)").multilineTextAlignment(.leading)
+                    Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
+                }
+                .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
+                .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
+            }.buttonStyle(.plain).padding(.top,4)
+            .accessibilityHint("Opens that night at the park.")
+        }
     }
     /// The starting point is either a chosen park or the device location, never both.
     private var startingPoint:some View {
