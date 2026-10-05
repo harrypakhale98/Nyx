@@ -14,6 +14,8 @@ Everything else is built, verified and documented. Each step below needs your Ap
 
 3. **Ask NPS for a higher request limit for the Nyx key** (optional before launch, needed if Nyx grows). Every install shares the one key, and NPS keys default to about 1,000 requests an hour. Nyx now sends only alerts for most screens, at most one request per park every ten minutes, but a popular launch could still reach the limit; Nyx then quietly keeps the last known alerts and says when they were checked. Use the contact link on developer.nps.gov, name the key, and describe the use (a free app reading park alerts and night-sky events). Only the key's owner can ask.
 
+4. **Enter the awards that close soon** (only the account owner can enter and pay). The full plan is in `Research/award-roadmap.md` (Tier 4). Once 1.0 is live: file an App Launch featuring nomination in App Store Connect (app → Featuring → Nominations); enter the **Webby Awards** by the early deadline **Oct 30, 2026** (Apps, Software & Immersive); register for the **iF Design Award** by **Nov 4, 2026** (UI/UX). Fees and later deadlines are in the roadmap.
+
 ## Done
 - Build 1.0 (5) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-05.
 - Build 1.0 (4) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-04. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, run `xcodegen generate`, then Product → Archive → Distribute App → App Store Connect → Upload.
