@@ -43,14 +43,17 @@ enum NyxMotion {
 }
 /// A card of Liquid Glass over the real sky, tinted deep indigo so text keeps its contrast while
 /// the stars glint through the edges. Solid indigo under Reduce Transparency, Increase Contrast
-/// and night vision, where glass would cost legibility.
+/// and night vision, where glass would cost legibility, and on wide (regular-width) layouts: an
+/// iPad-wide slab of glass over the brighter, wider Milky Way adapts its own luminance and can lift
+/// behind small text, while under the indigo fill it adds nothing the eye can see.
 struct Panel<Content: View>: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.nyx) private var palette
     @ViewBuilder var content: Content
     var body: some View {
         let shape=RoundedRectangle(cornerRadius:24)
-        let solid=reduceTransparency || palette.highContrast || palette.nightVision
+        let solid=reduceTransparency || palette.highContrast || palette.nightVision || sizeClass == .regular
         content.padding(20).frame(maxWidth:.infinity,alignment:.leading)
             .background { if solid { shape.fill(palette.panel) } else { shape.fill(palette.panel.opacity(0.8)) } }
             .glassEffect(solid ? .identity : .regular.tint(palette.panel.opacity(0.5)),in:shape)
