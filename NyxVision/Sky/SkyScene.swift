@@ -155,7 +155,7 @@ import UIKit
         // The Milky Way: true darkness only, washed out by moonlight in proportion to its glare (a
         // quarter Moon high takes about half of it, a full Moon nearly all) and by the park's glow.
         let washed = 1-0.97*Self.smooth(glare/0.4)
-        let milkyWayLight = 0.3*SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude)*washed*dark*boost
+        let milkyWayLight = 0.4*SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude)*washed*dark*boost
         tint(milkyWay, texture: milkyWayTexture, level: Self.srgb(milkyWayLight), color: Self.ink(palette))
 
         // The skyline, seeded by the park (built before its colour is set below).
@@ -413,10 +413,11 @@ import UIKit
         descriptor.primitives = .triangles(indices)
         return try MeshResource.generate(from: [descriptor])
     }
-    /// The band between galactic latitudes −20° and +20°, all the way round.
+    /// The band between galactic latitudes −30° and +30°, all the way round: wide enough that the
+    /// bulge's glow has faded to nothing well inside it.
     static func milkyWayMesh() throws -> MeshResource {
         var positions: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
-        let columns = 240, rows = 20, latitude = SkyTextures.milkyWayLatitude
+        let columns = 240, rows = 30, latitude = SkyTextures.milkyWayLatitude
         for i in 0...columns {
             for j in 0...rows {
                 let l = (Double(i)/Double(columns)+0.5)*2*Double.pi, b = (-latitude+2*latitude*Double(j)/Double(rows))*Double.pi/180

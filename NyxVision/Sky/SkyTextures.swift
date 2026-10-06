@@ -30,7 +30,7 @@ nonisolated enum SkyTextures {
     }
     static func look(row: Int) -> StarLook {
         let m = magnitude(row: row)
-        let flux = 0.24*pow(10, -0.4*0.6*(m-4.25))
+        let flux = 0.34*pow(10, -0.4*0.6*(m-4.25))
         let excess = max(0, flux-1)
         return StarLook(peak: min(1, flux), core: 0.036*(1+0.3*log2(1+excess)),
                         halo: excess > 0 ? 0.1*min(1, excess)+0.035*excess : 0, haloWidth: 0.1+0.05*excess,
@@ -78,7 +78,8 @@ nonisolated enum SkyTextures {
             let dx = (Double(x)+0.5)/Double(size)-0.5, dy = (Double(y)+0.5)/Double(size)-0.5
             let r = sqrt(dx*dx+dy*dy)*2
             let intensity = (exp(-pow(r/core, 2)) + 0.25*exp(-pow(r/0.5, 2)))*smooth((1-r)/0.3)
-            return (color*min(1, intensity), min(1, intensity))
+            // Opaque: added as light, and a faint alpha would be un-premultiplied into a bright pixel.
+            return (color*min(1, intensity), 1)
         }
     }
     /// Moonlight scattered in the air around the Moon: bright close in, a long faint skirt.
@@ -87,7 +88,7 @@ nonisolated enum SkyTextures {
             let dx = (Double(x)+0.5)/Double(size)-0.5, dy = (Double(y)+0.5)/Double(size)-0.5
             let r = sqrt(dx*dx+dy*dy)*2
             let intensity = (0.85/(1+pow(r/0.05, 2)) + 0.15*exp(-pow(r/0.45, 2)))*smooth((1-r)/0.35)
-            return (SIMD3(repeating: intensity), intensity)
+            return (SIMD3(repeating: intensity), 1)
         }
     }
 
@@ -96,8 +97,9 @@ nonisolated enum SkyTextures {
     /// The Milky Way's texture (drawn by `nyxMilkyWay` in SkyShaders.metal), equirectangular in
     /// galactic coordinates: u is longitude from the anticentre (u = 0.5 is the core, so the seam
     /// falls where the band is faintest and every noise wraps exactly at 360°), v is latitude from
-    /// −20° (the image's bottom row) to +20°. 0.088° per pixel along the band, 0.078° across it.
-    static let milkyWayWidth = 4096, milkyWayHeight = 512, milkyWayLatitude = 20.0
+    /// −30° (the image's bottom row) to +30°, fading to nothing over its outer 12°. 0.088° per pixel
+    /// along the band, 0.078° across it.
+    static let milkyWayWidth = 4096, milkyWayHeight = 768, milkyWayLatitude = 30.0
 
     // MARK: The sky's colour
 
