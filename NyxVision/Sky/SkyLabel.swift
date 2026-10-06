@@ -11,7 +11,7 @@ struct SkyLabel: View {
     var body: some View {
         switch style {
         case .compass:
-            Text(title).font(.system(size: 30, weight: .light, design: .serif)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 0.95 : 0.7))
+            Text(title).font(.system(size: 30, weight: .light, design: .serif)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 0.95 : 0.5))
         case .whisper:
             Text(title).font(.system(size: 13, weight: .regular, design: .serif)).italic().kerning(1.2)
                 .foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 0.9 : 0.55))
@@ -21,7 +21,7 @@ struct SkyLabel: View {
                 if let detail { Text(detail).font(.system(size: 11)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 0.95 : 0.72)) }
             }
             .foregroundStyle(palette.skyInk).padding(.horizontal, 14).padding(.vertical, 8)
-            .background(palette.nightVision ? AnyShapeStyle(palette.nightPanel) : AnyShapeStyle(.black.opacity(0.35)), in: .capsule)
+            .background(palette.nightVision ? AnyShapeStyle(palette.nightPanel) : AnyShapeStyle(.black.opacity(palette.solid || palette.highContrast ? 0.85 : 0.35)), in: .capsule)
         case .plaque:
             VStack(spacing: 6) {
                 Text(title).font(.system(size: 22, weight: .light, design: .serif)).foregroundStyle(palette.skyInk)
