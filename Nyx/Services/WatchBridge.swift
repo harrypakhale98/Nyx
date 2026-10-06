@@ -1,0 +1,54 @@
+#if canImport(WatchConnectivity) && os(iOS)
+import Foundation
+import WatchConnectivity
+
+/// Hands Apple Watch what it cannot know on its own (saved parks, the starting park, night
+/// vision, the last cloud forecasts) as WatchConnectivity application context: device to
+/// device, never through a server. Does nothing when no watch is paired or Nyx is not on it.
+nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sendable {
+    static let shared = WatchBridge()
+    /// Guards `latest` and `lastSent`; WatchConnectivity calls back on its own queue.
+    private let lock = NSLock()
+    private var latest: WatchContext?
+    private var lastSent: Data?
+    private override init() { super.init() }
+
+    /// Called wherever the widget snapshot is written. Cheap when there is no watch.
+    func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast]) {
+        guard WCSession.isSupported() else { return }
+        let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
+        let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts)
+        let session = WCSession.default
+        lock.withLock { latest = context }
+        if session.activationState == .activated { send(session) }
+        else { session.delegate = self; session.activate() }
+    }
+    private func send(_ session: WCSession) {
+        guard session.isPaired, session.isWatchAppInstalled else { return }
+        let context: WatchContext? = lock.withLock { latest }
+        guard let context, let data = context.data else { return }
+        // The same parks, forecasts and switch as last time: nothing to say.
+        let comparable = try? JSONEncoder().encode(WatchContext(sent: .distantPast, savedParkIDs: context.savedParkIDs, homeParkID: context.homeParkID, nightVision: context.nightVision, forecasts: context.forecasts))
+        guard comparable == nil || lock.withLock({ comparable != lastSent }) else { return }
+        // Remembered only once delivered to WatchConnectivity, so a failed update is retried next time.
+        do { try session.updateApplicationContext([WatchContext.key: data]) } catch { return }
+        lock.withLock { lastSent = comparable }
+        // A complication on the current face may wake the watch app to refresh now (budgeted by the system).
+        if session.isComplicationEnabled, session.remainingComplicationUserInfoTransfers > 0 {
+            session.transferCurrentComplicationUserInfo([WatchContext.key: data])
+        }
+    }
+    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
+        if state == .activated { send(session) }
+    }
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+    /// Switching to another watch: activate again so the new one receives the context.
+    func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+    func sessionWatchStateDidChange(_ session: WCSession) {
+        // Nyx was just installed on the watch: send what was last prepared.
+        guard session.isWatchAppInstalled else { return }
+        lock.withLock { lastSent = nil }
+        send(session)
+    }
+}
+#endif

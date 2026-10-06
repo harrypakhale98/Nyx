@@ -37,6 +37,23 @@ Roadmap §2, on branch `roadmap`. Logged under "What's up tonight" in `DECISIONS
 
 **Next starting point:** integrator bumps the build number; consider App Store In-App Events for the Geminids (Dec 13–14, 2026) now that the app names them.
 
+# Nyx handoff — 2026-10-05 (roadmap: Apple Watch)
+
+Roadmap Tier 2b with Tier 1 §1's wrist countdown, on a worktree branch from `roadmap`. Logged under "Apple Watch" in `DECISIONS.md`. The product brief's §11 no longer excludes the watch.
+
+- **Targets:** `NyxWatch` (watchOS 26+, `com.harrypakhale.nyx.watchkitapp`) embedded in the iOS app, with `NyxWatchWidgets` (complications and Smart Stack). A `NyxWatch` scheme runs it alone. Shared engine files are listed in `project.yml`; the network transport is deliberately not compiled for the watch (`verify_release.py` asserts it). `Forecast` moved to `Nyx/Models/Forecast.swift` for that reason.
+- **Sync:** `WatchBridge` (iOS, one new file, called where the widget snapshot is written and when night vision changes) sends a compact, versioned `WatchContext` (saved parks, starting park, night vision, cloud forecasts under 48 KB) over WatchConnectivity. No-op without a paired watch.
+- **Watch:** red-first palette (Red light / Match iPhone / Starlight). Tonight is a Digital Crown pager: gauge + Moon + next moment; tonight's milestones; the next seven nights. Parks list with tonight's scores; "Show on Tonight" pins any park; a park chooser before the first sync (moon and darkness only, said plainly). Dark adaptation: a red full-screen countdown.
+- **Complications:** circular, rectangular, corner, inline; relevance at dusk on Good+ nights, plus a watchOS 26 `RelevanceConfiguration` "Dark night ahead" Smart Stack widget.
+- **Tests:** `NyxTests/WatchTests.swift` (5): context round trip and equal cloud means, gaps/version/size rejection, milestone ordering inside the night for five parks × five months, polar edges (Denali June, Gates of the Arctic December), red contrast ≥ 4.5:1.
+- DEBUG: `-nyx-watch-screen`, `-nyx-watch-state`, `-nyx-watch-palette`, `-nyx-watch-ax` (README → Apple Watch).
+
+**Verified 2026-10-05:** unsigned Release archive of the Nyx scheme (iOS app, widgets, watch app, watch widgets) builds with zero warnings and `verify_release.py` passes (4 privacy manifests); NyxWatch Debug builds clean; `NyxTests` 51/51 pass on iOS 27 (Audit iPhone 17). **Not verified:** `NyxUITests` (accessibility audit) did not complete — on a host loaded by parallel builds XCUITest failed with "Audit failed to complete in time", "Failed to get matching snapshot" and "Failed to terminate" (4,951 s for one test) and the run was stopped at the 2-hour limit; this slice changes no iPhone screen, but rerun the full suite on an idle machine before merging (watchOS 27.0 simulators only: no watchOS 26 runtime is installed, so the 26.0 floor is compile-checked, not run). Watch screens captured on Nyx Watch S11 42 and Nyx Watch Ultra 3 (watchOS 27.0) and reviewed in `Research/Screenshots/watch/`: Tonight (red, Starlight, with a real Open-Meteo forecast and without), milestones, week, dark adaptation, parks, chooser, Denali, American Samoa, complications, accessibility text size. Review fixes: toolbar buttons filled bright red (now dark), the title fell to ~2.4:1 in red (now ink), the gauge's glow was clipped into a box and the Moon covered the band word (re-proportioned), the dark-adaptation close button was white (own dark Done), and self-updating countdown text looped layout so the app never launched (now written per minute). Second review (S11 + Ultra 3): Tonight never said whether it is dark *now* (added "Truly dark now" / "Twilight now", with "clouds unknown" folded onto the clock-time line so the gauge keeps its size); the circular complication's Moon glyph rendered white on a red face (now coloured); the week named one "darkest" night when five tied (every tied night ringed, "and 4 more"). Also "Then Dawn twilight at" became "Next: Dawn twilight, 6:30 AM", and `WatchBridge` remembers a context only once WatchConnectivity accepted it. The `s11-*-clouds-*` captures predate the second review's layout.
+
+**Known limits:** the watchOS status clock stays white; complications on a real face, the Smart Stack and real iPhone↔watch delivery need the on-device review (INPUT_NEEDED 6). The App Group and watch bundle IDs must be registered by the account holder at the first device build.
+
+**Next starting point:** merge this branch into `roadmap`; on-device watch review; watch screenshots for App Store Connect when 1.2 ships.
+
 ---
 
 # Nyx handoff — 2026-10-05 (roadmap: an honest forecast)

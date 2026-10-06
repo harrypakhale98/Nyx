@@ -10,6 +10,10 @@ The project is generated from `project.yml`. New source files are synchronized a
 
 Core planning, calendar, saved parks, Learn and the journal work on first launch without network or an API key. Cloud forecasts enhance scores when available. Without clouds, the remaining weights are renormalized and the uncertainty is visible. A score never confirms safe access.
 
+### Apple Watch
+
+`NyxWatch` (watchOS 26+, single-target app) and its complications, `NyxWatchWidgets`, are embedded in the iOS app, so the **Nyx** scheme builds them for the matching watch simulator or device. Run the watch alone with the **NyxWatch** scheme on a watch simulator (`Nyx Watch S11 42`, `Nyx Watch Ultra 3`). The watch makes no network requests: it computes the sky itself and receives saved parks, night vision and cloud forecasts from the iPhone over WatchConnectivity (`WatchBridge` → `WatchContext`). Without a paired iPhone it asks for a park and scores moon and darkness only. Screenshot routes (DEBUG): `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | complications`, `-nyx-watch-state synced | unsynced | polar | samoa`, `-nyx-watch-palette red | phone | standard`, `-nyx-watch-ax`.
+
 ### Optional NPS key
 
 Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/). Create `Config/Secrets.xcconfig` (git-ignored) containing one line, `NPS_API_KEY = your_key`, then build. `Config/Nyx.xcconfig` includes it and the app's Info.plist carries it as `NPS_API_KEY`. Without the file the key is empty and Nyx says plainly that park access was not checked. The key ships inside the app binary, so use a public-app key and treat it as identifiable, not secret.

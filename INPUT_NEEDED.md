@@ -18,6 +18,11 @@ Everything else is built, verified and documented. Each step below needs your Ap
 
 5. **Publish the updated privacy page before submitting a build with the smoke forecast.** Nyx now contacts a third host, `air-quality-api.open-meteo.com` (approved 2026-10-05, behind its own "Smoke and haze" switch). `docs/privacy.html`, `docs/support.html` and `docs/index.html` already say so, but GitHub Pages serves them only after they are pushed to `main`. Merge `roadmap` and push (`git push origin main`) before the build carrying this work goes to review, so the store's privacy link matches the app. The App Store privacy answer stays "Data Not Collected".
 
+6. **Before the first build with the Apple Watch app goes to App Store Connect** (it ships inside the iOS app, roadmap 1.2):
+   - Signing: open the project in Xcode once, signed in with the team account, and build the **Nyx** scheme for your iPhone with your Apple Watch paired. Automatic signing registers `com.harrypakhale.nyx.watchkitapp` and `com.harrypakhale.nyx.watchkitapp.widgets` and adds both to the App Group `group.com.harrypakhale.nyx`. If Xcode reports a capability error instead, add the App Group to those two identifiers at developer.apple.com → Identifiers. Only the account holder can do this.
+   - Try it at night: on the watch, Tonight (turn the Digital Crown through the three pages), the dark-adaptation countdown, Parks → Colors, and add the Nyx complications to a face (circular, corner, rectangular, inline) and the Smart Stack. Check that saving a park on the iPhone shows up on the watch with clouds, and that red stays comfortable with dark-adapted eyes.
+   - App Store Connect requires Apple Watch screenshots for a version that contains a watch app: capture them from the **NyxWatch** scheme on an Apple Watch simulator (Ultra and Series sizes) or the watch itself, and upload them under the version's Apple Watch section.
+
 ## Done
 - Build 1.0 (5) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-05.
 - Build 1.0 (4) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-04. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, run `xcodegen generate`, then Product → Archive → Distribute App → App Store Connect → Upload.

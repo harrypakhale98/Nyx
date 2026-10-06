@@ -10,7 +10,12 @@ assert info.get('ITSAppUsesNonExemptEncryption') is False,'ITSAppUsesNonExemptEn
 assert 'NSLocationWhenInUseUsageDescription' in info
 assert 'NSLocationAlwaysAndWhenInUseUsageDescription' not in info
 assert 'NSPhotoLibraryUsageDescription' not in info
-for folder in [root,root/'PlugIns/NyxWidgets.appex']:
+watchApp=root/'Watch/NyxWatch.app'
+watchInfo=plistlib.loads((watchApp/'Info.plist').read_bytes())
+assert watchInfo['CFBundleIdentifier']=='com.harrypakhale.nyx.watchkitapp'
+assert watchInfo['WKCompanionAppBundleIdentifier']=='com.harrypakhale.nyx'
+assert watchInfo['UIDeviceFamily']==[4],watchInfo['UIDeviceFamily']
+for folder in [root,root/'PlugIns/NyxWidgets.appex',watchApp,watchApp/'PlugIns/NyxWatchWidgets.appex']:
  manifest=plistlib.loads((folder/'PrivacyInfo.xcprivacy').read_bytes())
  assert manifest['NSPrivacyTracking']==False
  assert manifest['NSPrivacyTrackingDomains']==[]
@@ -18,7 +23,7 @@ for folder in [root,root/'PlugIns/NyxWidgets.appex']:
  apis=manifest['NSPrivacyAccessedAPITypes']
  assert len(apis)==1 and apis[0]['NSPrivacyAccessedAPIType']=='NSPrivacyAccessedAPICategoryUserDefaults'
  assert set(apis[0]['NSPrivacyAccessedAPITypeReasons'])=={'CA92.1','1C8F.1'}
-for name in ['Nyx','NyxWidgets']:
+for name in ['Nyx','NyxWidgets','NyxWatch','NyxWatchWidgets']:
  ent=plistlib.loads(Path('Config/'+name+'.entitlements').read_bytes())
  assert ent['com.apple.security.application-groups']==['group.com.harrypakhale.nyx']
 project=Path('Nyx.xcodeproj/project.pbxproj').read_text()
@@ -27,7 +32,14 @@ source=Path('Nyx/Services/DataServices.swift').read_text()
 assert set(re.findall(r'host="([^"]+)"',source))=={'developer.nps.gov','api.open-meteo.com','air-quality-api.open-meteo.com'}
 assert 'completionHandler(nil)' in source
 # Every shipping source file: URLSession and web URLs may appear only in the guarded transport.
-shipping=[f for f in list(Path('Nyx').rglob('*.swift'))+list(Path('NyxWidgets').rglob('*.swift'))]
+shipping=[f for folder in ['Nyx','NyxWidgets','NyxWatch','NyxWatchWidgets','NyxWatchShared'] for f in Path(folder).rglob('*.swift')]
+# The watch makes no requests at all: its targets must never compile the network transport.
+spec_text=Path('project.yml').read_text()
+for target in ['NyxWatch','NyxWatchWidgets']:
+ block=re.search(r'\n  '+target+r':\n(.*?)(?=\n  [A-Za-z]+:\n)',spec_text,re.S).group(1)
+ assert 'DataServices.swift' not in block,f'{target} must not include the network transport'
+for f in [f for folder in ['NyxWatch','NyxWatchWidgets','NyxWatchShared'] for f in Path(folder).rglob('*.swift')]:
+ assert 'URLSession' not in f.read_text() and 'URLRequest' not in f.read_text(),f'network code in a watch source: {f}'
 for f in shipping:
  if f.name=='DataServices.swift': continue
  text=f.read_text()
@@ -38,10 +50,11 @@ spec=Path('project.yml').read_text()
 marketing=re.search(r'MARKETING_VERSION:\s*"([^"]+)"',spec).group(1)
 build=re.search(r'CURRENT_PROJECT_VERSION:\s*"([^"]+)"',spec).group(1)
 widget=plistlib.loads((root/'PlugIns/NyxWidgets.appex/Info.plist').read_bytes())
-for bundle in [info,widget]:
+watchWidget=plistlib.loads((watchApp/'PlugIns/NyxWatchWidgets.appex/Info.plist').read_bytes())
+for bundle in [info,widget,watchInfo,watchWidget]:
  assert (bundle['CFBundleShortVersionString'],bundle['CFBundleVersion'])==(marketing,build),(bundle['CFBundleShortVersionString'],bundle['CFBundleVersion'],marketing,build)
 packages=project.count('XCRemoteSwiftPackageReference')
-manifests=sum((folder/'PrivacyInfo.xcprivacy').exists() for folder in [root,root/'PlugIns/NyxWidgets.appex'])
+manifests=sum((folder/'PrivacyInfo.xcprivacy').exists() for folder in [root,root/'PlugIns/NyxWidgets.appex',watchApp,watchApp/'PlugIns/NyxWatchWidgets.appex'])
 npsKey=info.get('NPS_API_KEY','')
 assert '$(' not in npsKey,'NPS_API_KEY was not expanded'
 catalog=json.loads(Path('Nyx/Resources/Localizable.xcstrings').read_text())
