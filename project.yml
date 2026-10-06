@@ -80,6 +80,9 @@ targets:
       - path: Nyx/Models/Park.swift
       - path: Nyx/Models/SkyConditions.swift
       - path: Nyx/Services/AstronomyEngine.swift
+      - path: Nyx/Services/SkyAlmanac.swift
+      - path: Nyx/Services/WhatsUp.swift
+      - path: Nyx/Resources/sky-events.json
       - path: Nyx/Services/ScoreEngine.swift
       - path: Nyx/Services/DataServices.swift
       - path: Nyx/Services/ForecastDetail.swift

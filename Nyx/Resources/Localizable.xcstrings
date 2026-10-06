@@ -12,6 +12,28 @@
         }
       }
     },
+    "%@ %@ at %@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ at %@, %@"
+          }
+        }
+      }
+    },
+    "%@ from %@ to %@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ from %@ to %@, %@."
+          }
+        }
+      }
+    },
     "%@ of true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -19,6 +41,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ of true darkness."
+          }
+        }
+      }
+    },
+    "%@ peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ peak"
+          }
+        }
+      }
+    },
+    "%@ peak %@: %@ at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ peak %@: %@ at %@"
+          }
+        }
+      }
+    },
+    "%@ peak tonight at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ peak tonight at %@"
           }
         }
       }
@@ -89,6 +144,17 @@
         }
       }
     },
+    "%@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@."
+          }
+        }
+      }
+    },
     "%@, %@. Darkness score %lld, %@. %@ %@ %@": {
       "extractionState": "manual",
       "localizations": {
@@ -118,6 +184,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %lld out of 100, %@. %@"
+          }
+        }
+      }
+    },
+    "%@, %lld out of 100, %@. %@%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld out of 100, %@. %@%@"
           }
         }
       }
@@ -232,6 +309,17 @@
         }
       }
     },
+    "%lld nights after the peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nights after the peak"
+          }
+        }
+      }
+    },
     "%lld of %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -342,6 +430,17 @@
         }
       }
     },
+    "%lld° up in the %@ as true darkness begins, then sinking.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld° up in the %@ as true darkness begins, then sinking."
+          }
+        }
+      }
+    },
     "%lld–%lld%%": {
       "extractionState": "manual",
       "localizations": {
@@ -375,6 +474,17 @@
         }
       }
     },
+    "A bright Moon hides all but the brightest meteors.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A bright Moon hides all but the brightest meteors."
+          }
+        }
+      }
+    },
     "A conservative Bortle estimate. It is not a measurement.": {
       "extractionState": "manual",
       "localizations": {
@@ -393,6 +503,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A darker sky.\nA clearer plan."
+          }
+        }
+      }
+    },
+    "A faint dimming": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A faint dimming"
           }
         }
       }
@@ -540,6 +661,28 @@
         }
       }
     },
+    "A weak return from this park; a rough guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A weak return from this park; a rough guide."
+          }
+        }
+      }
+    },
+    "About %lld an hour %@, Moon down. A rough guide; check clouds and park access before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld an hour %@, Moon down. A rough guide; check clouds and park access before you go."
+          }
+        }
+      }
+    },
     "About the data": {
       "extractionState": "manual",
       "localizations": {
@@ -639,6 +782,17 @@
         }
       }
     },
+    "All night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All night"
+          }
+        }
+      }
+    },
     "All park alerts (%lld)": {
       "extractionState": "manual",
       "localizations": {
@@ -657,6 +811,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "All three forecast models agree: %@ cloud."
+          }
+        }
+      }
+    },
+    "Also in the sky this night. Not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also in the sky this night. Not part of the score."
           }
         }
       }
@@ -738,6 +903,28 @@
         }
       }
     },
+    "At most %lld%% of the Moon's width is in shadow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At most %lld%% of the Moon's width is in shadow."
+          }
+        }
+      }
+    },
+    "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most."
+          }
+        }
+      }
+    },
     "Before you go": {
       "extractionState": "manual",
       "localizations": {
@@ -760,6 +947,17 @@
         }
       }
     },
+    "Below the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Below the horizon"
+          }
+        }
+      }
+    },
     "Below the horizon for %lld%% of true darkness.": {
       "extractionState": "manual",
       "localizations": {
@@ -778,6 +976,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Best %@ · %lld"
+          }
+        }
+      }
+    },
+    "Best %@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best %@, %@."
           }
         }
       }
@@ -1167,6 +1376,17 @@
         }
       }
     },
+    "Core": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core"
+          }
+        }
+      }
+    },
     "DARKNESS / 100": {
       "extractionState": "manual",
       "localizations": {
@@ -1420,13 +1640,13 @@
         }
       }
     },
-    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them.": {
+    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. Milky Way guidance is seasonal, not a precise visibility forecast. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them."
+            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them."
           }
         }
       }
@@ -1651,6 +1871,17 @@
         }
       }
     },
+    "For one observer under this park's sky; a rough guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For one observer under this park's sky; a rough guide."
+          }
+        }
+      }
+    },
     "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same dark window. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself always uses Open-Meteo's best-match forecast. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score.": {
       "extractionState": "manual",
       "localizations": {
@@ -1838,6 +2069,17 @@
         }
       }
     },
+    "Highest at %@, %lld° up in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highest at %@, %lld° up in the %@."
+          }
+        }
+      }
+    },
     "Hollow nights have no cloud forecast yet.": {
       "extractionState": "manual",
       "localizations": {
@@ -1867,6 +2109,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Illumination and the part of true darkness when the Moon is below the horizon."
+          }
+        }
+      }
+    },
+    "In Earth's shadow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Earth's shadow"
+          }
+        }
+      }
+    },
+    "In the %@ after dusk; sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the %@ after dusk; sets at %@."
           }
         }
       }
@@ -1955,6 +2219,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Journal photo %lld"
+          }
+        }
+      }
+    },
+    "Jupiter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jupiter"
           }
         }
       }
@@ -2135,6 +2410,39 @@
         }
       }
     },
+    "Low in the %@ after dusk; sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low in the %@ after dusk; sets at %@."
+          }
+        }
+      }
+    },
+    "Low on the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low on the horizon"
+          }
+        }
+      }
+    },
+    "Low: an open view toward the horizon matters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low: an open view toward the horizon matters."
+          }
+        }
+      }
+    },
     "Lower classes mean less artificial light. Conditions vary across the park.": {
       "extractionState": "manual",
       "localizations": {
@@ -2164,6 +2472,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Make time for the night"
+          }
+        }
+      }
+    },
+    "Mars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mars"
+          }
+        }
+      }
+    },
+    "Mercury": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mercury"
+          }
+        }
+      }
+    },
+    "Meteor shower peaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meteor shower peaks"
+          }
+        }
+      }
+    },
+    "Milky Way core": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core"
           }
         }
       }
@@ -2219,6 +2571,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon"
+          }
+        }
+      }
+    },
+    "Moon %lld° up in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon %lld° up in the %@"
           }
         }
       }
@@ -2322,6 +2685,50 @@
         }
       }
     },
+    "Moon down": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon down"
+          }
+        }
+      }
+    },
+    "Moon high in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon high in the %@"
+          }
+        }
+      }
+    },
+    "Moon low in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon low in the %@"
+          }
+        }
+      }
+    },
+    "Moon up, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up, %lld%% lit"
+          }
+        }
+      }
+    },
     "Moon, %lld percent illuminated, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2351,6 +2758,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon, %lld percent illuminated, lit from the %@, as seen %@"
+          }
+        }
+      }
+    },
+    "Moon-free from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free from %@ to %@."
+          }
+        }
+      }
+    },
+    "Moon-free from %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free from %@."
+          }
+        }
+      }
+    },
+    "Moon-free until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free until %@."
           }
         }
       }
@@ -2388,13 +2828,13 @@
         }
       }
     },
-    "Moonlit hours are lighter": {
+    "Moonlit hours are lighter.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonlit hours are lighter"
+            "value": "Moonlit hours are lighter."
           }
         }
       }
@@ -2597,6 +3037,17 @@
         }
       }
     },
+    "No moonlight to wash it out.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No moonlight to wash it out."
+          }
+        }
+      }
+    },
     "No national parks fall inside this radius. Widen it or choose a different starting park.": {
       "extractionState": "manual",
       "localizations": {
@@ -2626,6 +3077,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No parks in this sky"
+          }
+        }
+      }
+    },
+    "No true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness"
           }
         }
       }
@@ -2703,6 +3165,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No upcoming programs in the last update. Ask at the visitor center."
+          }
+        }
+      }
+    },
+    "Not visible from this park: the Moon is below the horizon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not visible from this park: the Moon is below the horizon."
           }
         }
       }
@@ -2861,6 +3334,17 @@
         }
       }
     },
+    "On the peak night of a major shower, when at least 20 an hour are expected at a saved park with the Moon down. At most one a night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the peak night of a major shower, when at least 20 an hour are expected at a saved park with the Moon down. At most one a night."
+          }
+        }
+      }
+    },
     "Open the breakdown to see whether clouds are included and how moonlight shapes this night.": {
       "extractionState": "manual",
       "localizations": {
@@ -2949,6 +3433,17 @@
         }
       }
     },
+    "Out of the night sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Out of the night sky"
+          }
+        }
+      }
+    },
     "Park": {
       "extractionState": "manual",
       "localizations": {
@@ -3026,6 +3521,17 @@
         }
       }
     },
+    "Partial lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partial lunar eclipse"
+          }
+        }
+      }
+    },
     "Past night": {
       "extractionState": "manual",
       "localizations": {
@@ -3033,6 +3539,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Past night"
+          }
+        }
+      }
+    },
+    "Penumbral lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penumbral lunar eclipse"
           }
         }
       }
@@ -3066,6 +3583,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plan a dark-sky night at %@, %@."
+          }
+        }
+      }
+    },
+    "Planets": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planets"
+          }
+        }
+      }
+    },
+    "Planets, the Milky Way and meteors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planets, the Milky Way and meteors"
           }
         }
       }
@@ -3143,6 +3682,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Promising-night reminders"
+          }
+        }
+      }
+    },
+    "Radiants, rates and patience": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radiants, rates and patience"
           }
         }
       }
@@ -3312,6 +3862,94 @@
         }
       }
     },
+    "Rises %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises %@"
+          }
+        }
+      }
+    },
+    "Rises after darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises after darkness"
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@ and climbs high before dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@ and climbs high before dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@, highest around %@, sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@, highest around %@, sets at %@."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; %@ before dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; %@ before dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; highest around %@ in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; highest around %@ in the %@."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; still low at dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; still low at dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; well up by dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; well up by dawn."
+          }
+        }
+      }
+    },
     "Roughly agree": {
       "extractionState": "manual",
       "localizations": {
@@ -3319,6 +3957,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roughly agree"
+          }
+        }
+      }
+    },
+    "Saturn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saturn"
           }
         }
       }
@@ -3455,6 +4104,17 @@
         }
       }
     },
+    "Sets before darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets before darkness"
+          }
+        }
+      }
+    },
     "Settings": {
       "extractionState": "manual",
       "localizations": {
@@ -3510,6 +4170,17 @@
         }
       }
     },
+    "Small marks above a night are a meteor shower's peak or a lunar eclipse.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small marks above a night are a meteor shower's peak or a lunar eclipse."
+          }
+        }
+      }
+    },
     "Smoke and haze": {
       "extractionState": "manual",
       "localizations": {
@@ -3532,13 +4203,13 @@
         }
       }
     },
-    "Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies.": {
+    "Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies."
+            "value": "Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
           }
         }
       }
@@ -3631,6 +4302,28 @@
         }
       }
     },
+    "Still climbing: %lld° up in the %@ as true darkness ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still climbing: %lld° up in the %@ as true darkness ends."
+          }
+        }
+      }
+    },
+    "Subtle: the Moon's edge darkens slightly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtle: the Moon's edge darkens slightly."
+          }
+        }
+      }
+    },
     "Summer favors the bright center. Look toward the southern sky; timing and terrain matter.": {
       "extractionState": "manual",
       "localizations": {
@@ -3653,13 +4346,13 @@
         }
       }
     },
-    "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. Times in %@.": {
+    "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. %@Times in %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. Times in %@."
+            "value": "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. %@Times in %@."
           }
         }
       }
@@ -3697,6 +4390,17 @@
         }
       }
     },
+    "The Milky Way's bright center is Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's calendar (IMO, 2026 edition): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness; it is a rough guide, and real showers vary from year to year. Lunar eclipse times come from NASA's predictions by Fred Espenak (NASA/GSFC); Nyx checks the Moon's height at the park itself. None of this changes the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way's bright center is Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's calendar (IMO, 2026 edition): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness; it is a rough guide, and real showers vary from year to year. Lunar eclipse times come from NASA's predictions by Fred Espenak (NASA/GSFC); Nyx checks the Moon's height at the park itself. None of this changes the score."
+          }
+        }
+      }
+    },
     "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
       "extractionState": "manual",
       "localizations": {
@@ -3704,6 +4408,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
+    "The Moon is down all that time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon is down all that time."
+          }
+        }
+      }
+    },
+    "The Moon is up all that time, %lld%% lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon is up all that time, %lld%% lit."
+          }
+        }
+      }
+    },
+    "The Moon rises already eclipsed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon rises already eclipsed."
+          }
+        }
+      }
+    },
+    "The Moon sets before it ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon sets before it ends."
           }
         }
       }
@@ -3730,6 +4478,17 @@
         }
       }
     },
+    "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
     "The bright center is out of the night sky this season. Bright constellations still reward a dark night.": {
       "extractionState": "manual",
       "localizations": {
@@ -3748,6 +4507,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bright center may be visible before dawn or near dusk. Timing and terrain matter."
+          }
+        }
+      }
+    },
+    "The bright center rises at %@, after true darkness ends at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center rises at %@, after true darkness ends at %@."
+          }
+        }
+      }
+    },
+    "The bright center sets at %@, before true darkness begins at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center sets at %@, before true darkness begins at %@."
           }
         }
       }
@@ -3928,6 +4709,28 @@
         }
       }
     },
+    "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky."
+          }
+        }
+      }
+    },
+    "The peak falls while the radiant is low here, so few meteors reach this sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The peak falls while the radiant is low here, so few meteors reach this sky."
+          }
+        }
+      }
+    },
     "The photo could not be loaded. Try choosing it again.": {
       "extractionState": "manual",
       "localizations": {
@@ -3935,6 +4738,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "The photo could not be loaded. Try choosing it again."
+          }
+        }
+      }
+    },
+    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO)."
+          }
+        }
+      }
+    },
+    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year."
           }
         }
       }
@@ -4126,6 +4951,28 @@
         }
       }
     },
+    "Total lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total lunar eclipse"
+          }
+        }
+      }
+    },
+    "Totality": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totality"
+          }
+        }
+      }
+    },
     "True darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -4291,6 +5138,28 @@
         }
       }
     },
+    "Until %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until %@"
+          }
+        }
+      }
+    },
+    "Up all night, highest around %@ in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up all night, highest around %@ in the %@."
+          }
+        }
+      }
+    },
     "Use Nyx's red palette to reduce glare at night.": {
       "extractionState": "manual",
       "localizations": {
@@ -4309,6 +5178,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use my location"
+          }
+        }
+      }
+    },
+    "Venus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venus"
           }
         }
       }
@@ -4353,6 +5233,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waning gibbous"
+          }
+        }
+      }
+    },
+    "Watching a meteor shower": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watching a meteor shower"
           }
         }
       }
@@ -4408,6 +5299,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "What you noticed"
+          }
+        }
+      }
+    },
+    "What's up this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up this night"
+          }
+        }
+      }
+    },
+    "What's up tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up tonight"
           }
         }
       }
@@ -4489,6 +5402,17 @@
         }
       }
     },
+    "Without true darkness at this latitude, few meteors will show.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without true darkness at this latitude, few meteors will show."
+          }
+        }
+      }
+    },
     "Without true darkness, the Milky Way stays faint.": {
       "extractionState": "manual",
       "localizations": {
@@ -4496,6 +5420,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Without true darkness, the Milky Way stays faint."
+          }
+        }
+      }
+    },
+    "Worked out on this iPhone for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worked out on this iPhone for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon."
           }
         }
       }
@@ -4610,6 +5545,17 @@
         }
       }
     },
+    "about %lld an hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %lld an hour"
+          }
+        }
+      }
+    },
     "about %lld%%": {
       "extractionState": "manual",
       "localizations": {
@@ -4617,6 +5563,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "about %lld%%"
+          }
+        }
+      }
+    },
+    "around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "around %@"
           }
         }
       }
@@ -4643,6 +5600,17 @@
         }
       }
     },
+    "before dawn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "before dawn"
+          }
+        }
+      }
+    },
     "bottom": {
       "extractionState": "manual",
       "localizations": {
@@ -4654,6 +5622,17 @@
         }
       }
     },
+    "bright": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bright"
+          }
+        }
+      }
+    },
     "clouds unknown, moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
@@ -4661,6 +5640,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "clouds unknown, moon and darkness only"
+          }
+        }
+      }
+    },
+    "east": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "east"
           }
         }
       }
@@ -4698,6 +5688,17 @@
         }
       }
     },
+    "essay.meteors": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watching a meteor shower\n\nA meteor is a grain of dust, often smaller than a grain of sand, striking the air at tens of kilometers a second and burning about a hundred kilometers up. A shower happens when Earth passes through the trail of dust a comet or asteroid has left along its orbit. The same trails return on the same dates every year, which is why the Perseids come in August and the Geminids in December.\n\nEvery meteor in a shower seems to fly out of one small patch of sky, the radiant, which gives the shower its name: the Geminids from Gemini, the Perseids from Perseus. You do not need to look at the radiant. Meteors cross the whole sky, and the longest, most graceful ones appear well away from it. Face whichever part of the sky is darkest and clearest, about halfway up.\n\nThe rate you read in calendars is the zenithal hourly rate, or ZHR: the number one observer would see in an hour under a perfect sky, with the radiant straight overhead. You will almost always see fewer. A radiant low in the sky hides most of the shower below the horizon. Moonlight and light pollution drown the faint meteors, which are most of them. Nyx works out a rough rate for each park and night from the radiant's height, the Moon and that park's estimated sky brightness. Treat it as a guide, not a count. Showers vary from year to year, and a few can surprise.\n\nThe Moon matters more than anything you control. A bright Moon can cut the count in half or worse. The best hours are usually after midnight, when your side of Earth faces forward into the dust, and especially when the Moon has set.\n\nLie down. A reclining chair or a sleeping pad lets you take in the most sky with the least strain. Dress for a temperature well below what the forecast says; lying still on the ground is colder than standing. Keep your phone dim and red, or away. Your eyes need twenty to thirty minutes to adapt to the dark, and one bright screen undoes it.\n\nThen be patient. Meteors come in clusters and lulls. Ten quiet minutes can be followed by three in a row. Give it at least an hour. Most people who say they saw nothing gave up after fifteen minutes.\n\nNo telescope or binoculars are needed. Meteors are too quick and too spread out. The instrument is your own eyes, adapted to the dark, under the widest sky you can find."
+          }
+        }
+      }
+    },
     "essay.milkyway": {
       "extractionState": "manual",
       "localizations": {
@@ -4705,6 +5706,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Finding the Milky Way\n\nThe Milky Way is our own galaxy seen from the inside: a band of light from countless distant stars, crossed by dark lanes of dust. Its brightest part, the galactic center, lies toward the constellations Sagittarius and Scorpius. Seeing it well depends on four things Nyx already weighs: a dark site, a dark Moon, clear air and enough true darkness.\n\nSeason matters most. From the United States the bright center rises before dawn in early spring, stands highest in the southern sky through June, July and August, and sinks into the southwest soon after dusk by October. From November through January it is close to the Sun and out of the night sky. In American Samoa, south of the equator, the center climbs nearly overhead in the same months. The fainter band still arches across the winter sky, through Cassiopeia and past Orion, and it rewards a dark night too.\n\nThe Moon decides which nights are worth the drive. A bright Moon washes out the faint glow, even at the darkest park. Look for nights near the new moon, or nights when the Moon sets early or rises late and leaves hours of true darkness. The calendar's ringed nights and the lighter, moonlit stretches of the sky arc show both.\n\nGive your eyes time. Full dark adaptation takes twenty to thirty minutes, and one glance at a bright screen undoes much of it. Turn on night-vision mode, lower your screen brightness, and use a dim red light on the trail.\n\nIn summer, look low and to the south, and choose a place with an open southern horizon: a desert flat, a ridgeline overlook, a lake shore. Cliffs, trees and canyon walls can hide the brightest part even under a perfect sky. Haze and wildfire smoke dim it as surely as clouds do, which is one reason no forecast can promise what you will see.\n\nPhotographs show more color and detail than the eye can. To the eye, the Milky Way is a soft, silvery river with darker gaps. That is not a disappointment. It is the real thing: light that has travelled for thousands of years to reach you."
+          }
+        }
+      }
+    },
+    "faint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "faint"
+          }
+        }
+      }
+    },
+    "fewer than 1 an hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fewer than 1 an hour"
           }
         }
       }
@@ -4720,6 +5743,28 @@
         }
       }
     },
+    "high in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "high in the %@"
+          }
+        }
+      }
+    },
+    "in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in the %@"
+          }
+        }
+      }
+    },
     "left": {
       "extractionState": "manual",
       "localizations": {
@@ -4727,6 +5772,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "left"
+          }
+        }
+      }
+    },
+    "low in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "low in the %@"
           }
         }
       }
@@ -4753,6 +5809,61 @@
         }
       }
     },
+    "north": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "north"
+          }
+        }
+      }
+    },
+    "northeast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "northeast"
+          }
+        }
+      }
+    },
+    "northwest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "northwest"
+          }
+        }
+      }
+    },
+    "not visible here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not visible here"
+          }
+        }
+      }
+    },
+    "on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "on %@"
+          }
+        }
+      }
+    },
     "out of 100": {
       "extractionState": "manual",
       "localizations": {
@@ -4760,6 +5871,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "out of 100"
+          }
+        }
+      }
+    },
+    "peak in %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak in %lld nights"
+          }
+        }
+      }
+    },
+    "peak the next night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak the next night"
+          }
+        }
+      }
+    },
+    "peak this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak this night"
+          }
+        }
+      }
+    },
+    "peak tomorrow night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak tomorrow night"
+          }
+        }
+      }
+    },
+    "peak tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak tonight"
           }
         }
       }
@@ -4775,6 +5941,61 @@
         }
       }
     },
+    "south": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "south"
+          }
+        }
+      }
+    },
+    "southeast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "southeast"
+          }
+        }
+      }
+    },
+    "southwest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "southwest"
+          }
+        }
+      }
+    },
+    "the night after the peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the night after the peak"
+          }
+        }
+      }
+    },
+    "tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tonight"
+          }
+        }
+      }
+    },
     "top": {
       "extractionState": "manual",
       "localizations": {
@@ -4782,6 +6003,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "top"
+          }
+        }
+      }
+    },
+    "up in true darkness from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "up in true darkness from %@ to %@"
           }
         }
       }
@@ -4808,6 +6040,17 @@
         }
       }
     },
+    "very bright": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "very bright"
+          }
+        }
+      }
+    },
     "waning": {
       "extractionState": "manual",
       "localizations": {
@@ -4826,6 +6069,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "waxing"
+          }
+        }
+      }
+    },
+    "west": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "west"
           }
         }
       }

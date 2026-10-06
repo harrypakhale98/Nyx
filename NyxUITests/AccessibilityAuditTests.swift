@@ -11,7 +11,7 @@ final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         return ["tonight","parks","calendar","journal","learn","detail","breakdown","editor","entry",
-                "onboarding","settings","privacy","data","article","share","river","skyarc"]
+                "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline") }

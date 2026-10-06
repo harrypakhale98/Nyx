@@ -38,7 +38,7 @@ struct TonightView: View {
                         if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
                         else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
                         if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
-                        darkerAhead(than:night)
+                        nudge(park:park,tonight:night)
                     }.frame(maxWidth:.infinity)
                     startingPoint
                     if best.count>1 {
@@ -65,23 +65,54 @@ struct TonightView: View {
                 await model.refresh(candidates,force:true);refreshed+=1
             }
     }
+    /// One quiet line under the hero, never more, the most significant first: a lunar eclipse the
+    /// best park can see within the next three nights, then a major meteor shower's peak worth the
+    /// trip there (at least 20 an hour with the Moon down), then a clearly darker night ahead.
+    @ViewBuilder private func nudge(park:Park,tonight:Night)->some View {
+        if let event=upcomingEvent(park) {
+            capsule(text:event.text,hint:"Opens that night at the park.") { ParkDetailView(park:park,initialDate:event.night.id) } icon:{
+                SkyGlyph(SkyGlyph.Kind(event.glyph),color:palette.accent).frame(width:15,height:15)
+            }
+        } else { darkerAhead(than:tonight) }
+    }
+    private func upcomingEvent(_ park:Park)->(night:Night,glyph:WhatsUp.Events.Glyph,text:String)? {
+        let first=model.tonight(park)
+        let nights=model.nights(park,from:first,count:4)
+        func when(_ night:Night)->String { night.id==first ? String(localized:"tonight") : String(localized:"on \(park.dayLabel(night.id))") }
+        for night in nights {
+            if let eclipse=model.events(night).eclipse, let visible=eclipse.visible {
+                return (night,.eclipse,String(localized:"\(WhatsUp.eclipseName(eclipse.eclipse)) \(when(night)) at \(park.shortName), \(park.time(visible.start))"))
+            }
+        }
+        for night in nights {
+            if let shower=model.events(night).reminderShower {
+                return (night,.meteors,String(localized:"\(shower.shower.name) peak \(when(night)): \(WhatsUp.rateText(shower.hourlyRate)) at \(park.shortName)"))
+            }
+        }
+        return nil
+    }
     /// Tonight answers where; this answers when. The darkest of the next six nights across every
     /// park in reach, shown only when it is clearly better than tonight's best.
     @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
         let ahead=candidates.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) }
             .reduce(nil as Night?) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night }
         if let ahead, ahead.score.value>=tonight.score.value+5 {
-            NavigationLink { ParkDetailView(park:ahead.park,initialDate:ahead.id) } label:{
-                HStack(spacing:8) {
-                    Image(systemName:"moon.stars").imageScale(.small).accessibilityHidden(true)
-                    Text("Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)").multilineTextAlignment(.leading)
-                    Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
-                }
-                .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
-                .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
-            }.buttonStyle(.plain).padding(.top,4)
-            .accessibilityHint("Opens that night at the park.")
+            capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)"),hint:"Opens that night at the park.") {
+                ParkDetailView(park:ahead.park,initialDate:ahead.id)
+            } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
         }
+    }
+    private func capsule<Destination:View,Icon:View>(text:String,hint:LocalizedStringKey,@ViewBuilder destination:@escaping ()->Destination,@ViewBuilder icon:()->Icon)->some View {
+        NavigationLink { destination() } label:{
+            HStack(spacing:8) {
+                icon().accessibilityHidden(true)
+                Text(text).multilineTextAlignment(.leading)
+                Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
+            }
+            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
+            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
+        }.buttonStyle(.plain).padding(.top,4)
+        .accessibilityHint(hint)
     }
     /// The starting point is either a chosen park or the device location, never both.
     private var startingPoint:some View {
