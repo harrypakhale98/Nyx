@@ -9,6 +9,8 @@ struct ParkRow: View {
     var closure: String?=nil
     /// Tonight and the six nights after it, for the week strip.
     var week: [Night]=[]
+    /// Said in the row while the Parks list is narrowed to step-free viewing, so the match is visible.
+    var stepFree=false
     var body: some View {
         VStack(alignment:.leading,spacing:8) {
             // Long names wrap beside the score; only accessibility sizes stack them.
@@ -20,17 +22,26 @@ struct ParkRow: View {
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(night.park.shortName), \(night.park.state). Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
+            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             Text("\(night.park.state)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark-Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
+            if stepFree { Label("Step-free viewing",systemImage:"figure.roll").font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if week.count>1 { WeekStrip(nights:week).padding(.top,4) }
         }
     }
     private var number: some View {
         VStack(alignment:.trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }
+    }
+}
+/// The Parks list's narrowing switches, kept apart from the view so they can be tested.
+nonisolated struct ParkFilter {
+    var darkOnly=false
+    var stepFreeOnly=false
+    func includes(_ park:Park,access:AccessData = .shared)->Bool {
+        (!darkOnly || park.darkSkyDesignated) && (!stepFreeOnly || access.hasStepFreeViewing(park.id))
     }
 }
 struct ParksView: View {
@@ -39,29 +50,35 @@ struct ParksView: View {
     @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
     @State private var search=""
     @State private var darkOnly=false
+    @State private var stepFreeOnly=DebugScenario.state=="step-free"
     @State private var savedOnly=false
     @AppStorage("parksByScore") private var byScore=false
     @Namespace private var zoom
     private var filtered:[Park] {
-        let matching=model.parks.filter { p in (!darkOnly || p.darkSkyDesignated) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || p.matches(search)) }
+        let filter=ParkFilter(darkOnly:darkOnly,stepFreeOnly:stepFreeOnly)
+        let matching=model.parks.filter { p in filter.includes(p) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || p.matches(search)) }
         return byScore ? model.ranked(matching) : matching
     }
+    /// Saved parks lead the list only when nothing narrows it.
+    private var narrowed:Bool { darkOnly || stepFreeOnly || savedOnly }
+    private var showsSavedSection:Bool { !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && !stepFreeOnly }
     var body: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
-                Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : LocalizedStringKey("63 places to look up"))
+                Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : narrowed ? LocalizedStringKey("\(filtered.count) of 63 parks") : LocalizedStringKey("63 places to look up"))
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 // Only worth saying when a row actually reads "Estimate".
                 if filtered.contains(where:{ !model.night($0).score.hasForecast }) { Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted) }
+                if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if filtered.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else {
-                    if !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly {
+                    if showsSavedSection {
                         Eyebrow(text:"Saved for later")
                         ForEach(model.parks.filter{p in saved.contains{$0.parkID==p.id}}) { p in link(p) }
                         Eyebrow(text:"All national parks")
                     }
-                    LazyVStack(spacing:0) { ForEach(filtered.filter { p in !( !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
+                    LazyVStack(spacing:0) { ForEach(filtered.filter { p in !(showsSavedSection && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
                 }
             }.padding(24)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
@@ -71,12 +88,12 @@ struct ParksView: View {
             .refreshable { await model.refresh(model.parks,force:true,parkUpdates:false) }
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu {
                 Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) }
-                Section { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) }
+                Section { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Step-free viewing",isOn:$stepFreeOnly); Toggle("Saved parks only",isOn:$savedOnly) }
             } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Sort and filter parks") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
     }
     private func link(_ park:Park)->some View {
-        NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+        NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7),stepFree:stepFreeOnly) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
     }
 }
 struct ParkDetailView: View {
@@ -195,17 +212,9 @@ struct ParkDetailView: View {
                         }
                     }
                     Divider().overlay(palette.line)
-                    LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
-                    Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
+                    LightPollution(park:park)
                 } }
-                Panel { VStack(alignment:.leading,spacing:18) {
-                    Eyebrow(text:"Places to settle in")
-                    if park.viewingSpots.isEmpty { Text("Ask a ranger for a permitted viewing area with an open horizon. Nyx has no verified viewing spot for this park yet.").foregroundStyle(palette.muted) }
-                    ForEach(park.viewingSpots,id:\.name) { spot in
-                        VStack(alignment:.leading,spacing:6) { Text(spot.name).font(.system(.title3,design:.serif)); Text("\(spot.latitude.formatted(.number.precision(.fractionLength(3)))), \(spot.longitude.formatted(.number.precision(.fractionLength(3)))) · approximate").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).textSelection(.enabled)
-                            .contextMenu { Button("Copy coordinates",systemImage:"doc.on.doc") { UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)" } }; Text(spot.note).font(.caption).foregroundStyle(palette.muted) }
-                    }
-                } }
+                Panel { ViewingSpots(park:park) }
                 Panel { VStack(alignment:.leading,spacing:14) {
                     Eyebrow(text:"Ranger night-sky programs")
                     if let data=model.enrichments[park.id] {
@@ -215,6 +224,7 @@ struct ParkDetailView: View {
                         ForEach(programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(park.programDate(program.date)).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
                     } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
                 } }
+                Panel { ProtectThisSky(park:park) }
                 ShareCardButton(night:night)
                 Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
                 NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
@@ -266,7 +276,7 @@ struct ScoreBreakdownView: View {
                 context:cloudContext,
                 detail:cloudContext.isEmpty ? String(localized:"The hourly forecast averaged over the complete dark window.")
                     : String(localized:"The hourly forecast averaged over the complete dark window. Model agreement, cloud layers and smoke are context; they do not change the score."))
-            row("Light pollution",points:night.score.bortlePoints,of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
+            row("Light pollution",points:night.score.bortlePoints,of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
             row("Length of darkness",points:night.score.lengthPoints,of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
             if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
@@ -302,6 +312,11 @@ struct ScoreBreakdownView: View {
         let lines:[(String,String?)]=[("rectangle.split.3x1",outlook.agreement?.sentence(tonight:isTonight)),("cloud",outlook.layers?.note),
                                       ("smoke",outlook.clarity?.sentence),("sun.haze",outlook.clarity == nil ? outlook.hazeText : nil)]
         return lines.compactMap { symbol,text in text.map { (symbol,$0) } }
+    }
+    /// NASA's night lights, as context beside the estimate the score uses.
+    private var lightContext:[(symbol:String,text:String)] {
+        guard let site=SkyGlow.shared.park(night.park.id) else { return [] }
+        return [("globe.americas",String(localized:"Satellite night lights: \(SkyGlow.levelLabel(SkyGlow.shared.level(site.glow))). Context only; not part of the score."))]
     }
     private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; without clouds the others are scaled up to fill it.

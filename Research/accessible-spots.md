@@ -1,6 +1,6 @@
 # Step-free access for viewing spots
 
-Retrieved 2026-10-05. Data: `Research/accessible-spots.json` (one record per spot in `parks.json`).
+Retrieved 2026-10-05. Data: `Nyx/Resources/accessible-spots.json` (one record per spot in `parks.json`; bundled in the app since 2026-10-06).
 
 ## Method
 

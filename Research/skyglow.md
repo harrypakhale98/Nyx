@@ -134,3 +134,17 @@ python3 Scripts/build_skyglow.py --cache <scratch> --skip-download   # reprocess
 ```
 
 Outputs: `Nyx/Resources/skyglow.json`, `Research/skyglow-calibration.csv`.
+
+## Review queue: hand estimate versus computed (2026-10-06)
+
+The app keeps the hand `bortleEstimate` in the score (DECISIONS, "Every sky"). These parks differ from the computed class by a full class or more and should be checked against measured data (NPS Night Skies Program SQM/all-sky photometry, or DarkSky International reports) before either number is changed:
+
+| Park | Hand | Computed | Likely reason to check |
+|---|---|---|---|
+| Biscayne (bisc) | 5 | 4.0 | Miami dome over water; the hand value may be conservative |
+| Cuyahoga Valley (cuva) | 6 | 5.0 | Suburban park; the 2 km cells smooth Akron/Cleveland edges |
+| Kobuk Valley (kova) | 2 | 3.2 | Alaskan gap-filled values; probably a computed overestimate |
+| Mammoth Cave (maca) | 4 | 2.9 | Dark-Sky designated; the hand value may be too bright |
+| Saguaro (sagu) | 4 | 5.0 | Tucson at the park boundary; the hand value may be too dark |
+
+Also note Hawaiʻi Volcanoes and Carlsbad Caverns, whose computed glow includes lava and oil-field flaring rather than skyglow from towns.
