@@ -22,6 +22,10 @@ struct RootView:View {
     /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
     @State private var revealed=DebugScenario.screen != nil
     @State private var launchParkID:String?
+    /// A link's night at the park, and whether to open it at What's up.
+    @State private var launchNight:(date:Date,whatsUp:Bool)?
+    /// First light's park, while the sky reveals itself over the app.
+    @State private var firstLight:Park?
     /// The Tonight tab icon is today's real moon phase; refreshed whenever Nyx returns.
     @State private var moonIcon=RootView.currentMoonIcon()
     private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
@@ -52,7 +56,8 @@ struct RootView:View {
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? "")))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
-        .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park) }
+        .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
+        .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
         .task {
             NotificationRouter.shared.connect { parkID in open(parkID) }
             if let screen=DebugScenario.screen { tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
@@ -72,10 +77,13 @@ struct RootView:View {
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
             else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
             openRequestedField()
+            if let link=DebugScenario.link { try? await Task.sleep(for:.seconds(1)); handle(DeepLink(link)) }
+            if DebugScenario.screen == nil { firstLight=await FirstLightWatcher.check(model:model) }
             if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
         .onChange(of:scenePhase) { _,phase in if phase == .active {
             model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
+            if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
             openRequestedField()
             // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
@@ -97,10 +105,21 @@ struct RootView:View {
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
         }
-        .onOpenURL { url in
-            guard url.scheme=="nyx" else { return }
-            if url.host=="park" { open(url.lastPathComponent) } else if url.host=="tonight" { tab=0 }
-            else if url.host=="field", let park=model.park(url.lastPathComponent) { FieldPresenter.present(park:park,model:model) }
+        .onOpenURL { url in handle(DeepLink(url)) }
+    }
+    /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.
+    private func handle(_ link:DeepLink?) {
+        switch link {
+        case .park(let id): launchNight=nil; open(id)
+        case .tonight: tab=0
+        case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model) }
+        case .whatsUp(let id,let day):
+            guard let park=model.park(id) else { return }
+            open(id,night:(day.evening(in:park),true))
+        case .calendar(let id,let year,let month):
+            guard model.park(id) != nil else { return }
+            tab=2; model.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
+        case nil: break
         }
     }
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
@@ -130,22 +149,30 @@ struct RootView:View {
         case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
         case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}
         case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
+        // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
+        case "trip": TripPlannerView()
+        case "constellation": ScrollView { YourSkyPanel(nights:DebugScenario.state=="empty" ? [] : DebugJournal.nights(now:model.today)) { _ in }.padding(24) }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+        case "recap": YearRecapView(nights:DebugJournal.nights(now:model.today))
+        case "icons": AppIconPicker()
+        case "first-light": if let park=model.home { FirstLightView(park:park,night:model.tonight(park),moment:FirstLightDebug.moment(park:park,model:model),leavesOnItsOwn:false) {} }
         default: TonightView()
         }
         #else
         TonightView()
         #endif
     }
-    /// Opens a park from a reminder, Spotlight or a widget. When another sheet is already up
-    /// (a journal draft, a breakdown), the park is presented above it instead of waiting or
-    /// dismissing it, so nothing the person was doing is lost.
-    private func open(_ parkID:String?) {
+    /// Opens a park from a reminder, Spotlight, a widget or a link (at a given night, and at What's
+    /// up, when the link names one). When another sheet is already up (a journal draft, a
+    /// breakdown), the park is presented above it instead of waiting or dismissing it, so nothing
+    /// the person was doing is lost.
+    private func open(_ parkID:String?,night:(date:Date,whatsUp:Bool)?=nil) {
         guard let parkID,let park=model.park(parkID) else { return }
+        launchNight=night
         let root=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
             .flatMap(\.windows).first(where:\.isKeyWindow)?.rootViewController
         guard var top=root?.presentedViewController else { launchParkID=parkID; return }
         while let next=top.presentedViewController { top=next }
-        let detail=ParkSheet(park:park).environment(model).modelContainer(context.container)
+        let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
     /// Opens field mode when Control Center, Siri or Shortcuts asked for it: the named park, else
@@ -220,18 +247,27 @@ struct RootView:View {
 /// presented, including above another sheet.
 private struct ParkSheet:View {
     let park:Park
+    var initialDate:Date?=nil
+    var whatsUp=false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     var body:some View {
         NavigationStack {
-            ParkDetailView(park:park).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
+            ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
         }
         .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)).nyxPresentation()
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }
 
+/// The moment first light shows in DEBUG scenarios: two hours into true darkness tonight.
+enum FirstLightDebug {
+    @MainActor static func moment(park:Park,model:PlanModel)->Date {
+        let sky=model.night(park).sky
+        return (sky.darkStart ?? sky.evening.addingTimeInterval(10*3600)).addingTimeInterval(2*3600)
+    }
+}
 private struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if DebugScenario.isEnabled("ax5") { content.dynamicTypeSize(.accessibility5) } else { content }

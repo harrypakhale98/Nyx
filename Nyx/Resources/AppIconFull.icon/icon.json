@@ -1,0 +1,12 @@
+{
+  "fill" : { "linear-gradient" : [ "srgb:0.16471,0.10588,0.30588,1.00000", "srgb:0.00000,0.00000,0.00000,1.00000" ] },
+  "groups" : [
+    { "layers" : [ { "glass" : false, "image-name" : "Star.svg", "name" : "Leading star" } ],
+      "shadow" : { "kind" : "none", "opacity" : 0.5 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
+    { "layers" : [ { "glass" : false, "image-name" : "Arc.svg", "name" : "Arc" } ],
+      "shadow" : { "kind" : "layer-color", "opacity" : 0.6 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
+    { "layers" : [ { "glass" : true, "image-name" : "Moon.svg", "name" : "Moon" }, { "glass" : true, "image-name" : "Disc.svg", "name" : "Earthshine" } ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.6 }, "translucency" : { "enabled" : true, "value" : 0.15 } }
+  ],
+  "supported-platforms" : { "squares" : "shared" }
+}
