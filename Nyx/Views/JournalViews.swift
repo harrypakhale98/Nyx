@@ -13,6 +13,10 @@ struct JournalView: View {
     @State private var saveError=false
     @State private var opened:JournalEntry?
     @State private var recap=false
+    @State private var width=0.0
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// A wide iPad: your constellation large on the left, the nights themselves on the right.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     var body:some View {
         let nights=model.loggedNights(entries)
         ScrollView {
@@ -20,14 +24,17 @@ struct JournalView: View {
                 Eyebrow(text:"Keep a little of the night")
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
                 if recapSeason(nights) { recapCard }
-                YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }
-                if entries.isEmpty { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
-                else {
-                    LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
-                    if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
+                if wide {
+                    HStack(alignment:.top,spacing:28) {
+                        YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
+                        VStack(alignment:.leading,spacing:24) { entryList }.frame(width:min(440,(width*0.4).rounded()))
+                    }
+                } else {
+                    YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }
+                    entryList
                 }
-            }.padding(24)
-        }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+            }.padding(24).readableColumn(wide ? .infinity : WideLayout.readableWidth)
+        }.measuringWidth($width).background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Menu {
                     Button("Year under the stars",systemImage:"sparkles") { recap=true }.disabled(entries.isEmpty)
@@ -39,6 +46,13 @@ struct JournalView: View {
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+    }
+    @ViewBuilder private var entryList: some View {
+        if entries.isEmpty { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
+        else {
+            LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
+            if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
+        }
     }
     /// December (and the first days of January): the year's recap waits at the top of the journal.
     private func recapSeason(_ nights:[LoggedNight])->Bool {
@@ -199,7 +213,7 @@ struct JournalEditorView:View {
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,4-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=4 || editor.loadingPhotos)
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone.").foregroundStyle(palette.muted) }
             if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
-        }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+        }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { dismiss() } }.disabled(editor.loadingPhotos) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
@@ -237,7 +251,7 @@ struct JournalDetailView:View {
         } else { Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted) }
     }
     var body:some View {
-        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }

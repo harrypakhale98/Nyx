@@ -101,6 +101,7 @@ struct FieldView: View {
             if inline { picker.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) } else { picker.pickerStyle(.segmented) }
         }
         .padding(.horizontal,20).padding(.bottom,12).padding(.top,8)
+        .readableColumn(WideLayout.proseWidth)
     }
     private func resetNotice(_ reset:DarkAdaptation.Reset)->some View {
         VStack(alignment:.leading,spacing:12) {
@@ -151,6 +152,8 @@ struct FieldNightPager: View {
                 // VoiceOver: step through what is still to come tonight, one milestone at a time.
                 .accessibilityRotor(Text("Milestones"),entries:ahead.map { MilestoneStop(id:$0.id,label:String(localized:"\($0.title), \(session.night.park.time($0.date))")) },entryID:\.id,entryLabel:\.label)
                 .padding(.horizontal,24)
+                // An iPad in landscape: one milestone at a time, at a reading width.
+                .readableColumn(WideLayout.proseWidth)
             }
             .scrollIndicators(.hidden)
             .scrollTargetBehavior(.viewAligned)

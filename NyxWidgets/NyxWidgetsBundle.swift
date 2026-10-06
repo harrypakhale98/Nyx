@@ -13,14 +13,14 @@ struct TonightProvider:TimelineProvider {
         if context.isPreview, snapshot?.parks.isEmpty ?? true, let sample=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
             snapshot=SavedSkySnapshot(parks:[sample],forecasts:[:])
         }
-        var builder=TonightTimeline(snapshot:snapshot,large:context.family == .systemLarge)
+        var builder=TonightTimeline(snapshot:snapshot,large:context.family == .systemLarge || context.family == .systemExtraLarge)
         completion(builder.entry(at:.now))
     }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
     /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
     func getTimeline(in context:Context,completion:@escaping(Timeline<TonightEntry>)->Void) {
         let now=Date.now
-        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:context.family == .systemLarge)
+        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:context.family == .systemLarge || context.family == .systemExtraLarge)
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
         let edges=builder.duskWindows(from:now,nights:2).flatMap { [$0.start,$0.end] }.filter { $0>now && $0<end }
@@ -79,7 +79,8 @@ struct TonightWidget:Widget {
     var body:some WidgetConfiguration {
         StaticConfiguration(kind:WidgetSelection.kind,provider:TonightProvider()) { entry in TonightWidgetView(entry:entry) }
             .configurationDisplayName("Tonight's sky").description("The darkest sky among your saved parks, with forecast limits shown.")
-            .supportedFamilies([.systemSmall,.systemMedium,.systemLarge,.accessoryCircular,.accessoryRectangular])
+            // Extra large appears only on iPad: tonight and the month side by side.
+            .supportedFamilies([.systemSmall,.systemMedium,.systemLarge,.systemExtraLarge,.accessoryCircular,.accessoryRectangular])
     }
 }
 struct NightVisionControl:ControlWidget {

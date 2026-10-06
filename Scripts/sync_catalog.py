@@ -20,11 +20,15 @@ for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*sim
 if extracted:
  for key in [k for k,v in strings.items() if k not in extracted and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
   del strings[key]
+# iPad wording for strings that name the device (see device_strings.py).
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
+import device_strings
+device_strings.apply(catalog)
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
-# Usage strings, kept identical to project.yml's Info.plist values.
-usage={'NSAlarmKitUsageDescription':"Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only.",
-       'NSLocationWhenInUseUsageDescription':'Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.'}
+# Usage strings, kept identical to project.yml's Info.plist values. "This device": one plist serves iPhone and iPad.
+usage={'NSAlarmKitUsageDescription':"Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only.",
+       'NSLocationWhenInUseUsageDescription':'Nyx uses your location on this device to find nearby national parks. Your coordinates are never sent to a service.'}
 info={'sourceLanguage':'en','strings':{key:{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':value}}}} for key,value in usage.items()},'version':'1.0'}
 path.with_name('InfoPlist.xcstrings').write_text(json.dumps(info,indent=2)+'\n')
 print('Catalog:',len(strings),'keys')

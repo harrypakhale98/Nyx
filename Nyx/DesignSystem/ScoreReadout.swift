@@ -42,6 +42,7 @@ struct ScoreReadout: View {
             .padding(.horizontal,4).contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .hoverEffect(.highlight)
         .accessibilityElement(children:.ignore)
         .accessibilityLabel("Why this score")
         .accessibilityValue(spoken)

@@ -16,7 +16,8 @@ struct RootView:View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("showerReminders") private var showerReminders=true
     @State private var savedUpdating=false
-    @State private var tab=0
+    /// This window's tab and keyboard commands (each iPad window has its own).
+    @State private var commands=SceneCommands()
     @State private var intro=false
     /// Cold launch: the launch screen's starfield paints first, then the app settles in.
     /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
@@ -38,20 +39,27 @@ struct RootView:View {
                 ZStack {
                 // Removed once revealed, so its sky stops animating and sensing tilt behind the tabs.
                 if !revealed { NightBackground().transition(.opacity) }
-                TabView(selection:$tab) {
-                    Tab(value:0) { NavigationStack { TonightView() } } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
-                    Tab("Parks",systemImage:"mountain.2",value:1) { NavigationStack { ParksView() } }
-                    Tab("Calendar",systemImage:"calendar",value:2) { NavigationStack { CalendarView() } }
-                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() } }
-                    Tab("Learn",systemImage:"sparkles",value:4) { NavigationStack { LearnView() } }
+                TabView(selection:$commands.tab) {
+                    Tab(value:0) { NavigationStack { TonightView() }.environment(\.nyxTab,0).modifier(TabChrome(tint:palette.accent)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
+                    // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
+                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().environment(\.nyxTab,1).modifier(TabChrome(tint:palette.accent)) }
+                    Tab("Calendar",systemImage:"calendar",value:2) { NavigationStack { CalendarView() }.environment(\.nyxTab,2).modifier(TabChrome(tint:palette.accent)) }
+                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.environment(\.nyxTab,3).modifier(TabChrome(tint:palette.accent)) }
+                    Tab("Learn",systemImage:"sparkles",value:4) { NavigationStack { LearnView() }.environment(\.nyxTab,4).modifier(TabChrome(tint:palette.accent)) }
                 }
+                // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
+                .tabViewStyle(.sidebarAdaptable)
+                .tint(commands.sidebar ? palette.controlTint : palette.accent)
+                .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
                 }
             }
         }
+        .environment(commands).focusedSceneValue(commands)
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(DebugTypeSize())
+        .modifier(DebugWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? "")))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
@@ -60,7 +68,7 @@ struct RootView:View {
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
         .task {
             NotificationRouter.shared.connect { parkID in open(parkID) }
-            if let screen=DebugScenario.screen { tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
+            if let screen=DebugScenario.screen { commands.tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
             #if DEBUG
             if DebugScenario.state=="populated" {
                 context.insert(JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
@@ -114,14 +122,14 @@ struct RootView:View {
     private func handle(_ link:DeepLink?) {
         switch link {
         case .park(let id): launchNight=nil; open(id)
-        case .tonight: tab=0
+        case .tonight: commands.tab=0
         case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model) }
         case .whatsUp(let id,let day):
             guard let park=model.park(id) else { return }
             open(id,night:(day.evening(in:park),true))
         case .calendar(let id,let year,let month):
             guard model.park(id) != nil else { return }
-            tab=2; model.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
+            commands.tab=2; model.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
         case nil: break
         }
     }
@@ -145,6 +153,7 @@ struct RootView:View {
         case "snippet": DebugSnippetView().task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
         case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
+        case "widgets-xl": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),extraLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
@@ -282,6 +291,15 @@ enum FirstLightDebug {
     @MainActor static func moment(park:Park,model:PlanModel)->Date {
         let sky=model.night(park).sky
         return (sky.darkStart ?? sky.evening.addingTimeInterval(10*3600)).addingTimeInterval(2*3600)
+    }
+}
+/// iPad screenshot scenarios: `-nyx-narrow` draws the app in a 390-point compact column, as in a
+/// narrow window beside another app. (Landscape: `ScreenshotTests` turns the simulator.)
+private struct DebugWindow: ViewModifier {
+    @ViewBuilder func body(content:Content)->some View {
+        if DebugScenario.isEnabled("narrow") {
+            content.environment(\.horizontalSizeClass,.compact).frame(maxWidth:390).frame(maxWidth:.infinity).background(Color(white:0.12).ignoresSafeArea())
+        } else { content }
     }
 }
 private struct DebugTypeSize: ViewModifier {

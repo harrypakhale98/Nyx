@@ -60,8 +60,11 @@ private struct StarLayer: View, Equatable {
         Canvas { context,size in
             if band == .faint && sky.dark {
                 // The Milky Way: a soft glow along the galactic plane, brightest toward the core.
+                // Sized to the projection (which scales with height), so a landscape iPad's wider
+                // window shows more of the band rather than a fatter one; a phone is unchanged.
+                let band=min(size.width,size.height*0.46)
                 context.drawLayer { glow in
-                    glow.addFilter(.blur(radius:size.width*0.05))
+                    glow.addFilter(.blur(radius:band*0.05))
                     for segment in sky.galaxy {
                         var path=Path()
                         for (i,point) in segment.enumerated() {
@@ -69,7 +72,7 @@ private struct StarLayer: View, Equatable {
                             if i==0 { path.move(to:p) } else { path.addLine(to:p) }
                         }
                         let core=segment.map(\.brightness).reduce(0,+)/Double(max(1,segment.count))
-                        glow.stroke(path,with:.color(ink.opacity((0.05+0.11*milkyWay)*core*strength/0.6)),style:StrokeStyle(lineWidth:size.width*0.2,lineCap:.round,lineJoin:.round))
+                        glow.stroke(path,with:.color(ink.opacity((0.05+0.11*milkyWay)*core*strength/0.6)),style:StrokeStyle(lineWidth:band*0.2,lineCap:.round,lineJoin:.round))
                     }
                 }
             }

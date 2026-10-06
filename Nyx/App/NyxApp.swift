@@ -21,5 +21,7 @@ import UserNotifications
             if let container { RootView().environment(model).modelContainer(container) }
             else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
+        // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night.
+        .commands { NyxCommands() }
     }
 }

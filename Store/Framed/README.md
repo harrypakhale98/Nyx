@@ -8,3 +8,5 @@ Six frames built from the raw captures in `Store/Screenshots` by `swift Scripts/
 Order: 01 Tonight, 02 Darkness Score, 03 Calendar, 04 Parks, 05 Night vision (Learn tab), 06 Journal.
 
 Scores are real (live forecasts captured Oct 3, 2026, scored by the shipping engine). Journal entries are illustrative DEBUG seed data with no personal photos. To change captions, edit the `frames` list in the script and rerun. Recapture the raw frames with `Scripts/capture_store.py` first if the UI changes.
+
+iPad (2026-10-06): no captioned iPad frames yet. The six raw 13-inch iPad captures in `Store/Screenshots/iPad/` (2752×2064 landscape, no alpha, real `live` data) can be uploaded as they are to App Store Connect's iPad 13-inch slot, which is required now that Nyx runs on iPad. To caption them, add an iPad size to `Scripts/make_store_frames.swift` (landscape canvas 2752×2064) rather than scaling the iPhone frames.

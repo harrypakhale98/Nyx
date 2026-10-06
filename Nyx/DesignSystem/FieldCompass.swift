@@ -25,7 +25,7 @@ struct FieldCompassView: View {
     var body: some View {
         VStack(spacing:12) {
             if showsList { list } else { sky }
-            controls.padding(.horizontal,20)
+            controls.padding(.horizontal,20).readableColumn(WideLayout.proseWidth)
         }
         .task(id:session.park.id) {
             // Stars move a quarter of a degree a minute: positions are refreshed twice a minute.
@@ -69,7 +69,7 @@ struct FieldCompassView: View {
                 }
                 if !sensing { Text("This iPhone can't sense where it is pointing, so the sky is listed instead.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if let eyeClock { EyeClock(session:session,expanded:eyeClock).padding(.top,12) }
-            }.padding(.horizontal,24).padding(.vertical,12)
+            }.padding(.horizontal,24).padding(.vertical,12).readableColumn(WideLayout.proseWidth)
         }
     }
     private var controls: some View {
@@ -104,14 +104,14 @@ struct FieldCompassView: View {
     // MARK: Drawing
 
     private func draw(_ context:inout GraphicsContext,size:CGSize,pose:SkyCompass.Pose,targets:[FieldSkyTarget],stars:[CompassStar]) {
-        let ink=palette.ink, w=size.width, h=size.height
-        func at(_ altitude:Double,_ azimuth:Double)->SkyCompass.Placement { SkyCompass.place(altitude:altitude,azimuth:azimuth,pose:pose,width:w,height:h) }
+        let ink=palette.ink, w=size.width, h=size.height, fov=SkyCompass.horizontalFieldOfView(width:w,height:h)
+        func at(_ altitude:Double,_ azimuth:Double)->SkyCompass.Placement { SkyCompass.place(altitude:altitude,azimuth:azimuth,pose:pose,width:w,height:h,fieldOfView:fov) }
         func point(_ p:SIMD2<Double>)->CGPoint { CGPoint(x:p.x,y:p.y) }
         // Altitude rings at 30° and 60°, and the horizon, each a run of short segments in view.
         for (altitude,opacity,width) in [(0.0,0.7,1.2),(30.0,0.2,0.6),(60.0,0.2,0.6)] {
             var path=Path(), drawing=false
             for step in 0...180 {
-                let placed=SkyCompass.place(altitude:altitude,azimuth:Double(step)*2,pose:pose,width:w,height:h,clipped:false)
+                let placed=SkyCompass.place(altitude:altitude,azimuth:Double(step)*2,pose:pose,width:w,height:h,fieldOfView:fov,clipped:false)
                 // Points far beyond the edge are left out, so a line never sweeps across from behind.
                 if let p=placed.point, abs(p.x-w/2)<w*3, abs(p.y-h/2)<h*3 { let q=CGPoint(x:p.x,y:p.y); if drawing { path.addLine(to:q) } else { path.move(to:q); drawing=true } } else { drawing=false }
             }

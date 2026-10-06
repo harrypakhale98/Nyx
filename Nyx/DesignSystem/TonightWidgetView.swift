@@ -52,7 +52,9 @@ struct TonightWidgetView:View {
                     Text(night.park.shortName).font(.system(.caption,design:.serif)).fixedSize(horizontal:false,vertical:true)
                     Text("\(night.score.value)/100 · \(forecastLabel(night))").font(.caption2).fixedSize(horizontal:false,vertical:true)
                 }.dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
-            } else if family == .systemLarge, let month=entry.month {
+            } else if family == .systemExtraLarge, let month=entry.month, !typeSize.isAccessibilitySize {
+                extraLargeContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
+            } else if family == .systemLarge || family == .systemExtraLarge, let month=entry.month {
                 largeContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
             } else if family == .systemMedium && !entry.week.isEmpty && !typeSize.isAccessibilitySize {
                 HStack(alignment:.top,spacing:14) {
@@ -72,7 +74,7 @@ struct TonightWidgetView:View {
                 VStack(alignment:.leading,spacing:8) {
                     Image(systemName:"moon.stars")
                     Text("Save a park in Nyx").font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                    if family == .systemMedium || family == .systemLarge { Text("Your next dark sky will appear here.").font(.caption).fixedSize(horizontal:false,vertical:true) }
+                    if family != .systemSmall { Text("Your next dark sky will appear here.").font(.caption).fixedSize(horizontal:false,vertical:true) }
                 }
                 Text("Save a park in Nyx").font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
             }.summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
@@ -194,6 +196,36 @@ struct TonightWidgetView:View {
             }
         }.dynamicTypeSize(.small ... .xLarge)
     }
+    /// iPad's extra-large widget: tonight on the left, large enough to read across a room, and the
+    /// coming nights as the same calendar of small skies on the right.
+    private func extraLargeContent(_ night:Night,month:NightPlanner.Month)->some View {
+        HStack(alignment:.top,spacing:28) {
+            VStack(alignment:.leading,spacing:8) {
+                Text("TONIGHT'S SKY").font(.system(size:10,weight:.medium)).tracking(1.4).foregroundStyle(muted)
+                Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
+                Text("\(night.score.value)").font(.system(size:72,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
+                Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted)
+                HStack(alignment:.center,spacing:10) {
+                    moon(night).frame(width:34,height:34)
+                    VStack(alignment:.leading,spacing:2) {
+                        Text(night.sky.moon.name).font(.caption)
+                        Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption2).foregroundStyle(muted)
+                    }
+                }.padding(.top,10)
+                if let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
+                    Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption).lineLimit(1).minimumScaleFactor(0.8)
+                }
+            }.frame(width:200,alignment:.leading)
+            VStack(alignment:.leading,spacing:8) {
+                // Room for the "2 of 3" button laid over the top corner.
+                Color.clear.frame(height:entry.savedCount>1 ? 18 : 0)
+                monthGrid(night.park,month:month)
+                if month.nights.contains(where:{ $0.map { !$0.score.hasForecast } ?? false }) {
+                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("No forecast yet").font(.caption2).foregroundStyle(muted) }
+                }
+            }
+        }.dynamicTypeSize(.small ... .xLarge)
+    }
     private func monthGrid(_ park:Park,month:NightPlanner.Month)->some View {
         let rows=stride(from:0,to:month.nights.count,by:7).map { Array(month.nights[$0..<min($0+7,month.nights.count)]) }
         let first=month.tonight?.id
@@ -234,7 +266,7 @@ struct TonightWidgetView:View {
     }
     private func summary(_ night:Night)->String {
         let tonight=String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cached forecast included") : String(localized:"Moon and darkness only, clouds unknown"))")
-        if family == .systemLarge, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
+        if family == .systemLarge || family == .systemExtraLarge, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
             let count=month.nights.compactMap { $0 }.count
             let events=month.nights.compactMap { $0 }.filter { month.events[$0.id] != nil }
                 .map { night in String(localized:"\(month.events[night.id] == .eclipse ? String(localized:"Lunar eclipse") : String(localized:"Meteor shower peak")), \(night.park.dayLabel(night.id))") }
@@ -282,6 +314,8 @@ struct WidgetReviewView:View {
     let entry:TonightEntry
     /// `widgets-large`: the large family in full colour, night vision and a tinted Home Screen.
     var large=false
+    /// `widgets-xl`: iPad's extra-large family.
+    var extraLarge=false
     private func card(_ family:WidgetFamily,_ entry:TonightEntry,height:Double,mode:WidgetRenderingMode = .fullColor)->some View {
         TonightWidgetView(previewFamily:family,entry:entry).environment(\.widgetRenderingMode,mode)
             .frame(maxWidth:family == .systemSmall ? 158 : .infinity).frame(height:height).padding(16)
@@ -294,8 +328,12 @@ struct WidgetReviewView:View {
     }
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:20) {
-            Text(large ? "Large widget review" : "Widget content review").font(.system(size:20,design:.serif))
-            if large {
+            Text(extraLarge ? "Extra-large widget review" : large ? "Large widget review" : "Widget content review").font(.system(size:20,design:.serif))
+            if extraLarge {
+                card(.systemExtraLarge,entry,height:330).frame(maxWidth:715+32)
+                Text("Night vision").font(.caption)
+                card(.systemExtraLarge,TonightEntry(date:entry.date,night:entry.night,nightVision:true,week:entry.week,month:entry.month,position:entry.position,savedCount:entry.savedCount),height:330).frame(maxWidth:715+32)
+            } else if large {
                 card(.systemLarge,entry,height:338)
                 Text("Night vision").font(.caption)
                 card(.systemLarge,TonightEntry(date:entry.date,night:entry.night,nightVision:true,week:entry.week,month:entry.month,position:entry.position,savedCount:entry.savedCount),height:338)

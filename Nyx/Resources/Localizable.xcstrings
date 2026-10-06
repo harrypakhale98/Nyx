@@ -1512,9 +1512,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alarms for Nyx are off. You can allow them in iPhone Settings."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alarms for Nyx are off. You can allow them in iPad Settings."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alarms for Nyx are off. You can allow them in iPhone Settings."
+                }
+              }
+            }
           }
         }
       }
@@ -1523,9 +1535,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alarms ring through Silent and Focus. They are set on this iPhone and nowhere else."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alarms ring through Silent and Focus. They are set on this iPad and nowhere else."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Alarms ring through Silent and Focus. They are set on this iPhone and nowhere else."
+                }
+              }
+            }
           }
         }
       }
@@ -2282,9 +2306,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -2381,9 +2417,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Close and reopen Nyx. Your saved nights remain on this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Close and reopen Nyx. Your saved nights remain on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Close and reopen Nyx. Your saved nights remain on this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -3294,9 +3342,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -3499,6 +3559,17 @@
         }
       }
     },
+    "Extra-large widget review": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra-large widget review"
+          }
+        }
+      }
+    },
     "Eyes adapt to the dark in two steps. Cones settle in about 10 minutes; rods, which see faint stars and the Milky Way, need 20 to 30. Dim red light barely touches rods, and a moment of white light starts them over. This clock counts your time in field mode, so it is only an estimate.": {
       "extractionState": "manual",
       "localizations": {
@@ -3627,6 +3698,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filter"
+          }
+        }
+      }
+    },
+    "Find a Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find a Park"
           }
         }
       }
@@ -3778,9 +3860,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Follow my iPhone"
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Follow my iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Follow my iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -3965,9 +4059,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "From your journal, on this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From your journal, on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From your journal, on this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -4152,9 +4258,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hold your iPhone up toward the sky. A list is also available."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Hold your iPad up toward the sky. A list is also available."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Hold your iPhone up toward the sky. A list is also available."
+                }
+              }
+            }
           }
         }
       }
@@ -4416,9 +4534,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "It plays even when your iPad is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button."
+                }
+              }
+            }
           }
         }
       }
@@ -4441,6 +4571,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Its bright center clears 10° in the %@."
+          }
+        }
+      }
+    },
+    "Its sky tonight, and the nights ahead, will open here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its sky tonight, and the nights ahead, will open here."
           }
         }
       }
@@ -4812,9 +4953,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Location is used only while you use Nyx, to compare park distances on this iPad. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPad to point the sky where you hold it; nothing is recorded."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded."
+                }
+              }
+            }
           }
         }
       }
@@ -4944,9 +5097,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Measured on this iPhone"
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Measured on this iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Measured on this iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -5670,9 +5835,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Move your iPhone in a slow figure eight to steady the compass."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Move your iPad in a slow figure eight to steady the compass."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Move your iPhone in a slow figure eight to steady the compass."
+                }
+              }
+            }
           }
         }
       }
@@ -5904,6 +6081,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next 7 nights"
+          }
+        }
+      }
+    },
+    "Next Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Night"
           }
         }
       }
@@ -6429,9 +6617,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notifications for Nyx are off in iPad Settings. Turn them on there, then switch reminders back on."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on."
+                }
+              }
+            }
           }
         }
       }
@@ -6462,9 +6662,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPad. They are estimates, not confirmations of clear skies or access."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access."
+                }
+              }
+            }
           }
         }
       }
@@ -6473,9 +6685,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can set an alarm on this iPad for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone."
+                }
+              }
+            }
           }
         }
       }
@@ -6495,9 +6719,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx compares distances on this iPhone. Your location is never sent to a service."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx compares distances on this iPad. Your location is never sent to a service."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx compares distances on this iPhone. Your location is never sent to a service."
+                }
+              }
+            }
           }
         }
       }
@@ -6528,9 +6764,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx could not open local storage. Restart the app after making space on this iPad. Existing data has not been replaced."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced."
+                }
+              }
+            }
           }
         }
       }
@@ -6539,9 +6787,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx has no account, no ads, no tracking. Your journal never leaves this phone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx has no account, no ads, no tracking. Your journal never leaves this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx has no account, no ads, no tracking. Your journal never leaves this phone."
+                }
+              }
+            }
           }
         }
       }
@@ -6583,9 +6843,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPad. You can also choose a starting park."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park."
+                }
+              }
+            }
           }
         }
       }
@@ -6715,9 +6987,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On this iPhone, Nyx's screen averaged %lld%% of full brightness in the day iOS last reported, ending %@."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "On this iPad, Nyx's screen averaged %lld%% of full brightness in the day iOS last reported, ending %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "On this iPhone, Nyx's screen averaged %lld%% of full brightness in the day iOS last reported, ending %@."
+                }
+              }
+            }
           }
         }
       }
@@ -6751,6 +7035,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "One night under the stars at %lld national park"
+          }
+        }
+      }
+    },
+    "Open %@ at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@ at %@"
           }
         }
       }
@@ -7316,6 +7611,17 @@
         }
       }
     },
+    "Previous Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous Night"
+          }
+        }
+      }
+    },
     "Previous month": {
       "extractionState": "manual",
       "localizations": {
@@ -7496,9 +7802,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -7573,9 +7891,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reminders are off. You can enable them in iPhone Settings."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reminders are off. You can enable them in iPad Settings."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reminders are off. You can enable them in iPhone Settings."
+                }
+              }
+            }
           }
         }
       }
@@ -7914,9 +8244,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved parks, journal entries and selected photos are stored on this iPad. iCloud sync is not used. Your device backup settings may include app data."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data."
+                }
+              }
+            }
           }
         }
       }
@@ -8013,9 +8355,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sets an alarm on this iPhone"
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Sets an alarm on this iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Sets an alarm on this iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -8148,6 +8502,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Show as a list"
+          }
+        }
+      }
+    },
+    "Show in Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Calendar"
           }
         }
       }
@@ -9443,9 +9808,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The notes and photos are removed from this iPhone."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The notes and photos are removed from this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The notes and photos are removed from this iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -9674,9 +10051,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This iPhone can't sense where it is pointing, so the sky is listed instead."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This iPad can't sense where it is pointing, so the sky is listed instead."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This iPhone can't sense where it is pointing, so the sky is listed instead."
+                }
+              }
+            }
           }
         }
       }
@@ -9696,9 +10085,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This optional explanation stays on your iPhone. Check the source records before making plans."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This optional explanation stays on your iPad. Check the source records before making plans."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This optional explanation stays on your iPhone. Check the source records before making plans."
+                }
+              }
+            }
           }
         }
       }
@@ -10572,6 +10973,17 @@
         }
       }
     },
+    "Where the sky is darkest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where the sky is darkest"
+          }
+        }
+      }
+    },
     "Where to look": {
       "extractionState": "manual",
       "localizations": {
@@ -10697,9 +11109,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Worked out on this iPhone for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Worked out on this iPad for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Worked out on this iPhone for this park. Planets are placed within about a degree; times can be a few minutes off where hills block the horizon."
+                }
+              }
+            }
           }
         }
       }
@@ -10708,9 +11132,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Written on this iPhone from your journal. The figures above are the facts."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Written on this iPad from your journal. The figures above are the facts."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Written on this iPhone from your journal. The figures above are the facts."
+                }
+              }
+            }
           }
         }
       }
@@ -10961,9 +11397,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your iPhone"
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Your iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Your iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -11379,9 +11827,21 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iOS measures the average brightness of the pixels Nyx draws (MetricKit's average pixel luminance: 0% is an all-black screen, 100% all white) and reports it about once a day. It is measured on this iPhone and never leaves it."
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iOS measures the average brightness of the pixels Nyx draws (MetricKit's average pixel luminance: 0% is an all-black screen, 100% all white) and reports it about once a day. It is measured on this iPad and never leaves it."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iOS measures the average brightness of the pixels Nyx draws (MetricKit's average pixel luminance: 0% is an all-black screen, 100% all white) and reports it about once a day. It is measured on this iPhone and never leaves it."
+                }
+              }
+            }
           }
         }
       }

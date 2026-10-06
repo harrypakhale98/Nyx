@@ -16,44 +16,41 @@ struct TonightView: View {
     @Namespace private var zoom
     private var candidates:[Park] { model.nearby(latitude:location.latitude,longitude:location.longitude) }
     private var best:[Park] { Array(model.ranked(candidates).prefix(5)) }
+    @State private var width=0.0
+    /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
+    @State private var riverNight:Date?
+    @State private var scrubbing=false
+    /// A wide iPad: the answer on the left, the ways to change the question on the right.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    private var loading:Bool { DebugScenario.state=="loading" }
+    private var empty:Bool { best.isEmpty || DebugScenario.state=="empty" }
     var body: some View {
-        @Bindable var model=model
         ScrollView {
-            VStack(alignment:.leading,spacing:22) {
-                // Decorative at accessibility sizes, where it would push the answer below the fold.
-                if !typeSize.isAccessibilitySize { HStack(alignment:.top) {
-                    VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text("Where the sky\nis darkest").font(.system(.title,design:.serif)).fixedSize(horizontal:false,vertical:true) }
-                    Spacer(minLength:8)
-                    if let home=model.home { MoonView(geometry:AstronomyEngine().moon(for:model.night(home)).geometry).frame(width:40,height:40).padding(.top,8) }
-                } }
-                if DebugScenario.state=="loading" { ConstellationLoader().frame(maxWidth:.infinity) }
-                else if best.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.");startingPoint }
-                else if let park=best.first {
-                    let night=model.night(park)
-                    VStack(spacing:10) {
-                        Eyebrow(text:"Your darkest nearby sky")
-                        NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }.padding(.vertical,14).padding(.horizontal,22).modifier(ParkPill()) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
-                        CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : 240)
-                            .modifier(DepthParallax(depth:0.08))
-                        Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-                        if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
-                        else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
-                        if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
-                        nudge(park:park,tonight:night)
-                        fieldOffer(best:park)
-                    }.frame(maxWidth:.infinity)
-                    startingPoint
-                    if best.count>1 {
-                        Eyebrow(text:"More skies within reach")
-                        ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom);Divider().overlay(palette.line) }
+            if wide, !loading, !empty, let park=best.first {
+                VStack(alignment:.leading,spacing:22) {
+                    header
+                    HStack(alignment:.top,spacing:36) {
+                        VStack(spacing:26) { hero(park); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; extras }.frame(maxWidth:500)
                     }
-                    Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
-                }
-                if DebugScenario.state != "loading" { tripLink }
-                if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
-                if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
-            }.padding(24)
-        }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
+                }.padding(24)
+            } else {
+                VStack(alignment:.leading,spacing:22) {
+                    header
+                    if loading { ConstellationLoader().frame(maxWidth:.infinity) }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.");startingPoint }
+                    else if let park=best.first {
+                        hero(park)
+                        startingPoint
+                        more
+                        footnote
+                    }
+                    extras
+                }.padding(24).readableColumn()
+            }
+        }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
+        .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
             .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)) }
             .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }
@@ -61,6 +58,7 @@ struct TonightView: View {
             .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
+            .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
                 if !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting && shooting==0 {
@@ -68,6 +66,65 @@ struct TonightView: View {
                 }
                 await model.refresh(candidates,force:true);refreshed+=1
             }
+    }
+    /// Decorative at accessibility sizes, where it would push the answer below the fold.
+    @ViewBuilder private var header: some View {
+        if !typeSize.isAccessibilitySize { HStack(alignment:.top) {
+            VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text(wide ? "Where the sky is darkest" : "Where the sky\nis darkest").font(.system(wide ? .largeTitle : .title,design:.serif)).fixedSize(horizontal:false,vertical:true) }
+            Spacer(minLength:8)
+            if let home=model.home { MoonView(geometry:AstronomyEngine().moon(for:model.night(home)).geometry).frame(width:wide ? 56 : 40,height:wide ? 56 : 40).padding(.top,8) }
+        } }
+    }
+    /// Wide iPad: where, then when. The best park's next thirty nights beside the answer, with the
+    /// chosen night one tap away. (On iPhone the river lives on the park's page.)
+    private func ahead(_ park:Park)->some View {
+        let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:30)
+        let chosen=riverNight.flatMap { id in nights.first { $0.id==id } }
+        return Panel { VStack(alignment:.leading,spacing:14) {
+            TimeRiver(nights:nights,selected:Binding(get:{ chosen?.id ?? tonight },set:{ riverNight=$0 }),outlooks:model.outlooks(nights),markers:model.markers(nights))
+            if let chosen, chosen.id != tonight {
+                capsule(text:String(localized:"Open \(park.dayLabel(chosen.id)) at \(park.shortName)"),hint:"Opens that night at the park.") { ParkDetailView(park:park,initialDate:chosen.id) } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
+            }
+        } }
+    }
+    private func stepRiver(_ delta:Int) {
+        guard let park=best.first else { return }
+        let tonight=model.tonight(park), current=riverNight ?? tonight
+        let next=park.date(current,addingDays:delta)
+        guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
+        withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { riverNight=next }
+    }
+    private func hero(_ park:Park)->some View {
+        let night=model.night(park)
+        return VStack(spacing:10) {
+            Eyebrow(text:"Your darkest nearby sky")
+            NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }.padding(.vertical,14).padding(.horizontal,22).modifier(ParkPill()) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+                .hoverEffect(.lift)
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
+                .modifier(DepthParallax(depth:0.08))
+            Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
+            if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+                .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
+            else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
+            nudge(park:park,tonight:night)
+            fieldOffer(best:park)
+        }.frame(maxWidth:.infinity)
+    }
+    @ViewBuilder private var more: some View {
+        if best.count>1 {
+            Eyebrow(text:"More skies within reach")
+            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight);Divider().overlay(palette.line) }
+        }
+    }
+    private var footnote: some View {
+        Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
+    }
+    @ViewBuilder private var extras: some View {
+        if !loading { tripLink }
+        if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
+        if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
     }
     /// One quiet line under the hero, never more, the most significant first: a lunar eclipse the
     /// best park can see within the next three nights, then a major meteor shower's peak worth the
@@ -197,7 +254,8 @@ private struct ParkPill:ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if palette.nightVision || reduceTransparency {
             content.background(Color.black,in:Capsule()).overlay(Capsule().stroke(palette.line,lineWidth:0.8))
-        } else { content.glassEffect() }
+        // Tinted like the panels, so the name keeps its contrast over a bright stretch of the Milky Way.
+        } else { content.glassEffect(.regular.tint(palette.panel.opacity(0.5))) }
     }
 }
 struct ParkPickerView: View {

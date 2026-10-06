@@ -54,8 +54,26 @@ nonisolated enum SkyCompass {
             up=simd_normalize(world(SIMD3(0, 1, 0)))
             right=simd_normalize(world(SIMD3(1, 0, 0)))
         }
+        /// The same pointing, seen through a screen turned `quarterTurns` from the device's own
+        /// portrait (an iPad in landscape): the view direction is unchanged; the screen's up and
+        /// right turn. 1: the device's top at the screen's left (interface landscape right);
+        /// 2: upside down; 3: the top at the screen's right (landscape left).
+        func turned(_ quarterTurns: Int) -> Pose {
+            switch (quarterTurns%4+4)%4 {
+            case 1: Pose(axes: look, right, -up)
+            case 2: Pose(axes: look, -up, -right)
+            case 3: Pose(axes: look, -right, up)
+            default: self
+            }
+        }
     }
 
+    /// The horizontal field of view for a window `width` by `height`: the shorter side always spans
+    /// `fieldOfView`, so an iPad in landscape shows more sky beside the target, not a zoomed one.
+    static func horizontalFieldOfView(width: Double, height: Double) -> Double {
+        guard width>height, height>0 else { return fieldOfView }
+        return 2*atan(tan(fieldOfView*Double.pi/360)*width/height)*180/Double.pi
+    }
     /// A sky position on a screen of `size` (points, origin top-left). `point` is nil when the
     /// target is behind the viewer or (when `clipped`) outside the screen; `edgeAngle` is then the direction to turn
     /// toward it, in screen terms (0 = right, π/2 = up).

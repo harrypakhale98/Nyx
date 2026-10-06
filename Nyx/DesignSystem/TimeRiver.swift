@@ -31,6 +31,8 @@ struct TimeRiver: View {
     @State private var detents=0
     /// Counts a person's choices, so the Moon's texture follows a scrub once it settles.
     @State private var felt=0
+    /// The night under an iPad's pointer, marked faintly before it is clicked.
+    @State private var hovered: Int?
     /// The selected night's position; nil when it is not on the river, which then marks no night
     /// rather than pretending the first one is chosen.
     private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
@@ -89,6 +91,12 @@ struct TimeRiver: View {
                 if scrubbing ?? (abs(drag.translation.width)>abs(drag.translation.height)) { choose(nearest(drag.location.x,width:width)) }
             })
             .onTapGesture { location in choose(nearest(location.x,width:width)) }
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let location): let i=nearest(location.x,width:width); hovered=nights.indices.contains(i) ? i : nil
+                case .ended: hovered=nil
+                }
+            }
         }
         .frame(height:150)
         .accessibilityElement()
@@ -180,6 +188,13 @@ struct TimeRiver: View {
             context.stroke(hairline,with:.color(palette.line),lineWidth:0.6)
         }
 
+        // The pointer's night, a fainter hairline and ring than the chosen one.
+        if let hovered, hovered != index, nights.indices.contains(hovered) {
+            let p=point(hovered)
+            var hairline=Path(); hairline.move(to:CGPoint(x:p.x,y:moonSize+8)); hairline.addLine(to:CGPoint(x:p.x,y:bottom+4))
+            context.stroke(hairline,with:.color(palette.line),style:StrokeStyle(lineWidth:0.6,dash:[2,3]))
+            context.stroke(Path(ellipseIn:CGRect(x:p.x-6,y:p.y-6,width:12,height:12)),with:.color(palette.accent.opacity(0.7)),lineWidth:0.9)
+        }
         // A smooth river through every night; the forecast-free stretch is dashed.
         func river(_ range:ClosedRange<Int>)->Path {
             var path=Path(); path.move(to:point(range.lowerBound))

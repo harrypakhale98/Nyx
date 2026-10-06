@@ -41,7 +41,7 @@ struct AppIconPicker: View {
             }
             if failed { Section { Text("The icon could not be changed right now. Try again in a moment.").foregroundStyle(palette.accent) } }
         }
-        .navigationTitle("App icon").navigationBarTitleDisplayMode(.inline)
+        .readableForm().navigationTitle("App icon").navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection,trigger:changed)
     }
     private func row(_ icon:NyxIcon)->some View {
