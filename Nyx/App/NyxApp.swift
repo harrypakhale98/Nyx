@@ -14,6 +14,7 @@ import UserNotifications
         UNUserNotificationCenter.current().delegate=NotificationRouter.shared
         // Registers park names as Siri / Shortcuts phrase parameters.
         NyxShortcuts.updateAppShortcutParameters()
+        SkyProjection.shared.lightSources=SkyGlow.lightSources
     }
     var body:some Scene {
         WindowGroup {

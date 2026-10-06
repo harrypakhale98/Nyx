@@ -45,7 +45,7 @@ ON YOUR WRIST AND IN THE ROOM
 - iPad: the calendar and park detail side by side.
 
 SKY GLOW YOU CAN READ
-- Sky glow at each named viewing spot is now estimated from NASA's Black Marble night-lights data, with the direction and strength of nearby city glow. It is still an estimate, and says so.
+- Sky glow at each named viewing spot is now compared with the other national parks, from NASA's Black Marble night-lights data, and each park names the towns whose glow rises on its horizon and which way they lie. It is a comparison, not a measurement, and says so.
 
 THE SKY FOR MORE PEOPLE
 - Hear the night: audio graphs for the timeline, calendar and sky arc, and a short sonification of tonight.
@@ -117,7 +117,7 @@ FIELD MODE
 At the park, "I'm here tonight" opens a red, dimmed screen made for night-adapted eyes: the countdown to true darkness, each milestone of the night, and a dark-adaptation clock. "Where to look" turns the real sky to your iPhone's direction, with no camera. A Live Activity keeps the countdown on the Lock Screen, and alarms can wake you for true darkness or the core's rise (iOS 26.1 and later). On Apple Watch, the countdown and the Moon are on your wrist, in red. On Apple Vision Pro, you can stand under the real sky for a park and a night.
 
 SKY GLOW
-Each named viewing spot shows sky glow estimated from NASA Black Marble night-lights data, with the direction of nearby city glow. It is an estimate, not a measurement taken at the spot.
+Each named viewing spot shows how its sky glow compares with the other national parks, from NASA Black Marble night-lights data, and each park names the direction of the city glow on its horizon. It is a comparison between places, not a measurement taken at the spot.
 
 KEEP A LITTLE OF THE NIGHT
 Save parks and receive optional local reminders for promising nights. Keep a private journal with notes and selected photos; each night becomes a star in your own constellation. Widgets show the best sky among your saved parks.

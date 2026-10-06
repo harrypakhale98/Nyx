@@ -1,3 +1,25 @@
+# Nyx handoff — 2026-10-06 (roadmap: every sky — the cost of light, step-free spots)
+
+Roadmap §4 and the step-free part of §5, on branch `glow`. Logged under "Every sky — 2026-10-06" in `DECISIONS.md`. The score is unchanged and still uses the hand Bortle estimate.
+
+- **Data:** `SkyGlow` and `AccessData` (`Nyx/Models/SkyGlow.swift`) load the bundled `skyglow.json` (NASA Black Marble) and `accessible-spots.json` (moved from `Research/` into `Nyx/Resources/`). Joined by park id and exact spot name; all 63 parks and 85 spots resolve.
+- **Park detail:** "Night lights from space" (a five-step rank among the 63 parks, meter + words), light domes in words ("Glow on the horizon: Las Vegas, east (45% of this park's light pollution)."; "a town to the west" when unnamed; a town named once), an honest source line; breakdown's light-pollution row gets the same rank as context. New **Protect this sky** card: Dark Sky Park designation (no year), the 2013→2025 growth *rank* (outer thirds only, artifact parks excluded), three home habits, a link to "A sky worth protecting".
+- **Viewing spots** (`ViewingSpots`, `ViewingSpotRow`): sky glow here (rank, and darker/brighter than the park's center), step-free status with icon and words (unknown omitted), "Access source" disclosure with the nps.gov sentence, note, Safari link and "Conditions change; check with the park."
+- **Parks filter** "Step-free viewing" (41 parks), rows say so, eyebrow counts matches.
+- **Real sky:** light domes glow warm at their true bearings above the horizon (`SkyProjection.lightSources`, injected by the app; widget/watch draw none and ship no glow data). No sky-arc tick (its axis is time).
+- **Journal entry:** "Share your observation with Globe at Night" (Safari, nothing prefilled). Limiting magnitude not built (logged).
+- **About the data:** "Night lights from space" (credit line, method, limits) and "Step-free viewing". Your privacy and PRIVACY.md: Safari links, Nyx sends nothing. `verify_release.py` checks the browser-link list (`BrowserLink`).
+- **Tests:** `NyxTests/SkyGlowTests.swift` (7): every park/spot joins (glow and access), access claims always sourced, levels span the parks, dome wording incl. null city and duplicate town, trend rank exclusions/tiny base/thirds, step-free filter, domes in the real sky (and none without a source).
+- DEBUG: `-nyx-screen light -nyx-park deva | grca | sequ` (added to the accessibility audit list), `-nyx-screen parks -nyx-state step-free`.
+
+**Verified 2026-10-06:** zero warnings. Audit iPhone 17 / iOS 27.0: 96 Swift Testing tests, both UI tests, both accessibility audits limited to `light,detail,parks,entry,data,privacy` (standard and night vision) — all pass. iPhone Air / iOS 26.5: 96 Swift Testing tests pass. Reviewed captures (kept as `Research/Screenshots/glow-*`): light domes on detail (Grand Canyon, July), light/spots/protect for Death Valley, Grand Canyon (and night vision), Sequoia (Moro Rock "Steps or trail"; AX5), Parks step-free filter, journal entry with Globe at Night; 26.5: Sequoia light, Parks filter. Review fixes in DECISIONS.
+
+**Known limits:** glow is a rank, not a sky-brightness measurement; domes east/west of the south-facing view are off screen (named in words). Five parks where the hand and computed Bortle disagree by ≥1 class are queued in `Research/skyglow.md`. New strings (about 50) need Spanish drafts in `Research/localization/es-strings.json`. `Scripts/sync_catalog.py` after a `build-for-testing` build tried to prune App Intents keys; only additions were merged.
+
+**Next starting point:** integrator merges `glow`, runs the full both-runtime suite, adds the Spanish drafts for the new keys; owner checks the five review-queue parks against NPS Night Skies data when available.
+
+---
+
 # Nyx handoff — 2026-10-05 (roadmap: field mode)
 
 Roadmap §1, on branch `roadmap`. Logged under "Field mode — 2026-10-05" in `DECISIONS.md`. The score is unchanged; field mode says what happens tonight and when, on a screen made for dark-adapted eyes.
