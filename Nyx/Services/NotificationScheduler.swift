@@ -1,3 +1,4 @@
+import AppIntents
 import Foundation
 import UserNotifications
 
@@ -26,6 +27,8 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
     func add(_ reminder:NightReminder) async throws {
         guard UserDefaults.standard.bool(forKey:"notificationsEnabled") else { throw URLError(.cancelled) }
         let content=UNMutableNotificationContent();content.title=reminder.title;content.body=reminder.body;content.userInfo=["parkID":reminder.parkID];content.sound = .default
+        // iOS 27: the reminder is about a park Siri knows, so "open this park" works from the notification.
+        if #available(iOS 27.0,*) { content.appEntityIdentifiers=[EntityIdentifier(for:ParkEntity.self,identifier:reminder.parkID)] }
         var calendar=Calendar(identifier:.gregorian);calendar.timeZone=reminder.timeZone
         // Gregorian components need their calendar attached, or a device set to another calendar reads 2026 as a different year.
         var components=calendar.dateComponents([.year,.month,.day,.hour,.minute],from:reminder.fireDate);components.calendar=calendar;components.timeZone=reminder.timeZone

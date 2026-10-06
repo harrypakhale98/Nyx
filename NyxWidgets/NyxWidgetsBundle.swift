@@ -8,43 +8,78 @@ import WidgetKit
 struct TonightProvider:TimelineProvider {
     func placeholder(in context:Context)->TonightEntry { TonightEntry(date:.now,night:nil,nightVision:false) }
     func getSnapshot(in context:Context,completion:@escaping(TonightEntry)->Void) {
-        var cache:[String:SkyConditions]=[:]
         var snapshot=SharedSettings.read()
         // The widget gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not "save a park".
         if context.isPreview, snapshot?.parks.isEmpty ?? true, let sample=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
             snapshot=SavedSkySnapshot(parks:[sample],forecasts:[:])
         }
-        completion(entry(at:.now,snapshot:snapshot,cache:&cache))
+        var builder=TonightTimeline(snapshot:snapshot,large:context.family == .systemLarge)
+        completion(builder.entry(at:.now))
     }
-    /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later.
-    /// Each night's sky is computed once and reused across entries.
+    /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
+    /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
     func getTimeline(in context:Context,completion:@escaping(Timeline<TonightEntry>)->Void) {
-        let now=Date.now, snapshot=SharedSettings.read()
+        let now=Date.now
+        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:context.family == .systemLarge)
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
-        var cache:[String:SkyConditions]=[:]
-        let entries=[entry(at:now,snapshot:snapshot,cache:&cache)]+(0..<24).map { entry(at:hour.addingTimeInterval(Double($0)*3600),snapshot:snapshot,cache:&cache) }
-        completion(Timeline(entries:entries,policy:.after(hour.addingTimeInterval(23*3600))))
+        let end=hour.addingTimeInterval(23*3600)
+        let edges=builder.duskWindows(from:now,nights:2).flatMap { [$0.start,$0.end] }.filter { $0>now && $0<end }
+        let dates=Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+edges).sorted()
+        completion(Timeline(entries:dates.map { builder.entry(at:$0) },policy:.after(end)))
     }
-    private func entry(at date:Date,snapshot:SavedSkySnapshot?,cache:inout [String:SkyConditions])->TonightEntry {
-        func night(_ park:Park,_ evening:Date)->Night {
-            let key="\(park.id)-\(evening.timeIntervalSince1970)"
-            let sky=cache[key] ?? AstronomyEngine().conditions(for:park,on:evening)
-            cache[key]=sky
-            let forecast=snapshot?.forecasts[park.id]
-            let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:date)
-            return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
+    /// The Smart Stack's own hint (iOS 18+): the dusk of each Good or better night in the next
+    /// two weeks at a saved park. Entries carry the same windows as `TimelineEntryRelevance`.
+    func relevance() async -> WidgetRelevance<Void> {
+        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:false)
+        return WidgetRelevance(builder.duskWindows(from:.now,nights:14).map { WidgetRelevanceAttribute(context:.date(interval:$0,kind:.default)) })
+    }
+}
+/// Builds Tonight entries from the shared snapshot. Each night's sky is computed once and reused
+/// across entries; the large widget's month (35 nights with shower and eclipse marks) once per night.
+struct TonightTimeline {
+    let snapshot:SavedSkySnapshot?
+    let large:Bool
+    private var skies:[String:SkyConditions]=[:]
+    private var months:[String:NightPlanner.Month]=[:]
+    init(snapshot:SavedSkySnapshot?,large:Bool) { self.snapshot=snapshot; self.large=large }
+    private var planner:NightPlanner { NightPlanner(forecasts:snapshot?.forecasts ?? [:]) }
+    /// The sky is fixed; the score is taken at the entry's date, because a forecast expires after 36 hours.
+    private mutating func night(_ park:Park,_ evening:Date,at date:Date)->Night {
+        let key="\(park.id)-\(evening.timeIntervalSince1970)"
+        let sky=skies[key] ?? AstronomyEngine().conditions(for:park,on:evening)
+        skies[key]=sky
+        return planner.night(park,sky:sky,now:date)
+    }
+    mutating func entry(at date:Date)->TonightEntry {
+        let parks=snapshot?.parks ?? []
+        let tonight=parks.map { night($0,$0.currentNight(at:date),at:date) }
+        let shown=WidgetSelection.pick(tonight)
+        let week=shown.map { first in (0..<7).map { night(first.park,first.park.date(first.id,addingDays:$0),at:date) } } ?? []
+        var month:NightPlanner.Month?
+        if large, let shown {
+            // Recomputed when the night turns over or the cached forecast expires (36 hours), never showing stale clouds.
+            let fresh=snapshot?.forecasts[shown.park.id].map { date.timeIntervalSince($0.updated)<36*3600 } ?? false
+            let key="\(shown.park.id)-\(shown.id.timeIntervalSince1970)-\(fresh)"
+            month=months[key] ?? planner.month(shown.park,at:date)
+            months[key]=month
         }
-        let nights=(snapshot?.parks ?? []).map { night($0,$0.currentNight(at:date)) }
-        let best=nights.max{$0.score.value<$1.score.value}
-        let week=best.map { tonight in (0..<7).map { night(tonight.park,tonight.park.date(tonight.id,addingDays:$0)) } } ?? []
-        return TonightEntry(date:date,night:best,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),week:week)
+        let relevance=NightPlanner.relevance(at:date,nights:tonight)
+        return TonightEntry(date:date,night:shown,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),week:week,month:month,
+                            position:shown.map { WidgetSelection.position(of:$0,in:tonight) } ?? 0,savedCount:parks.count,
+                            relevance:TimelineEntryRelevance(score:relevance.score,duration:relevance.duration))
+    }
+    /// Dusk windows of Good or better nights across the saved parks, `nights` nights from `start`.
+    mutating func duskWindows(from start:Date,nights count:Int)->[DateInterval] {
+        (snapshot?.parks ?? []).flatMap { park in
+            (0..<count).compactMap { offset in NightPlanner.duskWindow(night(park,park.date(park.currentNight(at:start),addingDays:offset),at:start)) }
+        }.filter { $0.end>start }
     }
 }
 struct TonightWidget:Widget {
     var body:some WidgetConfiguration {
-        StaticConfiguration(kind:"TonightWidget",provider:TonightProvider()) { entry in TonightWidgetView(entry:entry) }
+        StaticConfiguration(kind:WidgetSelection.kind,provider:TonightProvider()) { entry in TonightWidgetView(entry:entry) }
             .configurationDisplayName("Tonight's sky").description("The darkest sky among your saved parks, with forecast limits shown.")
-            .supportedFamilies([.systemSmall,.systemMedium,.accessoryCircular,.accessoryRectangular])
+            .supportedFamilies([.systemSmall,.systemMedium,.systemLarge,.accessoryCircular,.accessoryRectangular])
     }
 }
 struct NightVisionControl:ControlWidget {
@@ -68,5 +103,6 @@ struct NightVisionProvider:ControlValueProvider {
 }
 #Preview(as:.systemSmall) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.systemMedium) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:true) }
+#Preview(as:.systemLarge) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.accessoryCircular) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }

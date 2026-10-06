@@ -71,16 +71,17 @@ struct RootView:View {
             intro = !onboarded && DebugScenario.screen == nil
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
             else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
-            openRequestedField()
-            if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
+            openRequestedField(); openRequestedPark()
+            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
         .onChange(of:scenePhase) { _,phase in if phase == .active {
             model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
-            openRequestedField()
+            openRequestedField(); openRequestedPark()
             // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
         } }
         .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
+        .onReceive(NotificationCenter.default.publisher(for:ParkOpenRequest.notification)) { _ in openRequestedPark() }
         .task {
             // Keep "tonight" honest on a screen left open through sunrise.
             while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
@@ -120,7 +121,11 @@ struct RootView:View {
         case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { Panel { LightPollution(park:park) }; Panel { ViewingSpots(park:park) }; Panel { ProtectThisSky(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
         case "ask": GuideView(mode:.planning)
-        case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))
+        case "widgets": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        case "widgets-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),large:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        case "snippet": DebugSnippetView().task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
+        case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
@@ -159,6 +164,11 @@ struct RootView:View {
         let id=request.parkID ?? SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey) ?? model.homeID
         guard let park=model.park(id) ?? model.home else { return }
         FieldPresenter.present(park:park,model:model)
+    }
+    /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`).
+    private func openRequestedPark() {
+        guard DebugScenario.screen == nil else { return }
+        open(ParkOpenRequest.take())
     }
     /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
     private func renderWidgetMoons(for parks:[Park]) {
@@ -202,6 +212,8 @@ struct RootView:View {
         let ids=Set(parks.map(\.id))
         let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) })
         SharedSettings.write(snapshot)
+        // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
+        NyxShortcuts.updateAppShortcutParameters()
         WatchBridge.shared.push(savedParkIDs:parks.map(\.id),homeParkID:model.homeID,forecasts:model.forecasts)
         renderWidgetMoons(for:parks)
         WidgetCenter.shared.reloadAllTimelines()

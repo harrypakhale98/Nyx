@@ -105,6 +105,10 @@ struct PrivacyView:View {
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
                 Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
+            Section("Measured on this iPhone") {
+                Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
+                if let reading=LuminanceProof.current { Text(reading.sentence) }
+            }
             Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.");Text("Links to nps.gov accessibility pages and to Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
     }
@@ -115,6 +119,14 @@ struct AboutDataView:View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Text("An honest view of the sky").font(.system(.largeTitle,design:.serif))
             block("The score","Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Without a cloud forecast, the other weights are scaled to 100. No true darkness caps a night below 40, and the cap lifts gradually over the first three hours of true darkness.")
+            // Shown only after iOS has delivered a real MetricKit report; nothing is estimated in its place.
+            if let reading=LuminanceProof.current {
+                VStack(alignment:.leading,spacing:10) {
+                    Text("How dark Nyx keeps your screen").font(.system(.title2,design:.serif))
+                    Text(reading.sentence).font(.body).lineSpacing(4).foregroundStyle(palette.ink)
+                    Text("iOS measures the average brightness of the pixels Nyx draws (MetricKit's average pixel luminance: 0% is an all-black screen, 100% all white) and reports it about once a day. It is measured on this iPhone and never leaves it.").font(.body).lineSpacing(4).foregroundStyle(palette.muted)
+                }.accessibilityElement(children:.combine)
+            }
             block("Moon and twilight","Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position; allow about 15 minutes, and more near the poles or a blocked horizon. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map (NASA's Scientific Visualization Studio, CGI Moon Kit), lit from the Sun's real direction and tilted as it appears from the park at its highest point that night.")
             block("Planets, the Milky Way and meteors","The Milky Way's bright center is Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's calendar (IMO, 2026 edition): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness; it is a rough guide, and real showers vary from year to year. Lunar eclipse times come from NASA's predictions by Fred Espenak (NASA/GSFC); Nyx checks the Moon's height at the park itself. None of this changes the score.")
             block("Forecasts","Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.")
