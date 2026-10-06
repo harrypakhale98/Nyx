@@ -1,3 +1,22 @@
+# Nyx handoff — 2026-10-05 (roadmap: an honest forecast)
+
+Roadmap §3, on branch `roadmap`. Logged under "An honest forecast" in `DECISIONS.md`. The score formula is unchanged; everything new is context.
+
+- **Model agreement:** GFS, ECMWF and ICON clouds over each dark window (7 days). A word under the Clouds meter ("Models agree / Roughly agree / Models differ"), a sentence on detail and in the breakdown ("Models disagree: 4–46% cloud. Check again before you leave."), and a pale whisker on the time river spanning the scores the clearest and cloudiest model would give, with the range beside the selected night and in VoiceOver.
+- **Layers and the night itself:** layer note ("Thin high cloud; bright stars only."), coldest hour, dew on lenses, gusts, in locale units; visibility as a haze hint only.
+- **Smoke:** CAMS aerosol optical depth from `air-quality-api.open-meteo.com` (third host, owner-approved, own "Smoke and haze" switch). "Air" row on detail, amber caveat under the score on detail and Tonight from AOD 0.25.
+- **Data:** `ForecastDetailService` + `ForecastDetail` (`Nyx/Services/ForecastDetail.swift`), cached per park with per-part six-hour freshness; `Forecast` and its caches unchanged. Three extra requests per refresh cover all 63 parks.
+- **Docs:** the product brief §13, PRIVACY.md, docs/privacy|support|index.html, Store/PrivacyPolicy.md, README, both privacy manifests' host comments, `Scripts/verify_release.py` host assertion.
+- DEBUG: `-nyx-state agree | disagree | smoke`, `-nyx-night-vision` flag.
+
+**Verified 2026-10-05:** zero warnings; iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5 — 46 Swift Testing tests (11 new in `NyxTests/ForecastDetailTests.swift`: single and multi-coordinate payloads, rejected payloads, agreement and AOD bands, cold/dew/gust windows, old caches, smoke switch at the transport, per-switch requests, failure keeps last data, score unchanged with range) plus both UI tests and both accessibility audits (17 screens × standard and night vision) pass on both runtimes. Captured and reviewed: detail (agree, disagree, smoke, night vision, AX5, iOS 26.5), river (disagree, AX5 stepper), breakdown (disagree, smoke), Tonight (smoke), Your privacy; kept as `Research/Screenshots/forecast-*`. Review fixes: whiskers were too faint to read (wider, capped, range printed beside the selected night), breakdown context was as loud as the scored fact (now symbol-led callout lines), "The night itself" sentence broke mid-phrase (now three labelled lines), VoiceOver joined two sentences without a full stop.
+
+**Known limits:** agreement needs all three models (by design). The layer note's thresholds and the AOD bands are first estimates and deserve a check against real nights (INPUT_NEEDED 1). The updated privacy page must be pushed before a build with the smoke host is submitted (INPUT_NEEDED 5).
+
+**Next starting point:** integrator bumps the build number; push the docs with the merge; on-device night review including a smoky western night if one comes.
+
+---
+
 # Nyx handoff — 2026-10-05 (design pass, build 5)
 
 A design pass aimed at the Apple Design Award bar: every screen now answers "when" as well as "where", and every number arrives with its reason. Logged under "Design pass" in `DECISIONS.md`.

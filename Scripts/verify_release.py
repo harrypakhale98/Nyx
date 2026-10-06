@@ -24,7 +24,7 @@ for name in ['Nyx','NyxWidgets']:
 project=Path('Nyx.xcodeproj/project.pbxproj').read_text()
 assert 'XCRemoteSwiftPackageReference' not in project
 source=Path('Nyx/Services/DataServices.swift').read_text()
-assert set(re.findall(r'host="([^"]+)"',source))=={'developer.nps.gov','api.open-meteo.com'}
+assert set(re.findall(r'host="([^"]+)"',source))=={'developer.nps.gov','api.open-meteo.com','air-quality-api.open-meteo.com'}
 assert 'completionHandler(nil)' in source
 # Every shipping source file: URLSession and web URLs may appear only in the guarded transport.
 shipping=[f for f in list(Path('Nyx').rglob('*.swift'))+list(Path('NyxWidgets').rglob('*.swift'))]

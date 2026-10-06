@@ -16,6 +16,8 @@ Everything else is built, verified and documented. Each step below needs your Ap
 
 4. **Enter the awards that close soon** (only the account owner can enter and pay). The full plan is in `Research/award-roadmap.md` (Tier 4). Once 1.0 is live: file an App Launch featuring nomination in App Store Connect (app → Featuring → Nominations); enter the **Webby Awards** by the early deadline **Oct 30, 2026** (Apps, Software & Immersive); register for the **iF Design Award** by **Nov 4, 2026** (UI/UX). Fees and later deadlines are in the roadmap.
 
+5. **Publish the updated privacy page before submitting a build with the smoke forecast.** Nyx now contacts a third host, `air-quality-api.open-meteo.com` (approved 2026-10-05, behind its own "Smoke and haze" switch). `docs/privacy.html`, `docs/support.html` and `docs/index.html` already say so, but GitHub Pages serves them only after they are pushed to `main`. Merge `roadmap` and push (`git push origin main`) before the build carrying this work goes to review, so the store's privacy link matches the app. The App Store privacy answer stays "Data Not Collected".
+
 ## Done
 - Build 1.0 (5) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-05.
 - Build 1.0 (4) archived (zero warnings, `verify_release.py` passing) and uploaded to App Store Connect on 2026-10-04. Future builds: bump `CURRENT_PROJECT_VERSION` in `project.yml`, run `xcodegen generate`, then Product → Archive → Distribute App → App Store Connect → Upload.

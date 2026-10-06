@@ -9,8 +9,13 @@ import CoreLocation
     private let scoring: any ScoreProviding
     private let weather: any WeatherProviding
     private let parkStore: any ParkProviding
+    private let detailService: any DetailProviding
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
-    var forecasts: [String:Forecast] = [:]
+    var forecasts: [String:Forecast] = [:] { didSet { outlookCache=[:] } }
+    /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
+    var details: [String:ForecastDetail] = [:] { didSet { outlookCache=[:] } }
+    /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
+    @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
     /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
@@ -20,6 +25,7 @@ import CoreLocation
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
+    var smokeEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") } } }
     var today: Date {
         #if DEBUG
         if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
@@ -35,18 +41,21 @@ import CoreLocation
         clock=now
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
-         weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore()) {
+         weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
+         detail: any DetailProviding = ForecastDetailService()) {
         do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
-        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore
+        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
         homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
         radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
+        smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
         // Show the last forecasts and park updates immediately, offline included; refreshes replace them.
         if DebugScenario.screen == nil {
             for park in parks {
                 if let cached=CacheDirectory.read(Forecast.self,name:"weather-\(park.id)") { forecasts[park.id]=cached }
                 if let cached=CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") { enrichments[park.id]=cached }
+                if let cached=CacheDirectory.read(ForecastDetail.self,name:"detail-\(park.id)") { details[park.id]=cached }
             }
         }
         #if DEBUG
@@ -68,6 +77,34 @@ import CoreLocation
         let forecast=forecasts[park.id]
         let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
         return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
+    }
+    /// What the forecast says around the score for one night: model agreement (with the score the
+    /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
+    /// is shown only beside a score that includes clouds, so the two never contradict each other.
+    func outlook(_ night:Night)->NightOutlook? {
+        if let cached=outlookCache[night.park.id]?[night.id] { return cached }
+        let outlook=deriveOutlook(night)
+        outlookCache[night.park.id,default:[:]][night.id]=outlook
+        return outlook
+    }
+    private func deriveOutlook(_ night:Night)->NightOutlook? {
+        guard let detail=details[night.park.id] else { return nil }
+        let window=night.sky.cloudWindow
+        var outlook=detail.outlook(from:window.start,to:window.end)
+        if night.score.hasForecast, let agreement=outlook.agreement {
+            let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloudCover:agreement.low).value
+            let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloudCover:agreement.high).value
+            outlook.scoreRange=min(clearest,cloudiest)...max(clearest,cloudiest)
+        } else { outlook.agreement=nil }
+        return outlook.isEmpty ? nil : outlook
+    }
+    func outlooks(_ nights:[Night])->[Date:NightOutlook] {
+        Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    }
+    /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
+    func smokeCaveat(_ night:Night)->String? {
+        guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
+        return clarity.sentence
     }
     /// True when a night without clouds simply lies past the forecast's last hour (or about two
     /// weeks out when no forecast has arrived), rather than having a forecast that failed.
@@ -100,10 +137,17 @@ import CoreLocation
     /// and a list of nearby parks would tell the forecast service roughly where you are.
     func refreshForecasts(watching parks:[Park],force:Bool=false) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
-        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil }; return }
+        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil; details[park.id]=nil }; return }
+        #if DEBUG
+        if let state=DebugScenario.state, let fixture=DebugForecasts(state:state,parks:self.parks,now:today) {
+            forecasts=fixture.forecasts; details=fixture.details; return
+        }
+        #endif
         let network=weatherEnabled && live
         let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        let detail=await detailService.details(for:self.parks,weather:network,smoke:smokeEnabled && live,force:force)
+        for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         guard network else { return }
         for park in parks {
             if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }

@@ -3,13 +3,15 @@ import SwiftUI
 /// The score's four parts as an instrument readout under the gauge, so the number always arrives
 /// with its reasons. Each meter glides on the shared spring as nights are scrubbed. Without a
 /// forecast the cloud meter reads "Unknown" and the other maxima scale up, exactly as the score does.
-/// The whole readout is one button that opens the full breakdown.
+/// The whole readout is one button that opens the full breakdown. Within the seven-day model
+/// horizon the cloud meter carries one quiet line saying whether three forecast models agree.
 struct ScoreReadout: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let score: DarknessScore
+    var agreement: ModelAgreement?=nil
     var action: () -> Void = {}
     private struct Part: Identifiable {
         let id: String
@@ -17,12 +19,13 @@ struct ScoreReadout: View {
         let spoken: String
         let points: Double?
         let maximum: Double
+        var note: String?=nil
     }
     private var parts: [Part] {
         let scale=score.hasForecast ? 1 : 1/0.75
         return [
             Part(id:"moon",title:"Moon",spoken:String(localized:"Moonlight"),points:score.moonPoints,maximum:40*scale),
-            Part(id:"clouds",title:"Clouds",spoken:String(localized:"Cloud cover"),points:score.cloudPoints,maximum:25),
+            Part(id:"clouds",title:"Clouds",spoken:String(localized:"Cloud cover"),points:score.cloudPoints,maximum:25,note:score.hasForecast ? agreement?.word : nil),
             Part(id:"glow",title:"Sky glow",spoken:String(localized:"Light pollution"),points:score.bortlePoints,maximum:20*scale),
             Part(id:"hours",title:"Dark hours",spoken:String(localized:"Length of darkness"),points:score.lengthPoints,maximum:15*scale)
         ]
@@ -57,12 +60,16 @@ struct ScoreReadout: View {
             } else {
                 Text("Unknown").font(.system(.subheadline,design:.serif)).foregroundStyle(palette.muted).padding(.top,3)
             }
+            if let note=part.note {
+                Text(note).font(.caption2).foregroundStyle(palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : 1).minimumScaleFactor(0.75)
+                    .contentTransition(.opacity).padding(.top,-3)
+            }
         }
     }
     private var spoken: String {
         parts.map { part in
-            part.points.map { String(localized:"\(part.spoken), \(Int($0.rounded())) of \(Int(part.maximum.rounded()))") }
-                ?? String(localized:"\(part.spoken), unknown")
+            (part.points.map { String(localized:"\(part.spoken), \(Int($0.rounded())) of \(Int(part.maximum.rounded()))") }
+                ?? String(localized:"\(part.spoken), unknown"))+(part.note.map { ", "+$0 } ?? "")
         }.joined(separator:". ")
     }
     /// A hairline track with an amber fill; dashed and empty when the part is unknown.
@@ -94,5 +101,9 @@ struct ScoreReadout: View {
             ScoreReadout(score:m.night(p,on:p.date(m.tonight(p),addingDays:25)).score)
         }.padding(24).background(.black).preferredColorScheme(.dark)
     }
+}
+#Preview("Readout • models differ") {
+    let m=PlanModel()
+    if let p=m.home { ScoreReadout(score:m.night(p).score,agreement:ModelAgreement(low:4,high:48)).padding(24).background(.black).preferredColorScheme(.dark) }
 }
 #Preview("Readout • AX5") { let m=PlanModel();if let p=m.home { ScoreReadout(score:m.night(p).score).padding(24).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }

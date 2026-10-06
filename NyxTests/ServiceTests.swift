@@ -101,14 +101,20 @@ struct ServiceTests {
     /// Forecasts are always requested for every park, so the request never reflects where someone is.
     @MainActor @Test func forecastsAreRequestedForEveryPark() async throws {
         let http=StubHTTP([:])
-        let model=PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false))
+        let model=PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false),detail:ForecastDetailService(transport:http,persist:false))
         model.weatherEnabled=true
+        model.smokeEnabled=true
         let nearby=Array(model.parks.prefix(2))
         await model.refresh(nearby,parkUpdates:false)
-        let counts=await http.urls.map { url in
-            URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems?.first { $0.name=="latitude" }?.value?.split(separator:",").count ?? 0
+        // Clouds, model agreement, layers and smoke: each request kind covers every park.
+        var counts:[String:Int]=[:]
+        for url in await http.urls {
+            let items=URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems ?? []
+            let kind=(url.host ?? "")+(items.first { $0.name=="hourly" }?.value ?? "")+(items.first { $0.name=="models" }?.value ?? "")
+            counts[kind,default:0]+=items.first { $0.name=="latitude" }?.value?.split(separator:",").count ?? 0
         }
-        #expect(counts.reduce(0,+)==model.parks.count)
+        #expect(counts.count==4)
+        #expect(counts.values.allSatisfy { $0==model.parks.count })
     }
     /// Switching reminders off while a reschedule is still running must not leave its cancelled
     /// reminders recorded as delivered, or those nights could never be announced again.

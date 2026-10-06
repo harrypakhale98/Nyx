@@ -26,13 +26,14 @@
     <li><strong>On-device AI.</strong> On iPhones that support Apple's on-device model, optional explanations use only the records shown on screen. Nothing is sent to a remote AI service.</li>
   </ul>
 
-  <h2>The two network services</h2>
-  <p>Nyx contacts exactly two services, and only to update public information:</p>
+  <h2>The three network services</h2>
+  <p>Nyx contacts exactly three services, and only to update public information:</p>
   <ul>
-    <li><strong>Open-Meteo</strong> (api.open-meteo.com) for cloud forecasts. Requests contain a national park's public coordinates, never yours.</li>
+    <li><strong>Open-Meteo</strong> (api.open-meteo.com) for cloud forecasts, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. Requests contain the public coordinates of all 63 national parks, never yours.</li>
+    <li><strong>Open-Meteo air quality</strong> (air-quality-api.open-meteo.com) for the CAMS aerosol forecast that warns of smoke and haze. Requests contain the same public park coordinates, never yours.</li>
     <li><strong>National Park Service</strong> (developer.nps.gov) for park alerts and ranger programs. Requests contain a park code.</li>
   </ul>
-  <p>Like any website, these services see your IP address and ordinary request information. Open-Meteo states that its logs are not linked to identities and are deleted after 90 days. Their own policies govern their servers: <a href="https://open-meteo.com/en/terms">Open-Meteo</a>, <a href="https://www.nps.gov/aboutus/privacy.htm">National Park Service</a>. You can switch either service off in Nyx under Settings → Your privacy; information already saved stays available, and moon, twilight, calendar and journal keep working offline.</p>
+  <p>Like any website, these services see your IP address and ordinary request information. Open-Meteo states that its logs are not linked to identities and are deleted after 90 days. Their own policies govern their servers: <a href="https://open-meteo.com/en/terms">Open-Meteo</a>, <a href="https://www.nps.gov/aboutus/privacy.htm">National Park Service</a>. You can switch each service off in Nyx under Settings → Your privacy; information already saved stays available, and moon, twilight, calendar and journal keep working offline.</p>
 
   <h2>Children</h2>
   <p>Nyx collects no personal information from anyone, including children.</p>
