@@ -2,7 +2,7 @@ import SwiftUI
 
 /// "Where to look": the real sky over the park, turned to wherever the phone points. Not AR:
 /// no camera and no overlay, only the sky's geometry drawn in red on black, with the horizon,
-/// the cardinal points, the brighter stars, and labels for the Moon, the Milky Way's core, the
+/// the cardinal points, the Milky Way along the galactic plane, the brighter stars, and labels for the Moon, the Milky Way's core, the
 /// planets and a shower's radiant. Targets out of view get an arrow at the edge. A list gives
 /// the same facts to VoiceOver ("Jupiter: 32° up, east-southeast"), and a freeze holds the view.
 struct FieldCompassView: View {
@@ -16,6 +16,7 @@ struct FieldCompassView: View {
     @State private var listed: Bool?
     @State private var targets: [FieldSkyTarget]=[]
     @State private var stars: [CompassStar]=[]
+    @State private var band=CompassBand.none
     private var motion: FieldMotion { .shared }
     private var sensing: Bool { fixedPose != nil || motion.available }
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -33,6 +34,7 @@ struct FieldCompassView: View {
                 let now=session.now
                 targets=FieldSkyTarget.named(park:session.park,sky:session.night.sky,at:now)
                 stars=CompassStar.visible(park:session.park,at:now)
+                band=CompassBand.visible(park:session.park,moonIllumination:session.night.sky.moon.illumination,at:now)
                 try? await Task.sleep(for:.seconds(30))
             }
         }
@@ -42,8 +44,8 @@ struct FieldCompassView: View {
     private var sky: some View {
         TimelineView(.animation(minimumInterval:1/30,paused:frozen != nil || fixedPose != nil)) { _ in
             let pose=frozen ?? fixedPose ?? motion.pose ?? SkyCompass.Pose(azimuth:180,altitude:30)
-            let targets=targets, stars=stars
-            Canvas { context,size in draw(&context,size:size,pose:pose,targets:targets,stars:stars) }
+            let targets=targets, stars=stars, band=band
+            Canvas { context,size in draw(&context,size:size,pose:pose,targets:targets,stars:stars,band:band) }
                 .accessibilityElement(children:.ignore)
                 .accessibilityLabel("Sky view")
                 .accessibilityValue(summary(pose))
@@ -103,10 +105,12 @@ struct FieldCompassView: View {
     }
     // MARK: Drawing
 
-    private func draw(_ context:inout GraphicsContext,size:CGSize,pose:SkyCompass.Pose,targets:[FieldSkyTarget],stars:[CompassStar]) {
+    private func draw(_ context:inout GraphicsContext,size:CGSize,pose:SkyCompass.Pose,targets:[FieldSkyTarget],stars:[CompassStar],band:CompassBand) {
         let ink=palette.ink, w=size.width, h=size.height, fov=SkyCompass.horizontalFieldOfView(width:w,height:h)
         func at(_ altitude:Double,_ azimuth:Double)->SkyCompass.Placement { SkyCompass.place(altitude:altitude,azimuth:azimuth,pose:pose,width:w,height:h,fieldOfView:fov) }
         func point(_ p:SIMD2<Double>)->CGPoint { CGPoint(x:p.x,y:p.y) }
+        // Farthest first: the Milky Way under everything else.
+        if band.visibility>0.02 { drawBand(&context,band:band,pose:pose,size:size,fieldOfView:fov,ink:ink) }
         // Altitude rings at 30° and 60°, and the horizon, each a run of short segments in view.
         for (altitude,opacity,width) in [(0.0,0.7,1.2),(30.0,0.2,0.6),(60.0,0.2,0.6)] {
             var path=Path(), drawing=false
@@ -123,8 +127,13 @@ struct FieldCompassView: View {
         }
         for star in stars {
             guard let p=at(star.altitude,star.azimuth).point else { continue }
-            let d=max(1.2,3.4-0.7*star.magnitude)
-            context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(ink.opacity(max(0.35,min(1,1.1-0.15*star.magnitude)))))
+            let d=max(1.4,4.2-0.8*star.magnitude)
+            // The few brightest (Vega, Arcturus, Antares…) get a faint halo, so they read as landmarks at arm's length.
+            if star.magnitude<1.5 {
+                let r=d*2.2
+                context.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:r*2,height:r*2)),with:.radialGradient(Gradient(colors:[ink.opacity(0.22),ink.opacity(0)]),center:CGPoint(x:p.x,y:p.y),startRadius:0,endRadius:r))
+            }
+            context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(ink.opacity(max(0.4,min(1,1.15-0.15*star.magnitude)))))
         }
         // Labels never cover each other: brightest first, each takes the first free spot around
         // its mark (above, below, right, left); one with no room keeps its mark and loses its name.
@@ -135,7 +144,8 @@ struct FieldCompassView: View {
             for spot in spots {
                 let rect=CGRect(x:spot.x-s.width/2,y:spot.y-s.height/2,width:s.width,height:s.height).insetBy(dx:-3,dy:-1)
                 guard rect.minX>=0,rect.maxX<=w,rect.minY>=0,rect.maxY<=h,!taken.contains(where:{ $0.intersects(rect) }) else { continue }
-                taken.append(rect); context.draw(resolved,at:spot); return
+                // A dark halo keeps each name at full contrast where it crosses the Milky Way.
+                taken.append(rect); context.drawLayer { layer in layer.addFilter(.shadow(color:.black,radius:3)); layer.draw(resolved,at:spot) }; return
             }
         }
         let ordered=targets.filter { $0.altitude > -0.5 }.sorted { $0.magnitude<$1.magnitude }
@@ -150,9 +160,11 @@ struct FieldCompassView: View {
                 context.fill(Path(ellipseIn:CGRect(x:c.x-11,y:c.y-11,width:22,height:22)),with:.color(ink.opacity(0.25+0.7*lit)))
                 context.stroke(Path(ellipseIn:CGRect(x:c.x-11,y:c.y-11,width:22,height:22)),with:.color(ink),lineWidth:1)
             case .core:
-                context.fill(Path(ellipseIn:CGRect(x:c.x-34,y:c.y-22,width:68,height:44)),with:.radialGradient(Gradient(colors:[ink.opacity(0.35),ink.opacity(0)]),center:c,startRadius:0,endRadius:34))
+                // The bulge's brightest knot, round and soft, fading with the band (moonlight, twilight); the band carries the rest.
+                context.fill(Path(ellipseIn:CGRect(x:c.x-30,y:c.y-30,width:60,height:60)),with:.radialGradient(Gradient(colors:[ink.opacity(0.12+0.18*band.visibility),ink.opacity(0.08*band.visibility),ink.opacity(0)]),center:c,startRadius:0,endRadius:30))
             case .planet:
-                context.fill(Path(ellipseIn:CGRect(x:c.x-4,y:c.y-4,width:8,height:8)),with:.color(ink))
+                context.fill(Path(ellipseIn:CGRect(x:c.x-12,y:c.y-12,width:24,height:24)),with:.radialGradient(Gradient(colors:[ink.opacity(0.25),ink.opacity(0)]),center:c,startRadius:0,endRadius:12))
+                context.fill(Path(ellipseIn:CGRect(x:c.x-4.5,y:c.y-4.5,width:9,height:9)),with:.color(ink))
             case .radiant:
                 var rays=Path()
                 for i in 0..<10 { let a=Double(i)*Double.pi/5; rays.move(to:CGPoint(x:c.x+7*cos(a),y:c.y+7*sin(a))); rays.addLine(to:CGPoint(x:c.x+(i%2==0 ? 18 : 13)*cos(a),y:c.y+(i%2==0 ? 18 : 13)*sin(a))) }
@@ -165,6 +177,32 @@ struct FieldCompassView: View {
         // The middle of the window: where the back of the phone points.
         var reticle=Path(); reticle.addEllipse(in:CGRect(x:w/2-14,y:h/2-14,width:28,height:28))
         context.stroke(reticle,with:.color(ink.opacity(0.5)),lineWidth:0.8)
+    }
+    /// The Milky Way: soft discs along the galactic plane, added together, each as wide as the band is
+    /// there and as bright as RealSky's model, dimmed toward the horizon (more air to look through),
+    /// by twilight, moonlight and sky glow (`CompassBand.visibility`), and kept above the horizon.
+    /// Positions are computed twice a minute; each frame only re-projects them for the phone's pose.
+    private func drawBand(_ context:inout GraphicsContext,band:CompassBand,pose:SkyCompass.Pose,size:CGSize,fieldOfView fov:Double,ink:Color) {
+        let w=size.width, h=size.height, rad=Double.pi/180, focal=(w/2)/tan(fov*rad/2)
+        var layer=context
+        if let sky=SkyCompass.skySide(pose:pose,width:w,height:h,fieldOfView:fov) { layer.clip(to:Path { $0.addLines(sky.map { CGPoint(x:$0.x,y:$0.y) }); $0.closeSubpath() }) }
+        else if pose.altitude<0 { return }
+        layer.blendMode = .plusLighter
+        let stops=Gradient(stops:[.init(color:ink,location:0),.init(color:ink.opacity(0.55),location:0.4),.init(color:ink.opacity(0.15),location:0.75),.init(color:ink.opacity(0),location:1)])
+        for sample in band.samples {
+            let placed=SkyCompass.place(altitude:sample.altitude,azimuth:sample.azimuth,pose:pose,width:w,height:h,fieldOfView:fov,clipped:false)
+            guard let p=placed.point else { continue }
+            let r=focal*tan(sample.halfWidth*rad)/max(0.3,cos(placed.separation*rad))
+            guard p.x > -r, p.x<w+r, p.y > -r, p.y<h+r else { continue }
+            let extinction=0.35+0.65*min(1,max(0,sample.altitude/25))
+            // Discs every 3° overlap about r/3 deep along the band; dividing by that keeps the summed
+            // centre line near a quarter of the ink at the core and under a tenth on the faint side.
+            let opacity=0.24*sample.brightness*band.visibility*extinction*3/sample.halfWidth
+            layer.opacity=opacity
+            layer.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:r*2,height:r*2)),with:.radialGradient(stops,center:CGPoint(x:p.x,y:p.y),startRadius:0,endRadius:r))
+        }
+        // The window's top edge fades rather than cutting the band under the header.
+        context.fill(Path(CGRect(x:0,y:0,width:w,height:56)),with:.linearGradient(Gradient(colors:[.black,.black.opacity(0)]),startPoint:.zero,endPoint:CGPoint(x:0,y:56)))
     }
     /// An arrow just inside the edge toward a target out of view, with its name.
     private func edgeArrow(_ context:inout GraphicsContext,size:CGSize,angle:Double,name:String,ink:Color,taken:inout [CGRect]) {
@@ -181,7 +219,27 @@ struct FieldCompassView: View {
         let at=CGPoint(x:min(max(p.x-dx*(14+s.width/2),s.width/2+4),size.width-s.width/2-4),y:p.y-dy*16)
         let rect=CGRect(x:at.x-s.width/2,y:at.y-s.height/2,width:s.width,height:s.height)
         guard !taken.contains(where:{ $0.intersects(rect) }) else { return }
-        taken.append(rect); context.draw(resolved,at:at)
+        taken.append(rect); context.drawLayer { layer in layer.addFilter(.shadow(color:.black,radius:3)); layer.draw(resolved,at:at) }
+    }
+}
+
+/// The Milky Way over the park at one moment: its centre line in altitude and azimuth, and how much
+/// of it the eye can see then.
+nonisolated struct CompassBand: Sendable {
+    struct Sample: Sendable { let altitude: Double; let azimuth: Double; let brightness: Double; let halfWidth: Double }
+    let samples: [Sample]
+    let visibility: Double
+    static let none=CompassBand(samples:[],visibility:0)
+    static func visible(park:Park,moonIllumination:Double,at date:Date)->CompassBand {
+        let engine=AstronomyEngine()
+        let visibility=SkyCompass.milkyWayVisibility(sunAltitude:engine.solarAltitude(at:date,park:park),moonAltitude:engine.lunarAltitude(at:date,park:park),moonIllumination:moonIllumination,bortle:park.bortleEstimate)
+        guard visibility>0.02 else { return .none }
+        // Points just under the horizon still light the sky above it (the disc is wider than the gap).
+        let samples=SkyCompass.galacticPlane().compactMap { point -> Sample? in
+            let h=engine.horizontal(date:date,park:park,ra:point.ra,dec:point.dec)
+            return h.altitude > -point.halfWidth ? Sample(altitude:h.altitude,azimuth:h.azimuth,brightness:point.brightness,halfWidth:point.halfWidth) : nil
+        }
+        return CompassBand(samples:samples,visibility:visibility)
     }
 }
 

@@ -94,6 +94,50 @@ nonisolated enum SkyCompass {
         let onScreen = !clipped || (p.x>=0 && p.x<=width && p.y>=0 && p.y<=height)
         return Placement(point: onScreen ? p : nil, edgeAngle: angle, separation: separation)
     }
+    /// A point on the Milky Way's centre line (galactic latitude 0, J2000, radians), with the band's
+    /// brightness there (0.35…1, RealSky's model: brightest toward the core in Sagittarius, faintest
+    /// toward the anticentre) and its half-width in degrees (about 6° on the faint side, 13° at the core).
+    struct BandPoint: Sendable, Equatable { let ra: Double; let dec: Double; let brightness: Double; let halfWidth: Double }
+    /// The galactic plane every `step` degrees of galactic longitude, from the north galactic pole
+    /// (RA 192.859°, Dec +27.128°) and the ascending node's longitude (122.932°).
+    static func galacticPlane(step: Double=3) -> [BandPoint] {
+        let rad=Double.pi/180, poleRA=192.85948*rad, poleDec=27.12825*rad, nodeL=122.93192*rad
+        return stride(from: 0.0, to: 360, by: max(0.5, step)).map { degrees in
+            let l=degrees*rad
+            let dec=asin(cos(poleDec)*cos(nodeL-l))
+            var ra=poleRA+atan2(sin(nodeL-l), -sin(poleDec)*cos(nodeL-l))
+            ra=ra.truncatingRemainder(dividingBy: 2*Double.pi); if ra<0 { ra+=2*Double.pi }
+            let toCore=(1+cos(l))/2
+            return BandPoint(ra: ra, dec: dec, brightness: 0.35+0.65*toCore*toCore, halfWidth: 6+7*pow(toCore, 4))
+        }
+    }
+    /// How much of the Milky Way a dark-adapted eye can see, 0…1: none until the Sun is 12° down and
+    /// all of it from 18° (astronomical twilight's end); a Moon above the horizon washes it out by the
+    /// square root of its lit fraction (a quarter Moon already takes most of it); sky glow leaves all of
+    /// it under Bortle 1–3 and none from Bortle 7.
+    static func milkyWayVisibility(sunAltitude: Double, moonAltitude: Double, moonIllumination: Double, bortle: Int) -> Double {
+        let night=min(1, max(0, (-12-sunAltitude)/6))
+        let moonUp=min(1, max(0, (moonAltitude+1)/6))
+        let moon=1-0.9*moonUp*max(0, min(1, moonIllumination)).squareRoot()
+        let glow=min(1, max(0, Double(7-bortle)/4))
+        return night*moon*glow
+    }
+    /// The sky's side of the horizon on screen, as a polygon to clip to: the horizon is a great circle,
+    /// so through this window it is a straight line; the polygon is that line, closed far out on the
+    /// zenith's side. Nil when the horizon is out of view (then the screen is all sky or all ground).
+    static func skySide(pose: Pose, width: Double, height: Double, fieldOfView: Double=fieldOfView) -> [SIMD2<Double>]? {
+        // Swept from behind the viewer, so the part in front comes as one unbroken run.
+        var run: [SIMD2<Double>]=[]
+        for step in stride(from: 0.0, through: 360, by: 2) {
+            let placed=place(altitude: 0, azimuth: pose.azimuth+180+step, pose: pose, width: width, height: height, fieldOfView: fieldOfView, clipped: false)
+            if let p=placed.point, abs(p.x-width/2)<width*8, abs(p.y-height/2)<height*8 { run.append(p) }
+        }
+        let zenith=SIMD3<Double>(0, 0, 1)
+        let toward=SIMD2(simd_dot(zenith, pose.right), -simd_dot(zenith, pose.up))
+        guard run.count>=2, let first=run.first, let last=run.last, simd_length(toward)>1e-6 else { return nil }
+        let far=simd_normalize(toward)*(width+height)*20
+        return run+[last+far, first+far]
+    }
     /// Spoken: "32° up, east-southeast", or "below the horizon".
     static func spoken(altitude: Double, azimuth: Double) -> String {
         altitude < -0.5 ? String(localized: "below the horizon") : String(localized: "\(Int(max(0, altitude).rounded()))° up, \(Compass.fine(azimuth))")

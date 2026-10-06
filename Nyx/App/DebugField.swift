@@ -8,6 +8,7 @@ import SwiftUI
 /// reset notice, `adapted` 35 minutes in, `alarms` opens the "Wake me" sheet.
 struct DebugField: View {
     @State private var session: FieldSession
+    private let model: PlanModel
     private let compass: Bool
     private let pose: SkyCompass.Pose?
     init(park: Park, model: PlanModel, compass: Bool) {
@@ -20,12 +21,21 @@ struct DebugField: View {
         let session=FieldSession(park: park, model: model, changesPhone: false, offset: base.timeIntervalSinceNow, adaptedFor: adapted)
         if DebugScenario.state=="reset" { session.reset=DarkAdaptation.Reset(at: session.now.addingTimeInterval(-120), previousStart: session.now.addingTimeInterval(-26*60)) }
         _session=State(initialValue: session)
-        self.compass=compass
-        // Facing the core when it is up, otherwise south, 30° up.
+        self.model=model; self.compass=compass
+        // Toward the core when it is up, tipped 10° above it so the band shows rising from it; otherwise south, 30° up.
         let core=FieldSkyTarget.named(park: park, sky: night.sky, at: session.now).first { $0.kind == .core && $0.altitude>5 }
-        pose=compass ? SkyCompass.Pose(azimuth: core?.azimuth ?? 180, altitude: max(20, min(50, core?.altitude ?? 30))) : nil
+        pose=compass ? SkyCompass.Pose(azimuth: core?.azimuth ?? 180, altitude: max(20, min(50, core.map { $0.altitude+10 } ?? 30))) : nil
     }
-    var body: some View { FieldView(session: session, initialPage: compass ? .look : .night, fixedPose: pose, showsAlarms: DebugScenario.state=="alarms") {} }
+    var body: some View {
+        FieldView(session: session, initialPage: compass ? .look : .night, fixedPose: pose, showsAlarms: DebugScenario.state=="alarms") {}
+            // Under `-nyx-state live`, the same forecast refresh park detail makes, so field mode shows
+            // the same score as detail in one capture run (the session is built before any forecast arrives).
+            .task {
+                guard DebugScenario.state=="live" else { return }
+                await model.refreshForecasts(watching: [session.park])
+                session.score=model.night(session.park).score
+            }
+    }
 }
 
 /// `-nyx-screen live-activity`: the Live Activity's Lock Screen and Dynamic Island faces for
