@@ -1,0 +1,64 @@
+id,name,hand_bortle,computed_bortle,glow,dark_sky_designated
+acad,Acadia National Park,3,2.94,5.09,False
+arch,Arches National Park,3,2.22,0.343,True
+badl,Badlands National Park,2,2.19,0.192,False
+bibe,Big Bend National Park,2,2.17,0.0905,True
+bisc,Biscayne National Park,5,3.96,21.3,False
+blca,Black Canyon of the Gunnison National Park,2,2.32,0.82,True
+brca,Bryce Canyon National Park,2,2.19,0.206,True
+cany,Canyonlands National Park,2,2.16,0.083,True
+care,Capitol Reef National Park,2,2.17,0.121,True
+cave,Carlsbad Caverns National Park,2,2.45,1.52,False
+chis,Channel Islands National Park,2,2.41,1.28,False
+cong,Congaree National Park,4,3.18,7.54,False
+crla,Crater Lake National Park,2,2.19,0.177,False
+cuva,Cuyahoga Valley National Park,6,5.0,67.0,False
+deva,Death Valley National Park,2,2.27,0.553,True
+dena,Denali National Park & Preserve,2,2.59,2.36,False
+drto,Dry Tortugas National Park,2,2.18,0.14,False
+ever,Everglades National Park,3,2.68,2.97,False
+gaar,Gates of the Arctic National Park & Preserve,2,2.5,1.77,False
+jeff,Gateway Arch National Park,8,8.09,1500.0,False
+glba,Glacier Bay National Park & Preserve,2,2.68,2.93,False
+glac,Glacier National Park,2,2.19,0.2,True
+grca,Grand Canyon National Park,2,2.59,2.31,True
+grte,Grand Teton National Park,2,2.18,0.137,False
+grba,Great Basin National Park,2,2.16,0.0883,True
+grsa,Great Sand Dunes National Park & Preserve,2,2.22,0.338,True
+grsm,Great Smoky Mountains National Park,3,2.91,4.74,False
+gumo,Guadalupe Mountains National Park,2,2.32,0.781,False
+hale,Haleakalā National Park,2,2.21,0.277,False
+havo,Hawaiʻi Volcanoes National Park,3,2.67,2.87,False
+hosp,Hot Springs National Park,5,5.59,123.0,False
+indu,Indiana Dunes National Park,6,5.47,109.0,False
+isro,Isle Royale National Park,2,2.17,0.131,False
+jotr,Joshua Tree National Park,3,2.6,2.41,True
+katm,Katmai National Park & Preserve,2,2.23,0.354,False
+kefj,Kenai Fjords National Park,2,2.7,3.1,False
+kica,Kings Canyon National Park,3,2.27,0.564,False
+kova,Kobuk Valley National Park,2,3.23,8.18,False
+lacl,Lake Clark National Park & Preserve,2,2.77,3.63,False
+lavo,Lassen Volcanic National Park,2,2.22,0.311,False
+maca,Mammoth Cave National Park,4,2.9,4.69,True
+meve,Mesa Verde National Park,3,2.29,0.642,True
+mora,Mount Rainier National Park,3,2.47,1.6,False
+npsa,National Park of American Samoa,3,2.14,0.00476,False
+neri,New River Gorge National Park & Preserve,3,2.78,3.72,False
+noca,North Cascades National Park,2,2.31,0.759,False
+olym,Olympic National Park,3,2.36,1.03,False
+pefo,Petrified Forest National Park,2,2.52,1.89,True
+pinn,Pinnacles National Park,3,2.55,2.09,False
+redw,Redwood National and State Parks,3,2.17,0.129,False
+romo,Rocky Mountain National Park,2,2.5,1.78,False
+sagu,Saguaro National Park,4,5.05,70.7,False
+sequ,Sequoia National Park,3,2.35,0.941,False
+shen,Shenandoah National Park,3,2.75,3.45,False
+thro,Theodore Roosevelt National Park,2,2.36,0.985,False
+viis,Virgin Islands National Park,3,2.91,4.81,False
+voya,Voyageurs National Park,2,2.17,0.107,True
+whsa,White Sands National Park,3,2.36,1.0,False
+wica,Wind Cave National Park,2,2.25,0.481,False
+wrst,Wrangell–St. Elias National Park & Preserve,2,2.8,3.86,False
+yell,Yellowstone National Park,2,2.16,0.071,False
+yose,Yosemite National Park,3,2.3,0.723,False
+zion,Zion National Park,3,2.3,0.715,True
