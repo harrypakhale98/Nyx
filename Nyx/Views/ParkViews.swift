@@ -254,7 +254,7 @@ struct ParkDetailView: View {
             if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:30) { selected=nil }
         }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
-            .toolbar { saveToolbar }
+            .toolbar { saveToolbar }.modifier(SkyFullBleed())
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(park)) }.nyxPresentation().presentationDetents([.large]) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
             .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
@@ -375,3 +375,11 @@ struct ScoreBreakdownView: View {
 }
 #Preview("Park row") { if let p=PlanModel().home { ParkRow(night:PlanModel().night(p)).padding().background(.black) } }
 #Preview("Detail") { let m=PlanModel();if let p=m.home { NavigationStack { ParkDetailView(park:p) }.environment(m).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) } }
+
+/// iOS 27: the bars recede as the park's page scrolls down, so its sky runs edge to edge; they
+/// return on the way back up. iOS 26 keeps the standard bars.
+private struct SkyFullBleed: ViewModifier {
+    @ViewBuilder func body(content:Content)->some View {
+        if #available(iOS 27.0,*) { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar,.tabBar) } else { content }
+    }
+}

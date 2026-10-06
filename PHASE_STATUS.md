@@ -1,3 +1,25 @@
+# Nyx handoff — 2026-10-06 (roadmap: platform showcase, each for a reason)
+
+Roadmap Tier 3, on branch `platform`. Logged under "Platform — 2026-10-06" in `DECISIONS.md`. The score is unchanged. Every API was checked in the installed iPhoneOS 27.0 SDK.
+
+- **Engine for every surface:** `NightPlanner` (`Nyx/Services/NightPlanner.swift`, also in the widget extension): nights from parks + cached forecasts, ranking, the large widget's month, dusk windows and relevance.
+- **Widgets:** medium gains "2 of 3 ›" (`Button(intent: CycleWidgetParkIntent())`, `Nyx/Intents/WidgetParkIntent.swift`; the choice lapses at the park's next sunrise); new **large** family (35-cell month: dot for score, hollow without forecast, ring on the best, meteor/eclipse glyph, Moon phase and percent lit); `TimelineEntryRelevance` per entry plus `relevance()` → `WidgetRelevance` from `RelevantContext.date(interval:kind:)` for dusk on Good+ nights; white-only drawing outside `.fullColor` (StandBy at night, tinted, Lock Screen).
+- **App Intents & Spotlight:** `ParkEntity` is an `IndexedEntity`; Spotlight items associate their entity (and `relatedAppEntityIdentifier` on 27); `ParkQuery` is an `IndexedEntityQuery` on 27; `OpenParkIntent` (OpenIntent) opens a park via `ParkOpenRequest`. **Find the best night** (`Nyx/Intents/BestNightIntent.swift`): park or saved parks, 1–30 nights, honest dialog (shorter when `isVoiceOnly` on 27), interactive snippet with "Next best" and "Open in Nyx". App Shortcut phrases added; `updateAppShortcutParameters()` after saved parks change. No assistant schema fits.
+- **Reminders (27):** `appEntityIdentifiers` = the park's entity.
+- **Ask Nyx with tools** (`Nyx/Services/GuideTools.swift`): `bestNights`, `whatsUp`, `parksNear` return computed records numbered by `GuideLedger`; citations still validated; "What Nyx looked up" under the answer. Real `contextSize` + `tokenCount(for:)` (26.4) to trim; `ContextOptions(reasoningLevel:)` on 27.
+- **iOS 27 polish:** park detail `toolbarMinimizationBehavior(.onScrollDown, for: .navigationBar, .tabBar)`. **MetricKit** (`Nyx/Services/LuminanceProof.swift`): last average pixel luminance, shown in About the data and Your privacy only after a real report (no "typical app" comparison: no reference exists).
+- **visionOS:** links `AppIntents.framework`; the "Metadata extraction skipped" warning is gone.
+- **Tests:** `NyxTests/PlatformTests.swift` (12): dusk windows/relevance (incl. Denali June), month layout/best/forecast edge/Geminids glyph + timing, cycling order/wrap/lapse, best-night ranking/clamps/tie rule, dialog wording incl. voice and polar, snippet browsing, Spotlight items ↔ entities (27 identifier), ParkQuery, open request expiry, the three tools' records, ledger numbering, luminance reading validity.
+- DEBUG: `-nyx-screen widgets | widgets-large | snippet | metric` (`-nyx-state privacy` for Your privacy), best with `-nyx-state agree`.
+
+**Verified 2026-10-06:** zero warnings (app, widgets, tests; visionOS build clean). iPhone Air / iOS 27.0: 120 Swift Testing tests (12 new), both UI tests, both accessibility audits limited to `detail,data,privacy,ask` (standard and night vision) — all pass. iPhone 17e / iOS 26.5: 120 Swift Testing tests pass. Large-widget month with events: 25 ms. Reviewed captures (kept as `Research/Screenshots/platform-*`): widgets (small, medium with "3 of 3", Lock Screen, StandBy night simulated), large (full colour, night vision, tinted), snippet and voice-only wording, About the data with the DEBUG luminance fixture, park detail; on 26.5 large widget and snippet. Review fixes: button crowding the weekday row, invisible shower glyph, buried brightness line.
+
+**Known limits:** Smart Stack rise, StandBy night tint, interactive buttons in real widget/snippet hosts, Spotlight semantic results and the tools with a live model cannot be exercised in the simulator (INPUT_NEEDED 1). MetricKit reports arrive about daily on devices only. The month's clouds are frozen per night/forecast-freshness within a timeline. New strings (56) need Spanish drafts.
+
+**Next starting point:** integrator merges `platform` (expect small conflicts in `RootView.swift` with the delight lane: new `.onReceive(ParkOpenRequest…)`, debug routes, `updateSaved`), runs the full both-runtime suite, adds Spanish drafts.
+
+---
+
 # Nyx handoff — 2026-10-06 (roadmap: every sky — the cost of light, step-free spots)
 
 Roadmap §4 and the step-free part of §5, on branch `glow`. Logged under "Every sky — 2026-10-06" in `DECISIONS.md`. The score is unchanged and still uses the hand Bortle estimate.

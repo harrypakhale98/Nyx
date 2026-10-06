@@ -14,6 +14,13 @@ Nyx has no accounts, tracking, analytics/crash SDKs, advertising identifier, ATT
 
 `NyxVision` compiles only the astronomy engine, the score, the bundled tables and its own views. No networking source (`SafeHTTP`, `DataServices`, `ForecastDetail`) is in the target, it requests no permissions (no location, photos, notifications or world sensing), stores nothing (no UserDefaults, no SwiftData), and its scores are labelled "moon and darkness only" because it fetches no forecast. Its manifest (`NyxVision/Resources/PrivacyInfo.xcprivacy`) declares tracking false, no collected data and no required-reason APIs. The privacy label stays "Data Not Collected".
 
+## Platform surfaces (2026-10-06)
+
+- **MetricKit, on device only.** Nyx subscribes to iOS's daily MetricKit reports (`MetricManager` on iOS 27, `MXMetricManager` on iOS 26) and keeps one number from them: the last average pixel luminance, with the date it covers, in the app's own UserDefaults. It is shown in About the data and Your privacy so people can see how dark Nyx keeps the screen. Nothing else from the report is read or stored, and nothing is sent: Nyx has no server or analytics. MetricKit is Apple's framework, not vendor code, and is not a required-reason API. Before a real report arrives the line is simply absent (DEBUG builds have a fixture labelled "Debug fixture, not a measurement").
+- **Widgets, Spotlight, Siri and Shortcuts** compute from the bundled parks and the cached forecasts already on the phone. The medium widget's "next park" button stores the chosen park ID and night in the App Group defaults. Spotlight items for the 63 parks are public facts (name, state, Dark Sky designation), indexed into the device's own index.
+- **Ask Nyx's tools** run the engine on the phone over the bundled parks and cached forecasts; the on-device model (Foundation Models' `SystemLanguageModel`) never uses Private Cloud Compute or any network service.
+- **Reminders on iOS 27** carry the park's App Intents entity identifier (`appEntityIdentifiers`), so Siri can open the park from the notification. It is the park's public ID, local to the phone.
+
 ## Manifests
 
 App, widget, watch app and watch widget each bundle `PrivacyInfo.xcprivacy`: tracking false; tracking domains empty; declared collected data empty; UserDefaults required reasons CA92.1 (own preferences) and 1C8F.1 (same developer's App Group preferences). Allowed data hosts appear in a comment, not `NSPrivacyTrackingDomains`, because they are not tracking domains and Apple defines no general host-allowlist manifest key. No custom/unrecognized manifest keys were invented.
