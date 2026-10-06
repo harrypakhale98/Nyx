@@ -140,6 +140,17 @@ nonisolated struct ViewingSpot: Codable, Hashable, Sendable {
     let longitude: Double
     let sourceURL: String
     let note: String
+    /// The note in the reader's language. Every spot ends with the same caveat, a catalog key; the one
+    /// park-specific lead (Theodore Roosevelt's North Unit) has its own key. Anything else stays as bundled.
+    var localizedNote: String {
+        let caveat="Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+        guard note.hasSuffix(caveat) else { return note }
+        let local=String(localized:"Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.")
+        let lead=String(note.dropLast(caveat.count)).trimmingCharacters(in:.whitespaces)
+        if lead.isEmpty { return local }
+        let northUnit="The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park."
+        return (lead==northUnit ? String(localized:"The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.") : lead)+" "+local
+    }
 }
 nonisolated struct ParkAlert: Codable, Identifiable, Sendable {
     let id: String

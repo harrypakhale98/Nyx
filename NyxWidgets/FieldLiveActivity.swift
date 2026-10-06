@@ -70,6 +70,8 @@ struct FieldAlarmLiveActivity: Widget {
     }
 }
 
+// The preview night is a DEBUG fixture, so the previews are too (Release archives must not reference it).
+#if DEBUG
 #Preview("Lock Screen",as:.content,using:FieldActivityAttributes.preview) { FieldLiveActivity() } contentStates:{
     FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:false)
     FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:true)
@@ -85,3 +87,4 @@ struct FieldAlarmLiveActivity: Widget {
 #Preview("Island minimal",as:.dynamicIsland(.minimal),using:FieldActivityAttributes.preview) { FieldLiveActivity() } contentStates:{
     FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:false)
 }
+#endif

@@ -94,7 +94,7 @@ struct ViewingSpotRow: View {
                 // A 44-point target for the long-press "Copy coordinates" menu (iOS 26 audits the text's own height).
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
                 .contextMenu { Button("Copy coordinates",systemImage:"doc.on.doc") { UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)" } }
-            Text(spot.note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text(spot.localizedNote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let site=SkyGlow.shared.spot(spot.name,park:park.id) {
                 let level=SkyGlow.shared.level(site.glow)
                 let comparison=SkyGlow.shared.park(park.id).flatMap { SkyGlow.comparison(spot:site.glow,park:$0.glow) }
