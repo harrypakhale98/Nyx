@@ -6,6 +6,7 @@ import SwiftUI
 /// shows where the night stands now. Times are park-local.
 struct SkyArc: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.nyxAccess) private var access
     let night: Night
     /// Whether this is tonight's night, for copy that names it.
     var isTonight=true
@@ -35,7 +36,7 @@ struct SkyArc: View {
                 HStack(spacing:16) { legend;Spacer() }
                 VStack(alignment:.leading,spacing:8) { legend }
             }.font(.caption).foregroundStyle(palette.muted)
-            Text("Moonlit hours are lighter.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text(access.differentiate ? "Moonlit hours are lighter and hatched." : "Moonlit hours are lighter.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if night.sky.darkHours==0 {
                 Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.ink)
             } else {
@@ -46,9 +47,16 @@ struct SkyArc: View {
             }
             Text("Times in \(night.park.timeZoneName)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }.accessibilityElement(children:.ignore)
+            .accessibilityInputLabels([Text("Shape of the night"),Text("Sky arc")])
+            .accessibilityHint("An audio graph of the Sun, Moon and Milky Way core is available.")
+            .nightChart { [night=night,window=window,summary=spokenSummary] in NightChart.sky(night,window:window,summary:summary) }
             .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). \(core.map { $0.spoken+" " } ?? "")Times in \(night.park.timeZoneName).")
     }
 
+    private var spokenSummary:String {
+        let darkness=night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
+        return String(localized:"Sunset \(night.park.time(night.sky.sunset)).")+" "+darkness+" "+String(localized:"Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)).")
+    }
     /// Sky colour for a solar altitude: dusk blue, nebula violet at civil twilight,
     /// deep indigo at nautical, void black from astronomical twilight on.
     private func skyColor(_ altitude:Double)->Color {
@@ -95,6 +103,13 @@ struct SkyArc: View {
             let wash=Gradient(colors:[palette.ink.opacity(0.03),palette.ink.opacity(0.05+0.13*night.sky.moon.illumination)])
             for (a,b) in spans {
                 context.fill(Path(CGRect(x:a,y:0,width:b-a,height:horizon)),with:.linearGradient(wash,startPoint:CGPoint(x:0,y:0),endPoint:CGPoint(x:0,y:horizon)))
+                // Without colour, moonlight is a light diagonal hatch as well as a wash.
+                if access.differentiate {
+                    var hatch=Path(), x0=a-horizon
+                    while x0<b { hatch.move(to:CGPoint(x:x0,y:horizon)); hatch.addLine(to:CGPoint(x:x0+horizon,y:0)); x0+=9 }
+                    var clipped=context; clipped.clip(to:Path(CGRect(x:a,y:0,width:b-a,height:horizon)))
+                    clipped.stroke(hatch,with:.color(palette.ink.opacity(0.22)),lineWidth:0.6)
+                }
             }
         }
         // A few stars where the sky is truly dark.
@@ -156,7 +171,7 @@ struct SkyArc: View {
         if !corePaths.isEmpty {
             context.drawLayer { band in
                 band.addFilter(.blur(radius:4))
-                for path in corePaths { band.stroke(path,with:.color(palette.ink.opacity(0.16)),style:StrokeStyle(lineWidth:10,lineCap:.round,lineJoin:.round)) }
+                for path in corePaths { band.stroke(path,with:.color(palette.ink.opacity(0.16*access.glow)),style:StrokeStyle(lineWidth:10,lineCap:.round,lineJoin:.round)) }
             }
             for path in corePaths { context.stroke(path,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:1.3,lineCap:.round,dash:[0.1,3.6])) }
             if let peak=corePeak, peak.altitude>=8 {
@@ -168,6 +183,12 @@ struct SkyArc: View {
         }
         trace(sunPoints,color:palette.accent,width:1.8)
         trace(moonPoints,color:palette.ink,width:1.4)
+        // Without colour, the Sun's path is named where it last stands clear of the horizon.
+        if access.differentiate, let last=sunPoints.last(where:{ $0.1>3 && x($0.0)>24 }) ?? sunPoints.first(where:{ $0.1>3 }) {
+            let label=context.resolve(Text("Sun").font(.caption2.weight(.semibold)).foregroundStyle(palette.accent))
+            let measured=label.measure(in:CGSize(width:60,height:20))
+            context.draw(label,at:CGPoint(x:min(max(x(last.0),measured.width/2+4),size.width-measured.width/2-4),y:max(measured.height/2+2,y(last.1)-measured.height/2-3)))
+        }
         // The Moon itself, at its highest point in view.
         if let peak=moonPoints.max(by:{ $0.1<$1.1 }),peak.1>0,let symbol=context.resolveSymbol(id:"moon") {
             let px=min(max(x(peak.0),12),size.width-12), py=max(y(peak.1),12)

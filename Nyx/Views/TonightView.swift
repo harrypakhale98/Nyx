@@ -6,6 +6,7 @@ struct TonightView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @Environment(\.nyxAccess) private var access
     @State private var shooting=0.0
     @State private var refreshed=0
     @Environment(\.openURL) private var openURL
@@ -53,14 +54,15 @@ struct TonightView: View {
             }.padding(24)
         }.background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
-            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
+            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)) }
             .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
             .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .refreshable {
-                if !systemReduceMotion && !forcedReduceMotion && shooting==0 {
+                // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
+                if !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting && shooting==0 {
                     withAnimation(.spring(response:0.9,dampingFraction:1)) { shooting=1 } completion:{ shooting=0 }
                 }
                 await model.refresh(candidates,force:true);refreshed+=1

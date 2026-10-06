@@ -41,6 +41,7 @@ struct LightPollution: View {
         VStack(alignment:.leading,spacing:12) {
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
+                    .accessibilityElement(children:.ignore).speechLabel(String(localized:"Bortle estimate, class \(park.bortleEstimate) of 9"))
                 Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
             }
             if let site {

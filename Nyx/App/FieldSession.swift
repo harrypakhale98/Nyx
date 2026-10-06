@@ -140,7 +140,7 @@ import WidgetKit
         }
         let session=FieldSession(park: park, model: model)
         let host=FieldHostingController(parkID: park.id)
-        host.rootView=AnyView(FieldView(session: session) { [weak host] in host?.close() }.environment(model))
+        host.rootView=AnyView(FieldView(session: session) { [weak host] in host?.close() }.environment(model).nyxAccessibility())
         host.onClose={ session.end() }
         host.modalPresentationStyle = .fullScreen
         host.modalTransitionStyle = .crossDissolve

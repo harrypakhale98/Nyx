@@ -15,6 +15,7 @@ struct TimeRiver: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @Environment(\.nyxAccess) private var access
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let nights: [Night]
     @Binding var selected: Date
@@ -28,6 +29,8 @@ struct TimeRiver: View {
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
     @State private var detents=0
+    /// Counts a person's choices, so the Moon's texture follows a scrub once it settles.
+    @State private var felt=0
     /// The selected night's position; nil when it is not on the river, which then marks no night
     /// rather than pretending the first one is chosen.
     private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
@@ -57,6 +60,12 @@ struct TimeRiver: View {
         }
         .sensoryFeedback(.selection,trigger:detents)
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
+        // Feel the Moon: once a scrub rests on a night, its Moon's phase as a short texture.
+        .task(id:felt) {
+            guard felt>0, MoonHaptics.enabled, let moon=current?.sky.moon else { return }
+            try? await Task.sleep(for:.milliseconds(380))
+            if !Task.isCancelled { MoonHaptics.shared.play(.moon(illumination:moon.illumination,waxing:moon.waxing,duration:0.6)) }
+        }
     }
 
     private var river: some View {
@@ -85,7 +94,9 @@ struct TimeRiver: View {
         .accessibilityElement()
         .accessibilityLabel("Thirty-night darkness timeline")
         .accessibilityValue(spokenValue)
-        .accessibilityHint("Swipe up or down to move one night at a time.")
+        .accessibilityHint("Swipe up or down to move one night at a time. An audio graph is available.")
+        .accessibilityInputLabels([Text("River"),Text("Nights"),Text("Timeline")])
+        .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: choose(index.map { $0+1 } ?? 0)
@@ -116,6 +127,8 @@ struct TimeRiver: View {
             Text(spokenValue).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
         }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
             .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Adjust to move one night at a time.")
+            .accessibilityInputLabels([Text("Night"),Text("Selected night")])
+            .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
     }
 
     private var spokenValue: String {
@@ -132,10 +145,13 @@ struct TimeRiver: View {
     private var hasRanges:Bool { nights.contains { outlooks[$0.id]?.scoreRange != nil } }
     private var legend: String {
         if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet.") }
-        let base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
+        var base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
             : String(localized:"Drag along the river. Dashed, hollow nights are moon and darkness only.")
+        if access.differentiate { base+=" "+NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.") }
         return markers.isEmpty ? base : base+" "+String(localized:"Small marks above a night are a meteor shower's peak or a lunar eclipse.")
     }
+    /// The glowing nights, best first.
+    private var peakOrder:[Int] { peaks.sorted { nights[$0].score.value>nights[$1].score.value || (nights[$0].score.value==nights[$1].score.value && $0<$1) } }
 
     private func x(_ i:Int,width:Double)->Double {
         guard nights.count>1 else { return width/2 }
@@ -148,7 +164,9 @@ struct TimeRiver: View {
     private func choose(_ value:Int) {
         guard nights.indices.contains(value), value != index else { return }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=nights[value].id }
-        detents+=1
+        // The detent sharpens with the night's score where Core Haptics can say so.
+        if MoonHaptics.enabled { MoonHaptics.shared.detent(score:nights[value].score.value) } else { detents+=1 }
+        felt+=1
     }
 
     private func draw(in context:inout GraphicsContext,size:CGSize) {
@@ -196,15 +214,22 @@ struct TimeRiver: View {
         for i in nights.indices {
             let p=point(i), night=nights[i]
             if peaks.contains(i) {
-                context.fill(Path(ellipseIn:CGRect(x:p.x-12,y:p.y-12,width:24,height:24)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.45),palette.accent.opacity(0)]),center:p,startRadius:0,endRadius:12))
+                context.fill(Path(ellipseIn:CGRect(x:p.x-12,y:p.y-12,width:24,height:24)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.45*access.glow),palette.accent.opacity(0)]),center:p,startRadius:0,endRadius:12))
+                // A glow is only light; a small caret beneath says "best" in shape as well (rings
+                // would overlap on neighbouring nights).
+                if access.differentiate {
+                    var caret=Path(); caret.move(to:CGPoint(x:p.x,y:p.y+8)); caret.addLine(to:CGPoint(x:p.x-3.5,y:p.y+13)); caret.addLine(to:CGPoint(x:p.x+3.5,y:p.y+13)); caret.closeSubpath()
+                    context.fill(caret,with:.color(palette.ink.opacity(0.85)))
+                }
             }
             // The selected night's mark is named under the river instead, clear of its Moon.
             if let marker=markers[night.id], i != index {
                 SkyGlyph.draw(SkyGlyph.Kind(marker.glyph),in:&context,rect:CGRect(x:p.x-5,y:p.y-21,width:10,height:10),color:palette.ink)
             }
             let r=i==index ? 5.0 : 2.4
-            let dot=Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r))
-            if night.score.hasForecast { context.fill(dot,with:.color(palette.accent)) }
+            let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
+            let dot=mark.path(center:p,radius:r)
+            if mark.filled { context.fill(dot,with:.color(palette.accent)) }
             else { context.fill(dot,with:.color(.black)); context.stroke(dot,with:.color(palette.accent),lineWidth:1.1) }
         }
 
@@ -225,6 +250,36 @@ struct TimeRiver: View {
     private func startsWeek(_ i:Int)->Bool {
         let park=nights[i].park
         return park.calendar.component(.weekday,from:nights[i].id)==park.calendar.firstWeekday
+    }
+}
+/// The river's VoiceOver extras: its Audio Graph, jumps to the best nights (a rotor needs one
+/// element per entry, and the river is one element, so these are actions), and Feel the Moon.
+private struct RiverAccessibility: ViewModifier {
+    let nights:[Night]
+    let outlooks:[Date:NightOutlook]
+    let markers:[Date:WhatsUp.Events.Marker]
+    /// Best first.
+    let peaks:[Int]
+    let current:Int?
+    let choose:(Int)->Void
+    func body(content:Content)->some View {
+        let nights=nights, outlooks=outlooks, events=markers.mapValues(\.name)
+        let title=String(localized:"Darkness score, \(nights.count) nights")
+        content
+            .nightChart { NightChart.nights(nights,title:title,outlooks:outlooks,events:events) }
+            .accessibilityActions {
+                if let best=peaks.first { Button("Best night") { choose(best) } }
+                if peaks.count>1 {
+                    Button("Next of the best nights") {
+                        // The best nights in date order, starting after the one shown.
+                        let ordered=peaks.sorted()
+                        if let next=ordered.first(where:{ $0>(current ?? -1) }) ?? ordered.first { choose(next) }
+                    }
+                }
+                if MoonHaptics.enabled, let current, nights.indices.contains(current) {
+                    Button("Feel the Moon") { let moon=nights[current].sky.moon; MoonHaptics.shared.play(.moon(illumination:moon.illumination,waxing:moon.waxing)) }
+                }
+            }
     }
 }
 #Preview("River") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().background(.black) } }
