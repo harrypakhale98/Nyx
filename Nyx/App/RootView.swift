@@ -23,7 +23,7 @@ struct RootView:View {
     @State private var launchParkID:String?
     /// The Tonight tab icon is today's real moon phase; refreshed whenever Nyx returns.
     @State private var moonIcon=RootView.currentMoonIcon()
-    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision",highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
+    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
@@ -95,7 +95,7 @@ struct RootView:View {
         #if DEBUG
         switch screen {
         case "detail": if let park=model.home { ParkDetailView(park:park) }
-        case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park)) }
+        case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park)).task { await model.refreshForecasts(watching:[park]) } }
         case "editor": JournalEditorView()
         case "entry": JournalDetailView(entry:JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
         case "onboarding": OnboardingView {}
@@ -107,7 +107,7 @@ struct RootView:View {
         case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park)) }.padding(24) }.background(NightBackground()) }
-        case "river": if let park=model.home { ScrollView { Panel { TimeRiver(nights:DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30),selected:.constant(model.tonight(park))) }.padding(24) }.background(NightBackground()) }
+        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { TimeRiver(nights:nights,selected:.constant(model.tonight(park)),outlooks:model.outlooks(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())

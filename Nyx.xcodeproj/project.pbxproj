@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0726F99AC834BEFF893CE378 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
 		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
 		181813D2F2A04B5EDC0379EA /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
 		25869690169DA7AB3D4B444E /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C895A9689DFB8444878E5C /* MotionTilt.swift */; };
@@ -78,6 +79,7 @@
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetail.swift; sourceTree = "<group>"; };
 		C2B255D63E873FD4422C672B /* Nyx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Nyx.xcconfig; sourceTree = "<group>"; };
 		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonDisc.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 			children = (
 				8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */,
 				976C9F1742C2EE997BBE289E /* DataServices.swift */,
+				BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */,
 				A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */,
 				E051542A3954F87E88506B77 /* SharedSettings.swift */,
 			);
@@ -153,8 +156,8 @@
 			isa = PBXGroup;
 			children = (
 				6A17ED8BAE018F61B73A02CA /* Config */,
-				572A8226324E98790B53E82D /* Nyx */,
 				7A5BE32B9081D66DE8C152A9 /* Nyx */,
+				572A8226324E98790B53E82D /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
 				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
@@ -419,6 +422,7 @@
 			files = (
 				C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */,
 				EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */,
+				0726F99AC834BEFF893CE378 /* ForecastDetail.swift in Sources */,
 				277F8C64F0380157BE9D3093 /* MoonDisc.swift in Sources */,
 				25869690169DA7AB3D4B444E /* MotionTilt.swift in Sources */,
 				5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */,

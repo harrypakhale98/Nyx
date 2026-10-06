@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<!-- Optional data hosts: developer.nps.gov and api.open-meteo.com. Neither is a tracking domain. -->
+<!-- Optional data hosts: developer.nps.gov, api.open-meteo.com and air-quality-api.open-meteo.com. None is a tracking domain. -->
 <dict>
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>

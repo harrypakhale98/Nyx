@@ -7,7 +7,9 @@ struct RiverScrubbingKey:PreferenceKey {
 }
 /// Thirty nights as one flowing line. Drag across it (or swipe up/down with VoiceOver)
 /// to scrub; the moon above the selected night morphs as you go. Nights beyond the cloud
-/// forecast are dashed and hollow, and the best nights glow amber.
+/// forecast are dashed and hollow, and the best nights glow amber. Within the seven-day model
+/// horizon a pale bar through each night spans the scores the clearest and cloudiest of three
+/// forecast models would give, so uncertainty is something you can see, not a footnote.
 struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
@@ -18,6 +20,8 @@ struct TimeRiver: View {
     @Binding var selected: Date
     /// False when the river starts on a chosen night instead of tonight.
     var startsTonight=true
+    /// Each night's forecast context, keyed by night; only `scoreRange` and `agreement` are drawn.
+    var outlooks:[Date:NightOutlook]=[:]
     /// Whether the current drag is a horizontal scrub; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
@@ -92,6 +96,10 @@ struct TimeRiver: View {
                 Spacer(minLength:8)
                 Text("\(current.score.value)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
                 Text(current.score.hasForecast ? current.score.band.label : String(localized:"Estimate")).font(.caption).foregroundStyle(palette.muted)
+                // Where the models part, the range the score could fall in, beside the score itself.
+                if let outlook=outlooks[current.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
+                    Text("· \(range.lowerBound)–\(range.upperBound)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
+                }
             }
         }.accessibilityHidden(true)
     }
@@ -107,10 +115,18 @@ struct TimeRiver: View {
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
         let clouds=current.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")
-        return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")
+        return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")
     }
+    private func agreementSpoken(_ night:Night)->String? {
+        guard let outlook=outlooks[night.id], let agreement=outlook.agreement else { return nil }
+        guard agreement.band != .agree, let range=outlook.scoreRange, range.upperBound>range.lowerBound else { return String(localized:"Forecast models agree.") }
+        return agreement.band == .roughly ? String(localized:"Forecast models roughly agree; the score could be \(range.lowerBound) to \(range.upperBound).")
+            : String(localized:"Forecast models disagree; the score could be \(range.lowerBound) to \(range.upperBound).")
+    }
+    private var hasRanges:Bool { nights.contains { outlooks[$0.id]?.scoreRange != nil } }
     private var legend: String {
-        typeSize.isAccessibilitySize ? String(localized:"Hollow nights have no cloud forecast yet.")
+        if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet.") }
+        return hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
             : String(localized:"Drag along the river. Dashed, hollow nights are moon and darkness only.")
     }
 
@@ -155,6 +171,19 @@ struct TimeRiver: View {
         let dashedStart=(lastForecast ?? -1)+1
         if dashedStart<nights.count {
             context.stroke(river(max(0,dashedStart-1)...(nights.count-1)),with:.color(palette.accent.opacity(0.55)),style:StrokeStyle(lineWidth:1.1,lineCap:.round,dash:[3,4]))
+        }
+
+        // Model spread: a soft starlight bar from the cloudiest model's score to the clearest's.
+        for i in nights.indices {
+            guard let range=outlooks[nights[i].id]?.scoreRange, range.upperBound>range.lowerBound else { continue }
+            let cx=x(i,width:size.width)
+            let upper=bottom-span*Double(range.upperBound)/100, lower=bottom-span*Double(range.lowerBound)/100
+            let bar=Path(roundedRect:CGRect(x:cx-3.5,y:upper-3,width:7,height:lower-upper+6),cornerRadius:3.5)
+            context.fill(bar,with:.color(palette.ink.opacity(palette.highContrast ? 0.3 : 0.16)))
+            // A whisker with small caps, so the range still reads where the dot sits inside it.
+            var line=Path(); line.move(to:CGPoint(x:cx,y:upper)); line.addLine(to:CGPoint(x:cx,y:lower))
+            for y in [upper,lower] { line.move(to:CGPoint(x:cx-2.5,y:y)); line.addLine(to:CGPoint(x:cx+2.5,y:y)) }
+            context.stroke(line,with:.color(palette.ink.opacity(palette.highContrast ? 0.8 : 0.55)),style:StrokeStyle(lineWidth:0.9,lineCap:.round))
         }
 
         for i in nights.indices {

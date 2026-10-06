@@ -342,6 +342,17 @@
         }
       }
     },
+    "%lld–%lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld–%lld%%"
+          }
+        }
+      }
+    },
     "/%lld": {
       "extractionState": "manual",
       "localizations": {
@@ -584,6 +595,39 @@
         }
       }
     },
+    "Aerosol forecast from CAMS. Not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerosol forecast from CAMS. Not part of the score."
+          }
+        }
+      }
+    },
+    "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score. Smoke is context, not part of the score. Air-quality data: CAMS via Open-Meteo, CC BY 4.0. You can switch this request off in Your privacy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score. Smoke is context, not part of the score. Air-quality data: CAMS via Open-Meteo, CC BY 4.0. You can switch this request off in Your privacy."
+          }
+        }
+      }
+    },
+    "Air": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air"
+          }
+        }
+      }
+    },
     "All national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -602,6 +646,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "All park alerts (%lld)"
+          }
+        }
+      }
+    },
+    "All three forecast models agree: %@ cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All three forecast models agree: %@ cloud."
           }
         }
       }
@@ -892,6 +947,39 @@
         }
       }
     },
+    "Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "Clear air.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear air."
+          }
+        }
+      }
+    },
+    "Clear in all three forecast models.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear in all three forecast models."
+          }
+        }
+      }
+    },
     "Close": {
       "extractionState": "manual",
       "localizations": {
@@ -1020,6 +1108,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Clouds unknown"
+          }
+        }
+      }
+    },
+    "Cloudy in all three forecast models.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloudy in all three forecast models."
           }
         }
       }
@@ -1233,6 +1332,17 @@
         }
       }
     },
+    "Dew likely on lenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dew likely on lenses"
+          }
+        }
+      }
+    },
     "Distance units": {
       "extractionState": "manual",
       "localizations": {
@@ -1266,6 +1376,28 @@
         }
       }
     },
+    "Down to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Down to %@"
+          }
+        }
+      }
+    },
+    "Down to %@ around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Down to %@ around %@"
+          }
+        }
+      }
+    },
     "Drag along the river. Dashed, hollow nights are moon and darkness only.": {
       "extractionState": "manual",
       "localizations": {
@@ -1273,6 +1405,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Drag along the river. Dashed, hollow nights are moon and darkness only."
+          }
+        }
+      }
+    },
+    "Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only."
           }
         }
       }
@@ -1508,6 +1651,17 @@
         }
       }
     },
+    "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same dark window. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself always uses Open-Meteo's best-match forecast. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same dark window. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself always uses Open-Meteo's best-match forecast. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score."
+          }
+        }
+      }
+    },
     "Forecast included": {
       "extractionState": "manual",
       "localizations": {
@@ -1526,6 +1680,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forecast included · conditions may change"
+          }
+        }
+      }
+    },
+    "Forecast models agree.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models agree."
+          }
+        }
+      }
+    },
+    "Forecast models disagree; the score could be %lld to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models disagree; the score could be %lld to %lld."
+          }
+        }
+      }
+    },
+    "Forecast models roughly agree: %@ cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models roughly agree: %@ cloud."
+          }
+        }
+      }
+    },
+    "Forecast models roughly agree; the score could be %lld to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models roughly agree; the score could be %lld to %lld."
           }
         }
       }
@@ -1585,6 +1783,61 @@
         }
       }
     },
+    "Gusts to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusts to %@"
+          }
+        }
+      }
+    },
+    "Haze or smoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haze or smoke"
+          }
+        }
+      }
+    },
+    "Haze or smoke: the Milky Way will look faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haze or smoke: the Milky Way will look faint."
+          }
+        }
+      }
+    },
+    "Heavy smoke or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy smoke or haze"
+          }
+        }
+      }
+    },
+    "Heavy smoke or haze: faint stars hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy smoke or haze: faint stars hidden."
+          }
+        }
+      }
+    },
     "Hollow nights have no cloud forecast yet.": {
       "extractionState": "manual",
       "localizations": {
@@ -1592,6 +1845,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hollow nights have no cloud forecast yet."
+          }
+        }
+      }
+    },
+    "How sure the forecast is": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How sure the forecast is"
           }
         }
       }
@@ -1761,6 +2025,28 @@
         }
       }
     },
+    "Light haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light haze"
+          }
+        }
+      }
+    },
+    "Light haze.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light haze."
+          }
+        }
+      }
+    },
     "Light pollution": {
       "extractionState": "manual",
       "localizations": {
@@ -1768,6 +2054,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Light pollution"
+          }
+        }
+      }
+    },
+    "Light wind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light wind"
           }
         }
       }
@@ -1867,6 +2164,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Make time for the night"
+          }
+        }
+      }
+    },
+    "Models agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models agree"
+          }
+        }
+      }
+    },
+    "Models differ": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models differ"
+          }
+        }
+      }
+    },
+    "Models disagree: %@ cloud. Check again before you leave.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models disagree: %@ cloud. Check again before you leave."
+          }
+        }
+      }
+    },
+    "Models disagree: %@ cloud. Check again tomorrow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models disagree: %@ cloud. Check again tomorrow."
           }
         }
       }
@@ -2087,6 +2428,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "More skies within reach"
+          }
+        }
+      }
+    },
+    "Mostly low cloud, which hides what it covers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostly low cloud, which hides what it covers."
+          }
+        }
+      }
+    },
+    "Mostly mid-level cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostly mid-level cloud."
           }
         }
       }
@@ -2520,13 +2883,13 @@
         }
       }
     },
-    "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
+    "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Smoke, haze, transparency and seeing are not part of this score. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
+            "value": "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/."
           }
         }
       }
@@ -2927,13 +3290,35 @@
         }
       }
     },
-    "Requests go to api.open-meteo.com for all 63 parks at once, using park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using park coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to api.open-meteo.com for all 63 parks at once, using park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using park coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
+          }
+        }
+      }
+    },
+    "Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
+          }
+        }
+      }
+    },
+    "Roughly agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roughly agree"
           }
         }
       }
@@ -3121,6 +3506,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sky glow"
+          }
+        }
+      }
+    },
+    "Smoke and haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze"
           }
         }
       }
@@ -3433,6 +3829,17 @@
         }
       }
     },
+    "The hourly forecast averaged over the complete dark window. Model agreement, cloud layers and smoke are context; they do not change the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The hourly forecast averaged over the complete dark window. Model agreement, cloud layers and smoke are context; they do not change the score."
+          }
+        }
+      }
+    },
     "The next five nights near the new moon": {
       "extractionState": "manual",
       "localizations": {
@@ -3473,6 +3880,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The night is yours."
+          }
+        }
+      }
+    },
+    "The night itself": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The night itself"
           }
         }
       }
@@ -3572,6 +3990,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "These nights have passed. Look ahead to the next new moon."
+          }
+        }
+      }
+    },
+    "Thin high cloud; bright stars only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thin high cloud; bright stars only."
           }
         }
       }
@@ -3895,6 +4324,17 @@
         }
       }
     },
+    "Visibility forecast about %@; haze is possible.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visibility forecast about %@; haze is possible."
+          }
+        }
+      }
+    },
     "Waning crescent": {
       "extractionState": "manual",
       "localizations": {
@@ -4170,6 +4610,17 @@
         }
       }
     },
+    "about %lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %lld%%"
+          }
+        }
+      }
+    },
     "as the crow flies": {
       "extractionState": "manual",
       "localizations": {
@@ -4375,6 +4826,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "waxing"
+          }
+        }
+      }
+    },
+    "· %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %lld–%lld"
           }
         }
       }

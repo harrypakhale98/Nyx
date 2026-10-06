@@ -3,7 +3,9 @@ import Foundation
 nonisolated protocol HTTPTransport: Sendable {
     func get(_ url: URL) async throws -> Data
 }
-/// A redirect is never followed. Runtime requests can reach exactly two hosts.
+/// A redirect is never followed. Runtime requests can reach exactly three hosts, each behind its
+/// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05, with the owner's
+/// approval) the aerosol forecast that warns of smoke.
 nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
@@ -11,11 +13,16 @@ nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     }
 }
 nonisolated struct SafeHTTP: HTTPTransport {
-    static let hosts: Set<String> = ["developer.nps.gov", "api.open-meteo.com"]
+    /// Each host and the preference that must not be off before it is contacted.
+    static let preferences: [String: String] = ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": "weatherEnabled",
+                                                 "air-quality-api.open-meteo.com": "smokeEnabled"]
+    static var hosts: Set<String> { Set(preferences.keys) }
+    /// Where the switches live; tests use their own suite.
+    var suite: String? = nil
     func get(_ url: URL) async throws -> Data {
-        guard url.scheme == "https", let host = url.host, Self.hosts.contains(host) else { throw URLError(.unsupportedURL) }
-        let preference = host == "developer.nps.gov" ? "npsEnabled" : "weatherEnabled"
-        guard UserDefaults.standard.object(forKey: preference) as? Bool != false else { throw URLError(.cancelled) }
+        guard url.scheme == "https", let host = url.host, let preference = Self.preferences[host] else { throw URLError(.unsupportedURL) }
+        let defaults = suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+        guard defaults.object(forKey: preference) as? Bool != false else { throw URLError(.cancelled) }
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = 20
         configuration.timeoutIntervalForResource = 30
@@ -61,16 +68,8 @@ nonisolated struct Forecast: Codable, Sendable {
     let clouds: [Double?]
     /// Overlap-weighted hourly mean; a partial forecast is never treated as full.
     func mean(from start: Date?, to end: Date?, now: Date = .now) -> Double? {
-        guard let start, let end, end>start, now.timeIntervalSince(updated)<36*3600 else { return nil }
-        guard times.count==clouds.count, times.allSatisfy(\.isFinite),
-              zip(times,times.dropFirst()).allSatisfy({ abs($1-$0-3600)<0.1 }) else { return nil }
-        var weight = 0.0, sum = 0.0
-        for (i,t) in times.enumerated() where i<clouds.count {
-            let overlap = min(end.timeIntervalSince1970,t+3600)-max(start.timeIntervalSince1970,t)
-            if overlap>0, let cloud=clouds[i], cloud.isFinite, (0...100).contains(cloud) { sum+=cloud*overlap; weight+=overlap }
-        }
-        guard weight >= end.timeIntervalSince(start)-1 else { return nil }
-        return sum/weight
+        guard let start, let end, now.timeIntervalSince(updated)<36*3600 else { return nil }
+        return HourlyWindow.mean(times:times,values:clouds,from:start,to:end,valid:0...100)
     }
 }
 nonisolated protocol WeatherProviding: Sendable {
@@ -145,6 +144,110 @@ actor WeatherService: WeatherProviding {
         return zip(parks, decoded).compactMap { park, response in
             guard response.hourly.time.count == response.hourly.cloud_cover.count, !response.hourly.time.isEmpty else { return nil }
             return (park, Forecast(updated:now,times:response.hourly.time,clouds:response.hourly.cloud_cover))
+        }
+    }
+}
+nonisolated protocol DetailProviding: Sendable {
+    /// `weather` and `smoke` are the two switches in Your privacy: forecast detail comes from
+    /// the forecast host, aerosols from the air-quality host.
+    func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool) async -> [String: ForecastDetail]
+}
+/// The forecast's context, beside the score's own clouds: three models' clouds, cloud layers,
+/// cold, dew, wind and visibility (seven days), and the aerosol forecast that warns of smoke.
+/// Like clouds, every park shares each request, so a refresh is three more requests (two chunks
+/// each for 63 parks), never one per park, and none of them hints at where someone is. Each part
+/// keeps its own six-hour freshness; a failed request keeps the last good part.
+actor ForecastDetailService: DetailProviding {
+    enum Kind: CaseIterable, Sendable { case models, layers, air }
+    private let transport: any HTTPTransport
+    private let persist: Bool
+    private var memory: [String: ForecastDetail] = [:]
+    /// A refresh already under way; later callers wait for it instead of asking again.
+    private var running: Task<Void, Never>?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true) { self.transport=transport; self.persist=persist }
+    func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
+        for park in parks where memory[park.id] == nil {
+            if persist, let cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(park.id)") { memory[park.id]=cached }
+        }
+        if let running { await running.value }
+        else {
+            let now=Date.now
+            var jobs: [(Kind, [Park])] = []
+            for kind in Kind.allCases where kind == .air ? smoke : weather {
+                let due=parks.filter { park in
+                    let age=Self.series(memory[park.id], kind).map { now.timeIntervalSince($0.updated) } ?? .infinity
+                    return age>=6*3600 || (force && age>=600)
+                }
+                for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
+            }
+            if !jobs.isEmpty {
+                let task=Task {
+                    let results=await withTaskGroup(of: (Kind, [(String, HourlySeries)]).self) { group in
+                        for (kind, chunk) in jobs { group.addTask { (kind, await self.fetch(kind, chunk)) } }
+                        var all: [(Kind, [(String, HourlySeries)])] = []
+                        for await result in group { all.append(result) }
+                        return all
+                    }
+                    self.store(results)
+                }
+                running=task
+                await task.value
+                running=nil
+            }
+        }
+        var result: [String: ForecastDetail] = [:]
+        for park in parks { if let detail=memory[park.id] { result[park.id]=detail } }
+        return result
+    }
+    private func store(_ results: [(Kind, [(String, HourlySeries)])]) {
+        var changed=Set<String>()
+        for (kind, fetched) in results {
+            for (id, series) in fetched {
+                var detail=memory[id] ?? ForecastDetail()
+                switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series }
+                memory[id]=detail; changed.insert(id)
+            }
+        }
+        if persist { for id in changed { if let detail=memory[id] { CacheDirectory.write(detail, name: "detail-\(id)") } } }
+    }
+    private static func series(_ detail: ForecastDetail?, _ kind: Kind) -> HourlySeries? {
+        switch kind { case .models: detail?.models; case .layers: detail?.layers; case .air: detail?.air }
+    }
+    private func fetch(_ kind: Kind, _ parks: [Park]) async -> [(String, HourlySeries)] {
+        guard !parks.isEmpty else { return [] }
+        var parts=URLComponents()
+        parts.scheme="https"
+        var items=[URLQueryItem(name: "latitude", value: parks.map { String($0.latitude) }.joined(separator: ",")),
+                   URLQueryItem(name: "longitude", value: parks.map { String($0.longitude) }.joined(separator: ","))]
+        let keys: [String]
+        switch kind {
+        case .models:
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.modelKeys
+            items+=[URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "models", value: "gfs_seamless,ecmwf_ifs025,icon_seamless")]
+        case .layers:
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.layerKeys
+            items.append(URLQueryItem(name: "hourly", value: keys.joined(separator: ",")))
+        case .air:
+            // CAMS global covers every park, Alaska and American Samoa included.
+            parts.host="air-quality-api.open-meteo.com"; parts.path="/v1/air-quality"; keys=ForecastDetail.airKeys
+            items+=[URLQueryItem(name: "hourly", value: keys.joined(separator: ",")), URLQueryItem(name: "domains", value: "cams_global")]
+        }
+        parts.queryItems=items+[URLQueryItem(name: "forecast_days", value: "7"), URLQueryItem(name: "past_days", value: "1"),
+                                URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        guard let url=parts.url, let data=try? await transport.get(url) else { return [] }
+        struct Response: Decodable { let hourly: [String: [Double?]] }
+        // One coordinate returns an object; several return an array in request order.
+        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+        guard decoded.count == parks.count else { return [] }
+        let now=Date.now
+        return zip(parks, decoded).compactMap { park, response in
+            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
+            var values: [String: [Double?]] = [:]
+            for key in keys {
+                guard let series=response.hourly[key], series.count == times.count else { return nil }
+                values[key]=series
+            }
+            return (park.id, HourlySeries(updated: now, times: times, values: values))
         }
     }
 }
