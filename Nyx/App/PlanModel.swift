@@ -23,6 +23,8 @@ import CoreLocation
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
     let location=LocationService()
+    /// A link asked the Calendar tab for one park's month (`nyx://calendar/<park>?month=…`).
+    var calendarRequest: CalendarRequest?
     var enrichments: [String:ParkEnrichment] = [:]
     var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }

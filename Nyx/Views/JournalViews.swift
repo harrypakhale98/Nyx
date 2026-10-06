@@ -11,22 +11,53 @@ struct JournalView: View {
     @State private var editing=false
     @State private var deleting:JournalEntry?
     @State private var saveError=false
+    @State private var opened:JournalEntry?
+    @State private var recap=false
     var body:some View {
+        let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
                 Eyebrow(text:"Keep a little of the night")
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
-                if entries.isEmpty { CalmState(symbol:"book.closed",title:"Your first night belongs here",message:"Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.");Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
+                if recapSeason(nights) { recapCard }
+                YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }
+                if entries.isEmpty { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
                 else {
                     LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
                     if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
                 }
             }.padding(24)
         }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night") } }
+            .toolbar {
+                ToolbarItem(placement:.topBarTrailing) { Menu {
+                    Button("Year under the stars",systemImage:"sparkles") { recap=true }.disabled(entries.isEmpty)
+                } label:{ Image(systemName:"ellipsis") }.accessibilityLabel("Journal options") }
+                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night") }
+            }
+            .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
+            .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+    }
+    /// December (and the first days of January): the year's recap waits at the top of the journal.
+    private func recapSeason(_ nights:[LoggedNight])->Bool {
+        let now=model.today, calendar=Calendar.current
+        let month=calendar.component(.month,from:now), year=calendar.component(.year,from:now)
+        let recapYear=month==12 ? year : month==1 && calendar.component(.day,from:now)<=7 ? year-1 : nil
+        return recapYear.map { y in nights.contains { calendar.component(.year,from:$0.date)==y } } ?? false
+    }
+    private var recapCard:some View {
+        Button { recap=true } label:{
+            Panel { HStack(spacing:14) {
+                Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
+                VStack(alignment:.leading,spacing:4) {
+                    Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
+                    Text("Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+                Spacer(minLength:0)
+            } }
+        }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
     }
 }
 /// A remembered night, with the Moon as it actually was over that park.

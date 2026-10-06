@@ -327,8 +327,8 @@
 			isa = PBXGroup;
 			children = (
 				6A17ED8BAE018F61B73A02CA /* Config */,
-				572A8226324E98790B53E82D /* Nyx */,
 				7A5BE32B9081D66DE8C152A9 /* Nyx */,
+				572A8226324E98790B53E82D /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
 				EF9B82021F8DE7AC0904028C /* NyxVision */,
@@ -860,6 +860,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNew AppIconQuarter AppIconFull";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/Nyx.entitlements;
@@ -912,6 +913,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNew AppIconQuarter AppIconFull";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/Nyx.entitlements;

@@ -28,6 +28,26 @@ Roadmap Tier 3, on branch `platform`. Logged under "Platform — 2026-10-06" in 
 
 **Next starting point:** integrator merges `platform` (expect small conflicts in `RootView.swift` with the delight lane: new `.onReceive(ParkOpenRequest…)`, debug routes, `updateSaved`), runs the full both-runtime suite, adds Spanish drafts.
 
+# Nyx handoff — 2026-10-06 (roadmap: delight — reasons to go, a sky that remembers you)
+
+Roadmap Tier 2 "delight", on branch `delight`. Logged under "Delight — 2026-10-06" in `DECISIONS.md`. The score is unchanged.
+
+- **Trip planner** (Tonight → Plan a trip; `Nyx/Services/TripPlanner.swift`, `Nyx/Views/TripPlannerView.swift`): dates (≤ 14 nights), starting park or already-allowed device location, radius "as the crow flies", longest drive between back-to-back nights (default 300 mi), "Weekends only" (Fri/Sat). Dynamic programming assigns a park to each night from cached forecasts (moon-and-darkness, labelled, when any candidate lacks a forecast that night); closures from cached NPS alerts cost 10 points in the assignment and are flagged. The best night leads the screen; a route map, one row per night with a one-line reason ("New moon, 4% cloud forecast, Bortle 2"), hop distance, Add to Calendar (`EKEventEditViewController`, no permission, `CalendarDraft` with honest notes and a `nyx://whatsup` link), Share plan (text).
+- **Your constellation** (Journal header; `Nyx/Services/YourSky.swift`, `Nyx/DesignSystem/SkyMapView.swift`, `Nyx/Views/YourSkyViews.swift`): the 63 parks as faint stars, each logged night a star (brightness from observed Bortle and that night's score), each season's minimum spanning tree drawn once; AK/HI/AS/VI insets; tap a star → that entry; share card "My sky, 2026"; empty state "Your first night will be your first star".
+- **Skies you've seen**: "7 of 63 national park skies" with the darkest Bortle observed per park (disclosure).
+- **Year under the stars** (Journal menu; card at the top in December): nights, parks, new parks, darkest sky, eight Moons with the phases met, best eclipse/shower logged, this year's constellation, deterministic paragraph or an on-device retelling (grounded, `tokenCount`/`contextSize` from 26.4, `ReasoningLevel.light` on 27), share card.
+- **App icons**: `Nyx/Resources/AppIcon{New,Quarter,Full}.icon` + Settings → Appearance → App icon (`AppIconPicker`, ictool renders as previews).
+- **First light** (`FirstLightView`, `FirstLightWatcher`): once per park, location already allowed, at a park in true darkness, 5 PM–7 AM device time; brightest stars first, then the name; tap to end, Reduce Motion fade.
+- **Links** (`Nyx/App/DeepLink.swift`): `nyx://whatsup?date=&park=` (park sheet at that night, scrolled to What's up) and `nyx://calendar/<id>?month=` (Calendar tab at that park and month); existing park/tonight/field links moved onto the parser.
+- **Tests:** `NyxTests/DelightTests.swift` (17): days and weekends, hop limit, independent weekends, ties/determinism/best night, closures, empty plans, Denali midnight sun, mixed/stale forecasts, calendar draft, sky map placement for all 63 parks, constellation determinism/seasons/clusters/MST, skies seen, recap template incl. Perseids 2026, reflection grounding, first light, deep links.
+- DEBUG: `-nyx-screen trip | constellation | recap | icons | first-light` (states `agree`, `weekends`, `empty`, `skies`), `-nyx-link <url>`; the five routes are in the accessibility audit list.
+
+**Verified 2026-10-06:** zero warnings. Audit iPhone 17 / iOS 27.0: 112 Swift Testing tests (17 new), both UI tests, both accessibility audits limited to `trip,constellation,recap,icons,first-light,journal,tonight,settings,detail` (standard and night vision) — all pass (two documented audit exclusions: the sky map's Canvas-drawn inset names, and the recap's light serif numerals/heading). iPhone Air / iOS 26.5: 112 Swift Testing tests pass. The host was heavily loaded (load average up to ~770); two audit runs timed out before a clean one. Reviewed captures (kept as `Research/Screenshots/delight-*`): trip (top, bottom, night vision, AX5, 26.5), constellation (populated, empty, night vision, AX5, 26.5), recap (top, bottom, night vision, AX5, 26.5), icons (standard, AX5, 26.5), first light (standard, night vision), `nyx://whatsup` and `nyx://calendar` targets. Alternate icons confirmed in the built Info.plist (`CFBundleAlternateIcons`). Review fixes in DECISIONS.
+
+**Known limits:** the system calendar editor cannot be tinted red in night vision. Alternate icons need a device check (Home Screen rendering, tinted/clear modes). First light, the one-shot location and the calendar sheet need a device pass at a park. The plan is only as fresh as cached forecasts (no fetch from the planner beyond the usual all-parks forecast refresh). Seasons are northern names for all parks. About 140 new English strings need Spanish drafts.
+
+**Next starting point:** integrator merges `delight`, runs the full both-runtime suite and all audits, adds Spanish drafts for the new keys; owner checks the alternate icons and first light on a device.
+
 ---
 
 # Nyx handoff — 2026-10-06 (roadmap: every sky — the cost of light, step-free spots)

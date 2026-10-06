@@ -78,6 +78,28 @@
         }
       }
     },
+    "%@ from the night before": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ from the night before"
+          }
+        }
+      }
+    },
+    "%@ from the night before.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ from the night before."
+          }
+        }
+      }
+    },
     "%@ from this park, %@. A rough guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -210,6 +232,17 @@
         }
       }
     },
+    "%@ · Bortle %lld, as you saw it": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Bortle %lld, as you saw it"
+          }
+        }
+      }
+    },
     "%@ · forecast included": {
       "extractionState": "manual",
       "localizations": {
@@ -316,6 +349,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@. %lld seconds of sound, from %@ to %@."
+          }
+        }
+      }
+    },
+    "%@, %@. Observed Bortle %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@. Observed Bortle %lld."
           }
         }
       }
@@ -496,6 +540,17 @@
         }
       }
     },
+    "%@: %@, %lld/100 %@. %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@, %lld/100 %@. %@."
+          }
+        }
+      }
+    },
     "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling.": {
       "extractionState": "manual",
       "localizations": {
@@ -606,6 +661,28 @@
         }
       }
     },
+    "%lld national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld national parks"
+          }
+        }
+      }
+    },
+    "%lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nights"
+          }
+        }
+      }
+    },
     "%lld nights after the peak": {
       "extractionState": "manual",
       "localizations": {
@@ -617,6 +694,28 @@
         }
       }
     },
+    "%lld nights under the stars at %lld national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nights under the stars at %lld national parks"
+          }
+        }
+      }
+    },
+    "%lld nights, at most %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nights, at most %lld"
+          }
+        }
+      }
+    },
     "%lld of %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -624,6 +723,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld of %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld national park skies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld national park skies"
           }
         }
       }
@@ -646,6 +756,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld of 63 parks"
+          }
+        }
+      }
+    },
+    "%lld of 8 · marked in amber": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 8 · marked in amber"
           }
         }
       }
@@ -745,6 +866,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld%% average cover across the dark window."
+          }
+        }
+      }
+    },
+    "%lld%% cloud forecast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% cloud forecast"
           }
         }
       }
@@ -903,6 +1035,17 @@
         }
       }
     },
+    "(moon and darkness only)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(moon and darkness only)"
+          }
+        }
+      }
+    },
     "/%lld": {
       "extractionState": "manual",
       "localizations": {
@@ -965,6 +1108,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A dark night at a park Nyx follows."
+          }
+        }
+      }
+    },
+    "A dark-sky trip, planned with Nyx": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A dark-sky trip, planned with Nyx"
           }
         }
       }
@@ -1255,6 +1409,39 @@
         }
       }
     },
+    "Add %@ on %@ to Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add %@ on %@ to Calendar"
+          }
+        }
+      }
+    },
+    "Add to Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Calendar"
+          }
+        }
+      }
+    },
+    "Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars."
+          }
+        }
+      }
+    },
     "Adding photo": {
       "extractionState": "manual",
       "localizations": {
@@ -1343,6 +1530,17 @@
         }
       }
     },
+    "Alaska": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alaska"
+          }
+        }
+      }
+    },
     "All national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -1427,6 +1625,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Also: %@ (%@)."
+          }
+        }
+      }
+    },
+    "Am. Samoa": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am. Samoa"
           }
         }
       }
@@ -1530,6 +1739,28 @@
         }
       }
     },
+    "App icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App icon"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        }
+      }
+    },
     "Appears in the Smart Stack at dusk on Good nights or better.": {
       "extractionState": "manual",
       "localizations": {
@@ -1614,6 +1845,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most."
+          }
+        }
+      }
+    },
+    "Autumn %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autumn %@"
           }
         }
       }
@@ -1717,6 +1959,28 @@
         }
       }
     },
+    "Best night. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night. %@"
+          }
+        }
+      }
+    },
+    "Best night: %@ at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night: %@ at %@."
+          }
+        }
+      }
+    },
     "Best night: %@, %lld out of 100, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -1783,6 +2047,17 @@
         }
       }
     },
+    "Bortle %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld"
+          }
+        }
+      }
+    },
     "Bortle %lld observed · %@, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -1790,6 +2065,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bortle %lld observed · %@, %lld%% lit"
+          }
+        }
+      }
+    },
+    "Bortle %lld · %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld · %lld nights"
+          }
+        }
+      }
+    },
+    "Bortle %lld · one night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld · one night"
+          }
+        }
+      }
+    },
+    "Bortle as you observed it: the darkest of your nights there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle as you observed it: the darkest of your nights there."
           }
         }
       }
@@ -1882,6 +2190,17 @@
         }
       }
     },
+    "Check closures and the forecast before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check closures and the forecast before you go."
+          }
+        }
+      }
+    },
     "Choose a park": {
       "extractionState": "manual",
       "localizations": {
@@ -1926,6 +2245,17 @@
         }
       }
     },
+    "Choose a year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a year"
+          }
+        }
+      }
+    },
     "Choose photos": {
       "extractionState": "manual",
       "localizations": {
@@ -1933,6 +2263,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose photos"
+          }
+        }
+      }
+    },
+    "Choose the nights you are free. Nyx finds the darkest park in reach for each.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the nights you are free. Nyx finds the darkest park in reach for each."
           }
         }
       }
@@ -2333,6 +2674,17 @@
         }
       }
     },
+    "Crescent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crescent"
+          }
+        }
+      }
+    },
     "DARKNESS / 100": {
       "extractionState": "manual",
       "localizations": {
@@ -2476,6 +2828,17 @@
         }
       }
     },
+    "Darker skies shine brighter. Each season's nights join into a figure. Tap a star to open its night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker skies shine brighter. Each season's nights join into a figure. Tap a star to open its night."
+          }
+        }
+      }
+    },
     "Darker than most national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -2498,6 +2861,17 @@
         }
       }
     },
+    "Darkest observed sky: %@, %@, Bortle %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest observed sky: %@, %@, Bortle %lld"
+          }
+        }
+      }
+    },
     "Darkest of the week": {
       "extractionState": "manual",
       "localizations": {
@@ -2505,6 +2879,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darkest of the week"
+          }
+        }
+      }
+    },
+    "Darkest sky: %@, Bortle %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest sky: %@, Bortle %lld"
           }
         }
       }
@@ -2604,6 +2989,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darkness score %lld out of 100. %@. %@"
+          }
+        }
+      }
+    },
+    "Darkness score %lld/100 (%@), with the cloud forecast as Nyx last saw it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score %lld/100 (%@), with the cloud forecast as Nyx last saw it."
+          }
+        }
+      }
+    },
+    "Darkness score %lld/100, Moon and darkness only. No cloud forecast reached this night yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score %lld/100, Moon and darkness only. No cloud forecast reached this night yet."
           }
         }
       }
@@ -2773,6 +3180,28 @@
         }
       }
     },
+    "Distances are straight lines, not driving routes. Scores are estimates. Check closures and the forecast before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distances are straight lines, not driving routes. Scores are estimates. Check closures and the forecast before you go."
+          }
+        }
+      }
+    },
+    "Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go."
+          }
+        }
+      }
+    },
     "Distances use your region's units. Radius is always a straight line.": {
       "extractionState": "manual",
       "localizations": {
@@ -2861,6 +3290,17 @@
         }
       }
     },
+    "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone."
+          }
+        }
+      }
+    },
     "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them.": {
       "extractionState": "manual",
       "localizations": {
@@ -2879,6 +3319,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Each park uses its own local date. Estimates can change when cloud forecasts arrive."
+          }
+        }
+      }
+    },
+    "Each star is a night at its park. Brighter stars, darker skies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each star is a night at its park. Brighter stars, darker skies."
           }
         }
       }
@@ -3257,6 +3708,39 @@
         }
       }
     },
+    "First light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First light"
+          }
+        }
+      }
+    },
+    "First light at %@. The stars above you now.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First light at %@. The stars above you now."
+          }
+        }
+      }
+    },
+    "First night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First night"
+          }
+        }
+      }
+    },
     "First quarter": {
       "extractionState": "manual",
       "localizations": {
@@ -3433,6 +3917,28 @@
         }
       }
     },
+    "Friday and Saturday nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Friday and Saturday nights"
+          }
+        }
+      }
+    },
+    "From": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From"
+          }
+        }
+      }
+    },
     "From %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3451,6 +3957,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "From NASA satellite night lights: a comparison between parks, not a measurement of sky brightness. The score uses the estimate."
+          }
+        }
+      }
+    },
+    "From your journal, on this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From your journal, on this iPhone."
           }
         }
       }
@@ -3506,6 +4023,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gusts to %@"
+          }
+        }
+      }
+    },
+    "Half lit, half dark: the balance point.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Half lit, half dark: the balance point."
+          }
+        }
+      }
+    },
+    "Hawaiʻi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hawaiʻi"
           }
         }
       }
@@ -3697,6 +4236,39 @@
         }
       }
     },
+    "In %@ you spent %@ under the stars in %@, %lld of them new to you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %@ you spent %@ under the stars in %@, %lld of them new to you."
+          }
+        }
+      }
+    },
+    "In %@ you spent %@ under the stars in %@, each one new to you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %@ you spent %@ under the stars in %@, each one new to you."
+          }
+        }
+      }
+    },
+    "In %@ you spent %@ under the stars in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %@ you spent %@ under the stars in %@."
+          }
+        }
+      }
+    },
     "In Earth's shadow": {
       "extractionState": "manual",
       "localizations": {
@@ -3704,6 +4276,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "In Earth's shadow"
+          }
+        }
+      }
+    },
+    "In a few words": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In a few words"
           }
         }
       }
@@ -3884,6 +4467,17 @@
         }
       }
     },
+    "Journal options": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal options"
+          }
+        }
+      }
+    },
     "Journal photo %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -3924,6 +4518,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Large widget review"
+          }
+        }
+      }
+    },
+    "Last night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last night"
           }
         }
       }
@@ -4225,6 +4830,17 @@
         }
       }
     },
+    "Longest drive between nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest drive between nights"
+          }
+        }
+      }
+    },
     "Low in the %@ after dusk; sets at %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -4478,6 +5094,17 @@
         }
       }
     },
+    "Moon %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon %lld%% lit"
+          }
+        }
+      }
+    },
     "Moon %lld° up in the %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4610,6 +5237,17 @@
         }
       }
     },
+    "Moon and darkness only. No cloud forecast reached this night yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon and darkness only. No cloud forecast reached this night yet."
+          }
+        }
+      }
+    },
     "Moon and darkness only. Open Nyx on iPhone for clouds.": {
       "extractionState": "manual",
       "localizations": {
@@ -4676,6 +5314,17 @@
         }
       }
     },
+    "Moon down through the dark hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon down through the dark hours"
+          }
+        }
+      }
+    },
     "Moon high in the %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4694,6 +5343,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon low in the %@"
+          }
+        }
+      }
+    },
+    "Moon phases": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon phases"
+          }
+        }
+      }
+    },
+    "Moon phases met: %lld of 8": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon phases met: %lld of 8"
           }
         }
       }
@@ -5028,6 +5699,39 @@
         }
       }
     },
+    "My sky, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My sky, %@"
+          }
+        }
+      }
+    },
+    "My sky, %@–%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My sky, %@–%@"
+          }
+        }
+      }
+    },
+    "My year under the stars, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My year under the stars, %@"
+          }
+        }
+      }
+    },
     "N": {
       "extractionState": "manual",
       "localizations": {
@@ -5079,6 +5783,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "NYX"
+          }
+        }
+      }
+    },
+    "NYX · YEAR UNDER THE STARS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NYX · YEAR UNDER THE STARS"
           }
         }
       }
@@ -5145,6 +5860,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "New moon: no moonlight tonight."
+          }
+        }
+      }
+    },
+    "New parks this year: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New parks this year: %@"
+          }
+        }
+      }
+    },
+    "New to you": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New to you"
           }
         }
       }
@@ -5325,6 +6062,50 @@
         }
       }
     },
+    "Nights logged: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights logged: %lld"
+          }
+        }
+      }
+    },
+    "Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; they are compared without clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; they are compared without clouds."
+          }
+        }
+      }
+    },
+    "Nights out": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights out"
+          }
+        }
+      }
+    },
+    "Nights out, your darkest sky, and the Moons you met.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights out, your darkest sky, and the Moons you met."
+          }
+        }
+      }
+    },
     "No alerts in the last park update. Confirm access before travel.": {
       "extractionState": "manual",
       "localizations": {
@@ -5413,6 +6194,17 @@
         }
       }
     },
+    "No national parks fall inside this radius. Widen it or start from another park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No national parks fall inside this radius. Widen it or start from another park."
+          }
+        }
+      }
+    },
     "No national parks within %lld miles of %@, straight-line.": {
       "extractionState": "manual",
       "localizations": {
@@ -5442,6 +6234,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "No nights available"
+          }
+        }
+      }
+    },
+    "No nights logged in %@ yet. Your first night will be your first star.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No nights logged in %@ yet. Your first night will be your first star."
+          }
+        }
+      }
+    },
+    "No nights to plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No nights to plan"
+          }
+        }
+      }
+    },
+    "No parks in reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No parks in reach"
           }
         }
       }
@@ -5486,6 +6311,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No true darkness at %@ in the next %lld nights. The best is %@, %lld out of 100."
+          }
+        }
+      }
+    },
+    "No true darkness at this latitude": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness at this latitude"
           }
         }
       }
@@ -5897,6 +6733,28 @@
         }
       }
     },
+    "One night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One night"
+          }
+        }
+      }
+    },
+    "One night under the stars at %lld national park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One night under the stars at %lld national park"
+          }
+        }
+      }
+    },
     "Open Nyx's dark, red field screen for tonight.": {
       "extractionState": "manual",
       "localizations": {
@@ -6216,6 +7074,17 @@
         }
       }
     },
+    "Parks: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks: %@"
+          }
+        }
+      }
+    },
     "Partial lunar eclipse": {
       "extractionState": "manual",
       "localizations": {
@@ -6282,6 +7151,17 @@
         }
       }
     },
+    "Phases met: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phases met: %@"
+          }
+        }
+      }
+    },
     "Photos": {
       "extractionState": "manual",
       "localizations": {
@@ -6315,6 +7195,17 @@
         }
       }
     },
+    "Plan a trip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan a trip"
+          }
+        }
+      }
+    },
     "Planets": {
       "extractionState": "manual",
       "localizations": {
@@ -6333,6 +7224,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Planets, the Milky Way and meteors"
+          }
+        }
+      }
+    },
+    "Planning your nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planning your nights"
           }
         }
       }
@@ -6564,6 +7466,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reading the night"
+          }
+        }
+      }
+    },
+    "Reasons to go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reasons to go"
           }
         }
       }
@@ -6865,6 +7778,17 @@
         }
       }
     },
+    "Route map: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route map: %@."
+          }
+        }
+      }
+    },
     "S": {
       "extractionState": "manual",
       "localizations": {
@@ -7019,6 +7943,17 @@
         }
       }
     },
+    "Scores are estimates. Check closures and the forecast before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores are estimates. Check closures and the forecast before you go."
+          }
+        }
+      }
+    },
     "Scores without a cloud forecast are marked as estimates.": {
       "extractionState": "manual",
       "localizations": {
@@ -7118,6 +8053,28 @@
         }
       }
     },
+    "Share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        }
+      }
+    },
+    "Share plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share plan"
+          }
+        }
+      }
+    },
     "Share this night": {
       "extractionState": "manual",
       "localizations": {
@@ -7129,6 +8086,17 @@
         }
       }
     },
+    "Share your constellation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share your constellation"
+          }
+        }
+      }
+    },
     "Share your observation with Globe at Night": {
       "extractionState": "manual",
       "localizations": {
@@ -7136,6 +8104,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Share your observation with Globe at Night"
+          }
+        }
+      }
+    },
+    "Share your year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share your year"
           }
         }
       }
@@ -7459,6 +8438,17 @@
         }
       }
     },
+    "Spring %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spring %@"
+          }
+        }
+      }
+    },
     "StandBy at night (vibrant rendering, red tint, simulated)": {
       "extractionState": "manual",
       "localizations": {
@@ -7499,6 +8489,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stargazing Focus is on. Field mode at %@"
+          }
+        }
+      }
+    },
+    "Stargazing at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stargazing at %@"
           }
         }
       }
@@ -7587,6 +8588,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Starting park: %@. Distances are straight-line estimates."
+          }
+        }
+      }
+    },
+    "Starting point": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting point"
           }
         }
       }
@@ -7708,6 +8720,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Subtle: the Moon's edge darkens slightly."
+          }
+        }
+      }
+    },
+    "Summer %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summer %@"
           }
         }
       }
@@ -7888,6 +8911,17 @@
         }
       }
     },
+    "The Milky Way cast a faint shadow on the trail.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way cast a faint shadow on the trail."
+          }
+        }
+      }
+    },
     "The Milky Way core is up at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -8020,6 +9054,17 @@
         }
       }
     },
+    "The Moon's phases you met": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon's phases you met"
+          }
+        }
+      }
+    },
     "The Sun is 18° below the horizon: %@ of true darkness, until %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -8064,6 +9109,17 @@
         }
       }
     },
+    "The best night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The best night"
+          }
+        }
+      }
+    },
     "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm park access before you go.": {
       "extractionState": "manual",
       "localizations": {
@@ -8071,6 +9127,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm park access before you go."
+          }
+        }
+      }
+    },
+    "The bright Moon, for nights you spend with it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright Moon, for nights you spend with it."
           }
         }
       }
@@ -8148,6 +9215,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications, cross-checked against the NPS list. Viewing coordinates are approximate, not directions. Park data: National Park Service."
+          }
+        }
+      }
+    },
+    "The darkest nights. Only earthshine on the Moon's face.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest nights. Only earthshine on the Moon's face."
+          }
+        }
+      }
+    },
+    "The darkest park in reach for each night you are free.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest park in reach for each night you are free."
           }
         }
       }
@@ -8236,6 +9325,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "The hourly forecast averaged over the complete dark window. Model agreement, cloud layers and smoke are context; they do not change the score."
+          }
+        }
+      }
+    },
+    "The icon could not be changed right now. Try again in a moment.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The icon could not be changed right now. Try again in a moment."
+          }
+        }
+      }
+    },
+    "The icon stays in the phase you choose; it does not follow the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The icon stays in the phase you choose; it does not follow the Moon."
+          }
+        }
+      }
+    },
+    "The last park update listed a closure: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The last park update listed a closure: %@"
           }
         }
       }
@@ -8339,6 +9461,17 @@
         }
       }
     },
+    "The original. A waxing Moon over the score's dial.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The original. A waxing Moon over the score's dial."
+          }
+        }
+      }
+    },
     "The park library could not open": {
       "extractionState": "manual",
       "localizations": {
@@ -8412,6 +9545,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The ring marks the five nights with the least moonlight. Clouds and access may change the best choice."
+          }
+        }
+      }
+    },
+    "The route": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The route"
           }
         }
       }
@@ -8566,6 +9710,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "This photo is too large. Choose a smaller image."
+          }
+        }
+      }
+    },
+    "This year's constellation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This year's constellation"
           }
         }
       }
@@ -9142,6 +10297,17 @@
         }
       }
     },
+    "Virgin Is.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virgin Is."
+          }
+        }
+      }
+    },
     "Visibility forecast about %@; haze is possible.": {
       "extractionState": "manual",
       "localizations": {
@@ -9281,6 +10447,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waxing gibbous"
+          }
+        }
+      }
+    },
+    "Weekends only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekends only"
+          }
+        }
+      }
+    },
+    "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights."
           }
         }
       }
@@ -9439,6 +10627,17 @@
         }
       }
     },
+    "Winter %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Winter %@"
+          }
+        }
+      }
+    },
     "With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through.": {
       "extractionState": "manual",
       "localizations": {
@@ -9457,6 +10656,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "With VoiceOver"
+          }
+        }
+      }
+    },
+    "Within": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within"
           }
         }
       }
@@ -9494,6 +10704,105 @@
         }
       }
     },
+    "Written on this iPhone from your journal. The figures above are the facts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Written on this iPhone from your journal. The figures above are the facts."
+          }
+        }
+      }
+    },
+    "Year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Year"
+          }
+        }
+      }
+    },
+    "Year under the stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Year under the stars"
+          }
+        }
+      }
+    },
+    "Year: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Year: %@"
+          }
+        }
+      }
+    },
+    "You met %lld of the Moon's eight phases.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You met %lld of the Moon's eight phases."
+          }
+        }
+      }
+    },
+    "You met all eight of the Moon's phases.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You met all eight of the Moon's phases."
+          }
+        }
+      }
+    },
+    "You met one of the Moon's eight phases.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You met one of the Moon's eight phases."
+          }
+        }
+      }
+    },
+    "You were out for the %@ at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You were out for the %@ at %@."
+          }
+        }
+      }
+    },
+    "You were out for the %@ peak at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You were out for the %@ peak at %@."
+          }
+        }
+      }
+    },
     "You're at %@. Start field mode": {
       "extractionState": "manual",
       "localizations": {
@@ -9516,6 +10825,39 @@
         }
       }
     },
+    "Your constellation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation"
+          }
+        }
+      }
+    },
+    "Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star."
+          }
+        }
+      }
+    },
+    "Your constellation: %lld nights at %lld parks across %lld seasons, each a star at its park on a map of the United States.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation: %lld nights at %lld parks across %lld seasons, each a star at its park on a map of the United States."
+          }
+        }
+      }
+    },
     "Your darkest nearby sky": {
       "extractionState": "manual",
       "localizations": {
@@ -9523,6 +10865,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your darkest nearby sky"
+          }
+        }
+      }
+    },
+    "Your darkest sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your darkest sky"
+          }
+        }
+      }
+    },
+    "Your darkest sky was %@ on %@: Bortle %lld, as you saw it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your darkest sky was %@ on %@: Bortle %lld, as you saw it."
           }
         }
       }
@@ -9571,6 +10935,28 @@
         }
       }
     },
+    "Your first night under this sky. These are the stars above you now, facing %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your first night under this sky. These are the stars above you now, facing %@."
+          }
+        }
+      }
+    },
+    "Your first night will be your first star": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your first night will be your first star"
+          }
+        }
+      }
+    },
     "Your iPhone": {
       "extractionState": "manual",
       "localizations": {
@@ -9593,6 +10979,17 @@
         }
       }
     },
+    "Your location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your location"
+          }
+        }
+      }
+    },
     "Your next dark sky will appear here.": {
       "extractionState": "manual",
       "localizations": {
@@ -9600,6 +10997,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your next dark sky will appear here."
+          }
+        }
+      }
+    },
+    "Your nights as stars among the national parks, joined night to night. The ring marks the best night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your nights as stars among the national parks, joined night to night. The ring marks the best night."
           }
         }
       }
@@ -9633,6 +11041,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your season under the stars"
+          }
+        }
+      }
+    },
+    "Your year under the stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your year under the stars"
           }
         }
       }
@@ -10066,6 +11485,28 @@
         }
       }
     },
+    "nights out": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nights out"
+          }
+        }
+      }
+    },
+    "no cloud forecast yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no cloud forecast yet"
+          }
+        }
+      }
+    },
     "no true darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -10154,6 +11595,28 @@
         }
       }
     },
+    "one national park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "one national park"
+          }
+        }
+      }
+    },
+    "one night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "one night"
+          }
+        }
+      }
+    },
     "out of 100": {
       "extractionState": "manual",
       "localizations": {
@@ -10161,6 +11624,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "out of 100"
+          }
+        }
+      }
+    },
+    "parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "parks"
           }
         }
       }
@@ -10293,6 +11767,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "southwest"
+          }
+        }
+      }
+    },
+    "straight line, back-to-back nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "straight line, back-to-back nights"
           }
         }
       }
