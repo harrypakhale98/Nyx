@@ -9,7 +9,10 @@ struct RealSky: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyx) private var palette
+    @Environment(\.nyxAccess) private var access
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    /// When the system asks for less, the sky holds still: no twinkle, no tilt.
+    private var still: Bool { reduceMotion || access.reducedResources }
     let park: Park
     let night: Date
     /// 0…1. Higher-scoring nights twinkle harder and show a brighter Milky Way.
@@ -18,24 +21,24 @@ struct RealSky: View {
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night)
         let strength=palette.nightVision ? strength*0.45 : strength
-        TimelineView(.animation(minimumInterval:1/30,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
-            let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
-            let tilt=reduceMotion ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
+        TimelineView(.animation(minimumInterval:1/30,paused:still || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+            let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
                 // Far to near: the Milky Way and faint stars barely move, bright stars move most.
-                StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle).equatable().offset(x:tilt.x*2,y:tilt.y*2)
+                StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2)
                 StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4)
                 MarkLayer(sky:sky,ink:palette.ink,strength:strength).equatable().offset(x:tilt.x*5,y:tilt.y*5)
                 Canvas { context,size in
                     let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
                     for star in sky.bright {
-                        let shimmer=reduceMotion ? 0.85 : 0.7+amplitude*sin(t*speed*(1+star.seed)+star.seed*6.28)
+                        let shimmer=still ? 0.85 : 0.7+amplitude*sin(t*speed*(1+star.seed)+star.seed*6.28)
                         StarLayer.draw(star,in:&context,size:size,ink:palette.ink,opacity:shimmer*strength)
                     }
                 }.offset(x:tilt.x*7,y:tilt.y*7)
             }
         }
-        .onAppear { MotionTilt.shared.start(reduceMotion:reduceMotion) }
+        .onAppear { MotionTilt.shared.start(reduceMotion:still) }
         .onDisappear { MotionTilt.shared.stop() }
         .allowsHitTesting(false).accessibilityHidden(true)
     }

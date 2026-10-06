@@ -17,6 +17,27 @@ extension EnvironmentValues {
     var nyxReduceMotion: Bool { get { self[MotionOverrideKey.self] } set { self[MotionOverrideKey.self]=newValue } }
     var nyx: NyxPalette { get { self[PaletteKey.self] } set { self[PaletteKey.self]=newValue } }
 }
+/// The accessibility preferences Nyx adapts to beyond the basics (set by `nyxAccessibility()` in the app) each view reads itself (Reduce
+/// Motion, Reduce Transparency, Increase Contrast, Dynamic Type). Read once near the root from the
+/// system, newest settings behind availability, so every screen asks one question instead of four.
+/// DEBUG launch flags force each one for screenshots: `-nyx-differentiate`, `-nyx-reduce-highlighting`,
+/// `-nyx-crossfade`, `-nyx-reduced-resources`.
+nonisolated struct NyxAccess: Equatable, Sendable {
+    /// Differentiate Without Color: meaning carried by colour alone gains a shape or a word.
+    var differentiate=false
+    /// Reduce Highlighting Effects (iOS 26.4): glows, halos and the shooting star dim or go.
+    var reduceHighlighting=false
+    /// Prefer Cross-Fade Transitions (iOS 26.4): fades instead of the zoom and the month slide.
+    var crossFade=false
+    /// The system asks apps to use less (iOS 27): the sky holds still and draws fewer stars.
+    var reducedResources=false
+    /// How strong a decorative glow may be.
+    var glow: Double { reduceHighlighting ? 0.35 : 1 }
+}
+private struct NyxAccessKey: EnvironmentKey { static let defaultValue=NyxAccess() }
+extension EnvironmentValues {
+    var nyxAccess: NyxAccess { get { self[NyxAccessKey.self] } set { self[NyxAccessKey.self]=newValue } }
+}
 enum NyxMotion {
     static let spring=Animation.spring(response:0.65,dampingFraction:0.82)
 }

@@ -64,6 +64,11 @@ struct ParksView: View {
                     LazyVStack(spacing:0) { ForEach(filtered.filter { p in !( !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
                 }
             }.padding(24)
+            // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
+            .accessibilityRotor(Text("Closures"),entries:rotor { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
+            .accessibilityRotor(Text("Pristine nights"),entries:rotor { park in
+                let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
+            },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .searchable(text:$search,prompt:"Park or state")
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
@@ -72,8 +77,16 @@ struct ParksView: View {
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu {
                 Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) }
                 Section { Toggle("Dark-Sky designated only",isOn:$darkOnly); Toggle("Saved parks only",isOn:$savedOnly) }
-            } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Sort and filter parks") } }
-            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).navigationTransition(.zoom(sourceID:park.id,in:zoom)) }
+            } label:{ Image(systemName:"line.3.horizontal.decrease") }.accessibilityLabel("Sort and filter parks").accessibilityInputLabels([Text("Filter"),Text("Sort"),Text("Sort and filter")]) } }
+            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)) }
+    }
+    struct RotorPark: Identifiable { let id: String; let label: String }
+    /// One rotor stop for each park on screen that `label` names, in the order shown.
+    private func rotor(_ label:(Park)->String?)->[RotorPark] {
+        let sectioned = !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly
+        let first=sectioned ? model.parks.filter { p in saved.contains { $0.parkID==p.id } } : []
+        let rest=filtered.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
+        return (first+rest).compactMap { park in label(park).map { RotorPark(id:park.id,label:$0) } }
     }
     private func link(_ park:Park)->some View {
         NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
@@ -147,7 +160,11 @@ struct ParkDetailView: View {
                         }
                     }
                      if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
-                Panel { SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core) }
+                Panel { VStack(alignment:.leading,spacing:16) {
+                    SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core)
+                    Divider().overlay(palette.line)
+                    NightListenView(night:night,isTonight:night.id==model.tonight(park))
+                } }
                 Panel {
                     VStack(alignment:.leading,spacing:18) {
                         WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
@@ -169,6 +186,7 @@ struct ParkDetailView: View {
                         LabeledContent("Moonrise",value:park.time(night.sky.moonrise))
                         LabeledContent("Moonset",value:park.time(night.sky.moonset))
                         Text("Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.").font(.caption).foregroundStyle(palette.muted)
+                        FeelMoonButton(moon:night.sky.moon)
                     }
                 }
                 Panel { VStack(alignment:.leading,spacing:16) {
@@ -196,6 +214,7 @@ struct ParkDetailView: View {
                     }
                     Divider().overlay(palette.line)
                     LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
+                        .accessibilityElement(children:.ignore).speechLabel(String(localized:"Bortle estimate, class \(park.bortleEstimate) of 9"))
                     Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
                 } }
                 Panel { VStack(alignment:.leading,spacing:18) {
@@ -241,6 +260,7 @@ struct ParkDetailView: View {
     private var saveButton:some View {
         Button { if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
             .accessibilityLabel(isSaved ? "Unsave park" : "Save park")
+            .accessibilityInputLabels(isSaved ? [Text("Unsave"),Text("Unsave park")] : [Text("Save"),Text("Save park")])
     }
 }
 struct ScoreBreakdownView: View {

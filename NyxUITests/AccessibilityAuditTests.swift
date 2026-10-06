@@ -12,7 +12,7 @@ final class AccessibilityAuditTests:XCTestCase {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         return ["tonight","parks","calendar","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
-                "field","field-compass","alarm-explainer"]
+                "field","field-compass","alarm-explainer","listen","accessibility"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }

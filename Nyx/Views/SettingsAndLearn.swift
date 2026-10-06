@@ -22,6 +22,10 @@ struct SettingsView:View {
                 }
                 if let permissionMessage { Text(permissionMessage).font(.caption) }
             }
+            Section("Accessibility") {
+                NavigationLink("Sound and touch") { SoundAndTouchView() }
+                Text("Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings.").font(.caption).foregroundStyle(palette.muted)
+            }
             Section("Your iPhone") { NavigationLink("Your privacy") { PrivacyView() };NavigationLink("About the data") { AboutDataView() };LabeledContent("Distance units",value:String(localized:"Device locale"));Text("Distances use your region's units. Radius is always a straight line.").font(.caption).foregroundStyle(palette.muted) }
             Section { Button("Replay the introduction") { replay=true };LabeledContent("Version",value:Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "") }
         }.navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
@@ -38,6 +42,52 @@ struct SettingsView:View {
         guard notifications, DebugScenario.screen == nil, !(await SystemNotifications().authorized()) else { return }
         notifications=false
         permissionMessage=String(localized:"Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.")
+    }
+}
+/// Settings › Accessibility › Sound and touch: what the non-visual features do, each with a way to try it.
+struct SoundAndTouchView:View {
+    @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
+    @AppStorage(MoonHaptics.settingKey) private var moonHaptics=true
+    private var listener:NightListener { .shared }
+    var body:some View {
+        Form {
+            Section("Listen to a night") {
+                Text("Under the shape of the night on a park's page, Nyx can play that night as twelve seconds of sound, from sunset to sunrise.")
+                Text(NightSonification.key).foregroundStyle(palette.muted)
+                if let park=model.home {
+                    Button { if listener.isPlaying { listener.stop() } else { listener.play(NightSonification(park:park,sky:model.night(park).sky)) } } label:{
+                        HStack(alignment:.firstTextBaseline,spacing:12) {
+                            Image(systemName:listener.isPlaying ? "stop.fill" : "waveform").accessibilityHidden(true)
+                            Text(listener.isPlaying ? String(localized:"Stop listening") : String(localized:"Play tonight at \(park.shortName)")).fixedSize(horizontal:false,vertical:true)
+                        }.foregroundStyle(palette.accent).frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
+                    }.accessibilityInputLabels([Text("Play"),Text("Listen"),Text("Stop")])
+                }
+                Text("It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button.").font(.caption).foregroundStyle(palette.muted)
+            }
+            Section("Feel the Moon") {
+                if MoonHaptics.supported {
+                    Toggle("Moon texture on the time river",isOn:$moonHaptics).tint(palette.controlTint)
+                    Text("A new Moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full Moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises.").foregroundStyle(palette.muted)
+                    if moonHaptics {
+                        ForEach([(String(localized:"Feel a new Moon"),0.0),(String(localized:"Feel a half Moon"),0.5),(String(localized:"Feel a full Moon"),1.0)],id:\.0) { title,lit in
+                            Button(title) { MoonHaptics.shared.play(.moon(illumination:lit,waxing:true)) }.foregroundStyle(palette.accent)
+                        }
+                    }
+                } else {
+                    Text("This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it.").foregroundStyle(palette.muted)
+                }
+            }
+            Section("With VoiceOver") {
+                Text("The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone.")
+                Text("Rotors jump straight to what matters: Best nights and Moon window in the calendar, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.").foregroundStyle(palette.muted)
+            }
+            Section("Your display settings") {
+                Text("With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through.")
+                Text("Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still.").foregroundStyle(palette.muted)
+            }
+        }.navigationTitle("Sound and touch").navigationBarTitleDisplayMode(.inline)
+            .onDisappear { listener.stop() }
     }
 }
 struct PrivacyView:View {
@@ -78,14 +128,14 @@ struct AboutDataView:View {
     private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif));Text(content).font(.body).lineSpacing(4).textSelection(.enabled).foregroundStyle(palette.muted) } }
 }
 enum Essay: String,CaseIterable,Identifiable {
-    case darkness,milkyway,meteors,bortle,etiquette
+    case darkness,milkyway,meteors,bortle,etiquette,access
     var id:String { rawValue }
-    var title:String { switch self { case .darkness:String(localized:"A sky worth protecting");case .milkyway:String(localized:"Finding the Milky Way");case .meteors:String(localized:"Watching a meteor shower");case .bortle:String(localized:"Reading the Bortle scale");case .etiquette:String(localized:"Sharing the night") } }
-    var subtitle:String { switch self { case .darkness:String(localized:"Why darkness deserves care");case .milkyway:String(localized:"When, where and how to look");case .meteors:String(localized:"Radiants, rates and patience");case .bortle:String(localized:"Understand artificial sky brightness");case .etiquette:String(localized:"Leave room for everyone to look up") } }
-    var symbol:String { switch self { case .darkness:"sparkles";case .milkyway:"sparkle";case .meteors:"sparkles.2";case .bortle:"circle.lefthalf.filled";case .etiquette:"moon.stars" } }
+    var title:String { switch self { case .darkness:String(localized:"A sky worth protecting");case .milkyway:String(localized:"Finding the Milky Way");case .meteors:String(localized:"Watching a meteor shower");case .bortle:String(localized:"Reading the Bortle scale");case .etiquette:String(localized:"Sharing the night");case .access:String(localized:"Stargazing for everyone") } }
+    var subtitle:String { switch self { case .darkness:String(localized:"Why darkness deserves care");case .milkyway:String(localized:"When, where and how to look");case .meteors:String(localized:"Radiants, rates and patience");case .bortle:String(localized:"Understand artificial sky brightness");case .etiquette:String(localized:"Leave room for everyone to look up");case .access:String(localized:"Dark skies by sound, touch and red light") } }
+    var symbol:String { switch self { case .darkness:"sparkles";case .milkyway:"sparkle";case .meteors:"sparkles.2";case .bortle:"circle.lefthalf.filled";case .etiquette:"moon.stars";case .access:"accessibility" } }
     /// About 200 words a minute, never less than one.
     var minutes:Int { max(1,Int((Double(content.split(whereSeparator:\.isWhitespace).count)/200).rounded())) }
-    var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .milkyway:String(localized:"essay.milkyway");case .meteors:String(localized:"essay.meteors");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette") } }
+    var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .milkyway:String(localized:"essay.milkyway");case .meteors:String(localized:"essay.meteors");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette");case .access:String(localized:"essay.access") } }
 }
 /// The essay's mark: an SF Symbol, or for meteors (which SF Symbols lacks) the app's own streak glyph.
 private struct EssayIcon:View {

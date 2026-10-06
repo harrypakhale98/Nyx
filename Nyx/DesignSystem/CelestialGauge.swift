@@ -7,6 +7,7 @@ struct CelestialGauge: View {
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.nyxAccess) private var access
     let score: Int
     var hasForecast: Bool=true
     @State private var shown=0
@@ -27,6 +28,7 @@ struct CelestialGauge: View {
         }
         .accessibilityElement(children:.ignore)
         .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"Moon and darkness only. Cloud forecast unavailable."))")
+        .accessibilityInputLabels([Text("Score"),Text("Darkness score")])
         .task(id:score) {
             // Count up once per appearance; later changes (scrubbing nights) glide on the spring.
             if reduceMotion { shown=score; revealed=true; return }
@@ -42,7 +44,7 @@ struct CelestialGauge: View {
             withAnimation(NyxMotion.spring) { shown=score }
         }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone)
-        .onAppear { MotionTilt.shared.start(reduceMotion:reduceMotion) }
+        .onAppear { MotionTilt.shared.start(reduceMotion:reduceMotion || access.reducedResources) }
         .onDisappear { MotionTilt.shared.stop() }
     }
     private var numeral:some View {
@@ -82,7 +84,7 @@ struct CelestialGauge: View {
                 if displayed>0 {
                     context.drawLayer { glow in
                         glow.addFilter(.blur(radius:7))
-                        glow.stroke(arc,with:.color(palette.accent.opacity(0.18+0.3*Double(displayed)/100)),style:StrokeStyle(lineWidth:6,lineCap:.round,dash:dash))
+                        glow.stroke(arc,with:.color(palette.accent.opacity((0.18+0.3*Double(displayed)/100)*access.glow)),style:StrokeStyle(lineWidth:6,lineCap:.round,dash:dash))
                     }
                 }
                 context.stroke(arc,with:.color(palette.accent),style:StrokeStyle(lineWidth:2.3,lineCap:.round,dash:dash))
@@ -95,14 +97,14 @@ struct CelestialGauge: View {
                     context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:tick%10==0 ? 0.9 : 0.6)
                 }
             }
-            TimelineView(.animation(minimumInterval:nil,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+            TimelineView(.animation(minimumInterval:nil,paused:reduceMotion || access.reducedResources || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
                 Canvas { context,size in
                     let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
                     let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
                     let displayed = reduceMotion ? score : shown
                     let tip=Angle.degrees(140+260*Double(displayed)/100)
                     // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
-                    if !reduceMotion && !palette.nightVision {
+                    if !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
                         let tilt=MotionTilt.shared
                         let mid=(-90+tilt.x*55-tilt.y*12)*Double.pi/180, half=22*Double.pi/180
                         var glint=Path(); glint.addArc(center:center,radius:radius+11,startAngle:.radians(mid-half),endAngle:.radians(mid+half),clockwise:false)
@@ -114,7 +116,7 @@ struct CelestialGauge: View {
                         let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                         let pulse=reduceMotion ? 1 : 0.85+0.15*sin(t*2.4)
                         // A radial gradient, not a blur: this layer redraws every frame.
-                        context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))
+                        context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))
                         context.fill(Path(ellipseIn:CGRect(x:point.x-3.2,y:point.y-3.2,width:6.4,height:6.4)),with:.color(palette.ink))
                     }
                     // Orbiting stars: a loose ring that swirls faster and twinkles harder as the score rises.

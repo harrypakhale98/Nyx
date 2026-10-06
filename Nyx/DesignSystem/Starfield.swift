@@ -5,6 +5,7 @@ struct Starfield: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.nyx) private var palette
+    @Environment(\.nyxAccess) private var access
     let seed: String
     var strength: Double=0.6
     /// 0...1. Higher-scoring nights twinkle harder and a little faster.
@@ -18,13 +19,15 @@ struct Starfield: View {
         stars=(0..<88).map { _ in Star(x:random(),y:random(),radius:0.35+random()*1.05,phase:random()*6.28) }
     }
     var body: some View {
-        TimelineView(.animation(minimumInterval:1/30,paused:reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+        // When the system asks for less, half the stars, holding still.
+        let still=reduceMotion || access.reducedResources
+        TimelineView(.animation(minimumInterval:1/30,paused:still || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
             Canvas { context,size in
-                let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+                let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
                 let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
                 // Night vision keeps stars faint: kinder to dark-adapted eyes and to the text above them.
                 let strength=palette.nightVision ? strength*0.45 : strength
-                for star in stars {
+                for star in access.reducedResources ? Array(stars.prefix(44)) : stars {
                     let shimmer=0.55+amplitude*sin(t*speed+star.phase)
                     let point=CGRect(x:star.x*size.width,y:star.y*size.height,width:star.radius*2,height:star.radius*2)
                     context.fill(Path(ellipseIn:point),with:.color(palette.ink.opacity(shimmer*strength)))
