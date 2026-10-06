@@ -98,6 +98,9 @@ targets:
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Intents/NightVisionIntent.swift
       - path: Nyx/Intents/FieldModeIntent.swift
+      - path: Nyx/Intents/WidgetParkIntent.swift
+      - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/DesignSystem/SkyGlyph.swift
       - path: Nyx/Models/FieldActivity.swift
       - path: Nyx/DesignSystem/FieldActivityView.swift
       - path: Nyx/Resources/parks.json
@@ -225,6 +228,10 @@ targets:
       - path: Nyx/Resources/parks.json
       - path: Nyx/Resources/sky-events.json
       - path: Nyx/Resources/Assets.xcassets
+    # Linked so the App Intents metadata step finds its framework instead of warning on every build
+    # ("Metadata extraction skipped"). The window has no intents of its own yet; linking costs nothing.
+    dependencies:
+      - sdk: AppIntents.framework
     info:
       path: Config/NyxVision-Info.plist
       properties:
