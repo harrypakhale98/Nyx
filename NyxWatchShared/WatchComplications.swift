@@ -1,0 +1,187 @@
+import SwiftUI
+import WidgetKit
+
+/// One moment on the wrist: the night Tonight would show, and what happens next.
+nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
+    let date: Date
+    let night: Night?
+    let next: NightMilestone?
+    let nightVision: Bool
+    /// Smart Stack ranking, kept as plain values so the entry stays Sendable.
+    var rank: (score: Float, duration: TimeInterval)?
+    var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
+}
+
+/// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
+/// parks, forecasts and engine as Tonight, so the face and the app never disagree.
+nonisolated enum WatchTimeline {
+    static func entry(at date: Date, snapshot: SavedSkySnapshot?, nightVision: Bool, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
+        func night(_ park: Park) -> Night {
+            let evening = park.currentNight(at: date)
+            let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
+            let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
+            cache[key] = sky
+            return WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: date, sky: sky)
+        }
+        let best = (snapshot?.parks ?? []).map(night).max { $0.score.value < $1.score.value }
+        let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
+        return WatchSkyEntry(date: date, night: best, next: next, nightVision: nightVision, rank: best.map { rank(for: $0, at: date) })
+    }
+    /// Entries now, at every milestone of the next day (so "next" turns over on time), and hourly
+    /// (so tonight turns over at the park's sunrise). Countdown text updates itself in between.
+    static func entries(from now: Date, snapshot: SavedSkySnapshot?, nightVision: Bool) -> [WatchSkyEntry] {
+        var cache: [String: SkyConditions] = [:]
+        let first = entry(at: now, snapshot: snapshot, nightVision: nightVision, cache: &cache)
+        let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
+        var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
+        for park in snapshot?.parks ?? [] {
+            for offset in 0..<2 {
+                let evening = park.date(park.currentNight(at: now), addingDays: offset)
+                let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
+                let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
+                cache[key] = sky
+                for milestone in NightMilestone.list(for: sky) where milestone.date > now && milestone.date < now.addingTimeInterval(86400) {
+                    moments.insert(milestone.date)
+                }
+                if let start = duskWindow(sky: sky)?.start, start > now, start < now.addingTimeInterval(86400) { moments.insert(start) }
+            }
+        }
+        return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, nightVision: nightVision, cache: &cache) }
+    }
+    /// From 45 minutes before sunset to the end of true darkness: when a stargazer wants Nyx on the wrist.
+    static func duskWindow(sky: SkyConditions) -> DateInterval? {
+        guard let begin = sky.sunset ?? sky.darkStart else { return nil }
+        let start = begin.addingTimeInterval(-45*60)
+        let end = sky.darkEnd ?? sky.sunrise ?? begin.addingTimeInterval(3*3600)
+        return end > start ? DateInterval(start: start, end: end) : nil
+    }
+    /// Smart Stack ranking: relevant around dusk on Good nights or better, more so the darker the night.
+    static func rank(for night: Night, at date: Date) -> (score: Float, duration: TimeInterval) {
+        guard night.score.value >= 60, let window = duskWindow(sky: night.sky), window.contains(date) else { return (0, 0) }
+        return (Float(night.score.value)/100, window.end.timeIntervalSince(date))
+    }
+}
+
+/// "True darkness in 1 hr, 10 min". In a complication (`now` nil) the time updates itself; in the
+/// app it is written for `now` and refreshed by the screen's minute timeline, which keeps
+/// self-updating time text out of the app's paged views (it looped layout there on watchOS 27).
+func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
+    let reference = now.map { Text(verbatim: inDuration(until: milestone.date, from: $0)) }
+        ?? Text(.currentDate, format: .reference(to: milestone.date, allowedFields: [.hour, .minute]))
+    return switch milestone.kind {
+    case .sunset: Text("Sunset \(reference)")
+    case .darkStart: Text("True darkness \(reference)")
+    case .moonrise: Text("Moon rises \(reference)")
+    case .moonset: Text("Moon sets \(reference)")
+    case .darkEnd: Text("Dawn twilight \(reference)")
+    case .sunrise: Text("Sunrise \(reference)")
+    }
+}
+
+/// "in 42 min", rounded up to the minute so it never reads "in 0 min" before the moment.
+func inDuration(until date: Date, from now: Date) -> String {
+    let minutes = max(1, Int((date.timeIntervalSince(now)/60).rounded(.up)))
+    let span = Duration.seconds(minutes*60).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated, maximumUnitCount: 2))
+    return String(localized: "in \(span)")
+}
+
+/// The phase as a symbol, turned for the southern sky (American Samoa sees the Moon upside down).
+struct MoonSymbol: View {
+    let night: Night
+    var body: some View {
+        Image(systemName: night.sky.moon.symbolName)
+            .scaleEffect(x: night.park.latitude < 0 ? -1 : 1, y: night.park.latitude < 0 ? -1 : 1)
+            .accessibilityLabel("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit")
+    }
+}
+
+struct WatchComplicationView: View {
+    @Environment(\.widgetFamily) private var systemFamily
+    var previewFamily: WidgetFamily?
+    let entry: WatchSkyEntry
+    private var family: WidgetFamily { previewFamily ?? systemFamily }
+    private var ink: Color { entry.nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
+    private var accent: Color { entry.nightVision ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
+    private var muted: Color { ink.opacity(entry.nightVision ? NightRed.levels[1] : 0.72) }
+    var body: some View {
+        Group {
+            if let night = entry.night {
+                switch family {
+                case .accessoryCircular: circular(night)
+                case .accessoryCorner: corner(night)
+                case .accessoryInline: inline(night)
+                default: rectangular(night)
+                }
+            } else { empty }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(entry.night.map(summary) ?? String(localized: "Nyx. Choose a park in Nyx on Apple Watch."))
+        .containerBackground(for: .widget) { Color.black }
+    }
+    private func circular(_ night: Night) -> some View {
+        // The system's open ring echoes the app's celestial gauge; the Moon sits in its opening.
+        Gauge(value: Double(night.score.value), in: 0...100) {
+            // Coloured explicitly: the label otherwise renders white, the one bright thing on a red face.
+            MoonSymbol(night: night).foregroundStyle(muted)
+        } currentValueLabel: {
+            Text(night.score.value, format: .number).font(.system(.title3, design: .serif)).widgetAccentable()
+        }
+        .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink)
+    }
+    private func corner(_ night: Night) -> some View {
+        Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).foregroundStyle(accent).widgetAccentable()
+            .widgetLabel {
+                Gauge(value: Double(night.score.value), in: 0...100) {
+                    Text(night.score.band.label)
+                } currentValueLabel: {
+                    Text(night.score.value, format: .number)
+                } minimumValueLabel: {
+                    Text(verbatim: "0")
+                } maximumValueLabel: {
+                    Text(verbatim: "100")
+                }.tint(accent)
+            }
+    }
+    private func inline(_ night: Night) -> some View {
+        // Inline is one short line: the next moment's clock time reads at a glance and never goes stale.
+        Group {
+            if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.time(next.date))") }
+            else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.wristName)") }
+        }.foregroundStyle(ink)
+    }
+    private func rectangular(_ night: Night) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 4) {
+                MoonSymbol(night: night).font(.caption2).foregroundStyle(muted)
+                Text(night.park.wristName).font(.system(.headline, design: .serif)).lineLimit(1)
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text(night.score.value, format: .number).font(.system(.title2, design: .serif).weight(.light)).foregroundStyle(accent).widgetAccentable()
+                Text(night.score.hasForecast ? night.score.band.label : String(localized: "\(night.score.band.label), clouds unknown"))
+                    .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            if let next = entry.next { countdownText(next).font(.caption2).lineLimit(1).minimumScaleFactor(0.8) }
+        }
+        .foregroundStyle(ink).frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private var empty: some View {
+        Group {
+            switch family {
+            case .accessoryCircular: ZStack { AccessoryWidgetBackground(); Image(systemName: "moon.stars") }
+            case .accessoryCorner: Image(systemName: "moon.stars").widgetLabel("Nyx")
+            case .accessoryInline: Text("Nyx · choose a park")
+            default:
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("Nyx", systemImage: "moon.stars").font(.headline)
+                    Text("Choose a park in Nyx on Apple Watch.").font(.caption2).foregroundStyle(muted)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }.foregroundStyle(ink)
+    }
+    private func summary(_ night: Night) -> String {
+        var text = String(localized: "\(night.park.wristName), \(night.score.value) out of 100, \(night.score.band.label).")
+        if !night.score.hasForecast { text += " " + String(localized: "Moon and darkness only, clouds unknown.") }
+        if let next = entry.next { text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).") }
+        return text
+    }
+}

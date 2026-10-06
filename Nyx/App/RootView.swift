@@ -89,6 +89,7 @@ struct RootView:View {
             // Keep the Control Center toggle and widgets in step with the in-app switch.
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
+            WatchBridge.shared.push(savedParkIDs:saved.map(\.parkID),homeParkID:model.homeID,forecasts:model.forecasts)
         }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
@@ -195,6 +196,7 @@ struct RootView:View {
         let ids=Set(parks.map(\.id))
         let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) })
         SharedSettings.write(snapshot)
+        WatchBridge.shared.push(savedParkIDs:parks.map(\.id),homeParkID:model.homeID,forecasts:model.forecasts)
         renderWidgetMoons(for:parks)
         WidgetCenter.shared.reloadAllTimelines()
         if notificationsEnabled {

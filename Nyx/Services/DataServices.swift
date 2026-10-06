@@ -62,16 +62,6 @@ nonisolated enum CacheDirectory {
         try? data.write(to: url.appendingPathComponent("nyx-\(name).json"), options: .atomic)
     }
 }
-nonisolated struct Forecast: Codable, Sendable {
-    let updated: Date
-    let times: [Double]
-    let clouds: [Double?]
-    /// Overlap-weighted hourly mean; a partial forecast is never treated as full.
-    func mean(from start: Date?, to end: Date?, now: Date = .now) -> Double? {
-        guard let start, let end, now.timeIntervalSince(updated)<36*3600 else { return nil }
-        return HourlyWindow.mean(times:times,values:clouds,from:start,to:end,valid:0...100)
-    }
-}
 nonisolated protocol WeatherProviding: Sendable {
     func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast]
 }
