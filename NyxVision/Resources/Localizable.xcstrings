@@ -309,6 +309,17 @@
         }
       }
     },
+    "Computed for %@, %@. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is %@, not your room's real north.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is %@, not your room's real north."
+          }
+        }
+      }
+    },
     "Computed for %@, %@. Not a live view; clouds not shown.": {
       "extractionState": "manual",
       "localizations": {
@@ -316,17 +327,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Computed for %@, %@. Not a live view; clouds not shown."
-          }
-        }
-      }
-    },
-    "Computed for %@, %@. Not a live view; clouds not shown. Ahead is %@, not your room's real north.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Computed for %@, %@. Not a live view; clouds not shown. Ahead is %@, not your room's real north."
           }
         }
       }

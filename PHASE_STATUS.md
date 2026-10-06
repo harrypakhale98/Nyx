@@ -1,3 +1,13 @@
+# Nyx handoff — 2026-10-06 (Vision Pro polish: the immersive sky)
+
+Branch `vision-polish`; only `NyxVision/` changed. Logged under "Vision Pro polish — 2026-10-06" in `DECISIONS.md`.
+
+- **Done:** near-black night with faint airglow and Bortle glow; twilight colours, Earth's shadow and Belt of Venus from the Sun's real altitude; moonlight as glare (blue sky, aureole, Milky Way and faint stars washed out in proportion); GPU-drawn Milky Way model (`SkyShaders.metal`, 4096×512, warm core, star clouds, Great Rift and dust lanes); star atlas with a perceptual brightness curve, glare and blackbody colours; seeded two-range skyline (labelled illustrative) with compass letters on the land; label depth fix; Reduce Transparency in window and sky cards.
+- **Verified:** NyxVision builds with zero warnings (Debug, visionOS simulator). Captures on "Nyx Vision Pro" (visionOS 27): `Research/Screenshots/vision-polish-core-july.png`, `-core-overhead`, `-moonlit`, `-twilight`, `-belt-of-venus`, `-night-vision` (compare `vision-sky-*` from before). iOS suite not run (no shared file changed).
+- **Review fix:** the Milky Way's hard edge (faint alpha un-premultiplied on texture upload) is gone: additive textures are opaque, the band is ±30° with a 12° fade. Core, overhead, moonlit and night-vision captures retaken.
+- **Known issues:** on device (≈3× the pixel density) the 0.088°/px texture is softer than the stars. A second, higher-resolution texture for the summer core is the next step if it shows. No scintillation (by decision).
+- **Next:** try on a device for brightness calibration (the levels were tuned on simulator captures); consider a core-region detail texture.
+
 # Nyx handoff — 2026-10-06 (roadmap: every sky — the cost of light, step-free spots)
 
 Roadmap §4 and the step-free part of §5, on branch `glow`. Logged under "Every sky — 2026-10-06" in `DECISIONS.md`. The score is unchanged and still uses the hand Bortle estimate.
