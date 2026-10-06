@@ -5,6 +5,7 @@ import SwiftUI
 /// a list of places also answers "which night".
 struct WeekStrip: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.nyxAccess) private var access
     let nights: [Night]
     /// The earliest of the highest-scoring nights.
     private var best: Night? { nights.reduce(nil) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night } }
@@ -22,8 +23,9 @@ struct WeekStrip: View {
             for (index,night) in nights.enumerated() {
                 let center=CGPoint(x:6.5+CGFloat(index)*13,y:size.height/2)
                 let radius=1.3+3.6*pow(Double(night.score.value)/100,1.5)
-                let circle=Path(ellipseIn:CGRect(x:center.x-radius,y:center.y-radius,width:2*radius,height:2*radius))
-                if night.score.hasForecast { context.fill(circle,with:.color(palette.accent.opacity(0.45+Double(night.score.value)/200))) }
+                let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
+                let circle=mark.path(center:center,radius:radius)
+                if mark.filled { context.fill(circle,with:.color(palette.accent.opacity(0.45+Double(night.score.value)/200))) }
                 else { context.stroke(circle,with:.color(palette.accent.opacity(0.8)),lineWidth:0.8) }
                 if night.id==best.id {
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-6.5,y:center.y-6.5,width:13,height:13)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7)

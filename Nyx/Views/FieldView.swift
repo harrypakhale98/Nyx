@@ -65,8 +65,8 @@ struct FieldView: View {
 
     private var header: some View {
         HStack(alignment:.center,spacing:12) {
-            Button(action:close) { Image(systemName:"xmark").font(.body.weight(.semibold)).frame(width:44,height:44).contentShape(Rectangle()) }
-                .accessibilityLabel("Leave field mode")
+            Button { NightListener.shared.stop(); close() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
+                .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
             VStack(alignment:.leading,spacing:2) {
                 Text(session.park.shortName).font(.system(.headline,design:.serif)).lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
                 Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit()
@@ -80,8 +80,11 @@ struct FieldView: View {
                 if FieldActivities.enabled || !session.changesPhone {
                     Toggle(isOn:Binding(get:{ session.following },set:{ session.follow($0) })) { Label("Follow on the Lock Screen",systemImage:"lock.rectangle") }
                 }
-            } label:{ Image(systemName:"ellipsis").font(.body.weight(.semibold)).frame(width:44,height:44).contentShape(Rectangle()) }
-                .accessibilityLabel("Field mode options")
+                // Tonight as twelve seconds of sound; best with headphones, out of respect for the dark around you.
+                if NightListener.shared.isPlaying { Button("Stop listening",systemImage:"stop.fill") { NightListener.shared.stop() } }
+                else { Button("Listen to tonight",systemImage:"waveform") { NightListener.shared.play(NightSonification(park:session.park,sky:session.night.sky)) } }
+            } label:{ Image(systemName:"ellipsis").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
+                .accessibilityLabel("Field mode options").accessibilityInputLabels([Text("Options"),Text("Field mode options")])
         }
         .padding(.horizontal,12).padding(.top,8)
     }
@@ -145,6 +148,8 @@ struct FieldNightPager: View {
                     if !passed.isEmpty { earlier(passed).id("earlier") }
                 }
                 .scrollTargetLayout()
+                // VoiceOver: step through what is still to come tonight, one milestone at a time.
+                .accessibilityRotor(Text("Milestones"),entries:ahead.map { MilestoneStop(id:$0.id,label:String(localized:"\($0.title), \(session.night.park.time($0.date))")) },entryID:\.id,entryLabel:\.label)
                 .padding(.horizontal,24)
             }
             .scrollIndicators(.hidden)
@@ -216,6 +221,9 @@ struct FieldNightPager: View {
         return sky.moonrise.flatMap { $0>now ? String(localized:"Moon below the horizon until \(night.park.time($0)).") : nil } ?? String(localized:"Moon below the horizon.")
     }
 }
+
+/// A milestone's rotor stop: "Moonrise, 1:12 AM", in park time like its card.
+struct MilestoneStop: Identifiable { let id: String; let label: String }
 
 // MARK: The eye's clock
 
