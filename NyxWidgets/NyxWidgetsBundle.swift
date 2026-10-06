@@ -3,7 +3,7 @@ import SwiftUI
 import WidgetKit
 
 @main struct NyxWidgetsBundle:WidgetBundle {
-    var body:some Widget { TonightWidget();NightVisionControl() }
+    var body:some Widget { TonightWidget();NightVisionControl();FieldModeControl();FieldLiveActivity();FieldAlarmLiveActivity() }
 }
 struct TonightProvider:TimelineProvider {
     func placeholder(in context:Context)->TonightEntry { TonightEntry(date:.now,night:nil,nightVision:false) }
@@ -52,6 +52,14 @@ struct NightVisionControl:ControlWidget {
         StaticControlConfiguration(kind:"NightVisionControl",provider:NightVisionProvider()) { value in
             ControlWidgetToggle(isOn:value,action:NightVisionIntent()) { Label("Nyx night vision",systemImage:"moon") }
         }.displayName("Night vision").description("Use Nyx's red palette to reduce glare at night.")
+    }
+}
+/// Opens field mode for the last park used in the field, or the starting park.
+struct FieldModeControl:ControlWidget {
+    var body:some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind:"FieldModeControl") {
+            ControlWidgetButton(action:OpenFieldModeIntent()) { Label("Field mode",systemImage:"scope") }
+        }.displayName("Field mode").description("Open Nyx's dark, red field screen for tonight.")
     }
 }
 struct NightVisionProvider:ControlValueProvider {

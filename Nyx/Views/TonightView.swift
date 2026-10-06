@@ -39,6 +39,7 @@ struct TonightView: View {
                         else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
                         if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
                         nudge(park:park,tonight:night)
+                        fieldOffer(best:park)
                     }.frame(maxWidth:.infinity)
                     startingPoint
                     if best.count>1 {
@@ -74,6 +75,35 @@ struct TonightView: View {
                 SkyGlyph(SkyGlyph.Kind(event.glyph),color:palette.accent).frame(width:15,height:15)
             }
         } else { darkerAhead(than:tonight) }
+    }
+    /// Field mode, offered after sunset when this iPhone is already known to be in or near a park
+    /// (location is never asked for just for this), or while a Stargazing Focus is on.
+    @ViewBuilder private func fieldOffer(best:Park)->some View {
+        let now=DebugScenario.date ?? Date.now
+        let here=location.latitude.flatMap { lat in location.longitude.flatMap { model.fieldPark(latitude:lat,longitude:$0) } }
+        let focus=StargazingFocus.offersField() || DebugScenario.state=="stargazing"
+        if let here, Self.isEvening(here,model.night(here),now:now) {
+            fieldButton(park:here,text:String(localized:"You're at \(here.shortName). Start field mode"))
+        } else if focus, Self.isEvening(best,model.night(best),now:now) || DebugScenario.state=="stargazing" {
+            fieldButton(park:best,text:String(localized:"Stargazing Focus is on. Field mode at \(best.shortName)"))
+        }
+    }
+    /// From sunset until the night is over.
+    private static func isEvening(_ park:Park,_ night:Night,now:Date)->Bool {
+        guard let sunset=night.sky.sunset else { return false }
+        return now>=sunset && !FieldNight.isOver(night.sky,at:now)
+    }
+    private func fieldButton(park:Park,text:String)->some View {
+        Button { FieldPresenter.present(park:park,model:model) } label:{
+            HStack(spacing:8) {
+                Image(systemName:"scope").imageScale(.small).accessibilityHidden(true)
+                Text(text).multilineTextAlignment(.leading)
+                Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
+            }
+            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
+            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
+        }.buttonStyle(.plain).padding(.top,4)
+        .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
     }
     private func upcomingEvent(_ park:Park)->(night:Night,glyph:WhatsUp.Events.Glyph,text:String)? {
         let first=model.tonight(park)

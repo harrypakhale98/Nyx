@@ -137,6 +137,7 @@ struct ParkDetailView: View {
                     if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
                     ScoreReadout(score:night.score,agreement:outlook?.agreement) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                         .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+                    if night.id==model.tonight(park) { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
                 }
                 Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }
                 Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
@@ -147,7 +148,16 @@ struct ParkDetailView: View {
                     }
                      if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
                 Panel { SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core) }
-                Panel { WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park)) }
+                Panel {
+                    VStack(alignment:.leading,spacing:18) {
+                        WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
+                        // Tonight's wake-ups (AlarmKit), beside the moments they are for.
+                        if FieldAlarms.supported, night.id==model.tonight(park) {
+                            let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:DebugScenario.date ?? .now)
+                            if !options.isEmpty { Divider().overlay(palette.line); FieldAlarmRows(park:park,options:options,showsHeading:true) }
+                        }
+                    }
+                }
                 Panel {
                     VStack(alignment:.leading,spacing:18) {
                         Eyebrow(text:"Moonlight")

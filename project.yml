@@ -38,6 +38,10 @@ targets:
           - CFBundleURLSchemes: [nyx]
         # Custom keys are not expanded from INFOPLIST_KEY_* settings; this one must live in the plist.
         NPS_API_KEY: "$(NPS_API_KEY)"
+        # Field mode: the night's countdown on the Lock Screen and in the Dynamic Island (computed on the phone, no push).
+        NSSupportsLiveActivities: true
+        # Field mode's wake-ups (AlarmKit). Shown by iOS when the first alarm is set, after Nyx's own explainer.
+        NSAlarmKitUsageDescription: "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only."
         UILaunchScreen:
           UIImageName: LaunchStars
           UIColorName: LaunchBlack
@@ -88,6 +92,9 @@ targets:
       - path: Nyx/Services/ForecastDetail.swift
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Intents/NightVisionIntent.swift
+      - path: Nyx/Intents/FieldModeIntent.swift
+      - path: Nyx/Models/FieldActivity.swift
+      - path: Nyx/DesignSystem/FieldActivityView.swift
       - path: Nyx/Resources/parks.json
       - path: Nyx/Resources/Localizable.xcstrings
     info:

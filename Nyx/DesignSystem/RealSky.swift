@@ -157,6 +157,8 @@ private struct MarkLayer: View, Equatable {
               let rows=try? JSONDecoder().decode([[Double]].self,from:data) else { return [] }
         return rows.compactMap { $0.count==4 ? (ra:$0[0]*Double.pi/180,dec:$0[1]*Double.pi/180,mag:$0[2],bv:$0[3]) : nil }
     }()
+    /// The catalogue's stars brighter than `magnitude` (positions in radians), for field mode's compass.
+    func stars(brighterThan magnitude:Double)->[(ra:Double,dec:Double,mag:Double,bv:Double)] { catalogue.filter { $0.mag<magnitude } }
     /// Map projection units to a screen: the vertical field spans about 125°, the horizontal
     /// about 60° on a phone, close to what you take in standing under the sky.
     nonisolated static func screen(_ p:SIMD2<Double>,size:CGSize)->CGPoint {

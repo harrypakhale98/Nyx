@@ -12,7 +12,7 @@ struct SettingsView:View {
     @Environment(\.scenePhase) private var scenePhase
     var body:some View {
         Form {
-            Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too; Nyx does not change it for you.").font(.caption).foregroundStyle(palette.muted) }
+            Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too. Field mode, from a park's \"I'm here tonight\", turns this on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted) }
             Section("Saved parks") {
                 Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
                 Text("Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.").font(.caption).foregroundStyle(palette.muted)
@@ -55,7 +55,7 @@ struct PrivacyView:View {
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
                 Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
-            Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders are local.") }
+            Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
     }
 }

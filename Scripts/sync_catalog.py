@@ -21,6 +21,9 @@ if extracted:
   del strings[key]
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
-info={'sourceLanguage':'en','strings':{'NSLocationWhenInUseUsageDescription':{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':'Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.'}}}}},'version':'1.0'}
+# Usage strings, kept identical to project.yml's Info.plist values.
+usage={'NSAlarmKitUsageDescription':"Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only.",
+       'NSLocationWhenInUseUsageDescription':'Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.'}
+info={'sourceLanguage':'en','strings':{key:{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':value}}}} for key,value in usage.items()},'version':'1.0'}
 path.with_name('InfoPlist.xcstrings').write_text(json.dumps(info,indent=2)+'\n')
 print('Catalog:',len(strings),'keys')

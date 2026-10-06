@@ -48,7 +48,8 @@ struct RootView:View {
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(DebugTypeSize())
-        .modifier(NightVisionFilter(enabled:palette.nightVision))
+        // Field mode draws its own red; filtering it twice would darken it below legible contrast.
+        .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? "")))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park) }
@@ -70,9 +71,16 @@ struct RootView:View {
             intro = !onboarded && DebugScenario.screen == nil
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
             else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
+            openRequestedField()
             if DebugScenario.screen == nil { await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
-        .onChange(of:scenePhase) { _,phase in if phase == .active { model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() } } }
+        .onChange(of:scenePhase) { _,phase in if phase == .active {
+            model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
+            openRequestedField()
+            // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
+            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
+        } }
+        .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
         .task {
             // Keep "tonight" honest on a screen left open through sunrise.
             while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
@@ -91,6 +99,7 @@ struct RootView:View {
         .onOpenURL { url in
             guard url.scheme=="nyx" else { return }
             if url.host=="park" { open(url.lastPathComponent) } else if url.host=="tonight" { tab=0 }
+            else if url.host=="field", let park=model.park(url.lastPathComponent) { FieldPresenter.present(park:park,model:model) }
         }
     }
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
@@ -114,6 +123,9 @@ struct RootView:View {
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())
+        case "field","field-compass": if let park=model.home { DebugField(park:park,model:model,compass:screen=="field-compass") }
+        case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
+        case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}
         case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
         default: TonightView()
         }
@@ -132,6 +144,14 @@ struct RootView:View {
         while let next=top.presentedViewController { top=next }
         let detail=ParkSheet(park:park).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
+    }
+    /// Opens field mode when Control Center, Siri or Shortcuts asked for it: the named park, else
+    /// the last park used in the field, else the starting park.
+    private func openRequestedField() {
+        guard DebugScenario.screen == nil, let request=FieldModeRequest.take() else { return }
+        let id=request.parkID ?? SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey) ?? model.homeID
+        guard let park=model.park(id) ?? model.home else { return }
+        FieldPresenter.present(park:park,model:model)
     }
     /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
     private func renderWidgetMoons(for parks:[Park]) {

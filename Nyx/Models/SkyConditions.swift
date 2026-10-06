@@ -70,7 +70,7 @@ nonisolated struct DarknessScore: Sendable {
 }
 extension SkyConditions {
     /// The spec's wording for tonight; any other night is named as that night.
-    static func noDarknessMessage(tonight: Bool) -> String {
+    nonisolated static func noDarknessMessage(tonight: Bool) -> String {
         tonight ? String(localized: "No true darkness tonight at this latitude.") : String(localized: "No true darkness on this night at this latitude.")
     }
 }

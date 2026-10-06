@@ -154,6 +154,13 @@ import CoreLocation
         let lat=latitude ?? home.latitude, lon=longitude ?? home.longitude
         return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=radiusMiles*1609.344 }
     }
+    /// The park this iPhone is in or beside, for offering field mode: within 60 km of the park's
+    /// centre or 25 km of one of its viewing spots, nearest first. Straight-line, on this iPhone.
+    func fieldPark(latitude:Double,longitude:Double)->Park? {
+        parks.map { park in (park,min(park.distanceMeters(latitude:latitude,longitude:longitude)/60_000,
+                                       park.viewingSpots.map { spot in Park.distance(spot.latitude,spot.longitude,latitude,longitude)/25_000 }.min() ?? .infinity)) }
+            .filter { $0.1<=1 }.min { $0.1<$1.1 }?.0
+    }
     func ranked(_ candidates:[Park])->[Park] {
         let scores=Dictionary(candidates.map { ($0.id,night($0).score.value) },uniquingKeysWith:{ first,_ in first })
         return candidates.sorted { a,b in
