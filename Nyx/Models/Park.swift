@@ -111,8 +111,12 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         return String(format: "%04d-%02d-%02d", parts.year ?? 2000, parts.month ?? 1, parts.day ?? 1)
     }
     func distanceMeters(latitude lat: Double, longitude lon: Double) -> Double {
+        Self.distance(latitude, longitude, lat, lon)
+    }
+    /// Great-circle distance in metres between two coordinates (degrees).
+    static func distance(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {
         let r = Double.pi / 180
-        let a = pow(sin((latitude-lat)*r/2),2) + cos(lat*r)*cos(latitude*r)*pow(sin((longitude-lon)*r/2),2)
+        let a = pow(sin((lat1-lat2)*r/2),2) + cos(lat2*r)*cos(lat1*r)*pow(sin((lon1-lon2)*r/2),2)
         return 6_371_008.8 * 2 * atan2(sqrt(max(0,a)), sqrt(max(0,1-a)))
     }
 }

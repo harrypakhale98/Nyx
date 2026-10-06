@@ -14,9 +14,21 @@ import Foundation
     /// Forward tilt, about -1 … 1. Smoothed.
     private(set) var y=0.0
 
+    /// Field mode's compass needs Core Motion's attitude to itself; the tilt pauses meanwhile.
+    private var suspended=false
+    private var wanted=false
+    func suspend(_ on:Bool) {
+        suspended=on
+        if on { manager.stopDeviceMotionUpdates(); x=0; y=0 } else if wanted && clients>0 { begin() }
+    }
     func start(reduceMotion:Bool) {
         clients+=1
-        guard clients==1,!reduceMotion,!ProcessInfo.processInfo.isLowPowerModeEnabled,manager.isDeviceMotionAvailable else { return }
+        guard clients==1 else { return }
+        wanted = !reduceMotion
+        if wanted { begin() }
+    }
+    private func begin() {
+        guard !suspended,!manager.isDeviceMotionActive,!ProcessInfo.processInfo.isLowPowerModeEnabled,manager.isDeviceMotionAvailable else { return }
         manager.deviceMotionUpdateInterval=1/30
         manager.startDeviceMotionUpdates(to:.main) { [weak self] motion,_ in
             guard let gravity=motion?.gravity else { return }
@@ -30,6 +42,7 @@ import Foundation
     func stop() {
         clients=max(0,clients-1)
         guard clients==0 else { return }
+        wanted=false
         manager.stopDeviceMotionUpdates()
         x=0; y=0
     }

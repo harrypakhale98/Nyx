@@ -1,0 +1,71 @@
+#if DEBUG
+import SwiftUI
+
+/// `-nyx-screen field` / `field-compass`: field mode for the starting park tonight, with real
+/// computed milestones, at a moment in the night (`-nyx-field-minutes N` after sunset, 50 by
+/// default; the compass defaults to two hours after true darkness begins). Nothing on the phone
+/// is changed. `-nyx-state adapting` starts the eye's clock 12 minutes in, `reset` shows the
+/// reset notice, `adapted` 35 minutes in, `alarms` opens the "Wake me" sheet.
+struct DebugField: View {
+    @State private var session: FieldSession
+    private let compass: Bool
+    private let pose: SkyCompass.Pose?
+    init(park: Park, model: PlanModel, compass: Bool) {
+        let night=model.night(park)
+        let base: Date
+        if let minutes=DebugScenario.number("-nyx-field-minutes"), let sunset=night.sky.sunset { base=sunset.addingTimeInterval(minutes*60) }
+        else if compass, let dark=night.sky.darkStart { base=dark.addingTimeInterval(7200) }
+        else { base=(night.sky.sunset ?? night.sky.evening.addingTimeInterval(6*3600)).addingTimeInterval(50*60) }
+        let adapted: TimeInterval=switch DebugScenario.state { case "adapting": 12*60; case "adapted": 35*60; case "reset": 2*60; default: 4*60 }
+        let session=FieldSession(park: park, model: model, changesPhone: false, offset: base.timeIntervalSinceNow, adaptedFor: adapted)
+        if DebugScenario.state=="reset" { session.reset=DarkAdaptation.Reset(at: session.now.addingTimeInterval(-120), previousStart: session.now.addingTimeInterval(-26*60)) }
+        _session=State(initialValue: session)
+        self.compass=compass
+        // Facing the core when it is up, otherwise south, 30° up.
+        let core=FieldSkyTarget.named(park: park, sky: night.sky, at: session.now).first { $0.kind == .core && $0.altitude>5 }
+        pose=compass ? SkyCompass.Pose(azimuth: core?.azimuth ?? 180, altitude: max(20, min(50, core?.altitude ?? 30))) : nil
+    }
+    var body: some View { FieldView(session: session, initialPage: compass ? .look : .night, fixedPose: pose, showsAlarms: DebugScenario.state=="alarms") {} }
+}
+
+/// `-nyx-screen live-activity`: the Live Activity's Lock Screen and Dynamic Island faces for
+/// tonight at the starting park, in starlight, in night vision, stale and finished.
+struct FieldActivityReview: View {
+    let night: Night
+    var body: some View {
+        let field=FieldNight(park: night.park, sky: night.sky)
+        // Shown 50 minutes after sunset, moved to the real clock so the countdown and the line run.
+        let moment=(night.sky.sunset ?? night.sky.evening).addingTimeInterval(50*60)
+        let attributes=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label).shifted(by: Date.now.timeIntervalSince(moment))
+        let now=Date.now
+        let state=attributes.state(at: now, nightVision: false)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Eyebrow(text: "Lock Screen")
+                face { FieldActivityLockView(attributes: attributes, state: state, isStale: false) }
+                face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
+                Eyebrow(text: "After its milestone, before Nyx updates it")
+                face { FieldActivityLockView(attributes: attributes, state: state, isStale: true) }
+                face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dawn, nightVision: false), isStale: false) }
+                Eyebrow(text: "Dynamic Island")
+                HStack(spacing: 10) {
+                    island { HStack { FieldActivitySymbol(state: state); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
+                    island { FieldActivitySymbol(state: state) }.frame(width: 44)
+                }
+                island {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack { Label { Text(state.next?.title ?? "") } icon: { FieldActivitySymbol(state: state) }.font(.system(.subheadline, design: .serif)); Spacer(); FieldActivityCountdown(attributes: attributes, state: state, isStale: false).font(.system(.title3, design: .serif)) }
+                        FieldNightLine(attributes: attributes, colors: FieldActivityColors(nightVision: false)).frame(height: 14)
+                    }.padding(16)
+                }.frame(height: 110)
+            }.padding(24)
+        }.background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+    }
+    private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content().background(Color.black.opacity(0.88), in: RoundedRectangle(cornerRadius: 22))
+    }
+    private func island<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content().frame(maxWidth: .infinity, minHeight: 36).background(Color.black, in: Capsule()).overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.5))
+    }
+}
+#endif

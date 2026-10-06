@@ -35,5 +35,6 @@ struct DarknessIntent:AppIntent {
 struct NyxShortcuts:AppShortcutsProvider {
     static var appShortcuts:[AppShortcut] {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
+        AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
     }
 }

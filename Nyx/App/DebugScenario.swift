@@ -40,6 +40,14 @@ enum DebugScenario {
         return 0
         #endif
     }
+    /// A numeric launch argument, such as `-nyx-field-minutes 90`.
+    static func number(_ key: String) -> Double? {
+        #if DEBUG
+        return argument(key).flatMap(Double.init)
+        #else
+        return nil
+        #endif
+    }
     static func isEnabled(_ value: String) -> Bool {
         #if DEBUG
         return ProcessInfo.processInfo.arguments.contains("-nyx-"+value)

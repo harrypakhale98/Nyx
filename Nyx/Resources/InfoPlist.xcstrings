@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "NSAlarmKitUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only."
+          }
+        }
+      }
+    },
     "NSLocationWhenInUseUsageDescription": {
       "extractionState": "manual",
       "localizations": {
