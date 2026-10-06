@@ -27,7 +27,8 @@ struct NightDetail: View {
             .navigationTitle(Text(plan.park.shortName))
             .background {
                 // Nyx's night over the glass: deep indigo fading to void black, calm in a bright room.
-                LinearGradient(colors: [Color(red: 0.043, green: 0.063, blue: 0.149).opacity(0.55), Color.black.opacity(0.45)], startPoint: .top, endPoint: .bottom)
+                // Under Reduce Transparency it is nearly opaque, so nothing in the room shows through.
+                LinearGradient(colors: [Color(red: 0.043, green: 0.063, blue: 0.149).opacity(palette.solid ? 0.96 : 0.55), Color.black.opacity(palette.solid ? 0.96 : 0.45)], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea().accessibilityHidden(true)
             }
         } else {
@@ -178,7 +179,7 @@ private struct Fact: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(18)
-        .background(.thinMaterial.opacity(palette.nightVision ? 0 : 0.6), in: .rect(cornerRadius: 20))
+        .background(palette.solid && !palette.nightVision ? AnyShapeStyle(Color(red: 0.07, green: 0.08, blue: 0.14)) : AnyShapeStyle(.thinMaterial.opacity(palette.nightVision ? 0 : 0.6)), in: .rect(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(palette.line, lineWidth: 0.5))
         .accessibilityElement(children: .combine)
     }

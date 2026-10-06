@@ -6,6 +6,7 @@ import SwiftUI
 struct SkySpace: View {
     @Environment(VisionModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @State private var scene = SkyScene()
     var body: some View {
         RealityView { content in
@@ -22,5 +23,5 @@ struct SkySpace: View {
         .onAppear { model.immersiveOpen = true }
         .onDisappear { model.immersiveOpen = false }
     }
-    private var palette: VisionPalette { VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased) }
+    private var palette: VisionPalette { VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency) }
 }

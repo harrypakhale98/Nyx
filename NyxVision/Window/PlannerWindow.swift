@@ -6,6 +6,7 @@ import SwiftUI
 struct PlannerWindow: View {
     @Environment(VisionModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
@@ -13,7 +14,7 @@ struct PlannerWindow: View {
     @State private var query = ""
     var body: some View {
         @Bindable var model = model
-        let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased)
+        let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency)
         NavigationSplitView {
             ParkList(query: query)
                 .searchable(text: $query, prompt: Text("Search parks"))

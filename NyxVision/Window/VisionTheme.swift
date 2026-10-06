@@ -5,6 +5,8 @@ import SwiftUI
 struct VisionPalette: Equatable {
     var nightVision = false
     var highContrast = false
+    /// Reduce Transparency: panels behind words become nearly opaque.
+    var solid = false
     /// Window colours. In night vision the window's red filter does the tinting, so ink stays
     /// white there (as on the iPhone): a red ink filtered again would turn a dim, unreadable red.
     var ink: Color { nightVision ? .white : Color(red: 0.961, green: 0.945, blue: 0.902) }
