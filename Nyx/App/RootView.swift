@@ -114,6 +114,8 @@ struct RootView:View {
         case "settings": SettingsView()
         case "privacy": PrivacyView()
         case "data": AboutDataView()
+        // Light pollution, viewing spots (sky glow, step-free) and Protect this sky for one park: `-nyx-park deva | grca | sequ`.
+        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { Panel { LightPollution(park:park) }; Panel { ViewingSpots(park:park) }; Panel { ProtectThisSky(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:.darkness)
         case "ask": GuideView(mode:.planning)
         case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))

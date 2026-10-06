@@ -22,6 +22,8 @@ struct RealSky: View {
             let t=reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=reduceMotion ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
+                // Light domes sit on the horizon, farthest of all.
+                if !sky.domes.isEmpty { DomeLayer(sky:sky,strength:strength).equatable().offset(x:tilt.x*1.5,y:tilt.y*1.5) }
                 // Far to near: the Milky Way and faint stars barely move, bright stars move most.
                 StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle).equatable().offset(x:tilt.x*2,y:tilt.y*2)
                 StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4)
@@ -114,6 +116,41 @@ private struct MarkLayer: View, Equatable {
     }
 }
 
+/// Towns' light rising from the horizon at their true bearings (NASA Black Marble light domes):
+/// a soft warm glow, clipped at the horizon, stronger for a bigger share of a brighter park's light.
+/// Faint by design: it sits behind every screen's text, and under night vision the palette's
+/// reduced strength keeps it dimmer still.
+private struct DomeLayer: View, Equatable {
+    let sky: SkyProjection.Sky
+    let strength: Double
+    static func == (a:Self,b:Self)->Bool { a.sky.id==b.sky.id && a.strength==b.strength }
+    var body: some View {
+        Canvas { context,size in
+            let warm=Color(red:1,green:0.64,blue:0.36)
+            for dome in sky.domes {
+                let base=SkyProjection.screen(dome.base,size:size), top=SkyProjection.screen(dome.top,size:size)
+                let horizon=dome.horizon.map { SkyProjection.screen($0,size:size) }
+                guard let first=horizon.first, let last=horizon.last else { continue }
+                let rx=hypot(last.x-first.x,last.y-first.y)/2, ry=hypot(top.x-base.x,top.y-base.y)
+                guard rx>1, ry>1, base.x > -rx, base.x < size.width+rx, base.y > -ry, base.y < size.height+ry else { continue }
+                // Only the sky above the horizon glows; below it is ground.
+                var clip=Path(); clip.addLines(horizon); clip.addLine(to:CGPoint(x:last.x,y:-size.height)); clip.addLine(to:CGPoint(x:first.x,y:-size.height)); clip.closeSubpath()
+                let peak=(0.05+0.2*dome.intensity)*min(1,strength/0.6)
+                // A soft horizon edge: the clipped glow is blurred, so it fades into the ground, not cut.
+                context.drawLayer { layer in
+                    layer.addFilter(.blur(radius:max(2,ry*0.06)))
+                    layer.clip(to:clip)
+                    layer.translateBy(x:base.x,y:base.y)
+                    layer.scaleBy(x:rx/ry,y:1)
+                    layer.fill(Path(ellipseIn:CGRect(x:-ry,y:-ry,width:ry*2,height:ry*2)),
+                               with:.radialGradient(Gradient(stops:[.init(color:warm.opacity(peak),location:0),.init(color:warm.opacity(peak*0.4),location:0.45),.init(color:warm.opacity(0),location:1)]),
+                                                    center:.zero,startRadius:0,endRadius:ry))
+                }
+            }
+        }
+    }
+}
+
 /// Positions are computed once per park and night and kept, so screens can share them.
 @MainActor final class SkyProjection {
     static let shared=SkyProjection()
@@ -136,6 +173,9 @@ private struct MarkLayer: View, Equatable {
     nonisolated struct GalaxyPoint: Sendable { let position: SIMD2<Double>; let brightness: Double }
     /// A planet or a shower radiant, placed for the same moment as the stars (the name is for debugging and previews).
     nonisolated struct Mark: Sendable { let position: SIMD2<Double>; let name: String; let magnitude: Double }
+    /// A light dome in projection units: its foot on the horizon, its top, and the stretch of
+    /// horizon it spans. `intensity` 0…1 from the dome's share of the park's glow and that glow's size.
+    nonisolated struct Dome: Sendable { let base: SIMD2<Double>; let top: SIMD2<Double>; let horizon: [SIMD2<Double>]; let intensity: Double }
     nonisolated struct Sky: Sendable {
         let id: String
         let faint: [Star]
@@ -146,9 +186,19 @@ private struct MarkLayer: View, Equatable {
         let dark: Bool
         var planets: [Mark]=[]
         var radiant: Mark?=nil
+        var domes: [Dome]=[]
     }
     /// Skies by park and night, oldest first out: each holds about 45 KB of stars, and scrubbing
     /// thirty nights across several parks would otherwise keep every one of them.
+    /// A source of artificial light around a park: bearing (degrees from north), its share of the
+    /// park's modelled glow, and that glow (median park = 1).
+    nonisolated struct LightSource: Sendable { let bearing: Double; let share: Double; let glow: Double }
+    /// Light domes by park. The iPhone app sets this from NASA's night lights (`SkyGlow`); the widget
+    /// and watch ship no glow data and draw none.
+    var lightSources:(Park)->[LightSource]=SkyProjection.noLight {
+        didSet { cache=[:]; recent=[] }
+    }
+    nonisolated static func noLight(_ park:Park)->[LightSource] { [] }
     private var cache:[String:Sky]=[:]
     private var recent:[String]=[]
     private let capacity=40
@@ -175,12 +225,15 @@ private struct MarkLayer: View, Equatable {
         let moment:Date
         if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) } else { moment=sky.evening.addingTimeInterval(12*3600) }
         let facing=park.latitude<0 ? 0.0 : 180.0, centreAltitude=45.0*Double.pi/180
+        func project(altitude:Double,azimuth:Double)->SIMD2<Double> {
+            let alt=altitude*Double.pi/180, dAz=(azimuth-facing)*Double.pi/180
+            let k=2/(1+sin(centreAltitude)*sin(alt)+cos(centreAltitude)*cos(alt)*cos(dAz))
+            return SIMD2(k*cos(alt)*sin(dAz), k*(cos(centreAltitude)*sin(alt)-sin(centreAltitude)*cos(alt)*cos(dAz)))
+        }
         func project(_ ra:Double,_ dec:Double)->SIMD2<Double>? {
             let h=engine.horizontal(date:moment,park:park,ra:ra,dec:dec)
             guard h.altitude > -2 else { return nil }
-            let alt=h.altitude*Double.pi/180, dAz=(h.azimuth-facing)*Double.pi/180
-            let k=2/(1+sin(centreAltitude)*sin(alt)+cos(centreAltitude)*cos(alt)*cos(dAz))
-            return SIMD2(k*cos(alt)*sin(dAz), k*(cos(centreAltitude)*sin(alt)-sin(centreAltitude)*cos(alt)*cos(dAz)))
+            return project(altitude:h.altitude,azimuth:h.azimuth)
         }
         var faint:[Star]=[], middle:[Star]=[], bright:[Star]=[]
         for (index,star) in catalogue.enumerated() {
@@ -219,7 +272,19 @@ private struct MarkLayer: View, Equatable {
                 radiant=Mark(position:p,name:shower.shower.name,magnitude:0)
             }
         }
-        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,planets:planets,radiant:radiant)
+        // Light domes, when the sky shown is dark enough for them to matter. A dome rises about 14°;
+        // its width grows with its share of the light. Too faint to see (share × glow tiny): left out.
+        var domes:[Dome]=[]
+        if dark {
+            for dome in lightSources(park) {
+                let amount=dome.share*dome.glow
+                guard amount>=0.01 else { continue }
+                let half=10+20*dome.share
+                let horizon=stride(from:-half,through:half,by:half/6).map { project(altitude:0,azimuth:dome.bearing+$0) }
+                domes.append(Dome(base:project(altitude:0,azimuth:dome.bearing),top:project(altitude:14,azimuth:dome.bearing),horizon:horizon,intensity:min(1,(amount/4).squareRoot())))
+            }
+        }
+        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,planets:planets,radiant:radiant,domes:domes)
         cache[key]=result
         recent.append(key)
         if recent.count>capacity { cache[recent.removeFirst()]=nil }
