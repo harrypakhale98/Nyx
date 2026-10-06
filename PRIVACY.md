@@ -8,6 +8,10 @@ Nyx has no accounts, tracking, analytics/crash SDKs, advertising identifier, ATT
 
 `parks.json` contains NPS source URLs for provenance. They are not opened or downloaded by the app. Research scripts/USNO fixtures are development tools, not runtime network code. Apple's location, Photos, Siri, model provisioning and device backup services are OS-managed; this review does not claim control over the operating system's network traffic.
 
+## Apple Vision Pro app (2026-10-05)
+
+`NyxVision` compiles only the astronomy engine, the score, the bundled tables and its own views. No networking source (`SafeHTTP`, `DataServices`, `ForecastDetail`) is in the target, it requests no permissions (no location, photos, notifications or world sensing), stores nothing (no UserDefaults, no SwiftData), and its scores are labelled "moon and darkness only" because it fetches no forecast. Its manifest (`NyxVision/Resources/PrivacyInfo.xcprivacy`) declares tracking false, no collected data and no required-reason APIs. The privacy label stays "Data Not Collected".
+
 ## Manifests
 
 App and widget each bundle `PrivacyInfo.xcprivacy`: tracking false; tracking domains empty; declared collected data empty; UserDefaults required reasons CA92.1 (own preferences) and 1C8F.1 (same developer's App Group preferences). Allowed data hosts appear in a comment, not `NSPrivacyTrackingDomains`, because they are not tracking domains and Apple defines no general host-allowlist manifest key. No custom/unrecognized manifest keys were invented.
