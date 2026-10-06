@@ -189,7 +189,7 @@ struct OnboardingView:View {
     private let messages:[LocalizedStringKey]=["Find the national parks and nights that give the stars their best chance.","Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.","Nyx has no account, no ads, no tracking. Your journal never leaves this phone."]
     var body:some View {
         VStack(spacing:0) {
-            HStack { Text("NYX").font(.caption).tracking(8).accessibilityHidden(true);Spacer();Button("Skip") { finish() } }.padding(.horizontal,28).padding(.top,28)
+            HStack { Spacer();Button("Skip") { finish() } }.overlay { Text("NYX").font(.caption).tracking(8).accessibilityHidden(true) }.padding(.horizontal,28).padding(.top,28)
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {

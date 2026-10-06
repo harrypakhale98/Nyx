@@ -89,9 +89,11 @@ struct TripPlannerView: View {
                 }
                 if !useDevice {
                     Button { choosingPark=true } label:{
-                        HStack { Label(origin?.shortName ?? "",systemImage:"mappin.and.ellipse").fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).accessibilityHidden(true) }
-                            .frame(minHeight:44).contentShape(Rectangle())
-                    }.buttonStyle(.plain).foregroundStyle(palette.accent).accessibilityLabel("Starting park").accessibilityValue(origin?.shortName ?? "").accessibilityHint("Choose a starting park")
+                        // Starlight text with an amber mark, on its own solid indigo: iOS 26's lighter glass under the panel
+                        // otherwise sets the contrast of this control's text (amber text there fell short of 4.5:1).
+                        HStack { Label { Text(origin?.shortName ?? "").foregroundStyle(palette.ink) } icon:{ Image(systemName:"mappin.and.ellipse").foregroundStyle(palette.accent) }.fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                            .frame(minHeight:44).contentShape(Rectangle()).background(palette.panel)
+                    }.buttonStyle(.plain).accessibilityLabel("Starting park").accessibilityValue(origin?.shortName ?? "").accessibilityHint("Choose a starting park")
                 }
             }
             Divider().overlay(palette.line)
