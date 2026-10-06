@@ -3,8 +3,10 @@
 using namespace metal;
 
 // The immersive sky's static textures, drawn once on the GPU through `ImageRenderer` (milliseconds,
-// where the same model on the CPU took seconds in a debug build). Outputs are sRGB-encoded,
-// premultiplied, as `ImageRenderer` writes them straight into an 8-bit sRGB image.
+// where the same model on the CPU took seconds in a debug build). Outputs are sRGB-encoded, as
+// `ImageRenderer` writes them straight into an 8-bit sRGB image, and opaque: these textures are
+// added as light, and a faint pixel with a faint alpha is un-premultiplied on upload into a bright
+// one (that drew a hard edge where the alpha rounded to zero).
 
 namespace nyxsky {
 
@@ -86,8 +88,8 @@ float riftCentre(float l) {
 
     // Light.
     float thin = 0.8 * disc * exp(-b * b / (2.0 * width * width));
-    float thick = 0.06 * disc * exp(-b * b / (2.0 * 5.0 * 5.0));
-    float bulge = 0.32 * blob(l, b, 0.5, -2.5, 7, 5.5) + 0.1 * blob(l, b, 0, -1.5, 14, 8.5);
+    float thick = 0.07 * disc * exp(-b * b / (2.0 * 6.5 * 6.5));
+    float bulge = 0.22 * blob(l, b, 0.5, -2.5, 7, 5.5) + 0.1 * blob(l, b, 0, -2, 12, 9) + 0.035 * blob(l, b, 0, -2, 22, 16);
     float clouds = 0.8 * blob(l, b, 2.5, -4.6, 4.0, 2.8)       // Large Sagittarius Star Cloud
         + 0.6 * blob(l, b, 12.1, -0.8, 1.3, 0.9)               // Small Sagittarius Star Cloud, M24
         + 0.55 * blob(l, b, 27.5, -2.3, 3.0, 2.2)              // Scutum Star Cloud
@@ -132,7 +134,7 @@ float riftCentre(float l) {
     // Fainter filaments everywhere along the plane, strongest in the inner galaxy.
     tau += 0.8 * lanes * exp(-b * b / (2.0 * 3.0 * 3.0)) * (0.3 + 0.7 * inner);
     light *= exp(-tau);
-    light *= smooth01((latitude - abs(b)) / 9.0) * (0.35 + 0.65 * exp(-b * b / (2.0 * 8.0 * 8.0)));
+    light *= smooth01((latitude - abs(b)) / 12.0);
 
     // Colour.
     float3 warm = float3(1.0, 0.82, 0.6), cool = float3(0.72, 0.82, 1.0), neutral = float3(0.9, 0.9, 0.94);
@@ -143,9 +145,9 @@ float riftCentre(float l) {
     // A soft shoulder keeps the core luminous without clipping.
     // A gentle contrast curve keeps the faint wings faint, then a soft shoulder keeps the core
     // luminous without clipping.
-    float3 rgb = tint * (1.0 - exp(-1.6 * pow(light, 1.3)));
+    float3 rgb = tint * (1.0 - exp(-1.25 * pow(light, 1.2)));
     float3 encoded = encode(rgb);
-    return half4(half3(encoded), half(max(encoded.r, max(encoded.g, encoded.b))));
+    return half4(half3(encoded), 1.0h);
 }
 
 /// The star atlas: one column per B−V colour, one row per brightness (`SkyTextures.look`).
@@ -170,5 +172,5 @@ float riftCentre(float l) {
     float3 white = mix(float3(1.0), hue, 0.6);
     float3 rgb = min((white * core + hue * glare) * smooth01((1.0 - rn) / 0.18), float3(1.0));
     float3 encoded = encode(rgb);
-    return half4(half3(encoded), half(max(encoded.r, max(encoded.g, encoded.b))));
+    return half4(half3(encoded), 1.0h);
 }
