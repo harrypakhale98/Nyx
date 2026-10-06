@@ -102,6 +102,8 @@ struct RootView:View {
             if url.host=="park" { open(url.lastPathComponent) } else if url.host=="tonight" { tab=0 }
             else if url.host=="field", let park=model.park(url.lastPathComponent) { FieldPresenter.present(park:park,model:model) }
         }
+        // Differentiate Without Color, Reduce Highlighting, Cross-Fade, reduced resources: read once, for every screen and sheet.
+        .nyxAccessibility()
     }
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
         #if DEBUG
@@ -114,7 +116,7 @@ struct RootView:View {
         case "settings": SettingsView()
         case "privacy": PrivacyView()
         case "data": AboutDataView()
-        case "article": EssayView(essay:.darkness)
+        case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
         case "ask": GuideView(mode:.planning)
         case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
@@ -128,6 +130,8 @@ struct RootView:View {
         case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
         case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}
         case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
+        case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
+        case "accessibility": SoundAndTouchView()
         default: TonightView()
         }
         #else
@@ -225,13 +229,15 @@ private struct ParkSheet:View {
         NavigationStack {
             ParkDetailView(park:park).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
         }
-        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)).nyxPresentation()
+        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)).nyxPresentation().nyxAccessibility()
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }
 
 private struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
-        if DebugScenario.isEnabled("ax5") { content.dynamicTypeSize(.accessibility5) } else { content }
+        // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
+        let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
+        if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
     }
 }

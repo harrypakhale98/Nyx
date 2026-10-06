@@ -23,6 +23,17 @@
         }
       }
     },
+    "%@ at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@"
+          }
+        }
+      }
+    },
     "%@ at %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -210,6 +221,17 @@
         }
       }
     },
+    "%@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
     "%@, %@ · approximate": {
       "extractionState": "manual",
       "localizations": {
@@ -254,6 +276,17 @@
         }
       }
     },
+    "%@, %@. %lld seconds of sound, from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@. %lld seconds of sound, from %@ to %@."
+          }
+        }
+      }
+    },
     "%@, %@. Darkness score %lld, %@. %@ %@ %@": {
       "extractionState": "manual",
       "localizations": {
@@ -261,6 +294,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@. Darkness score %lld, %@. %@ %@ %@"
+          }
+        }
+      }
+    },
+    "%@, %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld"
           }
         }
       }
@@ -386,6 +430,17 @@
         }
       }
     },
+    "%@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        }
+      }
+    },
     "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling.": {
       "extractionState": "manual",
       "localizations": {
@@ -496,6 +551,17 @@
         }
       }
     },
+    "%lld of %lld nights have no cloud forecast yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld nights have no cloud forecast yet."
+          }
+        }
+      }
+    },
     "%lld of about 30 minutes. An estimate.": {
       "extractionState": "manual",
       "localizations": {
@@ -503,6 +569,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld of about 30 minutes. An estimate."
+          }
+        }
+      }
+    },
+    "%lld out of 100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld out of 100"
           }
         }
       }
@@ -661,6 +738,28 @@
         }
       }
     },
+    "%lld° below the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld° below the horizon"
+          }
+        }
+      }
+    },
+    "%lld° up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld° up"
+          }
+        }
+      }
+    },
     "%lld° up in the %@ as true darkness begins, then sinking.": {
       "extractionState": "manual",
       "localizations": {
@@ -782,6 +881,17 @@
         }
       }
     },
+    "A line through the date marks a night that has passed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A line through the date marks a night that has passed."
+          }
+        }
+      }
+    },
     "A little farther from here": {
       "extractionState": "manual",
       "localizations": {
@@ -800,6 +910,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A little knowledge. A wider sky."
+          }
+        }
+      }
+    },
+    "A new Moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full Moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new Moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full Moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises."
           }
         }
       }
@@ -1002,6 +1123,17 @@
         }
       }
     },
+    "Accessibility": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility"
+          }
+        }
+      }
+    },
     "Adding photo": {
       "extractionState": "manual",
       "localizations": {
@@ -1174,6 +1306,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "An alarm for the sky"
+          }
+        }
+      }
+    },
+    "An audio graph of the Sun, Moon and Milky Way core is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An audio graph of the Sun, Moon and Milky Way core is available."
+          }
+        }
+      }
+    },
+    "An audio graph of this month's nights is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An audio graph of this month's nights is available."
           }
         }
       }
@@ -1354,6 +1508,17 @@
         }
       }
     },
+    "Best night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night"
+          }
+        }
+      }
+    },
     "Best night this week: %@, %lld.": {
       "extractionState": "manual",
       "localizations": {
@@ -1361,6 +1526,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Best night this week: %@, %lld."
+          }
+        }
+      }
+    },
+    "Best night: %@, %lld out of 100, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night: %@, %lld out of 100, %@."
+          }
+        }
+      }
+    },
+    "Best nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best nights"
           }
         }
       }
@@ -1427,6 +1614,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bortle estimate"
+          }
+        }
+      }
+    },
+    "Bortle estimate, class %lld of 9": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle estimate, class %lld of 9"
           }
         }
       }
@@ -1574,6 +1772,17 @@
         }
       }
     },
+    "Clearest forecast model": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clearest forecast model"
+          }
+        }
+      }
+    },
     "Close": {
       "extractionState": "manual",
       "localizations": {
@@ -1603,6 +1812,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Closure alert: %@"
+          }
+        }
+      }
+    },
+    "Closures": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closures"
           }
         }
       }
@@ -1647,6 +1867,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cloud forecasts"
+          }
+        }
+      }
+    },
+    "Cloudiest forecast model": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloudiest forecast model"
           }
         }
       }
@@ -1893,6 +2124,17 @@
         }
       }
     },
+    "Dark skies by sound, touch and red light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark skies by sound, touch and red light"
+          }
+        }
+      }
+    },
     "Dark-Sky designated": {
       "extractionState": "manual",
       "localizations": {
@@ -2054,6 +2296,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darkness score %lld out of 100. %@. %@"
+          }
+        }
+      }
+    },
+    "Darkness score by night, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score by night, %@"
+          }
+        }
+      }
+    },
+    "Darkness score, %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score, %lld nights"
+          }
+        }
+      }
+    },
+    "Darkness score, out of 100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score, out of 100"
           }
         }
       }
@@ -2355,6 +2630,17 @@
         }
       }
     },
+    "Estimate, moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate, moon and darkness only"
+          }
+        }
+      }
+    },
     "Evening": {
       "extractionState": "manual",
       "localizations": {
@@ -2362,6 +2648,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Evening"
+          }
+        }
+      }
+    },
+    "Every night includes a cloud forecast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every night includes a cloud forecast."
           }
         }
       }
@@ -2476,6 +2773,61 @@
         }
       }
     },
+    "Feel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feel"
+          }
+        }
+      }
+    },
+    "Feel a full Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feel a full Moon"
+          }
+        }
+      }
+    },
+    "Feel a half Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feel a half Moon"
+          }
+        }
+      }
+    },
+    "Feel a new Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feel a new Moon"
+          }
+        }
+      }
+    },
+    "Feel the Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feel the Moon"
+          }
+        }
+      }
+    },
     "Field mode": {
       "extractionState": "manual",
       "localizations": {
@@ -2494,6 +2846,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Field mode options"
+          }
+        }
+      }
+    },
+    "Filter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
           }
         }
       }
@@ -2806,6 +3169,17 @@
         }
       }
     },
+    "Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings."
+          }
+        }
+      }
+    },
     "Heavy smoke or haze": {
       "extractionState": "manual",
       "localizations": {
@@ -2824,6 +3198,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heavy smoke or haze: faint stars hidden."
+          }
+        }
+      }
+    },
+    "Height above the horizon, degrees": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height above the horizon, degrees"
           }
         }
       }
@@ -3048,6 +3433,17 @@
         }
       }
     },
+    "It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button."
+          }
+        }
+      }
+    },
     "It sets in the %@. Moon-free true darkness from here.": {
       "extractionState": "manual",
       "localizations": {
@@ -3169,6 +3565,17 @@
         }
       }
     },
+    "Leave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave"
+          }
+        }
+      }
+    },
     "Leave field mode": {
       "extractionState": "manual",
       "localizations": {
@@ -3253,6 +3660,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "List"
+          }
+        }
+      }
+    },
+    "Listen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen"
+          }
+        }
+      }
+    },
+    "Listen to a night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen to a night"
+          }
+        }
+      }
+    },
+    "Listen to this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen to this night"
+          }
+        }
+      }
+    },
+    "Listen to tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen to tonight"
           }
         }
       }
@@ -3444,6 +3895,17 @@
         }
       }
     },
+    "Milestones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milestones"
+          }
+        }
+      }
+    },
     "Milky Way core": {
       "extractionState": "manual",
       "localizations": {
@@ -3455,6 +3917,17 @@
         }
       }
     },
+    "Milky Way core already up at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core already up at %@"
+          }
+        }
+      }
+    },
     "Milky Way core up": {
       "extractionState": "manual",
       "localizations": {
@@ -3462,6 +3935,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Milky Way core up"
+          }
+        }
+      }
+    },
+    "Milky Way core up at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core up at %@"
           }
         }
       }
@@ -3752,6 +4236,17 @@
         }
       }
     },
+    "Moon texture on the time river": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon texture on the time river"
+          }
+        }
+      }
+    },
     "Moon up, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -3785,6 +4280,17 @@
         }
       }
     },
+    "Moon window": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon window"
+          }
+        }
+      }
+    },
     "Moon, %lld percent illuminated, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3814,6 +4320,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon, %lld percent illuminated, lit from the %@, as seen %@"
+          }
+        }
+      }
+    },
+    "Moon, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld%% lit"
           }
         }
       }
@@ -3884,6 +4401,17 @@
         }
       }
     },
+    "Moonlit hours are lighter and hatched.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlit hours are lighter and hatched."
+          }
+        }
+      }
+    },
     "Moonlit hours are lighter.": {
       "extractionState": "manual",
       "localizations": {
@@ -3906,6 +4434,28 @@
         }
       }
     },
+    "Moonrise %@, moonset %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonrise %@, moonset %@."
+          }
+        }
+      }
+    },
+    "Moonrise at %@, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonrise at %@, %lld%% lit"
+          }
+        }
+      }
+    },
     "Moonset": {
       "extractionState": "manual",
       "localizations": {
@@ -3913,6 +4463,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moonset"
+          }
+        }
+      }
+    },
+    "Moonset at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonset at %@"
           }
         }
       }
@@ -4060,6 +4621,17 @@
         }
       }
     },
+    "Next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        }
+      }
+    },
     "Next 7 nights": {
       "extractionState": "manual",
       "localizations": {
@@ -4082,6 +4654,17 @@
         }
       }
     },
+    "Next of the best nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next of the best nights"
+          }
+        }
+      }
+    },
     "Next: %@, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4089,6 +4672,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next: %@, %@"
+          }
+        }
+      }
+    },
+    "Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night"
           }
         }
       }
@@ -4122,6 +4716,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Night-vision mode"
+          }
+        }
+      }
+    },
+    "Nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights"
           }
         }
       }
@@ -4188,6 +4793,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No national parks fall inside this radius. Widen it or choose a different starting park."
+          }
+        }
+      }
+    },
+    "No night has a cloud forecast yet; scores are moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No night has a cloud forecast yet; scores are moon and darkness only."
           }
         }
       }
@@ -4775,6 +5391,17 @@
         }
       }
     },
+    "Options": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options"
+          }
+        }
+      }
+    },
     "Other parks": {
       "extractionState": "manual",
       "localizations": {
@@ -4973,6 +5600,50 @@
         }
       }
     },
+    "Play": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play"
+          }
+        }
+      }
+    },
+    "Play tonight at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play tonight at %@"
+          }
+        }
+      }
+    },
+    "Plays the Moon's phase as a texture: sharp, sparse taps for a new Moon, a broad swell for a full one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays the Moon's phase as a texture: sharp, sparse taps for a new Moon, a broad swell for a full one."
+          }
+        }
+      }
+    },
+    "Plays the night from sunset to sunrise as twelve seconds of sound.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays the night from sunset to sunrise as twelve seconds of sound."
+          }
+        }
+      }
+    },
     "Poor": {
       "extractionState": "manual",
       "localizations": {
@@ -4995,6 +5666,17 @@
         }
       }
     },
+    "Previous": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        }
+      }
+    },
     "Previous month": {
       "extractionState": "manual",
       "localizations": {
@@ -5013,6 +5695,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pristine"
+          }
+        }
+      }
+    },
+    "Pristine nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pristine nights"
           }
         }
       }
@@ -5167,6 +5860,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Red light only. Eyes take 20 to 30 minutes to adapt to the dark; a bright screen resets them."
+          }
+        }
+      }
+    },
+    "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still."
           }
         }
       }
@@ -5358,6 +6062,17 @@
         }
       }
     },
+    "River": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "River"
+          }
+        }
+      }
+    },
     "Rods taking over": {
       "extractionState": "manual",
       "localizations": {
@@ -5365,6 +6080,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rods taking over"
+          }
+        }
+      }
+    },
+    "Rotors jump straight to what matters: Best nights and Moon window in the calendar, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotors jump straight to what matters: Best nights and Moon window in the calendar, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon."
           }
         }
       }
@@ -5501,6 +6227,17 @@
         }
       }
     },
+    "Score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score"
+          }
+        }
+      }
+    },
     "Score breakdown": {
       "extractionState": "manual",
       "localizations": {
@@ -5600,6 +6337,17 @@
         }
       }
     },
+    "Shape of the night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shape of the night"
+          }
+        }
+      }
+    },
     "Share this night": {
       "extractionState": "manual",
       "localizations": {
@@ -5666,6 +6414,17 @@
         }
       }
     },
+    "Sky arc": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky arc"
+          }
+        }
+      }
+    },
     "Sky glow": {
       "extractionState": "manual",
       "localizations": {
@@ -5695,6 +6454,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Small marks above a night are a meteor shower's peak or a lunar eclipse."
+          }
+        }
+      }
+    },
+    "Small triangles beneath mark the three best nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small triangles beneath mark the three best nights."
           }
         }
       }
@@ -5765,6 +6535,17 @@
         }
       }
     },
+    "Sort and filter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort and filter"
+          }
+        }
+      }
+    },
     "Sort and filter parks": {
       "extractionState": "manual",
       "localizations": {
@@ -5772,6 +6553,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sort and filter parks"
+          }
+        }
+      }
+    },
+    "Sound and touch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound and touch"
           }
         }
       }
@@ -5809,6 +6601,17 @@
         }
       }
     },
+    "Star-shaped marks are Excellent or Pristine nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star-shaped marks are Excellent or Pristine nights."
+          }
+        }
+      }
+    },
     "Stargazing": {
       "extractionState": "manual",
       "localizations": {
@@ -5827,6 +6630,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stargazing Focus is on. Field mode at %@"
+          }
+        }
+      }
+    },
+    "Stargazing for everyone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stargazing for everyone"
           }
         }
       }
@@ -5919,6 +6733,28 @@
         }
       }
     },
+    "Stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        }
+      }
+    },
+    "Stop listening": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop listening"
+          }
+        }
+      }
+    },
     "Subtle: the Moon's edge darkens slightly.": {
       "extractionState": "manual",
       "localizations": {
@@ -5959,6 +6795,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sun and Moon paths for %@. Sunset %@. %@ Moonrise %@, moonset %@. %@Times in %@."
+          }
+        }
+      }
+    },
+    "Sun, Moon and Milky Way core heights, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sun, Moon and Milky Way core heights, %@"
           }
         }
       }
@@ -6051,13 +6898,24 @@
         }
       }
     },
-    "Swipe up or down to move one night at a time.": {
+    "Sunset %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swipe up or down to move one night at a time."
+            "value": "Sunset %@."
+          }
+        }
+      }
+    },
+    "Swipe up or down to move one night at a time. An audio graph is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe up or down to move one night at a time. An audio graph is available."
           }
         }
       }
@@ -6623,6 +7481,28 @@
         }
       }
     },
+    "The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone."
+          }
+        }
+      }
+    },
+    "The tone falls as the sky darkens and rises toward dawn. It softens while the Moon is up, more for a fuller Moon. A rising pulse is moonrise, a falling pulse moonset, and a chime the Milky Way's core rising.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The tone falls as the sky darkens and rises toward dawn. It softens while the Moon is up, more for a fuller Moon. A rising pulse is moonrise, a falling pulse moonset, and a chime the Milky Way's core rising."
+          }
+        }
+      }
+    },
     "These nights have passed. Look ahead to the next new moon.": {
       "extractionState": "manual",
       "localizations": {
@@ -6652,6 +7532,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Thirty-night darkness timeline"
+          }
+        }
+      }
+    },
+    "This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it."
           }
         }
       }
@@ -6707,6 +7598,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "This photo is too large. Choose a smaller image."
+          }
+        }
+      }
+    },
+    "Time in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time in %@"
+          }
+        }
+      }
+    },
+    "Timeline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeline"
           }
         }
       }
@@ -6806,6 +7719,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Totality"
+          }
+        }
+      }
+    },
+    "Transcript": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcript"
           }
         }
       }
@@ -7074,6 +7998,17 @@
         }
       }
     },
+    "Under the shape of the night on a park's page, Nyx can play that night as twelve seconds of sound, from sunset to sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under the shape of the night on a park's page, Nyx can play that night as twelve seconds of sound, from sunset to sunrise."
+          }
+        }
+      }
+    },
     "Understand artificial sky brightness": {
       "extractionState": "manual",
       "localizations": {
@@ -7092,6 +8027,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Unknown"
+          }
+        }
+      }
+    },
+    "Unsave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unsave"
           }
         }
       }
@@ -7459,6 +8405,28 @@
         }
       }
     },
+    "With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through."
+          }
+        }
+      }
+    },
+    "With VoiceOver": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With VoiceOver"
+          }
+        }
+      }
+    },
     "Without true darkness at this latitude, few meteors will show.": {
       "extractionState": "manual",
       "localizations": {
@@ -7521,6 +8489,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your darkest nearby sky"
+          }
+        }
+      }
+    },
+    "Your display settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your display settings"
           }
         }
       }
@@ -7774,6 +8753,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "east-southeast"
+          }
+        }
+      }
+    },
+    "essay.access": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stargazing for everyone\n\nThe night sky asks very little of us. You do not need perfect eyesight, a long hike or a telescope to share in it. Many national parks hold their astronomy programs at paved parking areas and visitor centers, and some offer accessible viewing areas, tactile star maps or assistive listening at ranger talks. Ask the park before you go about step-free paths, accessible parking and restrooms near the place you plan to watch.\n\nDarkness can be a barrier of its own. Ground that is easy by day becomes uncertain at night. Arrive before dusk, learn the path while you can see it, and park close to where you will sit. A folding chair and a blanket make a long wait under the stars comfortable at any age. Bring someone along if you can; the sky is better shared.\n\nRed light protects night vision, yours and everyone's around you. Use the dimmest red light that still lets you move safely, and point it at the ground. Nyx's night-vision mode turns the screen red, and field mode lowers the brightness for you and puts it back when you leave.\n\nThe sky can be heard. Astronomers increasingly turn data into sound, and blind and low-vision astronomers have shown how much it can carry. In Nyx, Listen to tonight plays a whole night in twelve seconds: the tone falls as the sky darkens and rises toward dawn, it quiets while the Moon is up, a soft pulse marks moonrise and moonset, and a chime marks the Milky Way's core rising. A transcript says the same night in words. With VoiceOver, the time river, each calendar month and the shape of the night also have an audio graph you can play.\n\nThe Moon can be felt. On an iPhone with a Taptic Engine, Feel the Moon turns its phase into a texture: a few sharp, sparse taps for a new Moon, a broad swell for a full one. As you move along the time river, each night ticks firmer as its score rises.\n\nNyx follows the settings you already use: larger and bold text, VoiceOver and Voice Control, reduced motion, reduced transparency and highlighting, and shapes as well as colour when you ask for them. If something in Nyx does not work for you, that is a flaw to fix, not a limit of the sky."
           }
         }
       }
