@@ -1,3 +1,20 @@
+# Nyx handoff — 2026-10-05 (roadmap: Vision Pro, "stand under tonight's sky")
+
+Roadmap Tier 2b, on branch `vision`. Logged under "Vision Pro" in `DECISIONS.md`. The iPhone app is unchanged apart from one shared, tested math file (`Nyx/Services/SkyDome.swift`).
+
+- **New target `NyxVision`** (visionOS 26.0, scheme NyxVision, bundle `com.harrypakhale.nyx.vision`): shares the engine and bundled data by listing files; no network code is compiled in. Own String Catalog (`NyxVision/Resources/Localizable.xcstrings`, `Scripts/sync_vision_catalog.py`), privacy manifest and layered icon.
+- **Window:** searchable park list with each park's moon-and-darkness score for the chosen night; one park's night (score, shader Moon, true darkness, Moon times, Bortle, What's up, the sky at the clock's moment written out); bottom ornament with night stepper, sunset→sunrise clock and "Middle of darkness". Night vision toggle in the toolbar.
+- **Immersive "Stand under this sky":** catalogue stars (three additive meshes, B−V colours), a modelled Milky Way, the shader Moon at its true place (drawn 3× size), planets with tap cards, core label, compass on the horizon, twilight and moonlit dome, plaque with the honesty line. The celestial sphere turns by one rotation per moment.
+- **Tests:** `NyxTests/SkyDomeTests.swift` (7): rotation vs `AstronomyEngine.horizontal` in four parks (< 0.001°), facing and inverse, southern facing, galactic centre, scrub mapping and clamps, polar spans, twilight ordering.
+
+**Verified 2026-10-05/06:** NyxVision builds with zero warnings (visionOS simulator SDK, Xcode 27.0). iOS `Nyx` scheme on iPhone Air / iOS 27.0, with the Mac heavily loaded by parallel builds (load average ~580): 70 of 71 Swift Testing tests passed; the one failure (`SkyDome.skyColor` at exactly −18° returned 0.004000000000000001 instead of 0.004) is fixed by clamping and checked with a standalone build of the same file; a re-run was blocked by the host ("test runner hung", simulator boot timeout). Both UI tests passed. Both accessibility audits failed only by timeout ("Audit failed to complete in time", "main thread busy for 30 s"), with no audit issues recorded; no iPhone screen changed in this slice. Re-run the full suite on a quiet machine before merging. Reviewed captures (simulator "Nyx Vision Pro", visionOS 27.0, kept as `Research/Screenshots/vision-*`): window (room, immersive, night vision, accessibility size), Milky Way core in July, moonlit sky, Moon card, Saturn card, night-vision sky, plaque. Review fixes: the Milky Way's texture seam ran through the core (moved to the anticentre, noise made periodic), view attachments far out in the sky appeared late or not at all (labels are now SwiftUI rendered into textures), tone mapping bleached the night-vision red to white (sky materials now untone-mapped), the Milky Way was upside down in galactic latitude (texture rows flipped, checked with an orientation card), the Moon's night side punched a black hole in the twilight sky (now light over a sky-coloured disc), night-vision stars rendered white (grey textures, red tint), planets were fainter than bright stars, night-vision window text was filtered twice into a dim red.
+
+**Known limits:** the sky is not aligned to real north (by design, said in the sky). Below magnitude 4.5 there are no stars (no invented filler). The Milky Way is a model, not a photograph. The simulator cannot judge true angular sizes; a device pass is in INPUT_NEEDED 6. Shipping in the iPhone record needs the bundle ID switch described there.
+
+**Next starting point:** owner decides the bundle ID (INPUT_NEEDED 6) and tries it on a device; consider meteor radiants and the eclipse Moon in the immersive sky, and a "tonight" Spotlight/App Intent on visionOS.
+
+---
+
 # Nyx handoff — 2026-10-05 (roadmap: what's up tonight)
 
 Roadmap §2, on branch `roadmap`. Logged under "What's up tonight" in `DECISIONS.md`. The score formula is unchanged; everything new is a reason to go.

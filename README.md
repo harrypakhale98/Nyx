@@ -16,6 +16,10 @@ Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/
 
 The three independent network toggles (forecasts, smoke and haze, park updates) are in Tonight → Settings → Your privacy. They stop new requests without deleting cached data. Only `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com` are reachable through the transport; redirects are rejected. Location remains on-device. PhotosPicker sees only selected photos. Reminders are local.
 
+### Apple Vision Pro
+
+The **NyxVision** scheme builds the visionOS 26+ app: a planner window (every park's moon-and-darkness score for a night, one park's night in full, a night stepper and a sunset-to-sunrise clock in the ornament) and an immersive space, "Stand under this sky", that places the 904 catalogue stars, the Milky Way, the Moon (the iPhone's shader), the planets and the galactic core around you for that park and moment. South is ahead (north in American Samoa); it is not aligned to your room's real north. It makes no network requests. Build with `xcodebuild build -project Nyx.xcodeproj -scheme NyxVision -destination 'generic/platform=visionOS Simulator' -derivedDataPath /tmp/NyxVisionBuild`, then `python3 Scripts/sync_vision_catalog.py /tmp/NyxVisionBuild` to merge its strings into `NyxVision/Resources/Localizable.xcstrings`. DEBUG captures: `-nyx-vision-immersive`, `-nyx-vision-skyonly`, `-nyx-vision-look yaw,pitch`, `-nyx-vision-time 0…1`, `-nyx-vision-body saturn`, with `-nyx-date`, `-nyx-park`, `-nyx-night-vision` and `-nyx-ax5`.
+
 ## Verify
 
 The scheme's tests include `NyxUITests/AccessibilityAuditTests`, Apple's automated accessibility audit on 17 screens in both palettes; set `TEST_RUNNER_NYX_AUDIT_SCREENS=parks,detail` to audit a few. Run one simulator at a time; parallel simulators can overload the Mac.

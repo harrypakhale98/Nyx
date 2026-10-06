@@ -13,16 +13,28 @@
 		1955A73A85BE9FC6A49A222B /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		25869690169DA7AB3D4B444E /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C895A9689DFB8444878E5C /* MotionTilt.swift */; };
 		277F8C64F0380157BE9D3093 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
+		344B1A768B08154C9D54CC30 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
+		44CE6CD4D4D1F6D7BD9DC6A9 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE93CD7AB4547DBEB7286F4 /* stars.json */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */; };
+		685A55072DAD5E5203082FC7 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
 		7126506427BA9508A5AFDC21 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		781244D27B9EF72BEBCF8A4D /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
+		7BFD49661BA2E0D341917690 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
 		8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
+		91255766FCE2F2D9848CC32A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9669360F80847859C5A94942 /* Assets.xcassets */; };
 		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
+		B1CEAD366FA8DD91ED983982 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
+		B9CE014CFB69BD0A59617FDD /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */; };
+		C10A4FF7D4DDE8D0803DBA78 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 108FD5759687C9571D417768 /* Moon.metal */; };
 		C1680990853BED13F996A8E1 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */; };
 		C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
+		D0A792F6F7DBD42F08B7C72E /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
+		D16E58AC5F0496C22A386F10 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
 		D62DC582CFEE25E121C3775F /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */; };
+		D881D1AF471027FE558CE94D /* SkyDome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590ECA2B40434C0323AF6FD2 /* SkyDome.swift */; };
 		EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976C9F1742C2EE997BBE289E /* DataServices.swift */; };
 		F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
 		F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E051542A3954F87E88506B77 /* SharedSettings.swift */; };
@@ -71,8 +83,11 @@
 /* Begin PBXFileReference section */
 		0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0B8CFEEF4D0FA553056E4D4D /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = parks.json; sourceTree = "<group>"; };
+		108FD5759687C9571D417768 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Moon.metal; sourceTree = "<group>"; };
+		2DDB844BA3C38BF029401D53 /* NyxVision.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = NyxVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightWidgetView.swift; sourceTree = "<group>"; };
+		590ECA2B40434C0323AF6FD2 /* SkyDome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyDome.swift; sourceTree = "<group>"; };
 		6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightVisionIntent.swift; sourceTree = "<group>"; };
 		6967BB7A4C4C54513C5F3A49 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starfield.swift; sourceTree = "<group>"; };
 		726A6308FC0202124828D798 /* RealSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealSky.swift; sourceTree = "<group>"; };
@@ -80,6 +95,7 @@
 		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
 		873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyAlmanac.swift; sourceTree = "<group>"; };
 		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
+		9669360F80847859C5A94942 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +149,15 @@
 			path = NyxUITests;
 			sourceTree = "<group>";
 		};
+		EF9B82021F8DE7AC0904028C /* NyxVision */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxVision;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
@@ -145,6 +170,7 @@
 				A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */,
 				E051542A3954F87E88506B77 /* SharedSettings.swift */,
 				873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */,
+				590ECA2B40434C0323AF6FD2 /* SkyDome.swift */,
 				BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */,
 			);
 			path = Services;
@@ -153,6 +179,7 @@
 		3012C7130E736DD7E6A0B52B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				9669360F80847859C5A94942 /* Assets.xcassets */,
 				0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */,
 				0B8CFEEF4D0FA553056E4D4D /* parks.json */,
 				D82B7C8F3A98528CF0A9E37E /* sky-events.json */,
@@ -165,10 +192,11 @@
 			isa = PBXGroup;
 			children = (
 				6A17ED8BAE018F61B73A02CA /* Config */,
-				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				572A8226324E98790B53E82D /* Nyx */,
+				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
+				EF9B82021F8DE7AC0904028C /* NyxVision */,
 				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
 				C6C977DAF6E4DA8EAE489090 /* Products */,
 			);
@@ -214,6 +242,7 @@
 		BA145519602F4507E881CF90 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				108FD5759687C9571D417768 /* Moon.metal */,
 				CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */,
 				E7C895A9689DFB8444878E5C /* MotionTilt.swift */,
 				D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */,
@@ -230,6 +259,7 @@
 				AA589DE85797E6C559AB746B /* Nyx.app */,
 				3883DF0B22709FB826986A9C /* NyxTests.xctest */,
 				C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */,
+				2DDB844BA3C38BF029401D53 /* NyxVision.app */,
 				FA5B722D8576099210CEB8CA /* NyxWidgets.appex */,
 			);
 			name = Products;
@@ -326,6 +356,27 @@
 			productReference = 3883DF0B22709FB826986A9C /* NyxTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		C3FE8CF2BC17EF084DAF890D /* NyxVision */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 083E0E382D9FCC8D981CC0D9 /* Build configuration list for PBXNativeTarget "NyxVision" */;
+			buildPhases = (
+				2173521F4FCCD72FDDA9F592 /* Sources */,
+				EFAC2CA7D595D506FA761FFD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EF9B82021F8DE7AC0904028C /* NyxVision */,
+			);
+			name = NyxVision;
+			packageProductDependencies = (
+			);
+			productName = NyxVision;
+			productReference = 2DDB844BA3C38BF029401D53 /* NyxVision.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -352,6 +403,10 @@
 						DevelopmentTeam = DUHVN68KBA;
 						ProvisioningStyle = Automatic;
 					};
+					C3FE8CF2BC17EF084DAF890D = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 35DBE5EFDB6C5F8237D10EDD /* Build configuration list for PBXProject "Nyx" */;
@@ -370,6 +425,7 @@
 			targets = (
 				0A5547B7F4020EE942D01DA6 /* Nyx */,
 				1C08AA3770ABC4BE10D980C7 /* NyxWidgets */,
+				C3FE8CF2BC17EF084DAF890D /* NyxVision */,
 				854F1CAF019EEA9E852C4585 /* NyxTests */,
 				35EEA7F15A5144F18CBA3158 /* NyxUITests */,
 			);
@@ -409,9 +465,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EFAC2CA7D595D506FA761FFD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				91255766FCE2F2D9848CC32A /* Assets.xcassets in Resources */,
+				D0A792F6F7DBD42F08B7C72E /* parks.json in Resources */,
+				344B1A768B08154C9D54CC30 /* sky-events.json in Resources */,
+				44CE6CD4D4D1F6D7BD9DC6A9 /* stars.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2173521F4FCCD72FDDA9F592 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D16E58AC5F0496C22A386F10 /* AstronomyEngine.swift in Sources */,
+				C10A4FF7D4DDE8D0803DBA78 /* Moon.metal in Sources */,
+				685A55072DAD5E5203082FC7 /* Park.swift in Sources */,
+				B1CEAD366FA8DD91ED983982 /* ScoreEngine.swift in Sources */,
+				B9CE014CFB69BD0A59617FDD /* SkyAlmanac.swift in Sources */,
+				7BFD49661BA2E0D341917690 /* SkyConditions.swift in Sources */,
+				D881D1AF471027FE558CE94D /* SkyDome.swift in Sources */,
+				781244D27B9EF72BEBCF8A4D /* WhatsUp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6A9B704D1082D7C0A158B7FF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -556,6 +638,30 @@
 			};
 			name = Debug;
 		};
+		60C27F2F0F4FEDA85CF21D52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVision-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.vision;
+				PRODUCT_NAME = NyxVision;
+				SDKROOT = xros;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Release;
+		};
 		80A612BD5A59A9A9EED2D89E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -687,7 +793,6 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -696,6 +801,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -755,7 +861,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -764,6 +869,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
@@ -784,9 +890,42 @@
 			};
 			name = Debug;
 		};
+		EF3D960694E3A07D7B83D8F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVision-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.vision;
+				PRODUCT_NAME = NyxVision;
+				SDKROOT = xros;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		083E0E382D9FCC8D981CC0D9 /* Build configuration list for PBXNativeTarget "NyxVision" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EF3D960694E3A07D7B83D8F9 /* Debug */,
+				60C27F2F0F4FEDA85CF21D52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		35DBE5EFDB6C5F8237D10EDD /* Build configuration list for PBXProject "Nyx" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

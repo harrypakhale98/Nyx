@@ -5,6 +5,7 @@ options:
   bundleIdPrefix: com.harrypakhale
   deploymentTarget:
     iOS: "26.0"
+    visionOS: "26.0"
   defaultSourceDirectoryType: syncedFolder
   createIntermediateGroups: true
 settings:
@@ -108,6 +109,44 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
         ENABLE_PREVIEWS: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+  # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
+  # bundled data by listing files; no network code is compiled in (see PRIVACY.md).
+  NyxVision:
+    type: application
+    platform: visionOS
+    sources:
+      - path: NyxVision
+      - path: Nyx/Models/Park.swift
+      - path: Nyx/Models/SkyConditions.swift
+      - path: Nyx/Services/AstronomyEngine.swift
+      - path: Nyx/Services/ScoreEngine.swift
+      - path: Nyx/Services/SkyAlmanac.swift
+      - path: Nyx/Services/WhatsUp.swift
+      - path: Nyx/Services/SkyDome.swift
+      - path: Nyx/DesignSystem/Moon.metal
+      - path: Nyx/Resources/stars.json
+      - path: Nyx/Resources/parks.json
+      - path: Nyx/Resources/sky-events.json
+      - path: Nyx/Resources/Assets.xcassets
+    info:
+      path: Config/NyxVision-Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "7"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.vision
+        PRODUCT_NAME: NyxVision
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ENABLE_PREVIEWS: YES
   NyxTests:
     type: bundle.unit-test
     platform: iOS
@@ -144,6 +183,14 @@ schemes:
       targets:
         - NyxTests
         - NyxUITests
+    run:
+      config: Debug
+    archive:
+      config: Release
+  NyxVision:
+    build:
+      targets:
+        NyxVision: all
     run:
       config: Debug
     archive:
