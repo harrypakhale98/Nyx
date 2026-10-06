@@ -10,14 +10,17 @@
 		0726F99AC834BEFF893CE378 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
 		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
 		181813D2F2A04B5EDC0379EA /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
+		1955A73A85BE9FC6A49A222B /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		25869690169DA7AB3D4B444E /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C895A9689DFB8444878E5C /* MotionTilt.swift */; };
 		277F8C64F0380157BE9D3093 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */; };
+		7126506427BA9508A5AFDC21 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
 		8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
 		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
+		C1680990853BED13F996A8E1 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */; };
 		C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
 		D62DC582CFEE25E121C3775F /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */; };
 		EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976C9F1742C2EE997BBE289E /* DataServices.swift */; };
@@ -75,15 +78,18 @@
 		726A6308FC0202124828D798 /* RealSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealSky.swift; sourceTree = "<group>"; };
 		7A820E0228800E1EC62C207A /* SkyConditions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyConditions.swift; sourceTree = "<group>"; };
 		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
+		873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyAlmanac.swift; sourceTree = "<group>"; };
 		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsUp.swift; sourceTree = "<group>"; };
 		BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetail.swift; sourceTree = "<group>"; };
 		C2B255D63E873FD4422C672B /* Nyx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Nyx.xcconfig; sourceTree = "<group>"; };
 		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonDisc.swift; sourceTree = "<group>"; };
 		D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyxTheme.swift; sourceTree = "<group>"; };
+		D82B7C8F3A98528CF0A9E37E /* sky-events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "sky-events.json"; sourceTree = "<group>"; };
 		E051542A3954F87E88506B77 /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		E7C895A9689DFB8444878E5C /* MotionTilt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTilt.swift; sourceTree = "<group>"; };
 		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -138,6 +144,8 @@
 				BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */,
 				A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */,
 				E051542A3954F87E88506B77 /* SharedSettings.swift */,
+				873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */,
+				BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -147,6 +155,7 @@
 			children = (
 				0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */,
 				0B8CFEEF4D0FA553056E4D4D /* parks.json */,
+				D82B7C8F3A98528CF0A9E37E /* sky-events.json */,
 				FBE93CD7AB4547DBEB7286F4 /* stars.json */,
 			);
 			path = Resources;
@@ -381,6 +390,7 @@
 			files = (
 				8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */,
 				4F83D43656FA1ABA1181846D /* parks.json in Resources */,
+				7126506427BA9508A5AFDC21 /* sky-events.json in Resources */,
 				F959A114149CD1E965A35078 /* stars.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -431,9 +441,11 @@
 				181813D2F2A04B5EDC0379EA /* RealSky.swift in Sources */,
 				F4C49C384BFCA11DA76FEF72 /* ScoreEngine.swift in Sources */,
 				F922D26269FF4D42BAEC827E /* SharedSettings.swift in Sources */,
+				C1680990853BED13F996A8E1 /* SkyAlmanac.swift in Sources */,
 				7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */,
 				FF87A6B40581265EA3EFA16B /* Starfield.swift in Sources */,
 				177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */,
+				1955A73A85BE9FC6A49A222B /* WhatsUp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

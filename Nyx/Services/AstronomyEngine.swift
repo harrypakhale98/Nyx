@@ -190,6 +190,8 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         return best
     }
     /// Seasonal guidance for the galactic core (declination about −29°), never a timed forecast.
+    /// `WhatsUp` times the core with `SkyAlmanac` and keeps these words only where nothing can be
+    /// timed (far north, no true darkness).
     /// Its highest possible altitude is 90° − |latitude + 29°|: below about 3° it never clears the
     /// horizon (every Alaska park), and below about 10° it only skims the southern horizon.
     func milkyWayGuidance(for sky: SkyConditions, park: Park) -> String {

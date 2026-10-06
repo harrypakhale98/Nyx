@@ -16,6 +16,9 @@ import CoreLocation
     var details: [String:ForecastDetail] = [:] { didSet { outlookCache=[:] } }
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
+    /// What's up each night. Astronomy only, so never invalidated by a forecast.
+    @ObservationIgnored private var skyCache: [String:WhatsUp] = [:]
+    @ObservationIgnored private var eventCache: [String:WhatsUp.Events] = [:]
     /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
@@ -30,6 +33,7 @@ import CoreLocation
         #if DEBUG
         if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
         if DebugScenario.state=="polar" { return Date(timeIntervalSince1970:1782086400) }
+        if let fixed=DebugScenario.date { return fixed }
         #endif
         return clock
     }
@@ -62,6 +66,7 @@ import CoreLocation
         if DebugScenario.screen != nil { homeID="jotr" }
         if DebugScenario.state=="polar" { homeID="dena" }
         if DebugScenario.state=="polar-night" { homeID="gaar" }
+        if let park=DebugScenario.park { homeID=park }
         #endif
     }
     var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
@@ -98,6 +103,36 @@ import CoreLocation
         } else { outlook.agreement=nil }
         return outlook.isEmpty ? nil : outlook
     }
+    /// The core, planets, a meteor shower and an eclipse for one night, worded for that night
+    /// ("peak tonight" only on tonight). Kept per park and night: scrubbing recomputes nothing.
+    func whatsUp(_ night:Night)->WhatsUp {
+        let isTonight=night.id==tonight(night.park), key=Self.skyKey(night,isTonight:isTonight)
+        if let cached=skyCache[key] { return cached }
+        let value=WhatsUp(park:night.park,sky:night.sky,isTonight:isTonight)
+        skyCache[key]=value
+        return value
+    }
+    /// Only the shower and eclipse: cheap enough for every night of a calendar month.
+    func events(_ night:Night)->WhatsUp.Events {
+        let key="\(night.park.id)-\(Int(night.id.timeIntervalSince1970))"
+        if let cached=eventCache[key] { return cached }
+        let value=skyCache[Self.skyKey(night,isTonight:night.id==tonight(night.park))]?.events ?? WhatsUp.Events(park:night.park,sky:night.sky)
+        eventCache[key]=value
+        return value
+    }
+    /// Eclipse and shower-peak marks for a run of nights, keyed by night.
+    func markers(_ nights:[Night])->[Date:WhatsUp.Events.Marker] {
+        Dictionary(nights.compactMap { night in events(night).marker(park:night.park).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    }
+    /// Works out the river's nights off the main thread, so a scrub finds each one ready.
+    func prepareWhatsUp(_ nights:[Night]) async {
+        let missing=nights.map { ($0,$0.id==tonight($0.park)) }.filter { skyCache[Self.skyKey($0.0,isTonight:$0.1)] == nil }
+        guard !missing.isEmpty else { return }
+        let inputs=missing.map { (key:Self.skyKey($0.0,isTonight:$0.1),park:$0.0.park,sky:$0.0.sky,isTonight:$0.1) }
+        let computed=await Task.detached(priority:.utility) { inputs.map { ($0.key,WhatsUp(park:$0.park,sky:$0.sky,isTonight:$0.isTonight)) } }.value
+        for (key,value) in computed where skyCache[key] == nil { skyCache[key]=value }
+    }
+    private static func skyKey(_ night:Night,isTonight:Bool)->String { "\(night.park.id)-\(Int(night.id.timeIntervalSince1970))-\(isTonight)" }
     func outlooks(_ nights:[Night])->[Date:NightOutlook] {
         Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }

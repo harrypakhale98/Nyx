@@ -65,7 +65,13 @@ nonisolated struct NotificationScheduler {
     /// Reminders fire at 18:00 park time the evening before. When that moment has passed
     /// (tonight, or tomorrow opened late), they fire in a minute instead, as long as true
     /// darkness has not begun; a reminder already issued is never repeated.
-    func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[])->[NightReminder] {
+    /// Meteor shower peaks join the same plan, budget, ledger and switch (with their own sub-switch).
+    func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[],showers:Bool=false,table:SkyEvents = .shared)->[NightReminder] {
+        let scored=scorePlans(nights:nights,now:now,delivered:delivered)
+        let meteors=showers ? showerPlans(nights:nights,now:now,delivered:delivered,table:table) : []
+        return (scored+meteors).sorted { ($0.fireDate,$0.id)<($1.fireDate,$1.id) }.prefix(max(0,min(60,limit))).map{$0}
+    }
+    private func scorePlans(nights:[Night],now:Date,delivered:Set<String>)->[NightReminder] {
         var seen=Set<String>()
         return nights.filter { $0.score.value>=90 && $0.score.hasForecast && $0.sky.darkHours>0 }
             .sorted { $0.id<$1.id }.compactMap { night in
@@ -78,15 +84,40 @@ nonisolated struct NotificationScheduler {
                 let identifier=Self.identifier(park:park,night:night.id)
                 guard !delivered.contains(identifier), seen.insert(identifier).inserted else { return nil }
                 return NightReminder(id:identifier,parkID:park.id,title:String(localized:"A promising night at \(park.shortName)"),body:String(localized:"\(park.dayLabel(night.id)): \(night.score.value)/100, \(night.score.band.label). Forecasts can change. Confirm park access before traveling."),fireDate:fire,timeZone:park.timeZone)
-            }.prefix(max(0,min(60,limit))).map{$0}
+            }
+    }
+    /// A major shower's peak night at a saved park, when at least 20 an hour are expected at its
+    /// best moment with the Moon down (`WhatsUp.Events.reminderShower`), whatever the score. One per
+    /// night across all saved parks: the park with the highest rate. Skipped when the forecast for
+    /// that night is mostly cloud. Fires at 16:00 park time that day, or in a minute when that has
+    /// passed, as long as true darkness has not begun.
+    func showerPlans(nights:[Night],now:Date,delivered:Set<String>,table:SkyEvents = .shared)->[NightReminder] {
+        var best:[String:(night:Night,shower:SkyAlmanac.ShowerNight)]=[:]
+        for night in nights where night.sky.darkHours>0 && (night.cloudCover ?? 0)<70 {
+            guard let shower=WhatsUp.Events(park:night.park,sky:night.sky,table:table).reminderShower else { continue }
+            let day=night.park.isoDay(night.id)
+            if shower.hourlyRate>(best[day]?.shower.hourlyRate ?? -1) { best[day]=(night,shower) }
+        }
+        return best.values.compactMap { night,shower in
+            let park=night.park
+            guard let afternoon=park.calendar.date(bySettingHour:16,minute:0,second:0,of:night.id), let darkStart=night.sky.darkStart, let moment=shower.best else { return nil }
+            let fire=afternoon>now ? afternoon : now.addingTimeInterval(60)
+            let identifier=Self.showerIdentifier(park:park,night:night.id)
+            guard fire<darkStart, !delivered.contains(identifier) else { return nil }
+            return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.name) peak tonight at \(park.shortName)"),
+                body:String(localized:"About \(WhatsUp.rounded(rate:shower.hourlyRate)) an hour \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide; check clouds and park access before you go."),
+                fireDate:fire,timeZone:park.timeZone)
+        }
     }
     static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
+    /// Same prefix and trailing night stamp as score reminders, so the ledger and cancel paths treat both alike.
+    static func showerIdentifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-meteors-\(Int(night.timeIntervalSince1970))" }
     /// Replans reminders. A reminder already pending is left exactly as scheduled, so opening
     /// Nyx again never pushes it back or replaces its title; one that no longer qualifies is
     /// cancelled and may be planned again later. `retitle` may offer a calmer title for a newly
     /// added reminder at a fixed time; reminders due within two minutes skip it, so a slow
     /// model can never push their trigger into the past.
-    func reschedule(nights:[Night],now:Date = .now,retitle:(@Sendable (NightReminder) async -> String?)?=nil) async {
+    func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,retitle:(@Sendable (NightReminder) async -> String?)?=nil) async {
         guard await center.authorized() else { return }
         let pending=await center.pendingIDs()
         let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
@@ -94,14 +125,15 @@ nonisolated struct NotificationScheduler {
         // Issued before and no longer pending: it was delivered, tapped or cleared.
         let finished=issued.subtracting(ours).union(await center.deliveredIDs())
         let available=max(0,64-pending.filter{!$0.hasPrefix("nyx-night-")}.count)
-        let planned=plans(nights:nights,now:now,limit:available,delivered:finished)
+        let planned=plans(nights:nights,now:now,limit:available,delivered:finished,showers:showers)
         let plannedIDs=Set(planned.map(\.id))
         let cancelled=ours.subtracting(plannedIDs)
         await center.remove(cancelled.sorted())
         var added=ours.intersection(plannedIDs)
         for plan in planned where !ours.contains(plan.id) {
             var reminder=plan
-            if plan.fireDate>now.addingTimeInterval(120), let title=await retitle?(plan) {
+            // Only score reminders may be retitled; a shower reminder's title names the shower.
+            if plan.fireDate>now.addingTimeInterval(120), !plan.id.contains("-meteors-"), let title=await retitle?(plan) {
                 reminder=NightReminder(id:plan.id,parkID:plan.parkID,title:title,body:plan.body,fireDate:plan.fireDate,timeZone:plan.timeZone)
             }
             if (try? await center.add(reminder)) != nil { added.insert(plan.id) }

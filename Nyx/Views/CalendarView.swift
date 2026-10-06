@@ -6,11 +6,15 @@ struct NightCell: View {
     var highlighted:Bool=false
     var isTonight:Bool=false
     var isPast:Bool=false
+    /// A visible lunar eclipse or a notable shower's peak; at most one per night.
+    var marker:WhatsUp.Events.Marker?=nil
     var body:some View {
         VStack(spacing:5) {
             Text("\(night.park.calendar.component(.day,from:night.id))").font(.caption.monospacedDigit().weight(isTonight ? .bold : .regular))
                 .foregroundStyle(isTonight ? palette.accent : isPast ? palette.muted : palette.ink)
                 .overlay(alignment:.bottom) { if isTonight { Capsule().fill(palette.accent).frame(width:12,height:2).offset(y:4) } }
+                // The night's event beside its date: a reason to go that is not part of the score.
+                .overlay(alignment:.topTrailing) { if let marker { SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.ink.opacity(isPast ? 0.5 : 1)).frame(width:12,height:12).offset(x:15,y:-3) } }
             Canvas { context,size in
                 // Size follows the score on a curve, so a 95 night reads clearly larger than a 70.
                 let center=CGPoint(x:size.width/2,y:size.height/2),radius=1.5+8*pow(Double(night.score.value)/100,1.5)
@@ -40,6 +44,7 @@ struct NightCell: View {
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
         else { parts.append(String(localized:"No cloud forecast")) }
         if highlighted { parts.append(String(localized:"In the five-night moon window")) }
+        if let marker { parts.append(marker.name) }
         if isPast { parts.append(String(localized:"Past night")) }
         return parts.joined(separator:". ")
     }
@@ -49,6 +54,8 @@ struct NightPeek: View {
     @Environment(\.nyx) private var palette
     let night:Night
     var isTonight=false
+    /// The night's eclipse or shower peak, when it has one.
+    var event:WhatsUp.Item?=nil
     var body:some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(alignment:.center,spacing:16) {
@@ -66,6 +73,16 @@ struct NightPeek: View {
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
             else { Text("True darkness \(night.park.time(night.sky.darkStart)) – \(night.park.time(night.sky.darkEnd))").font(.subheadline).foregroundStyle(palette.ink) }
             Text(night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+            if let event {
+                Divider().overlay(palette.line)
+                HStack(alignment:.top,spacing:12) {
+                    SkyGlyph(item:event.kind,color:palette.accent).frame(width:18,height:18)
+                    VStack(alignment:.leading,spacing:3) {
+                        Text([event.title,event.value].compactMap { $0 }.joined(separator:" · ")).font(.subheadline.weight(.medium)).foregroundStyle(palette.ink)
+                        Text(event.detail).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }
+                }
+            }
         }.padding(20).frame(width:320).background(Color.black)
     }
 }
@@ -125,9 +142,10 @@ struct CalendarView: View {
                                     Text(park.dayLabel(night.id)).font(.headline)
                                     Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
                                     Text(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+                                    if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
                             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))")
+                                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
                                 .accessibilityHint(inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
                                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                                 .contextMenu {
@@ -140,11 +158,12 @@ struct CalendarView: View {
                             ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
                             ForEach(0..<lead,id:\.self) { _ in Color.clear.frame(height:78) }
                             ForEach(nights) { night in
-                                Button { chosen=night } label:{ NightCell(night:night,highlighted:inWindow.contains(night.id),isTonight:night.id==tonight,isPast:night.id<tonight) }.buttonStyle(.plain)
+                                let events=model.events(night)
+                                Button { chosen=night } label:{ NightCell(night:night,highlighted:inWindow.contains(night.id),isTonight:night.id==tonight,isPast:night.id<tonight,marker:events.marker(park:park)) }.buttonStyle(.plain)
                                     .contextMenu {
                                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                                    } preview: { NightPeek(night:night,isTonight:night.id==tonight).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
+                                    } preview: { NightPeek(night:night,isTonight:night.id==tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
                             }
                         }
                         .id(monthOffset)
@@ -164,7 +183,7 @@ struct CalendarView: View {
                             Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
                         }
                     } }
-                    Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies.").font(.caption).foregroundStyle(palette.muted)
+                    Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
                 }.padding(24).clipped()
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))

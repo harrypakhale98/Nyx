@@ -22,6 +22,8 @@ struct TimeRiver: View {
     var startsTonight=true
     /// Each night's forecast context, keyed by night; only `scoreRange` and `agreement` are drawn.
     var outlooks:[Date:NightOutlook]=[:]
+    /// A visible eclipse or a notable shower's peak, drawn small above that night's point.
+    var markers:[Date:WhatsUp.Events.Marker]=[:]
     /// Whether the current drag is a horizontal scrub; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
@@ -46,6 +48,10 @@ struct TimeRiver: View {
             } else {
                 river
                 summary
+                if let current, let marker=markers[current.id] {
+                    Label { Text(marker.name) } icon:{ SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.accent).frame(width:14,height:14) }
+                        .font(.caption).foregroundStyle(palette.ink).accessibilityHidden(true)
+                }
             }
             Text(legend).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
@@ -115,7 +121,7 @@ struct TimeRiver: View {
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
         let clouds=current.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")
-        return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")
+        return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
     }
     private func agreementSpoken(_ night:Night)->String? {
         guard let outlook=outlooks[night.id], let agreement=outlook.agreement else { return nil }
@@ -126,8 +132,9 @@ struct TimeRiver: View {
     private var hasRanges:Bool { nights.contains { outlooks[$0.id]?.scoreRange != nil } }
     private var legend: String {
         if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet.") }
-        return hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
+        let base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
             : String(localized:"Drag along the river. Dashed, hollow nights are moon and darkness only.")
+        return markers.isEmpty ? base : base+" "+String(localized:"Small marks above a night are a meteor shower's peak or a lunar eclipse.")
     }
 
     private func x(_ i:Int,width:Double)->Double {
@@ -190,6 +197,10 @@ struct TimeRiver: View {
             let p=point(i), night=nights[i]
             if peaks.contains(i) {
                 context.fill(Path(ellipseIn:CGRect(x:p.x-12,y:p.y-12,width:24,height:24)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.45),palette.accent.opacity(0)]),center:p,startRadius:0,endRadius:12))
+            }
+            // The selected night's mark is named under the river instead, clear of its Moon.
+            if let marker=markers[night.id], i != index {
+                SkyGlyph.draw(SkyGlyph.Kind(marker.glyph),in:&context,rect:CGRect(x:p.x-5,y:p.y-21,width:10,height:10),color:palette.ink)
             }
             let r=i==index ? 5.0 : 2.4
             let dot=Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r))

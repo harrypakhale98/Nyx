@@ -14,6 +14,7 @@ struct RootView:View {
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
+    @AppStorage("showerReminders") private var showerReminders=true
     @State private var savedUpdating=false
     @State private var tab=0
     @State private var intro=false
@@ -83,6 +84,7 @@ struct RootView:View {
         }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
+        .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
         }
@@ -106,8 +108,9 @@ struct RootView:View {
         case "ask": GuideView(mode:.planning)
         case "widgets": WidgetReviewView(entry:TonightEntry(date:.now,night:model.home.map{model.night($0)},nightVision:false,week:model.home.map{model.nights($0,from:model.tonight($0),count:7)} ?? []))
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
-        case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park)) }.padding(24) }.background(NightBackground()) }
-        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { TimeRiver(nights:nights,selected:.constant(model.tonight(park)),outlooks:model.outlooks(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
+        case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
+        case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
+        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { TimeRiver(nights:nights,selected:.constant(model.tonight(park)),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())
@@ -179,7 +182,7 @@ struct RootView:View {
             let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
             let names=Dictionary(parks.map { ($0.id,$0.shortName) },uniquingKeysWith:{ first,_ in first })
             // Reminders may have been switched off while the nights were computed.
-            if notificationsEnabled { await NotificationScheduler().reschedule(nights:nights) { plan in
+            if notificationsEnabled { await NotificationScheduler().reschedule(nights:nights,showers:showerReminders) { plan in
                 // The on-device model may only choose between two vetted titles; it never writes forecasts.
                 guard let name=names[plan.parkID], await OnDeviceGuide.reminderStyle(parkName:name) else { return nil }
                 return String(localized:"A night to consider at \(name)")

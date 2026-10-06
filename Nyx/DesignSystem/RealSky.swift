@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// The real sky over a park on a night: 904 stars from the Yale Bright Star Catalogue (to
-/// magnitude 4.5) in their true colours, and the Milky Way placed along the galactic plane.
+/// magnitude 4.5) in their true colours, the Milky Way placed along the galactic plane, the
+/// naked-eye planets and, on shower nights, the meteor radiant.
 /// Seen facing south (north in the southern hemisphere) at the middle of that night's darkness.
 /// It is the geometry of the sky, not a visibility forecast: clouds belong to the score.
 struct RealSky: View {
@@ -24,6 +25,7 @@ struct RealSky: View {
                 // Far to near: the Milky Way and faint stars barely move, bright stars move most.
                 StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle).equatable().offset(x:tilt.x*2,y:tilt.y*2)
                 StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4)
+                MarkLayer(sky:sky,ink:palette.ink,strength:strength).equatable().offset(x:tilt.x*5,y:tilt.y*5)
                 Canvas { context,size in
                     let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
                     for star in sky.bright {
@@ -77,6 +79,41 @@ private struct StarLayer: View, Equatable {
     }
 }
 
+/// The planets as slightly larger, warm points, and on shower nights the radiant as a faint burst
+/// of short rays. No names: the sky sits behind every screen's own text, where a name reads as UI
+/// that VoiceOver cannot reach (the audit flags it); the What's up card names them instead.
+private struct MarkLayer: View, Equatable {
+    let sky: SkyProjection.Sky
+    let ink: Color
+    let strength: Double
+    static func == (a:Self,b:Self)->Bool { a.sky.id==b.sky.id && a.ink==b.ink && a.strength==b.strength }
+    var body: some View {
+        Canvas { context,size in
+            let warm=Color(red:1,green:0.86,blue:0.66).mix(with:ink,by:0.3)
+            let opacity=min(1,strength/0.6)
+            if let radiant=sky.radiant {
+                let p=SkyProjection.screen(radiant.position,size:size)
+                var rays=Path()
+                for i in 0..<10 {
+                    let angle=Double(i)*Double.pi/5+0.3, inner=6.0, outer=inner+(i%2==0 ? 11 : 7)
+                    rays.move(to:CGPoint(x:p.x+inner*cos(angle),y:p.y+inner*sin(angle)))
+                    rays.addLine(to:CGPoint(x:p.x+outer*cos(angle),y:p.y+outer*sin(angle)))
+                }
+                context.stroke(rays,with:.color(ink.opacity(0.3*opacity)),style:StrokeStyle(lineWidth:0.7,lineCap:.round))
+            }
+            for planet in sky.planets {
+                let p=SkyProjection.screen(planet.position,size:size)
+                guard p.x>8, p.x<size.width-8, p.y>8, p.y<size.height-8 else { continue }
+                // As bright as the brightest stars, never brighter: the sky stays behind the text.
+                let d=max(3,min(4.6,3.8-0.35*planet.magnitude))
+                context.fill(Path(ellipseIn:CGRect(x:p.x-d*1.5,y:p.y-d*1.5,width:d*3,height:d*3)),
+                             with:.radialGradient(Gradient(colors:[warm.opacity(0.16*opacity),warm.opacity(0)]),center:p,startRadius:0,endRadius:d*1.5))
+                context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(warm.opacity(min(1,1.1*strength))))
+            }
+        }
+    }
+}
+
 /// Positions are computed once per park and night and kept, so screens can share them.
 @MainActor final class SkyProjection {
     static let shared=SkyProjection()
@@ -97,6 +134,8 @@ private struct StarLayer: View, Equatable {
         }
     }
     nonisolated struct GalaxyPoint: Sendable { let position: SIMD2<Double>; let brightness: Double }
+    /// A planet or a shower radiant, placed for the same moment as the stars (the name is for debugging and previews).
+    nonisolated struct Mark: Sendable { let position: SIMD2<Double>; let name: String; let magnitude: Double }
     nonisolated struct Sky: Sendable {
         let id: String
         let faint: [Star]
@@ -105,6 +144,8 @@ private struct StarLayer: View, Equatable {
         let galaxy: [[GalaxyPoint]]
         /// True when the Sun is at least 12° down at the moment shown: the Milky Way is drawn only then.
         let dark: Bool
+        var planets: [Mark]=[]
+        var radiant: Mark?=nil
     }
     /// Skies by park and night, oldest first out: each holds about 45 KB of stars, and scrubbing
     /// thirty nights across several parks would otherwise keep every one of them.
@@ -160,7 +201,23 @@ private struct StarLayer: View, Equatable {
             else if !current.isEmpty { segments.append(current); current=[] }
         }
         if !current.isEmpty { segments.append(current) }
-        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:engine.solarAltitude(at:moment,park:park) < -12)
+        let dark=engine.solarAltitude(at:moment,park:park) < -12
+        // Planets and a radiant only when the sky shown is dark: a label in daylight would be a fiction.
+        var planets:[Mark]=[], radiant:Mark?
+        if dark {
+            let almanac=SkyAlmanac()
+            for planet in SkyAlmanac.Planet.allCases {
+                let position=almanac.position(of:planet,at:moment)
+                guard engine.horizontal(date:moment,park:park,ra:position.ra,dec:position.dec).altitude>2, let p=project(position.ra,position.dec) else { continue }
+                planets.append(Mark(position:p,name:planet.name,magnitude:position.magnitude))
+            }
+            // The radiant of a shower worth looking for that night (fixed J2000 position; its drift is under a degree a day).
+            if let shower=WhatsUp.Events(park:park,sky:sky).shower, shower.hourlyRate>=5 || shower.isPeakNight,
+               let p=project(shower.shower.radiantRA*Double.pi/180,shower.shower.radiantDec*Double.pi/180) {
+                radiant=Mark(position:p,name:shower.shower.name,magnitude:0)
+            }
+        }
+        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,planets:planets,radiant:radiant)
         cache[key]=result
         recent.append(key)
         if recent.count>capacity { cache[recent.removeFirst()]=nil }

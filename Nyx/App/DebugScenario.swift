@@ -16,6 +16,23 @@ enum DebugScenario {
         return nil
         #endif
     }
+    /// `-nyx-date 2026-12-13`: "now" is that afternoon (21:00 UTC), so tonight is that night in every US park.
+    static var date: Date? {
+        #if DEBUG
+        guard let text=argument("-nyx-date") else { return nil }
+        return try? Date(text+"T21:00:00Z",strategy:.iso8601)
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-park ever`: the starting park for a scenario (Joshua Tree otherwise).
+    static var park: String? {
+        #if DEBUG
+        return argument("-nyx-park")
+        #else
+        return nil
+        #endif
+    }
     static var onboardingPage:Int {
         #if DEBUG
         return min(2,max(0,Int(argument("-nyx-onboarding-page") ?? "0") ?? 0))

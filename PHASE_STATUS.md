@@ -1,3 +1,24 @@
+# Nyx handoff — 2026-10-05 (roadmap: what's up tonight)
+
+Roadmap §2, on branch `roadmap`. Logged under "What's up tonight" in `DECISIONS.md`. The score formula is unchanged; everything new is a reason to go.
+
+- **Engine:** `SkyAlmanac` (core, planets via Schlyter elements, IMO meteor model, lunar eclipse visibility) and `SkyEvents` (bundled `sky-events.json`, sources in `Research/sky-events.md`). Wording and selection in `WhatsUp` (`Nyx/Services/WhatsUp.swift`), cached per park and night in `PlanModel`.
+- **Park detail:** a "What's up tonight" card after the sky arc: eclipse and shower first, then the timed Milky Way core ("9:38 PM – 2:41 AM · Highest at 11:13 PM, 27° up in the south. Moon-free from 12:12 AM."), then planets brightest first. Links to the Milky Way and new meteor essays. The seasonal Milky Way sentence is gone from "What the sky may hold".
+- **Sky arc:** the core's path (soft band, dotted spine, "Core" label, legend, VoiceOver). **Real sky:** planets as warm labelled points, the radiant as faint rays on shower nights.
+- **Calendar, river, peek, breakdown:** one mark per night (visible eclipse > notable shower peak) with names in VoiceOver and the peek; breakdown says "Not part of the score."
+- **Tonight:** one capsule at most: eclipse, then a major shower peak (≥ 20/h, Moon down), then "Darker on …".
+- **Reminders:** major shower peaks at saved parks, one per night, own "Meteor shower peaks" switch, same ledger and budget.
+- **Learn / About the data / README / site:** "Watching a meteor shower"; IMO and NASA/Espenak credits and accuracy.
+- DEBUG: `-nyx-date yyyy-MM-dd`, `-nyx-park <id>`, `-nyx-screen whatsup` (also audited).
+
+**Verified 2026-10-05:** zero warnings; iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5 — 64 Swift Testing tests (18 new: 6 engine references against PyEphem in `SkyAlmanacTests`, 12 in `WhatsUpTests` for table loading, core and planet wording, shower selection, peak notes, eclipse visibility, shower reminders, budget, ledger and no retitling) plus both UI tests and both accessibility audits (18 screens incl. the new `whatsup` × standard and night vision) pass on both runtimes. Reviewed captures (kept as `Research/Screenshots/whatsup-*`): detail and card on a Geminid peak, a total eclipse (and night vision), Alaska, a July core night, AX5, sky arc with the core, calendar, river, Tonight (shower and eclipse lines), Learn. Review fixes: planets took a glyph and a repeated time each (now one grouped list), the eclipse sentence repeated its own times, the calendar mark was lost in the halo (now beside the date), the river mark sat under the selected Moon, background planet names read as UI and failed the audit (removed; the card names them), essay links had an 18 pt hit area.
+
+**Known limits:** shower radiants are drawn at their J2000 peak position (drift under a degree a day); the activity profile uses IMO's default steepness where the table has none, so plateau showers (Taurids) are underestimated away from their peak; the 2027 IMO calendar was read only from excerpts (see `Research/sky-events.md`). The eclipse table ends in 2032; shower peaks without a published time come from the Sun's longitude (within about 20 minutes of IMO's, ±12 h for the five showers IMO dates only to a degree). Planets are not named in the background sky (audit: unreachable text); the card names them. xcodebuild sometimes stays alive after all tests report; results are read from the log.
+
+**Next starting point:** integrator bumps the build number; consider App Store In-App Events for the Geminids (Dec 13–14, 2026) now that the app names them.
+
+---
+
 # Nyx handoff — 2026-10-05 (roadmap: an honest forecast)
 
 Roadmap §3, on branch `roadmap`. Logged under "An honest forecast" in `DECISIONS.md`. The score formula is unchanged; everything new is context.
