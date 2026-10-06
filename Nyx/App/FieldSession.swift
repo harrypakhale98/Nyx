@@ -9,7 +9,8 @@ import WidgetKit
 @MainActor @Observable final class FieldSession {
     let park: Park
     let night: FieldNight
-    let score: DarknessScore
+    /// Read once on entry (field mode is one night); DEBUG captures set it again after a live refresh.
+    var score: DarknessScore
     var adaptation: DarkAdaptation
     /// Set when the eye's clock started over on return, until acknowledged.
     var reset: DarkAdaptation.Reset?

@@ -157,6 +157,54 @@ import simd
     }
     /// Core Motion's frame (x north, y west, z up): upright and facing north reads as north, level,
     /// whichever way round the quaternion is applied.
+    // MARK: The Milky Way in the compass
+
+    @Test func galacticPlaneMatchesPyEphem() {
+        let plane=SkyCompass.galacticPlane(step: 90), deg=180/Double.pi
+        // PyEphem 4.2.1, Galactic(l, 0) → Equatorial, J2000.
+        let reference: [(ra: Double, dec: Double)]=[(266.405, -28.936), (318.004, 48.330), (86.405, 28.936), (138.004, -48.330)]
+        #expect(plane.count == 4)
+        for (point, ref) in zip(plane, reference) {
+            #expect(abs(point.ra*deg-ref.ra)<0.02 && abs(point.dec*deg-ref.dec)<0.02)
+        }
+        // Brightest and widest at the core, faintest and narrowest toward the anticentre.
+        #expect(plane[0].brightness == 1 && abs(plane[2].brightness-0.35)<1e-9)
+        #expect(plane[0].halfWidth == 13 && plane[2].halfWidth == 6)
+        #expect(SkyCompass.galacticPlane().count == 120)
+    }
+    @Test func milkyWayFadesWithTwilightMoonAndGlow() {
+        func v(_ sun: Double, _ moon: Double = -20, _ lit: Double = 0, _ bortle: Int = 2) -> Double { SkyCompass.milkyWayVisibility(sunAltitude: sun, moonAltitude: moon, moonIllumination: lit, bortle: bortle) }
+        #expect(v(-20) == 1 && v(-10) == 0 && abs(v(-15)-0.5)<1e-9)
+        // A full Moon up leaves a tenth; the same Moon below the horizon leaves all of it.
+        #expect(abs(v(-20, 30, 1)-0.1)<1e-9 && v(-20, -5, 1) == 1)
+        #expect(abs(v(-20, 30, 0.25)-0.55)<1e-9)
+        #expect(v(-20, -20, 0, 3) == 1 && abs(v(-20, -20, 0, 5)-0.5)<1e-9 && v(-20, -20, 0, 7) == 0)
+    }
+    @Test func joshuaTreeSummerCoreStandsSouth() throws {
+        let park=try park("jotr")
+        // 3 July 2027, 23:25 PDT: no Moon (new on the 4th, rises after dawn), the core near transit.
+        let night=try Date("2027-07-04T06:25:00Z", strategy: .iso8601)
+        let band=CompassBand.visible(park: park, moonIllumination: 0.01, at: night)
+        #expect(band.visibility>0.95)
+        let core=try #require(band.samples.max { $0.brightness<$1.brightness })
+        #expect(abs(core.altitude-27)<1.5 && abs(core.azimuth-180)<8)
+        // From there the band climbs to about 59° toward Sagitta and Cygnus in the east (PyEphem: 59.0° at l = 57°).
+        let top=try #require(band.samples.max { $0.altitude<$1.altitude })
+        #expect(abs(top.altitude-59)<1.5 && top.azimuth<180)
+        // At noon nothing is drawn.
+        #expect(CompassBand.visible(park: park, moonIllumination: 0.01, at: night.addingTimeInterval(-11*3600)).samples.isEmpty)
+    }
+    @Test func skySideIsAboveTheHorizon() throws {
+        let w=390.0, h=700.0, pose=SkyCompass.Pose(azimuth: 180, altitude: 30)
+        let side=try #require(SkyCompass.skySide(pose: pose, width: w, height: h))
+        // The horizon crosses the middle column 30° below the centre; the polygon closes far above it.
+        let focal=(w/2)/tan(SkyCompass.fieldOfView*Double.pi/360)
+        let middle=try #require(side.dropLast(2).min { abs($0.x-w/2)<abs($1.x-w/2) })
+        #expect(abs(middle.y-(h/2+focal*tan(30*Double.pi/180)))<2)
+        #expect(side.suffix(2).allSatisfy { $0.y < -h*5 })
+        // Looking straight up, the horizon is out of view.
+        #expect(SkyCompass.skySide(pose: SkyCompass.Pose(azimuth: 0, altitude: 90), width: w, height: h) == nil)
+    }
     @Test func compassReadsCoreMotionsAttitude() {
         // Device axes in the reference frame: x (right) east = −y, y (top) up = z, z (screen) south = −x.
         let rotation = simd_double3x3(columns: (SIMD3(0, -1, 0), SIMD3(0, 0, 1), SIMD3(-1, 0, 0)))

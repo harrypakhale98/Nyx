@@ -1,6 +1,6 @@
 """Raw native-resolution App Store captures for the 1.1 iPhone set. Run after a Debug simulator build.
 
-Usage: python3 Scripts/capture_store.py [SIMULATOR_ID] [DERIVED_DATA] [en|es]
+Usage: python3 Scripts/capture_store.py [SIMULATOR_ID] [DERIVED_DATA] [en|es] [name,name…]
 Every frame uses live data (`-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time,
 scored by the shipping engine), except the journal, which is DEBUG seed data with no personal photo.
 Two frames need a scroll that simctl cannot perform: the script launches them and waits for you to
@@ -12,6 +12,8 @@ import subprocess,time,pathlib,sys,os
 sim=sys.argv[1] if len(sys.argv)>1 else '2E90D43E-75AD-44AA-AA66-44A4F5155CF5'
 derived=sys.argv[2] if len(sys.argv)>2 else '/tmp/NyxBuild'
 lang=sys.argv[3] if len(sys.argv)>3 else 'en'
+# Optional fourth argument: only these frames (e.g. field,compass), so a retake keeps the rest of the set.
+only=set(sys.argv[4].split(',')) if len(sys.argv)>4 else None
 def run(*args): return subprocess.run(['xcrun','simctl',*args],check=True,capture_output=True)
 subprocess.run(['xcrun','simctl','boot',sim],capture_output=True)
 run('bootstatus',sim,'-b')
@@ -26,7 +28,9 @@ shots=[
  ('detail',['-nyx-screen','detail','-nyx-state','live'],None),
  ('whatsup',['-nyx-screen','tonight','-nyx-state','live','-nyx-link',f'nyx://whatsup?date={today}&park=jotr'],None),
  ('field',['-nyx-screen','field','-nyx-state','live','-nyx-field-minutes','60'],None),
- ('compass',['-nyx-screen','field-compass','-nyx-state','live','-nyx-field-minutes','95'],None),
+ # A real summer night: 3 July 2027 at Joshua Tree, new Moon, 23:40 (the core near transit, 27° up in the south).
+ # Beyond the forecast, so the header's score is labelled moon and darkness only.
+ ('compass',['-nyx-screen','field-compass','-nyx-state','live','-nyx-date','2027-07-03','-nyx-field-minutes','225'],None),
  ('calendar',['-nyx-screen','calendar','-nyx-state','live'],None),
  ('trip',['-nyx-screen','trip','-nyx-state','live'],'Scroll until "The route" card sits under the title bar, with the first nights below it.'),
  ('journal',['-nyx-screen','journal','-nyx-state','populated'],None),
@@ -36,6 +40,7 @@ shots=[
 run('status_bar',sim,'override','--time','9:41','--batteryState','charged','--batteryLevel','100','--wifiMode','active','--wifiBars','3','--cellularMode','active','--cellularBars','4')
 try:
  for index,(name,args,manual) in enumerate(shots,1):
+  if only and name not in only: continue
   if manual and os.environ.get('NYX_SKIP_MANUAL'): print(f'skipped {index:02d}-{name}: {manual}',flush=True); continue
   run('launch','--terminate-running-process',sim,'com.harrypakhale.nyx',*args,'-nyx-reduce-motion',*language)
   time.sleep(14 if 'live' in args else 8)

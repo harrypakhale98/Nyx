@@ -1,3 +1,12 @@
+# Nyx handoff — 2026-10-06 (Store frame review: the Milky Way in "Where to look")
+
+Branch `roadmap`, still 1.1 (6). Logged under "Store frame review: the Milky Way in 'Where to look'" in `DECISIONS.md`. The score is unchanged.
+
+- **Done:** the field compass draws the Milky Way along the galactic plane (`SkyCompass.galacticPlane`, `milkyWayVisibility`, `skySide`; `CompassBand` in `FieldCompass.swift`): RealSky's brightness model, width by galactic longitude, dimmed by twilight, a Moon above the horizon, Bortle glow and horizon extinction, clipped at the horizon, red in field mode, re-projected per frame from positions computed twice a minute. Slightly larger stars, halos on the brightest stars and planets, black halos behind sky labels (6.0:1 measured over the band). Field mode labels a score without clouds ("Moon and darkness only. Clouds unknown." under the header). The DEBUG field routes refresh the forecast under `-nyx-state live` and re-read the score, so frame 04 now shows 93 like frame 02. Frame 05 retaken on a computed summer night (Joshua Tree, 3 July 2027, new Moon, 11:40 PM, core 27° up in the south); frames 04 and 05 retaken in English and Spanish (6.9" and 6.5") from the same cached forecast as the rest of the set; all frames rebuilt (only 04 and 05 changed). `capture_store.py` takes an optional frame list.
+- **Verified 2026-10-06:** zero warnings. Swift Testing 152 (4 new in `FieldModeTests`: galactic plane vs PyEphem, visibility, Joshua Tree's summer band, the horizon clip) pass on iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5. iOS 27: all UI tests and the accessibility audits for field, field-compass, detail, whatsup, light, tonight and parks in both palettes pass. `/tmp/Nyx-1.1-6.xcarchive` re-archived (Release, automatic signing, team DUHVN68KBA); `verify_release.py` passes with both archives (`Research/release-verification.json` unchanged). The Vision Pro archive was not rebuilt (no shared file changed).
+- **Known issues:** the band is a smooth model (no Great Rift or star clouds); its brightness was judged on simulator captures, not on a device at night. Frame 05's header score is moon and darkness only by design (the night is beyond the forecast).
+- **Next:** unchanged — owner follows `INPUT_NEEDED.md` 1–13; check the compass band's brightness on a device in the dark during the device pass.
+
 # Nyx handoff — 2026-10-06 (Roadmap complete — build 1.1 (6))
 
 Branch `roadmap`. Logged under "Release 1.1 (6) — 2026-10-06" in `DECISIONS.md`. The score is unchanged since 1.0.

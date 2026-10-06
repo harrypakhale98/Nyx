@@ -44,8 +44,8 @@ All captures are real renders, no alpha channel, verified sizes. Live = `-nyx-st
 | 1 | `01-tonight.png` | TONIGHT / Where is the sky darkest tonight? | Tonight: Death Valley 96, closure line beside the score (live) |
 | 2 | `02-score.png` | THE DARKNESS SCORE / One number, and its reasons. | Park detail: gauge 93, four meters, "Models agree", I'm here tonight (live) |
 | 3 | `03-whats-up.png` | WHAT'S UP TONIGHT / The Milky Way, and when to look. | What's up: core 7:43–8:54 PM, Jupiter, Mercury, Saturn, Mars, Wake me (live, via `nyx://whatsup`) |
-| 4 | `04-field-mode.png` | FIELD MODE / Red light for dark-adapted eyes. | Field mode in red: "True darkness in 22:37", milestones, eye clock (tonight, clock moved to 60 min after sunset) |
-| 5 | `05-where-to-look.png` | WHERE TO LOOK / Point your iPhone. Find the core. | Compass sky facing the core, Saturn marked (fixed pose; tonight 95 min after sunset) |
+| 4 | `04-field-mode.png` | FIELD MODE / Red light for dark-adapted eyes. | Field mode in red: 93 like the detail frame, "True darkness in 22:37", milestones, eye clock (tonight, live refresh, clock moved to 60 min after sunset) |
+| 5 | `05-where-to-look.png` | WHERE TO LOOK / Point your iPhone. Find the core. | Compass sky: the Milky Way band rising from the core, 27° up in the south, Antares, Mars marked at the edge (computed for Sat 3 July 2027, new Moon, 11:40 PM; fixed pose 10° above the core; header 86 with "Moon and darkness only. Clouds unknown.", as that night is beyond the forecast) |
 | 6 | `06-calendar.png` | BEST NIGHTS / Choose the night worth the drive. | October 2026: new-moon window halos, cloud glyphs, Orionids mark on the 20th, hollow nights past the forecast (live) |
 | 7 | `07-trip.png` | PLAN A TRIP / A park for every free night. | The route and the first nights, best night Wed Oct 7 Death Valley 97 (live) |
 | 8 | `08-constellation.png` | YOUR CONSTELLATION / Every night becomes a star. + privacy line | Journal: constellation, "4 of 63", an entry (illustrative DEBUG journal, no personal photos) |

@@ -31,6 +31,12 @@ struct FieldView: View {
         let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased)
         VStack(spacing:0) {
             header
+            // Without a cloud forecast (offline with nothing cached, or a night beyond the forecast) the score
+            // says what it leaves out, under it, aligned with the park's name.
+            if !session.score.hasForecast {
+                Text("Moon and darkness only. Clouds unknown.").font(.caption)
+                    .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.leading,68).padding(.trailing,20)
+            }
             // In the flow, not over it: the countdown under it stays readable.
             if let reset=session.reset { resetNotice(reset).padding(.horizontal,16).padding(.top,8).transition(.opacity.combined(with:.move(edge:.top))) }
             Group {
