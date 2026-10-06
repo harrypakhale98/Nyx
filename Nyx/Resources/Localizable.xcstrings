@@ -210,6 +210,17 @@
         }
       }
     },
+    "%@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
     "%@, %@ · approximate": {
       "extractionState": "manual",
       "localizations": {
@@ -254,13 +265,13 @@
         }
       }
     },
-    "%@, %@. Darkness score %lld, %@. %@ %@ %@": {
+    "%@, %@. %@ Darkness score %lld, %@. %@ %@ %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@. Darkness score %lld, %@. %@ %@ %@"
+            "value": "%@, %@. %@ Darkness score %lld, %@. %@ %@ %@"
           }
         }
       }
@@ -492,6 +503,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld of %lld"
+          }
+        }
+      }
+    },
+    "%lld of 63 parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 63 parks"
           }
         }
       }
@@ -734,6 +756,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A bright Moon hides all but the brightest meteors."
+          }
+        }
+      }
+    },
+    "A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself."
           }
         }
       }
@@ -1002,6 +1035,17 @@
         }
       }
     },
+    "Access source": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access source"
+          }
+        }
+      }
+    },
     "Adding photo": {
       "extractionState": "manual",
       "localizations": {
@@ -1167,6 +1211,50 @@
         }
       }
     },
+    "Also: %@ (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also: %@ (%@)."
+          }
+        }
+      }
+    },
+    "Among the brightest national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Among the brightest national parks"
+          }
+        }
+      }
+    },
+    "Among the darkest national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Among the darkest national parks"
+          }
+        }
+      }
+    },
+    "An International Dark Sky Park, certified by DarkSky International.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An International Dark Sky Park, certified by DarkSky International."
+          }
+        }
+      }
+    },
     "An alarm for the sky": {
       "extractionState": "manual",
       "localizations": {
@@ -1262,6 +1350,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Astronomical darkness, with ten hours receiving full credit."
+          }
+        }
+      }
+    },
+    "At home, anyone can help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At home, anyone can help"
           }
         }
       }
@@ -1431,6 +1530,28 @@
         }
       }
     },
+    "Brighter than most national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brighter than most national parks"
+          }
+        }
+      }
+    },
+    "Brighter than the park's center": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brighter than the park's center"
+          }
+        }
+      }
+    },
     "Cached forecast included": {
       "extractionState": "manual",
       "localizations": {
@@ -1515,6 +1636,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone."
+          }
+        }
+      }
+    },
+    "Choose warm bulbs, 3000 K or lower.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose warm bulbs, 3000 K or lower."
           }
         }
       }
@@ -1944,6 +2076,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darker on %@: %lld at %@"
+          }
+        }
+      }
+    },
+    "Darker than most national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker than most national parks"
+          }
+        }
+      }
+    },
+    "Darker than the park's center": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darker than the park's center"
           }
         }
       }
@@ -2740,6 +2894,17 @@
         }
       }
     },
+    "From NASA satellite night lights: a comparison between parks, not a measurement of sky brightness. The score uses the estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From NASA satellite night lights: a comparison between parks, not a measurement of sky brightness. The score uses the estimate."
+          }
+        }
+      }
+    },
     "From your location": {
       "extractionState": "manual",
       "localizations": {
@@ -2758,6 +2923,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Full moon"
+          }
+        }
+      }
+    },
+    "Glow on the horizon: %@ (%@ of this park's light pollution).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glow on the horizon: %@ (%@ of this park's light pollution)."
           }
         }
       }
@@ -3242,6 +3418,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Light wind"
+          }
+        }
+      }
+    },
+    "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light colour, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light colour, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution."
+          }
+        }
+      }
+    },
+    "Links to nps.gov accessibility pages and to Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Links to nps.gov accessibility pages and to Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites."
           }
         }
       }
@@ -3983,6 +4181,17 @@
         }
       }
     },
+    "NASA satellite night lights within %@, compared across parks. The sensor misses much of the blue light of white LEDs, and older and newer data were processed differently, so Nyx shows only the comparison.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NASA satellite night lights within %@, compared across parks. The sensor misses much of the blue light of white LEDs, and older and newer data were processed differently, so Nyx shows only the comparison."
+          }
+        }
+      }
+    },
     "NEXT SEVEN NIGHTS": {
       "extractionState": "manual",
       "localizations": {
@@ -4012,6 +4221,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Name"
+          }
+        }
+      }
+    },
+    "National Park Service, retrieved October 5, 2026. Conditions change; check with the park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Service, retrieved October 5, 2026. Conditions change; check with the park."
           }
         }
       }
@@ -4089,6 +4309,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Next: %@, %@"
+          }
+        }
+      }
+    },
+    "Night lights around this park grew faster than around most parks between 2013 and 2025.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night lights around this park grew faster than around most parks between 2013 and 2025."
+          }
+        }
+      }
+    },
+    "Night lights around this park grew more slowly than around most parks between 2013 and 2025.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night lights around this park grew more slowly than around most parks between 2013 and 2025."
+          }
+        }
+      }
+    },
+    "Night lights from space": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night lights from space"
+          }
+        }
+      }
+    },
+    "Night lights from space: %@, level %lld of 5.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night lights from space: %@, level %lld of 5."
           }
         }
       }
@@ -4665,6 +4929,17 @@
         }
       }
     },
+    "Open the park's page in Safari": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the park's page in Safari"
+          }
+        }
+      }
+    },
     "Open this night": {
       "extractionState": "manual",
       "localizations": {
@@ -4874,6 +5149,17 @@
         }
       }
     },
+    "Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go."
+          }
+        }
+      }
+    },
     "Partial lunar eclipse": {
       "extractionState": "manual",
       "localizations": {
@@ -4881,6 +5167,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Partial lunar eclipse"
+          }
+        }
+      }
+    },
+    "Partly step-free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partly step-free"
+          }
+        }
+      }
+    },
+    "Partly step-free: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partly step-free: %@"
           }
         }
       }
@@ -5050,6 +5358,17 @@
         }
       }
     },
+    "Protect this sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protect this sky"
+          }
+        }
+      }
+    },
     "Radiants, rates and patience": {
       "extractionState": "manual",
       "localizations": {
@@ -5090,6 +5409,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Read the estimate"
+          }
+        }
+      }
+    },
+    "Read “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read “%@”"
           }
         }
       }
@@ -5391,6 +5721,17 @@
         }
       }
     },
+    "Satellite night lights: %@. Context only; not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Satellite night lights: %@. Context only; not part of the score."
+          }
+        }
+      }
+    },
     "Saturn": {
       "extractionState": "manual",
       "localizations": {
@@ -5611,6 +5952,17 @@
         }
       }
     },
+    "Share your observation with Globe at Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share your observation with Globe at Night"
+          }
+        }
+      }
+    },
     "Sharing the night": {
       "extractionState": "manual",
       "localizations": {
@@ -5618,6 +5970,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sharing the night"
+          }
+        }
+      }
+    },
+    "Shield outdoor lights so they shine down, never up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shield outdoor lights so they shine down, never up."
           }
         }
       }
@@ -5673,6 +6036,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sky glow"
+          }
+        }
+      }
+    },
+    "Sky glow here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow here"
+          }
+        }
+      }
+    },
+    "Sky glow here: %@, level %lld of 5.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow here: %@, level %lld of 5."
           }
         }
       }
@@ -5904,6 +6289,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "Starting point: the device location. Distances are straight-line estimates."
+          }
+        }
+      }
+    },
+    "Step-free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step-free"
+          }
+        }
+      }
+    },
+    "Step-free notes come from each park's accessibility pages on nps.gov, retrieved October 5, 2026. A spot is marked only where an official page says so, and each note shows the sentence it rests on and a link to the page, which opens in Safari. Spots without an official statement show nothing. Night access, gates and seasonal closures are not covered. Conditions change; check with the park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step-free notes come from each park's accessibility pages on nps.gov, retrieved October 5, 2026. A spot is marked only where an official page says so, and each note shows the sentence it rests on and a link to the page, which opens in Safari. Spots without an official statement show nothing. Night access, gates and seasonal closures are not covered. Conditions change; check with the park."
+          }
+        }
+      }
+    },
+    "Step-free viewing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step-free viewing"
+          }
+        }
+      }
+    },
+    "Step-free viewing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step-free viewing."
+          }
+        }
+      }
+    },
+    "Step-free: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step-free: %@"
+          }
+        }
+      }
+    },
+    "Steps or trail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steps or trail"
           }
         }
       }
@@ -7030,6 +7481,17 @@
         }
       }
     },
+    "Typical of the national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical of the national parks"
+          }
+        }
+      }
+    },
     "Unable to delete": {
       "extractionState": "manual",
       "localizations": {
@@ -7140,6 +7602,17 @@
         }
       }
     },
+    "Use motion sensors, and switch lights off when no one needs them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use motion sensors, and switch lights off when no one needs them."
+          }
+        }
+      }
+    },
     "Use my location": {
       "extractionState": "manual",
       "localizations": {
@@ -7169,6 +7642,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version"
+          }
+        }
+      }
+    },
+    "Very little artificial light reaches this park; these glows are faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very little artificial light reaches this park; these glows are faint."
           }
         }
       }
@@ -7624,6 +8108,17 @@
         }
       }
     },
+    "a town to the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a town to the %@"
+          }
+        }
+      }
+    },
     "about %lld an hour": {
       "extractionState": "manual",
       "localizations": {
@@ -7642,6 +8137,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "about %lld%%"
+          }
+        }
+      }
+    },
+    "accessible amphitheater": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "accessible amphitheater"
+          }
+        }
+      }
+    },
+    "accessible parking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "accessible parking"
+          }
+        }
+      }
+    },
+    "accessible restroom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "accessible restroom"
           }
         }
       }
@@ -8042,6 +8570,17 @@
         }
       }
     },
+    "paved path": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paved path"
+          }
+        }
+      }
+    },
     "peak in %lld nights": {
       "extractionState": "manual",
       "localizations": {
@@ -8262,6 +8801,17 @@
         }
       }
     },
+    "view from your vehicle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "view from your vehicle"
+          }
+        }
+      }
+    },
     "waning": {
       "extractionState": "manual",
       "localizations": {
@@ -8324,6 +8874,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "· %lld–%lld"
+          }
+        }
+      }
+    },
+    "“%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”"
           }
         }
       }
