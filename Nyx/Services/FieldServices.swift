@@ -212,7 +212,7 @@ nonisolated struct FieldSkyTarget: Sendable, Identifiable, Equatable {
         }
         if let shower=WhatsUp.Events(park: park, sky: sky, almanac: almanac).shower, shower.hourlyRate>=2 || shower.isPeakNight {
             let h=engine.horizontal(date: date, park: park, ra: shower.shower.radiantRA*rad, dec: shower.shower.radiantDec*rad)
-            targets.append(FieldSkyTarget(id: "radiant", kind: .radiant, name: String(localized: "\(shower.shower.name) radiant"), altitude: h.altitude, azimuth: h.azimuth, magnitude: 0))
+            targets.append(FieldSkyTarget(id: "radiant", kind: .radiant, name: String(localized: "\(shower.shower.localizedName) radiant"), altitude: h.altitude, azimuth: h.azimuth, magnitude: 0))
         }
         return targets
     }

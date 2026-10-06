@@ -1,0 +1,87 @@
+{
+  "bisc": {
+    "note": "Mainland grounds close at 5:30 p.m. Seeing the night sky here means a boat and island camping.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/bisc/planyourvisit/hours.htm"
+  },
+  "chis": {
+    "note": "Reached only by boat from Ventura or Santa Barbara. Seeing the night sky means camping on an island.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/chis/planyourvisit/directions.htm"
+  },
+  "dena": {
+    "note": "One road entrance. In summer, private cars may drive only to Savage River, Mile 15 of the park road.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/dena/planyourvisit/directions.htm"
+  },
+  "drto": {
+    "note": "Boat or seaplane only. Seeing the night sky means camping on Garden Key, reached by ferry or private boat.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/drto/planyourvisit/camping.htm"
+  },
+  "gaar": {
+    "note": "No roads enter the park. Fly in by air taxi, or hike in from the Dalton Highway, and camp in the backcountry.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/gaar/planyourvisit/directions.htm"
+  },
+  "glba": {
+    "note": "No road leads to Glacier Bay. Fly or ferry to Gustavus, then camp or stay at the lodge in Bartlett Cove.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/glba/planyourvisit/basicinfo.htm"
+  },
+  "hale": {
+    "note": "Driving into the summit between 3 and 7 a.m. needs a sunrise reservation. Overnight only in campgrounds.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/hale/planyourvisit/sunrise.htm"
+  },
+  "isro": {
+    "note": "Ferry or seaplane only, mid-May to September. Closed Nov 1 to Apr 15. Night skies mean staying on the island.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/isro/planyourvisit/directions.htm"
+  },
+  "katm": {
+    "note": "Reached by small plane or boat from King Salmon. Brooks Camp campground and lodge run June 1 to Sept 17.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/katm/planyourvisit/brooks-camp.htm"
+  },
+  "kefj": {
+    "note": "Exit Glacier is reached by road from Seward. The fjords themselves are seen by boat or plane.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/kefj/planyourvisit/directions.htm"
+  },
+  "kova": {
+    "note": "No roads reach the park. Fly from Kotzebue or Bettles by air taxi; the night sky means backcountry camping.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/kova/planyourvisit/directions.htm"
+  },
+  "lacl": {
+    "note": "Not on the road system; most visitors arrive by small plane. Overnight means a lodge or backcountry camping.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/lacl/planyourvisit/basicinfo.htm"
+  },
+  "npsa": {
+    "note": "Reached by flights to Pago Pago on Tutuila; smaller flights continue to Ofu and Taʻū. Plan travel early.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/npsa/planyourvisit/index.htm"
+  },
+  "noca": {
+    "note": "SR 20 crosses the park but usually closes past Ross Dam Trailhead, November to April. Stehekin has no road in.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/noca/planyourvisit/directions.htm"
+  },
+  "viis": {
+    "note": "Reached by passenger ferry or car barge from St. Thomas. Camping is only at Cinnamon Bay, by reservation.",
+    "road": false,
+    "sourceURL": "https://www.nps.gov/viis/planyourvisit/directions.htm"
+  },
+  "voya": {
+    "note": "Visitor centers are reachable by car. Nearly every campsite is reached by boat.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/voya/planyourvisit/directions.htm"
+  },
+  "wrst": {
+    "note": "Two long gravel roads reach the park, McCarthy and Nabesna. There is no fuel along either.",
+    "road": true,
+    "sourceURL": "https://www.nps.gov/wrst/planyourvisit/directions.htm"
+  }
+}

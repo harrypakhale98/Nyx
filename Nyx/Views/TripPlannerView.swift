@@ -14,6 +14,8 @@ struct TripPlannerView: View {
     @State private var radius=300.0
     @State private var maxHop=300.0
     @State private var weekendsOnly=false
+    /// On by default: a plan that ends at a ferry dock at midnight is not a plan.
+    @State private var drivableOnly=true
     @State private var originID=""
     @State private var useDevice=false
     @State private var device:CLLocationCoordinate2D?
@@ -27,7 +29,7 @@ struct TripPlannerView: View {
     @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
     private var origin:Park? { model.park(originID) ?? model.home }
     private var days:[TripDay] { TripPlanner.days(first:TripDay(first),last:TripDay(last),weekendsOnly:weekendsOnly) }
-    private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(originID)-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
+    private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
     var body: some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Eyebrow(text:"Reasons to go")
@@ -54,6 +56,8 @@ struct TripPlannerView: View {
             #if DEBUG
             if let date=DebugScenario.date { first=date; last=date.addingTimeInterval(6*86400) }
             if DebugScenario.state=="weekends" { weekendsOnly=true; last=first.addingTimeInterval(27*86400) }
+            // Boat and plane parks included, close in: `-nyx-park chis` shows the access notes in the plan.
+            if DebugScenario.state=="boats" { drivableOnly=false; radius=100 }
             #endif
             // Location only if it was already allowed: the trip planner never asks for it.
             if DebugScenario.screen == nil, let fix=await OneShotLocation.current() { device=fix; useDevice=true }
@@ -68,7 +72,7 @@ struct TripPlannerView: View {
             planning=true
             let point=useDevice ? device : origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
             guard let point else { planning=false; return }
-            let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop)
+            let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
             withAnimation(NyxMotion.spring) { plan=result }
             planning=false
@@ -98,6 +102,7 @@ struct TripPlannerView: View {
             Divider().overlay(palette.line)
             distancePicker(title:"Within",selection:$radius,values:[100,200,300,500,1000],note:"as the crow flies")
             distancePicker(title:"Longest drive between nights",selection:$maxHop,values:[100,200,300,500],note:"straight line, back-to-back nights")
+            Toggle(isOn:$drivableOnly) { VStack(alignment:.leading,spacing:2) { Text("Parks you can drive to"); Text("Leaves out parks reached only by boat or plane").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) } }.tint(palette.controlTint)
         }
     }
     private func distancePicker(title:LocalizedStringKey,selection:Binding<Double>,values:[Double],note:LocalizedStringKey)->some View {
@@ -114,7 +119,7 @@ struct TripPlannerView: View {
     @ViewBuilder private var results:some View {
         if let plan {
             if plan.stops.isEmpty {
-                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? "No national parks fall inside this radius. Widen it or start from another park." : "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.")
+                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? (onlyByBoatOrPlane ? "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius." : "No national parks fall inside this radius. Widen it or start from another park.") : "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.")
             } else {
                 Panel { VStack(alignment:.leading,spacing:12) {
                     Eyebrow(text:"The route")
@@ -122,8 +127,10 @@ struct TripPlannerView: View {
                     Text("Your nights as stars among the national parks, joined night to night. The ring marks the best night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 } }
                 VStack(spacing:0) {
+                    // The access note once per park, on its first night, rather than on every row.
+                    let firsts=Set(plan.stops.reduce(into:[String:String]()) { seen,stop in if seen[stop.night.park.id]==nil { seen[stop.night.park.id]=stop.id } }.values)
                     ForEach(plan.stops) { stop in
-                        TripStopRow(stop:stop,addToCalendar:{ calendarStop=stop },distance:Self.miles)
+                        TripStopRow(stop:stop,addToCalendar:{ calendarStop=stop },distance:Self.miles,showsAccess:firsts.contains(stop.id))
                         if stop.id != plan.stops.last?.id { Divider().overlay(palette.line) }
                     }
                 }
@@ -134,6 +141,13 @@ struct TripPlannerView: View {
                 ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.buttonStyle(.bordered)
             }
         } else if planning || !prepared { ProgressView("Planning your nights").frame(maxWidth:.infinity).padding(.vertical,30) }
+    }
+    /// An empty plan only because the drive-to filter left out the boat-and-plane parks in reach.
+    private var onlyByBoatOrPlane:Bool {
+        guard drivableOnly else { return false }
+        let point=useDevice ? device : origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
+        guard let point else { return false }
+        return !TripPlanner.candidates(model.parks,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius).isEmpty
     }
     private func hero(_ best:TripStop)->some View {
         let park=best.night.park
@@ -147,6 +161,7 @@ struct TripPlannerView: View {
                 Text(best.night.score.hasForecast ? best.night.score.band.label : String(localized:"Moon and darkness only")).font(.subheadline).foregroundStyle(palette.ink)
                 Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                 if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+                AccessNoteLabel(park:park,alignment:.center)
             }.frame(maxWidth:.infinity)
         }.buttonStyle(.plain)
         .accessibilityElement(children:.combine)
@@ -165,8 +180,8 @@ struct TripPlannerView: View {
         let edges=zip(plan.stops,plan.stops.dropFirst()).compactMap { a,b in
             b.hopMeters.flatMap { $0>1000 ? (SkyMap.position(a.night.park),SkyMap.position(b.night.park)) : nil }
         }
-        let nearby=TripPlanner.candidates(model.parks,latitude:plan.stops[0].night.park.latitude,longitude:plan.stops[0].night.park.longitude,radiusMiles:radius).map(SkyMap.position)
-        return SkyMapContent(stars:stars,figures:edges.isEmpty ? [] : [edges],viewport:SkyMapContent.viewport(around:points+nearby),showsInsets:false)
+        let nearby=TripPlanner.candidates(model.parks,latitude:plan.stops[0].night.park.latitude,longitude:plan.stops[0].night.park.longitude,radiusMiles:radius,drivableOnly:drivableOnly).map(SkyMap.position)
+        return SkyMapContent(stars:stars,figures:edges.isEmpty ? [] : [edges],viewport:SkyMapContent.viewport(around:points+nearby),showsInsets:false,outlineRegions:Set(plan.stops.map { SkyMap.region($0.night.park) }))
     }
     private func routeSummary(_ plan:TripPlan)->String {
         let parks=Array(NSOrderedSet(array:plan.stops.map(\.night.park.shortName))).compactMap { $0 as? String }
@@ -180,6 +195,7 @@ struct TripStopRow: View {
     let stop: TripStop
     let addToCalendar: ()->Void
     let distance: (Double)->String
+    var showsAccess=true
     var body: some View {
         let night=stop.night, park=night.park
         VStack(alignment:.leading,spacing:10) {
@@ -195,6 +211,7 @@ struct TripStopRow: View {
                         if let hop=stop.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
                         if !night.score.hasForecast { Text("Moon and darkness only").font(.caption).foregroundStyle(palette.muted) }
                         if let closure=stop.closure { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+                        if showsAccess { AccessNoteLabel(park:park) }
                     }
                     Spacer(minLength:8)
                     VStack(alignment:.trailing,spacing:0) {
@@ -218,6 +235,7 @@ struct TripStopRow: View {
                    String(localized:"\(night.score.value) out of 100, \(night.score.hasForecast ? night.score.band.label : String(localized:"moon and darkness only"))"),stop.reason]
         if let hop=stop.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
         if let closure=stop.closure { parts.append(String(localized:"Closure alert: \(closure)")) }
+        if let access=park.accessNote { parts.append(String(localized:"Getting there: \(access)")) }
         return parts.joined(separator:". ")
     }
 }

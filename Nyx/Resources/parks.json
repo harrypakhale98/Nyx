@@ -131,7 +131,12 @@
         "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=DE30BE1E-FDF7-0433-7CC1BE9D5DAE87E3",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "Mainland grounds close at 5:30 p.m. Seeing the night sky here means a boat and island camping.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/bisc/planyourvisit/hours.htm"
+    }
   },
   {
     "id": "blca",
@@ -281,7 +286,12 @@
     "description": "Channel Islands National Park encompasses five remarkable islands and their ocean environment, preserving and protecting a wealth of natural and cultural resources. Isolation over thousands of years has created unique animals, plants, and archeological resources found nowhere else on Earth and helped preserve a place where visitors can experience coastal southern California as it once was.",
     "sourceURL": "https://www.nps.gov/chis/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Reached only by boat from Ventura or Santa Barbara. Seeing the night sky means camping on an island.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/chis/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "cong",
@@ -414,7 +424,12 @@
     "description": "Denali is six million acres of wild land, bisected by one ribbon of road. Travelers along it see the relatively low-elevation taiga forest give way to high alpine tundra and snowy mountains, culminating in North America's tallest peak, 20,310' Mount McKinley. Wild animals large and small roam un-fenced lands, living as they have for ages. Solitude, tranquility and wilderness await.",
     "sourceURL": "https://www.nps.gov/dena/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "One road entrance. In summer, private cars may drive only to Savage River, Mile 15 of the park road.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/dena/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "drto",
@@ -438,7 +453,12 @@
         "sourceURL": "https://www.nps.gov/drto/learn/nature/lightscape.htm",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "Boat or seaplane only. Seeing the night sky means camping on Garden Key, reached by ferry or private boat.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/drto/planyourvisit/camping.htm"
+    }
   },
   {
     "id": "ever",
@@ -492,7 +512,12 @@
     "description": "This vast landscape does not contain any roads or trails. Visitors discover intact ecosystems where people have lived with the land for over ten thousand years. Wild rivers meander through glacier-carved valleys, caribou migrate along age-old trails, endless summer light fades into aurora-lit night skies of winter. Virtually unchanged, except by the forces of nature.",
     "sourceURL": "https://www.nps.gov/gaar/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "No roads enter the park. Fly in by air taxi, or hike in from the Dalton Highway, and camp in the backcountry.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/gaar/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "jeff",
@@ -532,7 +557,12 @@
     "description": "Covering 3.3 million acres of rugged mountains, dynamic glaciers, temperate rainforest, wild coastlines and deep sheltered fjords, Glacier Bay National Park and Preserve is known as Homeland to the Huna and Yakutat Lingít, and is a highlight of Alaska's Inside Passage. From sea to summit, Glacier Bay offers limitless opportunities for adventure and inspiration.",
     "sourceURL": "https://www.nps.gov/glba/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "No road leads to Glacier Bay. Fly or ferry to Gustavus, then camp or stay at the lodge in Bartlett Cove.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/glba/planyourvisit/basicinfo.htm"
+    }
   },
   {
     "id": "glac",
@@ -766,7 +796,12 @@
         "sourceURL": "https://www.nps.gov/hale/planyourvisit/stargazing.htm",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "Driving into the summit between 3 and 7 a.m. needs a sunrise reservation. Overnight only in campgrounds.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/hale/planyourvisit/sunrise.htm"
+    }
   },
   {
     "id": "havo",
@@ -846,7 +881,12 @@
     "description": "Explore a rugged, isolated island far from our connected communities. Isle Royale offers adventures for backpackers, hikers, boaters, paddlers, and divers. Cross Lake Superior and make a commitment: Become a part of this island, and let it become a part of you. Find peace and refuge in island wilderness – because Isle Royale, in turn, finds refuge in us. Help Isle Royale stay wild.",
     "sourceURL": "https://www.nps.gov/isro/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Ferry or seaplane only, mid-May to September. Closed Nov 1 to Apr 15. Night skies mean staying on the island.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/isro/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "jotr",
@@ -893,7 +933,12 @@
     "description": "A landscape is alive underneath our feet, filled with creatures that remind us what it is to be wild. Katmai was established in 1918 to protect the volcanically devastated region surrounding Novarupta and the Valley of Ten Thousand Smokes. Today, Katmai National Park and Preserve also protects 9,000 years of human history and important habitat for salmon and thousands of brown bears.",
     "sourceURL": "https://www.nps.gov/katm/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Reached by small plane or boat from King Salmon. Brooks Camp campground and lodge run June 1 to Sept 17.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/katm/planyourvisit/brooks-camp.htm"
+    }
   },
   {
     "id": "kefj",
@@ -909,7 +954,12 @@
     "description": "At the edge of the Kenai Peninsula lies a land where the ice age lingers. Nearly 40 glaciers flow from the Harding Icefield, Kenai Fjords' crowning feature. Wildlife thrives in icy waters and lush forests along the fjords once carved by the vast expanse of ice. Today, shrinking glaciers bear witness to the effects of our changing climate.",
     "sourceURL": "https://www.nps.gov/kefj/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Exit Glacier is reached by road from Seward. The fjords themselves are seen by boat or plane.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/kefj/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "kica",
@@ -941,7 +991,12 @@
     "description": "Caribou, sand dunes, the Kobuk River, Onion Portage - just some of the facets of Kobuk Valley National Park. Thousands of caribou migrate through, their tracks crisscrossing sculpted dunes. The Kobuk River is an ancient and current corridor for people and wildlife. For 9000 years, people came to Onion Portage to harvest caribou as they swam the river. Even today, that rich tradition continues.",
     "sourceURL": "https://www.nps.gov/kova/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "No roads reach the park. Fly from Kotzebue or Bettles by air taxi; the night sky means backcountry camping.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/kova/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "lacl",
@@ -957,7 +1012,12 @@
     "description": "Lake Clark National Park and Preserve is a land of stunning beauty. Volcanoes steam, salmon run, bears forage, and craggy mountains reflect in shimmering turquoise lakes. Here, too, local people and culture still depend on the land and water. Venture into the park to become part of the wilderness.",
     "sourceURL": "https://www.nps.gov/lacl/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Not on the road system; most visitors arrive by small plane. Overnight means a lodge or backcountry camping.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/lacl/planyourvisit/basicinfo.htm"
+    }
   },
   {
     "id": "lavo",
@@ -1104,7 +1164,12 @@
     "description": "The National Park of American Samoa invites you to discover the vibrant culture and stunning landscapes of the South Pacific. Experience a world unlike any other, where natural beauty and cultural heritage are protected for future generations. Join us in exploring these islands of sacred earth!",
     "sourceURL": "https://www.nps.gov/npsa/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Reached by flights to Pago Pago on Tutuila; smaller flights continue to Ofu and Taʻū. Plan travel early.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/npsa/planyourvisit/index.htm"
+    }
   },
   {
     "id": "neri",
@@ -1166,7 +1231,12 @@
         "sourceURL": "https://www.nps.gov/noca/planyourvisit/evening-explorations.htm",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "SR 20 crosses the park but usually closes past Ross Dam Trailhead, November to April. Stehekin has no road in.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/noca/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "olym",
@@ -1483,7 +1553,12 @@
         "sourceURL": "https://www.nps.gov/planyourvisit/event-details.htm?id=EB18447A-DCF1-A26C-1F274CFABBE7DEA5",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "Reached by passenger ferry or car barge from St. Thomas. Camping is only at Cinnamon Bay, by reservation.",
+      "road": false,
+      "sourceURL": "https://www.nps.gov/viis/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "voya",
@@ -1514,7 +1589,12 @@
         "sourceURL": "https://www.nps.gov/voya/learn/news/2026-08-11-voyageurs-national-park-sixth-annual-star-party.htm",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
-    ]
+    ],
+    "access": {
+      "note": "Visitor centers are reachable by car. Nearly every campsite is reached by boat.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/voya/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "whsa",
@@ -1578,7 +1658,12 @@
     "description": "Wrangell-St. Elias is a vast national park that rises from the ocean all the way up to 18,008 ft. At 13.2 million acres, the park is the same size as Yellowstone National Park, Yosemite National Park, and Switzerland combined! Within this wild landscape, people continue to live off the land as they have done for centuries. This rugged, beautiful land is filled with opportunities for adventure.",
     "sourceURL": "https://www.nps.gov/wrst/index.htm",
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
-    "viewingSpots": []
+    "viewingSpots": [],
+    "access": {
+      "note": "Two long gravel roads reach the park, McCarthy and Nabesna. There is no fuel along either.",
+      "road": true,
+      "sourceURL": "https://www.nps.gov/wrst/planyourvisit/directions.htm"
+    }
   },
   {
     "id": "yell",

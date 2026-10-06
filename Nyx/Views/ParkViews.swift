@@ -2,6 +2,22 @@ import SwiftUI
 import SwiftData
 import TipKit
 
+/// How a visitor reaches the night sky, for parks a car cannot simply drive to: one calm line
+/// wherever a park is recommended. Nothing for the parks you can drive into.
+struct AccessNoteLabel: View {
+    @Environment(\.nyx) private var palette
+    let park: Park
+    var alignment: HorizontalAlignment = .leading
+    var body: some View {
+        if let note=park.accessNote {
+            Label { Text(note).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:park.drivable ? "road.lanes" : "ferry") }
+                .font(.caption).foregroundStyle(palette.muted)
+                .multilineTextAlignment(alignment == .center ? .center : .leading)
+                .accessibilityElement(children:.ignore)
+                .accessibilityLabel(String(localized:"Getting there: \(note)"))
+        }
+    }
+}
 struct ParkRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -22,13 +38,14 @@ struct ParkRow: View {
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
+            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") \(night.park.drivable ? "" : String(localized:"No road access.")) Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
             Text("\(night.park.state)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark-Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
             if stepFree { Label("Step-free viewing",systemImage:"figure.roll").font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
+            if !night.park.drivable { Label("No road access",systemImage:"ferry").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if week.count>1 { WeekStrip(nights:week).padding(.top,4) }
         }
     }
@@ -236,6 +253,7 @@ struct ParkDetailView: View {
             Eyebrow(text:"A night beneath the stars")
             Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
             Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+            AccessNoteLabel(park:park,alignment:.center).frame(maxWidth:420).padding(.horizontal,12)
             // The dial opens at the bottom; let the lines below tuck into that space.
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
                 .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
@@ -467,4 +485,12 @@ private struct SkyFullBleed: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar,.tabBar) } else { content }
     }
+}
+#Preview("Access note • boat, limited road, none") {
+    let parks=(try? ParkData.load()) ?? []
+    VStack(alignment:.leading,spacing:20) {
+        ForEach(parks.filter { ["chis","dena","jotr"].contains($0.id) }) { park in
+            VStack(alignment:.leading,spacing:4) { Text(park.shortName).font(.headline); AccessNoteLabel(park:park) }
+        }
+    }.padding(24).frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.topLeading).background(.black).preferredColorScheme(.dark)
 }

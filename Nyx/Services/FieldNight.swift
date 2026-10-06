@@ -83,7 +83,7 @@ nonisolated struct FieldNight: Sendable {
         // A meteor shower's best moment, when one is worth looking for.
         if let shower=WhatsUp.Events(park: park, sky: sky, table: table, almanac: almanac).shower, let best=shower.best, shower.hourlyRate>=2 {
             let moon=shower.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(lit)% lit")
-            list.append(Milestone(kind: .shower, date: best, title: String(localized: "\(shower.shower.name) at their best"),
+            list.append(Milestone(kind: .shower, date: best, title: String(localized: "\(shower.shower.localizedName) at their best"),
                 detail: String(localized: "\(WhatsUp.rateText(shower.hourlyRate).capitalizedFirst) from this park, \(moon). A rough guide."), subject: shower.shower.code, symbol: "sparkles"))
         }
         // Planets rising or setting during the night.

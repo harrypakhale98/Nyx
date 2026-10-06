@@ -7,6 +7,7 @@ build=sys.argv[1] if len(sys.argv)>1 else '/tmp/NyxBuild'
 extracted=set()
 # iPhone and watch simulator builds both: the watch app shares this catalog.
 for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*simulator/*/Objects-normal/arm64/*.stringsdata'):
+ if 'Tests.build/' in filename: continue  # test literals are not app copy
  try: data=json.load(open(filename))
  except (ValueError,OSError): continue
  for item in data.get('tables',{}).get('Localizable',[]):
@@ -32,3 +33,7 @@ usage={'NSAlarmKitUsageDescription':"Nyx sets alarms you choose for moments in t
 info={'sourceLanguage':'en','strings':{key:{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':value}}}} for key,value in usage.items()},'version':'1.0'}
 path.with_name('InfoPlist.xcstrings').write_text(json.dumps(info,indent=2)+'\n')
 print('Catalog:',len(strings),'keys')
+# Spanish (and the data-backed shower.*/access.* keys) after every sync, so new copy never drops it.
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
+import apply_translations
+apply_translations.main()

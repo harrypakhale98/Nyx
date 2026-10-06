@@ -94,7 +94,7 @@ nonisolated struct WhatsUp: Sendable {
         func headline(park: Park) -> String? {
             switch glyph {
             case .eclipse: eclipse.map { WhatsUp.eclipseName($0.eclipse) }
-            case .meteors: shower.map { String(localized: "\($0.shower.name) peak") }
+            case .meteors: shower.map { String(localized: "\($0.shower.localizedName) peak") }
             case nil: nil
             }
         }
@@ -238,8 +238,8 @@ nonisolated struct WhatsUp: Sendable {
             value=String(localized: "No true darkness")
             lead=String(localized: "Without true darkness at this latitude, few meteors will show.")
         }
-        return Item(id: "shower-\(shower.code)", kind: .meteors, title: shower.name, note: note, value: value, detail: lead,
-            spoken: "\(shower.name), \(note): \(value). \(lead) \(published)", footnote: published, timed: night.best != nil)
+        return Item(id: "shower-\(shower.code)", kind: .meteors, title: shower.localizedName, note: note, value: value, detail: lead,
+            spoken: "\(shower.localizedName), \(note): \(value). \(lead) \(published)", footnote: published, timed: night.best != nil)
     }
     /// Why a peak night will be poor from this park, in one honest sentence.
     static func poorReason(_ night: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions) -> String {

@@ -107,7 +107,7 @@ nonisolated struct NotificationScheduler {
             let fire=afternoon>now ? afternoon : now.addingTimeInterval(60)
             let identifier=Self.showerIdentifier(park:park,night:night.id)
             guard fire<darkStart, !delivered.contains(identifier) else { return nil }
-            return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.name) peak tonight at \(park.shortName)"),
+            return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.localizedName) peak tonight at \(park.shortName)"),
                 body:String(localized:"About \(WhatsUp.rounded(rate:shower.hourlyRate)) an hour \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide; check clouds and park access before you go."),
                 fireDate:fire,timeZone:park.timeZone)
         }

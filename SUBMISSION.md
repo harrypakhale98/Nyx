@@ -8,7 +8,7 @@
 - Subtitle: **Plan a darker night**
 - Primary category: Travel. Secondary: Weather.
 - Price: Free; no subscriptions, ads or in-app purchases. This is required by the chosen Open-Meteo free/non-commercial service.
-- Language: English. iPhone only, portrait, iOS 26.0 and later.
+- Language: English. iPhone only, portrait, iOS 26.0 and later. (1.1 adds Spanish: the app ships an `es` localization, and the Spanish (Mexico) App Store metadata is in [`Store/1.1/metadata-es.md`](Store/1.1/metadata-es.md), pending the native-speaker review in `INPUT_NEEDED.md`.)
 - Keywords (95/100; the name already covers "Nyx", "dark", "sky", "planner"): `stargazing,national parks,moon phase,astronomy,milky way,night sky,bortle,camping,meteor,aurora`
 - Copyright: `2026 Hardik Pakhale`
 - Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/`. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.

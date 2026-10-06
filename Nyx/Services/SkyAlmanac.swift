@@ -180,7 +180,11 @@ nonisolated struct SkyAlmanac: Sendable {
     nonisolated struct MeteorShower: Codable, Sendable, Identifiable, Equatable {
         var id: String { code }
         let code: String
+        /// The IMO's English name, as bundled. Display `localizedName`.
         let name: String
+        /// The name in the reader's language: catalog key `shower.<code>` (written by
+        /// Scripts/apply_translations.py from sky-events.json), falling back to the bundled English.
+        var localizedName: String { Bundle.main.localizedString(forKey: "shower.\(code)", value: name, table: nil) }
         /// Activity window, "MM-dd".
         let start: String
         let end: String

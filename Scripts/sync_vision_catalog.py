@@ -26,3 +26,7 @@ if extracted:
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
 print('Vision catalog:',len(strings),'keys')
+# Spanish (and the data-backed shower.*/access.* keys) after every sync, so new copy never drops it.
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
+import apply_translations
+apply_translations.main()

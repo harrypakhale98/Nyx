@@ -9,6 +9,12 @@
             "state": "translated",
             "value": "%@ from %@ to %@, %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ a %@, %@."
+          }
         }
       }
     },
@@ -20,6 +26,12 @@
             "state": "translated",
             "value": "%@ peak"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máximo de las %@"
+          }
         }
       }
     },
@@ -27,6 +39,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@"
@@ -42,6 +60,12 @@
             "state": "translated",
             "value": "%@ · moon and darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Luna y oscuridad"
+          }
         }
       }
     },
@@ -49,6 +73,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ – %@"
@@ -64,6 +94,12 @@
             "state": "translated",
             "value": "%@, %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
         }
       }
     },
@@ -71,6 +107,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@."
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@."
@@ -86,6 +128,12 @@
             "state": "translated",
             "value": "%@, night of %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, noche del %@"
+          }
         }
       }
     },
@@ -93,6 +141,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h %lld min"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld h %lld min"
@@ -108,6 +162,12 @@
             "state": "translated",
             "value": "%lld nights after the peak"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld noches después del máximo"
+          }
         }
       }
     },
@@ -118,6 +178,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld out of 100, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de 100, %@"
           }
         }
       }
@@ -130,6 +196,12 @@
             "state": "translated",
             "value": "%lld out of 100, %@, moon and darkness only"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld de 100, %@, solo Luna y oscuridad"
+          }
         }
       }
     },
@@ -140,6 +212,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld%% lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% iluminada"
           }
         }
       }
@@ -152,6 +230,12 @@
             "state": "translated",
             "value": "%lld° up in the %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a %lld° de altura en el %@"
+          }
         }
       }
     },
@@ -162,6 +246,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld° up in the %@ as true darkness begins, then sinking."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A %lld° de altura en el %@ al empezar la oscuridad total; luego desciende."
           }
         }
       }
@@ -174,6 +264,12 @@
             "state": "translated",
             "value": "A bright Moon hides all but the brightest meteors."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una Luna brillante oculta todos los meteoros salvo los más brillantes."
+          }
         }
       }
     },
@@ -184,6 +280,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "A faint dimming"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un leve oscurecimiento"
           }
         }
       }
@@ -196,6 +298,12 @@
             "state": "translated",
             "value": "A weak return from this park; a rough guide."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poca actividad desde este parque; una guía aproximada."
+          }
         }
       }
     },
@@ -206,6 +314,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "All night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toda la noche"
           }
         }
       }
@@ -218,6 +332,12 @@
             "state": "translated",
             "value": "Astronomical twilight"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crepúsculo astronómico"
+          }
         }
       }
     },
@@ -228,6 +348,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "At most %lld%% of the Moon's width is in shadow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como máximo, el %lld%% del ancho de la Luna queda en sombra."
           }
         }
       }
@@ -240,6 +366,12 @@
             "state": "translated",
             "value": "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A esta latitud, el centro brillante nunca sube más de %lld°. Lo más importante es una vista despejada hacia el sur."
+          }
         }
       }
     },
@@ -250,6 +382,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Back to tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a esta noche"
           }
         }
       }
@@ -262,6 +400,12 @@
             "state": "translated",
             "value": "Below the horizon"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo el horizonte"
+          }
         }
       }
     },
@@ -273,6 +417,12 @@
             "state": "translated",
             "value": "Best %@, %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor %@, %@."
+          }
         }
       }
     },
@@ -280,6 +430,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Bortle %lld"
@@ -295,6 +451,12 @@
             "state": "translated",
             "value": "Civil twilight"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crepúsculo civil"
+          }
         }
       }
     },
@@ -305,6 +467,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Compass point on the horizon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Punto cardinal en el horizonte"
           }
         }
       }
@@ -317,6 +485,12 @@
             "state": "translated",
             "value": "Computed for %@, %@. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is %@, not your room's real north."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo; no se muestran las nubes y el horizonte es ilustrativo. Al frente está el %@, no el norte real de tu habitación."
+          }
         }
       }
     },
@@ -327,6 +501,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Computed for %@, %@. Not a live view; clouds not shown."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo; no se muestran las nubes."
           }
         }
       }
@@ -339,6 +519,12 @@
             "state": "translated",
             "value": "Computing"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculando"
+          }
         }
       }
     },
@@ -349,6 +535,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Darkness score"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de oscuridad"
           }
         }
       }
@@ -361,6 +553,12 @@
             "state": "translated",
             "value": "Down all night"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oculta toda la noche"
+          }
         }
       }
     },
@@ -372,6 +570,12 @@
             "state": "translated",
             "value": "Down for %lld%% of true darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oculta durante el %lld%% de la oscuridad total"
+          }
         }
       }
     },
@@ -379,6 +583,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "E"
@@ -394,6 +604,12 @@
             "state": "translated",
             "value": "Estimate"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimación"
+          }
         }
       }
     },
@@ -404,6 +620,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Estimate · International Dark Sky Park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimación · International Dark Sky Park"
           }
         }
       }
@@ -416,6 +638,12 @@
             "state": "translated",
             "value": "Excellent"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excelente"
+          }
         }
       }
     },
@@ -426,6 +654,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fair"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular"
           }
         }
       }
@@ -438,6 +672,12 @@
             "state": "translated",
             "value": "First quarter"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuarto creciente"
+          }
         }
       }
     },
@@ -448,6 +688,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "For one observer under this park's sky; a rough guide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para un observador bajo el cielo de este parque; una guía aproximada."
           }
         }
       }
@@ -460,6 +706,12 @@
             "state": "translated",
             "value": "Full moon"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna llena"
+          }
         }
       }
     },
@@ -470,6 +722,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Good"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buena"
           }
         }
       }
@@ -482,6 +740,12 @@
             "state": "translated",
             "value": "Highest at %@, %lld° up in the %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Punto más alto a las %@, a %lld° en el %@."
+          }
         }
       }
     },
@@ -492,6 +756,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "In Earth's shadow"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En la sombra de la Tierra"
           }
         }
       }
@@ -504,6 +774,12 @@
             "state": "translated",
             "value": "In the %@ after dusk; sets at %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el %@ al anochecer; se pone a las %@."
+          }
         }
       }
     },
@@ -514,6 +790,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Jupiter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Júpiter"
           }
         }
       }
@@ -526,6 +808,12 @@
             "state": "translated",
             "value": "Last quarter"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuarto menguante"
+          }
         }
       }
     },
@@ -536,6 +824,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Leave the sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salir del cielo"
           }
         }
       }
@@ -548,6 +842,12 @@
             "state": "translated",
             "value": "Low in the %@ after dusk; sets at %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo en el %@ al anochecer; se pone a las %@."
+          }
         }
       }
     },
@@ -558,6 +858,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Low on the horizon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo en el horizonte"
           }
         }
       }
@@ -570,6 +876,12 @@
             "state": "translated",
             "value": "Low: an open view toward the horizon matters."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo: importa una vista despejada hacia el horizonte."
+          }
         }
       }
     },
@@ -580,6 +892,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marte"
           }
         }
       }
@@ -592,6 +910,12 @@
             "state": "translated",
             "value": "Mercury"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mercurio"
+          }
         }
       }
     },
@@ -602,6 +926,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Middle of darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitad de la oscuridad"
           }
         }
       }
@@ -614,6 +944,12 @@
             "state": "translated",
             "value": "Middle of true darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitad de la oscuridad total"
+          }
         }
       }
     },
@@ -624,6 +960,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Milky Way core"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea"
           }
         }
       }
@@ -636,6 +978,12 @@
             "state": "translated",
             "value": "Moon"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna"
+          }
         }
       }
     },
@@ -646,6 +994,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon %@, %lld%% lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna %@, %lld%% iluminada"
           }
         }
       }
@@ -658,6 +1012,12 @@
             "state": "translated",
             "value": "Moon %lld° up in the %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna a %lld° en el %@"
+          }
         }
       }
     },
@@ -668,6 +1028,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo Luna y oscuridad. Nyx en Vision Pro no descarga pronósticos de nubes; consulta uno antes de ir."
           }
         }
       }
@@ -680,6 +1046,12 @@
             "state": "translated",
             "value": "Moon below the horizon"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna bajo el horizonte"
+          }
         }
       }
     },
@@ -690,6 +1062,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon down"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna oculta"
           }
         }
       }
@@ -702,6 +1080,12 @@
             "state": "translated",
             "value": "Moon high in the %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna alta en el %@"
+          }
         }
       }
     },
@@ -712,6 +1096,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon low in the %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna baja en el %@"
           }
         }
       }
@@ -724,6 +1114,12 @@
             "state": "translated",
             "value": "Moon up, %lld%% lit"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna en el cielo, %lld%% iluminada"
+          }
         }
       }
     },
@@ -734,6 +1130,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon, %lld percent illuminated"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %lld por ciento iluminada"
           }
         }
       }
@@ -746,6 +1148,12 @@
             "state": "translated",
             "value": "Moon, %lld percent illuminated, as seen at %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %lld por ciento iluminada, vista en %@"
+          }
         }
       }
     },
@@ -756,6 +1164,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon, %lld percent lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %lld por ciento iluminada"
           }
         }
       }
@@ -768,6 +1182,12 @@
             "state": "translated",
             "value": "Moon-free from %@ to %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna de %@ a %@."
+          }
         }
       }
     },
@@ -778,6 +1198,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moon-free from %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna desde las %@."
           }
         }
       }
@@ -790,6 +1216,12 @@
             "state": "translated",
             "value": "Moon-free until %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin Luna hasta las %@."
+          }
         }
       }
     },
@@ -801,6 +1233,12 @@
             "state": "translated",
             "value": "Moves the clock to the middle of true darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lleva el reloj a la mitad de la oscuridad total"
+          }
         }
       }
     },
@@ -808,6 +1246,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "N"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "N"
@@ -823,6 +1267,12 @@
             "state": "translated",
             "value": "Nautical twilight"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crepúsculo náutico"
+          }
         }
       }
     },
@@ -833,6 +1283,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "New moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna nueva"
           }
         }
       }
@@ -845,6 +1301,12 @@
             "state": "translated",
             "value": "Next night"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche siguiente"
+          }
         }
       }
     },
@@ -855,6 +1317,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche"
           }
         }
       }
@@ -867,6 +1335,12 @@
             "state": "translated",
             "value": "Night vision"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visión nocturna"
+          }
         }
       }
     },
@@ -877,6 +1351,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Moon or planets above the horizon. The stars have the sky to themselves."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni la Luna ni los planetas están sobre el horizonte. Las estrellas tienen el cielo para ellas solas."
           }
         }
       }
@@ -889,6 +1369,12 @@
             "state": "translated",
             "value": "No crossing"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin cruce"
+          }
         }
       }
     },
@@ -899,6 +1385,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "No moonlight to wash it out."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin luz de luna que la opaque."
           }
         }
       }
@@ -911,6 +1403,12 @@
             "state": "translated",
             "value": "No true darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total"
+          }
         }
       }
     },
@@ -921,6 +1419,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "No true darkness on this night at this latitude."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa noche no hay oscuridad total a esta latitud."
           }
         }
       }
@@ -933,6 +1437,12 @@
             "state": "translated",
             "value": "No true darkness tonight at this latitude."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche no hay oscuridad total a esta latitud."
+          }
         }
       }
     },
@@ -944,6 +1454,12 @@
             "state": "translated",
             "value": "Not visible from this park: the Moon is below the horizon."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No es visible desde este parque: la Luna está bajo el horizonte."
+          }
         }
       }
     },
@@ -951,6 +1467,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Nyx"
@@ -966,6 +1488,12 @@
             "state": "translated",
             "value": "Out of the night sky"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuera del cielo nocturno"
+          }
         }
       }
     },
@@ -976,6 +1504,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Partial lunar eclipse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eclipse parcial de Luna"
           }
         }
       }
@@ -988,6 +1522,12 @@
             "state": "translated",
             "value": "Penumbral lunar eclipse"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eclipse penumbral de Luna"
+          }
         }
       }
     },
@@ -998,6 +1538,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Poor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mala"
           }
         }
       }
@@ -1010,6 +1556,12 @@
             "state": "translated",
             "value": "Previous night"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche anterior"
+          }
         }
       }
     },
@@ -1020,6 +1572,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pristine"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prístina"
           }
         }
       }
@@ -1032,6 +1590,12 @@
             "state": "translated",
             "value": "Rises %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale %@"
+          }
         }
       }
     },
@@ -1042,6 +1606,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rises %@, sets %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale %@, se pone %@"
           }
         }
       }
@@ -1054,6 +1624,12 @@
             "state": "translated",
             "value": "Rises after darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale después de la oscuridad"
+          }
         }
       }
     },
@@ -1064,6 +1640,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rises at %@ in the %@ and climbs high before dawn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@ y sube alto antes del amanecer."
           }
         }
       }
@@ -1076,6 +1658,12 @@
             "state": "translated",
             "value": "Rises at %@ in the %@, highest around %@, sets at %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@, alcanza su punto más alto hacia las %@ y se pone a las %@."
+          }
         }
       }
     },
@@ -1086,6 +1674,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rises at %@ in the %@; %@ before dawn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@; %@ antes del amanecer."
           }
         }
       }
@@ -1098,6 +1692,12 @@
             "state": "translated",
             "value": "Rises at %@ in the %@; highest around %@ in the %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@; más alto hacia las %@ en el %@."
+          }
         }
       }
     },
@@ -1108,6 +1708,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rises at %@ in the %@; still low at dawn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@; aún bajo al amanecer."
           }
         }
       }
@@ -1120,6 +1726,12 @@
             "state": "translated",
             "value": "Rises at %@ in the %@; well up by dawn."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale a las %@ por el %@; bien alto al amanecer."
+          }
         }
       }
     },
@@ -1127,6 +1739,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "R↑"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "R↑"
@@ -1142,6 +1760,12 @@
             "state": "translated",
             "value": "S"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S"
+          }
         }
       }
     },
@@ -1152,6 +1776,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saturn"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saturno"
           }
         }
       }
@@ -1164,6 +1794,12 @@
             "state": "translated",
             "value": "Search parks"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar parques"
+          }
         }
       }
     },
@@ -1174,6 +1810,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sets %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se pone %@"
           }
         }
       }
@@ -1186,6 +1828,12 @@
             "state": "translated",
             "value": "Sets %@, rises %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se pone %@, sale %@"
+          }
         }
       }
     },
@@ -1196,6 +1844,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sets before darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se pone antes de la oscuridad"
           }
         }
       }
@@ -1208,6 +1862,12 @@
             "state": "translated",
             "value": "Sky glow"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resplandor"
+          }
         }
       }
     },
@@ -1218,6 +1878,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sky over %@ at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo sobre %@ a las %@"
           }
         }
       }
@@ -1230,6 +1896,12 @@
             "state": "translated",
             "value": "Southern winter favors the bright center. Look toward the southern sky; timing and terrain matter."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El invierno austral favorece el centro brillante. Mira hacia el cielo del sur; importan la hora y el terreno."
+          }
         }
       }
     },
@@ -1240,6 +1912,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stand under this sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar en este cielo"
           }
         }
       }
@@ -1252,6 +1930,12 @@
             "state": "translated",
             "value": "Still climbing: %lld° up in the %@ as true darkness ends."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún subiendo: a %lld° en el %@ cuando termina la oscuridad total."
+          }
         }
       }
     },
@@ -1262,6 +1946,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Subtle: the Moon's edge darkens slightly."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sutil: el borde de la Luna se oscurece un poco."
           }
         }
       }
@@ -1274,6 +1964,12 @@
             "state": "translated",
             "value": "Summer favors the bright center. Look toward the southern sky; timing and terrain matter."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El verano favorece el centro brillante. Mira hacia el cielo del sur; importan la hora y el terreno."
+          }
         }
       }
     },
@@ -1284,6 +1980,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Surrounds you with this park's computed sky at the time on the clock below"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te rodea con el cielo calculado de este parque a la hora del reloj de abajo"
           }
         }
       }
@@ -1296,6 +1998,12 @@
             "state": "translated",
             "value": "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tan al norte, el centro brillante de la Vía Láctea se queda en el horizonte o por debajo. Su banda más tenue aún cruza los cielos oscuros."
+          }
         }
       }
     },
@@ -1306,6 +2014,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Moon is down all that time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna está oculta todo ese tiempo."
           }
         }
       }
@@ -1318,6 +2032,12 @@
             "state": "translated",
             "value": "The Moon is up all that time, %lld%% lit."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna está en el cielo todo ese tiempo, %lld%% iluminada."
+          }
         }
       }
     },
@@ -1328,6 +2048,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Moon rises already eclipsed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna sale ya eclipsada."
           }
         }
       }
@@ -1340,6 +2066,12 @@
             "state": "translated",
             "value": "The Moon sets before it ends."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna se pone antes de que termine."
+          }
         }
       }
     },
@@ -1350,6 +2082,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The Sun is up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es de día"
           }
         }
       }
@@ -1362,6 +2100,12 @@
             "state": "translated",
             "value": "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En esta temporada, el centro brillante está cerca del Sol. La banda más tenue de la Vía Láctea aún cruza los cielos oscuros."
+          }
         }
       }
     },
@@ -1372,6 +2116,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bright center is out of the night sky this season. Bright constellations still reward a dark night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En esta temporada, el centro brillante no está en el cielo nocturno. Las constelaciones brillantes aún recompensan una noche oscura."
           }
         }
       }
@@ -1384,6 +2134,12 @@
             "state": "translated",
             "value": "The bright center may be visible before dawn or near dusk. Timing and terrain matter."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El centro brillante puede verse antes del amanecer o cerca del anochecer. Importan la hora y el terreno."
+          }
         }
       }
     },
@@ -1394,6 +2150,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bright center rises at %@, after true darkness ends at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El centro brillante sale a las %@, después de que termina la oscuridad total a las %@."
           }
         }
       }
@@ -1406,6 +2168,12 @@
             "state": "translated",
             "value": "The bright center sets at %@, before true darkness begins at %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El centro brillante se pone a las %@, antes de que empiece la oscuridad total a las %@."
+          }
         }
       }
     },
@@ -1416,6 +2184,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The bright center stays low on the horizon at this latitude. An open view to the south matters most."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A esta latitud, el centro brillante se queda bajo en el horizonte. Lo más importante es una vista despejada hacia el sur."
           }
         }
       }
@@ -1428,6 +2202,12 @@
             "state": "translated",
             "value": "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí el máximo cae de día o durante el crepúsculo, así que solo sus extremos llegan a un cielo oscuro."
+          }
         }
       }
     },
@@ -1438,6 +2218,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The peak falls while the radiant is low here, so few meteors reach this sky."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí el máximo llega con el radiante bajo, así que pocos meteoros alcanzan este cielo."
           }
         }
       }
@@ -1450,6 +2236,12 @@
             "state": "translated",
             "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO)."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO)."
+          }
         }
       }
     },
@@ -1460,6 +2252,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO); varía de un año a otro."
           }
         }
       }
@@ -1472,6 +2270,12 @@
             "state": "translated",
             "value": "The sky at %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cielo a las %@"
+          }
         }
       }
     },
@@ -1482,6 +2286,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Time of night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora de la noche"
           }
         }
       }
@@ -1494,6 +2304,12 @@
             "state": "translated",
             "value": "Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las horas son las del parque. La salida y la puesta de la Luna tienen un margen de unos quince minutos; los planetas, de un grado. En el cielo, la Luna se dibuja más grande de lo real para que se lea su fase; su posición es la verdadera."
+          }
         }
       }
     },
@@ -1504,6 +2320,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche"
           }
         }
       }
@@ -1516,6 +2338,12 @@
             "state": "translated",
             "value": "Tonight · moon and darkness"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche · Luna y oscuridad"
+          }
         }
       }
     },
@@ -1526,6 +2354,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Total lunar eclipse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eclipse total de Luna"
           }
         }
       }
@@ -1538,6 +2372,12 @@
             "state": "translated",
             "value": "Totality"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totalidad"
+          }
         }
       }
     },
@@ -1548,6 +2388,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "True darkness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad total"
           }
         }
       }
@@ -1560,6 +2406,12 @@
             "state": "translated",
             "value": "Turns the window and the sky a dim red that keeps your eyes adapted to the dark"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pone la ventana y el cielo en un rojo tenue que mantiene tus ojos adaptados a la oscuridad"
+          }
         }
       }
     },
@@ -1570,6 +2422,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Until %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hasta %@"
           }
         }
       }
@@ -1582,6 +2440,12 @@
             "state": "translated",
             "value": "Up all night"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo toda la noche"
+          }
         }
       }
     },
@@ -1593,6 +2457,12 @@
             "state": "translated",
             "value": "Up all night, highest around %@ in the %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visible toda la noche, más alto hacia las %@ en el %@."
+          }
         }
       }
     },
@@ -1600,6 +2470,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venus"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Venus"
@@ -1615,6 +2491,12 @@
             "state": "translated",
             "value": "W"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O"
+          }
         }
       }
     },
@@ -1625,6 +2507,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waning crescent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna menguante"
           }
         }
       }
@@ -1637,6 +2525,12 @@
             "state": "translated",
             "value": "Waning gibbous"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gibosa menguante"
+          }
         }
       }
     },
@@ -1647,6 +2541,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waxing crescent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna creciente"
           }
         }
       }
@@ -1659,6 +2559,12 @@
             "state": "translated",
             "value": "Waxing gibbous"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gibosa creciente"
+          }
         }
       }
     },
@@ -1669,6 +2575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "What's up this night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo esa noche"
           }
         }
       }
@@ -1681,6 +2593,12 @@
             "state": "translated",
             "value": "What's up tonight"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo esta noche"
+          }
         }
       }
     },
@@ -1691,6 +2609,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Without true darkness at this latitude, few meteors will show."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total a esta latitud, se verán pocos meteoros."
           }
         }
       }
@@ -1703,6 +2627,12 @@
             "state": "translated",
             "value": "Without true darkness, the Milky Way stays faint."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin oscuridad total, la Vía Láctea se ve tenue."
+          }
         }
       }
     },
@@ -1713,6 +2643,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "about %lld an hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unos %lld por hora"
           }
         }
       }
@@ -1725,6 +2661,12 @@
             "state": "translated",
             "value": "around %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hacia las %@"
+          }
         }
       }
     },
@@ -1735,6 +2677,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "before dawn"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "antes del amanecer"
           }
         }
       }
@@ -1747,6 +2695,12 @@
             "state": "translated",
             "value": "below the horizon"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bajo el horizonte"
+          }
         }
       }
     },
@@ -1757,6 +2711,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "bright"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brillante"
           }
         }
       }
@@ -1769,6 +2729,12 @@
             "state": "translated",
             "value": "east"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "este"
+          }
         }
       }
     },
@@ -1779,6 +2745,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "faint"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tenue"
           }
         }
       }
@@ -1791,6 +2763,12 @@
             "state": "translated",
             "value": "fewer than 1 an hour"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "menos de 1 por hora"
+          }
         }
       }
     },
@@ -1801,6 +2779,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "high in the %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "alto en el %@"
           }
         }
       }
@@ -1813,6 +2797,12 @@
             "state": "translated",
             "value": "in the %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en el %@"
+          }
         }
       }
     },
@@ -1823,6 +2813,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "low in the %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bajo en el %@"
           }
         }
       }
@@ -1835,6 +2831,12 @@
             "state": "translated",
             "value": "north"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "norte"
+          }
         }
       }
     },
@@ -1845,6 +2847,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "northeast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "noreste"
           }
         }
       }
@@ -1857,6 +2865,12 @@
             "state": "translated",
             "value": "northwest"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "noroeste"
+          }
         }
       }
     },
@@ -1867,6 +2881,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "not visible here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no visible aquí"
           }
         }
       }
@@ -1879,6 +2899,12 @@
             "state": "translated",
             "value": "peak in %lld nights"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "máximo en %lld noches"
+          }
         }
       }
     },
@@ -1889,6 +2915,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "peak the next night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "máximo la noche siguiente"
           }
         }
       }
@@ -1901,6 +2933,12 @@
             "state": "translated",
             "value": "peak this night"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "máximo esa noche"
+          }
         }
       }
     },
@@ -1911,6 +2949,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "peak tomorrow night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "máximo mañana por la noche"
           }
         }
       }
@@ -1923,6 +2967,233 @@
             "state": "translated",
             "value": "peak tonight"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "máximo esta noche"
+          }
+        }
+      }
+    },
+    "shower.CAP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alpha Capricornids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alfa Capricórnidas"
+          }
+        }
+      }
+    },
+    "shower.DRA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "October Draconids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dracónidas"
+          }
+        }
+      }
+    },
+    "shower.ETA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eta Aquariids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eta Acuáridas"
+          }
+        }
+      }
+    },
+    "shower.GEM": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geminids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemínidas"
+          }
+        }
+      }
+    },
+    "shower.LEO": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leonids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leónidas"
+          }
+        }
+      }
+    },
+    "shower.LYR": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "April Lyrids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Líridas"
+          }
+        }
+      }
+    },
+    "shower.NTA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Northern Taurids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táuridas del Norte"
+          }
+        }
+      }
+    },
+    "shower.ORI": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orionids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oriónidas"
+          }
+        }
+      }
+    },
+    "shower.PER": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perseids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perseidas"
+          }
+        }
+      }
+    },
+    "shower.QUA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quadrantids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuadrántidas"
+          }
+        }
+      }
+    },
+    "shower.SDA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Southern Delta Aquariids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delta Acuáridas del Sur"
+          }
+        }
+      }
+    },
+    "shower.STA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Southern Taurids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táuridas del Sur"
+          }
+        }
+      }
+    },
+    "shower.URS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ursids"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Úrsidas"
+          }
         }
       }
     },
@@ -1933,6 +3204,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "south"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur"
           }
         }
       }
@@ -1945,6 +3222,12 @@
             "state": "translated",
             "value": "southeast"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sureste"
+          }
         }
       }
     },
@@ -1955,6 +3238,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "southwest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "suroeste"
           }
         }
       }
@@ -1967,6 +3256,12 @@
             "state": "translated",
             "value": "the bright center of our galaxy"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "el centro brillante de nuestra galaxia"
+          }
         }
       }
     },
@@ -1977,6 +3272,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "the night after the peak"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "la noche después del máximo"
           }
         }
       }
@@ -1989,6 +3290,12 @@
             "state": "translated",
             "value": "up in true darkness from %@ to %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sobre el horizonte en oscuridad total de %@ a %@"
+          }
         }
       }
     },
@@ -2000,6 +3307,12 @@
             "state": "translated",
             "value": "very bright"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muy brillante"
+          }
         }
       }
     },
@@ -2010,6 +3323,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "west"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oeste"
           }
         }
       }

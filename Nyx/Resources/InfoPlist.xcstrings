@@ -9,6 +9,12 @@
             "state": "translated",
             "value": "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx programa las alarmas que eliges para momentos de la noche, como la salida del núcleo de la Vía Láctea. Se configuran solo en este dispositivo."
+          }
         }
       }
     },
@@ -19,6 +25,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyx uses your location on this device to find nearby national parks. Your coordinates are never sent to a service."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx usa tu ubicación en este dispositivo para encontrar parques nacionales cercanos. Tus coordenadas nunca se envían a ningún servicio."
           }
         }
       }

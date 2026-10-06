@@ -1,3 +1,13 @@
+# Nyx handoff — 2026-10-06 (Spanish and polish)
+
+Branch `roadmap`. Logged under "Spanish and polish — 2026-10-06" in `DECISIONS.md`. The score is unchanged.
+
+- **Done:** Spanish (`es`) shipped in the app, widgets, watch and Vision Pro catalogs from `Research/localization/` via `Scripts/apply_translations.py` (run by both sync scripts; `--check` for CI-style gaps): every key translated (8 iPad strings, 1 intent summary and the new access/outline copy added), Learn essays from `learn-es/`, meteor shower names by IMO code (`MeteorShower.localizedName`, catalog `shower.*`), eclipse sentence no longer lowercased, times at sentence end fixed, permission strings say *este dispositivo*. Spanish App Store metadata in `Store/1.1/metadata-es.md` (referenced from `SUBMISSION.md`). Access notes for 17 parks (`parks.json` `access`, `Research/park-access.md`) on detail, Tonight, "Darker on…", trip planner, park rows ("No road access") and Ask Nyx records; trip planner "Parks you can drive to" toggle, on by default. Faint US outline (Census, public domain) under the journal constellation and trip map, red in night vision, credited in About the data. Readout grid, inset-name clamp, once-per-park access in trips.
+- **Verified:** zero warnings for Nyx (app, widgets, tests), NyxWidgets, NyxWatch, NyxWatchWidgets and NyxVision; unit tests (147, incl. `SpanishAndAccessTests`) on iOS 27 and 26.5; UI tests and the accessibility audit on iOS 27 for tonight, parks, detail, journal, constellation, trip and data, both palettes. Spanish captures: `Research/Screenshots/es-*-27.png` (19, incl. AX5 Tonight, detail, trip) and `es-*-26.png` (3).
+- **Stubbed / not done:** the project's knownRegions still list only `en` (XcodeGen limitation with synchronized folders; Spanish works from the bundle). Watch screens were not captured in Spanish (watch strings share the iPhone catalog and are in the review list). Widgets show no access note (no room). Park and spot names, NPS alerts and programs stay English by design.
+- **Known issues:** Spanish needs the native-speaker review in `INPUT_NEEDED.md` (step 9) before release. On a 24-hour Spanish device, sentences that end with a time have no final period. `Research/release-verification.json` had an uncommitted change from earlier; left as found.
+- **Next:** integrator's full both-runtime audit (all screens; the 26.5 night-vision audit timed out under load before); native review; then bump the build and archive.
+
 # Nyx handoff — 2026-10-06 (iPad)
 
 Branch `ipad`. Logged under "iPad — 2026-10-06" in `DECISIONS.md`. The score is unchanged; iPhone stays portrait with the same layouts.

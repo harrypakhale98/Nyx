@@ -10,7 +10,7 @@ Every translation in `es-strings.json`, `es-infoplist.json`, `learn-es/` and `ap
 - **Gender-neutral second person.** Avoid forms like *estacionado* or *cómodo* when they would refer to the reader (*cuando te hayas estacionado*, *estar a gusto*).
 - **Capitals: Luna and Sol** when they mean the bodies, matching the English *Moon* and *Sun* (*la Luna se pone*). Moon phases are lowercase mid-sentence (*cerca de la luna nueva*) and capitalized only at the start of a label (*Luna nueva*). *luz de luna* is lowercase.
 - **Numbers:** the decimal point stays a period (0.25, 29.53), which matches Mexico and the US. Write *40%* with no space. Format specifiers, units and `Measurement` output are untouched.
-- **Times:** *a las %@*, *hasta las %@*, *hacia las %@* (time strings come from the system formatter). Known limitation: 1:xx o'clock times need *a la 1:20*. This is rare at night and acceptable for v1. The reviewer may want to rephrase as *a %@* if it reads badly on device.
+- **Times:** *a las %@*, *hasta las %@*, *hacia las %@* (time strings come from the system formatter). **A sentence that ends with a time has no final period** (*Sin Luna hasta las %@*): US and Mexican Spanish write the time as *3:38 a.m.*, whose own period ends the sentence; a second one printed *a.m..* (fixed 2026-10-06). On a 24-hour device the sentence simply ends with the time. Known limitation: 1:xx o'clock times need *a la 1:20*. This is rare at night and acceptable for v1. The reviewer may want to rephrase as *a %@* if it reads badly on device.
 - Quotation marks follow the English source (“ ” or \" \").
 
 ## Core terms

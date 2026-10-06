@@ -29,7 +29,11 @@ nonisolated struct NightLookup: Sendable {
         let park=night.park
         let basis=night.score.hasForecast ? String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud") : String(localized: "moon and darkness only, clouds not yet forecast")
         let dark=night.sky.darkHours>0 ? String(localized: "\(String(format: "%.1f", night.sky.darkHours)) hours of true darkness") : String(localized: "no true darkness")
-        return String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")
+        return String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
+    }
+    /// The access note, so the model never recommends a ferry-only park as a drive.
+    func access(_ park: Park) -> String {
+        park.accessNote.map { "; "+String(localized: "getting there: \($0)") } ?? ""
     }
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
         guard let park=park(named: name) else { return [String(localized: "No national park matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks.")] }
@@ -59,7 +63,7 @@ nonisolated struct NightLookup: Sendable {
         guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.shortName), straight-line.")] }
         return ranked.map { park, miles in
             let night=tonight[park.id]
-            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")
+            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+access(park)
         }
     }
 }

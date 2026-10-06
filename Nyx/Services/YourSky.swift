@@ -46,6 +46,37 @@ nonisolated enum SkyMap {
         let x0=inset.frame.midX-width*scale/2, y0=inset.frame.midY-height*scale/2
         return CGPoint(x:x0+(longitude-inset.longitudes.lowerBound)*squeeze*scale,y:y0+(inset.latitudes.upperBound-latitude)*scale)
     }
+    /// A region's coasts and borders in canvas units, drawn very faintly under the stars so they
+    /// read as places. `clip` keeps an inset's outline inside its frame.
+    struct Outline: Sendable {
+        let region: Region
+        let clip: CGRect
+        let rings: [[CGPoint]]
+    }
+    /// US Census Bureau cartographic boundary cb_2023_us_nation_20m (public domain), simplified.
+    /// Puerto Rico (the file's Caribbean region) has no national park and is left out; American
+    /// Samoa and the Virgin Islands are too small at this scale to draw.
+    static let outlines: [Outline] = outlines(from: Bundle.main.url(forResource: "us-outline", withExtension: "json"))
+    static func outlines(from url: URL?) -> [Outline] {
+        struct File: Decodable { let regions: [String: [[[Double]]]] }
+        guard let url, let data=try? Data(contentsOf: url), let file=try? JSONDecoder().decode(File.self, from: data) else { return [] }
+        let keys: [(String, Region)]=[("lower48", .lower48), ("alaska", .alaska), ("hawaii", .hawaii)]
+        return keys.compactMap { key, region in
+            guard let polygons=file.regions[key] else { return nil }
+            let inset=inset(region)
+            // Islands whose middle lies outside the inset's range (Kauaʻi, the Alexander
+            // Archipelago's outer islands) would only show as fragments at the frame's edge.
+            let rings=polygons.compactMap { ring -> [CGPoint]? in
+                let points=ring.filter { $0.count==2 }
+                guard points.count>2 else { return nil }
+                let lon=points.map { $0[0] }.reduce(0, +)/Double(points.count), lat=points.map { $0[1] }.reduce(0, +)/Double(points.count)
+                guard inset.longitudes.contains(lon), inset.latitudes.contains(lat) else { return nil }
+                return points.map { position(latitude: $0[1], longitude: $0[0], in: inset) }
+            }
+            let clip=region == .lower48 ? CGRect(x: 0, y: 0, width: 1, height: aspect) : inset.frame.insetBy(dx: -0.004, dy: -0.004)
+            return rings.isEmpty ? nil : Outline(region: region, clip: clip, rings: rings)
+        }
+    }
 }
 
 /// A logged night, as the constellation and the recap need it: plain values, so layout is pure.
@@ -203,10 +234,15 @@ nonisolated struct YearRecap: Sendable {
             let events=WhatsUp.Events(park:park,sky:sky)
             // An eclipse you could see outranks any shower; then the shower with the higher published rate.
             if let eclipse=events.eclipse, eclipse.visible != nil {
-                let text=String(localized:"You were out for the \(WhatsUp.eclipseName(eclipse.eclipse).lowercased()) at \(park.shortName).")
+                // Whole sentences per type: lowercasing the eclipse's title would break "Luna" in Spanish.
+                let text=switch eclipse.eclipse.type {
+                case "total": String(localized:"You were out for the total lunar eclipse at \(park.shortName).")
+                case "partial": String(localized:"You were out for the partial lunar eclipse at \(park.shortName).")
+                default: String(localized:"You were out for the penumbral lunar eclipse at \(park.shortName).")
+                }
                 if (best?.rank ?? -1)<1000 { best=(1000,text) }
             } else if let shower=events.shower, shower.isPeakNight, WhatsUp.Events.isNotable(shower.shower), shower.shower.zhr>(best?.rank ?? -1) {
-                best=(shower.shower.zhr,String(localized:"You were out for the \(shower.shower.name) peak at \(park.shortName)."))
+                best=(shower.shower.zhr,String(localized:"You were out for the \(shower.shower.localizedName) peak at \(park.shortName)."))
             }
         }
         self.phases=phases

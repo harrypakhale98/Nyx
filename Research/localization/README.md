@@ -1,6 +1,6 @@
 # Spanish localization (es-MX / US Spanish): draft
 
-Prepared on 2026-10-05 as a translation memory and brought up to date on 2026-10-06 against commit a7825ec (branch `roadmap`). **Nothing here is wired into the app yet.** The String Catalogs were not edited, because other work was editing them at the same time.
+Prepared on 2026-10-05 as a translation memory and brought up to date on 2026-10-06 against commit a7825ec (branch `roadmap`). **Wired in on 2026-10-06:** `python3 Scripts/apply_translations.py` merges these files into the String Catalogs as the `es` localization (it also runs at the end of `sync_catalog.py` and `sync_vision_catalog.py`). Edit Spanish here, then run it; never edit the catalogs' Spanish by hand. The "Integration" section below is kept as the record of what was decided.
 
 ## Files
 
@@ -10,6 +10,7 @@ Prepared on 2026-10-05 as a translation memory and brought up to date on 2026-10
 | `es-strings-obsolete.json` | The **5** first-pass entries whose keys are no longer in the catalog (the source text changed or the string was removed): *Darkness score %lld, %@*, *%@, %@. Darkness score %lld, %@. %@ %@ %@*, *Swipe up or down to move one night at a time.*, *Field mode offered*, *Nothing changes yet*. Kept for reference only; their replacements are in `es-strings.json`. |
 | `es-vision-strings.json` | All **183** keys in `NyxVision/Resources/Localizable.xcstrings`. 138 reuse the iPhone translation word for word; 45 are Vision-only. |
 | `es-shower-names.json` | Meteor shower code (`sky-events.json` `meteorShowers[].code`) → Spanish name, for all 13 showers. The integrator will localize shower names by code. |
+| `es-access-notes.json` | Park id → Spanish access note (catalog keys `access.<id>`; English from `parks.json`), added 2026-10-06 for the 17 parks in `Research/park-access.md`. |
 | `es-infoplist.json` | The two keys in `Nyx/Resources/InfoPlist.xcstrings`: `NSLocationWhenInUseUsageDescription` and `NSAlarmKitUsageDescription`. |
 | `glossary-es.md` | Register (tú), term decisions, proper names, meteor shower and compass names. Read this first. |
 | `learn-es/*.md` | The six Learn essays in Spanish (`access.md`, *Un cielo para todos*, added 2026-10-06). They match the `essay.*` values in `es-strings.json` (the first line is the title, then paragraphs separated by blank lines, the same structure `EssayView` expects). |

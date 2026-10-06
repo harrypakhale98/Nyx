@@ -93,9 +93,10 @@ nonisolated enum TripPlanner {
         }
         return days
     }
-    /// Parks within `radiusMiles` of the starting point, as the crow flies, sorted by id.
-    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMiles: Double) -> [Park] {
-        parks.filter { $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMiles*1609.344 }.sorted { $0.id<$1.id }
+    /// Parks within `radiusMiles` of the starting point, as the crow flies, sorted by id. With
+    /// `drivableOnly`, parks whose sky needs a boat or a plane (`Park.drivable`) are left out.
+    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMiles: Double, drivableOnly: Bool = false) -> [Park] {
+        parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMiles*1609.344 }.sorted { $0.id<$1.id }
     }
     /// Every candidate's night for every day, `[day][park]`, scored as `PlanModel.night` scores it.
     /// Pure and off the main actor: astronomy, the cached forecasts and nothing else.
@@ -177,6 +178,7 @@ nonisolated enum TripPlanner {
             var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value)/100 \(stop.night.score.hasForecast ? stop.night.score.band.label : String(localized:"(moon and darkness only)")). \(stop.reason).")
             if let hop=stop.hopMeters, hop>1000 { line+=" "+String(localized:"\(distance(hop)) from the night before.") }
             if let closure=stop.closure { line+=" "+String(localized:"Closure alert: \(closure)") }
+            if let access=park.accessNote { line+=" "+access }
             lines.append(line)
         }
         if let best=plan.best { lines.append(String(localized:"Best night: \(best.night.park.dayLabel(best.night.id)) at \(best.night.park.shortName).")) }

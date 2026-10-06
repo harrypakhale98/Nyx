@@ -15,6 +15,19 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     let sourceURL: String
     let sourceNote: String
     let viewingSpots: [ViewingSpot]
+    /// How a visitor reaches the night sky, for parks a car cannot simply drive to (nps.gov "Getting there").
+    var access: Access?
+    nonisolated struct Access: Codable, Hashable, Sendable {
+        let note: String
+        /// False when the night sky here needs a boat or a plane from the road network you drove on.
+        let road: Bool
+        let sourceURL: String
+    }
+    /// The access note in the reader's language (catalog `access.<id>`, written by
+    /// Scripts/apply_translations.py), falling back to the bundled English.
+    var accessNote: String? { access.map { Bundle.main.localizedString(forKey: "access.\(id)", value: $0.note, table: nil) } }
+    /// Whether a car reaches somewhere in the park to watch the sky. Parks without a note are.
+    var drivable: Bool { access?.road ?? true }
     var shortName: String {
         name.replacingOccurrences(of: " National Park & Preserve", with: "")
             .replacingOccurrences(of: " National Park", with: "")
