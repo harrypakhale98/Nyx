@@ -279,7 +279,7 @@ private struct DomeLayer: View, Equatable {
             // The radiant of a shower worth looking for that night (fixed J2000 position; its drift is under a degree a day).
             if let shower=WhatsUp.Events(park:park,sky:sky).shower, shower.hourlyRate>=5 || shower.isPeakNight,
                let p=project(shower.shower.radiantRA*Double.pi/180,shower.shower.radiantDec*Double.pi/180) {
-                radiant=Mark(position:p,name:shower.shower.name,magnitude:0)
+                radiant=Mark(position:p,name:shower.shower.localizedName,magnitude:0)
             }
         }
         // Light domes, when the sky shown is dark enough for them to matter. A dome rises about 14°;

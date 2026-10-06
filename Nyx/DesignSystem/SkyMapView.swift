@@ -19,6 +19,9 @@ nonisolated struct SkyMapContent: Sendable {
     /// The part of the canvas shown, in canvas units.
     var viewport = CGRect(x:0,y:0,width:1,height:SkyMap.aspect)
     var showsInsets = true
+    /// The regions whose faint coastline is drawn: all of them on the whole map, only the trip's own
+    /// when zoomed, so an inset's outline never wanders into a close-up of the lower 48.
+    var outlineRegions = Set(SkyMap.Region.allCases)
     /// The smallest box around `points`, padded and widened to the map's shape, so a trip's few
     /// hundred miles fill the panel instead of a corner of the country.
     static func viewport(around points: [CGPoint], padding: Double = 0.05, minimumWidth: Double = 0.16) -> CGRect {
@@ -48,7 +51,20 @@ struct SkyMapCanvas: View {
                 for inset in SkyMap.insets.dropFirst() {
                     let rect=CGRect(origin:screen(inset.frame.origin),size:CGSize(width:inset.frame.width*scale,height:inset.frame.height*scale)).insetBy(dx:-3,dy:-3)
                     context.stroke(Path(roundedRect:rect,cornerRadius:4),with:.color(palette.line.opacity(0.7)),style:StrokeStyle(lineWidth:0.5,dash:[2,3]))
-                    context.draw(Text(inset.name).font(.system(size:8,weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)),at:CGPoint(x:rect.minX+1,y:rect.maxY+2),anchor:.topLeading)
+                    // Kept inside the canvas: a longer name ("I. Vírgenes") ends at the right edge instead of past it.
+                    let name=context.resolve(Text(inset.name).font(.system(size:8,weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)))
+                    let width=name.measure(in:size).width
+                    context.draw(name,at:CGPoint(x:max(1,min(rect.minX+1,size.width-width-1)),y:rect.maxY+2),anchor:.topLeading)
+                }
+            }
+            // The country, barely there: coasts and borders so the stars read as places.
+            for outline in SkyMap.outlines where content.outlineRegions.contains(outline.region) {
+                var path=Path()
+                for ring in outline.rings { path.addLines(ring.map(screen)); path.closeSubpath() }
+                let clip=outline.clip
+                context.drawLayer { layer in
+                    layer.clip(to:Path(CGRect(origin:screen(clip.origin),size:CGSize(width:clip.width*scale,height:clip.height*scale))))
+                    layer.stroke(path,with:.color(palette.ink.opacity(palette.nightVision ? 0.17 : 0.14)),style:StrokeStyle(lineWidth:0.6,lineJoin:.round))
                 }
             }
             // The 63 parks: the sky's faint background.

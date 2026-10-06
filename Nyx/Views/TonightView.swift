@@ -108,6 +108,7 @@ struct TonightView: View {
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
             else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
+            AccessNoteLabel(park:park,alignment:.center).padding(.horizontal,12)
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
         }.frame(maxWidth:.infinity)
@@ -176,7 +177,7 @@ struct TonightView: View {
         }
         for night in nights {
             if let shower=model.events(night).reminderShower {
-                return (night,.meteors,String(localized:"\(shower.shower.name) peak \(when(night)): \(WhatsUp.rateText(shower.hourlyRate)) at \(park.shortName)"))
+                return (night,.meteors,String(localized:"\(shower.shower.localizedName) peak \(when(night)): \(WhatsUp.rateText(shower.hourlyRate)) at \(park.shortName)"))
             }
         }
         return nil
@@ -190,6 +191,8 @@ struct TonightView: View {
             capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)"),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)
             } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
+            // A darker night somewhere the car cannot go says so before the tap, not after.
+            if !ahead.park.drivable { AccessNoteLabel(park:ahead.park,alignment:.center).padding(.horizontal,12) }
         }
     }
     private func capsule<Destination:View,Icon:View>(text:String,hint:LocalizedStringKey,@ViewBuilder destination:@escaping ()->Destination,@ViewBuilder icon:()->Icon)->some View {

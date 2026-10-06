@@ -11,8 +11,8 @@ extension PlanModel {
     }
     /// A trip plan from the cached forecasts and park updates, worked out off the main thread.
     /// Nothing is fetched: the plan is as fresh as what Nyx already has, and says so night by night.
-    func planTrip(days: [TripDay], latitude: Double, longitude: Double, radiusMiles: Double, maxHopMiles: Double) async -> TripPlan {
-        let candidates=TripPlanner.candidates(parks,latitude:latitude,longitude:longitude,radiusMiles:radiusMiles)
+    func planTrip(days: [TripDay], latitude: Double, longitude: Double, radiusMiles: Double, maxHopMiles: Double, drivableOnly: Bool = true) async -> TripPlan {
+        let candidates=TripPlanner.candidates(parks,latitude:latitude,longitude:longitude,radiusMiles:radiusMiles,drivableOnly:drivableOnly)
         let ids=Set(candidates.map(\.id))
         let forecasts=self.forecasts.filter { ids.contains($0.key) }
         let closures=Dictionary(candidates.compactMap { park in closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
