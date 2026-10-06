@@ -1,0 +1,2019 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ from %@ to %@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ from %@ to %@, %@."
+          }
+        }
+      }
+    },
+    "%@ peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ peak"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@ · moon and darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · moon and darkness"
+          }
+        }
+      }
+    },
+    "%@ – %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "%@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@."
+          }
+        }
+      }
+    },
+    "%@, night of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, night of %@"
+          }
+        }
+      }
+    },
+    "%lld h %lld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h %lld min"
+          }
+        }
+      }
+    },
+    "%lld nights after the peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nights after the peak"
+          }
+        }
+      }
+    },
+    "%lld out of 100, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld out of 100, %@"
+          }
+        }
+      }
+    },
+    "%lld out of 100, %@, moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld out of 100, %@, moon and darkness only"
+          }
+        }
+      }
+    },
+    "%lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% lit"
+          }
+        }
+      }
+    },
+    "%lld° up in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld° up in the %@"
+          }
+        }
+      }
+    },
+    "%lld° up in the %@ as true darkness begins, then sinking.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld° up in the %@ as true darkness begins, then sinking."
+          }
+        }
+      }
+    },
+    "A bright Moon hides all but the brightest meteors.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A bright Moon hides all but the brightest meteors."
+          }
+        }
+      }
+    },
+    "A faint dimming": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A faint dimming"
+          }
+        }
+      }
+    },
+    "A weak return from this park; a rough guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A weak return from this park; a rough guide."
+          }
+        }
+      }
+    },
+    "All night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All night"
+          }
+        }
+      }
+    },
+    "Astronomical twilight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Astronomical twilight"
+          }
+        }
+      }
+    },
+    "At most %lld%% of the Moon's width is in shadow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At most %lld%% of the Moon's width is in shadow."
+          }
+        }
+      }
+    },
+    "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At this latitude the bright center never climbs more than %lld° up. An open view to the south matters most."
+          }
+        }
+      }
+    },
+    "Back to tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to tonight"
+          }
+        }
+      }
+    },
+    "Below the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Below the horizon"
+          }
+        }
+      }
+    },
+    "Best %@, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best %@, %@."
+          }
+        }
+      }
+    },
+    "Bortle %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bortle %lld"
+          }
+        }
+      }
+    },
+    "Civil twilight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Civil twilight"
+          }
+        }
+      }
+    },
+    "Compass point on the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compass point on the horizon"
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view; clouds not shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view; clouds not shown."
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view; clouds not shown. Ahead is %@, not your room's real north.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view; clouds not shown. Ahead is %@, not your room's real north."
+          }
+        }
+      }
+    },
+    "Computing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computing"
+          }
+        }
+      }
+    },
+    "Darkness score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score"
+          }
+        }
+      }
+    },
+    "Down all night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Down all night"
+          }
+        }
+      }
+    },
+    "Down for %lld%% of true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Down for %lld%% of true darkness"
+          }
+        }
+      }
+    },
+    "E": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E"
+          }
+        }
+      }
+    },
+    "Estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate"
+          }
+        }
+      }
+    },
+    "Estimate · International Dark Sky Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate · International Dark Sky Park"
+          }
+        }
+      }
+    },
+    "Excellent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excellent"
+          }
+        }
+      }
+    },
+    "Fair": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fair"
+          }
+        }
+      }
+    },
+    "First quarter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First quarter"
+          }
+        }
+      }
+    },
+    "For one observer under this park's sky; a rough guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For one observer under this park's sky; a rough guide."
+          }
+        }
+      }
+    },
+    "Full moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full moon"
+          }
+        }
+      }
+    },
+    "Good": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good"
+          }
+        }
+      }
+    },
+    "Highest at %@, %lld° up in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highest at %@, %lld° up in the %@."
+          }
+        }
+      }
+    },
+    "In Earth's shadow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Earth's shadow"
+          }
+        }
+      }
+    },
+    "In the %@ after dusk; sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the %@ after dusk; sets at %@."
+          }
+        }
+      }
+    },
+    "Jupiter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jupiter"
+          }
+        }
+      }
+    },
+    "Last quarter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last quarter"
+          }
+        }
+      }
+    },
+    "Leave the sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave the sky"
+          }
+        }
+      }
+    },
+    "Low in the %@ after dusk; sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low in the %@ after dusk; sets at %@."
+          }
+        }
+      }
+    },
+    "Low on the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low on the horizon"
+          }
+        }
+      }
+    },
+    "Low: an open view toward the horizon matters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low: an open view toward the horizon matters."
+          }
+        }
+      }
+    },
+    "Mars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mars"
+          }
+        }
+      }
+    },
+    "Mercury": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mercury"
+          }
+        }
+      }
+    },
+    "Middle of darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle of darkness"
+          }
+        }
+      }
+    },
+    "Middle of true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle of true darkness"
+          }
+        }
+      }
+    },
+    "Milky Way core": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core"
+          }
+        }
+      }
+    },
+    "Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon"
+          }
+        }
+      }
+    },
+    "Moon %@, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon %@, %lld%% lit"
+          }
+        }
+      }
+    },
+    "Moon %lld° up in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon %lld° up in the %@"
+          }
+        }
+      }
+    },
+    "Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go."
+          }
+        }
+      }
+    },
+    "Moon below the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon below the horizon"
+          }
+        }
+      }
+    },
+    "Moon down": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon down"
+          }
+        }
+      }
+    },
+    "Moon high in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon high in the %@"
+          }
+        }
+      }
+    },
+    "Moon low in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon low in the %@"
+          }
+        }
+      }
+    },
+    "Moon up, %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon up, %lld%% lit"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent illuminated": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent illuminated"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent illuminated, as seen at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent illuminated, as seen at %@"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent lit"
+          }
+        }
+      }
+    },
+    "Moon-free from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free from %@ to %@."
+          }
+        }
+      }
+    },
+    "Moon-free from %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free from %@."
+          }
+        }
+      }
+    },
+    "Moon-free until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon-free until %@."
+          }
+        }
+      }
+    },
+    "Moves the clock to the middle of true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the clock to the middle of true darkness"
+          }
+        }
+      }
+    },
+    "N": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "N"
+          }
+        }
+      }
+    },
+    "Nautical twilight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nautical twilight"
+          }
+        }
+      }
+    },
+    "New moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New moon"
+          }
+        }
+      }
+    },
+    "Next night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next night"
+          }
+        }
+      }
+    },
+    "Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night"
+          }
+        }
+      }
+    },
+    "Night vision": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night vision"
+          }
+        }
+      }
+    },
+    "No Moon or planets above the horizon. The stars have the sky to themselves.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Moon or planets above the horizon. The stars have the sky to themselves."
+          }
+        }
+      }
+    },
+    "No crossing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No crossing"
+          }
+        }
+      }
+    },
+    "No moonlight to wash it out.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No moonlight to wash it out."
+          }
+        }
+      }
+    },
+    "No true darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness"
+          }
+        }
+      }
+    },
+    "No true darkness on this night at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness on this night at this latitude."
+          }
+        }
+      }
+    },
+    "No true darkness tonight at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness tonight at this latitude."
+          }
+        }
+      }
+    },
+    "Not visible from this park: the Moon is below the horizon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not visible from this park: the Moon is below the horizon."
+          }
+        }
+      }
+    },
+    "Nyx": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx"
+          }
+        }
+      }
+    },
+    "Out of the night sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Out of the night sky"
+          }
+        }
+      }
+    },
+    "Partial lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partial lunar eclipse"
+          }
+        }
+      }
+    },
+    "Penumbral lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penumbral lunar eclipse"
+          }
+        }
+      }
+    },
+    "Poor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poor"
+          }
+        }
+      }
+    },
+    "Previous night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous night"
+          }
+        }
+      }
+    },
+    "Pristine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pristine"
+          }
+        }
+      }
+    },
+    "Rises %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises %@"
+          }
+        }
+      }
+    },
+    "Rises %@, sets %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises %@, sets %@"
+          }
+        }
+      }
+    },
+    "Rises after darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises after darkness"
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@ and climbs high before dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@ and climbs high before dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@, highest around %@, sets at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@, highest around %@, sets at %@."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; %@ before dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; %@ before dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; highest around %@ in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; highest around %@ in the %@."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; still low at dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; still low at dawn."
+          }
+        }
+      }
+    },
+    "Rises at %@ in the %@; well up by dawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises at %@ in the %@; well up by dawn."
+          }
+        }
+      }
+    },
+    "R↑": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "R↑"
+          }
+        }
+      }
+    },
+    "S": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S"
+          }
+        }
+      }
+    },
+    "Saturn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saturn"
+          }
+        }
+      }
+    },
+    "Search parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search parks"
+          }
+        }
+      }
+    },
+    "Sets %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets %@"
+          }
+        }
+      }
+    },
+    "Sets %@, rises %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets %@, rises %@"
+          }
+        }
+      }
+    },
+    "Sets before darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets before darkness"
+          }
+        }
+      }
+    },
+    "Sky glow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow"
+          }
+        }
+      }
+    },
+    "Sky over %@ at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky over %@ at %@"
+          }
+        }
+      }
+    },
+    "Southern winter favors the bright center. Look toward the southern sky; timing and terrain matter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Southern winter favors the bright center. Look toward the southern sky; timing and terrain matter."
+          }
+        }
+      }
+    },
+    "Stand under this sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand under this sky"
+          }
+        }
+      }
+    },
+    "Still climbing: %lld° up in the %@ as true darkness ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still climbing: %lld° up in the %@ as true darkness ends."
+          }
+        }
+      }
+    },
+    "Subtle: the Moon's edge darkens slightly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtle: the Moon's edge darkens slightly."
+          }
+        }
+      }
+    },
+    "Summer favors the bright center. Look toward the southern sky; timing and terrain matter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summer favors the bright center. Look toward the southern sky; timing and terrain matter."
+          }
+        }
+      }
+    },
+    "Surrounds you with this park's computed sky at the time on the clock below": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Surrounds you with this park's computed sky at the time on the clock below"
+          }
+        }
+      }
+    },
+    "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
+    "The Moon is down all that time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon is down all that time."
+          }
+        }
+      }
+    },
+    "The Moon is up all that time, %lld%% lit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon is up all that time, %lld%% lit."
+          }
+        }
+      }
+    },
+    "The Moon rises already eclipsed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon rises already eclipsed."
+          }
+        }
+      }
+    },
+    "The Moon sets before it ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon sets before it ends."
+          }
+        }
+      }
+    },
+    "The Sun is up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Sun is up"
+          }
+        }
+      }
+    },
+    "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center is near the Sun this season. The Milky Way's fainter band still crosses dark skies."
+          }
+        }
+      }
+    },
+    "The bright center is out of the night sky this season. Bright constellations still reward a dark night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center is out of the night sky this season. Bright constellations still reward a dark night."
+          }
+        }
+      }
+    },
+    "The bright center may be visible before dawn or near dusk. Timing and terrain matter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center may be visible before dawn or near dusk. Timing and terrain matter."
+          }
+        }
+      }
+    },
+    "The bright center rises at %@, after true darkness ends at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center rises at %@, after true darkness ends at %@."
+          }
+        }
+      }
+    },
+    "The bright center sets at %@, before true darkness begins at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center sets at %@, before true darkness begins at %@."
+          }
+        }
+      }
+    },
+    "The bright center stays low on the horizon at this latitude. An open view to the south matters most.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bright center stays low on the horizon at this latitude. An open view to the south matters most."
+          }
+        }
+      }
+    },
+    "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky."
+          }
+        }
+      }
+    },
+    "The peak falls while the radiant is low here, so few meteors reach this sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The peak falls while the radiant is low here, so few meteors reach this sky."
+          }
+        }
+      }
+    },
+    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO)."
+          }
+        }
+      }
+    },
+    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year."
+          }
+        }
+      }
+    },
+    "The sky at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sky at %@"
+          }
+        }
+      }
+    },
+    "Time of night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time of night"
+          }
+        }
+      }
+    },
+    "Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
+          }
+        }
+      }
+    },
+    "Tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight"
+          }
+        }
+      }
+    },
+    "Tonight · moon and darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight · moon and darkness"
+          }
+        }
+      }
+    },
+    "Total lunar eclipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total lunar eclipse"
+          }
+        }
+      }
+    },
+    "Totality": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Totality"
+          }
+        }
+      }
+    },
+    "True darkness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness"
+          }
+        }
+      }
+    },
+    "Turns the window and the sky a dim red that keeps your eyes adapted to the dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turns the window and the sky a dim red that keeps your eyes adapted to the dark"
+          }
+        }
+      }
+    },
+    "Until %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until %@"
+          }
+        }
+      }
+    },
+    "Up all night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up all night"
+          }
+        }
+      }
+    },
+    "Up all night, highest around %@ in the %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up all night, highest around %@ in the %@."
+          }
+        }
+      }
+    },
+    "Venus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venus"
+          }
+        }
+      }
+    },
+    "W": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "W"
+          }
+        }
+      }
+    },
+    "Waning crescent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waning crescent"
+          }
+        }
+      }
+    },
+    "Waning gibbous": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waning gibbous"
+          }
+        }
+      }
+    },
+    "Waxing crescent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waxing crescent"
+          }
+        }
+      }
+    },
+    "Waxing gibbous": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waxing gibbous"
+          }
+        }
+      }
+    },
+    "What's up this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up this night"
+          }
+        }
+      }
+    },
+    "What's up tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up tonight"
+          }
+        }
+      }
+    },
+    "Without true darkness at this latitude, few meteors will show.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without true darkness at this latitude, few meteors will show."
+          }
+        }
+      }
+    },
+    "Without true darkness, the Milky Way stays faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without true darkness, the Milky Way stays faint."
+          }
+        }
+      }
+    },
+    "about %lld an hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %lld an hour"
+          }
+        }
+      }
+    },
+    "around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "around %@"
+          }
+        }
+      }
+    },
+    "before dawn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "before dawn"
+          }
+        }
+      }
+    },
+    "below the horizon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "below the horizon"
+          }
+        }
+      }
+    },
+    "bright": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bright"
+          }
+        }
+      }
+    },
+    "east": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "east"
+          }
+        }
+      }
+    },
+    "faint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "faint"
+          }
+        }
+      }
+    },
+    "fewer than 1 an hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fewer than 1 an hour"
+          }
+        }
+      }
+    },
+    "high in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "high in the %@"
+          }
+        }
+      }
+    },
+    "in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in the %@"
+          }
+        }
+      }
+    },
+    "low in the %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "low in the %@"
+          }
+        }
+      }
+    },
+    "north": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "north"
+          }
+        }
+      }
+    },
+    "northeast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "northeast"
+          }
+        }
+      }
+    },
+    "northwest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "northwest"
+          }
+        }
+      }
+    },
+    "not visible here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not visible here"
+          }
+        }
+      }
+    },
+    "peak in %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak in %lld nights"
+          }
+        }
+      }
+    },
+    "peak the next night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak the next night"
+          }
+        }
+      }
+    },
+    "peak this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak this night"
+          }
+        }
+      }
+    },
+    "peak tomorrow night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak tomorrow night"
+          }
+        }
+      }
+    },
+    "peak tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak tonight"
+          }
+        }
+      }
+    },
+    "south": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "south"
+          }
+        }
+      }
+    },
+    "southeast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "southeast"
+          }
+        }
+      }
+    },
+    "southwest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "southwest"
+          }
+        }
+      }
+    },
+    "the bright center of our galaxy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the bright center of our galaxy"
+          }
+        }
+      }
+    },
+    "the night after the peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the night after the peak"
+          }
+        }
+      }
+    },
+    "up in true darkness from %@ to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "up in true darkness from %@ to %@"
+          }
+        }
+      }
+    },
+    "very bright": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "very bright"
+          }
+        }
+      }
+    },
+    "west": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "west"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

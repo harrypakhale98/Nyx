@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DAB1C17E6D972FDE5831B51D"
-               BuildableName = "NyxWatch.app"
-               BlueprintName = "NyxWatch"
+               BlueprintIdentifier = "C3FE8CF2BC17EF084DAF890D"
+               BuildableName = "NyxVision.app"
+               BlueprintName = "NyxVision"
                ReferencedContainer = "container:Nyx.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DAB1C17E6D972FDE5831B51D"
-            BuildableName = "NyxWatch.app"
-            BlueprintName = "NyxWatch"
+            BlueprintIdentifier = "C3FE8CF2BC17EF084DAF890D"
+            BuildableName = "NyxVision.app"
+            BlueprintName = "NyxVision"
             ReferencedContainer = "container:Nyx.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -55,12 +55,14 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DAB1C17E6D972FDE5831B51D"
-            BuildableName = "NyxWatch.app"
-            BlueprintName = "NyxWatch"
+            BlueprintIdentifier = "C3FE8CF2BC17EF084DAF890D"
+            BuildableName = "NyxVision.app"
+            BlueprintName = "NyxVision"
             ReferencedContainer = "container:Nyx.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -72,9 +74,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DAB1C17E6D972FDE5831B51D"
-            BuildableName = "NyxWatch.app"
-            BlueprintName = "NyxWatch"
+            BlueprintIdentifier = "C3FE8CF2BC17EF084DAF890D"
+            BuildableName = "NyxVision.app"
+            BlueprintName = "NyxVision"
             ReferencedContainer = "container:Nyx.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
