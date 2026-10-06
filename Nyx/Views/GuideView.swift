@@ -50,7 +50,7 @@ struct GuideView:View {
                 Eyebrow(text:"The original records")
                 ForEach(Array(records.enumerated()),id:\.offset) { index,record in Panel { Text("\(index+1). \(record)").font(.subheadline) } }
             }
-        }.padding(24) }.background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
+        }.padding(24).readableColumn() }.background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
             .task(id:requestID) {
                 guard requestID>0 else { return }
                 // Planning gets tools that call the engine; recaps and explainers reason over their records only.

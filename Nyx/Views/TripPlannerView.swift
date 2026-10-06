@@ -37,7 +37,7 @@ struct TripPlannerView: View {
             if let best=plan?.best { hero(best) }
             Panel { controls }
             results
-        }.padding(24) }
+        }.padding(24).readableColumn() }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
         .navigationTitle("Plan a trip").navigationBarTitleDisplayMode(.inline)
@@ -102,7 +102,7 @@ struct TripPlannerView: View {
     }
     private func distancePicker(title:LocalizedStringKey,selection:Binding<Double>,values:[Double],note:LocalizedStringKey)->some View {
         ViewThatFits(in:.horizontal) {
-            HStack(alignment:.firstTextBaseline) { VStack(alignment:.leading,spacing:2) { Text(title); Text(note).font(.caption).foregroundStyle(palette.muted) }; Spacer(minLength:8); menu(title:title,selection:selection,values:values) }
+            HStack(alignment:.firstTextBaseline) { VStack(alignment:.leading,spacing:2) { Text(title).fixedSize(horizontal:false,vertical:true); Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.layoutPriority(1); Spacer(minLength:8); menu(title:title,selection:selection,values:values) }
             VStack(alignment:.leading,spacing:4) { Text(title); Text(note).font(.caption).foregroundStyle(palette.muted); menu(title:title,selection:selection,values:values) }
         }
     }

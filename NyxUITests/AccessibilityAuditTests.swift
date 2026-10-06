@@ -53,7 +53,11 @@ final class AccessibilityAuditTests:XCTestCase {
     private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
         // scrolling through that band is dimmed by design, whatever the app's colours.
-        let fadeZone=tabBar.isNull ? CGRect.null : tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:-28)
+        // On iPad the tab bar floats at the top of the window and the edge effect runs below it (to about 84 pt).
+        let topBar = !tabBar.isNull && tabBar.midY<window.height/2
+        var fadeZone=tabBar.isNull ? CGRect.null : tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:topBar ? 28 : -28)
+        // iPad: the navigation bar's own scroll-edge effect at the top of the window, whatever the tab bar reports.
+        if UIDevice.current.userInterfaceIdiom == .pad, !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
         let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
         switch issue.auditType {
         case .dynamicType:
@@ -77,16 +81,21 @@ final class AccessibilityAuditTests:XCTestCase {
             // Moons sample as low contrast on the same anti-aliased strokes; starlight on solid indigo is about 13:1, red on
             // night-vision black 6.2:1. Checked by eye in zoomed iOS 27 captures in both palettes.
             let recapSerif=screen=="recap" && (numeral || issue.element?.label=="The Moon's phases you met")
-            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif
+            // iPad Learn grid (2026-10-06): the right-hand cards' "2 minute read" captions, starlight at 86% on the indigo
+            // panel (about 12:1); the audit samples the glass over the Milky Way behind them. Checked in a zoomed capture.
+            let learnCaption=screen=="learn" && (issue.element?.label ?? "").hasSuffix("minute read")
+            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption
         case .textClipped:
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).
-            return !visible || issue.element?.elementType == .searchField || (screen=="editor" && issue.element?.label=="Choose photos")
+            // On iPad the Parks search field sits in the split view's list column; its placeholder is reported as its own element.
+            return !visible || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
             // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a
             // labelled button and the map has a spoken summary.
-            return issue.element==nil && ["onboarding","river","constellation","journal","recap"].contains(screen)
+            // iPad (2026-10-06): the river is on screen on Tonight (wide) and in the detail's hero column.
+            return issue.element==nil && ["onboarding","river","constellation","journal","recap","tonight","detail"].contains(screen)
         default:
             return false
         }

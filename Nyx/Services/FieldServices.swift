@@ -154,7 +154,8 @@ extension FieldActivityAttributes {
             if #available(iOS 27.0, *) { accuracy=motion.headingAccuracy }
             MainActor.assumeIsolated {
                 guard let self else { return }
-                let measured=SkyCompass.Pose(quaternion: simd_quatd(ix: q.x, iy: q.y, iz: q.z, r: q.w), gravity: SIMD3(g.x, g.y, g.z))
+                // Core Motion speaks in the device's own axes; an iPad held in landscape turns the screen's.
+                let measured=SkyCompass.Pose(quaternion: simd_quatd(ix: q.x, iy: q.y, iz: q.z, r: q.w), gravity: SIMD3(g.x, g.y, g.z)).turned(Self.quarterTurns())
                 self.pose=self.pose.map { Self.smooth($0, toward: measured) } ?? measured
                 if let accuracy { self.needsCalibration=accuracy<0 || accuracy>20 }
                 else { self.needsCalibration=calibration == .uncalibrated || calibration == .low }
@@ -165,6 +166,16 @@ extension FieldActivityAttributes {
         manager.stopDeviceMotionUpdates()
         MotionTilt.shared.suspend(false)
         pose=nil
+    }
+    /// How far the interface is turned from the device's portrait (always 0 on iPhone, which is portrait only).
+    private static func quarterTurns() -> Int {
+        let scenes=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        return switch (scenes.first { $0.activationState == .foregroundActive } ?? scenes.first)?.effectiveGeometry.interfaceOrientation {
+        case .landscapeRight: 1
+        case .portraitUpsideDown: 2
+        case .landscapeLeft: 3
+        default: 0
+        }
     }
     /// A gentle low-pass, so the sky glides rather than jitters in the hand.
     private static func smooth(_ a: SkyCompass.Pose, toward b: SkyCompass.Pose) -> SkyCompass.Pose {

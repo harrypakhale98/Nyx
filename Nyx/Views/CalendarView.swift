@@ -9,9 +9,13 @@ struct NightCell: View {
     var isPast:Bool=false
     /// A visible lunar eclipse or a notable shower's peak; at most one per night.
     var marker:WhatsUp.Events.Marker?=nil
+    /// Larger on a wide iPad, where the month has the room.
+    var scale=1.0
+    /// The night shown beside the month on a wide iPad.
+    var selected=false
     var body:some View {
         VStack(spacing:5) {
-            Text("\(night.park.calendar.component(.day,from:night.id))").font(.caption.monospacedDigit().weight(isTonight ? .bold : .regular))
+            Text("\(night.park.calendar.component(.day,from:night.id))").font((scale>1 ? Font.callout : Font.caption).monospacedDigit().weight(isTonight ? .bold : .regular))
                 .foregroundStyle(isTonight ? palette.accent : isPast ? palette.muted : palette.ink)
                 // Past nights are dimmer; without colour, a line through the date says so.
                 .strikethrough(access.differentiate && isPast,color:palette.muted)
@@ -20,13 +24,14 @@ struct NightCell: View {
                 .overlay(alignment:.topTrailing) { if let marker { SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.ink.opacity(isPast ? 0.5 : 1)).frame(width:12,height:12).offset(x:15,y:-3) } }
             Canvas { context,size in
                 // Size follows the score on a curve, so a 95 night reads clearly larger than a 70.
-                let center=CGPoint(x:size.width/2,y:size.height/2),radius=1.5+8*pow(Double(night.score.value)/100,1.5)
+                let center=CGPoint(x:size.width/2,y:size.height/2),radius=(1.5+8*pow(Double(night.score.value)/100,1.5))*scale
                 if highlighted {
-                    context.stroke(Path(ellipseIn:CGRect(x:center.x-12.5,y:center.y-12.5,width:25,height:25)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7)
+                    let ring=12.5*scale, halo=9*scale
+                    context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7)
                     // A soft halo: the new-moon window glows a little, like a dark sky does.
                     context.drawLayer { glow in
-                        glow.addFilter(.blur(radius:5))
-                        glow.fill(Path(ellipseIn:CGRect(x:center.x-9,y:center.y-9,width:18,height:18)),with:.color(palette.accent.opacity(0.22*access.glow*(isPast ? 0.35 : 1))))
+                        glow.addFilter(.blur(radius:5*scale))
+                        glow.fill(Path(ellipseIn:CGRect(x:center.x-halo,y:center.y-halo,width:2*halo,height:2*halo)),with:.color(palette.accent.opacity(0.22*access.glow*(isPast ? 0.35 : 1))))
                     }
                 }
                 let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
@@ -35,10 +40,12 @@ struct NightCell: View {
                 let fade=isPast ? 0.35 : 1.0
                 if mark.filled { context.fill(circle,with:.color(palette.accent.opacity((0.45+Double(night.score.value)/200)*fade))) }
                 else { context.stroke(circle,with:.color(palette.accent.opacity(fade)),lineWidth:1.1) }
-            }.frame(height:28).accessibilityHidden(true)
+            }.frame(height:28*scale).accessibilityHidden(true)
             if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(palette.muted) }
-        }.frame(maxWidth:.infinity,minHeight:78).contentShape(Rectangle())
+        }.frame(maxWidth:.infinity,minHeight:78*scale)
+            .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8)) } }
+            .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(spoken)
     }
@@ -103,108 +110,183 @@ struct CalendarView: View {
     @State private var chosen:Night?
     @State private var peeking=false
     @State private var forward=true
+    /// The night shown beside the month on a wide iPad; tonight (or the month's first night) until one is chosen.
+    @State private var focusedID:Date?
+    @State private var width=0.0
     private var park:Park? { model.park(parkID) ?? model.home }
+    /// A wide iPad shows the chosen night's breakdown beside a larger month, instead of in a sheet.
+    private var wide:Bool { !typeSize.isAccessibilitySize && WideLayout.columns(width:width,largeText:false)==2 }
+    /// Everything one month's page draws, worked out once per render.
+    private struct Month {
+        let date:Date
+        let nights:[Night]
+        let lead:Int
+        let tonight:Date
+        let window:ArraySlice<Night>
+        let windowInMonth:Bool
+        let inWindow:Set<Date>
+    }
+    private func month(_ park:Park)->Month {
+        let base=park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:model.today)) ?? model.today
+        let month=park.calendar.date(byAdding:.month,value:monthOffset,to:base) ?? base
+        let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
+        let nights=model.nights(park,from:month,count:count)
+        let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
+        let tonight=park.evening(model.tonight(park))
+        // The window may reach into the neighbouring months: a new moon on the 1st still gets five nights.
+        let found=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+38),month:nights,after:tonight)
+        return Month(date:month,nights:nights,lead:lead,tonight:tonight,window:found.nights,windowInMonth:found.inMonth,inWindow:found.inMonth ? Set(found.nights.map(\.id)) : [])
+    }
+    private func focused(_ data:Month)->Night? {
+        data.nights.first { $0.id==focusedID } ?? data.nights.first { $0.id==data.tonight } ?? data.nights.first
+    }
     var body: some View {
         ScrollView {
             if let park {
-                let base=park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:model.today)) ?? model.today
-                let month=park.calendar.date(byAdding:.month,value:monthOffset,to:base) ?? base
-                let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
-                let nights=model.nights(park,from:month,count:count)
-                let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
-                let tonight=park.evening(model.tonight(park))
-                // The window may reach into the neighbouring months: a new moon on the 1st still gets five nights.
-                let found=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+38),month:nights,after:tonight)
-                let window=found.nights
-                let inWindow=found.inMonth ? Set(window.map(\.id)) : []
-                VStack(alignment:.leading,spacing:24) {
-                    if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
-                    Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                    if typeSize.isAccessibilitySize {
-                        Menu {
-                            Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
-                        } label: {
-                            HStack(alignment:.firstTextBaseline) {
-                                Text(park.shortName).font(.body).fixedSize(horizontal:false,vertical:true)
-                                Spacer(minLength:8)
-                                Image(systemName:"chevron.up.chevron.down").font(.title3)
-                            }.padding(.vertical,8).foregroundStyle(palette.accent)
-                        }.accessibilityLabel("Park").accessibilityValue(park.shortName)
-                    } else {
-                        Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }.pickerStyle(.menu)
-                    }
-                    HStack {
-                        Button { move(-1) } label:{ Image(systemName:"chevron.left").frame(width:44,height:44) }.accessibilityLabel("Previous month").accessibilityInputLabels([Text("Previous month"),Text("Previous")])
-                        Spacer(minLength:0)
-                        // The month's name carries its Audio Graph: the darkness of every night, as a tone.
-                        Text(park.monthLabel(month)).font(.system(.title2,design:.serif)).multilineTextAlignment(.center)
-                            .accessibilityAddTraits(.isHeader)
-                            .accessibilityHint("An audio graph of this month's nights is available.")
-                            .nightChart { [nights,events=monthEvents(nights,park:park),title=String(localized:"Darkness score by night, \(park.monthLabel(month))")] in NightChart.nights(nights,title:title,events:events) }
-                        Spacer(minLength:0)
-                        Button { move(1) } label:{ Image(systemName:"chevron.right").frame(width:44,height:44) }.accessibilityLabel("Next month").accessibilityInputLabels([Text("Next month"),Text("Next")])
-                    }
-                    if typeSize.isAccessibilitySize {
-                        LazyVStack(alignment:.leading,spacing:20) { ForEach(nights) { night in
-                            Button { chosen=night } label:{
-                                VStack(alignment:.leading,spacing:8) {
-                                    Text(park.dayLabel(night.id)).font(.headline)
-                                    Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                                    Text(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
-                                    if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
-                                }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
-                            }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
-                                .accessibilityHint(inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
-                                .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
-                                .contextMenu {
-                                    Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
-                                    Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                                }
-                                .accessibilityInputLabels(Self.spokenNames(night))
-                        } }
-                        .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(nights,after:tonight),entryID:\.id,entryLabel:\.label)
-                    } else {
-                        LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
-                            ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
-                            ForEach(0..<lead,id:\.self) { _ in Color.clear.frame(height:78) }
-                            ForEach(nights) { night in
-                                let events=model.events(night)
-                                Button { chosen=night } label:{ NightCell(night:night,highlighted:inWindow.contains(night.id),isTonight:night.id==tonight,isPast:night.id<tonight,marker:events.marker(park:park)) }.buttonStyle(.plain)
-                                    .accessibilityInputLabels(Self.spokenNames(night))
-                                    .contextMenu {
-                                        Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
-                                        Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                                    } preview: { NightPeek(night:night,isTonight:night.id==tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
-                            }
-                        }
-                        .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(nights,after:tonight),entryID:\.id,entryLabel:\.label)
-                        .accessibilityRotor(Text("Moon window"),entries:Self.rotor(window.filter { inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
-                        .id(monthOffset)
-                        .transition(reduceMotion || access.crossFade ? .opacity : .asymmetric(insertion:.move(edge:forward ? .trailing : .leading).combined(with:.opacity),removal:.move(edge:forward ? .leading : .trailing).combined(with:.opacity)))
-                        .contentShape(Rectangle())
-                        .gesture(DragGesture(minimumDistance:30).onEnded { drag in
-                            guard abs(drag.translation.width)>abs(drag.translation.height)*1.5 else { return }
-                            move(drag.translation.width<0 ? 1 : -1)
-                        })
-                    }
-                    Panel { VStack(alignment:.leading,spacing:10) {
-                        Label(found.inMonth || window.isEmpty ? String(localized:"Five nights near the new moon") : String(localized:"The next five nights near the new moon"),systemImage:"circle.circle").font(.subheadline)
-                        if let first=window.first,let last=window.last {
-                            Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                            Text(found.inMonth ? String(localized:"The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.") : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted)
-                        } else {
-                            Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
-                        }
-                    } }
-                    Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
-                    if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                }.padding(24).clipped()
+                let data=month(park)
+                if wide {
+                    HStack(alignment:.top,spacing:28) {
+                        VStack(alignment:.leading,spacing:24) { heading(park); monthBar(park,data); grid(park,data,scale:1.3); windowPanel(park,data); legend }
+                            .frame(maxWidth:640)
+                        if let night=focused(data) { aside(night) }
+                    }.padding(24).clipped()
+                } else {
+                    VStack(alignment:.leading,spacing:24) {
+                        heading(park); monthBar(park,data)
+                        if typeSize.isAccessibilitySize { list(park,data) } else { grid(park,data,scale:1) }
+                        windowPanel(park,data); legend
+                    }.padding(24).clipped().readableColumn()
+                }
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
+            .measuringWidth($width)
             .task(id:park?.id) { if let park { await model.refresh([park]) } }.navigationTitle("Calendar").navigationBarTitleDisplayMode(.inline)
             .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation() }
+            // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
+            .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
+    }
+    @ViewBuilder private func heading(_ park:Park)->some View {
+        if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
+        Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
+        if typeSize.isAccessibilitySize {
+            Menu {
+                Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+            } label: {
+                HStack(alignment:.firstTextBaseline) {
+                    Text(park.shortName).font(.body).fixedSize(horizontal:false,vertical:true)
+                    Spacer(minLength:8)
+                    Image(systemName:"chevron.up.chevron.down").font(.title3)
+                }.padding(.vertical,8).foregroundStyle(palette.accent)
+            }.accessibilityLabel("Park").accessibilityValue(park.shortName)
+        } else {
+            Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }.pickerStyle(.menu)
+        }
+    }
+    private func monthBar(_ park:Park,_ data:Month)->some View {
+        HStack {
+            Button { move(-1) } label:{ Image(systemName:"chevron.left").frame(width:44,height:44) }.accessibilityLabel("Previous month").accessibilityInputLabels([Text("Previous month"),Text("Previous")])
+                .hoverEffect(.highlight)
+            Spacer(minLength:0)
+            // The month's name carries its Audio Graph: the darkness of every night, as a tone.
+            Text(park.monthLabel(data.date)).font(.system(.title2,design:.serif)).multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityHint("An audio graph of this month's nights is available.")
+                .nightChart { [nights=data.nights,events=monthEvents(data.nights,park:park),title=String(localized:"Darkness score by night, \(park.monthLabel(data.date))")] in NightChart.nights(nights,title:title,events:events) }
+            Spacer(minLength:0)
+            Button { move(1) } label:{ Image(systemName:"chevron.right").frame(width:44,height:44) }.accessibilityLabel("Next month").accessibilityInputLabels([Text("Next month"),Text("Next")])
+                .hoverEffect(.highlight)
+        }
+    }
+    private func list(_ park:Park,_ data:Month)->some View {
+        LazyVStack(alignment:.leading,spacing:20) { ForEach(data.nights) { night in
+            Button { chosen=night } label:{
+                VStack(alignment:.leading,spacing:8) {
+                    Text(park.dayLabel(night.id)).font(.headline)
+                    Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+                    Text(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+                    if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
+                }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
+            }.buttonStyle(.plain).accessibilityElement(children:.ignore)
+                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
+                .accessibilityHint(data.inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
+                .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
+                .contextMenu {
+                    Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
+                    Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                }
+                .accessibilityInputLabels(Self.spokenNames(night))
+        } }
+        .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
+    }
+    /// `scale` enlarges each night's little sky on a wide iPad.
+    private func grid(_ park:Park,_ data:Month,scale:Double)->some View {
+        let focusedNight=wide ? focused(data)?.id : nil
+        return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
+            ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
+            ForEach(0..<data.lead,id:\.self) { _ in Color.clear.frame(height:78*scale) }
+            ForEach(data.nights) { night in
+                let events=model.events(night)
+                Button { choose(night) } label:{ NightCell(night:night,highlighted:data.inWindow.contains(night.id),isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight) }.buttonStyle(.plain)
+                    .hoverEffect(.highlight)
+                    .accessibilityAddTraits(night.id==focusedNight ? .isSelected : [])
+                    .accessibilityInputLabels(Self.spokenNames(night))
+                    .contextMenu {
+                        Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
+                        Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                    } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
+            }
+        }
+        .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
+        .accessibilityRotor(Text("Moon window"),entries:Self.rotor(data.window.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
+        .id(monthOffset)
+        .transition(reduceMotion || access.crossFade ? .opacity : .asymmetric(insertion:.move(edge:forward ? .trailing : .leading).combined(with:.opacity),removal:.move(edge:forward ? .leading : .trailing).combined(with:.opacity)))
+        .contentShape(Rectangle())
+        .gesture(DragGesture(minimumDistance:30).onEnded { drag in
+            guard abs(drag.translation.width)>abs(drag.translation.height)*1.5 else { return }
+            move(drag.translation.width<0 ? 1 : -1)
+        })
+    }
+    private func windowPanel(_ park:Park,_ data:Month)->some View {
+        Panel { VStack(alignment:.leading,spacing:10) {
+            Label(data.windowInMonth || data.window.isEmpty ? String(localized:"Five nights near the new moon") : String(localized:"The next five nights near the new moon"),systemImage:"circle.circle").font(.subheadline)
+            if let first=data.window.first,let last=data.window.last {
+                Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
+                Text(data.windowInMonth ? String(localized:"The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.") : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            } else {
+                Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
+            }
+        } }
+    }
+    @ViewBuilder private var legend: some View {
+        Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
+        if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+    }
+    /// The chosen night beside the month: its breakdown, and the way into the park on that night.
+    private func aside(_ night:Night)->some View {
+        Panel { VStack(alignment:.leading,spacing:18) {
+            ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park),inline:true)
+            Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.buttonStyle(.bordered)
+        } }
+        .frame(maxWidth:560)
+        .id(night.id)
+        .transition(.opacity)
+    }
+    /// A tap: beside the month on a wide iPad, in a sheet otherwise.
+    private func choose(_ night:Night) {
+        if wide { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=night.id } } else { chosen=night }
+    }
+    private func step(_ delta:Int) {
+        guard let park else { return }
+        let data=month(park)
+        guard let current=focused(data) else { return }
+        let next=park.date(current.id,addingDays:delta)
+        let calendar=park.calendar
+        let base=calendar.date(from:calendar.dateComponents([.year,.month],from:model.today)) ?? model.today
+        let target=calendar.date(from:calendar.dateComponents([.year,.month],from:next)) ?? next
+        let offset=calendar.dateComponents([.month],from:base,to:target).month ?? monthOffset
+        if offset != monthOffset { move(offset-monthOffset) }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=next }
     }
     /// One rotor stop per night: the day, its score and band.
     struct RotorNight: Identifiable { let id: Date; let label: String }

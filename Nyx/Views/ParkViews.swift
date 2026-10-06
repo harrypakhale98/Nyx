@@ -33,7 +33,8 @@ struct ParkRow: View {
         }
     }
     private var number: some View {
-        VStack(alignment:.trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }
+        // The score never wraps, whatever the column width; the name beside it does.
+        VStack(alignment:.trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
     }
 }
 /// The Parks list's narrowing switches, kept apart from the view so they can be tested.
@@ -47,7 +48,12 @@ nonisolated struct ParkFilter {
 struct ParksView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
+    /// Beside the park on a wide iPad: rows choose the park shown in the detail column instead of pushing it.
+    var selection: Binding<String?>?=nil
+    @FocusState private var searchFocused: Bool
     @State private var search=""
     @State private var darkOnly=false
     @State private var stepFreeOnly=DebugScenario.state=="step-free"
@@ -88,6 +94,10 @@ struct ParksView: View {
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .searchable(text:$search,prompt:"Park or state")
+            // ⌘F from anywhere in the window.
+            .searchFocused($searchFocused)
+            .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
+            .onAppear { focusSearchIfAsked() }
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
             .task { await model.refresh(model.parks,parkUpdates:false) }
             .refreshable { await model.refresh(model.parks,force:true,parkUpdates:false) }
@@ -105,8 +115,32 @@ struct ParksView: View {
         let rest=filtered.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
         return (first+rest).compactMap { park in label(park).map { RotorPark(id:park.id,label:$0) } }
     }
-    private func link(_ park:Park)->some View {
-        NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7),stepFree:stepFreeOnly) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
+    @ViewBuilder private func link(_ park:Park)->some View {
+        let row=ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7),stepFree:stepFreeOnly)
+        if let selection {
+            let chosen=selection.wrappedValue==park.id
+            Button { selection.wrappedValue=park.id } label:{
+                row.padding(.horizontal,12).background(RoundedRectangle(cornerRadius:16).fill(palette.accent.opacity(chosen ? (palette.nightVision ? 0.22 : 0.13) : 0))).padding(.horizontal,-12)
+                    .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:16).inset(by:-2))
+            }.buttonStyle(.plain).hoverEffect(.highlight)
+                .accessibilityAddTraits(chosen ? .isSelected : [])
+                .contextMenu { rowMenu(park) }
+        } else {
+            NavigationLink(value:park) { row }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight).contextMenu { rowMenu(park) }
+        }
+    }
+    /// Long press, or a secondary click with a pointer.
+    @ViewBuilder private func rowMenu(_ park:Park)->some View {
+        let isSaved=saved.contains { $0.parkID==park.id }
+        Button(isSaved ? "Unsave park" : "Save park",systemImage:isSaved ? "bookmark.slash" : "bookmark") {
+            if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
+            do { try context.save() } catch { context.rollback() }
+        }
+        Button("Show in Calendar",systemImage:"calendar") { model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
+    }
+    private func focusSearchIfAsked() {
+        guard commands?.takeSearch() == true else { return }
+        Task { try? await Task.sleep(for:.milliseconds(250)); searchFocused=true }
     }
 }
 struct ParkDetailView: View {
@@ -126,6 +160,7 @@ struct ParkDetailView: View {
     @State private var breakdown=false
     @State private var persistenceError=false
     @State private var scrubbing=false
+    @State private var width=0.0
     private var night:Night { model.night(park,on:selected ?? initialDate ?? model.tonight(park)) }
     private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
     private var outlook:NightOutlook? { model.outlook(night) }
@@ -151,123 +186,154 @@ struct ParkDetailView: View {
         let chosen=park.evening(initialDate)
         return chosen>=tonight && chosen<park.date(tonight,addingDays:30) ? tonight : chosen
     }
+    /// Two columns on a wide iPad: the night (gauge, river, access) stays in view on the left while
+    /// the sky's detail scrolls on the right. One readable column otherwise.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     var body: some View {
-        ScrollViewReader { proxy in ScrollView {
-            VStack(spacing:26) {
-                VStack(spacing:12) {
-                    Eyebrow(text:"A night beneath the stars")
-                    Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
-                    Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
-                    // The dial opens at the bottom; let the lines below tuck into that space.
-                    CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
-                        .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
-                        .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
-                        .modifier(DepthParallax(depth:0.1))
-                    if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-                    if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
-                    if !night.score.hasForecast { Text(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-                    if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
-                    ScoreReadout(score:night.score,agreement:outlook?.agreement) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
-                        .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
-                    if night.id==model.tonight(park) { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
+        ScrollViewReader { proxy in
+            Group {
+                if wide {
+                    HStack(alignment:.top,spacing:0) {
+                        ScrollView { VStack(spacing:26) { hero; river; alerts }.padding(24) }
+                            .scrollDisabled(scrubbing).frame(width:WideLayout.leadingWidth(width))
+                        ScrollView { VStack(spacing:26) { sky; footer }.padding(24) }
+                    }
+                } else {
+                    ScrollView { VStack(spacing:26) { hero; river; alerts; sky; footer }.padding(24).readableColumn() }.scrollDisabled(scrubbing)
                 }
-                Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }
-                Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
-                    if let data=model.enrichments[park.id],!data.alerts.isEmpty {
-                        DisclosureGroup("All park alerts (\(data.alerts.count))") {
-                            ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
-                        }
-                    }
-                     if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
-                Panel { VStack(alignment:.leading,spacing:16) {
-                    SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core)
-                    Divider().overlay(palette.line)
-                    NightListenView(night:night,isTonight:night.id==model.tonight(park))
-                } }
-                Panel {
-                    VStack(alignment:.leading,spacing:18) {
-                        WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
-                        // Tonight's wake-ups (AlarmKit), beside the moments they are for.
-                        if FieldAlarms.supported, night.id==model.tonight(park) {
-                            let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:DebugScenario.date ?? .now)
-                            if !options.isEmpty { Divider().overlay(palette.line); FieldAlarmRows(park:park,options:options,showsHeading:true) }
-                        }
-                    }
-                }.id("whatsup")
-                Panel {
-                    VStack(alignment:.leading,spacing:18) {
-                        Eyebrow(text:"Moonlight")
-                        HStack(alignment:.center,spacing:24) {
-                            let moon=AstronomyEngine().moon(for:night)
-                            MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:70,height:70)
-                            VStack(alignment:.leading,spacing:6) { Text(night.sky.moon.name).font(.system(.title3,design:.serif));Text("\(Int((night.sky.moon.illumination*100).rounded()))% illuminated").font(.subheadline).foregroundStyle(palette.muted) }
-                        }
-                        LabeledContent("Moonrise",value:park.time(night.sky.moonrise))
-                        LabeledContent("Moonset",value:park.time(night.sky.moonset))
-                        Text("Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.").font(.caption).foregroundStyle(palette.muted)
-                        FeelMoonButton(moon:night.sky.moon)
-                    }
-                }
-                Panel { VStack(alignment:.leading,spacing:16) {
-                    Eyebrow(text:"What the sky may hold")
-                    VStack(alignment:.leading,spacing:6) {
-                        LabeledContent("Cloud cover",value:night.cloudCover.map{String(localized:"\(Int($0.rounded()))% average")} ?? String(localized:"Unavailable"))
-                        ForEach(cloudContext,id:\.self) { line in Text(line).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                    }
-                    if let clarity=outlook?.clarity {
-                        VStack(alignment:.leading,spacing:6) {
-                            LabeledContent("Air",value:clarity.label)
-                            Text("Aerosol forecast from CAMS. Not part of the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                        }
-                    } else if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                    if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted) }
-                    if !nightItself.isEmpty {
-                        Divider().overlay(palette.line)
-                        VStack(alignment:.leading,spacing:10) {
-                            Eyebrow(text:"The night itself")
-                            ForEach(nightItself,id:\.text) { line in
-                                Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
-                                    .font(.subheadline).foregroundStyle(palette.ink)
-                            }
-                        }
-                    }
-                    Divider().overlay(palette.line)
-                    LightPollution(park:park)
-                } }
-                Panel { ViewingSpots(park:park) }
-                Panel { VStack(alignment:.leading,spacing:14) {
-                    Eyebrow(text:"Ranger night-sky programs")
-                    if let data=model.enrichments[park.id] {
-                        let programs=data.programs.filter{$0.date>=park.isoDay(model.today)}
-                        if programs.isEmpty && data.programsUpdated == nil { Text("Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
-                        else if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
-                        ForEach(programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(park.programDate(program.date)).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
-                    } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
-                } }
-                Panel { ProtectThisSky(park:park) }
-                ShareCardButton(night:night)
-                Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
-                NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
-            }.padding(24)
-        }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
-        .task {
-            guard focusWhatsUp else { return }
-            // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
-            try? await Task.sleep(for:.milliseconds(500))
-            withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("whatsup",anchor:.top) }
-        } }
+            }
+            .onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+            .task {
+                guard focusWhatsUp else { return }
+                // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
+                try? await Task.sleep(for:.milliseconds(500))
+                withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("whatsup",anchor:.top) }
+            }
+        }
+        .measuringWidth($width)
+        // iPad keyboard: ⌘← and ⌘→ move along the river, as dragging it does.
+        .nightKeys { delta in step(delta) }
         // Left open past sunrise, the river moves on to the new tonight; a chosen night that has
         // dropped off it is released, so the gauge and the river always show the same night.
         .onChange(of:riverStart) { _,start in
             if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:30) { selected=nil }
         }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
-            .toolbar { saveToolbar }.modifier(SkyFullBleed())
+            .toolbar { saveToolbar }.modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(park)) }.nyxPresentation().presentationDetents([.large]) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
             .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             .task { await model.refresh([park],programs:true) }
             .refreshable { await model.refresh([park],force:true,programs:true) }
+    }
+    private func step(_ delta:Int) {
+        let next=park.date(night.id,addingDays:delta)
+        guard next>=riverStart, next<park.date(riverStart,addingDays:30) else { return }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=next }
+    }
+    private var hero: some View {
+        VStack(spacing:12) {
+            Eyebrow(text:"A night beneath the stars")
+            Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center)
+            Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+            // The dial opens at the bottom; let the lines below tuck into that space.
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
+                .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
+                .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
+                .modifier(DepthParallax(depth:0.1))
+            if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+            if !night.score.hasForecast { Text(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
+            ScoreReadout(score:night.score,agreement:outlook?.agreement) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+                .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+            if night.id==model.tonight(park) { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
+        }
+    }
+    private var river: some View {
+        Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }
+    }
+    private var alerts: some View {
+        Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
+            if let data=model.enrichments[park.id],!data.alerts.isEmpty {
+                DisclosureGroup("All park alerts (\(data.alerts.count))") {
+                    ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
+                }
+            }
+             if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
+    }
+    @ViewBuilder private var sky: some View {
+        Panel { VStack(alignment:.leading,spacing:16) {
+            SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core)
+            Divider().overlay(palette.line)
+            NightListenView(night:night,isTonight:night.id==model.tonight(park))
+        } }
+        Panel {
+            VStack(alignment:.leading,spacing:18) {
+                WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
+                // Tonight's wake-ups (AlarmKit), beside the moments they are for.
+                if FieldAlarms.supported, night.id==model.tonight(park) {
+                    let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:DebugScenario.date ?? .now)
+                    if !options.isEmpty { Divider().overlay(palette.line); FieldAlarmRows(park:park,options:options,showsHeading:true) }
+                }
+            }
+        }.id("whatsup")
+        Panel {
+            VStack(alignment:.leading,spacing:18) {
+                Eyebrow(text:"Moonlight")
+                HStack(alignment:.center,spacing:24) {
+                    let moon=AstronomyEngine().moon(for:night)
+                    MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:70,height:70)
+                    VStack(alignment:.leading,spacing:6) { Text(night.sky.moon.name).font(.system(.title3,design:.serif));Text("\(Int((night.sky.moon.illumination*100).rounded()))% illuminated").font(.subheadline).foregroundStyle(palette.muted) }
+                }
+                LabeledContent("Moonrise",value:park.time(night.sky.moonrise))
+                LabeledContent("Moonset",value:park.time(night.sky.moonset))
+                Text("Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.").font(.caption).foregroundStyle(palette.muted)
+                FeelMoonButton(moon:night.sky.moon)
+            }
+        }
+        Panel { VStack(alignment:.leading,spacing:16) {
+            Eyebrow(text:"What the sky may hold")
+            VStack(alignment:.leading,spacing:6) {
+                LabeledContent("Cloud cover",value:night.cloudCover.map{String(localized:"\(Int($0.rounded()))% average")} ?? String(localized:"Unavailable"))
+                ForEach(cloudContext,id:\.self) { line in Text(line).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            }
+            if let clarity=outlook?.clarity {
+                VStack(alignment:.leading,spacing:6) {
+                    LabeledContent("Air",value:clarity.label)
+                    Text("Aerosol forecast from CAMS. Not part of the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+            } else if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted) }
+            if !nightItself.isEmpty {
+                Divider().overlay(palette.line)
+                VStack(alignment:.leading,spacing:10) {
+                    Eyebrow(text:"The night itself")
+                    ForEach(nightItself,id:\.text) { line in
+                        Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                            .font(.subheadline).foregroundStyle(palette.ink)
+                    }
+                }
+            }
+            Divider().overlay(palette.line)
+            LightPollution(park:park)
+        } }
+        Panel { ViewingSpots(park:park) }
+        Panel { VStack(alignment:.leading,spacing:14) {
+            Eyebrow(text:"Ranger night-sky programs")
+            if let data=model.enrichments[park.id] {
+                let programs=data.programs.filter{$0.date>=park.isoDay(model.today)}
+                if programs.isEmpty && data.programsUpdated == nil { Text("Programs could not be checked in the last update. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
+                else if programs.isEmpty { Text("No upcoming programs in the last update. Ask at the visitor center.").foregroundStyle(palette.muted) }
+                ForEach(programs) { program in VStack(alignment:.leading,spacing:8) { Text(program.title).font(.system(.title3,design:.serif)); Text(park.programDate(program.date)).font(.caption);Text(program.description).font(.subheadline).foregroundStyle(palette.muted) } }
+            } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
+        } }
+        Panel { ProtectThisSky(park:park) }
+    }
+    @ViewBuilder private var footer: some View {
+        ShareCardButton(night:night)
+        Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
+        NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
     }
     @ToolbarContentBuilder private var saveToolbar: some ToolbarContent {
         if #available(iOS 27.0,*) {
@@ -286,9 +352,19 @@ struct ScoreBreakdownView: View {
     @Environment(\.dismiss) private var dismiss
     let night:Night
     var isTonight=true
+    /// Beside the month on a wide iPad: the breakdown without its own page, background or Done.
+    var inline=false
     @ScaledMetric(relativeTo:.largeTitle) private var numeralSize=72.0
     var body: some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) {
+        if inline { content }
+        else {
+            ScrollView { content.padding(24).readableColumn() }
+                .background(NightBackground(score:night.score.value,park:night.park,night:night.id)).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+    private var content: some View {
+        VStack(alignment:.leading,spacing:26) {
             VStack(alignment:.leading,spacing:10) {
                 Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
                 Text("A number with a reason").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
@@ -323,9 +399,7 @@ struct ScoreBreakdownView: View {
             }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
             ShareCardButton(night:night)
-        }.padding(24) }
-        .background(NightBackground(score:night.score.value,park:night.park,night:night.id)).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+        }
     }
     private var moonFact:String {
         let lit=String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit.")
@@ -387,7 +461,10 @@ struct ScoreBreakdownView: View {
 /// iOS 27: the bars recede as the park's page scrolls down, so its sky runs edge to edge; they
 /// return on the way back up. iOS 26 keeps the standard bars.
 private struct SkyFullBleed: ViewModifier {
+    /// Off in two columns, where the night's column stays put beside the scrolling detail and bars
+    /// receding over one column would read as a glitch.
+    var enabled=true
     @ViewBuilder func body(content:Content)->some View {
-        if #available(iOS 27.0,*) { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar,.tabBar) } else { content }
+        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar,.tabBar) } else { content }
     }
 }

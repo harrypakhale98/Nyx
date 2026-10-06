@@ -12,7 +12,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    TARGETED_DEVICE_FAMILY: "1"
+    TARGETED_DEVICE_FAMILY: "1,2"
     DEVELOPMENT_TEAM: DUHVN68KBA
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0"
@@ -43,7 +43,7 @@ targets:
         # Field mode: the night's countdown on the Lock Screen and in the Dynamic Island (computed on the phone, no push).
         NSSupportsLiveActivities: true
         # Field mode's wake-ups (AlarmKit). Shown by iOS when the first alarm is set, after Nyx's own explainer.
-        NSAlarmKitUsageDescription: "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only."
+        NSAlarmKitUsageDescription: "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only."
         UILaunchScreen:
           UIImageName: LaunchStars
           UIColorName: LaunchBlack
@@ -56,18 +56,21 @@ targets:
       - target: NyxWatch
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1"
+        # iPhone and iPad. The phone stays portrait; iPad takes every orientation and any window size
+        # (iPadOS 26 windowing; `UIRequiresFullScreen` is deprecated and not set). Layout follows size classes.
+        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
         PRODUCT_NAME: Nyx
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Dark
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find nearby national parks. Your coordinates are never sent to a service.
         CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Settings → App icon: the Moon's other phases, each its own Icon Composer document in Resources.
@@ -116,7 +119,8 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1"
+        # Must match the app's families, or the extension cannot be embedded for iPad.
+        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.widgets
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
@@ -262,7 +266,7 @@ targets:
       - target: Nyx
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.tests
         GENERATE_INFOPLIST_FILE: YES
   NyxUITests:
@@ -274,7 +278,7 @@ targets:
       - target: Nyx
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Nyx

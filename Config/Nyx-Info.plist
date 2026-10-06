@@ -30,7 +30,7 @@
 	<key>NPS_API_KEY</key>
 	<string>$(NPS_API_KEY)</string>
 	<key>NSAlarmKitUsageDescription</key>
-	<string>Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this iPhone only.</string>
+	<string>Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UILaunchScreen</key>

@@ -13,6 +13,8 @@ struct CelestialGauge: View {
     @State private var shown=0
     @State private var milestone=0
     @State private var revealed=false
+    /// Where an iPad's pointer rests over the dial: the glint on the glass follows it, like light on a real instrument.
+    @State private var pointer: CGPoint?
     var body: some View {
         Group {
             if typeSize.isAccessibilitySize {
@@ -24,6 +26,14 @@ struct CelestialGauge: View {
             } else {
                 ZStack { bezel; orbit;VStack(spacing:5) { numeral;band;units.padding(.top,8) } }
                     .frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
+                    // No taller than on the widest iPhone, so a wide column does not open a gap around the dial.
+                    .frame(maxWidth:354)
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let location): pointer=location
+                        case .ended: pointer=nil
+                        }
+                    }
             }
         }
         .accessibilityElement(children:.ignore)
@@ -106,7 +116,7 @@ struct CelestialGauge: View {
                     // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
                     if !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
                         let tilt=MotionTilt.shared
-                        let mid=(-90+tilt.x*55-tilt.y*12)*Double.pi/180, half=22*Double.pi/180
+                        let mid=pointer.map { atan2($0.y-center.y,$0.x-center.x) } ?? (-90+tilt.x*55-tilt.y*12)*Double.pi/180, half=22*Double.pi/180
                         var glint=Path(); glint.addArc(center:center,radius:radius+11,startAngle:.radians(mid-half),endAngle:.radians(mid+half),clockwise:false)
                         let from=CGPoint(x:center.x+cos(mid-half)*radius,y:center.y+sin(mid-half)*radius), to=CGPoint(x:center.x+cos(mid+half)*radius,y:center.y+sin(mid+half)*radius)
                         context.stroke(glint,with:.linearGradient(Gradient(colors:[.white.opacity(0),.white.opacity(0.35),.white.opacity(0)]),startPoint:from,endPoint:to),style:StrokeStyle(lineWidth:2.5,lineCap:.round))

@@ -184,7 +184,7 @@ struct YearRecapView: View {
                 }
             }
             if recap.nights>0 { RecapShareButton(recap:recap,layout:layout) }
-        }.padding(24) }
+        }.padding(24).readableColumn() }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground()).navigationTitle("Year under the stars").navigationBarTitleDisplayMode(.inline)
         .task(id:year) {
