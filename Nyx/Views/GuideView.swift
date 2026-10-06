@@ -37,6 +37,11 @@ struct GuideView:View {
             Button("Ask using these records") { requestID+=1 }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).disabled(guide.loading || records.isEmpty)
             if guide.loading { ConstellationLoader().frame(maxWidth:.infinity) }
             if !guide.text.isEmpty { Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6); Text("Sources: \(guide.citations.map{String($0+1)}.joined(separator:", "))").font(.caption).foregroundStyle(palette.muted) }
+            if !guide.lookedUp.isEmpty {
+                // What the model asked the engine for: computed by Nyx, numbered after the records below.
+                Eyebrow(text:"What Nyx looked up")
+                ForEach(guide.lookedUp,id:\.id) { record in Panel { Text("\(record.id+1). \(record.text)").font(.subheadline) } }
+            }
             if let error=guide.error { Text(error).foregroundStyle(palette.muted) }
             if case .learn = mode {
                 // The source is the essay the reader just left; don't print it twice.
@@ -46,6 +51,12 @@ struct GuideView:View {
                 ForEach(Array(records.enumerated()),id:\.offset) { index,record in Panel { Text("\(index+1). \(record)").font(.subheadline) } }
             }
         }.padding(24) }.background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
-            .task(id:requestID) { guard requestID>0 else { return };let records=records;await guide.answer(question:prompt,context:records.enumerated().map{"ID \($0.offset): \($0.element)"}.joined(separator:"\n"),validIDs:Set(records.indices)) }
+            .task(id:requestID) {
+                guard requestID>0 else { return }
+                // Planning gets tools that call the engine; recaps and explainers reason over their records only.
+                var lookup:NightLookup?
+                if case .planning = mode { lookup=NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today) }
+                await guide.answer(question:prompt,context:records,lookup:lookup)
+            }
     }
 }
