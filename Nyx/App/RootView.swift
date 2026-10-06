@@ -175,6 +175,9 @@ struct RootView:View {
         case "recap": YearRecapView(nights:DebugJournal.nights(now:model.today))
         case "icons": AppIconPicker()
         case "first-light": if let park=model.home { FirstLightView(park:park,night:model.tonight(park),moment:FirstLightDebug.moment(park:park,model:model),leavesOnItsOwn:false) {} }
+        // Store art (In-App Event media): the park's computed sky for the night alone, edge to edge,
+        // a little brighter than behind text. Same stars, Milky Way, planets and radiant as every screen.
+        case "sky": if let park=model.home { RealSky(park:park,night:model.tonight(park),twinkle:pow(Double(model.night(park).score.value)/100,2),strength:0.9).background(Color.black).ignoresSafeArea().toolbarVisibility(.hidden,for:.navigationBar) }
         default: TonightView()
         }
         #else
