@@ -1,12 +1,10 @@
-# Captioned App Store screenshots
+# Captioned App Store screenshots: Nyx 1.1
 
-Six frames built from the raw captures in `Store/Screenshots` by `swift Scripts/make_store_frames.swift` (run from the repo root). Each puts a short serif headline over the full, uncropped screen on a starfield. Flattened, no alpha.
+Ten frames per language built from `Store/Screenshots` by `swift Scripts/make_store_frames.swift` (English) and `swift Scripts/make_store_frames.swift es` (Spanish), run from the repo root. Each puts an eyebrow and a short serif caption over the full, uncropped screen on a starfield; field mode and "Where to look" use signal red. Flattened, no alpha.
 
-- `6.9-inch/` 1320×2868 — App Store Connect's required iPhone 6.9" slot
-- `6.5-inch/` 1284×2778 — the 6.5" slot
+- `6.9-inch/` 1320×2868 (App Store Connect's required iPhone slot) and `6.5-inch/` 1284×2778.
+- `es/6.9-inch/`, `es/6.5-inch/`: Spanish (Mexico) captions on Spanish captures (native review pending, `INPUT_NEEDED.md`).
 
-Order: 01 Tonight, 02 Darkness Score, 03 Calendar, 04 Parks, 05 Night vision (Learn tab), 06 Journal.
+Order: 01 Tonight, 02 Darkness Score, 03 What's up tonight, 04 Field mode, 05 Where to look, 06 Calendar, 07 Plan a trip, 08 Your constellation, 09 Sound and touch, 10 Sky glow and access. Captions are calm, six words or fewer, with no prices, no "new" and no exclamation marks; edit the `english` / `spanishFrames` lists in the script and rerun.
 
-Scores are real (live forecasts captured Oct 3, 2026, scored by the shipping engine). Journal entries are illustrative DEBUG seed data with no personal photos. To change captions, edit the `frames` list in the script and rerun. Recapture the raw frames with `Scripts/capture_store.py` first if the UI changes.
-
-iPad (2026-10-06): no captioned iPad frames yet. The six raw 13-inch iPad captures in `Store/Screenshots/iPad/` (2752×2064 landscape, no alpha, real `live` data) can be uploaded as they are to App Store Connect's iPad 13-inch slot, which is required now that Nyx runs on iPad. To caption them, add an iPad size to `Scripts/make_store_frames.swift` (landscape canvas 2752×2064) rather than scaling the iPhone frames.
+iPad, Apple Watch and Vision Pro are uploaded raw from `Store/Screenshots/iPad`, `Watch` and `Vision` (the script lays out portrait iPhone canvases only). 1.0 frames: `Store/1.0/Framed`.

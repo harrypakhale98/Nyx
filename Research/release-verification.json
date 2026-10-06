@@ -1,17 +1,37 @@
 {
   "deviceFamily": [
-    1
+    1,
+    2
   ],
-  "version": "1.0",
-  "build": "5",
-  "bundledManifests": 2,
+  "version": "1.1",
+  "build": "6",
+  "bundledManifests": 4,
   "runtimeHTTPHosts": [
+    "air-quality-api.open-meteo.com",
     "api.open-meteo.com",
     "developer.nps.gov"
   ],
   "runtimePackages": 0,
   "npsKeyEmbedded": true,
-  "catalogKeys": 398,
-  "privacyDeclaration": "UNRESOLVED \u2014 publisher review required",
-  "signing": "unsigned archive; distribution validation pending"
+  "catalogKeys": 1139,
+  "privacyDeclaration": "Data Not Collected (PRIVACY.md); publisher confirms in App Store Connect",
+  "signing": "development-signed Release; App Store export/validation pending",
+  "verified": "2026-10-06",
+  "archives": [
+    "/tmp/Nyx-1.1-6.xcarchive",
+    "/tmp/NyxVision-1.1-6.xcarchive"
+  ],
+  "watchApp": {
+    "version": "1.1",
+    "build": "6"
+  },
+  "visionApp": {
+    "version": "1.1",
+    "build": "6",
+    "deviceFamily": [
+      7
+    ],
+    "networkCode": false,
+    "signed": true
+  }
 }

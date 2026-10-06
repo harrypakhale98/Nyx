@@ -540,7 +540,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@. %lld segundos de sonido, de %@ a %@."
+            "value": "%@, %@. %lld segundos de sonido, de %@ a %@"
           }
         }
       }
@@ -2816,6 +2816,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aparece en la Pila inteligente al anochecer en noches Buenas o mejores."
+          }
+        }
+      }
+    },
+    "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordenadas aproximadas. Confirma con un guardaparques el acceso, los horarios y los cierres actuales. Esto no es una guía de navegación."
           }
         }
       }
@@ -8862,7 +8879,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin Luna de %@ a %@."
+            "value": "Sin Luna de %@ a %@"
           }
         }
       }
@@ -14806,6 +14823,23 @@
         }
       }
     },
+    "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Unidad Norte usa la hora del Centro, una hora más que las horas que Nyx muestra para este parque."
+          }
+        }
+      }
+    },
     "The Sun is 18° below the horizon: %@ of true darkness, until %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -16318,7 +16352,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oscuridad total de %@ a %@."
+            "value": "Oscuridad total de %@ a %@"
           }
         }
       }

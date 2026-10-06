@@ -1,93 +1,122 @@
-# Nyx 1.0 submission package
+# Nyx 1.1 submission package
 
-**Release gates remain open.** Complete `INPUT_NEEDED.md` and the physical-device review before submitting. Unsigned and development-signed Release archives succeed; neither is an App Store validation result.
+**Build 1.1 (6), archived 2026-10-06.** `/tmp/Nyx-1.1-6.xcarchive` (iPhone and iPad app with the Tonight's sky widget and the Apple Watch app inside) and `/tmp/NyxVision-1.1-6.xcarchive` (Apple Vision Pro), both Release, development-signed with team `DUHVN68KBA`, zero warnings, `python3 Scripts/verify_release.py` passing (`Research/release-verification.json`). Nothing is uploaded. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store. `/tmp` does not survive a restart, so if the archives are gone, archive again in Xcode (Product → Archive) after checking `project.yml` still says 1.1 / 6.
 
-## Product metadata draft
+**Release gates remain open** until the owner finishes the ordered steps in `INPUT_NEEDED.md` (device pass, Spanish review, privacy page push).
 
-- App Store name: **Nyx: Dark Sky Planner** ("Nyx" alone is taken; chosen by the owner 2026-10-03). Home Screen name stays **Nyx** (`CFBundleDisplayName`). Fallback if this is taken too: **Noctis**.
-- Subtitle: **Plan a darker night**
-- Primary category: Travel. Secondary: Weather.
-- Price: Free; no subscriptions, ads or in-app purchases. This is required by the chosen Open-Meteo free/non-commercial service.
-- Language: English. iPhone only, portrait, iOS 26.0 and later. (1.1 adds Spanish: the app ships an `es` localization, and the Spanish (Mexico) App Store metadata is in [`Store/1.1/metadata-es.md`](Store/1.1/metadata-es.md), pending the native-speaker review in `INPUT_NEEDED.md`.)
-- Keywords (95/100; the name already covers "Nyx", "dark", "sky", "planner"): `stargazing,national parks,moon phase,astronomy,milky way,night sky,bortle,camping,meteor,aurora`
-- Copyright: `2026 Hardik Pakhale`
-- Privacy policy URL: https://harrypakhale98.github.io/Nyx/privacy.html · Support URL: https://harrypakhale98.github.io/Nyx/support.html · Marketing URL (optional): https://harrypakhale98.github.io/Nyx/ — served by GitHub Pages from `docs/`. Contact: harry.pakhale98@gmail.com. These pages are submission metadata, not app network endpoints.
+## The record
 
-### Description
+- App Store name: **Nyx: Dark Sky Planner** ("Nyx" alone is taken; owner's choice 2026-10-03). Home Screen name **Nyx**. Fallback: **Noctis**.
+- Subtitle (≤30): **The night sky, park by park** (27). Recommended in `Store/1.1/metadata.md`; the 1.0 subtitle "Plan a darker night" stays valid if you prefer continuity. A subtitle changes only with a new version.
+- Categories: Travel (primary), Weather (secondary). Price: Free; no subscriptions, ads or in-app purchases (required by Open-Meteo's free, non-commercial terms).
+- Platforms in this version: **iPhone, iPad (new), Apple Watch (new, inside the iOS build), Apple Vision Pro (new, its own build, same bundle ID `com.harrypakhale.nyx`, universal purchase).** iOS/iPadOS 26.0+, watchOS 26.0+, visionOS 26.0+.
+- Languages: English (U.S.) and **Spanish (Mexico)** (the app ships an `es` localization; see below).
+- Copyright `2026 Hardik Pakhale`. Privacy policy https://harrypakhale98.github.io/Nyx/privacy.html · Support https://harrypakhale98.github.io/Nyx/support.html · Marketing https://harrypakhale98.github.io/Nyx/ (GitHub Pages from `docs/`, submission metadata, not app endpoints). Contact harry.pakhale98@gmail.com.
+- Release: **manual** after approval, so the In-App Events and the featuring nomination line up.
 
-Make time for a darker sky.
+## English metadata (paste from `Store/1.1/metadata.md`)
 
-Nyx compares nights across the 63 US national parks. Moonlight, cloud cover, estimated artificial light and the length of true darkness become one Darkness Score, with a breakdown that explains it.
+Every field below is in `Store/1.1/metadata.md` with character counts verified by script. Paste from there, not from memory.
 
-Find nearby parks using a straight-line radius or choose a starting park yourself, or sort every park by tonight's darkness. Explore the calendar and five-night moon window. Follow changing conditions along a thirty-night timeline. Park-local times help you plan the evening without converting time zones.
+- **What's New:** the full text in `metadata.md` (3,251 of 4,000) or its 518-character fallback. It describes only features in build 6: What's up tonight, the honest forecast (three models, layers, dew, smoke and haze), field mode with Live Activity and alarms, Apple Watch, Apple Vision Pro, iPad, sky glow from NASA Black Marble, audio graphs and Listen to tonight, Feel the Moon, Reduce bright effects, step-free spots, Spanish, trip planner, your constellation, and the third optional data service.
+- **Promotional text (≤170):** `Plan the night, then follow it. The Milky Way core, planets and meteor showers, honest forecasts, and a red field mode for your eyes. Free. Data Not Collected.` (159). Seasonal alternates are in `metadata.md`; promotional text can change without a build.
+- **Description:** `metadata.md` § Description (3,978 of 4,000). It corrects the 1.0 sentence about smoke and haze. Delete "Voice Control" from the accessibility paragraph unless the Voice Control device pass is signed off.
+- **Keywords (≤100):** `stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,star` (96). "aurora" is dropped on purpose: Nyx does not forecast aurora.
+- **Review notes:** the 1.0 notes below, plus: "1.1 adds a third provider host, `air-quality-api.open-meteo.com`, behind its own switch in Tonight → Settings → Your privacy, listed in `PrivacyInfo.xcprivacy`. Field mode (Live Activity, AlarmKit alarms, Core Motion for 'Where to look') starts from 'I'm here tonight' on any park's detail screen; best tried in the evening. AlarmKit asks for permission in context after an explainer. The Apple Watch and Apple Vision Pro apps share the engine and make no network requests of their own. No login."
+  - 1.0 notes, still true: no account or reviewer login; onboarding requests no permissions and can be skipped; manual starting-park selection works with location denied; each data service is switchable in Tonight → Settings → Your privacy; core astronomy and the bundled park library work offline; unknown cloud forecasts have hollow calendar and timeline marks and a caveat beside the score; a polar summer night has no true darkness and is capped below 40; notifications are local, opt-in, for saved parks with complete recent forecasts and scores of at least 90; PhotosPicker accesses only selected photos; SwiftData stores observations on the device, no CloudKit; widgets and Control Center share `group.com.harrypakhale.nyx`; Siri and Shortcuts answer without network; Apple Intelligence features appear only when the on-device model is available; the build includes the publisher's NPS key (from git-ignored `Config/Secrets.xcconfig`); no developer screenshot launch arguments exist in Release.
+- **Age rating:** re-answer the questionnaire; nothing in 1.1 changes the answers (no public UGC, no web browsing beyond the providers, no account).
 
-Save parks, receive optional local reminders for promising nights, and keep a private journal with notes and selected photos. Home and Lock Screen widgets show the best sky among your saved parks and the week ahead. Night-vision mode uses a red palette; Learn offers short essays on finding the Milky Way, reading the Bortle scale, skyglow and sharing the night.
+## Spanish (Mexico) localization
 
-Moon and twilight calculations, the park library, calendar, journal and saved parks work offline. Cloud forecasts extend roughly sixteen days. When clouds are unknown, Nyx says so and recalculates the estimate without them. Bortle classes are conservative estimates, not measurements. Lunar rise and set times are approximate and can vary with terrain.
+- App: Spanish ships in the app, widgets, watch and Vision Pro catalogs. Machine-drafted, marked translated, **native-speaker review pending** (`INPUT_NEEDED.md`). Do not submit Spanish metadata before that review.
+- Metadata: `Store/1.1/metadata-es.md`. Name: keep **Nyx: Dark Sky Planner**. Subtitle: `Planea una noche más oscura` (27). Keywords: the list in that file (95 bytes). Description: the Spanish text **plus** its "Optional paragraph" (What's up and field mode now ship). What's New: the Spanish draft with the field-mode paragraph. The Spanish description covers fewer 1.1 features than the English one (no Watch, Vision Pro, trip planner); extending it is part of the native review.
+- Screenshots: `Store/Framed/es/6.9-inch` and `es/6.5-inch` (ten captioned frames, Spanish captions in `Scripts/make_store_frames.swift`). Raw captures in `Store/Screenshots/es/`.
+- Spanish (Mexico) is offered on the US storefront as an additional metadata language; confirm in App Store Connect → App Information → Localizable Information.
 
-Nyx has no account, advertising or tracking. Device location stays on your iPhone. Optional weather and park updates contact their respective data providers; see the privacy policy for those requests and provider processing.
+## Screenshots per device
 
-Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Forecasts do not include smoke, haze or telescope seeing. Park alerts and ranger programs come from the National Park Service and may be unavailable.
+All captures are real renders, no alpha channel, verified sizes. Live = `-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time (2026-10-06, around 12:15 PM Pacific), scored by the shipping engine. Nothing is mocked. Sizes checked against Apple's [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) on 2026-10-06.
 
-Weather data: Open-Meteo, CC BY 4.0. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service.
+**iPhone 6.9-inch (required), 1320×2868: `Store/Framed/6.9-inch/`** (captioned; raw in `Store/Screenshots/`). iPhone 18 Pro Max, iOS 27.0. **6.5-inch, 1284×2778: `Store/Framed/6.5-inch/`** (optional when 6.9-inch is supplied). Upload in this order:
 
-### Promotional text
-
-Compare parks and nights, understand what is still uncertain, and keep a little of the night in a private journal.
-
-### Review notes
-
-No account or reviewer login. Onboarding requests no permissions and can be skipped. Manual starting-park selection works with location denied. Data updates are independently switchable in Tonight → Settings → Your privacy. Core astronomy and the bundled park library work offline. Unknown cloud forecasts have hollow calendar/timeline marks and a caveat beside the score; a polar summer night has no true darkness and is capped below 40.
-
-Notifications are local, opt-in, and scheduled only for saved parks with complete recent cloud forecasts and scores of at least 90. They are recalculated on activation. PhotosPicker accesses only selected photos. SwiftData stores observations on-device; there is no CloudKit synchronization.
-
-Widgets/Control Center share `group.com.harrypakhale.nyx`. Save a park to populate the widget; opening Nyx refreshes its cached data. Siri/Shortcuts can answer a park's score without network. Optional AI explanations appear only when Apple's Foundation Models is actually available; absence is expected on unsupported/unconfigured devices. AI uses supplied source records and does not calculate astronomy.
-
-The build includes the publisher's NPS key (from git-ignored `Config/Secrets.xcconfig`), so live park alerts and ranger programs load; if they are unavailable the app says access was not checked. No developer screenshot launch arguments exist in the Release experience.
-
-## Screenshot plan
-
-Use actual app renders, not fabricated scores or clouds. Retain visible forecast/access caveats. `Research/Screenshots` is the QA matrix, not automatically store-ready artwork. `Store/Screenshots` contains raw large-device captures when generated; the owner can submit the raw frames or compose restrained captions around them. Recapture after the final icon and any content/privacy changes.
-
-[Apple's screenshot specification](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) checked October 2, 2026: the 6.9-inch iPhone class uses portrait 1260×2736, 1290×2796 or 1320×2868. The 6.3-inch class includes 1206×2622. Use the actual current simulator output that matches App Store Connect, do not stretch a smaller capture. iPad (2026-10-06): Nyx now runs on iPad, so App Store Connect requires at least one 13-inch iPad screenshot: 2064×2752 or 2048×2732 portrait, 2752×2064 or 2732×2048 landscape (specification page checked October 6, 2026). `Store/Screenshots/iPad/` holds six raw 13-inch captures (iPad Pro 13-inch (M5), iOS 27.0, no alpha): Tonight, Parks split view, park detail, Calendar with the night beside the month, Journal constellation, field mode "Where to look". Opt out of Mac availability until the app has been tried there (INPUT_NEEDED 8).
-
-| Order | Screen | Optional caption | Truth to preserve |
+| # | File | Eyebrow / caption | Screen (all Joshua Tree unless named) |
 |---|---|---|---|
-| 1 | Tonight | Where the sky is darkest | Park name, score, forecast state and access guidance |
-| 2 | Park detail | A number with a reason | Real computed local date; approximate/unknown data visible |
-| 3 | Calendar | Make time for the night | Hollow forecast horizon and new-moon window explanation |
-| 4 | Parks | Find your park | Actual inventory, honest forecast and access status |
-| 5 | Journal | Keep a little of the night | Clearly illustrative observation; no personal photos without consent |
-| 6 | Night vision / Learn | Room for your eyes to adjust | Actual readable red UI; no unsupported physiological guarantee |
+| 1 | `01-tonight.png` | TONIGHT / Where is the sky darkest tonight? | Tonight: Death Valley 96, closure line beside the score (live) |
+| 2 | `02-score.png` | THE DARKNESS SCORE / One number, and its reasons. | Park detail: gauge 93, four meters, "Models agree", I'm here tonight (live) |
+| 3 | `03-whats-up.png` | WHAT'S UP TONIGHT / The Milky Way, and when to look. | What's up: core 7:43–8:54 PM, Jupiter, Mercury, Saturn, Mars, Wake me (live, via `nyx://whatsup`) |
+| 4 | `04-field-mode.png` | FIELD MODE / Red light for dark-adapted eyes. | Field mode in red: "True darkness in 22:37", milestones, eye clock (tonight, clock moved to 60 min after sunset) |
+| 5 | `05-where-to-look.png` | WHERE TO LOOK / Point your iPhone. Find the core. | Compass sky facing the core, Saturn marked (fixed pose; tonight 95 min after sunset) |
+| 6 | `06-calendar.png` | BEST NIGHTS / Choose the night worth the drive. | October 2026: new-moon window halos, cloud glyphs, Orionids mark on the 20th, hollow nights past the forecast (live) |
+| 7 | `07-trip.png` | PLAN A TRIP / A park for every free night. | The route and the first nights, best night Wed Oct 7 Death Valley 97 (live) |
+| 8 | `08-constellation.png` | YOUR CONSTELLATION / Every night becomes a star. + privacy line | Journal: constellation, "4 of 63", an entry (illustrative DEBUG journal, no personal photos) |
+| 9 | `09-listen.png` | SOUND AND TOUCH / Hear the shape of the night. | Shape of the night, Listen to tonight, transcript (live) |
+| 10 | `10-every-sky.png` | SKY GLOW AND ACCESS / City glow, named. Step-free spots, marked. | Death Valley: NASA night-lights rank, glow from Las Vegas, Ridgecrest, Visalia; partly step-free spot |
 
-Capture 6.9-inch on iPhone 18 Pro Max / iOS 27.0 and verify the accepted resolution. Supply 6.3-inch originals from both tested Pro simulators as useful secondary evidence. Native frames need no marketing adjectives, badges, NPS logos or implied endorsement. Optional widget artwork must show a real populated saved-park widget; DEBUG content review alone does not establish system hosting. Save source captions separately and keep status bars consistent.
+Captions: calm, six words or fewer, no prices, no "new", no exclamation marks. Frames 4–5 use signal red. Reproduce: `python3 Scripts/capture_store.py SIM DERIVED en|es` (frames 7 and 9 need one scroll each; the script says where), then `swift Scripts/make_store_frames.swift [es]`.
 
-## App Store Connect checklist
+**iPad 13-inch (required now that Nyx runs on iPad), 2752×2064 landscape: `Store/Screenshots/iPad/`**, six raw captures (iPad Pro 13-inch (M5), iOS 27.0, live data except the journal): Tonight with the river, Parks split view, two-column detail, Calendar with the night beside the month, Journal constellation, field mode "Where to look". Raw is acceptable; the frame script lays out portrait iPhone canvases only, so iPad frames were not made.
 
-1. App Privacy: answer "No, we do not collect data from this app" (Data Not Collected), no tracking. Reasoning against Apple's definitions is in `PRIVACY.md`; the published policy discloses the providers' IP logs.
-2. Complete every device gate in `AUDIT.md`, including VoiceOver, all accessibility settings, hardware motion/haptics, widgets/control, Siri, available-model AI, denied permissions, selected photos and airplane mode. Fix failures and rerun both simulator suites.
-3. The Icon Composer icon (`Nyx/Resources/AppIcon.icon`) ships in the build. Optionally open it in Icon Composer to fine-tune glass and lighting, then rebuild and recapture artwork.
-4. In the developer account, confirm the existing `com.harrypakhale.nyx`, `com.harrypakhale.nyx.widgets`, and App Group `group.com.harrypakhale.nyx` records and App Groups for both targets. Signing team is already `DUHVN68KBA`; local development signing validates. Configure distribution provisioning/certificates for export.
-5. Configure the optional public NPS key locally; test live alert and recurring-program decoding plus failure/cached states. Never commit credentials. If distributing without the key, keep the unchecked UX and remove unsupported live-data marketing promises.
-6. Create the App Store Connect app record under the owner's legal account. Verify Nyx name availability, SKU/bundle ID, agreements and regional availability. If Nyx conflicts, apply Noctis coherently through `project.yml`, catalogs, metadata and icon sources and rebuild.
-7. Confirm version/build numbers in `project.yml` (current 1.0 / 4). Both Info.plists read them from the build settings. Increment build number for each upload; regenerate with XcodeGen if changed.
-8. Archive **Nyx / Release / Any iOS Device**, signed for distribution. In Organizer validate, generate/review the privacy report, check both manifests/entitlements and extension embedding, then upload. The development-signed archive must be exported/re-signed for App Store distribution; it cannot be uploaded as-is.
-9. Complete TestFlight processing and export compliance. `ITSAppUsesNonExemptEncryption=NO`: only standard HTTPS through Apple's framework; owner verifies no other encryption was added. Exercise the distributed build on iOS 26 and 27 devices.
-10. Enter reviewed metadata, screenshots, privacy/support HTTPS URLs and owner contact details. Complete the current age-rating questionnaire accurately (no public UGC feed, gambling, medical claims or account system). Private journal storage is not a public social feed; answer the exact current questionnaire, not a guessed rating.
-11. Enter the resolved App Privacy answers and review notes, including actual NPS configuration and optional model availability. Keep release notes/support accurate; do not claim device gates that remain unchecked.
-12. Select the processed build and manual release. Submit for review only after the owner signs the gate table. After approval, perform a final install/offline sanity check before releasing.
+**Apple Watch, 422×514 (Ultra 3 / Ultra 4 class): `Store/Screenshots/Watch/`**, six captures from the NyxWatch scheme on Apple Watch Ultra 3 (watchOS 27): Tonight gauge, milestones, the week, Parks, dark-adaptation cover (red), Tonight in night vision. Apple requires **one** watch size used consistently across localizations; this set is it. The Series 11 42 mm simulator captures at 374×446, which App Store Connect does not accept (accepted: 422×514, 410×502, 416×496, 396×484, 368×448, 312×390), so it was not used. The watch simulator has no paired iPhone, so its scores are moon and darkness only and say "clouds unknown" (honest, not mocked); the clock shows the capture time because the watch simulator ignores status-bar overrides.
+
+**Apple Vision Pro, 3840×2160: `Store/Screenshots/Vision/`**, four captures from NyxVision on the Vision Pro simulator (visionOS 27): `01-window` (the planner window in a room, tonight, Joshua Tree 91, moon and darkness only), `02-immersive-core` (Joshua Tree tonight, the Milky Way setting in the west), `03-moonlit` (Great Basin, 2027-07-15, the Moon beside the core), `04-name-card` (the 11%-lit Moon rising in the east before dawn at Joshua Tree, name card). Sky scenes are computed by the engine for the stated park and date.
+
+**App Preview video (optional):** storyboard and specs in `Store/1.1/app-preview-script.md`.
+
+**History:** 1.0 sets are kept in `Store/1.0/`.
+
+## Platform steps
+
+- **iPad:** included in the iOS build. Upload the iPad 13-inch set. **Mac availability:** App Store Connect → Pricing and Availability → Mac Availability → do not make the app available on Mac (field mode, compass, alarms and Live Activities were never tried there).
+- **Apple Watch:** included in the iOS build (`Nyx.app/Watch/NyxWatch.app` with its complications). The bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` are registered and carry the App Group (Xcode's automatic signing produced their profiles during the archive). Upload the watch set under the version's Apple Watch section. The watch app needs the iPhone app (companion).
+- **Apple Vision Pro:** App Store Connect → the app → **+ Add Platform → visionOS**, then upload `NyxVision-1.1-6` from Organizer (archive scheme NyxVision, destination Any visionOS Device), add the four 3840×2160 screenshots, and submit the visionOS version with iOS 1.1. Same bundle ID, so it is one universal purchase.
+
+## Privacy
+
+- App Privacy: **"No, we do not collect data from this app" (Data Not Collected), no tracking.** Reasoning in `PRIVACY.md`.
+- The third host, `air-quality-api.open-meteo.com` (smoke and haze, approved by the owner 2026-10-05), receives only the public coordinates of national parks, as the forecast host does; it has its own switch under Your privacy, is named in `PrivacyInfo.xcprivacy` and the privacy policy, and does not change the label. `verify_release.py` checks that the code contacts exactly `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com`, that the watch and Vision Pro targets contain no network code, and that all five bundled manifests declare no tracking and no collected data.
+- The published privacy page must already mention the third host before review: push `docs/` to `main` (`INPUT_NEEDED.md`).
+
+## Accessibility Nutrition Labels
+
+App Store Connect → App Information → Accessibility, per device. Full reasoning and the device pass in `Store/1.1/accessibility-nutrition-labels.md`.
+
+| Feature | iPhone | iPad | Apple Watch | Vision Pro | Declare when |
+|---|---|---|---|---|---|
+| VoiceOver | Yes | Yes | Yes | Yes | after the device pass on each |
+| Voice Control | Yes | Yes | n/a | Yes | only after the Voice Control pass |
+| Larger Text | Yes | Yes | Yes | Yes | after checking Live Activity, watch and Vision Pro |
+| Dark Interface | Yes | Yes | Yes | Yes | now |
+| Differentiate Without Color Alone | Yes | Yes | Yes | Yes | after a grayscale pass |
+| Sufficient Contrast | Yes | Yes | Yes | Yes | after device sampling |
+| Reduced Motion | Yes | Yes | Yes | Yes | after the device check |
+| Captions / Audio Descriptions | No (no video or speech) | No | n/a | No | — |
+
+## In-App Events and featuring
+
+- **In-App Events:** eleven paste-ready events in `Store/1.1/in-app-events.md` (Geminids under a thin Moon, Quadrantids, seven new-moon weekends, Eta Aquariids, Perseids 2027), badge Special Event, deep links `nyx://whatsup?date=…&park=…` (supported in build 6). Submit each at least 7 days before its publish date; publish up to 14 days before start. Event media (16:9 card, 9:16 details) still has to be produced (`in-app-events.md` § Media).
+- **Featuring:** `Store/1.1/featuring-nominations.md`. Nomination 2, **App Enhancements (Nyx 1.1)**, needs at least three weeks' lead: for a mid-November release, file by about **Oct 28**. Nomination 3a (Geminids event) by Nov 20. File Nomination 1 (App Launch) only if 1.0 has not shipped yet.
+
+## App Store Connect checklist (1.1)
+
+1. If 1.0 (5) was never submitted, rename the pending version to 1.1 and use build 6; otherwise create version 1.1.
+2. Upload build 1.1 (6) (iOS, with watch inside) and the visionOS build from Organizer → Distribute App → App Store Connect. Wait for processing; complete export compliance (`ITSAppUsesNonExemptEncryption = NO`: standard HTTPS only).
+3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass in `INPUT_NEEDED.md`.
+4. Version page: What's New, promotional text, description, keywords, subtitle (English, then Spanish after review); screenshots for iPhone 6.9", iPad 13", Apple Watch, Vision Pro, in both languages for iPhone.
+5. Mac Availability off; add the visionOS platform.
+6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only the features the device pass confirmed), age rating, review notes.
+7. Select builds, manual release, Submit for Review. Attach In-App Events and file the featuring nomination per the dates above.
+8. After approval: install from the App Store, offline sanity check, then release.
 
 ## Owner sign-off
 
 | Gate | Status / evidence |
 |---|---|
-| Privacy label | READY — Data Not Collected recommended with reasoning in `PRIVACY.md`; publisher confirms in App Store Connect |
-| Physical accessibility and dark-field testing | OPEN — use AUDIT.md device procedure |
-| Hardware performance, haptics, ProMotion | OPEN — simulator timing is not certification |
-| Actual widgets/control/Siri/available AI | OPEN — content compiles/previews; device integration review required |
-| Icon Composer native icon | DONE — `AppIcon.icon` compiled by actool; Default, Dark, Tinted and Clear renditions checked |
-| Development-signed archive | PASS locally — signatures/App Group verified; distribution export pending |
-| Hosted privacy/support pages | LIVE — https://harrypakhale98.github.io/Nyx/privacy.html and /support.html |
-| App Store export and account metadata | OPEN — publisher account workflow |
-
-The strongest current work is honest offline astronomy presented with native glass navigation and a coherent moon/score language. A further week would be best spent in real parks with VoiceOver users and two or three stargazers, expanding verified viewing spots and tuning scrub/motion/haptics from observation. Those evaluations cannot be replaced by simulator screenshots.
+| Privacy label | READY: Data Not Collected, `PRIVACY.md`; third host explained above |
+| Privacy page with the third host live | OPEN: push `docs/` to `main` |
+| Release archives | PASS locally: 1.1 (6) iOS + watch + widgets and visionOS, development-signed, `verify_release.py` passing; distribution export pending |
+| Physical accessibility, field mode at night, haptics, ProMotion | OPEN: `INPUT_NEEDED.md` step 1, `AUDIT.md` |
+| Widgets, Live Activity, alarms, Siri, Spotlight, Smart Stack, available AI on device | OPEN: the simulator cannot host these |
+| Apple Watch and Vision Pro on hardware | OPEN |
+| Spanish native review | OPEN |
+| Screenshots | READY: iPhone 6.9"/6.5" English and Spanish, iPad 13", Watch, Vision Pro |
+| App Store export and account metadata | OPEN: publisher account workflow |

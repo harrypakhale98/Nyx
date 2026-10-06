@@ -1,9 +1,11 @@
-# App Store screenshot drafts
+# App Store screenshots: Nyx 1.1 (raw)
 
-Six raw native-resolution captures from iPhone 18 Pro Max / iOS 27.0, verified 1320×2868, recaptured October 3, 2026 for build 3 (lit NASA Moon, real star sky, glass instrument dial and cards). Tonight, detail, calendar and Parks use the `live` scenario: real Open-Meteo forecasts and NPS alerts at capture time, scored by the shipping engine. Unknown clouds stay explicit wherever they occur. DEBUG routing uses an in-memory journal; the observation in frame 5 is illustrative and contains no personal photo. All frames use the Reduce Motion review override for settled artwork. Status bars are set to 9:41 and restored after capture. Every frame was visually reviewed after capture.
+Native-resolution captures, no alpha channel, captured 2026-10-06 (around 12:15 PM Pacific) for build 1.1 (6). Every iPhone frame uses the `live` scenario (real Open-Meteo forecasts and NPS alerts at capture time, scored by the shipping engine) except the journal, which is illustrative DEBUG seed data with no personal photos. Status bars are 9:41; `-nyx-reduce-motion` gives settled artwork. Every frame was looked at and critiqued (see `PHASE_STATUS.md`).
 
-These are drafts, not uploaded assets. Recapture after the final icon, provider/privacy changes or field fixes. Retain forecast/access caveats when adding optional captions; do not invent pristine forecasts. See `SUBMISSION.md` for the six-frame plan and current device-size requirements. Reproduce with `python3 Scripts/capture_store.py SIMULATOR_ID DERIVED_DATA_PATH` after building the Debug simulator app.
+- `NN-name-6.9.png`: iPhone 18 Pro Max, iOS 27.0, 1320×2868. `6.5-inch/`: 1284×2778 (scaled to width 1284, 6 px trimmed top and bottom).
+- `es/`: the same ten in Spanish (`-AppleLanguages "(es)" -AppleLocale es_MX`), with its own `6.5-inch/`.
+- `iPad/`: six 13-inch landscape captures, 2752×2064 (iPad Pro 13-inch (M5), iOS 27.0), from 2026-10-06; raw is what App Store Connect takes.
+- `Watch/`: six Apple Watch Ultra 3 captures, 422×514, watchOS 27 (Tonight, milestones, week, Parks, dark adaptation, Tonight in red). No paired iPhone in the simulator, so scores are moon and darkness only and say so.
+- `Vision/`: four Apple Vision Pro captures, 3840×2160, visionOS 27 (window, immersive core, moonlit, name card).
 
-`6.5-inch/` holds 1284×2778 versions (scaled from the 6.9-inch frames, 6 px trimmed) for App Store Connect's 6.5-inch slot.
-
-`iPad/` (2026-10-06): six raw 13-inch captures from iPad Pro 13-inch (M5) / iOS 27.0, 2752×2064 landscape, no alpha: 01 Tonight (answer beside the choices, with the river), 02 Parks (list beside the park), 03 park detail in two columns, 04 Calendar with the night's breakdown beside the month, 05 Journal (your constellation beside the entries), 06 field mode "Where to look" in landscape. Tonight, Parks, detail and Calendar use the `live` scenario (real forecasts and NPS alerts at capture time); the journal is DEBUG seed data. Captured by `NyxUITests/ScreenshotTests` (the simulator cannot be turned from the command line), then the orientation baked into the pixels.
+Order and contents: `SUBMISSION.md` § Screenshots per device. Reproduce the iPhone set with `python3 Scripts/capture_store.py SIMULATOR_ID DERIVED_DATA en|es` after a Debug simulator build (frames 7 and 9 need one scroll each; the script pauses and says where), then caption with `swift Scripts/make_store_frames.swift [es]`. 1.0 captures: `Store/1.0/Screenshots`.

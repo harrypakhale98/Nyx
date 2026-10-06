@@ -39,6 +39,14 @@ struct SpanishAndAccessTests {
         #expect(try spanish("shower.GEM")=="Gemínidas")
         #expect(try spanish("shower.LYR")=="Líridas")
     }
+    /// Every viewing spot's caveat is a catalog key, so Spanish never shows the bundled English note.
+    @Test func viewingSpotNotesAreLocalized() throws {
+        let spots=parks.flatMap(\.viewingSpots)
+        #expect(spots.count>=80)
+        for spot in spots { #expect(spot.localizedNote==spot.note,"\(spot.name)") }
+        #expect(try spanish("Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.").hasPrefix("Coordenadas aproximadas"))
+        #expect(try spanish("The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.").hasPrefix("La Unidad Norte"))
+    }
 
     // MARK: Access
 

@@ -2,6 +2,10 @@
 
 A calm, offline-first dark-sky planner for the 63 US national parks. Nyx compares moonlight, clouds, estimated skyglow and true darkness to help choose a park and a night. No accounts, advertising, tracking, backend or third-party runtime packages.
 
+## Version
+
+**1.1 (6)**, archived 2026-10-06 (`MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml`, inherited by every target). 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.0 (5) was the last uploaded build. Release steps: `SUBMISSION.md` and `INPUT_NEEDED.md`; archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json`; never prints the NPS key). Store screenshots: `Store/Screenshots`, `Store/Framed` (1.0 sets in `Store/1.0`).
+
 ## Run
 
 Requires the installed Xcode 27 (Swift 6), an iOS 26+ iPhone or iPad (or simulator), and XcodeGen only when changing project settings. Open `Nyx.xcodeproj`, select the **Nyx** scheme and run. The signing team is `DUHVN68KBA`; configure the app/extension identifiers and App Group in your Apple developer account for a device.
