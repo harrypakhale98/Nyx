@@ -5,7 +5,8 @@ catalog=json.loads(path.read_text())
 strings=catalog['strings']
 build=sys.argv[1] if len(sys.argv)>1 else '/tmp/NyxBuild'
 extracted=set()
-for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-iphonesimulator/*/Objects-normal/arm64/*.stringsdata'):
+# iPhone and watch simulator builds both: the watch app shares this catalog.
+for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*simulator/*/Objects-normal/arm64/*.stringsdata'):
  try: data=json.load(open(filename))
  except (ValueError,OSError): continue
  for item in data.get('tables',{}).get('Localizable',[]):
