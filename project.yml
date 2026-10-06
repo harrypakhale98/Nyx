@@ -70,6 +70,8 @@ targets:
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this iPhone to find nearby national parks. Your coordinates are never sent to a service.
         CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Settings → App icon: the Moon's other phases, each its own Icon Composer document in Resources.
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIconNew AppIconQuarter AppIconFull"
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
         ENABLE_PREVIEWS: YES

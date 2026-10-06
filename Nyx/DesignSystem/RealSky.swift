@@ -218,15 +218,19 @@ private struct DomeLayer: View, Equatable {
         let scale=size.height/2.6
         return CGPoint(x:size.width/2+p.x*scale,y:size.height*0.5-p.y*scale)
     }
-    func sky(for park:Park,night:Date)->Sky {
+    /// `at`: a particular moment of the night (first light shows the sky as it is right now, to the
+    /// nearest five minutes); otherwise the middle of true darkness.
+    func sky(for park:Park,night:Date,at instant:Date?=nil)->Sky {
         // Looked up before any astronomy: this runs whenever a screen behind the stars redraws.
-        let key="\(park.id)-\(Int(park.evening(night).timeIntervalSince1970))"
+        let slot=instant.map { "-\(Int($0.timeIntervalSince1970/300))" } ?? ""
+        let key="\(park.id)-\(Int(park.evening(night).timeIntervalSince1970))"+slot
         if let cached=cache[key] { return cached }
         let engine=AstronomyEngine()
         let sky=engine.conditions(for:park,on:night)
         // The middle of true darkness; otherwise local midnight.
         let moment:Date
-        if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) } else { moment=sky.evening.addingTimeInterval(12*3600) }
+        if let instant { moment=Date(timeIntervalSince1970:(instant.timeIntervalSince1970/300).rounded(.down)*300) }
+        else if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) } else { moment=sky.evening.addingTimeInterval(12*3600) }
         let facing=park.latitude<0 ? 0.0 : 180.0, centreAltitude=45.0*Double.pi/180
         func project(altitude:Double,azimuth:Double)->SIMD2<Double> {
             let alt=altitude*Double.pi/180, dAz=(azimuth-facing)*Double.pi/180

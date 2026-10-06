@@ -33,6 +33,15 @@ enum DebugScenario {
         return nil
         #endif
     }
+    /// `-nyx-link nyx://whatsup?date=2026-12-13&park=grba`: opened as if tapped, once the app is up
+    /// (the simulator's own `openurl` asks "Open in Nyx?" first, which scripts cannot answer).
+    static var link: URL? {
+        #if DEBUG
+        return argument("-nyx-link").flatMap(URL.init(string:))
+        #else
+        return nil
+        #endif
+    }
     static var onboardingPage:Int {
         #if DEBUG
         return min(2,max(0,Int(argument("-nyx-onboarding-page") ?? "0") ?? 0))

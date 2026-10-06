@@ -49,6 +49,7 @@ struct TonightView: View {
                     }
                     Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
                 }
+                if DebugScenario.state != "loading" { tripLink }
                 if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
                 if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
             }.padding(24)
@@ -145,6 +146,20 @@ struct TonightView: View {
             .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
         }.buttonStyle(.plain).padding(.top,4)
         .accessibilityHint(hint)
+    }
+    /// Tonight answers where; the trip planner answers which nights to take off.
+    private var tripLink:some View {
+        NavigationLink { TripPlannerView() } label:{
+            Panel { HStack(alignment:.center,spacing:16) {
+                Image(systemName:"calendar.badge.clock").font(.system(size:26,weight:.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
+                VStack(alignment:.leading,spacing:4) {
+                    Text("Plan a trip").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
+                    Text("Choose the nights you are free. Nyx finds the darkest park in reach for each.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+                Spacer(minLength:0)
+                Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
+            } }
+        }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
     }
     /// The starting point is either a chosen park or the device location, never both.
     private var startingPoint:some View {

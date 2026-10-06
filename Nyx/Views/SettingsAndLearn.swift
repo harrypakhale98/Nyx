@@ -13,6 +13,7 @@ struct SettingsView:View {
     var body:some View {
         Form {
             Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too. Field mode, from a park's \"I'm here tonight\", turns this on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted) }
+            Section("Appearance") { NavigationLink("App icon") { AppIconPicker() } }
             Section("Saved parks") {
                 Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
                 Text("Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.").font(.caption).foregroundStyle(palette.muted)
@@ -109,7 +110,7 @@ struct PrivacyView:View {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
                 if let reading=LuminanceProof.current { Text(reading.sentence) }
             }
-            Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.");Text("Links to nps.gov accessibility pages and to Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites.") }
+            Section { Text("Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.");Text("Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.");Text("Links to nps.gov accessibility pages and to Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites.");Text("Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.") }
         }.navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
     }
 }

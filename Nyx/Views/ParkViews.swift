@@ -120,6 +120,8 @@ struct ParkDetailView: View {
     @Query private var saved:[SavedPark]
     let park:Park
     var initialDate:Date?=nil
+    /// Opened from a link to that night's What's up (`nyx://whatsup`): scroll there once.
+    var focusWhatsUp=false
     @State private var selected:Date?
     @State private var breakdown=false
     @State private var persistenceError=false
@@ -150,7 +152,7 @@ struct ParkDetailView: View {
         return chosen>=tonight && chosen<park.date(tonight,addingDays:30) ? tonight : chosen
     }
     var body: some View {
-        ScrollView {
+        ScrollViewReader { proxy in ScrollView {
             VStack(spacing:26) {
                 VStack(spacing:12) {
                     Eyebrow(text:"A night beneath the stars")
@@ -191,7 +193,7 @@ struct ParkDetailView: View {
                             if !options.isEmpty { Divider().overlay(palette.line); FieldAlarmRows(park:park,options:options,showsHeading:true) }
                         }
                     }
-                }
+                }.id("whatsup")
                 Panel {
                     VStack(alignment:.leading,spacing:18) {
                         Eyebrow(text:"Moonlight")
@@ -248,6 +250,12 @@ struct ParkDetailView: View {
                 NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
             }.padding(24)
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        .task {
+            guard focusWhatsUp else { return }
+            // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
+            try? await Task.sleep(for:.milliseconds(500))
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("whatsup",anchor:.top) }
+        } }
         // Left open past sunrise, the river moves on to the new tonight; a chosen night that has
         // dropped off it is released, so the gauge and the river always show the same night.
         .onChange(of:riverStart) { _,start in
