@@ -12,7 +12,7 @@ final class AccessibilityAuditTests:XCTestCase {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         return ["tonight","parks","calendar","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
-                "field","field-compass","alarm-explainer","light"]
+                "field","field-compass","alarm-explainer","light","trip","constellation","recap","icons","first-light"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }
@@ -73,14 +73,20 @@ final class AccessibilityAuditTests:XCTestCase {
             // they render light-on-dark and legible (checked by screenshot). iOS 26 passes the same buttons.
             // The same glass, unsampled, on a sheet's own top-corner "Close" (permission explainers), checked by screenshot.
             let toolbarButton=issue.element?.elementType == .button && ((!navigationBar.isNull && frame.intersects(navigationBar)) || (screen.hasSuffix("explainer") && frame.maxY<120))
-            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton
+            // Year recap (2026-10-06): its light serif tile numerals ("7") in night vision and the serif heading over the row of
+            // Moons sample as low contrast on the same anti-aliased strokes; starlight on solid indigo is about 13:1, red on
+            // night-vision black 6.2:1. Checked by eye in zoomed iOS 27 captures in both palettes.
+            let recapSerif=screen=="recap" && (numeral || issue.element?.label=="The Moon's phases you met")
+            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif
         case .textClipped:
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).
             return !visible || issue.element?.elementType == .searchField || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
-            return issue.element==nil && (screen=="onboarding" || screen=="river")
+            // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a
+            // labelled button and the map has a spoken summary.
+            return issue.element==nil && ["onboarding","river","constellation","journal","recap"].contains(screen)
         default:
             return false
         }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><defs>
+<radialGradient id="lit" cx="610" cy="470" r="260" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFDF7"/><stop offset="0.55" stop-color="#F3ECDC"/><stop offset="0.85" stop-color="#D8CFBC"/><stop offset="1" stop-color="#BDB3A0"/></radialGradient>
+<linearGradient id="term" x1="512" y1="0" x2="585" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3A3550" stop-opacity="0.7"/><stop offset="1" stop-color="#3A3550" stop-opacity="0"/></linearGradient>
+<clipPath id="c"><path d="M512 322 A190 190 0 0 1 512 702 Z"/></clipPath></defs>
+<path d="M512 322 A190 190 0 0 1 512 702 Z" fill="url(#lit)"/>
+<g clip-path="url(#c)">
+<circle cx="560" cy="420" r="34" fill="#8E8676" opacity="0.18"/><circle cx="596" cy="492" r="38" fill="#8E8676" opacity="0.16"/><circle cx="660" cy="445" r="20" fill="#8E8676" opacity="0.15"/><circle cx="622" cy="566" r="24" fill="#8E8676" opacity="0.13"/><circle cx="548" cy="612" r="20" fill="#8E8676" opacity="0.12"/>
+<rect x="500" y="300" width="90" height="420" fill="url(#term)"/>
+</g></svg>

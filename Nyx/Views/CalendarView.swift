@@ -188,7 +188,17 @@ struct CalendarView: View {
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .task(id:park?.id) { if let park { await model.refresh([park]) } }.navigationTitle("Calendar").navigationBarTitleDisplayMode(.inline)
+            .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation() }
+    }
+    /// A `nyx://calendar` link: that park, and that month (this month when the link names none).
+    private func show(_ request:CalendarRequest) {
+        model.calendarRequest=nil
+        guard let target=model.park(request.parkID) else { return }
+        parkID=target.id
+        let calendar=target.calendar, now=calendar.dateComponents([.year,.month],from:model.today)
+        let months=request.year.flatMap { y in request.month.map { m in (y-(now.year ?? y))*12+(m-(now.month ?? m)) } } ?? 0
+        forward=months>=monthOffset; monthOffset=months
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
     /// The five consecutive nights with the least moonlight, ignoring nights already past. A window
