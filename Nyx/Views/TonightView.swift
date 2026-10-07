@@ -168,7 +168,7 @@ struct TonightView: View {
                 .hoverEffect(.lift)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
-            Text(night.basisCaption(unavailable:!model.beyondForecast(night)) ?? String(localized:"\(park.dayLabel(night.id)) · forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            Text(night.basisCaption(unavailable:!model.beyondForecast(night)) ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
             // A forecast more than six hours old says when it is from.
             if night.score.hasForecast, let updated=night.forecastUpdated, Date.now.timeIntervalSince(updated)>6*3600 {
                 Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
