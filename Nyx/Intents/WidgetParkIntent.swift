@@ -23,7 +23,7 @@ nonisolated enum WidgetSelection {
     static let kind="TonightWidget"
     static let key="widgetPark"
     /// The order the button walks: tonight's best first, as `NightPlanner` ranks nights.
-    static func ordered(_ nights:[Night])->[Night] { nights.sorted(by:NightPlanner.better) }
+    static func ordered(_ nights:[Night])->[Night] { NightPlanner.ranked(nights) }
     /// The chosen park while its chosen night is still tonight; otherwise the best.
     static func pick(_ nights:[Night],defaults:UserDefaults = SharedSettings.defaults)->Night? {
         let order=ordered(nights)

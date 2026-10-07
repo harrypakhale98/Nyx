@@ -37,9 +37,12 @@ struct TimeRiver: View {
     /// rather than pretending the first one is chosen.
     private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
     private var current:Night? { index.map { nights[$0] } }
-    /// The three highest-scoring nights, at least Good, receive the amber glow.
+    /// The three best nights, at least Good, receive the amber glow: ranked as every list of
+    /// nights is (`Night.rankScore`), so a night beyond the forecast is weighed with its park's
+    /// typical clouds, not as if clear.
     private var peaks:Set<Int> {
-        Set(nights.indices.filter { nights[$0].score.value>=60 }.sorted { nights[$0].score.value>nights[$1].score.value }.prefix(3))
+        let ranks=nights.map(\.rankScore)
+        return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0
 
@@ -141,7 +144,7 @@ struct TimeRiver: View {
 
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
-        let clouds=current.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")
+        let clouds=current.score.hasForecast ? String(localized:"Forecast included") : current.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))
         return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
     }
     private func agreementSpoken(_ night:Night)->String? {
@@ -159,7 +162,10 @@ struct TimeRiver: View {
         return markers.isEmpty ? base : base+" "+String(localized:"Small marks above a night are a meteor shower's peak or a lunar eclipse.")
     }
     /// The glowing nights, best first.
-    private var peakOrder:[Int] { peaks.sorted { nights[$0].score.value>nights[$1].score.value || (nights[$0].score.value==nights[$1].score.value && $0<$1) } }
+    private var peakOrder:[Int] {
+        let ranks=nights.map(\.rankScore)
+        return peaks.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }
+    }
 
     private func x(_ i:Int,width:Double)->Double {
         guard nights.count>1 else { return width/2 }

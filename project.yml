@@ -105,6 +105,8 @@ targets:
       - path: Nyx/Intents/FieldModeIntent.swift
       - path: Nyx/Intents/WidgetParkIntent.swift
       - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/Models/CloudClimate.swift
+      - path: Nyx/Resources/cloud-climate.json
       - path: Nyx/DesignSystem/SkyGlyph.swift
       - path: Nyx/Models/FieldActivity.swift
       - path: Nyx/DesignSystem/FieldActivityView.swift

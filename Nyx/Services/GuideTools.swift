@@ -29,7 +29,7 @@ nonisolated struct NightLookup: Sendable {
     /// One line per night, worded like the app: score, band, what the score rests on, the Moon.
     func describe(_ night: Night) -> String {
         let park=night.park
-        let basis=night.score.hasForecast ? String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud") : String(localized: "moon and darkness only, clouds not yet forecast")
+        let basis=night.score.hasForecast ? String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud") : String(localized: "moon and darkness only, clouds not yet forecast")+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")
         let dark=night.sky.darkHours>0 ? String(localized: "\(String(format: "%.1f", night.sky.darkHours)) hours of true darkness") : String(localized: "no true darkness")
         return String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
     }
