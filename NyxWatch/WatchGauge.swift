@@ -2,14 +2,18 @@ import SwiftUI
 
 /// The iPhone's celestial gauge, distilled for the wrist: an arc open at the bottom, ticks every
 /// ten points, a leading star where the score has reached, and the Moon resting in the opening.
-/// The arc sweeps in on the shared spring once; still under Reduce Motion and wrist-down.
+/// The arc sweeps in on the shared spring once, with one light tap as it lands; still under Reduce
+/// Motion and wrist-down. Turning the Crown through the week springs the arc to each night's score.
 struct WatchGauge: View {
     @Environment(\.nyx) private var palette
     @Environment(\.isLuminanceReduced) private var dimmed
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     let night: Night
+    /// The night's day ("Fri, Oct 9") when it is not tonight, read first by VoiceOver.
+    var nightLabel: String? = nil
     @State private var shown = 0.0
+    @State private var revealed = false
     var body: some View {
         let score = night.score.value
         // Proportions follow the dial, not the text size: the numeral is the dial's face. At
@@ -36,12 +40,14 @@ struct WatchGauge: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Darkness score")
-        .accessibilityValue("\(score) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized: "Includes cloud forecast.") : String(localized: "Moon and darkness only. Cloud forecast unavailable.")) \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.")
+        .accessibilityValue("\(nightLabel.map { $0 + ", " } ?? "")\(score) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized: "Includes cloud forecast.") : String(localized: "Moon and darkness only. Cloud forecast unavailable.")) \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.")
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: .milliseconds(120))
             withAnimation(NyxMotion.spring) { shown = Double(score) }
+            revealed = true
         }
+        .sensoryFeedback(.selection, trigger: revealed) { _, new in new }
         .onChange(of: dimmed) { _, _ in shown = Double(score) }
     }
 }

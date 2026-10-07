@@ -150,6 +150,7 @@ targets:
       - path: Nyx/Services/WatchContext.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
       - path: Nyx/DesignSystem/MoonSymbol.swift
+      - path: Nyx/Services/WristSky.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
       - path: Nyx/DesignSystem/RealSky.swift
@@ -170,6 +171,9 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
         INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.harrypakhale.nyx
+        # Not independent: the watch has no network and gets saved parks and clouds from Nyx on iPhone,
+        # so it installs with the iPhone app rather than alone from the watch's App Store.
+        INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp: NO
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         CODE_SIGN_ENTITLEMENTS: Config/NyxWatch.entitlements
@@ -194,6 +198,7 @@ targets:
       - path: Nyx/Services/WatchContext.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
       - path: Nyx/DesignSystem/MoonSymbol.swift
+      - path: Nyx/Services/WristSky.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
       - path: Nyx/DesignSystem/RealSky.swift

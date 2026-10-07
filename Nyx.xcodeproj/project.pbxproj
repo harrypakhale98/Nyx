@@ -11,6 +11,7 @@
 		0726F99AC834BEFF893CE378 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
 		0A68ED255315EC895D086670 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E051542A3954F87E88506B77 /* SharedSettings.swift */; };
 		0F3EA1357E1E4AA6D12F4D4E /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
+		10CEC4D49F967048006DAAF2 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AED34DC99F5465D2537837E /* WristSky.swift */; };
 		10FAB9D1532627D428A96400 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE93CD7AB4547DBEB7286F4 /* stars.json */; };
 		11B90E182CC3165966D5397D /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
 		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
@@ -59,6 +60,7 @@
 		9E65115B2CD6361AB2847D76 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
 		9F85E185775C4F36716C9B97 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F42E226920E038011BF3AFD /* MoonSymbol.swift */; };
 		A0988DA463FFFCAC89CC7812 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
+		A0CA918C2E5EE43D6AFD43B2 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AED34DC99F5465D2537837E /* WristSky.swift */; };
 		A46F22AEA6C4CBF0ECD340BB /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967BB7A4C4C54513C5F3A49 /* Starfield.swift */; };
 		A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53D0C95B34F3513BFD765F3B /* AppIntents.framework */; };
 		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
@@ -179,6 +181,7 @@
 		2DDB844BA3C38BF029401D53 /* NyxVision.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = NyxVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3827DA5D85D72EFCBF89D193 /* WidgetParkIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetParkIntent.swift; sourceTree = "<group>"; };
 		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AED34DC99F5465D2537837E /* WristSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristSky.swift; sourceTree = "<group>"; };
 		408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightWidgetView.swift; sourceTree = "<group>"; };
 		4BC9AFF046F0EA36B22DE657 /* NightPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightPlanner.swift; sourceTree = "<group>"; };
 		53D0C95B34F3513BFD765F3B /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
@@ -315,6 +318,7 @@
 				590ECA2B40434C0323AF6FD2 /* SkyDome.swift */,
 				5F344E96BCA1734C9A363158 /* WatchContext.swift */,
 				BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */,
+				3AED34DC99F5465D2537837E /* WristSky.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -762,6 +766,7 @@
 				A46F22AEA6C4CBF0ECD340BB /* Starfield.swift in Sources */,
 				B5BD25158E365A4FFF040E6E /* WatchContext.swift in Sources */,
 				DBCBDDF1E0419F473F1FD36F /* WhatsUp.swift in Sources */,
+				A0CA918C2E5EE43D6AFD43B2 /* WristSky.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -831,6 +836,7 @@
 				CB46F08FAFDF778EAF696E47 /* Starfield.swift in Sources */,
 				930BF15F93CC4AEE6462ABBC /* WatchContext.swift in Sources */,
 				E6D51DC90B31507FF16EA8AF /* WhatsUp.swift in Sources */,
+				10CEC4D49F967048006DAAF2 /* WristSky.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -916,6 +922,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.harrypakhale.nyx;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp;
 				PRODUCT_NAME = NyxWatch;
@@ -1170,6 +1177,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.harrypakhale.nyx;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp;
 				PRODUCT_NAME = NyxWatch;
