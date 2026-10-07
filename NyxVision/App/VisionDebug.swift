@@ -8,7 +8,9 @@ import Foundation
 /// `-nyx-vision-uvtest` (an orientation test card in place of the Moon), `-nyx-vision-partial`
 /// (the sky opens at its everyday 0.6 instead of fully), `-nyx-vision-moon` (opens the Moon
 /// volume), `-nyx-vision-credits` (the credits sheet), `-nyx-vision-no-lines` (figures off),
-/// `-nyx-vision-widget-shots` (renders the widget's faces to PNGs in the app's tmp folder).
+/// `-nyx-vision-widget-shots` (renders the widget's faces to PNGs in the app's tmp folder),
+/// `-nyx-vision-privacy` (the Your privacy sheet), `-nyx-vision-night 6`, `-nyx-vision-clouds 60`.
+/// A pinned date never makes a network request.
 /// Named stars take `-nyx-vision-body star.Vega`.
 enum VisionDebug {
     static var date: Date? {
@@ -20,6 +22,11 @@ enum VisionDebug {
         #endif
     }
     static var park: String? { argument("-nyx-park") }
+    /// `-nyx-vision-night 6`: the planner opens that many nights after tonight (an early look).
+    static var nightOffset: Int? { argument("-nyx-vision-night").flatMap(Int.init).map { min(365, max(0, $0)) } }
+    /// `-nyx-vision-clouds 60`: every park gets a forecast of that constant cover, issued at the
+    /// pinned date; no request is made.
+    static var clouds: Double? { argument("-nyx-vision-clouds").flatMap(Double.init) }
     static var time: Double? { argument("-nyx-vision-time").flatMap(Double.init) }
     static var body: String? { argument("-nyx-vision-body") }
     /// `-nyx-vision-moon-night 9`: the Moon volume opens on that many nights after tonight.

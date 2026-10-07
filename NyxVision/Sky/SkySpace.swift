@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The immersive space's content. The window drives it: the park, the night and the moment come
 /// from the shared model, so the window's ornament scrubs this sky. A drag across the sky turns
-/// the night too, and the room darkens as the sky surrounds.
+/// the night too, and the room darkens as the sky surrounds. Where the forecast reaches the hour,
+/// its clouds dim the stars and drift overhead.
 struct SkySpace: View {
     @Environment(VisionModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
@@ -31,7 +32,7 @@ struct SkySpace: View {
             ]
         } update: { _ in
             guard let plan = model.plan, let moment = model.skyMoment else { return }
-            scene.update(plan: plan, moment: moment, palette: palette, typeSize: typeSize, selected: model.selectedBody,
+            scene.update(plan: plan, moment: moment, cloud: plan.cloud(at: moment.date), palette: palette, typeSize: typeSize, selected: model.selectedBody,
                          constellations: model.constellations, reduceMotion: reduceMotion)
         }
         .gesture(SpatialTapGesture().targetedToAnyEntity().onEnded { value in Self.toggle(value.entity.name, in: model) })

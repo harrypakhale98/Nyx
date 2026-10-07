@@ -50,7 +50,7 @@ The same app target runs on iPad (iPadOS 26+, every orientation, resizable windo
 
 ### Apple Vision Pro
 
-The **NyxVision** scheme builds the visionOS 26+ app: a planner window (every park's moon-and-darkness score for a night, one park's night in full, a night stepper and a sunset-to-sunrise clock in the ornament) and an immersive space, "Stand under this sky", that places the 904 catalogue stars, the Milky Way, the Moon (the iPhone's shader), the planets and the galactic core around you for that park and moment. South is ahead (north in American Samoa); it is not aligned to your room's real north. It makes no network requests.
+The **NyxVision** scheme builds the visionOS 26+ app: a planner window (every park's moon-and-darkness score for a night, one park's night in full, a night stepper and a sunset-to-sunrise clock in the ornament) and an immersive space, "Stand under this sky", that places the 903 catalogue stars, the Milky Way, the Moon (the iPhone's shader), the planets and the galactic core around you for that park and moment. South is ahead (north in American Samoa); it is not aligned to your room's real north. Its only network request is the optional cloud forecast from `api.open-meteo.com` (shared `CloudForecastClient`, its own switch); `-nyx-vision-clouds <percent>`, `-nyx-vision-night <n>` and `-nyx-vision-privacy` are its DEBUG routes for clouds, a night offset and the privacy sheet.
 
 ```sh
 xcodebuild build -project Nyx.xcodeproj -scheme NyxVision \
