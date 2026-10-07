@@ -5,7 +5,11 @@ import Foundation
 /// (position in the night, sunset 0 to sunrise 1), `-nyx-vision-body jupiter` (name card shown),
 /// flags `-nyx-vision-immersive` (open the sky at launch), `-nyx-night-vision`, `-nyx-ax5`,
 /// `-nyx-vision-look yaw,pitch` (degrees; turns the scene for a screenshot),
-/// `-nyx-vision-uvtest` (an orientation test card in place of the Moon).
+/// `-nyx-vision-uvtest` (an orientation test card in place of the Moon), `-nyx-vision-partial`
+/// (the sky opens at its everyday 0.6 instead of fully), `-nyx-vision-moon` (opens the Moon
+/// volume), `-nyx-vision-credits` (the credits sheet), `-nyx-vision-no-lines` (figures off),
+/// `-nyx-vision-widget-shots` (renders the widget's faces to PNGs in the app's tmp folder).
+/// Named stars take `-nyx-vision-body star.Vega`.
 enum VisionDebug {
     static var date: Date? {
         #if DEBUG
@@ -18,6 +22,8 @@ enum VisionDebug {
     static var park: String? { argument("-nyx-park") }
     static var time: Double? { argument("-nyx-vision-time").flatMap(Double.init) }
     static var body: String? { argument("-nyx-vision-body") }
+    /// `-nyx-vision-moon-night 9`: the Moon volume opens on that many nights after tonight.
+    static var moonNights: Int? { argument("-nyx-vision-moon-night").flatMap(Int.init) }
     static var look: (yaw: Float, pitch: Float)? {
         guard let parts = argument("-nyx-vision-look")?.split(separator: ",").compactMap({ Float($0) }), parts.count == 2 else { return nil }
         return (parts[0], parts[1])
