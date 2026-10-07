@@ -2,8 +2,7 @@
  "retrieved": "2026-10-05",
  "notes": {
   "meteorShowers": "IMO 2026 Meteor Shower Calendar (Table 5 working list, shower sections, Table 6 radiant positions). peakSolarLongitude is lambda-sun, equinox J2000. peaks = IMO-published date/time (UT); peaksComputed = instants computed by Nyx's reference algorithm from peakSolarLongitude (accuracy about 10-20 min against IMO-stated times; showers whose lambda is given only to 1 degree are good to roughly +/-12 h). 2027 values in peaks come from excerpts of the IMO 2027 calendar and were not read from the PDF itself. driftRA/driftDec are deg/day derived from Table 6 (rounded to whole degrees there, so +/-0.1 deg/day).",
-  "lunarEclipses": "NASA/GSFC Espenak eclipse figures (eclipse.gsfc.nasa.gov/LEplot). All contact times UT; NASA assumed DeltaT 75-79 s, the current value is about 69 s so true UT contacts are about 6-10 s later. null = contact does not occur. umbralMagnitude is negative for penumbral eclipses.",
-  "solarEclipses": "Events from NASA/GSFC 2026-2032 solar eclipse list whose central path, or a partial phase of at least 30% of the Sun's disk covered (obscuration) with the Sun above the horizon, reaches a US state, Puerto Rico, the US Virgin Islands or American Samoa. The 30% test and the usMaxObscuration fields were computed by Nyx from NASA Besselian elements (validated against the 8 Apr 2024 eclipse at Boston, New York and Chicago); NASA does not publish them. Region text is a plain-language summary."
+  "lunarEclipses": "NASA/GSFC Espenak eclipse figures (eclipse.gsfc.nasa.gov/LEplot). All contact times UT; NASA assumed DeltaT 75-79 s, the current value is about 69 s so true UT contacts are about 6-10 s later. null = contact does not occur. umbralMagnitude is negative for penumbral eclipses."
  },
  "meteorShowers": [
   {
@@ -702,64 +701,6 @@
    "penumbralMagnitude": 2.083,
    "gamma": 0.4169,
    "region": "Africa, Europe, Asia, Australia"
-  }
- ],
- "solarEclipses": [
-  {
-   "date": "2026-08-12",
-   "type": "total",
-   "greatestUT": "2026-08-12T17:45:54Z",
-   "gamma": 0.8978,
-   "magnitude": 1.0386,
-   "region": "Total in Greenland, Iceland and Spain. Partial from Alaska (about 55% of the Sun covered in the far north, Sun low in the sky) and, slightly, northern Maine (under 30%).",
-   "usTouch": "partial",
-   "usMaxObscurationPct": 57,
-   "usMaxObscurationAt": "Utqiagvik, AK (computed)"
-  },
-  {
-   "date": "2028-01-26",
-   "type": "annular",
-   "greatestUT": "2028-01-26T15:07:47Z",
-   "gamma": 0.3901,
-   "magnitude": 0.9208,
-   "region": "Annular path crosses Ecuador, Peru, Brazil, Suriname, Spain and Portugal. Partial from Puerto Rico and the US Virgin Islands (about 35% covered, Sun well up); under 25% in southern Florida.",
-   "usTouch": "partial",
-   "usMaxObscurationPct": 37,
-   "usMaxObscurationAt": "St Croix, USVI (computed)"
-  },
-  {
-   "date": "2029-01-14",
-   "type": "partial",
-   "greatestUT": "2029-01-14T17:12:35Z",
-   "gamma": 1.0553,
-   "magnitude": 0.8714,
-   "region": "Partial eclipse across North America. Over half of the Sun is covered across the northern contiguous US from the Pacific Northwest to Minnesota (about 70-75%), and 30% or more over most of the contiguous US north of roughly the 35th parallel; Sun is low in the west.",
-   "usTouch": "partial",
-   "usMaxObscurationPct": 74,
-   "usMaxObscurationAt": "Montana / North Dakota / Pacific Northwest (computed)"
-  },
-  {
-   "date": "2030-06-01",
-   "type": "annular",
-   "greatestUT": "2030-06-01T06:27:56Z",
-   "gamma": 0.5626,
-   "magnitude": 0.9443,
-   "region": "Annular path crosses Algeria, Tunisia, Greece, Turkey, Russia, northern China and Japan. In the US only the western Aleutian Islands, Alaska, reach about 45% covered, with the Sun at or just above the horizon around sunrise. Marginal for Nyx.",
-   "usTouch": "partial",
-   "usMaxObscurationPct": 48,
-   "usMaxObscurationAt": "Attu / Adak, AK, Sun 0-7 deg altitude (computed)",
-   "marginal": true
-  },
-  {
-   "date": "2031-11-14",
-   "type": "hybrid",
-   "greatestUT": "2031-11-14T21:06:12Z",
-   "gamma": 0.3077,
-   "magnitude": 1.0106,
-   "region": "Hybrid eclipse over the central Pacific (total path ends near Panama). Partial from Hawaii (about 55-60% covered, Sun about 35-40 degrees up). South Florida reaches 30-40% only as the Sun sets.",
-   "usTouch": "partial",
-   "usMaxObscurationPct": 62,
-   "usMaxObscurationAt": "Hawaii island (computed)"
   }
  ]
 }
