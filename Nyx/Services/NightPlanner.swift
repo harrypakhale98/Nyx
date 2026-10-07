@@ -19,13 +19,27 @@ nonisolated struct NightPlanner: Sendable {
     }
     /// `count` nights from the park-local night that contains `start` (clamped to 1...60).
     func nights(_ park: Park, from start: Date, count: Int, now: Date) -> [Night] {
-        let first = park.currentNight(at: start)
-        return (0..<min(60, max(1, count))).map { night(park, on: park.date(first, addingDays: $0), now: now) }
+        nights(park, first: park.currentNight(at: start), count: count, now: now)
+    }
+    /// `count` nights from the evening of `day` (year, month, day), a date someone picked (a
+    /// Shortcuts date, a date Ask Nyx names). The picked day is the night, whatever its time of
+    /// day; never before tonight.
+    func nights(_ park: Park, day: DateComponents, count: Int, now: Date) -> [Night] {
+        let tonight = park.currentNight(at: now)
+        let picked = park.calendar.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 12)) ?? tonight
+        return nights(park, first: max(picked, tonight), count: count, now: now)
+    }
+    private func nights(_ park: Park, first: Date, count: Int, now: Date) -> [Night] {
+        (0..<min(60, max(1, count))).map { night(park, on: park.date(first, addingDays: $0), now: now) }
     }
     /// The best nights across parks: highest score first; on a tie, a night with a cloud forecast
     /// before one without (it is the surer number), then the earlier night, then the park's name.
     func bestNights(_ parks: [Park], from start: Date, count: Int, now: Date, limit: Int = 3) -> [Night] {
         Array(parks.flatMap { nights($0, from: start, count: count, now: now) }.sorted(by: Self.better).prefix(max(0, limit)))
+    }
+    /// The same, from a picked day.
+    func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3) -> [Night] {
+        Array(parks.flatMap { nights($0, day: day, count: count, now: now) }.sorted(by: Self.better).prefix(max(0, limit)))
     }
     static func better(_ a: Night, _ b: Night) -> Bool {
         if a.score.value != b.score.value { return a.score.value > b.score.value }

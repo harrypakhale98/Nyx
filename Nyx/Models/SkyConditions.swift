@@ -35,12 +35,16 @@ nonisolated struct SkyConditions: Sendable {
     let moonset: Date?
     let moonBelowFraction: Double
     let darkHours: Double
+    /// Under the midnight sun, when the Sun is lowest (solar midnight); nil on other nights.
+    var lowestSun: Date? = nil
     /// The hours whose clouds matter. True darkness when there is any; otherwise sunset
-    /// to sunrise, or local 22:00–02:00 under the midnight sun, so an Alaska summer night
-    /// still reports its forecast instead of looking like it has none.
+    /// to sunrise, or under the midnight sun the four hours around the Sun's lowest point
+    /// (local 22:00–02:00 if that is unknown), so an Alaska summer night still reports its
+    /// forecast instead of looking like it has none.
     var cloudWindow: (start: Date, end: Date) {
         if let darkStart, let darkEnd, darkEnd > darkStart { return (darkStart, darkEnd) }
         if let sunset, let sunrise, sunrise > sunset { return (sunset, sunrise) }
+        if let lowestSun { return (lowestSun.addingTimeInterval(-2*3600), lowestSun.addingTimeInterval(2*3600)) }
         return (evening.addingTimeInterval(10*3600), evening.addingTimeInterval(14*3600))
     }
 }

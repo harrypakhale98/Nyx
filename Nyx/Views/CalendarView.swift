@@ -129,7 +129,8 @@ struct CalendarView: View {
         let inWindow:Set<Date>
     }
     private func month(_ park:Park)->Month {
-        let base=park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:model.today)) ?? model.today
+        // Tonight's month, not the clock's: at 1 AM on the 1st, tonight is still last month's last night.
+        let base=park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:model.tonight(park))) ?? model.today
         let month=park.calendar.date(byAdding:.month,value:monthOffset,to:base) ?? base
         let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
         let nights=model.nights(park,from:month,count:count)

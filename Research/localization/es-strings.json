@@ -1117,5 +1117,6 @@
   "west-northwest": "oestenoroeste",
   "west-southwest": "oestesuroeste",
   "· %lld–%lld": "· %lld–%lld",
-  "“%@”": "“%@”"
+  "“%@”": "“%@”",
+  "cloud forecast included": "con pronóstico de nubes"
 }

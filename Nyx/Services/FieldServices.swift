@@ -21,7 +21,7 @@ extension FieldActivityAttributes {
         self.init(parkID: night.park.id, parkName: night.park.shortName, score: score, band: band,
                   dusk: night.sky.sunset ?? window.start, dawn: night.sky.sunrise ?? window.end,
                   darkStart: night.sky.darkStart, darkEnd: night.sky.darkEnd,
-                  milestones: kept.map { Milestone(title: $0.title, date: $0.date, symbol: $0.symbol) })
+                  milestones: kept.map { Milestone(title: $0.title, date: $0.date, symbol: $0.symbol) }, timeZoneID: night.park.timeZoneID)
     }
     /// The state at `now`: the next marked milestone, or finished once the night is over.
     nonisolated func state(at now: Date, nightVision: Bool) -> ContentState {

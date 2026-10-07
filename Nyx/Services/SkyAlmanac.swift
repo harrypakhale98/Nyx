@@ -104,7 +104,8 @@ nonisolated struct SkyAlmanac: Sendable {
             var best = visible.start, bestAltitude = -90.0
             sample(visible) { date in let a = altitude(date); if a > bestAltitude { bestAltitude = a; best = date } }
             let p = position(of: planet, at: best)
-            let edges = transitions(in: window) { altitude($0) >= 0 }
+            // Rise and set on the refracted horizon (34'), as almanacs give them; planets are points.
+            let edges = transitions(in: window) { altitude($0) >= -0.567 }
             return PlanetNight(planet: planet, magnitude: p.magnitude, visible: visible, best: best, bestAltitude: bestAltitude,
                 bestAzimuth: engine.horizontal(date: best, park: park, ra: p.ra, dec: p.dec).azimuth,
                 rises: edges.rises.first, sets: edges.sets.first)
@@ -342,10 +343,11 @@ nonisolated struct SkyAlmanac: Sendable {
             if let a = eclipse.p1, let b = eclipse.p4, b > a { return DateInterval(start: a, end: b) }
             return nil
         }()
-        let moonUp = { (date: Date) in engine.lunarAltitude(at: date, park: park) > 0 }
+        // The same horizon as moonrise: upper limb on the refracted horizon.
+        let moonUp = { (date: Date) in engine.lunarAltitude(at: date, park: park) > -0.833 }
         let visible = stage.flatMap { longest(in: $0, where: moonUp) }
         let altitude = engine.lunarAltitude(at: eclipse.greatest, park: park)
-        return EclipseNight(eclipse: eclipse, visible: visible, greatestVisible: altitude > 0, altitudeAtGreatest: altitude)
+        return EclipseNight(eclipse: eclipse, visible: visible, greatestVisible: altitude > -0.833, altitudeAtGreatest: altitude)
     }
 
     // MARK: Shared time search

@@ -43,6 +43,29 @@ struct NyxTests {
         #expect(try park("grsm").matches("smokies"))
         #expect(try !park("jotr").matches("Yellowstone"))
     }
+    /// Kobuk Valley in late December: solar noon is after 13:00, so sunrise (about 13:04 the next
+    /// day) falls after the noon-to-noon window. It is still found, after true darkness ends.
+    @Test func lateArcticSunriseIsFound() throws {
+        let kova=try park("kova")
+        let sky=AstronomyEngine().conditions(for:kova,on:try date("2026-12-27 12:00",park:kova))
+        let sunset=try #require(sky.sunset), sunrise=try #require(sky.sunrise)
+        #expect(sunrise>sky.end && sunrise<sky.end.addingTimeInterval(6*3600))
+        #expect(sunrise>sunset && sunrise>(sky.darkEnd ?? sunset))
+        #expect(kova.calendar.component(.hour,from:sunrise)==13)
+    }
+    /// Under the midnight sun the cloud window is centred on the Sun's lowest point, not the clock's midnight.
+    @Test func midnightSunCloudWindowFollowsTheSun() throws {
+        let kova=try park("kova"), engine=AstronomyEngine()
+        let sky=engine.conditions(for:kova,on:try date("2026-06-21 12:00",park:kova))
+        #expect(sky.state == .polarDay)
+        let low=try #require(sky.lowestSun)
+        let window=sky.cloudWindow
+        #expect(window.start==low.addingTimeInterval(-7200) && window.end==low.addingTimeInterval(7200))
+        // Lower than at either edge of the window, and lower than at 22:00 on the clock.
+        #expect(engine.solarAltitude(at:low,park:kova)<engine.solarAltitude(at:window.start,park:kova))
+        #expect(engine.solarAltitude(at:low,park:kova)<engine.solarAltitude(at:window.end,park:kova))
+        #expect(engine.solarAltitude(at:low,park:kova)<engine.solarAltitude(at:try date("2026-06-21 22:00",park:kova),park:kova)-5)
+    }
     @Test func midnightSunStillUsesItsForecast() throws {
         let denali=try park("dena")
         let sky=AstronomyEngine().conditions(for:denali,on:try date("2026-06-21 12:00",park:denali))
@@ -210,7 +233,9 @@ struct NyxTests {
     @Test func forecastCoverage() {
         let now=Date.now
         let forecast=Forecast(updated:now,times:[now.timeIntervalSince1970,now.timeIntervalSince1970+3600],clouds:[20,80])
-        #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==50)
+        // Instant values: each stands for the half hour either side of its timestamp.
+        #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600))==50)
+        #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==80)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(8000))==nil)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600),now:now.addingTimeInterval(40*3600))==nil)
     }

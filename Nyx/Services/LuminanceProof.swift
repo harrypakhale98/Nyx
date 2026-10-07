@@ -14,7 +14,9 @@ nonisolated struct LuminanceReading: Codable, Sendable, Equatable {
     static func load(_ defaults: UserDefaults = .standard) -> LuminanceReading? {
         defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(LuminanceReading.self, from: $0) }
     }
+    /// Keeps the newest reading: reports can arrive out of order (a backlog after an update).
     func save(_ defaults: UserDefaults = .standard) {
+        if let stored=Self.load(defaults), stored.end>end { return }
         if let data=try? JSONEncoder().encode(self) { defaults.set(data, forKey: Self.key) }
     }
     /// A reading only from a plausible value; MetricKit omits it on displays without the measurement.

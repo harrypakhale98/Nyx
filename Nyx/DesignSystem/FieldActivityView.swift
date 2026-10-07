@@ -56,6 +56,7 @@ struct FieldActivityLockView: View {
         }
         .padding(16)
         .accessibilityElement(children:.combine)
+        .environment(\.timeZone,attributes.timeZone)
     }
     private func laterMark(_ item:FieldActivityAttributes.Milestone)->some View {
         HStack(spacing:4) { Text(item.title); Text(item.date,style:.time).monospacedDigit() }.fixedSize()
@@ -107,6 +108,7 @@ struct FieldActivityCountdown: View {
                 Text(later.date,style:.time).monospacedDigit()
             } else { Text("Dawn") }
         }.font(.caption.weight(.semibold)).foregroundStyle(colors.accent)
+        .environment(\.timeZone,attributes.timeZone)
     }
 }
 
@@ -115,7 +117,7 @@ extension FieldActivityAttributes {
     /// The same night moved in time, so a review screen's system timers count against a real clock.
     func shifted(by seconds:TimeInterval)->FieldActivityAttributes {
         FieldActivityAttributes(parkID:parkID,parkName:parkName,score:score,band:band,dusk:dusk+seconds,dawn:dawn+seconds,darkStart:darkStart.map { $0+seconds },darkEnd:darkEnd.map { $0+seconds },
-            milestones:milestones.map { Milestone(title:$0.title,date:$0.date+seconds,symbol:$0.symbol) })
+            milestones:milestones.map { Milestone(title:$0.title,date:$0.date+seconds,symbol:$0.symbol) },timeZoneID:timeZoneID)
     }
     /// A real-looking night for previews: dusk at 6:20 PM, darkness 7:45 PM to 5:30 AM.
     static var preview: FieldActivityAttributes {

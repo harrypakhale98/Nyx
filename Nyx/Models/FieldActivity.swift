@@ -31,6 +31,10 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     let darkEnd: Date?
     /// At most eight, earliest first, so the whole activity stays far below ActivityKit's 4 KB.
     let milestones: [Milestone]
+    /// The park's IANA zone: the Lock Screen shows park time, as field mode does, wherever the
+    /// phone's clock is set. Optional so an activity started by an earlier build still decodes.
+    var timeZoneID: String? = nil
+    var timeZone: TimeZone { timeZoneID.flatMap(TimeZone.init(identifier:)) ?? .current }
 
     /// The milestones after the one the state points at, for when the state has gone stale.
     func after(_ milestone: Milestone?) -> [Milestone] {

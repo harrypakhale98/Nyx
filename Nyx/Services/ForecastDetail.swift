@@ -4,15 +4,21 @@ import Foundation
 /// moment of it is covered. A partial forecast is never treated as full, and a missing hour is
 /// never filled in as clear.
 nonisolated enum HourlyWindow {
+    /// What moment an hourly value describes, as Open-Meteo's docs give it: most variables
+    /// (clouds, temperature, dew point, visibility, aerosols) are instant values at their
+    /// timestamp, so each stands for the half hour either side of it; gusts are the preceding
+    /// hour's maximum.
+    enum Timing: Sendable { case instant, precedingHour }
     /// Each hour that overlaps the window with a valid value, weighted by its overlap in seconds;
     /// nil unless the hours are a clean hourly series that covers the whole window.
     static func samples(times: [Double], values: [Double?], from start: Date, to end: Date,
-                        valid: ClosedRange<Double>) -> [(value: Double, weight: Double)]? {
+                        valid: ClosedRange<Double>, timing: Timing = .instant) -> [(value: Double, weight: Double)]? {
         guard end>start, !times.isEmpty, times.count==values.count, times.allSatisfy(\.isFinite),
               zip(times,times.dropFirst()).allSatisfy({ abs($1-$0-3600)<0.1 }) else { return nil }
         var found: [(value: Double, weight: Double)] = []
+        let (before,after): (Double,Double) = timing == .instant ? (1800,1800) : (3600,0)
         for (t,value) in zip(times,values) {
-            let overlap=min(end.timeIntervalSince1970,t+3600)-max(start.timeIntervalSince1970,t)
+            let overlap=min(end.timeIntervalSince1970,t+after)-max(start.timeIntervalSince1970,t-before)
             if overlap>0, let value, value.isFinite, valid.contains(value) { found.append((value,overlap)) }
         }
         guard found.reduce(0,{ $0+$1.weight }) >= end.timeIntervalSince(start)-1 else { return nil }
@@ -33,9 +39,9 @@ nonisolated struct HourlySeries: Codable, Sendable, Equatable {
     let values: [String: [Double?]]
     /// Forecasts older than 36 hours are not described, as with clouds.
     func usable(now: Date) -> Bool { now.timeIntervalSince(updated)<36*3600 }
-    func samples(_ key: String, from start: Date, to end: Date, valid: ClosedRange<Double>) -> [(value: Double, weight: Double)]? {
+    func samples(_ key: String, from start: Date, to end: Date, valid: ClosedRange<Double>, timing: HourlyWindow.Timing = .instant) -> [(value: Double, weight: Double)]? {
         guard let series=values[key] else { return nil }
-        return HourlyWindow.samples(times:times,values:series,from:start,to:end,valid:valid)
+        return HourlyWindow.samples(times:times,values:series,from:start,to:end,valid:valid,timing:timing)
     }
     func mean(_ key: String, from start: Date, to end: Date, valid: ClosedRange<Double>) -> Double? {
         guard let series=values[key] else { return nil }
@@ -75,9 +81,10 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
                let found=HourlyWindow.samples(times:layers.times,values:temperatures,from:start,to:end,valid:-90...60),
                let coldest=found.map(\.value).min() {
                 outlook.coldest=coldest
-                // The start of the coldest hour that falls inside the window, for "by 5 AM".
-                let hours=zip(layers.times,temperatures).filter { t,value in value==coldest && t+3600>start.timeIntervalSince1970 && t<end.timeIntervalSince1970 }
-                outlook.coldestAt=hours.first.map { max(start,Date(timeIntervalSince1970:$0.0)) }
+                // When the coldest reading falls inside the window, for "by 5 AM": its timestamp,
+                // kept within the window's ends.
+                let hours=zip(layers.times,temperatures).filter { t,value in value==coldest && t+1800>start.timeIntervalSince1970 && t-1800<end.timeIntervalSince1970 }
+                outlook.coldestAt=hours.first.map { min(end,max(start,Date(timeIntervalSince1970:$0.0))) }
             }
             if let temperatures=layers.values["temperature_2m"], let dew=layers.values["dew_point_2m"], temperatures.count==dew.count {
                 // How close the air comes to its dew point; at 2 °C or less, glass left out collects dew.
@@ -87,7 +94,7 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
                 }
                 outlook.dewMargin=HourlyWindow.samples(times:layers.times,values:margins,from:start,to:end,valid:0...150)?.map(\.value).min()
             }
-            outlook.gust=layers.samples("wind_gusts_10m",from:start,to:end,valid:0...400)?.map(\.value).max()
+            outlook.gust=layers.samples("wind_gusts_10m",from:start,to:end,valid:0...400,timing:.precedingHour)?.map(\.value).max()
             outlook.visibility=layers.mean("visibility",from:start,to:end,valid:0...200_000)
         }
         if let air, air.usable(now:now) {
