@@ -100,12 +100,13 @@ struct PrivacyView:View {
             Section { Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif));Text("Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.") }
             Section("Optional data updates") {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
-                Text("Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use park coordinates only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Smoke and haze",isOn:$model.smokeEnabled).tint(palette.controlTint)
-                Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using park coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
-                Text("When park updates are available, requests go to developer.nps.gov for parks you open or save and parks within your Tonight radius, which can suggest a broad region. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Alerts for all 63 parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
+            Section { NPSKeyField() } header:{ Text("Advanced") }
             Section("Measured on this iPhone") {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
                 if let reading=LuminanceProof.current { Text(reading.sentence) }
@@ -298,3 +299,39 @@ private struct ScoreAnatomy:View {
 #Preview("Learn") { NavigationStack { LearnView() }.preferredColorScheme(.dark) }
 #Preview("Onboarding") { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Privacy AX5") { NavigationStack { PrivacyView() }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+/// Your privacy → Advanced: an NPS key of the person's own, used instead of the key every install
+/// shares. Free from nps.gov; kept in the Keychain on this device; never shown again in full.
+struct NPSKeyField: View {
+    @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
+    /// `-nyx-advanced` (DEBUG) opens it for screenshots.
+    @State private var expanded=DebugScenario.isEnabled("advanced")
+    @State private var draft=""
+    @State private var saved=NPSKeyStore().key != nil
+    @State private var message:String?
+    var body: some View {
+        DisclosureGroup(isExpanded:$expanded) {
+            VStack(alignment:.leading,spacing:10) {
+                Text("Park alerts use a key every copy of Nyx shares, limited to 1,000 requests an hour. If alerts are often busy, you can use a free key of your own from the National Park Service. It stays in this device's Keychain and is sent only to developer.nps.gov.")
+                    .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                if saved {
+                    Label("Using your own key.",systemImage:"key").font(.subheadline)
+                    Button("Remove my key",role:.destructive) { NPSKeyStore().remove(); saved=false; message=nil }.frame(minHeight:44)
+                } else {
+                    SecureField("Your NPS API key",text:$draft).textContentType(.password).autocorrectionDisabled().textInputAutocapitalization(.never).font(.body.monospaced())
+                        .submitLabel(.done).onSubmit(save)
+                    Button("Use this key",action:save).disabled(draft.isEmpty).frame(minHeight:44)
+                }
+                if let message { Text(message).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+            }.padding(.top,6)
+        } label:{ Text("Use your own NPS key").frame(minHeight:44,alignment:.leading) }
+        .tint(palette.accent)
+    }
+    private func save() {
+        guard NPSKeyStore.plausible(draft) else { message=String(localized:"That doesn't look like an NPS key. Keys are about 40 letters and numbers."); return }
+        if NPSKeyStore().save(draft) {
+            draft=""; saved=true; message=nil
+            Task { await model.refreshParkUpdates([],force:true) }
+        } else { message=String(localized:"The key could not be saved. Try again.") }
+    }
+}

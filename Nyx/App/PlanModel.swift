@@ -26,6 +26,25 @@ import CoreLocation
     /// A link asked the Calendar tab for one park's month (`nyx://calendar/<park>?month=…`).
     var calendarRequest: CalendarRequest?
     var enrichments: [String:ParkEnrichment] = [:]
+    /// The journal's store could not be opened; Nyx runs with an empty one in memory and says so on the Journal tab.
+    var journalUnavailable=false
+    /// A `.nyxjournal` opened from Files or another app, waiting for the Journal tab to import it.
+    var journalFile:URL?
+    /// NPS is refusing requests right now (the shared key's quota, or a struggling service).
+    var alertsBusy=false
+    /// The last forecast detail request was held back by Low Data Mode.
+    var detailPausedForLowData=false
+    /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
+    /// in this session: Tonight and the park list need only clouds.
+    @ObservationIgnored private var detailWanted=false
+    @ObservationIgnored private var alertsCache: ParkAlertsCache?
+    @ObservationIgnored private var programs: [String:ProgramsCache] = [:]
+    /// The cached forecasts and alerts, read off the main actor once at launch.
+    @ObservationIgnored private var hydration: Task<Void,Never>?
+    /// Keeps the widget, the watch, Siri and reminders in step with the saved parks, once per process.
+    @ObservationIgnored let savedSync=SavedSkySync()
+    /// When Tonight's candidates were last refreshed, for a refresh on return.
+    @ObservationIgnored private(set) var lastRefresh: Date?
     var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
@@ -48,7 +67,7 @@ import CoreLocation
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
-         detail: any DetailProviding = ForecastDetailService()) {
+         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
         do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
         homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
@@ -56,13 +75,22 @@ import CoreLocation
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
         smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
-        // Show the last forecasts and park updates immediately, offline included; refreshes replace them.
+        // The last forecasts and park updates are read by the services, off the main actor, while
+        // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
         if DebugScenario.screen == nil {
-            for park in parks {
-                if let cached=CacheDirectory.read(Forecast.self,name:"weather-\(park.id)") { forecasts[park.id]=cached }
-                if let cached=CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") { enrichments[park.id]=cached }
-                if let cached=CacheDirectory.read(ForecastDetail.self,name:"detail-\(park.id)") { details[park.id]=cached }
-            }
+            if let preload {
+                // Read in the background since launch began; taken now, before the first frame.
+                let cached=preload.wait()
+                forecasts=cached.forecasts; details=cached.details
+                apply(AlertsUpdate(cache:cached.alerts,busy:false))
+                LaunchSignposts.note("Caches ready")
+                let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+                hydration=Task {
+                    await weather.seed(cached.forecasts,parks:parks)
+                    await detailService.seed(cached.details,parks:parks)
+                    await parkStore.seed(cached.alerts)
+                }
+            } else { hydration=Task { await hydrate() } }
         }
         #if DEBUG
         if DebugScenario.screen != nil { homeID="jotr" }
@@ -190,11 +218,29 @@ import CoreLocation
             return NightPlanner.better(x,y)
         }
     }
-    var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    /// The person's own key from Your privacy, else the key every install shares.
+    var npsKey: String { NPSKeyStore().key ?? Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    /// Reads every cache once, in the services, and shows what they hold where nothing newer is.
+    func hydrate() async {
+        let interval=LaunchSignposts.begin("Hydrate caches")
+        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+        async let cachedForecasts=weather.hydrate(parks)
+        async let cachedDetails=detailService.hydrate(parks)
+        async let cachedAlerts=parkStore.hydrate(parks)
+        let (f,d,a)=await (cachedForecasts,cachedDetails,cachedAlerts)
+        for (id,forecast) in f where forecasts[id] == nil { forecasts[id]=forecast }
+        for (id,detail) in d where details[id] == nil { details[id]=detail }
+        if alertsCache == nil { apply(a) }
+        LaunchSignposts.end(interval)
+        LaunchSignposts.note("Caches ready")
+    }
     /// Forecasts for every park arrive together (one or two requests); park updates (alerts, and
     /// ranger programs where they are shown) follow park by park, and only when asked for.
     func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true,programs:Bool=false) async {
+        // Programs are asked for only on a park's page: from then on its forecast detail is wanted too.
+        if programs { detailWanted=true }
         await refreshForecasts(watching:parks,force:force)
+        lastRefresh=Date.now
         if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
     }
     /// Always asks for all 63 parks, never only those near the device: it costs the same request,
@@ -207,36 +253,61 @@ import CoreLocation
             forecasts=fixture.forecasts; details=fixture.details; return
         }
         #endif
+        await hydration?.value
         let network=weatherEnabled && live
         let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
-        let detail=await detailService.details(for:self.parks,weather:network,smoke:smokeEnabled && live,force:force)
+        let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
+        let paused=await detailService.pausedForLowData()
+        if paused != detailPausedForLowData { detailPausedForLowData=paused }
         guard network else { return }
         for park in parks {
             if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }
+    /// Alerts for every park arrive in one request (whichever screen asks first, at most every six
+    /// hours), so the request never says which parks are near you; ranger programs follow only for
+    /// the park whose page is open.
     func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        let network=npsEnabled && live, key=npsKey
+        await hydration?.value
+        apply(await parkStore.alerts(for:self.parks,key:key,network:network,force:force))
+        guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }
-            enrichments[park.id]=await parkStore.enrichment(for:park,key:npsKey,network:npsEnabled && live,force:force,programs:programs)
+            if let fresh=await parkStore.programs(for:park,key:key,network:network,force:force) { self.programs[park.id]=fresh; rebuild(park) }
         }
     }
-    /// A closure from the last park update, if any. Shown beside every score for that park.
+    private func apply(_ update:AlertsUpdate) {
+        // `-nyx-alerts-busy` (DEBUG): the busy state for screenshots.
+        let busy=update.busy || DebugScenario.isEnabled("alerts-busy")
+        if alertsBusy != busy { alertsBusy=busy }
+        guard update.cache != alertsCache else { return }
+        alertsCache=update.cache
+        for park in parks { rebuild(park) }
+    }
+    /// One park's update as the screens read it: its alerts from the shared request, ranked, and
+    /// its programs if its page has asked for them.
+    private func rebuild(_ park:Park) {
+        guard let cache=alertsCache, let alerts=cache.alerts[park.apiCode] else { return }
+        let today=park.isoDay(Date.now), shown=programs[park.id]
+        enrichments[park.id]=ParkEnrichment(updated:cache.updated,alerts:AlertRanking.ranked(alerts),programs:(shown?.programs ?? []).filter { $0.date>=today },description:nil,programsUpdated:shown?.updated)
+    }
+    /// A closure from the last park update, if any: a road, trail, campground, area or the park
+    /// itself, never an amenity notice. Shown beside every score for that park.
     func closure(_ park:Park)->String? {
-        // NPS files some closures under "Caution"; a closure or danger anywhere in the alert counts.
-        enrichments[park.id]?.alerts.first { alert in
-            let text=(alert.category+" "+alert.title).lowercased()
-            return ["closure","closed","danger"].contains { text.contains($0) }
-        }?.title
+        AlertRanking.closure(enrichments[park.id]?.alerts ?? [])?.displayTitle(park:park)
     }
     func alertSummary(_ park:Park)->String {
-        guard let data=enrichments[park.id] else { return String(localized:"Access not checked. Confirm closures with the park.") }
+        guard let data=enrichments[park.id] else {
+            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
+        }
         if let closure=closure(park) { return closure }
-        if let first=data.alerts.first { return first.title }
-        return String(localized:"No alerts in the last park update. Confirm access before travel.")
+        if let danger=data.alerts.first(where:{ $0.kind == .danger }) { return danger.displayTitle(park:park) }
+        if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
+        return String(localized:"No closures in the last park update. Check all park alerts before you go.")
     }
 }
 @MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {
@@ -266,6 +337,11 @@ import CoreLocation
     }
     /// Return to the chosen starting park.
     func clear() { latitude=nil; longitude=nil; message=nil }
+    /// Back in the app: a fresh fix, only when "near me" is in use and already allowed. Never asks.
+    func refreshIfAuthorized() {
+        guard latitude != nil, manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways else { return }
+        manager.requestLocation()
+    }
     func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
         locating=false; message=String(localized:"Location is unavailable. Choose a starting park instead.")
     }
