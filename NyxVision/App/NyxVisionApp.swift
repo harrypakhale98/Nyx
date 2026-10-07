@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Nyx for Apple Vision Pro: plan in a calm window, then stand under the sky you planned for, or
-/// set the night's Moon on the table. Everything is computed on device from bundled data; this
-/// app makes no network requests.
+/// set the night's Moon on the table. Everything is computed on device from bundled data; the one
+/// request is the parks' cloud forecast, behind its switch in Your privacy (`VisionModel+Forecasts`).
 @main struct NyxVisionApp: App {
     @State private var model = VisionModel()
     /// The sky opens most of the way: the room stays at the edges, so nobody is dropped into
