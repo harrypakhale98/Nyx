@@ -167,10 +167,20 @@ private struct EssayIcon:View {
         }.frame(width:size*1.3,height:size*1.3,alignment:.leading)
     }
 }
+/// "About the data" as a row with a mark and a chevron, the same at the foot of Learn and of a park.
+struct AboutDataLink:View {
+    @Environment(\.nyx) private var palette
+    var body:some View {
+        NavigationLink { AboutDataView() } label:{
+            HStack { Label("About the data",systemImage:"info.circle");Spacer();Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true) }
+                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+        }.foregroundStyle(palette.ink)
+    }
+}
 struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:22,alignment:.top)],spacing:26) { ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:0) { VStack(alignment:.leading,spacing:22) { EssayIcon(essay:essay,size:28);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted) };Spacer(minLength:22);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86)) }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift) } };NavigationLink { AboutDataView() } label:{ HStack { Label("About the data",systemImage:"info.circle");Spacer();Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true) }.frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.ink) }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:22,alignment:.top)],spacing:26) { ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:0) { VStack(alignment:.leading,spacing:22) { EssayIcon(essay:essay,size:28);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted) };Spacer(minLength:22);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86)) }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift) } };AboutDataLink() }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {

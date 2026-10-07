@@ -353,7 +353,7 @@ struct ParkDetailView: View {
     @ViewBuilder private var footer: some View {
         ShareCardButton(night:night)
         Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
-        NavigationLink { AboutDataView() } label:{ Text("About the data").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.subheadline)
+        AboutDataLink().font(.subheadline)
     }
     @ToolbarContentBuilder private var saveToolbar: some ToolbarContent {
         if #available(iOS 27.0,*) {
