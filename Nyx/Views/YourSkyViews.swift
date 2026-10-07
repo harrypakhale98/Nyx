@@ -39,7 +39,7 @@ struct YourSkyPanel: View {
                 Text("Your first night will be your first star").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text("Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {
-                Text("Darker skies shine brighter. Each season's nights join into a figure. Tap a star to open its night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text("Brighter stars mark darker skies. Each season's nights join into a figure. Tap a star to open its night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 Divider().overlay(palette.line)
                 SkiesSeenSection(seen:SkiesSeen(nights:nights,parks:model.parks))
             }
@@ -88,7 +88,7 @@ struct ConstellationCard: View {
                 Text("NYX").font(.caption).tracking(7).foregroundStyle(palette.muted)
                 Text(title).font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(palette.ink)
                 SkyMapCanvas(content:layout.content(parks:model.parks),parks:model.parks).frame(width:500,height:300)
-                Text(layout.stars.count==1 ? String(localized:"One night under the stars at \(parks) national park") : String(localized:"\(layout.stars.count) nights under the stars at \(parks) national parks"))
+                Text(String(localized:"\(layout.stars.count) nights under the stars at \(parks) national parks"))
                     .font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
                 Text("Each star is a night at its park. Brighter stars, darker skies.").font(.caption).foregroundStyle(palette.muted)
             }.padding(40)

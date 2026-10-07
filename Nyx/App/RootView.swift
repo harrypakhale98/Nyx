@@ -34,19 +34,20 @@ struct RootView:View {
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
-            else if let screen=DebugScenario.screen,screen != "tonight",screen != "parks",screen != "calendar",screen != "journal",screen != "learn" {
+            else if let screen=DebugScenario.screen,SceneCommands.tabIndex(screen) == nil {
                 NavigationStack { debugScreen(screen) }
             } else {
                 ZStack {
                 // Removed once revealed, so its sky stops animating and sensing tilt behind the tabs.
                 if !revealed { NightBackground().transition(.opacity) }
+                // Four tabs: where (Tonight, Parks), when (Plan: the month, or the nights you are free),
+                // and remember (Journal). Learn lives in Settings › About the sky and beside the sky it explains.
                 TabView(selection:$commands.tab) {
                     Tab(value:0) { NavigationStack { TonightView() }.environment(\.nyxTab,0).modifier(TabChrome(tint:palette.accent)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
                     // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
                     Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().environment(\.nyxTab,1).modifier(TabChrome(tint:palette.accent)) }
-                    Tab("Calendar",systemImage:"calendar",value:2) { NavigationStack { CalendarView() }.environment(\.nyxTab,2).modifier(TabChrome(tint:palette.accent)) }
+                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.environment(\.nyxTab,2).modifier(TabChrome(tint:palette.accent)) }
                     Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.environment(\.nyxTab,3).modifier(TabChrome(tint:palette.accent)) }
-                    Tab("Learn",systemImage:"sparkles",value:4) { NavigationStack { LearnView() }.environment(\.nyxTab,4).modifier(TabChrome(tint:palette.accent)) }
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
@@ -56,6 +57,8 @@ struct RootView:View {
                 }
             }
         }
+        // The first save offers reminders; the first journal entry may ask for a rating.
+        .background(MomentsWatcher())
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
@@ -73,7 +76,7 @@ struct RootView:View {
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
             NotificationRouter.shared.connect { route in openReminder(route) }
-            if let screen=DebugScenario.screen { commands.tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
+            if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
             if DebugScenario.state=="populated" {
                 // Illustrative sessions so store captures show a lived-in journal, written in the capture's language
@@ -157,6 +160,10 @@ struct RootView:View {
         case "entry": JournalDetailView(entry:JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
         case "onboarding": OnboardingView {}
         case "settings": SettingsView()
+        case "credits": CreditsView()
+        // Learn is no longer a tab: its index as Settings › About the sky pushes it.
+        case "learn": LearnView()
+        case "places": StartingPointPicker(nearMe:nil) { _ in }
         case "privacy": PrivacyView()
         // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
         case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)

@@ -5,7 +5,10 @@ struct NightCell: View {
     @Environment(\.nyxAccess) private var access
     let night:Night
     var highlighted:Bool=false
+    /// What the ring means, for VoiceOver: "In the best stretch" or "In the darkest moon stretch".
+    var stretchName:String?=nil
     var isTonight:Bool=false
+    /// A night that has passed: the date dimmed, a faint dot, no ring and no score.
     var isPast:Bool=false
     /// A visible lunar eclipse or a notable shower's peak; at most one per night.
     var marker:WhatsUp.Events.Marker?=nil
@@ -25,6 +28,12 @@ struct NightCell: View {
             Canvas { context,size in
                 // Size follows the score on a curve, so a 95 night reads clearly larger than a 70.
                 let center=CGPoint(x:size.width/2,y:size.height/2),radius=(1.5+8*pow(Double(night.score.value)/100,1.5))*scale
+                // A past night is one quiet mark, whatever its forecast was: it can no longer be chosen.
+                if isPast {
+                    let dot=1.6*scale
+                    context.fill(Path(ellipseIn:CGRect(x:center.x-dot,y:center.y-dot,width:2*dot,height:2*dot)),with:.color(palette.muted.opacity(0.45)))
+                    return
+                }
                 if highlighted {
                     let ring=12.5*scale, halo=9*scale
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7)
@@ -39,7 +48,8 @@ struct NightCell: View {
                 let fade=isPast ? 0.35 : 1.0
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200)
             }.frame(height:28*scale).accessibilityHidden(true)
-            if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
+            if isPast { Text(verbatim:"00").font(.caption2.monospacedDigit()).hidden() }
+            else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78*scale)
             .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8)) } }
@@ -48,13 +58,13 @@ struct NightCell: View {
             .accessibilityLabel(spoken)
     }
     private var spoken:String {
+        if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
         var parts=[isTonight ? String(localized:"Tonight, \(night.park.dayLabel(night.id))") : night.park.dayLabel(night.id),
                    String(localized:"\(night.score.value), \(night.score.band.label)")]
         if let label=night.basisLabel { parts.append(label) }
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
-        if highlighted { parts.append(String(localized:"In the five-night moon window")) }
+        if highlighted, let stretchName { parts.append(stretchName) }
         if let marker { parts.append(marker.name) }
-        if isPast { parts.append(String(localized:"Past night")) }
         return parts.joined(separator:". ")
     }
 }
@@ -105,7 +115,8 @@ struct CalendarView: View {
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyxAccess) private var access
-    @State private var parkID=""
+    /// Kept for the window, so switching Plan to "My free nights" and back returns to this park.
+    @SceneStorage("planPark") private var parkID=""
     @State private var monthOffset=0
     @State private var chosen:Night?
     @State private var peeking=false
@@ -122,8 +133,7 @@ struct CalendarView: View {
         let nights:[Night]
         let lead:Int
         let tonight:Date
-        let window:ArraySlice<Night>
-        let windowInMonth:Bool
+        let stretch:Stretch
         let inWindow:Set<Date>
     }
     private func month(_ park:Park)->Month {
@@ -134,9 +144,9 @@ struct CalendarView: View {
         let nights=model.nights(park,from:month,count:count)
         let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
         let tonight=park.evening(model.tonight(park))
-        // The window may reach into the neighbouring months: a new moon on the 1st still gets five nights.
-        let found=bestWindow(model.nights(park,from:park.date(month,addingDays:-4),count:count+38),month:nights,after:tonight)
-        return Month(date:month,nights:nights,lead:lead,tonight:tonight,window:found.nights,windowInMonth:found.inMonth,inWindow:found.inMonth ? Set(found.nights.map(\.id)) : [])
+        // The stretch may reach into the neighbouring months: a new moon on the 1st still gets five nights.
+        let found=Self.stretch(model.nights(park,from:park.date(month,addingDays:-4),count:count+38),month:nights,after:tonight)
+        return Month(date:month,nights:nights,lead:lead,tonight:tonight,stretch:found,inWindow:found.inMonth ? Set(found.nights.map(\.id)) : [])
     }
     private func focused(_ data:Month)->Night? {
         data.nights.first { $0.id==focusedID } ?? data.nights.first { $0.id==data.tonight } ?? data.nights.first
@@ -161,27 +171,28 @@ struct CalendarView: View {
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .measuringWidth($width)
-            .task(id:park?.id) { if let park { await model.refresh([park]) } }.navigationTitle("Calendar").navigationBarTitleDisplayMode(.inline)
+            .task(id:park?.id) { if let park { await model.refresh([park]) } }
             .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
-            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation() }
+            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
+                .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
             .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
     }
+    /// The park whose month this is, as the page's title: its state and Dark Sky status above it
+    /// (data, not a slogan), and the name itself the menu that changes it.
     @ViewBuilder private func heading(_ park:Park)->some View {
-        if !typeSize.isAccessibilitySize { Eyebrow(text:"Make time for the night") }
-        Text("Choose your night").font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
-        if typeSize.isAccessibilitySize {
+        VStack(alignment:.leading,spacing:6) {
+            let states=park.state.replacingOccurrences(of:",",with:" · ")
+            Eyebrow(text:park.darkSkyDesignated ? "\(states) · International Dark Sky Park" : LocalizedStringKey(states))
             Menu {
                 Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
             } label: {
-                HStack(alignment:.firstTextBaseline) {
-                    Text(park.shortName).font(.body).fixedSize(horizontal:false,vertical:true)
-                    Spacer(minLength:8)
-                    Image(systemName:"chevron.up.chevron.down").font(.title3)
-                }.padding(.vertical,8).foregroundStyle(palette.accent)
-            }.accessibilityLabel("Park").accessibilityValue(park.shortName)
-        } else {
-            Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }.pickerStyle(.menu)
+                HStack(alignment:.firstTextBaseline,spacing:10) {
+                    Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                    Image(systemName:"chevron.up.chevron.down").font(.title3).foregroundStyle(palette.accent).accessibilityHidden(true)
+                    Spacer(minLength:0)
+                }.frame(minHeight:44).contentShape(Rectangle())
+            }.accessibilityLabel("Park").accessibilityValue(park.shortName).accessibilityInputLabels([Text("Park"),Text("Choose park"),Text(park.shortName)])
         }
     }
     private func monthBar(_ park:Park,_ data:Month)->some View {
@@ -199,9 +210,22 @@ struct CalendarView: View {
                 .hoverEffect(.highlight)
         }
     }
+    /// Accessibility sizes: one night per row, starting at tonight. Nights already past fold away
+    /// under one line, dimmed and without scores, as in the month grid.
     private func list(_ park:Park,_ data:Month)->some View {
-        LazyVStack(alignment:.leading,spacing:20) { ForEach(data.nights) { night in
-            Button { chosen=night } label:{
+        let past=data.nights.filter { $0.id<data.tonight }
+        return LazyVStack(alignment:.leading,spacing:20) {
+            if !past.isEmpty {
+                DisclosureGroup {
+                    VStack(alignment:.leading,spacing:12) { ForEach(past) { night in
+                        Text(park.dayLabel(night.id)).font(.body).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                            .accessibilityLabel("\(park.dayLabel(night.id)). Past night")
+                    } }.padding(.top,10)
+                } label:{ Text("Past nights · \(past.count)").font(.headline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                .tint(palette.muted)
+            }
+            ForEach(data.nights.filter { $0.id>=data.tonight }) { night in
+            Button { choose(night) } label:{
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
                     Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
@@ -210,7 +234,7 @@ struct CalendarView: View {
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
                 .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Forecast included"))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
-                .accessibilityHint(data.inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
+                .accessibilityHint(data.inWindow.contains(night.id) ? data.stretch.kind.spokenHint : String(localized:"Opens the score breakdown."))
                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                 .contextMenu {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
@@ -219,6 +243,7 @@ struct CalendarView: View {
                 .accessibilityInputLabels(Self.spokenNames(night))
         } }
         .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
+        .accessibilityRotor(Text(data.stretch.kind.title),entries:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
     }
     /// `scale` enlarges each night's little sky on a wide iPad.
     private func grid(_ park:Park,_ data:Month,scale:Double)->some View {
@@ -228,7 +253,7 @@ struct CalendarView: View {
             ForEach(0..<data.lead,id:\.self) { _ in Color.clear.frame(height:78*scale) }
             ForEach(data.nights) { night in
                 let events=model.events(night)
-                Button { choose(night) } label:{ NightCell(night:night,highlighted:data.inWindow.contains(night.id),isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight) }.buttonStyle(.plain)
+                Button { choose(night) } label:{ NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight) }.buttonStyle(.plain)
                     .hoverEffect(.highlight)
                     .accessibilityAddTraits(night.id==focusedNight ? .isSelected : [])
                     .accessibilityInputLabels(Self.spokenNames(night))
@@ -239,7 +264,7 @@ struct CalendarView: View {
             }
         }
         .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
-        .accessibilityRotor(Text("Moon window"),entries:Self.rotor(data.window.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
+        .accessibilityRotor(Text(data.stretch.kind.title),entries:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
         .id(monthOffset)
         .transition(reduceMotion || access.crossFade ? .opacity : .asymmetric(insertion:.move(edge:forward ? .trailing : .leading).combined(with:.opacity),removal:.move(edge:forward ? .leading : .trailing).combined(with:.opacity)))
         .contentShape(Rectangle())
@@ -248,19 +273,23 @@ struct CalendarView: View {
             move(drag.translation.width<0 ? 1 : -1)
         })
     }
+    /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon.
     private func windowPanel(_ park:Park,_ data:Month)->some View {
-        Panel { VStack(alignment:.leading,spacing:10) {
-            Label(data.windowInMonth || data.window.isEmpty ? String(localized:"Five nights near the new moon") : String(localized:"The next five nights near the new moon"),systemImage:"circle.circle").font(.subheadline)
-            if let first=data.window.first,let last=data.window.last {
+        let stretch=data.stretch
+        return Panel { VStack(alignment:.leading,spacing:10) {
+            Label(stretch.kind == .moon && !stretch.inMonth && !stretch.nights.isEmpty ? String(localized:"The next darkest moon stretch") : stretch.kind.title,systemImage:"circle.circle").font(.subheadline)
+            if let first=stretch.nights.first,let last=stretch.nights.last {
                 Text("\(park.dayLabel(first.id)) – \(park.dayLabel(last.id))").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                Text(data.windowInMonth ? String(localized:"The ring marks the five nights with the least moonlight. Clouds and access may change the best choice.") : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text(stretch.kind == .best ? String(localized:"The ring marks the five nights in a row with the highest scores while forecasts reach them. A closure can still change the best choice.")
+                     : stretch.inMonth ? String(localized:"Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.")
+                     : String(localized:"The darkest stretch this month has passed or falls just beyond it. Look ahead to plan it.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {
                 Text("These nights have passed. Look ahead to the next new moon.").font(.caption).foregroundStyle(palette.muted)
             }
         } }
     }
     @ViewBuilder private var legend: some View {
-        Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
+        Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
         if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
     }
     /// The chosen night beside the month: its breakdown, and the way into the park on that night.
@@ -275,7 +304,7 @@ struct CalendarView: View {
     }
     /// A tap: beside the month on a wide iPad, in a sheet otherwise.
     private func choose(_ night:Night) {
-        if wide { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=night.id } } else { chosen=night }
+        if wide { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=night.id }; ReviewPrompt.noteNightViewed(score:night.score.value) } else { chosen=night }
     }
     private func step(_ delta:Int) {
         guard let park else { return }
@@ -320,20 +349,43 @@ struct CalendarView: View {
         forward=months>=monthOffset; monthOffset=months
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
-    /// The five consecutive nights with the least moonlight, ignoring nights already past. A window
-    /// only counts if it really sits near a new moon (some night under 12% lit): late in a month the
-    /// few windows left may be bright, and those are never called "near the new moon". When no such
-    /// window touches this month, the next one ahead is returned with `inMonth` false.
-    private func bestWindow(_ nights:[Night],month:[Night],after tonight:Date)->(nights:ArraySlice<Night>,inMonth:Bool) {
-        guard let first=month.first?.id,let last=month.last?.id else { return ([],false) }
+    /// The five nights the ring marks.
+    struct Stretch {
+        enum Kind {
+            /// The best five nights in a row by score, while a forecast (or an early look) reaches all five.
+            case best
+            /// Beyond the forecasts: the five nights with the least moonlight near a new moon.
+            case moon
+            var title:String { self == .best ? String(localized:"Best stretch") : String(localized:"Darkest moon stretch") }
+            /// What VoiceOver adds to a ringed night.
+            var spoken:String { self == .best ? String(localized:"In the best stretch") : String(localized:"In the darkest moon stretch") }
+            var spokenHint:String { self == .best ? String(localized:"In the best stretch. Opens the score breakdown.") : String(localized:"In the darkest moon stretch. Opens the score breakdown.") }
+        }
+        let kind:Kind
+        let nights:ArraySlice<Night>
+        /// False when the stretch shown is the next one, beyond this month.
+        let inMonth:Bool
+    }
+    /// The ring, ignoring nights already past. While forecasts exist, it marks the five consecutive
+    /// nights with the highest total score (earliest on a tie), so the ring and the numbers beside it
+    /// always agree. Where no five forecast nights touch the month, it falls back to the five
+    /// consecutive nights with the least moonlight; such a stretch only counts if it really sits near
+    /// a new moon (some night under 12% lit), since late in a month the few left may be bright. When
+    /// no moon stretch touches this month, the next one ahead is returned with `inMonth` false.
+    static func stretch(_ nights:[Night],month:[Night],after tonight:Date)->Stretch {
+        guard let first=month.first?.id,let last=month.last?.id else { return Stretch(kind:.moon,nights:[],inMonth:false) }
         let starts=nights.indices.filter { i in i+5<=nights.count && nights[i].id>=tonight }
+        func touches(_ i:Int)->Bool { nights[i].id<=last && nights[i+4].id>=first }
+        func total(_ i:Int)->Int { nights[i..<(i+5)].reduce(0) { $0+$1.rankScore } }
+        let forecast=starts.filter { i in touches(i) && nights[i..<(i+5)].allSatisfy { $0.basis != .usual } }
+        if let best=forecast.max(by:{ a,b in total(a) != total(b) ? total(a)<total(b) : a>b }) { return Stretch(kind:.best,nights:nights[best..<(best+5)],inMonth:true) }
         func light(_ i:Int)->Double { nights[i..<(i+5)].reduce(0) { $0+$1.sky.moon.illumination } }
         func nearNew(_ i:Int)->Bool { nights[i..<(i+5)].contains { $0.sky.moon.illumination<0.12 } }
-        let touching=starts.filter { nights[$0].id<=last && nights[$0+4].id>=first && nearNew($0) }
-        if let best=touching.min(by:{ light($0)<light($1) }) { return (nights[best..<(best+5)],true) }
+        let touching=starts.filter { touches($0) && nearNew($0) }
+        if let best=touching.min(by:{ light($0)<light($1) }) { return Stretch(kind:.moon,nights:nights[best..<(best+5)],inMonth:true) }
         let ahead=starts.filter { nights[$0+4].id>last && nearNew($0) }
-        guard let next=ahead.min(by:{ light($0)<light($1) }) else { return ([],false) }
-        return (nights[next..<(next+5)],false)
+        guard let next=ahead.min(by:{ light($0)<light($1) }) else { return Stretch(kind:.moon,nights:[],inMonth:false) }
+        return Stretch(kind:.moon,nights:nights[next..<(next+5)],inMonth:false)
     }
 }
 #Preview("Calendar") { NavigationStack { CalendarView() }.environment(PlanModel()).preferredColorScheme(.dark) }
