@@ -46,6 +46,12 @@ import CoreLocation
     /// When Tonight's candidates were last refreshed, for a refresh on return.
     @ObservationIgnored private(set) var lastRefresh: Date?
     var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
+    /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
+    /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
+    var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
+    /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
+    /// asks, and its answer is labelled an example. Anyone who chose a park before has.
+    var startChosen: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(startChosen,forKey:"startChosen") } } }
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
@@ -70,7 +76,12 @@ import CoreLocation
          detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
         do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
+        // Parks opens darkest tonight first: the list answers the app's question before it is asked.
+        // (A registered default: anyone who chose Name keeps it.)
+        UserDefaults.standard.register(defaults:["parksByScore":true])
         homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
+        homePlace=UserDefaults.standard.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
+        startChosen=UserDefaults.standard.object(forKey:"startChosen") as? Bool ?? (UserDefaults.standard.string(forKey:"homePark") != nil)
         radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
@@ -93,7 +104,9 @@ import CoreLocation
             } else { hydration=Task { await hydrate() } }
         }
         #if DEBUG
-        if DebugScenario.screen != nil { homeID="jotr" }
+        if DebugScenario.screen != nil { homeID="jotr"; homePlace=nil; startChosen=DebugScenario.state != "first-run" }
+        // `-nyx-place "Chicago, IL"`: a city as the starting point, its nearest park as the home park.
+        if let name=DebugScenario.place, let place=StartingPlaces.named(name) { choose(place) }
         if DebugScenario.state=="polar" { homeID="dena" }
         if DebugScenario.state=="polar-night" { homeID="gaar" }
         if let park=DebugScenario.park { homeID=park }
@@ -198,10 +211,26 @@ import CoreLocation
         return night.id.timeIntervalSince(today)>14*86400
     }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
-    func nearby(latitude:Double?,longitude:Double?)->[Park] {
-        guard let home else { return [] }
-        let lat=latitude ?? home.latitude, lon=longitude ?? home.longitude
-        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=radiusMiles*1609.344 }
+    func nearby(latitude:Double?,longitude:Double?,radiusMiles:Double?=nil)->[Park] {
+        guard let origin else { return [] }
+        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, miles=radiusMiles ?? self.radiusMiles
+        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=miles*1609.344 }
+    }
+    /// Where distances are measured from without "Near me": the chosen place, else the starting park.
+    var origin:(latitude:Double,longitude:Double)? { homePlace.map { ($0.latitude,$0.longitude) } ?? home.map { ($0.latitude,$0.longitude) } }
+    /// The starting point's name: "Chicago" or "Joshua Tree".
+    var originName:String { homePlace?.name ?? home?.shortName ?? "" }
+    /// Start from a park: distances from it, and no place.
+    func choose(parkID:String) { homePlace=nil; homeID=parkID; startChosen=true }
+    /// Start from a city or town: distances from it, and the park nearest to it as the home park
+    /// (the sky behind the app, the calendar's first park, the widget before anything is saved).
+    func choose(_ place:StartingPlace) {
+        homePlace=place; startChosen=true
+        if let nearest=Self.nearestPark(to:place,in:parks) { homeID=nearest.id }
+    }
+    /// The park closest to a place, straight-line.
+    nonisolated static func nearestPark(to place:StartingPlace,in parks:[Park])->Park? {
+        parks.min { place.distanceMeters(to:$0)<place.distanceMeters(to:$1) }
     }
     /// The park this iPhone is in or beside, for offering field mode: within 60 km of the park's
     /// centre or 25 km of one of its viewing spots, nearest first. Straight-line, on this iPhone.

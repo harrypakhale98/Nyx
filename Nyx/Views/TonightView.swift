@@ -15,6 +15,8 @@ struct TonightView: View {
     private var location:LocationService { model.location }
     @State private var explainLocation=false
     @State private var chooseHome=false
+    /// "Near me" chosen in the starting-point sheet: the location explainer follows once it closes.
+    @State private var nearMeAfterPicker=false
     @Namespace private var zoom
     private var candidates:[Park] { model.nearby(latitude:location.latitude,longitude:location.longitude) }
     private var best:[Park] { Array(model.ranked(candidates).prefix(5)) }
@@ -30,19 +32,20 @@ struct TonightView: View {
         ScrollView {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
-                    header
+                    if !model.startChosen { firstRun }
                     HStack(alignment:.top,spacing:36) {
-                        VStack(spacing:26) { hero(park); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(spacing:26) { hero(park); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; extras }.frame(maxWidth:500)
                     }
                 }.padding(24)
             } else {
                 VStack(alignment:.leading,spacing:22) {
-                    header
+                    if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting park.");startingPoint }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint }
                     else if let park=best.first {
                         hero(park)
+                        farther(than:park)
                         startingPoint
                         more
                         footnote
@@ -53,11 +56,21 @@ struct TonightView: View {
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement:.topBarTrailing) { NavigationLink { SettingsView() } label:{ Image(systemName:"slider.horizontal.3") }.accessibilityLabel("Settings") } }
-            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)) }
-            .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }
-            .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
-            .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            .tabRootToolbar()
+            .navigationDestination(for:Park.self) { park in ParkDetailView(park:park).modifier(ParkTransition(sourceID:park.id,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(park).score.value) } }
+            .sheet(isPresented:$chooseHome,onDismiss:{ if nearMeAfterPicker { nearMeAfterPicker=false; explainLocation=true } }) {
+                NavigationStack { StartingPointPicker(nearMe:{ nearMeAfterPicker=true },selectedParkID:model.homeID,selectedPlace:model.homePlace,locationOff:location.denied || DebugScenario.state=="no-location") { choice in
+                    switch choice {
+                    case .park(let id): model.choose(parkID:id)
+                    case .place(let place): model.choose(place)
+                    }
+                    location.clear()
+                } }.nyxPresentation().presentationDetents([.large])
+            }
+            .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
+            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            // A location found is a starting point chosen.
+            .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
             // Back from the background: where you are may have changed, and so may the sky.
             .onChange(of:scenePhase) { _,phase in
                 guard phase == .active, DebugScenario.screen == nil else { return }
@@ -75,13 +88,56 @@ struct TonightView: View {
                 await model.refresh(candidates,force:true);refreshed+=1
             }
     }
-    /// Decorative at accessibility sizes, where it would push the answer below the fold.
-    @ViewBuilder private var header: some View {
-        if !typeSize.isAccessibilitySize { HStack(alignment:.top) {
-            VStack(alignment:.leading,spacing:10) { Eyebrow(text:"The night is waiting");Text(wide ? "Where the sky is darkest" : "Where the sky\nis darkest").font(.system(wide ? .largeTitle : .title,design:.serif)).fixedSize(horizontal:false,vertical:true) }
-            Spacer(minLength:8)
-            if let home=model.home { MoonView(geometry:AstronomyEngine().moon(for:model.night(home)).geometry).frame(width:wide ? 56 : 40,height:wide ? 56 : 40).padding(.top,8) }
+    /// First run, until a starting point is chosen: the question, asked in place, with no permission
+    /// up front. The answer below is labelled an example until then.
+    private var firstRun: some View {
+        Panel { VStack(alignment:.leading,spacing:14) {
+            Text("Where do you start from?").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)
+            Text(location.denied ? "Location is off. Choose your city or the park closest to you." : "Nyx measures straight-line distances from there. Until you choose, the night below is an example.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:12) { firstRunButtons }
+                VStack(alignment:.leading,spacing:12) { firstRunButtons }
+            }
         } }
+    }
+    @ViewBuilder private var firstRunButtons: some View {
+        if !location.denied {
+            Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").frame(minHeight:30) }
+                .buttonStyle(.borderedProminent).foregroundStyle(Color.black)
+                .accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")])
+        }
+        Button { chooseHome=true } label:{ Label("Choose a starting point",systemImage:"mappin.and.ellipse").frame(minHeight:30) }
+            .buttonStyle(.bordered).accessibilityInputLabels([Text("Choose a starting point"),Text("Choose a city"),Text("Choose a park")])
+    }
+    /// The line above the answer, all data: the night, and where "in reach" is measured from.
+    /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
+    private func answerLine(_ park:Park)->Text {
+        let day=park.dayLabel(model.night(park).id), radius=Self.distance(model.radiusMiles)
+        if !model.startChosen { return Text("\(day) · Example: from \(model.originName)") }
+        if location.latitude != nil { return Text("\(day) · Darkest within \(radius) of you") }
+        return Text("\(day) · Darkest within \(radius) of \(model.originName)")
+    }
+    private static func distance(_ miles:Double)->String { Measurement(value:miles,unit:UnitLength.miles).formatted(.measurement(width:.abbreviated,usage:.road)) }
+    /// A thin answer (fewer than three parks in reach, or a bright sky at the best of them) points to
+    /// the darkest park within 500 miles when it scores higher tonight. A tap widens the radius.
+    @ViewBuilder private func farther(than best:Park?)->some View {
+        let wider=500.0
+        if model.radiusMiles<wider, candidates.count<3 || (best?.bortleEstimate ?? 9)>=5 {
+            let inReach=Set(candidates.map(\.id)), bestScore=best.map { model.night($0).score.value } ?? -1
+            if let far=model.ranked(model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMiles:wider)).first(where:{ !inReach.contains($0.id) }),
+               model.night(far).score.value>bestScore {
+                Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMiles=wider } } label:{
+                    HStack(spacing:8) {
+                        Image(systemName:"scope").imageScale(.small).accessibilityHidden(true)
+                        Text("Darker within \(Self.distance(wider)): \(far.shortName), \(model.night(far).score.value) tonight").multilineTextAlignment(.leading)
+                        Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
+                    }
+                    .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
+                    .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
+                }.buttonStyle(.plain).frame(maxWidth:.infinity)
+                .accessibilityHint("Widens the radius to \(Self.distance(wider)).")
+            }
+        }
     }
     /// Wide iPad: where, then when. The best park's next thirty nights beside the answer, with the
     /// chosen night one tap away. (On iPhone the river lives on the park's page.)
@@ -105,7 +161,9 @@ struct TonightView: View {
     private func hero(_ park:Park)->some View {
         let night=model.night(park)
         return VStack(spacing:10) {
-            Eyebrow(text:"Your darkest nearby sky")
+            // The first line is the answer's own context: the night, and from where.
+            answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize ? nil : .uppercase)
+                .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }.padding(.vertical,14).padding(.horizontal,22).modifier(ParkPill()) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
                 .hoverEffect(.lift)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
@@ -135,9 +193,7 @@ struct TonightView: View {
         Text("Each park uses its own local date. Scores without a full forecast can change when one arrives.").font(.caption).foregroundStyle(palette.muted)
     }
     @ViewBuilder private var extras: some View {
-        if !loading { tripLink }
         if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
-        if OnDeviceGuide.available { NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }.buttonStyle(.bordered) }
     }
     /// One quiet line under the hero, never more, the most significant first: a lunar eclipse the
     /// best park can see within the next three nights, then a major meteor shower's peak worth the
@@ -222,28 +278,14 @@ struct TonightView: View {
         }.buttonStyle(.plain).padding(.top,4)
         .accessibilityHint(hint)
     }
-    /// Tonight answers where; the trip planner answers which nights to take off.
-    private var tripLink:some View {
-        NavigationLink { TripPlannerView() } label:{
-            Panel { HStack(alignment:.center,spacing:16) {
-                Image(systemName:"calendar.badge.clock").font(.system(size:26,weight:.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
-                VStack(alignment:.leading,spacing:4) {
-                    Text("Plan a trip").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-                    Text("Choose the nights you are free. Nyx finds the darkest park in reach for each.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                }
-                Spacer(minLength:0)
-                Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
-            } }
-        }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
-    }
-    /// The starting point is either a chosen park or the device location, never both.
+    /// The starting point is a chosen park, a city or town, or the device location: one at a time.
     private var startingPoint:some View {
         Panel { VStack(alignment:.leading,spacing:12) {
             HStack(alignment:.center) {
                 Button { chooseHome=true } label:{
-                    if location.latitude==nil { Label(String(localized:"From \(model.home?.shortName ?? "")"),systemImage:"mappin.and.ellipse") }
+                    if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:model.homePlace == nil ? "mappin.and.ellipse" : "building.2") }
                     else { Label("From your location",systemImage:"location.fill") }
-                }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
+                }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
                 Spacer(minLength:8)
                 if location.locating { ProgressView().accessibilityLabel("Finding your location") }
                 else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
@@ -253,7 +295,7 @@ struct TonightView: View {
                 HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
                 VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
             }
-            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. A starting park works just as well.").font(.caption).foregroundStyle(palette.muted) }
+            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted) }
             if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
         } }
     }
@@ -274,25 +316,6 @@ private struct ParkPill:ViewModifier {
             content.background(Color.black,in:Capsule()).overlay(Capsule().stroke(palette.line,lineWidth:0.8))
         // Tinted like the panels, so the name keeps its contrast over a bright stretch of the Milky Way.
         } else { content.glassEffect(.regular.tint(palette.panel.opacity(0.5))) }
-    }
-}
-struct ParkPickerView: View {
-    @Environment(PlanModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.dynamicTypeSize) private var typeSize
-    @Binding var selection:String
-    @State private var search=""
-    @FocusState private var searchFocused: Bool
-    var body: some View {
-        List {
-            // The bar's search field fails at accessibility sizes on iOS 27 (see `SystemSearch`).
-            if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top:8,leading:16,bottom:8,trailing:16)) }
-            ForEach(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
-                Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark").accessibilityHidden(true) } } }.tint(.primary)
-                    .accessibilityAddTraits(selection==park.id ? .isSelected : [])
-            }
-        }.modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize)).navigationTitle("Starting park")
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
     }
 }
 struct PermissionExplainer: View {
