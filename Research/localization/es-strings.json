@@ -564,7 +564,6 @@
   "Night-vision mode": "Modo de visión nocturna",
   "Nights": "Noches",
   "Nights logged: %lld": "Noches registradas: %lld",
-  "Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; they are compared without clouds.": "Las noches marcadas como \"Solo Luna y oscuridad\" quedan fuera del pronóstico de nubes, o no todos los parques tenían uno; se comparan sin nubes.",
   "Nights out": "Noches afuera",
   "Nights out, your darkest sky, and the Moons you met.": "Tus noches afuera, tu cielo más oscuro y las fases de la Luna que viste.",
   "No alerts in the last park update. Confirm access before travel.": "Sin alertas en la última actualización del parque. Confirma el acceso antes de viajar.",
@@ -637,7 +636,6 @@
   "Open the breakdown to see whether clouds are included and how moonlight shapes this night.": "Abre el desglose para ver si incluye nubes y cómo influye la luz de la Luna en esta noche.",
   "Open the park's page in Safari": "Abrir la página del parque en Safari",
   "Open this night": "Abrir esta noche",
-  "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or 10 PM to 2 AM local time under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": "Los pronósticos de Open-Meteo cubren hasta 16 días. Muchos parques comparten una sola solicitud, que solo usa las coordenadas de los parques. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o de 10 p.m. a 2 a.m. hora local bajo el sol de medianoche. Los pronósticos de más de 36 horas o con cobertura incompleta se consideran no disponibles. Datos meteorológicos: Open-Meteo, CC BY 4.0. Licencia: creativecommons.org/licenses/by/4.0/.",
   "Open-Meteo · updated %@": "Open-Meteo · actualizado %@",
   "Opens Nyx's field screen for the night: a dark, red countdown through its milestones.": "Abre la pantalla de campo de Nyx para la noche: una cuenta regresiva oscura y roja por sus hitos.",
   "Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look.": "Abre una pantalla de campo oscura y roja para esta noche en un parque nacional: cuándo empieza la oscuridad total, la Luna, el núcleo de la Vía Láctea y hacia dónde mirar.",
@@ -1118,5 +1116,13 @@
   "west-southwest": "oestesuroeste",
   "· %lld–%lld": "· %lld–%lld",
   "“%@”": "“%@”",
-  "cloud forecast included": "con pronóstico de nubes"
+  "cloud forecast included": "con pronóstico de nubes",
+  "%@ nights here are rarely clear.": "Las noches de %@ aquí rara vez están despejadas.",
+  "%@ nights here are nearly always clear.": "Las noches de %@ aquí casi siempre están despejadas.",
+  "About %lld in 10 %@ nights here are mostly clear.": "Unas %lld de cada 10 noches de %@ aquí están mayormente despejadas.",
+  "typically: %@": "lo habitual: %@",
+  "Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; parks are compared with their usual clouds for that month.": "Las noches marcadas como \"Solo Luna y oscuridad\" quedan fuera del pronóstico de nubes, o no todos los parques tenían uno; los parques se comparan con sus nubes habituales de ese mes.",
+  "Open-Meteo forecasts cover up to 16 days. Many parks share one request, using park coordinates only. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. Forecasts older than 36 hours or with incomplete coverage are treated as unavailable. Weather data: Open-Meteo, CC BY 4.0. License: creativecommons.org/licenses/by/4.0/.": "Los pronósticos de Open-Meteo cubren hasta 16 días. Muchos parques comparten una sola solicitud, que solo usa las coordenadas de los parques. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Los pronósticos de más de 36 horas o con cobertura incompleta se consideran no disponibles. Datos meteorológicos: Open-Meteo, CC BY 4.0. Licencia: creativecommons.org/licenses/by/4.0/.",
+  "Usual clouds": "Nubes habituales",
+  "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5 reanalysis, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are ranked with these usual clouds, so a park whose winter nights are mostly overcast does not tie a desert, and they say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast, and it does not change the score. Contains modified Copernicus Climate Change Service information (2015–2024); ERA5, Hersbach et al. 2020, CC BY 4.0.": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) del reanálisis ERA5, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se ordenan con estas nubes habituales, para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto, e indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico, y no cambia la puntuación. Contiene información modificada del Servicio de Cambio Climático de Copernicus (2015–2024); ERA5, Hersbach et al. 2020, CC BY 4.0."
 }

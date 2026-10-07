@@ -144,7 +144,7 @@ struct TripPlannerView: View {
                     }
                 }
                 VStack(alignment:.leading,spacing:6) {
-                    if plan.moonOnlyNights>0 { Text("Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; they are compared without clouds.").fixedSize(horizontal:false,vertical:true) }
+                    if plan.moonOnlyNights>0 { Text("Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; parks are compared with their usual clouds for that month.").fixedSize(horizontal:false,vertical:true) }
                     Text("Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.").fixedSize(horizontal:false,vertical:true)
                 }.font(.caption).foregroundStyle(palette.muted)
                 ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.buttonStyle(.bordered)

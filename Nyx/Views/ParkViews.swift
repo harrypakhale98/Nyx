@@ -283,7 +283,7 @@ struct ParkDetailView: View {
                 .modifier(DepthParallax(depth:0.1))
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
-            if !night.score.hasForecast { Text(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+            if !night.score.hasForecast { Text(night.withTypicalClouds(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only."))).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
             ScoreReadout(score:night.score,agreement:outlook?.agreement) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)

@@ -32,22 +32,32 @@ nonisolated struct NightPlanner: Sendable {
     private func nights(_ park: Park, first: Date, count: Int, now: Date) -> [Night] {
         (0..<min(60, max(1, count))).map { night(park, on: park.date(first, addingDays: $0), now: now) }
     }
-    /// The best nights across parks: highest score first; on a tie, a night with a cloud forecast
-    /// before one without (it is the surer number), then the earlier night, then the park's name.
+    /// The best nights across parks, ranked by `better`.
     func bestNights(_ parks: [Park], from start: Date, count: Int, now: Date, limit: Int = 3) -> [Night] {
-        Array(parks.flatMap { nights($0, from: start, count: count, now: now) }.sorted(by: Self.better).prefix(max(0, limit)))
+        Array(Self.ranked(parks.flatMap { nights($0, from: start, count: count, now: now) }).prefix(max(0, limit)))
     }
     /// The same, from a picked day.
     func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3) -> [Night] {
-        Array(parks.flatMap { nights($0, day: day, count: count, now: now) }.sorted(by: Self.better).prefix(max(0, limit)))
+        Array(Self.ranked(parks.flatMap { nights($0, day: day, count: count, now: now) }).prefix(max(0, limit)))
     }
-    static func better(_ a: Night, _ b: Night) -> Bool {
-        if a.score.value != b.score.value { return a.score.value > b.score.value }
+    /// Best first. Each night is compared on `Night.rankScore`: its score where a cloud forecast
+    /// reaches, otherwise its score under the park's typical cloud for that month. A forecast
+    /// score and a moon-and-darkness score are never compared directly; the second assumes
+    /// nothing about clouds and so reads like a clear night. On a tie, a night with a forecast
+    /// first (the surer number), then the higher score, the earlier night, the park's name.
+    static func better(_ a: Night, _ b: Night) -> Bool { better(a, a.rankScore, b, b.rankScore) }
+    private static func better(_ a: Night, _ x: Int, _ b: Night, _ y: Int) -> Bool {
+        if x != y { return x > y }
         if a.score.hasForecast != b.score.hasForecast { return a.score.hasForecast }
+        if a.score.value != b.score.value { return a.score.value > b.score.value }
         if a.id != b.id { return a.id < b.id }
         return a.park.name < b.park.name
     }
-    static func best(_ nights: [Night]) -> Night? { nights.sorted(by: better).first }
+    /// `nights` sorted by `better`, each night's rank worked out once.
+    static func ranked(_ nights: [Night]) -> [Night] {
+        nights.map { ($0, $0.rankScore) }.sorted { better($0.0, $0.1, $1.0, $1.1) }.map(\.0)
+    }
+    static func best(_ nights: [Night]) -> Night? { ranked(nights).first }
 
     // MARK: Smart Stack
 
@@ -65,7 +75,7 @@ nonisolated struct NightPlanner: Sendable {
     /// night's score (0.6...1.0) and the time left in its window. WidgetKit compares scores only
     /// among one widget's own entries, so the scale only has to rank Nyx's nights.
     static func relevance(at date: Date, nights: [Night]) -> (score: Float, duration: TimeInterval) {
-        for night in nights.sorted(by: better) {
+        for night in ranked(nights) {
             if let window = duskWindow(night), window.contains(date) {
                 return (Float(night.score.value)/100, window.end.timeIntervalSince(date))
             }

@@ -71,13 +71,13 @@ nonisolated enum BestNightSearch {
         let night=answer.best, park=night.park
         let day=park.programDate(park.isoDay(night.id))
         if voiceOnly {
-            let basis=night.score.hasForecast ? "" : " "+String(localized:"Clouds aren't forecast yet.")
+            let basis=night.score.hasForecast ? "" : " "+night.withTypicalClouds(String(localized:"Clouds aren't forecast yet."))
             return String(localized:"\(day) at \(park.shortName): \(night.score.value), \(night.score.band.label).")+basis
         }
         if night.sky.darkHours==0 {
             return String(localized:"No true darkness at \(park.shortName) in the next \(answer.count) nights. The best is \(day), \(night.score.value) out of 100.")
         }
-        let basis=night.score.hasForecast ? String(localized:"Includes a cached cloud forecast.") : String(localized:"Moon and darkness only; clouds are not forecast that far ahead.")
+        let basis=night.score.hasForecast ? String(localized:"Includes a cached cloud forecast.") : night.withTypicalClouds(String(localized:"Moon and darkness only; clouds are not forecast that far ahead."))
         return String(localized:"The best of the next \(answer.count) nights: \(day) at \(park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(basis) Confirm park access before you go.")
     }
 }
@@ -150,6 +150,7 @@ struct BestNightSnippetView: View {
                 }
             }
             .accessibilityElement(children:.combine)
+            if let typical=night.typicalClouds { Text(typical).font(.caption).foregroundStyle(palette.muted) }
             Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
             HStack(spacing:10) {
                 if total>1 {

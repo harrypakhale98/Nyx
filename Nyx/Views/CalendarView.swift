@@ -85,7 +85,7 @@ struct NightPeek: View {
             }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
             else { Text("True darkness \(night.park.time(night.sky.darkStart)) – \(night.park.time(night.sky.darkEnd))").font(.subheadline).foregroundStyle(palette.ink) }
-            Text(night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+            Text(night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))).font(.caption).foregroundStyle(palette.muted)
             if let event {
                 Divider().overlay(palette.line)
                 HStack(alignment:.top,spacing:12) {
@@ -207,11 +207,11 @@ struct CalendarView: View {
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
                     Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                    Text(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown.")).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.score.hasForecast ? String(localized:"Forecast included") : night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : String(localized:"Moon and darkness only. Clouds unknown."))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
+                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown.")))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
                 .accessibilityHint(data.inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                 .contextMenu {
@@ -300,7 +300,7 @@ struct CalendarView: View {
     static func bestNights(_ nights:[Night],after tonight:Date)->[RotorNight] {
         let ahead=nights.filter { $0.id>=tonight }
         let excellent=ahead.filter { $0.score.value>=75 }
-        let chosen=excellent.isEmpty ? Array(ahead.sorted { $0.score.value>$1.score.value }.prefix(3)) : excellent
+        let chosen=excellent.isEmpty ? Array(NightPlanner.ranked(ahead).prefix(3)) : excellent
         return rotor(chosen.sorted { $0.id<$1.id })
     }
     /// What Voice Control accepts for a night: its day number, or weekday and day ("Tap 17", "Tap Friday 17").

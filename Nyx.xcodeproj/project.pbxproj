@@ -40,6 +40,7 @@
 		685A55072DAD5E5203082FC7 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
 		7126506427BA9508A5AFDC21 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		75AD3B6F8090CAAC59990329 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
 		7773E0D2CDE42342AA5B3E28 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
 		781244D27B9EF72BEBCF8A4D /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		7B520DF900AD765D92D34CF5 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
@@ -55,6 +56,7 @@
 		94328E704B9544BAF802DCB1 /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
 		9776E9A5B3B7E9EBBCBD27BF /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
 		9E65115B2CD6361AB2847D76 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
+		A0988DA463FFFCAC89CC7812 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
 		A46F22AEA6C4CBF0ECD340BB /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967BB7A4C4C54513C5F3A49 /* Starfield.swift */; };
 		A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53D0C95B34F3513BFD765F3B /* AppIntents.framework */; };
 		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
@@ -186,6 +188,7 @@
 		7B2DDCA9223A4636BA869DB4 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Park.swift; sourceTree = "<group>"; };
 		873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyAlmanac.swift; sourceTree = "<group>"; };
 		8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstronomyEngine.swift; sourceTree = "<group>"; };
+		9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudClimate.swift; sourceTree = "<group>"; };
 		9669360F80847859C5A94942 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		976C9F1742C2EE997BBE289E /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataServices.swift; sourceTree = "<group>"; };
 		A895C83D02E79E01979EF8EB /* FieldModeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldModeIntent.swift; sourceTree = "<group>"; };
@@ -204,6 +207,7 @@
 		E81A22666ECF6861DFB831D0 /* FieldActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldActivityView.swift; sourceTree = "<group>"; };
 		EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NyxWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB0AF4CCD977A189AB255205 /* cloud-climate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "cloud-climate.json"; sourceTree = "<group>"; };
 		FBE93CD7AB4547DBEB7286F4 /* stars.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = stars.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -315,6 +319,7 @@
 			isa = PBXGroup;
 			children = (
 				9669360F80847859C5A94942 /* Assets.xcassets */,
+				FB0AF4CCD977A189AB255205 /* cloud-climate.json */,
 				0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */,
 				0B8CFEEF4D0FA553056E4D4D /* parks.json */,
 				D82B7C8F3A98528CF0A9E37E /* sky-events.json */,
@@ -327,8 +332,8 @@
 			isa = PBXGroup;
 			children = (
 				6A17ED8BAE018F61B73A02CA /* Config */,
-				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				572A8226324E98790B53E82D /* Nyx */,
+				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
 				EF9B82021F8DE7AC0904028C /* NyxVision */,
@@ -364,6 +369,7 @@
 		760258CCF55DD0094C511477 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */,
 				1C8D4F4BF7CFEFF14C466234 /* FieldActivity.swift */,
 				0C5FC0F768120358CF62DD01 /* Forecast.swift */,
 				7B2DDCA9223A4636BA869DB4 /* Park.swift */,
@@ -670,6 +676,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8AF09595A60522D6EE9CBC66 /* Localizable.xcstrings in Resources */,
+				A0988DA463FFFCAC89CC7812 /* cloud-climate.json in Resources */,
 				4F83D43656FA1ABA1181846D /* parks.json in Resources */,
 				7126506427BA9508A5AFDC21 /* sky-events.json in Resources */,
 				F959A114149CD1E965A35078 /* stars.json in Resources */,
@@ -771,6 +778,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */,
+				75AD3B6F8090CAAC59990329 /* CloudClimate.swift in Sources */,
 				EBBAD56F2570D736DC565B9D /* DataServices.swift in Sources */,
 				BDB69286DF11E225C221AB19 /* FieldActivity.swift in Sources */,
 				38E97C1E6833F9F567A346D0 /* FieldActivityView.swift in Sources */,

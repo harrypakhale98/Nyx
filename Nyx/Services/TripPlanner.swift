@@ -75,8 +75,10 @@ nonisolated struct TripPlan: Sendable {
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
 ///
 /// **Honest comparison.** A night is compared with clouds only if every candidate park has a cloud
-/// forecast for it; otherwise all of them are compared on Moon and darkness alone (and labelled so),
-/// because a renormalised score and a score with clouds are not the same measure.
+/// forecast for it; otherwise all of them are compared without the forecast (and labelled Moon and
+/// darkness only), because a renormalised score and a score with clouds are not the same measure.
+/// Without a forecast, parks are weighed with their typical clouds for that month (`Night.rankScore`,
+/// ERA5 2015–2024), so a park whose winter nights are usually overcast does not tie a desert.
 nonisolated enum TripPlanner {
     static let maxNights = 14
     /// A closure in the last park update costs a park this many points in the assignment only; the
@@ -121,7 +123,8 @@ nonisolated enum TripPlanner {
         let n=parks.count
         var hop=Array(repeating:Array(repeating:0.0,count:n),count:n)
         for a in 0..<n { for b in 0..<n where a != b { hop[a][b]=Park.distance(parks[a].latitude,parks[a].longitude,parks[b].latitude,parks[b].longitude) } }
-        func value(_ d: Int, _ p: Int) -> Int { grid[d][p].score.value-(closures[parks[p].id] == nil ? 0 : closurePenalty) }
+        let ranks=grid.map { $0.map(\.rankScore) }
+        func value(_ d: Int, _ p: Int) -> Int { ranks[d][p]-(closures[parks[p].id] == nil ? 0 : closurePenalty) }
         struct Cell { var total: Int; var distance: Double; var previous: Int? }
         func better(_ a: Cell, than b: Cell?) -> Bool {
             guard let b else { return true }
@@ -152,7 +155,7 @@ nonisolated enum TripPlanner {
         }
         // The single best night: highest value (closures count against it here too), earliest on a tie.
         if let best=stops.indices.max(by:{ a,b in
-            let va=stops[a].night.score.value-(stops[a].closure == nil ? 0 : closurePenalty), vb=stops[b].night.score.value-(stops[b].closure == nil ? 0 : closurePenalty)
+            let va=stops[a].night.rankScore-(stops[a].closure == nil ? 0 : closurePenalty), vb=stops[b].night.rankScore-(stops[b].closure == nil ? 0 : closurePenalty)
             return va != vb ? va<vb : a>b
         }) { stops[best].isBest=true }
         return TripPlan(stops:stops,candidates:n)
@@ -208,7 +211,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         location=park.name
         var lines=[night.score.hasForecast
                    ? String(localized:"Darkness score \(night.score.value)/100 (\(night.score.band.label)), with the cloud forecast as Nyx last saw it.")
-                   : String(localized:"Darkness score \(night.score.value)/100, Moon and darkness only. No cloud forecast reached this night yet."),
+                   : night.withTypicalClouds(String(localized:"Darkness score \(night.score.value)/100, Moon and darkness only. No cloud forecast reached this night yet.")),
                    TripPlanner.reason(night)+"."]
         if sky.darkHours==0 { lines.append(SkyConditions.noDarknessMessage(tonight:false)) }
         if let closure { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
