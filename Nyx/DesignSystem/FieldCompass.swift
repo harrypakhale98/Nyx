@@ -42,7 +42,7 @@ struct FieldCompassView: View {
         .onDisappear { motion.stop() }
     }
     private var sky: some View {
-        TimelineView(.animation(minimumInterval:1/30,paused:frozen != nil || fixedPose != nil)) { _ in
+        TimelineView(.animation(minimumInterval:1/30,paused:frozen != nil || fixedPose != nil || PowerState.shared.thermalSerious)) { _ in
             let pose=frozen ?? fixedPose ?? motion.pose ?? SkyCompass.Pose(azimuth:180,altitude:30)
             let targets=targets, stars=stars, band=band
             Canvas { context,size in draw(&context,size:size,pose:pose,targets:targets,stars:stars,band:band) }

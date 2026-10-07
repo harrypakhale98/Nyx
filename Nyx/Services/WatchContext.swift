@@ -6,8 +6,10 @@ import Foundation
 /// Sent as one property-list value (JSON data) through WatchConnectivity, device to device.
 nonisolated struct WatchContext: Codable, Sendable, Equatable {
     static let key = "nyx.watch.context"
-    /// Bumped when the shape changes; an older or newer context is ignored, never misread.
+    /// Bumped when the shape changes. Watch apps update on their own schedule, so a watch reads any
+    /// context from `minimumVersion` on: fields added later are optional and unknown ones ignored.
     static let currentVersion = 1
+    static let minimumVersion = 1
     /// WatchConnectivity rejects large contexts; forecasts that would pass this are left out
     /// (those parks are scored with their usual clouds, labelled as such).
     static let byteBudget = 48_000
@@ -46,11 +48,25 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         self.init(data: data)
     }
     init?(data: Data) {
-        guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version == Self.currentVersion else { return nil }
+        guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version >= Self.minimumVersion else { return nil }
         self = decoded
     }
     /// The forecasts in the shape the score engine and the widgets already read.
     var cloudForecasts: [String: Forecast] { forecasts.compactMapValues(\.forecast) }
+}
+
+nonisolated extension WatchContext {
+    /// Lenient: only the version, the time sent and the starting park are required; a forecast
+    /// that no longer decodes leaves that park without clouds instead of dropping the context.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(Int.self, forKey: .version)
+        sent = try container.decode(Date.self, forKey: .sent)
+        homeParkID = try container.decode(String.self, forKey: .homeParkID)
+        savedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .savedParkIDs)) ?? []
+        nightVision = (try? container.decodeIfPresent(Bool.self, forKey: .nightVision)) ?? false
+        forecasts = ((try? container.decodeIfPresent([String: Lenient<CompactForecast>].self, forKey: .forecasts)) ?? [:]).compactMapValues(\.value)
+    }
 }
 
 /// An hourly cloud series as a start time and values: the times of a clean hourly series are
