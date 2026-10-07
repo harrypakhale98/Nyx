@@ -291,13 +291,16 @@ struct ParkDetailView: View {
         }
     }
     private var river: some View {
-        Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }.id("river")
+        Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river))
+            if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
+        }.id("river")
     }
     private var alerts: some View {
         Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
+            if model.alertsBusy { AlertsBusyNote(park:park,summarySaysBusy:model.enrichments[park.id] == nil) }
             if let data=model.enrichments[park.id],!data.alerts.isEmpty {
                 DisclosureGroup {
-                    ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
+                    ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.displayTitle(park:park)).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
                 } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
             }
              if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
@@ -556,3 +559,21 @@ struct InlineSearchField: View {
         .overlay(RoundedRectangle(cornerRadius:22,style:.continuous).stroke(palette.line,lineWidth:0.5))
     }
 }
+/// NPS is refusing requests (the shared hourly quota, or a struggling service): say so calmly and
+/// offer the park's own current-conditions page, opened in Safari.
+struct AlertsBusyNote: View {
+    @Environment(\.nyx) private var palette
+    let park: Park
+    /// True when the summary above already says the alerts are busy.
+    var summarySaysBusy=false
+    var body: some View {
+        VStack(alignment:.leading,spacing:4) {
+            if !summarySaysBusy { Text("Park alerts are busy. Check current conditions on nps.gov.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let url=BrowserLink.parkConditions(park) {
+                Link(destination:url) { Label("Current conditions on nps.gov",systemImage:"safari").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
+                    .foregroundStyle(palette.accent).accessibilityHint("Opens the park's page in Safari.")
+            }
+        }
+    }
+}
+#Preview("Alerts busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park).padding(24).background(Color.black).preferredColorScheme(.dark) } }

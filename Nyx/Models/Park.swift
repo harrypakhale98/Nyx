@@ -47,7 +47,7 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
             .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
             .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.joined(separator: " ")
     }
-    private static let aliases: [String: [String]] = [
+    static let aliases: [String: [String]] = [
         "grsm": ["Smokies", "Smoky Mountains"], "jeff": ["St. Louis Arch", "Gateway Arch"], "deva": ["Death Valley"],
         "wrst": ["Wrangell Saint Elias"], "havo": ["Volcanoes", "Kilauea"], "hale": ["Haleakala"], "npsa": ["American Samoa"],
         "viis": ["Virgin Islands", "St. John"], "thro": ["Teddy Roosevelt", "TR"], "grte": ["Tetons"], "romo": ["Rocky Mountain", "RMNP"],
@@ -160,13 +160,13 @@ nonisolated struct ViewingSpot: Codable, Hashable, Sendable {
         return (lead==northUnit ? String(localized:"The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.") : lead)+" "+local
     }
 }
-nonisolated struct ParkAlert: Codable, Identifiable, Sendable {
+nonisolated struct ParkAlert: Codable, Identifiable, Sendable, Equatable {
     let id: String
     let title: String
     let description: String
     let category: String
 }
-nonisolated struct RangerProgram: Codable, Identifiable, Sendable {
+nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
     let id: String
     let title: String
     let date: String
