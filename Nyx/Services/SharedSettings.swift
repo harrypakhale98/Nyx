@@ -18,9 +18,17 @@ nonisolated enum SharedSettings {
         return try? JSONDecoder().decode(SavedSkySnapshot.self,from:data)
     }
 }
+/// What the app hands its widgets (and the watch app writes for its complications). Versioned and
+/// decoded leniently, so a field added later, or one park that no longer decodes, never blanks a
+/// widget until the app is next opened.
 nonisolated struct SavedSkySnapshot:Codable,Sendable {
+    /// 2 adds the version and the per-park closures (1.1).
+    static let currentVersion=2
+    var version=SavedSkySnapshot.currentVersion
     let parks:[Park]
     let forecasts:[String:Forecast]
+    /// Each saved park's closure as Nyx words it beside the score, from the last park update.
+    var closures:[String:String]=[:]
     /// Bulk reminder planning is safe to run off the main actor. It never reads
     /// preferences, does I/O, or assumes missing clouds are clear.
     func nights(from date:Date,count:Int,forecastAsOf:Date = .now)->[Night] {
@@ -32,4 +40,18 @@ nonisolated struct SavedSkySnapshot:Codable,Sendable {
             return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:cloud),cloudCover:cloud,forecastUpdated:cloud==nil ? nil : forecast?.updated)
         } }
     }
+}
+nonisolated extension SavedSkySnapshot {
+    init(from decoder:any Decoder) throws {
+        let container=try decoder.container(keyedBy:CodingKeys.self)
+        version=try container.decodeIfPresent(Int.self,forKey:.version) ?? 1
+        parks=(try container.decodeIfPresent([Lenient<Park>].self,forKey:.parks) ?? []).compactMap(\.value)
+        forecasts=(try container.decodeIfPresent([String:Lenient<Forecast>].self,forKey:.forecasts) ?? [:]).compactMapValues(\.value)
+        closures=(try? container.decodeIfPresent([String:String].self,forKey:.closures)) ?? [:]
+    }
+}
+/// A value that decodes to nil instead of failing the whole document.
+nonisolated struct Lenient<T:Decodable>:Decodable {
+    let value:T?
+    init(from decoder:any Decoder) throws { value=try? T(from:decoder) }
 }

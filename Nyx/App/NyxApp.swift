@@ -5,23 +5,38 @@ import TipKit
 import UserNotifications
 
 @main struct NyxApp: App {
-    @State private var model=PlanModel()
+    @State private var model:PlanModel
     private let container:ModelContainer?
     init() {
-        do { container=try ModelContainer(for:SavedPark.self,JournalEntry.self,configurations:ModelConfiguration(isStoredInMemoryOnly:DebugScenario.screen != nil)) }
-        catch { container=nil }
+        LaunchSignposts.start()
+        let launch=LaunchSignposts.begin("App init")
+        let store=LaunchSignposts.begin("Open store")
+        let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
+        container=opened.container
+        LaunchSignposts.end(store)
+        let planner=LaunchSignposts.begin("PlanModel init")
+        let model=PlanModel()
+        // `-nyx-journal-unavailable` (DEBUG) shows the journal banner for screenshots.
+        model.journalUnavailable=opened.failed || DebugScenario.isEnabled("journal-unavailable")
+        _model=State(initialValue:model)
+        LaunchSignposts.end(planner)
         try? Tips.configure([.datastoreLocation(.applicationDefault)])
         UNUserNotificationCenter.current().delegate=NotificationRouter.shared
         // Registers park names as Siri / Shortcuts phrase parameters.
         NyxShortcuts.updateAppShortcutParameters()
         SkyProjection.shared.lightSources=SkyGlow.lightSources
+        DiagnosticsStore.shared.start()
+        LaunchSignposts.end(launch)
     }
     var body:some Scene {
         WindowGroup {
             if let container { RootView().environment(model).modelContainer(container) }
-            else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+            else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
         // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night.
         .commands { NyxCommands() }
+        // About every six hours, when iOS allows: saved parks' clouds (and alerts when due), the
+        // widget, the watch and reminders, so a reminder never rests on a stale forecast.
+        .backgroundTask(.appRefresh(SavedSkySync.refreshTask)) { [model] in await model.savedSync.backgroundRefresh(model) }
     }
 }

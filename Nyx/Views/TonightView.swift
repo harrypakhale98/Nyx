@@ -10,6 +10,8 @@ struct TonightView: View {
     @State private var shooting=0.0
     @State private var refreshed=0
     @Environment(\.openURL) private var openURL
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
+    @Environment(\.scenePhase) private var scenePhase
     private var location:LocationService { model.location }
     @State private var explainLocation=false
     @State private var chooseHome=false
@@ -56,6 +58,12 @@ struct TonightView: View {
             .sheet(isPresented:$chooseHome) { NavigationStack { ParkPickerView(selection:Binding(get:{model.homeID},set:{ model.homeID=$0;location.clear() })) }.nyxPresentation().presentationDetents([.large]) }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
             .task(id:model.homeID+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            // Back from the background: where you are may have changed, and so may the sky.
+            .onChange(of:scenePhase) { _,phase in
+                guard phase == .active, DebugScenario.screen == nil else { return }
+                location.refreshIfAuthorized()
+                if model.lastRefresh.map({ Date.now.timeIntervalSince($0)>3600 }) ?? true { Task { await model.refresh(candidates) } }
+            }
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .measuringWidth($width)
@@ -103,6 +111,10 @@ struct TonightView: View {
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            // A forecast more than six hours old says when it is from.
+            if night.score.hasForecast, let updated=night.forecastUpdated, Date.now.timeIntervalSince(updated)>6*3600 {
+                Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            }
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
             if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
@@ -140,6 +152,9 @@ struct TonightView: View {
     /// Field mode, offered after sunset when this iPhone is already known to be in or near a park
     /// (location is never asked for just for this), or while a Stargazing Focus is on.
     @ViewBuilder private func fieldOffer(best:Park)->some View {
+        if FieldPresenter.supported { fieldOfferButton(best:best) }
+    }
+    @ViewBuilder private func fieldOfferButton(best:Park)->some View {
         let now=DebugScenario.date ?? Date.now
         let here=location.latitude.flatMap { lat in location.longitude.flatMap { model.fieldPark(latitude:lat,longitude:$0) } }
         let focus=StargazingFocus.offersField() || DebugScenario.state=="stargazing"
@@ -155,7 +170,7 @@ struct TonightView: View {
         return now>=sunset && !FieldNight.isOver(night.sky,at:now)
     }
     private func fieldButton(park:Park,text:String)->some View {
-        Button { FieldPresenter.present(park:park,model:model) } label:{
+        Button { FieldPresenter.present(park:park,model:model,from:commands?.topController ?? SceneCommands.top(in:nil)) } label:{
             HStack(spacing:8) {
                 Image(systemName:"scope").imageScale(.small).accessibilityHidden(true)
                 Text(text).multilineTextAlignment(.leading)
