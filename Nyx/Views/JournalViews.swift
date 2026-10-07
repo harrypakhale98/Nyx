@@ -15,6 +15,10 @@ struct JournalView: View {
     @State private var recap=false
     @State private var width=0.0
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var exporting:JournalDocument?
+    @State private var importing=false
+    @State private var importResult:String?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     var body:some View {
@@ -23,6 +27,11 @@ struct JournalView: View {
             VStack(alignment:.leading,spacing:24) {
                 Eyebrow(text:"Keep a little of the night")
                 Text("Under the same sky").font(.system(.largeTitle,design:.serif))
+                if model.journalUnavailable { JournalUnavailableBanner() }
+                // A journal lives on the device it was written on; say so where a second device is likely.
+                if UIDevice.current.userInterfaceIdiom == .pad || sizeClass == .regular {
+                    Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
                 if recapSeason(nights) { recapCard }
                 if wide {
                     HStack(alignment:.top,spacing:28) {
@@ -38,6 +47,10 @@ struct JournalView: View {
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Menu {
                     Button("Year under the stars",systemImage:"sparkles") { recap=true }.disabled(entries.isEmpty)
+                    Divider()
+                    Button("Export journal",systemImage:"square.and.arrow.up") { exporting=JournalDocument(archive:JournalArchive.make(from:entries)) }
+                        .disabled(entries.isEmpty || model.journalUnavailable)
+                    Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable)
                 } label:{ Image(systemName:"ellipsis") }.accessibilityLabel("Journal options") }
                 ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night") }
             }
@@ -46,6 +59,30 @@ struct JournalView: View {
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+            .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentType:.nyxJournal,
+                          defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(.iso8601.year().month().day()))")) { result in
+                if case .failure=result { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
+            }
+            .fileImporter(isPresented:$importing,allowedContentTypes:[.nyxJournal]) { result in
+                if case .success(let url)=result { importJournal(url) }
+            }
+            .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
+            .task(id:model.journalFile) {
+                // A journal opened from Files or another app.
+                guard let url=model.journalFile, !model.journalUnavailable else { return }
+                model.journalFile=nil
+                importJournal(url)
+            }
+    }
+    /// Adds the nights the journal does not have yet; nothing already here is changed.
+    private func importJournal(_ url:URL) {
+        do {
+            let result=try JournalArchive(url:url).merge(into:context,parks:model.parks)
+            importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
+        } catch {
+            context.rollback()
+            importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
+        }
     }
     @ViewBuilder private var entryList: some View {
         if entries.isEmpty { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
@@ -277,3 +314,16 @@ struct JournalDetailView:View {
     }
 }
 #Preview("Empty journal") { NavigationStack { JournalView() }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) }
+/// The journal's store could not be opened. Everything else works, and the file on disk is left alone.
+struct JournalUnavailableBanner:View {
+    @Environment(\.nyx) private var palette
+    var body:some View {
+        Label { Text("Your journal couldn't be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
+            icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
+            .font(.subheadline).foregroundStyle(palette.ink)
+            .padding(14).frame(maxWidth:.infinity,alignment:.leading)
+            .background(palette.panel,in:RoundedRectangle(cornerRadius:16)).overlay(RoundedRectangle(cornerRadius:16).stroke(palette.line,lineWidth:0.5))
+            .accessibilityElement(children:.combine)
+    }
+}
+#Preview("Journal unavailable") { JournalUnavailableBanner().padding(24).background(Color.black).preferredColorScheme(.dark) }
