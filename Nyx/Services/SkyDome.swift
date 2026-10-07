@@ -110,6 +110,34 @@ nonisolated enum SkyDome {
         return s.start.addingTimeInterval(s.duration/2)
     }
 
+    // MARK: Forecast clouds
+
+    /// The cloud cover (0…1) the immersive sky draws at `moment`: the forecast's hour around it
+    /// (each hourly value stands for the half hour either side, as Open-Meteo documents), eased
+    /// toward the park's usual clouds by the forecast's lead exactly as the score eases a night
+    /// (`CloudBasis.forecastWeight`). Nil, and nothing drawn, when the night has no forecast at all
+    /// (`.usual`) or the forecast has no value for that hour: a sky never shows invented clouds.
+    static func cloud(at moment: Date, forecast: Forecast?, basis: CloudBasis, usual: Double?) -> Double? {
+        guard basis != .usual, let forecast else { return nil }
+        let t = moment.timeIntervalSince1970
+        let hour = zip(forecast.times, forecast.clouds)
+            .compactMap { time, cloud -> (gap: Double, cloud: Double)? in
+                guard let cloud, cloud.isFinite, (0...100).contains(cloud), abs(time-t) <= 1800 else { return nil }
+                return (abs(time-t), cloud)
+            }
+            .min { $0.gap < $1.gap }
+        guard let hour else { return nil }
+        let weight = CloudBasis.forecastWeight(leadDays: moment.timeIntervalSince(forecast.updated)/86400)
+        guard weight > 0 else { return nil }
+        let counted = usual.map { weight*hour.cloud + (1-weight)*$0 } ?? hour.cloud
+        return min(1, max(0, counted/100))
+    }
+    /// What clouds leave of the stars and the Milky Way: 1 under a clear sky, 0.1 under overcast
+    /// (thin spots and gaps still show the brightest stars). Never increases with cloud.
+    static func cloudDimming(_ cloud: Double) -> Double { 1-0.9*min(1, max(0, cloud.isFinite ? cloud : 0)) }
+    /// Above this cover the sky also draws a soft cloud layer; below it, clouds only dim the stars.
+    static let cloudLayerFrom = 0.3
+
     // MARK: Twilight
 
     /// How much of a class of stars twilight leaves visible (0…1), from the Sun's altitude in

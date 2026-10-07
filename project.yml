@@ -123,6 +123,7 @@ targets:
       - path: Nyx/Resources/sky-events.json
       - path: Nyx/Services/ScoreEngine.swift
       - path: Nyx/Services/DataServices.swift
+      - path: Nyx/Services/CloudForecastClient.swift
       - path: Nyx/Models/Forecast.swift
       - path: Nyx/Services/ForecastDetail.swift
       - path: Nyx/Services/SharedSettings.swift
@@ -264,7 +265,9 @@ targets:
         # The same isolation as every other target, so shared files compile identically everywhere.
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
   # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
-  # bundled data by listing files; no network code is compiled in (see PRIVACY.md).
+  # bundled data by listing files. Its one network request is the cloud forecast from
+  # api.open-meteo.com, behind its own switch (approved 2026-10-07): CloudForecastClient.swift only,
+  # never DataServices.swift (park updates, smoke), so no other host is compiled in (see PRIVACY.md).
   NyxVision:
     type: application
     platform: visionOS
@@ -274,8 +277,9 @@ targets:
       - path: Nyx/Models/SkyConditions.swift
       - path: Nyx/Services/AstronomyEngine.swift
       - path: Nyx/Services/ScoreEngine.swift
-      # The phone's night rule, with no forecast: every night uses the park's usual clouds.
+      # The phone's night rule (`NightPlanner.night`): the forecast where it reaches, usual clouds beyond.
       - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/Services/CloudForecastClient.swift
       - path: Nyx/Models/CloudClimate.swift
       - path: Nyx/Models/Forecast.swift
       - path: Nyx/Services/ForecastDetail.swift
