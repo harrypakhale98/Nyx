@@ -46,10 +46,10 @@ assert 'completionHandler(nil)' in source
 shipping=[f for folder in ['Nyx','NyxWidgets','NyxWatch','NyxWatchWidgets','NyxWatchShared'] for f in Path(folder).rglob('*.swift')]
 # The watch makes no requests at all: its targets must never compile the network transport.
 spec_text=Path('project.yml').read_text()
-for target in ['NyxWatch','NyxWatchWidgets','NyxVision']:
+for target in ['NyxWatch','NyxWatchWidgets','NyxVision','NyxVisionWidgets']:
  block=re.search(r'\n  '+target+r':\n(.*?)(?=\n  [A-Za-z]+:\n)',spec_text,re.S).group(1)
  assert 'DataServices.swift' not in block,f'{target} must not include the network transport'
-for f in [f for folder in ['NyxWatch','NyxWatchWidgets','NyxWatchShared','NyxVision'] for f in Path(folder).rglob('*.swift')]:
+for f in [f for folder in ['NyxWatch','NyxWatchWidgets','NyxWatchShared','NyxVision','NyxVisionWidgets'] for f in Path(folder).rglob('*.swift')]:
  assert 'URLSession' not in f.read_text() and 'URLRequest' not in f.read_text(),f'network code in a watch source: {f}'
 for f in shipping:
  if f.name=='DataServices.swift': continue
@@ -100,6 +100,11 @@ if visionArchive:
  assert vinfo.get('ITSAppUsesNonExemptEncryption') is False
  assert (vinfo['CFBundleShortVersionString'],vinfo['CFBundleVersion'])==(marketing,build)
  check_manifest(vroot,userDefaults=False)
+ # The visionOS widget: its own empty manifest, the same version and build.
+ vwidget=vroot/'PlugIns/NyxVisionWidgets.appex'
+ check_manifest(vwidget,userDefaults=False)
+ vwinfo=plistlib.loads((vwidget/'Info.plist').read_bytes())
+ assert (vwinfo['CFBundleShortVersionString'],vwinfo['CFBundleVersion'])==(marketing,build)
  vsigned=(vroot/'embedded.mobileprovision').exists()
  if vsigned: subprocess.run(['codesign','--verify','--deep','--strict',str(vroot)],check=True,capture_output=True)
  vision={'version':vinfo['CFBundleShortVersionString'],'build':vinfo['CFBundleVersion'],'deviceFamily':vinfo['UIDeviceFamily'],'networkCode':False,'signed':vsigned}
