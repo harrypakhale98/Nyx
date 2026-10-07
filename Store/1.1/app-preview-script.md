@@ -1,6 +1,6 @@
 # Nyx — App Preview video: storyboard and specs
 
-One 28-second preview for the iPhone 6.9-inch slot, staged from the DEBUG launch arguments in `README.md` ("Screenshot scenarios"). Autoplay is muted on the App Store, so the story is carried by the pictures and six-word captions.
+One 26-second preview for the iPhone 6.9-inch slot, staged from the DEBUG launch arguments in `README.md` ("Screenshot scenarios"). Autoplay is muted on the App Store, so the story is carried by the pictures and six-word captions.
 
 ## Apple's rules (verified 2026-10-06)
 
@@ -37,19 +37,20 @@ Sources: App Store Connect Help, [App preview specifications](https://developer.
 
 **Cadence.** Record each shot separately, 6 to 10 seconds, then cut. Hold each caption at least 2.5 seconds. Dissolves of 0.3 s between shots. No flashes. End the video on the Moon and the name.
 
-## Storyboard (28 s, 7 shots)
+## Storyboard (26 s, 6 shots)
+
+Revised 2026-10-07 (ST-4, DX-19). The order follows the product page's hero order: the real sky in colour, the river mid-scrub with the Moon changing shape, the Moon at size, field mode, the calendar. The "models disagree" shot is dropped (hard to read with the sound off), field mode gets four full seconds, and the video ends on the night, not on privacy. Privacy belongs in the description and the label.
 
 | # | Time | What happens | Caption (≤6 words) | Launch arguments |
 |---|---|---|---|---|
-| 1 | 0.0 to 3.5 s | Cold open on Tonight: the real sky, the top park, the dial counts up. | `Where is the sky darkest?` (5) | `-nyx-screen tonight -nyx-state live` |
-| 2 | 3.5 to 8.0 s | Park detail: the score reveal, the four meters glide into place, the band word appears. Poster frame here, at about 7 s once the numeral has settled. | `One score. Four reasons.` (4) | `-nyx-screen detail -nyx-state live` |
-| 3 | 8.0 to 13.0 s | The thirty-night time river: a finger-less scrub left to right (the screen recording shows no hand), the Moon morphing above the selected night, amber glow on the best nights, a hollow mark past the forecast. Perform the drag during the recording; haptics do not appear in video. | `Scrub the month. Watch the Moon.` (6) | `-nyx-screen detail -nyx-state live` (scroll just enough that the river fills the lower half) |
-| 4 | 13.0 to 17.0 s | What's up tonight: the Milky Way core timed ("rises", "highest", "Moon-free from"), planets, and the sky arc with the core's path. Use a plain summer date. | `The Milky Way, timed.` (4) | `-nyx-screen whatsup -nyx-date 2027-07-17` (then scroll to the arc: `-nyx-screen skyarc -nyx-date 2027-07-17`) |
-| 5 | 17.0 to 21.0 s | The honest forecast: three models disagree, the pale range bar on the river and the words "Models differ". | `Honest when models disagree.` (4) | `-nyx-screen detail -nyx-state disagree` |
-| 6 | 21.0 to 25.0 s | Night vision: the whole app turns red. Cut to field mode: the countdown to true darkness and the eye clock. | `Made for night-adapted eyes.` (4) | `-nyx-screen field -nyx-state adapting -nyx-field-minutes 14` (add `-nyx-night-vision` for the red cut on the previous screen: `-nyx-screen detail -nyx-state live -nyx-night-vision`) |
-| 7 | 25.0 to 28.0 s | The compass sky turns with the phone ("Where to look"), then fades to the Moon and the app name, "Nyx", above "Dark Sky Planner". | `No account. No tracking.` (4) | `-nyx-screen field-compass` (fixed pose facing the core) |
+| 1 | 0.0 to 4.0 s | Cold open on the real sky in colour over the park, then Tonight's first line: the darkest park and its score counting up. | `The darkest park. The darkest night.` (6) | `-nyx-screen sky -nyx-state live` cut to `-nyx-screen tonight -nyx-state live` |
+| 2 | 4.0 to 10.0 s | The thirty-night time river, scrubbed mid-way: the Moon above the selected night changes shape night by night, the best nights glow, the half-filled and hollow nights show where the forecast thins out. Perform the drag during the recording; haptics do not appear in video. Poster frame here, at about 7 s, with the Moon half lit. | `Scrub the month. Watch the Moon.` (6) | `-nyx-screen detail -nyx-state live` (scroll until the river fills the lower half) |
+| 3 | 10.0 to 14.0 s | The Moon at size: the shader Moon filling most of the width, lit at that night's phase, its terminator slowly crossing the craters as the night steps on. | `The Moon, as the park sees it.` (6) | Needs a capture route: no DEBUG screen shows the Moon at full width yet (`MoonView` appears at 70 pt in Moonlight). Ask for a `-nyx-screen moon` route, or use the onboarding Moon (`-nyx-screen onboarding -nyx-onboarding-page 0`) if it reads at size. |
+| 4 | 14.0 to 18.0 s | Field mode: the screen turns red, the countdown to true darkness runs, the eye clock fills. | `Red light for dark-adapted eyes.` (5) | `-nyx-screen field -nyx-state adapting -nyx-field-minutes 14` |
+| 5 | 18.0 to 22.0 s | The calendar: a month of nights as tiny skies, the best stretch ringed, the month sliding to the next. | `Choose the night worth the drive.` (6) | `-nyx-screen calendar -nyx-state live` (route name may change with the Plan tab; check `RootView`) |
+| 6 | 22.0 to 26.0 s | End card: the Moon on black, then the name. | `Where. When. Then look up.` (5), then "Nyx" | Edited in post: the Moon from shot 3 over void black, the serif name beneath. No app UI on the card. |
 
-**Total 28.0 s.** Safe under the 30 s limit with a 2-second margin for trimming. If the review team rejects any caption, the story still reads from the pictures.
+**Total 26.0 s**, inside Apple's 15 to 30 s with room to trim. If a caption is rejected, the pictures still carry the story.
 
 ### Caption style
 
@@ -60,7 +61,7 @@ Sources: App Store Connect Help, [App preview specifications](https://developer.
 ### Audio
 
 - **No music, no voiceover** in the main cut. A very quiet stereo bed of the Moon-and-star ambience (or silence on an AAC track) keeps the file spec-correct.
-- Optional: lay the app's own "Listen to tonight" sonification under shot 3 if it sounds good at low level; it shows the accessibility work. Audio never carries information that the picture does not, since autoplay is muted.
+- Optional: lay the app's own "Listen to tonight" sonification under shot 2 if it sounds good at low level; it shows the accessibility work. Audio never carries information that the picture does not, since autoplay is muted.
 - If the sound is added, keep integrated loudness around -23 LUFS.
 
 ## Export
@@ -85,7 +86,7 @@ Final Cut, iMovie or Compressor with the same settings work as well. Check the l
 ## Checklist
 
 1. Capture in a Debug build on device or simulator with the arguments above; keep source files in a shared folder, not the repo.
-2. Edit to 28 s with the captions and the end card; export to the spec above.
-3. Review: no hands, no frame, no prices, no dates, no "new"; the status bar reads 9:41 with full battery; no personal journal content; the score numbers are the engine's own.
+2. Edit to 26 s with the captions and the end card; export to the spec above.
+3. Review: no hands, no frame, no prices, no dates, no "new"; the status bar reads 9:41 with full battery; no personal journal content; the score numbers are the engine's own, from build 8 (score v2), never a build 7 capture.
 4. Upload in App Store Connect under the 6.9-inch iPhone slot; choose the poster frame near 7 s; allow up to 24 hours for processing.
 5. Reuse segments of the preview as the In-App Event videos (`in-app-events.md`, 30 s cap) and as the Webby, iF and Core77 case-study clip (`award-entries.md`).

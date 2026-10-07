@@ -47,6 +47,8 @@ assert set(re.findall(r'[a-z-]+(?:\.[a-z-]+)*\.(?:gov|com)',' '.join(re.findall(
 for name in ['Nyx','NyxWidgets','NyxWatch','NyxWatchWidgets']:
  ent=plistlib.loads(Path('Config/'+name+'.entitlements').read_bytes())
  assert ent['com.apple.security.application-groups']==['group.com.harrypakhale.nyx']
+# Age assurance (Texas SB 2420): only the app asks the system for an age range; nothing is stored.
+assert plistlib.loads(Path('Config/Nyx.entitlements').read_bytes()).get('com.apple.developer.declared-age-range') is True
 project=Path('Nyx.xcodeproj/project.pbxproj').read_text()
 assert 'XCRemoteSwiftPackageReference' not in project
 source=Path('Nyx/Services/DataServices.swift').read_text()
@@ -68,7 +70,7 @@ for f in shipping:
  assert not re.search(r'"https?://',text),f'web URL literal outside the guarded transport: {f}'
 # Pages opened in Safari at a tap (SwiftUI Link), never fetched by Nyx: exactly this list.
 browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()
-assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov'}
+assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov','open-meteo.com','creativecommons.org'}
 # Version and build come from project.yml; the archive must carry them in both bundles.
 spec=Path('project.yml').read_text()
 marketing=re.search(r'MARKETING_VERSION:\s*"([^"]+)"',spec).group(1)

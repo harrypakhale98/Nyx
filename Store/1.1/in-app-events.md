@@ -49,7 +49,7 @@ Routes suggested for 1.1 (not built; the integrator can add them with a few line
 | `nyx://planner?from=2026-11-06&to=2026-11-09` | The trip planner with those dates filled | New moon weekends (optional) |
 | `nyx://park/<id>` (exists) | Park detail for tonight | Park-specific variants |
 
-Until the new routes exist, use `nyx://tonight` for every event. It works in 1.0 and 1.1. Test a custom-scheme link from the event page on a device with Nyx installed and with it removed (the event should send people to the App Store page); Apple's guidance prefers a universal link, which would need a hosted `apple-app-site-association` file on a domain you control (GitHub Pages cannot serve one at the root of a project site). **Owner decision:** custom scheme now, universal link later.
+Where a route is missing in build 8, use `nyx://tonight`, which every build supports. Test a custom-scheme link from the event page on a device with Nyx installed and with it removed (the event should send people to the App Store page); Apple's guidance prefers a universal link, which would need a hosted `apple-app-site-association` file on a domain you control (GitHub Pages cannot serve one at the root of a project site). **Owner decision:** custom scheme now, universal link later.
 
 ---
 
@@ -193,7 +193,7 @@ The "core returns before dawn" (March) and "core rises after midnight" (April) l
 
 ## Checklist
 
-1. 1.1 approved and live (events that mention What's up tonight need it). November's event needs only 1.0.
+1. 1.1 (8) approved. It is Nyx's first public release, so every event, November's included, rides on it; an event can be submitted only once a build with the app is approved.
 2. Add the `whatsup`, `calendar` and `planner` routes, or use `nyx://tonight`.
 3. Check each event's numbers in Nyx with the `-nyx-date` flag for the starting park and one western and one eastern park.
 4. Create the event, upload media, submit for review at least 7 days before publish.

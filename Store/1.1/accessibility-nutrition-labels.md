@@ -134,8 +134,25 @@ If a pass has not been completed by the submission date, leave that label undecl
 2. Provide the optional accessibility support URL if the form offers one (not verified for this account). A good page would reuse the paragraphs above and the audit's honest limits.
 3. Update the answers in each release where a feature changes.
 
-## Copy for the product page and nominations
+## Copy for the product page and nominations (gated, C11)
 
-> Nyx is built for night-adapted eyes and for more people: VoiceOver summaries on every custom control, audio graphs for the timeline, calendar and sky arc, Larger Text to AX5, Reduce Motion, Reduce Transparency, Increase Contrast, a red night-vision mode, step-free viewing spots and Spanish. Free, with no account and no tracking.
+The same device-pass gate applies to every public sentence, not only to the labels (Guideline 2.3.1).
 
-Use only the features you declared.
+**Before the device pass (use now: store description, press kit, case study, nominations):**
+
+> Nyx is designed for VoiceOver and the largest text sizes. Audio graphs let you hear a month of darkness, haptics can follow the Moon's phase, and a red mode keeps the whole app readable to night-adapted eyes.
+
+This names only what the code and the simulator audit show: the features exist and are built for these settings. It does not claim that every task has been completed with them on a device.
+
+**After the pass, for each feature signed in `AUDIT.md`:**
+
+> Nyx works with VoiceOver, Larger Text, Reduce Motion, Reduce Transparency and Increase Contrast, …
+
+Add only the features that passed, in the same order as the labels declared in App Store Connect. Voice Control is added last, after its own pass.
+
+| Surface | Wording today | Switch to "works with" when |
+|---|---|---|
+| App Store description (`metadata.md`, FOR MORE PEOPLE) | "designed for VoiceOver and the largest text sizes" | VoiceOver and Larger Text pass on iPhone |
+| visionOS description (`metadata-visionos.md`) | "Reduce Motion, Reduce Transparency and Increase Contrast are respected" | Vision Pro pass; cut the sentence if it is not done by submission |
+| Press kit, case study (`docs/`) | "designed for…", plus "testing on physical devices … is the next step" | the pass is signed; then replace the last sentence with what was tested |
+| Award entries (`award-entries.md`) | "testing … is under way" | state exactly what was tested, never more |
