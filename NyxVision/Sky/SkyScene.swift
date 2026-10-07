@@ -324,7 +324,7 @@ import UIKit
         placeCompass(facing: facing, palette: palette, typeSize: typeSize)
         placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize, coreWashed: coreWashed)
         let night = park.dayLabel(plan.sky.evening)
-        let plaqueText = VisionModel.honesty(plan)+" "+String(localized: "The skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north.")
+        let plaqueText = VisionModel.honesty(plan, inSky: true)+" "+String(localized: "Ahead is \(Compass.name(facing)), not your room's real north.")
         // Scaled by its distance from the eye, so it reads at the size it would at one metre.
         let plaquePosition: SIMD3<Float> = [0, -0.95, -1.9]
         label(plaque, SkyLabel(title: park.shortName, detail: plaqueText, style: .plaque, palette: palette, typeSize: typeSize),

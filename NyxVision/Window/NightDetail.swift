@@ -55,8 +55,8 @@ struct NightDetail: View {
                 .contentTransition(.numericText(value: Double(plan.score.value)))
                 .accessibilityLabel(Text("Darkness score"))
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
-            Text(plan.night.basisLabel.map { "\(plan.score.band.label) · \($0)" } ?? plan.score.band.label)
-                .font(.system(.title, design: .serif)).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
+            // The band alone: the caption below always opens with the basis ("Early look: …").
+            Text(plan.score.band.label).font(.system(.title, design: .serif)).foregroundStyle(palette.ink)
             // The weakest link, when it holds the score below its parts ("Clouds limit tonight to 55.").
             if let limit = limitLine(plan) {
                 Text(limit).font(.callout).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
