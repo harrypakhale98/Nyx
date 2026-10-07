@@ -12,9 +12,11 @@ struct SettingsView:View {
     @Environment(\.scenePhase) private var scenePhase
     var body:some View {
         Form {
-            Section("In the dark") { Toggle("Night-vision mode",isOn:$nightVision).tint(palette.controlTint);Text("A red palette reduces glare. Lower the screen brightness too. Field mode, from a park's \"I'm here tonight\", turns this on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted) }
-            Section("Appearance") { NavigationLink("App icon") { AppIconPicker() } }
-            Section("Saved parks") {
+            Section("Night vision") {
+                Toggle("Night vision",isOn:$nightVision).tint(palette.controlTint)
+                Text("A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
+            }.listRowBackground(palette.panel)
+            Section("Reminders") {
                 Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
                 Text("Local reminders for saved parks with scores of 90 or higher. Forecasts may change. Upcoming nights are recalculated whenever Nyx opens.").font(.caption).foregroundStyle(palette.muted)
                 if notifications {
@@ -22,27 +24,62 @@ struct SettingsView:View {
                     Text("On the peak night of a major shower, when at least 20 an hour are expected at a saved park with the Moon down. At most one a night.").font(.caption).foregroundStyle(palette.muted)
                 }
                 if let permissionMessage { Text(permissionMessage).font(.caption) }
-            }
+            }.listRowBackground(palette.panel)
+            Section("Appearance") { NavigationLink("App icon") { AppIconPicker() } }.listRowBackground(palette.panel)
             Section("Accessibility") {
                 NavigationLink("Sound and touch") { SoundAndTouchView() }
                 Text("Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings.").font(.caption).foregroundStyle(palette.muted)
-            }
-            Section("Your iPhone") { NavigationLink("Your privacy") { PrivacyView() };NavigationLink("About the data") { AboutDataView() };LabeledContent("Distance units",value:String(localized:"Device locale"));Text("Distances use your region's units. Radius is always a straight line.").font(.caption).foregroundStyle(palette.muted) }
-            Section { Button("Replay the introduction") { replay=true };LabeledContent("Version",value:Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "") }
-        }.readableForm().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented:$explainNotifications) { PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
-                explainNotifications=false
-                Task { notifications=await NotificationScheduler().requestAuthorization(); if !notifications { permissionMessage=String(localized:"Reminders are off. You can enable them in iPhone Settings.") } }
+            }.listRowBackground(palette.panel)
+            Section("Privacy and data") { NavigationLink("Your privacy") { PrivacyView().nightForm() };NavigationLink("About the data") { AboutDataView() } }.listRowBackground(palette.panel)
+            Section("About the sky") {
+                NavigationLink { LearnView() } label:{
+                    VStack(alignment:.leading,spacing:4) {
+                        Text("Learn to look up")
+                        Text("Short essays on dark skies, the Milky Way, meteors, the Bortle scale and sharing the night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }.padding(.vertical,4)
+                }
+            }.listRowBackground(palette.panel)
+            Section("Support") {
+                if let url=SupportLink.privacyPolicy { Link(destination:url) { ExternalRow(title:"Privacy policy") }.accessibilityHint("Opens the policy in Safari.") }
+                if let url=SupportLink.support { Link(destination:url) { ExternalRow(title:"Support and contact") }.accessibilityHint("Opens the support page in Safari.") }
+                if let url=SupportLink.email { Link(destination:url) { ExternalRow(title:"Email the developer") }.accessibilityHint("Opens a new email in Mail.") }
+                if let url=SupportLink.review { Link(destination:url) { ExternalRow(title:"Rate Nyx") }.accessibilityHint("Opens Nyx in the App Store.") }
+                NavigationLink("Credits") { CreditsView() }
+                NavigationLink("Diagnostics") { DiagnosticsView().nightForm() }
+                Button("Replay the introduction") { replay=true }
+                LabeledContent("Version",value:Self.version)
+            }.listRowBackground(palette.panel)
+        }.readableForm().nightForm().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented:$explainNotifications) { RemindersExplainer { granted in
+                notifications=granted; if !granted { permissionMessage=String(localized:"Reminders are off. You can enable them in iPhone Settings.") }
             }.nyxPresentation() }
             .sheet(isPresented:$replay) { OnboardingView { replay=false }.nyxPresentation() }
             .task { await syncPermission() }
             .onChange(of:scenePhase) { _,phase in if phase == .active { Task { await syncPermission() } } }
+    }
+    /// "1.1 (8)": the version and build, from the bundle.
+    static var version:String {
+        let short=Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? ""
+        let build=Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? ""
+        return build.isEmpty ? short : "\(short) (\(build))"
     }
     /// If reminders were turned off in iPhone Settings, say so instead of showing a switch that lies.
     private func syncPermission() async {
         guard notifications, DebugScenario.screen == nil, !(await SystemNotifications().authorized()) else { return }
         notifications=false
         permissionMessage=String(localized:"Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.")
+    }
+}
+/// The in-context explainer before iOS asks about notifications: from Settings, and the first time
+/// a park is saved. `decided` hears whether iOS allowed them.
+struct RemindersExplainer:View {
+    @Environment(\.dismiss) private var dismiss
+    let decided:(Bool)->Void
+    var body:some View {
+        PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Nyx can remind you about promising nights at saved parks. These notifications are scheduled on this iPhone. They are estimates, not confirmations of clear skies or access.",action:"Enable reminders") {
+            dismiss()
+            Task { decided(await NotificationScheduler().requestAuthorization()) }
+        }
     }
 }
 /// Settings › Accessibility › Sound and touch: what the non-visual features do, each with a way to try it.
@@ -65,7 +102,7 @@ struct SoundAndTouchView:View {
                     }.accessibilityInputLabels([Text("Play"),Text("Listen"),Text("Stop")])
                 }
                 Text("It plays even when your iPhone is set to silent, because you asked for it, and other audio lowers while it plays. A transcript is always beside the button.").font(.caption).foregroundStyle(palette.muted)
-            }
+            }.listRowBackground(palette.panel)
             Section("Feel the Moon") {
                 if MoonHaptics.supported {
                     Toggle("Moon texture on the time river",isOn:$moonHaptics).tint(palette.controlTint)
@@ -78,16 +115,16 @@ struct SoundAndTouchView:View {
                 } else {
                     Text("This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it.").foregroundStyle(palette.muted)
                 }
-            }
+            }.listRowBackground(palette.panel)
             Section("With VoiceOver") {
                 Text("The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone.")
-                Text("Rotors jump straight to what matters: Best nights and Moon window in the calendar, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.").foregroundStyle(palette.muted)
-            }
+                Text("Rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.").foregroundStyle(palette.muted)
+            }.listRowBackground(palette.panel)
             Section("Your display settings") {
                 Text("With Differentiate Without Color, Excellent and Pristine nights are drawn as small stars, the river's best nights are marked with a triangle, moonlit hours are hatched and past nights are struck through.")
                 Text("Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still.").foregroundStyle(palette.muted)
-            }
-        }.readableForm().navigationTitle("Sound and touch").navigationBarTitleDisplayMode(.inline)
+            }.listRowBackground(palette.panel)
+        }.readableForm().nightForm().navigationTitle("Sound and touch").navigationBarTitleDisplayMode(.inline)
             .onDisappear { listener.stop() }
     }
 }
@@ -179,10 +216,27 @@ struct AboutDataLink:View {
         }.foregroundStyle(palette.ink)
     }
 }
+/// The essays, from Settings › About the sky (and the `learn` screenshot route). Compact cards, so a
+/// phone shows most of them at once; two or three columns on a wide iPad.
 struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:22,alignment:.top)],spacing:26) { ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:0) { VStack(alignment:.leading,spacing:22) { EssayIcon(essay:essay,size:28);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted) };Spacer(minLength:22);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86)) }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift) } };AboutDataLink() }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:24) {
+            Text("Learn to look up").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:18,alignment:.top)],spacing:18) { ForEach(Essay.allCases) { essay in
+                NavigationLink { EssayView(essay:essay) } label:{ Panel { HStack(alignment:.top,spacing:14) {
+                    EssayIcon(essay:essay,size:24)
+                    VStack(alignment:.leading,spacing:6) {
+                        Text(essay.title).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                        Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                        Text("\(essay.minutes) minute read").font(.caption).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86))
+                    }
+                    Spacer(minLength:0)
+                    Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
+                }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift)
+            } }
+            AboutDataLink()
+        }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {
@@ -198,10 +252,16 @@ struct OnboardingView:View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
+    @Environment(PlanModel.self) private var model
+    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @State private var page=DebugScenario.onboardingPage
     let finish:()->Void
-    private let titles:[LocalizedStringKey]=["Make room\nfor the night","A darker sky.\nA clearer plan.","The night is yours."]
-    private let messages:[LocalizedStringKey]=["Find the national parks and nights that give the stars their best chance.","Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.","Nyx has no account, no ads, no tracking. Your journal never leaves this phone."]
+    private let titles:[LocalizedStringKey]=["Where and when\nthe sky is darkest","A darker sky.\nA clearer plan.","Made for dark eyes"]
+    private var messages:[LocalizedStringKey] {[
+        "Nyx compares the \(model.parks.isEmpty ? 63 : model.parks.count) national parks night by night, so you know which park to drive to and which night to take off.",
+        "Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.",
+        "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.",
+    ]}
     var body:some View {
         VStack(spacing:0) {
             // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
@@ -213,6 +273,7 @@ struct OnboardingView:View {
                             art(index)
                             Text(titles[index]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                             Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
+                            if index==2 { redToggle }
                         }.padding(.horizontal,28).padding(.vertical,index==1 ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy that runs past the controls fades out instead of being cut mid-line.
@@ -225,7 +286,7 @@ struct OnboardingView:View {
                     .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
                     .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
                     .accessibilityElement().accessibilityLabel("Introduction, page \(page+1) of 3")
-                Button(page==2 ? "Begin exploring" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
+                Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
                     .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
             }.padding(.bottom,28)
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
@@ -234,8 +295,20 @@ struct OnboardingView:View {
         switch index {
         case 0: OnboardingMoon(daysAfterNew:3).frame(width:170,height:170).padding(.vertical,24)
         case 1: ScoreAnatomy(active:page==1)
-        default: OnboardingMoon(daysAfterNew:0).frame(width:170,height:170).padding(.vertical,24)
+        // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
+        default: OnboardingMoon(daysAfterNew:11).frame(width:170,height:170).padding(.vertical,24)
         }
+    }
+    /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
+    private var redToggle:some View {
+        Toggle(isOn:$nightVision) {
+            Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "moon.circle.fill" : "moon.circle").foregroundStyle(palette.accent) }.font(.headline)
+        }
+        .tint(palette.controlTint)
+        .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)
+        .background(Capsule().fill(palette.panel)).overlay(Capsule().stroke(palette.line,lineWidth:0.5))
+        .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
+        .accessibilityHint("Turns the screen red. You can change it any time.")
     }
 }
 /// A real Moon over the starting park: a young crescent, or the new Moon's earthlit disc.
@@ -257,35 +330,44 @@ private struct OnboardingMoon:View {
         } else { MoonDisc(illumination:daysAfterNew>0 ? 0.18 : 0,waxing:true) }
     }
 }
-/// The four parts of the Darkness Score filling in, one after another, as the example score counts up.
-private struct ScoreAnatomy:View {
+/// The recipe of the Darkness Score: one bar split into its four shares, lit one after another as
+/// the example score counts up, then the band words. Shares, not marks: the bar is always whole.
+struct ScoreAnatomy:View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let active:Bool
     @State private var filled=0
-    private let parts:[(LocalizedStringKey,Int,Int)]=[("Moonlight",40,38),("Clouds",25,24),("Light pollution",20,18),("Length of darkness",15,14)]
+    private let parts:[(LocalizedStringKey,Int)]=[("Moonlight",40),("Clouds",25),("Light pollution",20),("Length of darkness",15)]
+    /// Each share a step dimmer, so the four read apart without colour; gaps divide them too.
+    private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
-        VStack(spacing:10) {
-            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 188) // fresh count-up each time the page arrives
-            VStack(spacing:6) {
-                ForEach(parts.indices,id:\.self) { i in
-                    VStack(alignment:.leading,spacing:5) {
-                        HStack { Text(parts[i].0).font(.caption);Spacer();Text("\(parts[i].1)%").font(.caption.monospacedDigit()).foregroundStyle(palette.muted) }
-                        GeometryReader { proxy in
-                            ZStack(alignment:.leading) {
-                                Capsule().fill(palette.line)
-                                Capsule().fill(palette.accent).frame(width:i<filled ? proxy.size.width*Double(parts[i].2)/Double(parts[i].1) : 0)
-                            }
-                        }.frame(height:3)
+        VStack(spacing:12) {
+            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 176) // fresh count-up each time the page arrives
+            VStack(alignment:.leading,spacing:8) {
+                Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                GeometryReader { proxy in
+                    HStack(spacing:3) {
+                        ForEach(parts.indices,id:\.self) { i in
+                            Capsule().fill(i<filled ? palette.accent.opacity(shade(i)) : palette.line)
+                                .frame(width:max(0,(proxy.size.width-9)*Double(parts[i].1)/100))
+                        }
                     }
+                }.frame(height:6)
+                ViewThatFits(in:.horizontal) {
+                    Grid(alignment:.leading,horizontalSpacing:18,verticalSpacing:6) {
+                        GridRow { legend(0); legend(1) }
+                        GridRow { legend(2); legend(3) }
+                    }
+                    VStack(alignment:.leading,spacing:6) { ForEach(parts.indices,id:\.self) { legend($0) } }
                 }
             }.frame(maxWidth:320)
+            Text("90 Pristine · 75 Excellent · 60 Good").font(.caption).foregroundStyle(palette.ink).multilineTextAlignment(.center)
             Text("Example night").font(.caption).foregroundStyle(palette.muted)
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Example score 94 out of 100. Moonlight counts for 40 percent, clouds 25, light pollution 20, and the length of darkness 15.")
+        .accessibilityLabel("Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, light pollution 20, and the length of darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
         .task(id:active) {
             guard active else { filled=0; return }
             if systemReduceMotion || forcedReduceMotion { filled=parts.count; return }
@@ -295,7 +377,16 @@ private struct ScoreAnatomy:View {
             }
         }
     }
+    private func legend(_ i:Int)->some View {
+        HStack(spacing:6) {
+            Capsule().fill(palette.accent.opacity(shade(i))).frame(width:10,height:4)
+            Text(parts[i].0).font(.caption)
+            Text("\(parts[i].1)%").font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
+        }
+    }
 }
+#Preview("Score anatomy") { ScoreAnatomy(active:true).padding().background(.black).preferredColorScheme(.dark) }
+#Preview("Score anatomy AX5") { ScrollView { ScoreAnatomy(active:true).padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
 #Preview("Learn") { NavigationStack { LearnView() }.preferredColorScheme(.dark) }
 #Preview("Onboarding") { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Privacy AX5") { NavigationStack { PrivacyView() }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

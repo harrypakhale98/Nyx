@@ -67,8 +67,8 @@ for f in shipping:
  assert 'URLSession' not in text,f'URLSession outside the guarded transport: {f}'
  assert not re.search(r'"https?://',text),f'web URL literal outside the guarded transport: {f}'
 # Pages opened in Safari at a tap (SwiftUI Link), never fetched by Nyx: exactly this list.
-browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()
-assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov'}
+browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()+Path('Nyx/Views/SettingsSupport.swift').read_text()
+assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov','harrypakhale98.github.io','open-meteo.com','apps.apple.com'},set(re.findall(r'page\(host:"([^"]+)"',browser))
 # Version and build come from project.yml; the archive must carry them in both bundles.
 spec=Path('project.yml').read_text()
 marketing=re.search(r'MARKETING_VERSION:\s*"([^"]+)"',spec).group(1)
