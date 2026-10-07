@@ -56,6 +56,9 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
 .hero figure, figure.wide { margin: 0; }
 .hero img, figure.wide img, .shots img { display: block; width: 100%; border-radius: 20px; border: 1px solid var(--line); }
 figure.wide { margin: 28px 0; }
+figure.phone { max-width: 320px; margin: 28px auto; }
+figure.phone img { display: block; width: 100%; border-radius: 20px; border: 1px solid var(--line); }
+figure.phone figcaption { text-align: center; }
 figcaption { font-size: 14px; margin-top: 8px; color: var(--muted); }
 .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 30px 0 0; padding: 0; list-style: none; }
 .links li { margin: 0; }
