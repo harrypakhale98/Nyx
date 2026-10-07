@@ -46,5 +46,5 @@ Build 1.1 (7) is archived, verified and uploaded (it supersedes 1.1 (6) with the
 
 ## Done
 - Build 1.1 (7) archived 2026-10-06 (build 6 before it, uploaded): iOS app with widgets and the watch app (watch bundle IDs registered, App Group in every profile) and the visionOS app, both development-signed with team `DUHVN68KBA`, zero warnings, `verify_release.py` passing (`Research/release-verification.json`).
-- Store screenshots captured with live data 2026-10-06 for iPhone (English and Spanish, captioned), iPad, Apple Watch and Vision Pro; 1.0 sets kept in `Store/1.0/`.
+- Store screenshots captured with live data 2026-10-06 for iPhone (English and Spanish, captioned), iPad, Apple Watch and Vision Pro.
 - Builds 1.0 (4) and 1.0 (5) uploaded to App Store Connect (2026-10-04 and 2026-10-05). Privacy page (forecast and park-alert wording) pushed 2026-10-04. NPS key in `Config/Secrets.xcconfig` (git-ignored, this Mac only; copy it before building elsewhere). Icon Composer icons. Privacy label decision. Public pages live on GitHub Pages. Accessibility audit passes on every screen in both palettes.

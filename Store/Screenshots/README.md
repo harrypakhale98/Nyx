@@ -8,4 +8,4 @@ Native-resolution captures, no alpha channel, captured 2026-10-06; the iPhone (E
 - `Watch/`: six Apple Watch Ultra 3 captures, 422×514, watchOS 27 (Tonight, milestones, week, Parks, dark adaptation, Tonight in red). No paired iPhone in the simulator, so scores are moon and darkness only and say so.
 - `Vision/`: four Apple Vision Pro captures, 3840×2160, visionOS 27 (window, immersive core, moonlit, Jupiter's name card).
 
-Order and contents: `SUBMISSION.md` § Screenshots per device. Reproduce the iPhone set with `python3 Scripts/capture_store.py SIMULATOR_ID DERIVED_DATA en|es` after a Debug simulator build (trip and listen are scrolled by DEBUG flags, so the whole set runs unattended), then caption with `swift Scripts/make_store_frames.swift [es]`. 1.0 captures: `Store/1.0/Screenshots`.
+Order and contents: `SUBMISSION.md` § Screenshots per device. Reproduce the iPhone set with `python3 Scripts/capture_store.py SIMULATOR_ID DERIVED_DATA en|es` after a Debug simulator build (trip and listen are scrolled by DEBUG flags, so the whole set runs unattended), then caption with `swift Scripts/make_store_frames.swift [es]`.

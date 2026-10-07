@@ -62,7 +62,7 @@ Captions: calm, six words or fewer, no prices, no "new", no exclamation marks. F
 
 **App Preview video (optional):** storyboard and specs in `Store/1.1/app-preview-script.md`.
 
-**History:** 1.0 sets are kept in `Store/1.0/`.
+**History:** the 1.0 sets left the tree on 2026-10-06; they are in git history (last present at commit `1a27187`).
 
 ## Platform steps
 

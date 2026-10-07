@@ -104,7 +104,7 @@ Ranked by value to the app and to an Apple Design Award case (Visuals and Graphi
 
 - **Moon:** sphere shading via SVG radial gradient (limb darkening), a soft terminator band, faint earthshine. Icon Composer renders these into its glass layers.
 - **Layer depth:** arc and leading star as the front group (glass highlight on the arc), moon in the middle group, stars and background at the back. Liquid Glass then adds real specular movement on the Home Screen.
-- **Check:** the Default, Dark, Tinted and Clear renditions, and 60 px legibility (the comparison sheet in `IconSources/Concepts/` shows the method).
+- **Check:** the Default, Dark, Tinted and Clear renditions, and 60 px legibility (a comparison sheet of the concepts, `IconSources/Concepts/comparison.png`, is in git history).
 
 ### 8. Widgets, share card, notifications — follow-through · S
 

@@ -1,9 +1,17 @@
+# macOS
 .DS_Store
+
+# Xcode
 xcuserdata/
 DerivedData/
 build/
 *.xcuserstate
 *.xcresult
-Research/Traces/*.trace/
+
+# Secrets (NPS key; see README "Optional NPS key")
 Config/Secrets.xcconfig
+
+# Large local artifacts
+*.trace/
 Store/Social/*.mp4
+
