@@ -49,7 +49,7 @@ Fit quality, honestly stated:
 | Grand Teton | grte | 2 | 2.2 | +0.2 | 0.137 |  |
 | Dry Tortugas | drto | 2 | 2.2 | +0.2 | 0.14 |  |
 | Crater Lake | crla | 2 | 2.2 | +0.2 | 0.177 |  |
-| Badlands | badl | 2 | 2.2 | +0.2 | 0.192 |  |
+| Badlands | badl | 2 | 2.2 | +0.2 | 0.192 | yes (July 2026) |
 | Glacier | glac | 2 | 2.2 | +0.2 | 0.2 | yes |
 | Bryce Canyon | brca | 2 | 2.2 | +0.2 | 0.206 | yes |
 | Haleakalā | hale | 2 | 2.2 | +0.2 | 0.277 |  |

@@ -56,7 +56,7 @@
     "longitude": -102.482942,
     "timeZoneID": "America/Denver",
     "hemisphere": "north",
-    "darkSkyDesignated": false,
+    "darkSkyDesignated": true,
     "bortleEstimate": 2,
     "description": "The rugged beauty of the Badlands draws visitors from around the world. These striking geologic deposits contain one of the world’s richest fossil beds. Ancient horses and rhinos once roamed here. The park’s 244,000 acres protect an expanse of mixed-grass prairie where bison, bighorn sheep, prairie dogs, and black-footed ferrets live today.",
     "sourceURL": "https://www.nps.gov/badl/index.htm",
