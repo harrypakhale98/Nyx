@@ -89,4 +89,4 @@ Nyx for Apple Vision Pro makes no network requests and has no login. Choose a pa
 
 ## Support and marketing URLs
 
-Same as iPhone (`SUBMISSION.md`). The support and privacy pages in `docs/` do not yet mention Apple Vision Pro; see `INPUT_NEEDED.md`.
+Same as iPhone (`SUBMISSION.md`). The support and privacy pages cover Apple Vision Pro (live 2026-10-06).

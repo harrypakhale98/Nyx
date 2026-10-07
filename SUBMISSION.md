@@ -112,7 +112,7 @@ App Store Connect → App Information → Accessibility, per device. Full reason
 | Gate | Status / evidence |
 |---|---|
 | Privacy label | READY: Data Not Collected, `PRIVACY.md`; third host explained above |
-| Privacy page with the third host live | OPEN: push `docs/` to `main` |
+| Privacy page with the third host live | DONE 2026-10-06: live, covering iPad, Apple Watch and Apple Vision Pro |
 | Release archives | PASS locally: 1.1 (7) iOS + watch + widgets and visionOS, development-signed, `verify_release.py` passing; distribution export pending |
 | Physical accessibility, field mode at night, haptics, ProMotion | OPEN: `INPUT_NEEDED.md` step 1, `AUDIT.md` |
 | Widgets, Live Activity, alarms, Siri, Spotlight, Smart Stack, available AI on device | OPEN: the simulator cannot host these |
