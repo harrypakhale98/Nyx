@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The planner: every park with its moon-and-darkness score for the chosen night, and one park's
+/// The planner: every park with its score for the chosen night, and one park's
 /// night in full. The ornament below steps nights and scrubs the night's clock, for the window and
 /// for the immersive sky alike.
 struct PlannerWindow: View {
@@ -15,6 +15,7 @@ struct PlannerWindow: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var query = ""
     @State private var showCredits = VisionDebug.isEnabled("vision-credits")
+    @State private var showPrivacy = VisionDebug.isEnabled("vision-privacy")
     /// True while the sky is opening or closing, so a second tap cannot start a second transition.
     @State private var skyBusy = false
     var body: some View {
@@ -25,6 +26,10 @@ struct PlannerWindow: View {
                 .searchable(text: $query, prompt: Text("Search parks"))
                 .navigationTitle(Text("Nyx"))
                 .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showPrivacy = true } label: { Label("Your privacy", systemImage: "hand.raised") }
+                            .help(Text("Your privacy"))
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { showCredits = true } label: { Label("Credits", systemImage: "info.circle") }
                             .help(Text("Credits"))
@@ -55,6 +60,7 @@ struct PlannerWindow: View {
                 }
         }
         .sheet(isPresented: $showCredits) { CreditsView().environment(\.visionPalette, palette).modifier(DebugTypeSize()) }
+        .sheet(isPresented: $showPrivacy) { YourPrivacyView().environment(model).environment(\.visionPalette, palette).modifier(DebugTypeSize()) }
         .ornament(visibility: model.parks.isEmpty ? .hidden : .visible, attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
             NightControls().environment(\.visionPalette, palette)
         }
@@ -69,6 +75,11 @@ struct PlannerWindow: View {
             if VisionDebug.isEnabled("vision-immersive") { await toggleSky() }
             // DEBUG: `-nyx-vision-skyonly` closes the window once the sky is open, for screenshots of the sky alone.
             if VisionDebug.isEnabled("vision-skyonly"), model.immersiveOpen { dismissWindow(id: "planner") }
+        }
+        // While the window is in use: the parks' cloud forecast, asked for again only when six hours old.
+        .task(id: scenePhase == .active) {
+            guard scenePhase == .active else { return }
+            await model.keepForecastsFresh()
         }
         .onChange(of: scenePhase) { _, phase in
             // The window holds every control for the sky. Closed, it would leave someone standing
@@ -127,10 +138,10 @@ struct ParkList: View {
         List(selection: $model.selectedID) {
             Section {
                 ForEach(parks) { park in
-                    ParkRow(park: park, score: model.listScores[park.id]).tag(park.id)
+                    ParkRow(park: park, night: model.listNights[park.id]).tag(park.id)
                 }
             } header: {
-                Text(model.nightOffset == 0 ? "Tonight · usual clouds" : "\(nightName) · usual clouds")
+                Text(model.nightOffset == 0 ? String(localized: "Tonight") : nightName)
             }
         }
         .overlay {
@@ -143,10 +154,12 @@ struct ParkList: View {
         return park.dayLabel(model.night(for: park))
     }
 }
+/// A park and its night: the score, and under it the band, or "Early look" / "Estimate" when the
+/// night has no full cloud forecast (the iPhone's compact words).
 struct ParkRow: View {
     @Environment(\.visionPalette) private var palette
     let park: Park
-    let score: DarknessScore?
+    let night: Night?
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
@@ -154,10 +167,10 @@ struct ParkRow: View {
                 Text(park.state).font(.caption).foregroundStyle(palette.muted)
             }
             Spacer(minLength: 8)
-            if let score {
+            if let night {
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(score.value, format: .number).font(.system(.title2, design: .serif)).monospacedDigit().foregroundStyle(palette.accent)
-                    Text(score.band.label).font(.caption2).foregroundStyle(palette.muted)
+                    Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).monospacedDigit().foregroundStyle(palette.accent)
+                    Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
                 }
             } else {
                 ProgressView().controlSize(.small)
@@ -165,19 +178,24 @@ struct ParkRow: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(park.name))
-        .accessibilityValue(score.map { Text("\($0.value) out of 100, \($0.band.label), with the park's usual clouds") } ?? Text("Computing"))
+        .accessibilityValue(night.map { Text("\($0.score.value) out of 100, \($0.bandWithBasis)") } ?? Text("Computing"))
     }
 }
 
-#Preview("Park rows") {
-    let parks = VisionModel(now: .now).parks.prefix(2)
-    List {
-        if let park = parks.first {
-            ParkRow(park: park, score: DarknessScore(value: 94, moonPoints: 40, cloudPoints: nil, bortlePoints: 20, lengthPoints: 13))
-            ParkRow(park: park, score: nil)
-        }
-        if let park = parks.last {
-            ParkRow(park: park, score: DarknessScore(value: 38, moonPoints: 6, cloudPoints: nil, bortlePoints: 18, lengthPoints: 14))
+#Preview("Park rows: forecast, early look, usual clouds, computing") {
+    let parks = Array(VisionModel(now: .now).parks.prefix(2))
+    let now = Date.now
+    func night(_ park: Park, days: Int, forecast: Bool) -> Night {
+        let evening = park.date(park.currentNight(at: now), addingDays: days)
+        return NightPlanner.night(park: park, sky: AstronomyEngine().conditions(for: park, on: evening),
+                                  forecast: forecast ? VisionModel.fixture(parks: [park], cover: 20, issued: now)[park.id] : nil, detail: nil, now: now)
+    }
+    return List {
+        ForEach(parks) { park in
+            ParkRow(park: park, night: night(park, days: 0, forecast: true))
+            ParkRow(park: park, night: night(park, days: 6, forecast: true))
+            ParkRow(park: park, night: night(park, days: 20, forecast: false))
+            ParkRow(park: park, night: nil)
         }
     }
 }

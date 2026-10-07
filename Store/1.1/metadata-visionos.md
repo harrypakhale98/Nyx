@@ -2,7 +2,7 @@
 
 Paste-ready copy for the **visionOS** version page in App Store Connect (App Store tab → the visionOS platform in the sidebar → 1.1). Name, subtitle (`Stargazing in national parks`), categories, age rating, App Privacy and the privacy policy URL are shared with iPhone and set once under App Information. Description, keywords, promotional text, support and marketing URLs, screenshots and review notes belong to each platform's version page.
 
-Updated 2026-10-07 for build 8: star names and constellation figures, turning the night by hand, the Moon on your table, the visionOS widget, and scores with each park's usual clouds (score v2). The Vision Pro app makes no network requests, so it never has a cloud forecast and the copy says so. 1.1 is the first public release on every platform, so there is no What's New. Character counts are checked by script (in brackets).
+Updated 2026-10-07 for build 8: star names and constellation figures, turning the night by hand, the Moon on your table, the visionOS widget, and scores with each park's usual clouds (score v2). The Vision Pro app makes one optional request, the cloud forecast from Open-Meteo for the parks' public coordinates (switchable in Your privacy); nothing else leaves the headset. 1.1 is the first public release on every platform, so there is no What's New. Character counts are checked by script (in brackets).
 
 ---
 
@@ -45,7 +45,7 @@ A WIDGET FOR THE WALL
 Tonight's Moon: its phase, how much is lit and the next new moon, on a wall or a desk.
 
 PRIVATE BY DESIGN
-No account, no advertising, no tracking, and no network requests. Everything Nyx shows on Apple Vision Pro is computed on the device.
+No account, no advertising, no tracking. The sky is computed on the device; the one thing Nyx fetches is the cloud forecast for the parks' public coordinates, never anything about you, and a switch in Your privacy turns it off.
 
 PLEASE NOTE
 Scores are estimates and do not confirm clear skies or safe access. Check current park conditions before traveling.
@@ -74,7 +74,7 @@ milky way,planetarium,immersive,astronomy,moon phase,planet,constellation,star n
 ## Review notes (visionOS)
 
 ```
-Nyx for Apple Vision Pro makes no network requests, asks for no permissions and has no login. Choose a park in the window, then "Stand under this sky" to open the immersive sky (it opens with the room still visible at the edges; turn the Digital Crown for more). "Leave the sky" closes it. The clock ornament steps nights and scrubs the hours; dragging across the sky also turns the night. Tap a planet, a bright star, the Moon or the Milky Way core for its name card. "The Moon on your table" in the window toolbar opens a volumetric Moon. The sky is computed for the chosen park and night and is not aligned to the room's real north (a plaque at your feet says so). Scores use each park's usual clouds for the month, never a forecast, and are labeled that way. Credits are under the info button in the sidebar.
+Nyx for Apple Vision Pro asks for no permissions and has no login. Its only network request is the cloud forecast from api.open-meteo.com for the 63 parks' public coordinates (Your privacy → Cloud forecasts switches it off). Choose a park in the window, then "Stand under this sky" to open the immersive sky (it opens with the room still visible at the edges; turn the Digital Crown for more). "Leave the sky" closes it. The clock ornament steps nights and scrubs the hours; dragging across the sky also turns the night. Tap a planet, a bright star, the Moon or the Milky Way core for its name card. "The Moon on your table" in the window toolbar opens a volumetric Moon. The sky is computed for the chosen park and night and is not aligned to the room's real north (a plaque at your feet says so). Scores use the cloud forecast for nights it covers, eased toward each park's usual clouds farther out, and say which. Credits are under the info button in the sidebar.
 ```
 
 ---

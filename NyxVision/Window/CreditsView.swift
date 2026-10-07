@@ -11,6 +11,7 @@ struct CreditsView: View {
         ("Stars", "Yale Bright Star Catalogue (HEASARC)."),
         ("Star names", "IAU Working Group on Star Names."),
         ("Constellation figures", "Drawn for Nyx between catalogue stars."),
+        ("Cloud forecasts", "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx."),
         ("Usual clouds", "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024)."),
         ("Park data", "National Park Service."),
     ]
