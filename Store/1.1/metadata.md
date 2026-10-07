@@ -105,7 +105,7 @@ Make time for a darker sky.
 Nyx compares nights across the 63 US national parks. Moonlight, cloud cover, estimated sky glow and the length of true darkness become one Darkness Score from 0 to 100, with a breakdown that explains it.
 
 PLAN
-Find nearby parks within a straight-line radius, or sort every park by tonight's darkness. Explore the calendar and its five-night new moon window. Follow thirty nights on a timeline that draws in the range the forecast models allow. Give the trip planner your free dates and it suggests a park for each night. Times are park-local.
+Find nearby parks within a straight-line radius, or sort every park by tonight's darkness. Browse the calendar's five-night new moon window. Follow thirty nights on a timeline that draws in the range the forecast models allow. Give the trip planner your free dates and it suggests a park for each night. Times are park-local.
 
 SEE WHAT IS UP
 Each park's night lists the Milky Way core with its rise, highest point, direction and Moon-free hours; planets with rise and set times; meteor showers with the Moon's interference and a rate estimate from the International Meteor Organization; and lunar eclipses the park can see. These are reasons to go. They never change the score.
@@ -117,7 +117,7 @@ FIELD MODE
 At the park, "I'm here tonight" opens a red, dimmed screen made for night-adapted eyes: the countdown to true darkness, each milestone of the night, and a dark-adaptation clock. "Where to look" turns the real sky to your iPhone's direction, with no camera. A Live Activity keeps the countdown on the Lock Screen, and alarms can wake you for true darkness or the core's rise (iOS 26.1 and later). On Apple Watch, the countdown and the Moon are on your wrist, in red. On Apple Vision Pro, you can stand under the real sky for a park and a night.
 
 SKY GLOW
-Each named viewing spot shows how its sky glow compares with the other national parks, from NASA Black Marble night-lights data, and each park names the direction of the city glow on its horizon. It is a comparison between places, not a measurement taken at the spot.
+Each named viewing spot shows how its sky glow compares with the other national parks, from NASA Black Marble night-lights data, and each park names the direction of the city glow on its horizon. It compares places; it is not a measurement taken at the spot.
 
 KEEP A LITTLE OF THE NIGHT
 Save parks and receive optional local reminders for promising nights. Keep a private journal with notes and selected photos; each night becomes a star in your own constellation. Widgets show the best sky among your saved parks.
@@ -129,15 +129,15 @@ PRIVATE BY DESIGN
 No account, no advertising, no tracking. Your location and your journal stay on your device. Three optional services supply data, each with its own switch under Your privacy: park alerts from the National Park Service, forecasts from Open-Meteo, and smoke and haze from Open-Meteo's air-quality service. They receive the public coordinates of national parks, not yours.
 
 WORKS OFFLINE
-Moon, sun and twilight calculations, the core, planets, the park library, the calendar, the journal and saved parks work without a connection. Forecasts reach about sixteen days. Light-pollution classes are estimates. Moonrise and moonset are approximate, to about 15 minutes.
+Moon, sun and twilight calculations, the core, planets, the park library, the calendar, the journal and saved parks work without a connection. Forecasts reach about sixteen days. Moonrise and moonset are approximate, to about 15 minutes.
 
 PLEASE NOTE
-Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Forecasts do not include telescope seeing. Park alerts and ranger programs come from the National Park Service and may be unavailable.
+Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Park alerts and ranger programs come from the National Park Service and may be unavailable.
 
 Weather data: Open-Meteo, CC BY 4.0. Air quality: Copernicus Atmosphere Monitoring Service via Open-Meteo, CC BY 4.0. Night lights and Moon imagery: NASA. Meteor showers: International Meteor Organization. Lunar eclipses: Fred Espenak, NASA/GSFC. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service or NASA.
 ```
 
-[4,044 of 4,000 characters. It is tight on purpose: if you add a sentence, cut one.]
+[3,946 of 4,000 characters; 3,980 even if App Store Connect counts each line break twice. If you add a sentence, cut one.]
 
 Notes for the owner:
 - The 1.0 description said "Forecasts do not include smoke, haze or telescope seeing." That sentence is now false for smoke and haze (the forecast adds them, as a caveat); this draft changes it. Keep that correction.
@@ -212,7 +212,7 @@ Spanish subtitle drafts (≤30, native review): `Planifica una noche oscura` (25
 | What's New | 4,000 | 3,251 |
 | What's New short | 4,000 | 518 |
 | Promotional text (primary) | 170 | 159 |
-| Description | 4,000 | 3,978 |
+| Description | 4,000 | 3,946 |
 | Keywords (primary) | 100 | 96 |
 | Keywords (alternate) | 100 | 97 |
 | Keywords (Spanish draft) | 100 | 96 |
