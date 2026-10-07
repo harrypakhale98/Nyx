@@ -170,13 +170,13 @@ nonisolated enum CloudSource: Equatable, Sendable {
     case unsynced
     /// A forecast fetched at this moment, still in use.
     case fresh(Date)
-    /// The iPhone's last forecast for this park is too old to use.
+    /// The iPhone's last forecast for this park is old: still scored (eased toward usual clouds), but worth refreshing.
     case expired(Date)
     /// The iPhone sent a context without a forecast for this park; `followed` says whether it
     /// is one the iPhone sends clouds for (saved, or the starting park).
     case missing(followed: Bool)
 
-    /// A forecast older than this scores no clouds (the same limit as `Forecast.mean`).
+    /// After this the watch asks for a fresh forecast; the score itself fades an old one by lead time.
     static let lifetime: TimeInterval = 36*3600
 
     static func of(context: WatchContext?, park: Park, now: Date) -> CloudSource {

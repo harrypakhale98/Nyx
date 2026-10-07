@@ -88,10 +88,11 @@ struct DarknessIntent:AppIntent {
         // Saved parks share their forecast with the widget; the app's own cache may be newer.
         let forecast=[SharedSettings.read()?.forecasts[selected.id],CacheDirectory.read(Forecast.self,name:"weather-\(selected.id)")]
             .compactMap { $0 }.max { $0.updated<$1.updated }
-        let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
-        let score=ScoreEngine().score(sky:sky,bortle:selected.bortleEstimate,cloudCover:clouds)
+        let detail=CacheDirectory.read(ForecastDetail.self,name:"detail-\(selected.id)") ?? SharedSettings.read()?.details?[selected.id]
+        let night=NightPlanner.night(park:selected,sky:sky,forecast:forecast,detail:detail,now:.now)
+        let score=night.score
         if sky.darkHours==0 { return .result(dialog:"No true darkness tonight at \(selected.shortName). The darkness score is \(score.value) out of 100.") }
-        if clouds==nil { return .result(dialog:"\(selected.shortName): \(score.value) out of 100, \(score.band.label). Moon and darkness only. Clouds and park access are unknown.") }
+        if let caption=night.basisCaption() { return .result(dialog:"\(selected.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
         return .result(dialog:"\(selected.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.")
     }
 }

@@ -1,8 +1,8 @@
 import SwiftUI
 import simd
 
-/// One park on one night, computed on device: the sky, the moon-and-darkness score (Vision Pro
-/// fetches no forecast, so clouds are never part of it) and what's up.
+/// One park on one night, computed on device: the sky, the score (Vision Pro fetches no forecast,
+/// so its clouds are always the park's usual clouds for the month, `NightPlanner.night`) and what's up.
 nonisolated struct NightPlan: Sendable {
     let park: Park
     let sky: SkyConditions
@@ -18,7 +18,7 @@ nonisolated struct NightPlan: Sendable {
         let engine = AstronomyEngine()
         self.park = park
         sky = engine.conditions(for: park, on: night)
-        score = ScoreEngine().score(sky: sky, bortle: park.bortleEstimate, cloudCover: nil)
+        score = NightPlanner.night(park: park, sky: sky, forecast: nil, detail: nil, now: night).score
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
@@ -139,11 +139,11 @@ nonisolated struct SkyMoment: Sendable {
         listTask?.cancel()
         listTask = Task {
             let scores = await Task.detached(priority: .utility) {
-                let engine = AstronomyEngine(), scorer = ScoreEngine()
+                let engine = AstronomyEngine()
                 var result: [String: DarknessScore] = [:]
                 for park in parks {
                     let night = park.date(park.currentNight(at: now), addingDays: offset)
-                    result[park.id] = scorer.score(sky: engine.conditions(for: park, on: night), bortle: park.bortleEstimate, cloudCover: nil)
+                    result[park.id] = NightPlanner.night(park: park, sky: engine.conditions(for: park, on: night), forecast: nil, detail: nil, now: now).score
                 }
                 return result
             }.value

@@ -152,10 +152,10 @@ struct WristSkyTests {
         let expired = CloudSource.of(context: context, park: jotr, now: updated.addingTimeInterval(36*3600))
         #expect(expired == .expired(updated) && expired.isStale)
         #expect(expired.line(for: jotr) == "No recent forecast. Open Nyx on iPhone to refresh.")
-        // The same limit the score uses: clouds stop counting exactly when the watch calls them old.
+        // An old forecast still reaches the score (eased toward usual clouds by its lead time); the watch
+        // only says it is old, so the person knows to refresh it.
         let window = (updated.addingTimeInterval(40*3600), updated.addingTimeInterval(44*3600))
-        #expect(forecast.mean(from: window.0, to: window.1, now: updated.addingTimeInterval(CloudSource.lifetime-1)) != nil)
-        #expect(forecast.mean(from: window.0, to: window.1, now: updated.addingTimeInterval(CloudSource.lifetime)) == nil)
+        #expect(forecast.mean(from: window.0, to: window.1) != nil)
         // A saved park whose clouds did not travel can be refreshed; a park never saved cannot.
         #expect(CloudSource.of(context: context, park: try park("deva"), now: updated) == .missing(followed: true))
         #expect(CloudSource.of(context: context, park: yell, now: updated) == .missing(followed: false))

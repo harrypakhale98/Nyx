@@ -32,7 +32,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     }
     func snapshot(for configuration: TonightParkIntent, in context: Context) async -> WatchSkyEntry {
         var snapshot = Self.snapshot(for: configuration)
-        // The face gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not an empty state.
+        // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         var cache: [String: SkyConditions] = [:]
         return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, cache: &cache)

@@ -5,6 +5,8 @@ import Foundation
 /// in, nothing is fetched, and missing clouds are never treated as clear.
 nonisolated struct NightPlanner: Sendable {
     let forecasts: [String: Forecast]
+    /// Smoke, cloud layers and model agreement, where known; optional everywhere.
+    var details: [String: ForecastDetail] = [:]
     var astronomy = AstronomyEngine()
     var scoring = ScoreEngine()
 
@@ -12,10 +14,52 @@ nonisolated struct NightPlanner: Sendable {
     func night(_ park: Park, on evening: Date, now: Date) -> Night { night(park, sky: astronomy.conditions(for: park, on: evening), now: now) }
     /// The same, for a sky already computed (a widget reuses each night's sky across entries).
     func night(_ park: Park, sky: SkyConditions, now: Date) -> Night {
-        let forecast = forecasts[park.id]
-        let clouds = forecast?.mean(from: sky.cloudWindow.start, to: sky.cloudWindow.end, now: now)
-        return Night(park: park, sky: sky, score: scoring.score(sky: sky, bortle: park.bortleEstimate, cloudCover: clouds),
-                     cloudCover: clouds, forecastUpdated: clouds == nil ? nil : forecast?.updated)
+        Self.night(park: park, sky: sky, forecast: forecasts[park.id], detail: details[park.id], now: now, scoring: scoring)
+    }
+
+    // MARK: The one way a night is built
+
+    /// The only constructor of a `Night` from a sky and what is known about its clouds; the app,
+    /// widgets, Siri, the trip planner, Ask Nyx, the watch and Vision Pro all come through here,
+    /// so a rule changed once changes everywhere.
+    ///
+    /// **Clouds.** cloud = w·forecast + (1 − w)·usual, with `usual` the park's ERA5 cloud for the
+    /// month and w = `CloudBasis.forecastWeight` of the lead from the forecast's issue to the
+    /// middle of the night's cloud window. No forecast covering the window: the usual clouds
+    /// alone. A park flagged `aboveInversion` (Haleakalā's summit) counts mid and high cloud only
+    /// when the layer forecast covers the night: low cloud there lies below the observer.
+    /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
+    /// only lower a score, so its age never hides it). **Ties.** The three models' cloud spread.
+    /// `now` decides only whether the model spread is recent enough to describe (36 hours).
+    static func night(park: Park, sky: SkyConditions, forecast: Forecast?, detail: ForecastDetail?, now: Date,
+                      climate: CloudClimate = .shared, scoring: any ScoreProviding = ScoreEngine()) -> Night {
+        let window = sky.cloudWindow
+        let usual = climate.typical(park, on: sky.evening)?.cloud
+        var predicted = forecast?.mean(from: window.start, to: window.end), issued = forecast?.updated, upper = false
+        if park.aboveInversion == true, let layers = detail?.layers,
+           let mid = layers.mean("cloud_cover_mid", from: window.start, to: window.end, valid: 0...100),
+           let high = layers.mean("cloud_cover_high", from: window.start, to: window.end, valid: 0...100) {
+            // Random overlap of the two layers above the summit.
+            predicted = 100*(1-(1-mid/100)*(1-high/100)); issued = layers.updated; upper = true
+        }
+        let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
+        let lead = issued.map { middle.timeIntervalSince($0)/86400 } ?? .infinity
+        let weight = predicted == nil ? 0 : CloudBasis.forecastWeight(leadDays: lead)
+        let counted: Double? = switch (predicted, usual) {
+        case let (f?, u?): weight*f + (1-weight)*u
+        case let (f?, nil): f
+        case let (nil, u): u
+        }
+        let aerosol = detail?.air?.mean("aerosol_optical_depth", from: window.start, to: window.end, valid: 0...10)
+        var spread: Double?
+        if let models = detail?.models, models.usable(now: now) {
+            let means = ForecastDetail.modelKeys.compactMap { models.mean($0, from: window.start, to: window.end, valid: 0...100) }
+            if means.count == ForecastDetail.modelKeys.count, let low = means.min(), let high = means.max() { spread = high-low }
+        }
+        let used = weight > 0
+        let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
+        return Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
+                     usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread)
     }
     /// `count` nights from the park-local night that contains `start` (clamped to 1...60).
     func nights(_ park: Park, from start: Date, count: Int, now: Date) -> [Night] {
@@ -40,30 +84,45 @@ nonisolated struct NightPlanner: Sendable {
     func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3) -> [Night] {
         Array(Self.ranked(parks.flatMap { nights($0, day: day, count: count, now: now) }).prefix(max(0, limit)))
     }
-    /// Best first. Each night is compared on `Night.rankScore`: its score where a cloud forecast
-    /// reaches, otherwise its score under the park's typical cloud for that month. A forecast
-    /// score and a moon-and-darkness score are never compared directly; the second assumes
-    /// nothing about clouds and so reads like a clear night. On a tie, a night with a forecast
-    /// first (the surer number), then the higher score, the earlier night, the park's name.
-    static func better(_ a: Night, _ b: Night) -> Bool { better(a, a.rankScore, b, b.rankScore) }
-    private static func better(_ a: Night, _ x: Int, _ b: Night, _ y: Int) -> Bool {
-        if x != y { return x > y }
-        if a.score.hasForecast != b.score.hasForecast { return a.score.hasForecast }
+    /// Best first, by score. Every night's score already counts clouds (forecast, early look or
+    /// the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
+    /// go to the darker measured sky (Black Marble glow, `glowRank`), then the longer true
+    /// darkness, then the forecast models that agree more closely, then the surer cloud basis,
+    /// then the earlier night and the park's name. The numbers shown never change.
+    static func better(_ a: Night, _ b: Night) -> Bool {
         if a.score.value != b.score.value { return a.score.value > b.score.value }
+        let ga = glowRank(a.park.id), gb = glowRank(b.park.id)
+        if ga != gb { return ga < gb }
+        if abs(a.sky.darkHours-b.sky.darkHours) >= 1.0/60 { return a.sky.darkHours > b.sky.darkHours }
+        let sa = a.modelSpread ?? .infinity, sb = b.modelSpread ?? .infinity
+        if abs(sa-sb) >= 0.5 { return sa < sb }
+        if certainty(a.basis) != certainty(b.basis) { return certainty(a.basis) > certainty(b.basis) }
         if a.id != b.id { return a.id < b.id }
         return a.park.name < b.park.name
     }
-    /// `nights` sorted by `better`, each night's rank worked out once.
-    static func ranked(_ nights: [Night]) -> [Night] {
-        nights.map { ($0, $0.rankScore) }.sorted { better($0.0, $0.1, $1.0, $1.1) }.map(\.0)
+    private static func certainty(_ basis: CloudBasis) -> Double {
+        switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
     }
+    static func ranked(_ nights: [Night]) -> [Night] { nights.sorted(by: better) }
     static func best(_ nights: [Night]) -> Night? { ranked(nights).first }
+    /// Where a park's measured sky glow sits among the 63 park centres, 0 (darkest) to 1
+    /// (brightest); 1 when unknown. NASA Black Marble (`skyglow.json`) separates the 35 parks a
+    /// hand estimate calls Bortle 2, which the score cannot.
+    static func glowRank(_ id: String) -> Double { glowRanks[id] ?? 1 }
+    private static let glowRanks: [String: Double] = {
+        struct Site: Decodable { let glow: Double }
+        struct File: Decodable { let parks: [String: Site] }
+        guard let url = Bundle.main.url(forResource: "skyglow", withExtension: "json"), let data = try? Data(contentsOf: url),
+              let file = try? JSONDecoder().decode(File.self, from: data), file.parks.count > 1 else { return [:] }
+        let order = file.parks.sorted { ($0.value.glow, $0.key) < ($1.value.glow, $1.key) }.map(\.key)
+        return Dictionary(uniqueKeysWithValues: order.enumerated().map { ($1, Double($0)/Double(order.count-1)) })
+    }()
 
     // MARK: Smart Stack
 
     /// The hours a night is worth surfacing: from 90 minutes before sunset until an hour into
-    /// true darkness (or sunrise when there is none). Good or better only; a night whose score is
-    /// moon and darkness alone must reach Excellent, because clouds may still take it away.
+    /// true darkness (or sunrise when there is none). Good or better only; a night without a full
+    /// cloud forecast must reach Excellent, because the real clouds may still take it away.
     static func duskWindow(_ night: Night) -> DateInterval? {
         guard night.score.value >= (night.score.hasForecast ? 60 : 75), night.sky.darkHours > 0,
               let sunset = night.sky.sunset else { return nil }

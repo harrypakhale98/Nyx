@@ -10,7 +10,8 @@ nonisolated struct NightLookup: Sendable {
     let forecasts: [String: Forecast]
     let now: Date
     var table: SkyEvents = .shared
-    private var planner: NightPlanner { NightPlanner(forecasts: forecasts) }
+    var details: [String: ForecastDetail] = [:]
+    private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
     /// A park by name: an exact short name first, then the app's own search (aliases included).
     func park(named name: String) -> Park? {
@@ -29,9 +30,17 @@ nonisolated struct NightLookup: Sendable {
     /// One line per night, worded like the app: score, band, what the score rests on, the Moon.
     func describe(_ night: Night) -> String {
         let park=night.park
-        let basis=night.score.hasForecast ? String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud") : String(localized: "moon and darkness only, clouds not yet forecast")+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")
+        let basis=Self.basis(night)
         let dark=night.sky.darkHours>0 ? String(localized: "\(String(format: "%.1f", night.sky.darkHours)) hours of true darkness") : String(localized: "no true darkness")
         return String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
+    }
+    /// What a record's clouds rest on, in the app's words.
+    static func basis(_ night: Night) -> String {
+        switch night.basis {
+        case .forecast: return String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud")
+        case .blended(_, let lead): return String(localized: "early look: a \(Int((night.cloudCover ?? 0).rounded()))% cloud forecast \(max(1, Int(lead.rounded()))) days out, eased toward usual clouds")
+        case .usual: return String(localized: "no cloud forecast yet; scored with the park's usual clouds for the month")+(night.typicalClouds.map { "; "+String(localized: "typically: \($0)") } ?? "")
+        }
     }
     /// The access note, so the model never recommends a ferry-only park as a drive.
     func access(_ park: Park) -> String {
@@ -66,7 +75,7 @@ nonisolated struct NightLookup: Sendable {
         guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.shortName), straight-line.")] }
         return ranked.map { park, miles in
             let night=tonight[park.id]
-            let basis=night.map { $0.score.hasForecast ? String(localized: "cloud forecast included") : String(localized: "moon and darkness only, clouds not yet forecast") } ?? ""
+            let basis=night.map(Self.basis) ?? ""
             return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
