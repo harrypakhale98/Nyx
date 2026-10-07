@@ -44,6 +44,20 @@ import UIKit
     private var milkyWayTexture: TextureResource?
     private var glowTexture: TextureResource?
     private var aureoleTexture: TextureResource?
+    /// Named stars and constellation figures (`SkyLore`). Each named star is a target over its
+    /// catalogue star, nearly invisible until looked at, with the hover effect and name card planets have.
+    private(set) var lore = SkyLore.empty
+    private var catalogueStars: [CatalogueStar] = []
+    private var namedStars: [String: ModelEntity] = [:]
+    private var starAccess: [String: String] = [:]
+    /// The stick figures: one mesh of thin ribbons in celestial coordinates, turning with the stars.
+    private let figures = ModelEntity()
+    private var lineTexture: TextureResource?
+    private var linesOn = false, linesFade = 0.0, linesLevel = 0.0, linesColor = SIMD3<Double>(1, 1, 1)
+    private var linesTask: Task<Void, Never>?
+    /// A shell of input targets 40 m out, behind every star and label: what a drag on the empty
+    /// sky lands on (`SkySpace` turns the night with it). It has no hover effect and draws nothing.
+    let grab = Entity()
 
     // Distances in metres: far enough that both eyes see the sky at infinity, inside any far plane.
     static let starRadius: Float = 30, milkyWayRadius: Float = 34, domeRadius: Float = 48, bodyRadius: Float = 28, labelRadius: Float = 10
@@ -63,6 +77,8 @@ import UIKit
     private var labelKeys: [ObjectIdentifier: String] = [:]
     /// VoiceOver's activate on a body, kept alive with the scene.
     var activation: EventSubscription?
+    /// VoiceOver's increment and decrement on the sky, kept alive with the scene.
+    var adjustments: [EventSubscription] = []
 
     init() {
         root.name = "sky"
@@ -94,6 +110,7 @@ import UIKit
         if let image = SkyTextures.disc() { discTexture = try? await TextureResource(image: image, options: .init(semantic: .color)) }
 
         let catalogue = Self.catalogue()
+        catalogueStars = catalogue
         for layer in [SkyDome.Layer.faint, .middle, .bright] {
             let members = catalogue.filter { star in
                 switch layer { case .bright: star.mag < 2.2; case .middle: star.mag >= 2.2 && star.mag < 3.6; default: star.mag >= 3.6 }
@@ -128,12 +145,62 @@ import UIKit
         coreTarget.components.set(CollisionComponent(shapes: [.generateSphere(radius: 1.6)]))
         coreTarget.components.set(InputTargetComponent())
         for _ in 0..<4 { let label = Entity(); eye.addChild(label); compass.append(label) }
+        buildLore(catalogue)
+        buildGrab()
         apply(palette: palette)
+    }
+
+    /// Named stars' targets and the constellation figures' mesh.
+    private func buildLore(_ catalogue: [CatalogueStar]) {
+        lore = SkyLore.load(catalogue: catalogue)
+        if let image = SkyTextures.image(width: 32, height: 4, pixel: { x, _ in
+            // Across the ribbon: bright in the middle, soft to nothing at both edges, so a thin
+            // line far away stays smooth instead of stepping.
+            let u = abs((Double(x)+0.5)/16-1)
+            return (SIMD3(repeating: SkyTextures.smooth(1-u)), 1)
+        }) { lineTexture = try? TextureResource(image: image, options: .init(semantic: .color)) }
+        if let mesh = try? Self.figureMesh(lore.lines, catalogue: catalogue) { figures.model = ModelComponent(mesh: mesh, materials: []) }
+        figures.isEnabled = false
+        celestial.addChild(figures)
+        let quad = Self.quad()
+        for star in lore.stars {
+            let entity = ModelEntity(mesh: quad, materials: [])
+            entity.name = "body:"+star.id
+            // A target 0.7° across: close pairs such as Alnitak and Alnilam (1.4° apart) stay separate.
+            Self.makeTappable(entity, radius: 0.5)
+            eye.addChild(entity)
+            namedStars[star.id] = entity
+        }
+    }
+    /// About 145 overlapping panels, every 15° of azimuth and altitude from 15° below the
+    /// horizon to 75° up, and a cap over the zenith.
+    private func buildGrab() {
+        grab.name = "sky.grab"
+        let r: Float = 40, step = 15.0*Double.pi/180
+        var shapes: [ShapeResource] = []
+        for altitude in stride(from: -7.5, through: 67.5, by: 15) {
+            for azimuth in stride(from: 0.0, to: 360, by: 15) {
+                let position = Self.point(altitude, azimuth, 0, r)
+                let width = Float(Double(r)*cos(altitude*Double.pi/180)*step*1.3)+0.5, height = Float(Double(r)*step*1.3)
+                shapes.append(ShapeResource.generateBox(size: [width, height, 0.5]).offsetBy(rotation: Self.facingViewer(position), translation: position))
+            }
+        }
+        let cap = r*Float(cos(75*Double.pi/180))*2.4
+        shapes.append(ShapeResource.generateBox(size: [cap, 0.5, cap]).offsetBy(translation: [0, r*Float(sin(75*Double.pi/180)), 0]))
+        grab.components.set(CollisionComponent(shapes: shapes))
+        grab.components.set(InputTargetComponent())
+        eye.addChild(grab)
+    }
+    /// The compass bearing (degrees from north) of a point in the scene, as seen from the eye:
+    /// how a drag across the sky is measured.
+    func azimuth(ofScenePoint point: SIMD3<Float>, facing: Double) -> Double {
+        let local = eye.convert(position: point, from: nil)
+        return SkyDome.horizontal(of: SIMD3<Double>(local), facing: facing).azimuth
     }
 
     // MARK: Each moment
 
-    func update(plan: NightPlan, moment: SkyMoment, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?) {
+    func update(plan: NightPlan, moment: SkyMoment, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?, constellations: Bool = true, reduceMotion: Bool = false) {
         apply(palette: palette)
         let park = plan.park, facing = SkyDome.facing(for: park)
         let m = moment.rotation
@@ -191,6 +258,8 @@ import UIKit
         }
         var domeAccess = AccessibilityComponent()
         domeAccess.isAccessibilityElement = true
+        // VoiceOver's swipe up and down move the clock half an hour, as a drag across the sky does.
+        domeAccess.systemActions = [.increment, .decrement]
         domeAccess.label = LocalizedStringResource(stringLiteral: String(localized: "Sky over \(park.shortName) at \(park.time(moment.date))"))
         domeAccess.value = LocalizedStringResource(stringLiteral: Self.summary(moment))
         dome.components.set(domeAccess)
@@ -205,12 +274,16 @@ import UIKit
         } else { sun.isEnabled = false }
 
         let coreShown = moment.core.altitude > 0 && SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude) > 0.3
+        // Moonlight can leave nothing of the band to point at: the label then says so instead of
+        // naming a patch of empty, moonlit sky.
+        let coreWashed = Self.coreWashedOut(moonUp: moment.moon.up, washed: washed)
+        let coreTitle = coreWashed ? String(localized: "Milky Way core, washed out by the Moon") : moment.core.name
         coreTarget.isEnabled = coreShown
         coreLabel.isEnabled = coreShown
         if coreShown {
             coreTarget.position = Self.point(moment.core.altitude, moment.core.azimuth, facing, Self.bodyRadius)
-            let face = label(coreLabel, SkyLabel(title: moment.core.name, detail: nil, style: .whisper, palette: palette, typeSize: typeSize),
-                             key: "core\(palette.nightVision)", altitude: moment.core.altitude-2.4, azimuth: moment.core.azimuth, facing: facing)
+            let face = label(coreLabel, SkyLabel(title: coreTitle, detail: nil, style: .whisper, palette: palette, typeSize: typeSize),
+                             key: "core\(palette.nightVision)\(coreWashed)", altitude: moment.core.altitude-2.4, azimuth: moment.core.azimuth, facing: facing)
             if let face {
                 // The visible words are what the eye lands on: they light up under a look and answer a tap.
                 if face.name != "body:core" {
@@ -219,11 +292,13 @@ import UIKit
                     face.components.set(InputTargetComponent())
                     face.components.set(HoverEffectComponent())
                 }
-                face.components.set(Self.access(moment.core.name, moment.core.place))
+                face.components.set(Self.access(coreTitle, moment.core.place))
             }
         }
+        placeStars(moment: moment, facing: facing, palette: palette)
+        placeLines(moment: moment, palette: palette, glare: glare, on: constellations, reduceMotion: reduceMotion)
         placeCompass(facing: facing, palette: palette, typeSize: typeSize)
-        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize)
+        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize, coreWashed: coreWashed)
         let night = park.dayLabel(plan.sky.evening)
         let plaqueText = String(localized: "Computed for \(park.shortName), \(night). Not a live view; clouds not shown, and the skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north.")
         // Scaled by its distance from the eye, so it reads at the size it would at one metre.
@@ -297,14 +372,78 @@ import UIKit
         }
     }
 
-    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize) {
+    /// Where a catalogue star is at a moment: altitude and azimuth, degrees.
+    private func horizontal(row: Int, moment: SkyMoment, facing: Double) -> (altitude: Double, azimuth: Double)? {
+        guard catalogueStars.indices.contains(row) else { return nil }
+        let star = catalogueStars[row]
+        return SkyDome.horizontal(of: moment.rotation*SkyDome.celestial(ra: star.ra, dec: star.dec), facing: facing)
+    }
+    /// Named stars' targets, over their stars, while they are up and the sky is dark enough to show them.
+    private func placeStars(moment: SkyMoment, facing: Double, palette: VisionPalette) {
+        for star in lore.stars {
+            guard let entity = namedStars[star.id], let place = horizontal(row: star.row, moment: moment, facing: facing) else { continue }
+            let seen = SkyDome.visibility(star.magnitude < 2.2 ? .bright : .middle, sunAltitude: moment.sunAltitude) > 0.3
+            guard place.altitude > 1, seen else { entity.isEnabled = false; continue }
+            billboard(entity, altitude: place.altitude, azimuth: place.azimuth, facing: facing, radius: Self.bodyRadius+0.6, degrees: 1.4)
+            // A breath of glow, too faint to notice until a look brightens it: the hover effect's canvas.
+            tint(entity, texture: glowTexture, level: 0.02, color: Self.ink(palette))
+            // "Vega", "high in the west, in Lyra". Rebuilt only when the words change.
+            let value = String(localized: "\(SkyLore.direction(altitude: place.altitude, azimuth: place.azimuth)), in \(star.constellation)")
+            if starAccess[star.id] != value {
+                starAccess[star.id] = value
+                entity.components.set(Self.access(star.name, value))
+            }
+        }
+    }
+    /// The figures: faint, cool lines that fade in over 0.6 s (at once under Reduce Motion) and
+    /// follow twilight as the middle stars do, a little dimmer under a bright Moon.
+    private func placeLines(moment: SkyMoment, palette: VisionPalette, glare: Double, on: Bool, reduceMotion: Bool) {
+        linesLevel = 0.3*SkyDome.visibility(.middle, sunAltitude: moment.sunAltitude)*(1-0.4*Self.smooth(glare/0.7))*(palette.highContrast ? 1.5 : 1)
+        linesColor = palette.sky(SIMD3(0.62, 0.72, 1))
+        if on != linesOn {
+            linesOn = on
+            linesTask?.cancel()
+            if reduceMotion {
+                linesFade = on ? 1 : 0
+            } else {
+                let start = linesFade, goal: Double = on ? 1 : 0, began = Date.now
+                linesTask = Task { [weak self] in
+                    while !Task.isCancelled {
+                        let t = min(1, Date.now.timeIntervalSince(began)/0.6)
+                        guard let self else { return }
+                        self.linesFade = start+(goal-start)*Self.smooth(t)
+                        self.paintLines()
+                        if t >= 1 { return }
+                        try? await Task.sleep(for: .milliseconds(16))
+                    }
+                }
+            }
+        }
+        paintLines()
+    }
+    private func paintLines() {
+        tint(figures, texture: lineTexture, level: linesLevel*linesFade, color: linesColor)
+    }
+    /// True when moonlight has washed the band out enough that a label on the core would name nothing visible.
+    nonisolated static func coreWashedOut(moonUp: Bool, washed: Double) -> Bool { moonUp && washed < 0.3 }
+
+    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize, coreWashed: Bool) {
+        if let selected, let star = lore.stars.first(where: { $0.id == selected }) {
+            guard let place = horizontal(row: star.row, moment: moment, facing: facing), namedStars[star.id]?.isEnabled == true else { card.isEnabled = false; return }
+            card.isEnabled = true
+            let detail = "\(String(localized: "\(Int(place.altitude.rounded()))° up in the \(Compass.name(place.azimuth))")) · \(star.constellation) · \(SkyLore.brightness(star.magnitude))"
+            label(card, SkyLabel(title: star.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(star.id)\(detail)\(palette.nightVision)",
+                  altitude: place.altitude-(typeSize.isAccessibilitySize ? 3.4 : 2.4), azimuth: place.azimuth, facing: facing)
+            card.components.set(Self.access(star.name, detail, activatable: false))
+            return
+        }
         let bodies = [moment.moon, moment.core] + moment.planets
         guard let selected, let body = bodies.first(where: { $0.id == selected }), body.up else { card.isEnabled = false; return }
         card.isEnabled = true
         var detail = body.place
         if body.kind == .planet { detail += " · " + WhatsUp.brightness(body.magnitude) }
         if body.kind == .moon { detail += " · " + String(localized: "\(Int((moment.moonIllumination*100).rounded()))% lit") }
-        if body.kind == .core { detail += " · " + String(localized: "the bright center of our galaxy") }
+        if body.kind == .core { detail += " · " + (coreWashed ? String(localized: "washed out by moonlight") : String(localized: "the bright center of our galaxy")) }
         label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(body.id)\(detail)\(palette.nightVision)",
               altitude: body.altitude-(body.kind == .moon ? 3.4 : 2.8), azimuth: body.azimuth, facing: facing)
         card.components.set(Self.access(body.name, detail, activatable: false))
@@ -431,6 +570,42 @@ import UIKit
             indices += [base, base+1, base+2, base, base+2, base+3]
         }
         var descriptor = MeshDescriptor(name: "stars")
+        descriptor.positions = MeshBuffers.Positions(positions)
+        descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        descriptor.primitives = .triangles(indices)
+        return try MeshResource.generate(from: [descriptor])
+    }
+    /// The constellation figures: each line a thin ribbon along the great circle between two
+    /// catalogue stars, stopping short of both so the stars stand clear of their lines, as on a
+    /// planetarium dome. Celestial coordinates, just inside the stars.
+    static func figureMesh(_ lines: [(Int, Int)], catalogue: [CatalogueStar]) throws -> MeshResource? {
+        let radius = starRadius-0.5, halfWidth = Double(radius)*tan(0.055*Double.pi/180)
+        var positions: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
+        for (a, b) in lines where catalogue.indices.contains(a) && catalogue.indices.contains(b) {
+            let p = SkyDome.celestial(ra: catalogue[a].ra, dec: catalogue[a].dec), q = SkyDome.celestial(ra: catalogue[b].ra, dec: catalogue[b].dec)
+            let angle = acos(max(-1, min(1, simd_dot(p, q))))
+            // The gap at each end: half the star's drawn size and a little more.
+            let gapA = (SkyTextures.starSize(magnitude: catalogue[a].mag)/2+0.45)*Double.pi/180
+            let gapB = (SkyTextures.starSize(magnitude: catalogue[b].mag)/2+0.45)*Double.pi/180
+            guard angle > gapA+gapB+0.002 else { continue }
+            let steps = max(1, Int((angle*180/Double.pi/2).rounded(.up)))
+            let axis = simd_normalize(simd_cross(p, q))
+            let side = SIMD3<Float>(axis*halfWidth)
+            for i in 0...steps {
+                // p turned toward q by t about their common axis (Rodrigues; axis ⟂ p).
+                let t = gapA+(angle-gapA-gapB)*Double(i)/Double(steps)
+                let centre = SIMD3<Float>(p*cos(t)+simd_cross(axis, p)*sin(t))*radius
+                positions += [centre-side, centre+side]
+                let v = Float(i)/Float(steps)
+                uvs += [[0, v], [1, v]]
+                if i > 0 {
+                    let base = UInt32(positions.count-4)
+                    indices += [base, base+1, base+3, base, base+3, base+2]
+                }
+            }
+        }
+        guard !indices.isEmpty else { return nil }
+        var descriptor = MeshDescriptor(name: "figures")
         descriptor.positions = MeshBuffers.Positions(positions)
         descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
         descriptor.primitives = .triangles(indices)

@@ -83,6 +83,26 @@ nonisolated enum SkyDome {
         guard span.duration > 0 else { return 0 }
         return min(1, max(0, date.timeIntervalSince(span.start)/span.duration))
     }
+    /// The scrub position a drag across the immersive sky asks for: the sky turned with the hand
+    /// by `degrees` of azimuth at its own 15.04° an hour. Westward (to the right, facing south)
+    /// moves time forward in the northern sky; facing north from the southern hemisphere, west is
+    /// to the left, so the sign turns over. Clamped to the night.
+    static func dragTarget(from start: Double, degrees: Double, southern: Bool, span: DateInterval) -> Double {
+        guard span.duration > 0, degrees.isFinite else { return start }
+        let hours = degrees/15.04*(southern ? -1 : 1)
+        return min(1, max(0, start+hours*3600/span.duration))
+    }
+    /// One step of following a drag: a quick ease toward the goal, but never more than `limit`
+    /// degrees of sky a second, however fast the hand moves. `degreesPerNight` is how far the sky
+    /// turns from scrub position 0 to 1.
+    static func chaseStep(from current: Double, toward goal: Double, seconds: Double, degreesPerNight: Double, limit: Double) -> Double {
+        guard degreesPerNight > 0 else { return goal }
+        guard seconds > 0 else { return current }
+        let gap = goal-current
+        guard abs(gap) >= 0.0001 else { return goal }
+        let cap = limit*seconds/degreesPerNight
+        return current+max(-cap, min(cap, gap*min(1, seconds*14)))
+    }
     /// Where a night opens: the middle of true darkness, else the middle of the span.
     static func darkest(_ sky: SkyConditions) -> Date {
         if let a = sky.darkStart, let b = sky.darkEnd, b > a { return a.addingTimeInterval(b.timeIntervalSince(a)/2) }
