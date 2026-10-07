@@ -2,7 +2,9 @@ import SwiftUI
 
 /// The score's four parts as an instrument readout under the gauge, so the number always arrives
 /// with its reasons. Each meter glides on the shared spring as nights are scrubbed. Without a
-/// forecast the cloud meter reads "Unknown" and the other maxima scale up, exactly as the score does.
+/// forecast the cloud meter shows the park's usual clouds and says so. When a cap holds the score
+/// below the sum of its parts (clouds, sky glow, smoke, short darkness), one line under the meters
+/// names it, so the parts and the number never seem to disagree.
 /// The whole readout is one button that opens the full breakdown. Within the seven-day model
 /// horizon the cloud meter carries one quiet line saying whether three forecast models agree.
 struct ScoreReadout: View {
@@ -12,6 +14,8 @@ struct ScoreReadout: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let score: DarknessScore
     var agreement: ModelAgreement?=nil
+    /// Words the cap line for tonight ("Clouds limit tonight to 55.") or another night.
+    var isTonight=true
     var action: () -> Void = {}
     private struct Part: Identifiable {
         let id: String
@@ -22,17 +26,30 @@ struct ScoreReadout: View {
         var note: String?=nil
     }
     private var parts: [Part] {
-        let scale=score.hasForecast ? 1 : 1/0.75
+        let scale=score.cloudPoints == nil ? 1/0.75 : 1
         return [
             Part(id:"moon",title:String(localized:"Moon"),spoken:String(localized:"Moonlight"),points:score.moonPoints,maximum:40*scale),
-            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Cloud cover"),points:score.cloudPoints,maximum:25,note:score.hasForecast ? agreement?.word : nil),
+            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Cloud cover"),points:score.cloudPoints,maximum:25,note:cloudNote),
             Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Light pollution"),points:score.bortlePoints,maximum:20*scale),
             Part(id:"hours",title:String(localized:"Dark hours"),spoken:String(localized:"Length of darkness"),points:score.lengthPoints,maximum:15*scale)
         ]
     }
+    private var cloudNote: String? {
+        switch score.basis {
+        case .forecast: agreement?.word
+        case .blended: String(localized:"Early look")
+        case .usual: score.cloudPoints == nil ? nil : String(localized:"Usual clouds")
+        }
+    }
+    /// The binding cap, when the parts add up to more than the score.
+    private var limitLine: String? {
+        guard let limit=score.limit else { return nil }
+        let sum=Int((score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints).rounded())
+        return limit.cap<sum ? limit.sentence(tonight:isTonight) : nil
+    }
     var body: some View {
         Button(action:action) {
-            Group {
+            VStack(alignment:.leading,spacing:12) {
                 if typeSize.isAccessibilitySize {
                     VStack(alignment:.leading,spacing:18) { ForEach(parts) { part in column(part) } }
                 } else {
@@ -42,6 +59,10 @@ struct ScoreReadout: View {
                         GridRow { ForEach(parts) { part in meter(part) } }
                         GridRow(alignment:.top) { ForEach(parts) { part in value(part) } }
                     }
+                }
+                // The weakest link, when it holds the score below its parts: the number and the meters agree.
+                if let limitLine {
+                    Text(limitLine).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
                 }
             }
             .padding(.horizontal,4).contentShape(Rectangle())
@@ -85,7 +106,7 @@ struct ScoreReadout: View {
         parts.map { part in
             (part.points.map { String(localized:"\(part.spoken), \(Int($0.rounded())) of \(Int(part.maximum.rounded()))") }
                 ?? String(localized:"\(part.spoken), unknown"))+(part.note.map { ", "+$0 } ?? "")
-        }.joined(separator:". ")
+        }.joined(separator:". ")+(limitLine.map { ". "+$0 } ?? "")
     }
     /// A hairline track with an amber fill; dashed and empty when the part is unknown.
     private struct Meter: View {
@@ -122,3 +143,10 @@ struct ScoreReadout: View {
     if let p=m.home { ScoreReadout(score:m.night(p).score,agreement:ModelAgreement(low:4,high:48)).padding(24).background(.black).preferredColorScheme(.dark) }
 }
 #Preview("Readout • AX5") { let m=PlanModel();if let p=m.home { ScoreReadout(score:m.night(p).score).padding(24).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }
+#Preview("Readout • held by clouds / early look / usual clouds") {
+    VStack(spacing:40) {
+        ScoreReadout(score:DarknessScore(value:28,moonPoints:40,cloudPoints:5,bortlePoints:17.5,lengthPoints:15,basis:.forecast,cloudUsed:80,limit:.clouds(28)))
+        ScoreReadout(score:DarknessScore(value:74,moonPoints:38,cloudPoints:16,bortlePoints:10,lengthPoints:14,basis:.blended(weight:0.4,leadDays:7.2),cloudUsed:36,limit:.skyGlow(74)),isTonight:false)
+        ScoreReadout(score:DarknessScore(value:60,moonPoints:30,cloudPoints:14,bortlePoints:17.5,lengthPoints:15,basis:.usual,cloudUsed:44,limit:.clouds(60)))
+    }.padding(24).background(.black).preferredColorScheme(.dark)
+}

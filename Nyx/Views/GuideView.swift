@@ -18,7 +18,7 @@ struct GuideView:View {
         case .planning:
             guard let home=model.home else { return [] }
             let best=Array(model.ranked(model.nearby(latitude:model.location.latitude,longitude:model.location.longitude)).prefix(3))
-            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in String(localized:"\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(night.score.hasForecast ? String(localized:"forecast included") : String(localized:"clouds unknown, moon and darkness only")). \(model.alertSummary(park))") } + (park.accessNote.map { [String(localized:"\(park.shortName); getting there: \($0)")] } ?? []) } + [model.location.latitude == nil ? String(localized:"Starting park: \(home.shortName). Distances are straight-line estimates.") : String(localized:"Starting point: the device location. Distances are straight-line estimates.")]
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in String(localized:"\(park.shortName); \(park.dayLabel(night.id)); score \(night.score.value)/100 \(night.score.band.label); \(NightLookup.basis(night)). \(model.alertSummary(park))") } + (park.accessNote.map { [String(localized:"\(park.shortName); getting there: \($0)")] } ?? []) } + [model.location.latitude == nil ? String(localized:"Starting park: \(home.shortName). Distances are straight-line estimates.") : String(localized:"Starting point: the device location. Distances are straight-line estimates.")]
         case .recap:
             return entries.prefix(8).map { String(localized:"\(model.park($0.parkID)?.shortName ?? String(localized:"Park")); \(model.park($0.parkID)?.dateLabel($0.date) ?? $0.date.formatted(date:.abbreviated,time:.omitted)); observed Bortle \($0.observedBortle); observation: \(String($0.notes.prefix(250)))") }
         case .learn(let essay): return [String(essay.content.prefix(6500))]
@@ -55,7 +55,7 @@ struct GuideView:View {
                 guard requestID>0 else { return }
                 // Planning gets tools that call the engine; recaps and explainers reason over their records only.
                 var lookup:NightLookup?
-                if case .planning = mode { lookup=NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today) }
+                if case .planning = mode { lookup=NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details) }
                 await guide.answer(question:prompt,context:records,lookup:lookup)
                 // Focus stays on the button while the answer streams in below it, so say when it is there.
                 guard !Task.isCancelled else { return }

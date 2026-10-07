@@ -81,9 +81,7 @@ import CoreLocation
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
         }
-        let forecast=forecasts[park.id]
-        let clouds=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end)
-        return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:clouds),cloudCover:clouds,forecastUpdated:clouds==nil ? nil : forecast?.updated)
+        return NightPlanner.night(park:park,sky:sky,forecast:forecasts[park.id],detail:details[park.id],now:today,scoring:scoring)
     }
     /// What the forecast says around the score for one night: model agreement (with the score the
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
@@ -98,9 +96,11 @@ import CoreLocation
         guard let detail=details[night.park.id] else { return nil }
         let window=night.sky.cloudWindow
         var outlook=detail.outlook(from:window.start,to:window.end)
-        if night.score.hasForecast, let agreement=outlook.agreement {
-            let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloudCover:agreement.low).value
-            let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloudCover:agreement.high).value
+        if night.score.hasForecast, !night.upperCloudOnly, let agreement=outlook.agreement {
+            // The same caps as the score itself, smoke included.
+            let aerosol=outlook.aerosol
+            let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.low,basis:.forecast,aerosol:aerosol).value
+            let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.high,basis:.forecast,aerosol:aerosol).value
             outlook.scoreRange=min(clearest,cloudiest)...max(clearest,cloudiest)
         } else { outlook.agreement=nil }
         return outlook.isEmpty ? nil : outlook
@@ -138,6 +138,25 @@ import CoreLocation
     func outlooks(_ nights:[Night])->[Date:NightOutlook] {
         Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
+    /// The best clear, dark, moon-free stretch of a forecast night, from the hourly clouds
+    /// (mid and high cloud only at a summit above the inversion). Nil without a full forecast.
+    func clearWindow(_ night:Night)->ClearWindow? {
+        guard night.score.hasForecast else { return nil }
+        let window=night.sky.cloudWindow
+        var hours:[(time:Date,cloud:Double)]=[]
+        if night.upperCloudOnly, let layers=details[night.park.id]?.layers, let mid=layers.values["cloud_cover_mid"], let high=layers.values["cloud_cover_high"], mid.count==layers.times.count, high.count==layers.times.count {
+            hours=layers.times.indices.compactMap { i in
+                guard let m=mid[i], let h=high[i], layers.times[i]+1800>window.start.timeIntervalSince1970, layers.times[i]-1800<window.end.timeIntervalSince1970 else { return nil }
+                return (Date(timeIntervalSince1970:layers.times[i]),100*(1-(1-m/100)*(1-h/100)))
+            }
+        } else if let forecast=forecasts[night.park.id] { hours=forecast.hours(from:window.start,to:window.end) }
+        return ClearWindow.find(park:night.park,sky:night.sky,hours:hours)
+    }
+    /// Aurora season, satellites, zodiacal light, the faintest stars and the core's light dome.
+    func skyNotes(_ night:Night)->[SkyNote] {
+        let aerosol=details[night.park.id]?.air?.mean("aerosol_optical_depth",from:night.sky.cloudWindow.start,to:night.sky.cloudWindow.end,valid:0...10)
+        return SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:aerosol)
+    }
     /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
     func smokeCaveat(_ night:Night)->String? {
         guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
@@ -146,7 +165,7 @@ import CoreLocation
     /// True when a night without clouds simply lies past the forecast's last hour (or about two
     /// weeks out when no forecast has arrived), rather than having a forecast that failed.
     func beyondForecast(_ night:Night)->Bool {
-        guard !night.score.hasForecast else { return false }
+        guard night.basis == .usual else { return false }
         if let last=forecasts[night.park.id]?.times.last { return night.sky.cloudWindow.end.timeIntervalSince1970>last+3600 }
         return night.id.timeIntervalSince(today)>14*86400
     }
@@ -164,11 +183,11 @@ import CoreLocation
             .filter { $0.1<=1 }.min { $0.1<$1.1 }?.0
     }
     func ranked(_ candidates:[Park])->[Park] {
-        // Ranked as every other surface ranks nights: on a tie, a forecast before an estimate.
+        // Ranked as every other surface ranks nights: on a tie, the darker measured sky first.
         let nights=Dictionary(candidates.map { ($0.id,night($0)) },uniquingKeysWith:{ first,_ in first })
         return candidates.sorted { a,b in
             guard let x=nights[a.id], let y=nights[b.id] else { return a.name<b.name }
-            return x.score.value==y.score.value && x.score.hasForecast==y.score.hasForecast ? a.name<b.name : NightPlanner.better(x,y)
+            return NightPlanner.better(x,y)
         }
     }
     var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }

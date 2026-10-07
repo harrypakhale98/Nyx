@@ -34,12 +34,10 @@ struct NightCell: View {
                         glow.fill(Path(ellipseIn:CGRect(x:center.x-halo,y:center.y-halo,width:2*halo,height:2*halo)),with:.color(palette.accent.opacity(0.22*access.glow*(isPast ? 0.35 : 1))))
                     }
                 }
-                let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
-                let circle=mark.path(center:center,radius:radius)
+                let mark=NightMark.mark(night,differentiate:access.differentiate)
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
-                if mark.filled { context.fill(circle,with:.color(palette.accent.opacity((0.45+Double(night.score.value)/200)*fade))) }
-                else { context.stroke(circle,with:.color(palette.accent.opacity(fade)),lineWidth:1.1) }
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200)
             }.frame(height:28*scale).accessibilityHidden(true)
             if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(palette.muted) }
@@ -52,8 +50,8 @@ struct NightCell: View {
     private var spoken:String {
         var parts=[isTonight ? String(localized:"Tonight, \(night.park.dayLabel(night.id))") : night.park.dayLabel(night.id),
                    String(localized:"\(night.score.value), \(night.score.band.label)")]
+        if let label=night.basisLabel { parts.append(label) }
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
-        else { parts.append(String(localized:"No cloud forecast")) }
         if highlighted { parts.append(String(localized:"In the five-night moon window")) }
         if let marker { parts.append(marker.name) }
         if isPast { parts.append(String(localized:"Past night")) }
@@ -80,12 +78,12 @@ struct NightPeek: View {
                 Spacer(minLength:12)
                 VStack(alignment:.trailing,spacing:2) {
                     Text("\(night.score.value)").font(.system(size:min(scoreSize,72),weight:.light,design:.serif)).foregroundStyle(palette.accent)
-                    Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.compactBandLabel).font(.caption).foregroundStyle(palette.muted)
                 }
             }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
             else { Text("True darkness \(night.park.time(night.sky.darkStart)) – \(night.park.time(night.sky.darkEnd))").font(.subheadline).foregroundStyle(palette.ink) }
-            Text(night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))).font(.caption).foregroundStyle(palette.muted)
+            Text(night.basisCaption(typical:true) ?? night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? "").font(.caption).foregroundStyle(palette.muted)
             if let event {
                 Divider().overlay(palette.line)
                 HStack(alignment:.top,spacing:12) {
@@ -207,11 +205,11 @@ struct CalendarView: View {
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
                     Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                    Text(night.score.hasForecast ? String(localized:"Forecast included") : night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.basisCaption(typical:true) ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included") : night.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown.")))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
+                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Forecast included"))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
                 .accessibilityHint(data.inWindow.contains(night.id) ? "In the five-night moon window. Opens score breakdown." : "Opens score breakdown.")
                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                 .contextMenu {
@@ -262,7 +260,7 @@ struct CalendarView: View {
         } }
     }
     @ViewBuilder private var legend: some View {
-        Text("Solid: full forecast. Hollow: moon and darkness only. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
+        Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
         if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
     }
     /// The chosen night beside the month: its breakdown, and the way into the park on that night.

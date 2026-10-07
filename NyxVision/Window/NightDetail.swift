@@ -56,7 +56,7 @@ struct NightDetail: View {
                 .accessibilityLabel(Text("Darkness score"))
                 .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.score.band.label)"))
             Text(plan.score.band.label).font(.system(.title, design: .serif)).foregroundStyle(palette.ink)
-            Text("Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go.")
+            Text("No cloud forecast. This score uses the park's usual clouds for the month. Nyx on Vision Pro fetches no forecast; check one before you go.")
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: 380, alignment: .leading)

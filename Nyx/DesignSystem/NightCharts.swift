@@ -31,13 +31,13 @@ nonisolated struct NightChart: Sendable {
     // MARK: Nights
 
     /// Darkness score by night: the river's thirty nights or a calendar month. Nights without a
-    /// cloud forecast are labelled as estimates; where three forecast models disagree, two more
+    /// full cloud forecast say so ("Early look", "No cloud forecast yet"); where three forecast models disagree, two more
     /// series give the clearest and cloudiest models' scores, so the spread can be heard too.
     static func nights(_ nights:[Night],title:String,outlooks:[Date:NightOutlook]=[:],events:[Date:String]=[:])->NightChart {
         let labels=nights.map { $0.park.dayLabel($0.id) }
         let points=nights.indices.map { i in
             let night=nights[i]
-            var parts=[night.score.hasForecast ? night.score.band.label : String(localized:"Estimate, moon and darkness only")]
+            var parts=[night.score.band.label]+[night.basisLabel].compactMap { $0 }
             if let event=events[night.id] { parts.append(event) }
             return Point(x:Double(i),y:Double(night.score.value),label:parts.joined(separator:". "))
         }
@@ -59,10 +59,10 @@ nonisolated struct NightChart: Sendable {
     /// The best night, how many are estimates, and the best band reached.
     static func summary(_ nights:[Night])->String {
         guard let best=nights.max(by:{ $0.score.value<$1.score.value || ($0.score.value==$1.score.value && $0.id>$1.id) }) else { return String(localized:"No nights available") }
-        let estimates=nights.filter { !$0.score.hasForecast }.count
+        let estimates=nights.filter { $0.basis == .usual }.count
         let first=String(localized:"Best night: \(best.park.dayLabel(best.id)), \(best.score.value) out of 100, \(best.score.band.label).")
-        let second=estimates==0 ? String(localized:"Every night includes a cloud forecast.")
-            : estimates==nights.count ? String(localized:"No night has a cloud forecast yet; scores are moon and darkness only.")
+        let second=estimates==0 ? (nights.allSatisfy { $0.score.hasForecast } ? String(localized:"Every night includes a cloud forecast.") : String(localized:"Every night includes a cloud forecast; the later ones are an early look."))
+            : estimates==nights.count ? String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds.")
             : String(localized:"\(estimates) of \(nights.count) nights have no cloud forecast yet.")
         return first+" "+second
     }

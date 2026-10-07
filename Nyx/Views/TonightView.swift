@@ -102,7 +102,7 @@ struct TonightView: View {
                 .hoverEffect(.lift)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
-            Text(night.score.hasForecast ? String(localized:"\(park.dayLabel(night.id)) · forecast included") : String(localized:"Moon and darkness only. Clouds are unknown.")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            Text(night.basisCaption(unavailable:!model.beyondForecast(night)) ?? String(localized:"\(park.dayLabel(night.id)) · forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
             if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
@@ -120,7 +120,7 @@ struct TonightView: View {
         }
     }
     private var footnote: some View {
-        Text("Each park uses its own local date. Estimates can change when cloud forecasts arrive.").font(.caption).foregroundStyle(palette.muted)
+        Text("Each park uses its own local date. Scores without a full forecast can change when one arrives.").font(.caption).foregroundStyle(palette.muted)
     }
     @ViewBuilder private var extras: some View {
         if !loading { tripLink }

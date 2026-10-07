@@ -38,7 +38,7 @@ struct ParkRow: View {
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") \(night.park.drivable ? "" : String(localized:"No road access.")) Darkness score \(night.score.value), \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cloud forecast included.") : String(localized:"Moon and darkness only.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
+            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") \(night.park.drivable ? "" : String(localized:"No road access.")) Darkness score \(night.score.value), \(night.score.band.label). \(night.basisLabel.map { $0+"." } ?? String(localized:"Cloud forecast included.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
@@ -51,7 +51,7 @@ struct ParkRow: View {
     }
     private var number: some View {
         // The score never wraps, whatever the column width; the name beside it does.
-        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
+        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
     }
 }
 /// The Parks list's narrowing switches, kept apart from the view so they can be tested.
@@ -94,7 +94,7 @@ struct ParksView: View {
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate".
-                if filtered.contains(where:{ !model.night($0).score.hasForecast }) { Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted) }
+                if filtered.contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if filtered.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
@@ -187,7 +187,13 @@ struct ParkDetailView: View {
     /// Agreement and the cloud layer, under the cloud figure.
     private var cloudContext:[String] {
         guard let outlook else { return [] }
-        return [outlook.agreement?.sentence(tonight:night.id==model.tonight(park)),outlook.layers?.note].compactMap { $0 }
+        return [outlook.agreement?.sentence(tonight:night.id==model.tonight(park)),night.upperCloudOnly ? nil : outlook.layers?.note].compactMap { $0 }
+    }
+    /// The cloud figure beside "Cloud cover": the forecast's average, else the park's usual cloud.
+    private var cloudValue:String {
+        if let cloud=night.cloudCover { return String(localized:"\(Int(cloud.rounded()))% average") }
+        if let usual=night.usualCloud { return String(localized:"Usually \(Int(usual.rounded()))%") }
+        return String(localized:"Unavailable")
     }
     /// What to bring, one short line each: the coldest hour, dew on optics, and wind. Lines with
     /// no data are left out; with none, the section is not shown.
@@ -283,9 +289,15 @@ struct ParkDetailView: View {
                 .modifier(DepthParallax(depth:0.1))
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:night.id==model.tonight(park))).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
-            if !night.score.hasForecast { Text(night.withTypicalClouds(model.beyondForecast(night) ? String(localized:"Moon and darkness only — forecast not yet available.") : String(localized:"Cloud forecast unavailable. Moon and darkness only."))).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
-            ScoreReadout(score:night.score,agreement:outlook?.agreement) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+            if let window=model.clearWindow(night) {
+                // At accessibility sizes the glyph would take a column of its own: the words alone.
+                Label { Text(window.line(park:park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
+                    .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
+                    .accessibilityElement(children:.combine)
+            }
+            ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:night.id==model.tonight(park)) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
             if night.id==model.tonight(park) { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
         }
@@ -310,7 +322,7 @@ struct ParkDetailView: View {
         } }.id("sky")
         Panel {
             VStack(alignment:.leading,spacing:18) {
-                WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
+                WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park),notes:model.skyNotes(night))
                 // Tonight's wake-ups (AlarmKit), beside the moments they are for.
                 if FieldAlarms.supported, night.id==model.tonight(park) {
                     let options=FieldNight.alarmOptions(park:park,sky:night.sky,at:DebugScenario.date ?? .now)
@@ -335,7 +347,8 @@ struct ParkDetailView: View {
         Panel { VStack(alignment:.leading,spacing:16) {
             Eyebrow(text:"What the sky may hold")
             VStack(alignment:.leading,spacing:6) {
-                LabeledContent("Cloud cover",value:night.cloudCover.map{String(localized:"\(Int($0.rounded()))% average")} ?? String(localized:"Unavailable"))
+                LabeledContent("Cloud cover",value:cloudValue)
+                if night.upperCloudOnly { Text("The summit sits above most low cloud, so the score counts mid and high cloud only.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 ForEach(cloudContext,id:\.self) { line in Text(line).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
             if let clarity=outlook?.clarity {
@@ -414,14 +427,20 @@ struct ScoreBreakdownView: View {
                 VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
             }
             .accessibilityElement(children:.combine)
-            row("Moonlight",points:night.score.moonPoints,of:40,fact:moonFact,detail:String(localized:"Illumination and the part of true darkness when the Moon is below the horizon."))
-            row("Cloud cover",points:night.score.cloudPoints,of:25,fact:night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover across the dark window.") } ?? String(localized:"No forecast covers this night yet."),
+            // The weakest link, said beside the number it sets, before the parts that add up to more.
+            if let limit=night.score.limit, limit.cap<partsSum {
+                if case .darkness = limit {} else {
+                    Text(limit.sentence(tonight:isTonight)+" "+String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                }
+            }
+            row("Moonlight",points:night.score.moonPoints,of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
+            row("Cloud cover",points:night.score.cloudPoints,of:25,fact:cloudFact,
                 context:cloudContext,
-                detail:cloudContext.isEmpty ? String(localized:"The hourly forecast averaged over the complete dark window.")
-                    : String(localized:"The hourly forecast averaged over the complete dark window. Model agreement, cloud layers and smoke are context; they do not change the score."))
+                detail:cloudContext.isEmpty ? String(localized:"The hourly forecast averaged over the complete dark window. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
+                    : String(localized:"The hourly forecast averaged over the complete dark window, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; heavy smoke can cap the score."))
             row("Light pollution",points:night.score.bortlePoints,of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"A conservative Bortle estimate. It is not a measurement."))
             row("Length of darkness",points:night.score.lengthPoints,of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"Astronomical darkness, with ten hours receiving full credit."))
-            if !night.score.hasForecast { Text("Clouds are unknown. The remaining components are scaled to 100. This estimate may change when a forecast arrives.").foregroundStyle(palette.muted) }
+            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(caption+" "+String(localized:"The score will change as a forecast arrives.")).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
             else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
             if let event=model.events(night).item(park:night.park,sky:night.sky,isTonight:isTonight) {
@@ -439,6 +458,19 @@ struct ScoreBreakdownView: View {
             }
             Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
             ShareCardButton(night:night)
+        }
+    }
+    /// The four parts' sum before any cap, as the readout shows them.
+    private var partsSum:Int { Int((night.score.moonPoints+(night.score.cloudPoints ?? 0)+night.score.bortlePoints+night.score.lengthPoints).rounded()) }
+    private var cloudFact:String {
+        switch night.basis {
+        case .forecast: return night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover across the dark window.") } ?? String(localized:"No forecast covers this night yet.")
+        case .blended(_, let lead):
+            guard let forecast=night.cloudCover, let counted=night.score.cloudUsed else { return String(localized:"An early look at the clouds.") }
+            return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(max(1,Int(lead.rounded()))) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%.")
+        case .usual:
+            guard let usual=night.usualCloud else { return String(localized:"No forecast covers this night yet.") }
+            return String(localized:"No forecast covers this night yet. Usual cloud here this month: \(Int(usual.rounded()))%.")
         }
     }
     private var moonFact:String {
@@ -460,10 +492,10 @@ struct ScoreBreakdownView: View {
         return [("globe.americas",String(localized:"Satellite night lights: \(SkyGlow.levelLabel(SkyGlow.shared.level(site.glow))). Context only; not part of the score."))]
     }
     private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
-    /// `weight` is the component's share of 100; without clouds the others are scaled up to fill it.
+    /// `weight` is the component's share of 100; with no cloud figure at all the others are scaled up to fill it.
     /// Each part states the fact it was scored from, then how it is scored.
     private func row(_ title:LocalizedStringKey,points:Double?,of weight:Double,fact:String,context:[(symbol:String,text:String)]=[],detail:String)->some View {
-        let maximum=night.score.hasForecast || points==nil ? weight : weight/0.75
+        let maximum=night.score.cloudPoints != nil || points==nil ? weight : weight/0.75
         return VStack(alignment:.leading,spacing:9) {
             ViewThatFits(in:.horizontal) {
                 HStack(alignment:.firstTextBaseline) { Text(title).font(.headline);Spacer();amount(points,of:maximum) }

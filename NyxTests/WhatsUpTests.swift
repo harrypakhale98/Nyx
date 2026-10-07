@@ -46,7 +46,7 @@ import Testing
         let up = WhatsUp(park: jotr, sky: try sky(jotr, "2026-12-13"), isTonight: true)
         #expect(up.planets.first?.title == "Venus")
         #expect(up.planets.allSatisfy { ["very bright", "bright", "faint"].contains($0.note ?? "") })
-        #expect(WhatsUp.brightness(-4) == "very bright" && WhatsUp.brightness(0.5) == "bright" && WhatsUp.brightness(1.5) == "faint")
+        #expect(WhatsUp.brightness(-4) == "very bright" && WhatsUp.brightness(0.5) == "bright" && WhatsUp.brightness(1.6) == "faint" && WhatsUp.brightness(1.5) == "bright")
         #expect(up.items.map(\.kind).first == .meteors)
     }
     /// Geminids 2026 from Joshua Tree: a glyph, a reminder, a rounded rate and the published ZHR beside it.
@@ -55,7 +55,7 @@ import Testing
         let up = WhatsUp(park: jotr, sky: try sky(jotr, "2026-12-13"), isTonight: true)
         #expect(up.events.glyph == .meteors && up.events.reminderShower?.shower.code == "GEM")
         let item = try #require(up.shower)
-        #expect(item.note == "peak tonight" && item.value == "about 130 an hour")
+        #expect(item.note == "peak tonight" && item.value == "70–130 an hour")
         #expect(item.detail.contains("Moon down") && item.footnote?.contains("150 an hour") == true)
         #expect(up.events.headline(park: jotr) == "Geminids peak")
     }
