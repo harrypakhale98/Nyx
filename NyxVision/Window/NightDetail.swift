@@ -54,13 +54,26 @@ struct NightDetail: View {
                 .foregroundStyle(palette.accent)
                 .contentTransition(.numericText(value: Double(plan.score.value)))
                 .accessibilityLabel(Text("Darkness score"))
-                .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.score.band.label)"))
-            Text(plan.score.band.label).font(.system(.title, design: .serif)).foregroundStyle(palette.ink)
-            Text("No cloud forecast. This score uses the park's usual clouds for the month. Nyx on Vision Pro fetches no forecast; check one before you go.")
+                .accessibilityValue(Text("\(plan.score.value) out of 100, \(plan.night.bandWithBasis)"))
+            Text(plan.night.basisLabel.map { "\(plan.score.band.label) · \($0)" } ?? plan.score.band.label)
+                .font(.system(.title, design: .serif)).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
+            // The weakest link, when it holds the score below its parts ("Clouds limit tonight to 55.").
+            if let limit = limitLine(plan) {
+                Text(limit).font(.callout).foregroundStyle(palette.accent).fixedSize(horizontal: false, vertical: true)
+            }
+            // What the clouds rest on, in the iPhone's words.
+            Text(model.cloudCaption(plan.night))
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: 380, alignment: .leading)
         .animation(VisionMotion.spring, value: plan.score.value)
+    }
+    /// The binding cap, when the four parts add up to more than the score.
+    private func limitLine(_ plan: NightPlan) -> String? {
+        let score = plan.score
+        guard let limit = score.limit else { return nil }
+        let sum = Int((score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints).rounded())
+        return limit.cap < sum ? limit.sentence(tonight: model.nightOffset == 0) : nil
     }
     private func moon(_ plan: NightPlan) -> some View {
         VStack(spacing: 10) {
@@ -146,12 +159,31 @@ struct NightDetail: View {
                 }
                 .accessibilityElement(children: .combine)
             }
+            clouds(plan, moment)
         }
+    }
+    /// "Forecast clouds": the hour's cover the sky draws, or why none is drawn.
+    private func clouds(_ plan: NightPlan, _ moment: SkyMoment) -> some View {
+        let cloud = plan.cloud(at: moment.date)
+        let value: String = if let cloud {
+            plan.night.basis.isEarlyLook ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look eased toward usual clouds")
+                : String(localized: "About \(Int((cloud*100).rounded()))% of the sky this hour")
+        } else if plan.night.basis == .usual {
+            String(localized: "None drawn: no cloud forecast reaches this night")
+        } else {
+            String(localized: "None drawn: the forecast has no value for this hour")
+        }
+        return HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Image(systemName: cloud == nil ? "cloud" : "cloud.fill").foregroundStyle(palette.muted).accessibilityHidden(true)
+            Text("Forecast clouds").font(.body.weight(.medium))
+            Text(value).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private func honesty(_ plan: NightPlan) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Computed for \(plan.park.shortName), \(plan.park.dayLabel(plan.sky.evening)). Not a live view; clouds not shown.")
+            Text(VisionModel.honesty(plan))
             Text("Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
         }
         .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
@@ -213,6 +245,19 @@ struct ParkDataUnavailable: View {
     let model = VisionModel(now: .now)
     model.nightVision = true
     return NavigationStack { NightDetail() }.environment(model).environment(\.visionPalette, VisionPalette(nightVision: true, solid: true))
+}
+
+#Preview("Night detail, forecast 60% cloud") {
+    let model = VisionModel(now: .now)
+    model.forecasts = VisionModel.fixture(parks: model.parks, cover: 60, issued: .now)
+    return NavigationStack { NightDetail() }.environment(model)
+}
+
+#Preview("Night detail, early look") {
+    let model = VisionModel(now: .now)
+    model.forecasts = VisionModel.fixture(parks: model.parks, cover: 40, issued: .now)
+    model.nightOffset = 6
+    return NavigationStack { NightDetail() }.environment(model)
 }
 
 #Preview("Park data unavailable") {

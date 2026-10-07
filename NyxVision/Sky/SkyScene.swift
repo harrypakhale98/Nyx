@@ -9,7 +9,8 @@ import UIKit
 /// are built once in celestial coordinates; a moment only turns that sphere (`SkyDome.rotation`),
 /// so scrubbing a night is a single transform change. The Moon, the planets and the labels move
 /// against the stars and are placed each moment; the sky's colour is redrawn only when the Sun or
-/// the Moon has moved enough to change it. Nothing here touches the network.
+/// the Moon has moved enough to change it. Forecast clouds, when a forecast reaches the hour, dim
+/// the stars and drift overhead as a soft deck (`SkyClouds`). Nothing here touches the network.
 @MainActor final class SkyScene {
     /// Floor origin of the immersive space.
     let root = Entity()
@@ -58,6 +59,18 @@ import UIKit
     /// A shell of input targets 40 m out, behind every star and label: what a drag on the empty
     /// sky lands on (`SkySpace` turns the night with it). It has no hover effect and draws nothing.
     let grab = Entity()
+    /// The forecast's cloud deck, fixed to the land (not the stars), drifting slowly unless Reduce
+    /// Motion is on. One texture per tenth of cover, drawn off the main thread on first use.
+    private let clouds = ModelEntity()
+    private var cloudTextures: [Int: TextureResource] = [:]
+    private var cloudPending = Set<Int>()
+    private var cloudWanted: (tenths: Int, presence: Double, color: SIMD3<Double>)?
+    private var cloudDrift: Task<Void, Never>?
+    private var cloudYaw: Float = 0
+    /// Draw order for what overlaps in the sky: the Milky Way, the stars, the figures, then the
+    /// clouds over them, then every label over the clouds, so words are never clouded.
+    private static let order = ModelSortGroup(depthPass: nil)
+    private static func sort(_ entity: Entity, _ rank: Int32) { entity.components.set(ModelSortGroupComponent(group: order, order: rank)) }
 
     // Distances in metres: far enough that both eyes see the sky at infinity, inside any far plane.
     static let starRadius: Float = 30, milkyWayRadius: Float = 34, domeRadius: Float = 48, bodyRadius: Float = 28, labelRadius: Float = 10
@@ -88,7 +101,7 @@ import UIKit
         if let look = VisionDebug.look { eye.orientation = simd_quatf(angle: look.pitch*Float.pi/180, axis: [1, 0, 0])*simd_quatf(angle: -look.yaw*Float.pi/180, axis: [0, 1, 0]) }
         root.addChild(eye)
         eye.addChild(ground)
-        for child in [dome, celestial, farRidge, nearRidge, moonAureole, moonHalo, moonShadow, moon, sun, coreTarget, coreLabel, card, plaque] as [Entity] { eye.addChild(child) }
+        for child in [dome, celestial, farRidge, nearRidge, clouds, moonAureole, moonHalo, moonShadow, moon, sun, coreTarget, coreLabel, card, plaque] as [Entity] { eye.addChild(child) }
     }
 
     /// Builds the meshes and textures. Async because the additive program compiles off the main thread.
@@ -119,9 +132,14 @@ import UIKit
             if let mesh = try? Self.starMesh(members) { entity.model = ModelComponent(mesh: mesh, materials: []) }
             celestial.addChild(entity)
             stars.append((entity, layer))
+            Self.sort(entity, 1)
         }
         if let mesh = try? Self.milkyWayMesh() { milkyWay.model = ModelComponent(mesh: mesh, materials: []) }
         celestial.addChild(milkyWay)
+        Self.sort(milkyWay, 0)
+        if let mesh = try? Self.domeMesh(radius: SkyClouds.radius, from: SkyClouds.bottom) { clouds.model = ModelComponent(mesh: mesh, materials: []) }
+        clouds.isEnabled = false
+        Self.sort(clouds, 3)
 
         if let mesh = try? Self.domeMesh() { dome.model = ModelComponent(mesh: mesh, materials: []) }
         dome.components.set(AccessibilityComponent())
@@ -162,6 +180,7 @@ import UIKit
         if let mesh = try? Self.figureMesh(lore.lines, catalogue: catalogue) { figures.model = ModelComponent(mesh: mesh, materials: []) }
         figures.isEnabled = false
         celestial.addChild(figures)
+        Self.sort(figures, 2)
         let quad = Self.quad()
         for star in lore.stars {
             let entity = ModelEntity(mesh: quad, materials: [])
@@ -200,7 +219,9 @@ import UIKit
 
     // MARK: Each moment
 
-    func update(plan: NightPlan, moment: SkyMoment, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?, constellations: Bool = true, reduceMotion: Bool = false) {
+    /// `cloud` is the forecast's cover at this moment (0…1), nil when no forecast reaches it.
+    func update(plan: NightPlan, moment: SkyMoment, cloud: Double? = nil, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?,
+                constellations: Bool = true, reduceMotion: Bool = false) {
         apply(palette: palette)
         let park = plan.park, facing = SkyDome.facing(for: park)
         let m = moment.rotation
@@ -213,7 +234,9 @@ import UIKit
         let glare = light.moonGlare
         // What the park's own light pollution leaves of the faint sky (Bortle 1 all of it, 5 about a third).
         let dark = pow(max(0.03, 1-0.12*Double(park.bortleEstimate-1)), 1.5)
-        let boost = palette.highContrast ? 1.25 : 1.0
+        // Forecast clouds dim everything beyond them alike; the deck below adds where they lie.
+        let clouded = SkyDome.cloudDimming(cloud ?? 0)
+        let boost = (palette.highContrast ? 1.25 : 1.0)*clouded
         for (entity, layer) in stars {
             var level = SkyDome.visibility(layer, sunAltitude: moment.sunAltitude)
             switch layer {
@@ -261,7 +284,7 @@ import UIKit
         // VoiceOver's swipe up and down move the clock half an hour, as a drag across the sky does.
         domeAccess.systemActions = [.increment, .decrement]
         domeAccess.label = LocalizedStringResource(stringLiteral: String(localized: "Sky over \(park.shortName) at \(park.time(moment.date))"))
-        domeAccess.value = LocalizedStringResource(stringLiteral: Self.summary(moment))
+        domeAccess.value = LocalizedStringResource(stringLiteral: Self.summary(moment, cloud: cloud))
         dome.components.set(domeAccess)
 
         placeMoon(plan: plan, moment: moment, facing: facing, palette: palette, light: light)
@@ -296,15 +319,16 @@ import UIKit
             }
         }
         placeStars(moment: moment, facing: facing, palette: palette)
-        placeLines(moment: moment, palette: palette, glare: glare, on: constellations, reduceMotion: reduceMotion)
+        placeLines(moment: moment, palette: palette, glare: glare, clouded: clouded, on: constellations, reduceMotion: reduceMotion)
+        placeClouds(cloud, light: light, palette: palette, reduceMotion: reduceMotion)
         placeCompass(facing: facing, palette: palette, typeSize: typeSize)
         placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize, coreWashed: coreWashed)
         let night = park.dayLabel(plan.sky.evening)
-        let plaqueText = String(localized: "Computed for \(park.shortName), \(night). Not a live view; clouds not shown, and the skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north.")
+        let plaqueText = VisionModel.honesty(plan)+" "+String(localized: "The skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north.")
         // Scaled by its distance from the eye, so it reads at the size it would at one metre.
         let plaquePosition: SIMD3<Float> = [0, -0.95, -1.9]
         label(plaque, SkyLabel(title: park.shortName, detail: plaqueText, style: .plaque, palette: palette, typeSize: typeSize),
-              key: "plaque\(park.id)\(night)\(palette.nightVision)", position: plaquePosition, scale: simd_length(plaquePosition))
+              key: "plaque\(park.id)\(night)\(palette.nightVision)\(plaqueText.hashValue)", position: plaquePosition, scale: simd_length(plaquePosition))
         plaque.components.set(Self.access(park.shortName, plaqueText, activatable: false))
     }
 
@@ -397,8 +421,8 @@ import UIKit
     }
     /// The figures: faint, cool lines that fade in over 0.6 s (at once under Reduce Motion) and
     /// follow twilight as the middle stars do, a little dimmer under a bright Moon.
-    private func placeLines(moment: SkyMoment, palette: VisionPalette, glare: Double, on: Bool, reduceMotion: Bool) {
-        linesLevel = 0.3*SkyDome.visibility(.middle, sunAltitude: moment.sunAltitude)*(1-0.4*Self.smooth(glare/0.7))*(palette.highContrast ? 1.5 : 1)
+    private func placeLines(moment: SkyMoment, palette: VisionPalette, glare: Double, clouded: Double, on: Bool, reduceMotion: Bool) {
+        linesLevel = 0.3*SkyDome.visibility(.middle, sunAltitude: moment.sunAltitude)*(1-0.4*Self.smooth(glare/0.7))*(palette.highContrast ? 1.5 : 1)*clouded
         linesColor = palette.sky(SIMD3(0.62, 0.72, 1))
         if on != linesOn {
             linesOn = on
@@ -424,6 +448,56 @@ import UIKit
     private func paintLines() {
         tint(figures, texture: lineTexture, level: linesLevel*linesFade, color: linesColor)
     }
+    /// The cloud deck: shown above `SkyDome.cloudLayerFrom` cover, fading in over the next tenth,
+    /// in the night's light (red in night vision). It drifts about a third of a degree a second,
+    /// and not at all under Reduce Motion.
+    private func placeClouds(_ cloud: Double?, light: SkyTextures.Light, palette: VisionPalette, reduceMotion: Bool) {
+        guard let cloud, cloud > SkyDome.cloudLayerFrom else {
+            cloudWanted = nil; clouds.isEnabled = false
+            cloudDrift?.cancel(); cloudDrift = nil
+            return
+        }
+        let tenths = min(10, max(3, Int((cloud*10).rounded())))
+        cloudWanted = (tenths, Self.smooth((cloud-SkyDome.cloudLayerFrom)/0.1), palette.sky(SkyClouds.color(light)))
+        if cloudTextures[tenths] == nil && cloudPending.insert(tenths).inserted {
+            Task { [weak self] in
+                let image = await Task.detached(priority: .userInitiated) { SkyClouds.image(tenths: tenths) }.value
+                guard let image, let texture = try? await TextureResource(image: image, options: .init(semantic: .color)) else { return }
+                self?.cloudTextures[tenths] = texture
+                self?.cloudPending.remove(tenths)
+                self?.paintClouds()
+            }
+        }
+        paintClouds()
+        if reduceMotion { cloudDrift?.cancel(); cloudDrift = nil }
+        else if cloudDrift == nil {
+            cloudDrift = Task { [weak self] in
+                var last = Date.now
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(50))
+                    guard let self else { return }
+                    let now = Date.now
+                    self.cloudYaw += Float(now.timeIntervalSince(last))*0.35*Float.pi/180
+                    last = now
+                    self.clouds.orientation = simd_quatf(angle: self.cloudYaw, axis: [0, 1, 0])
+                }
+            }
+        }
+    }
+    private func paintClouds() {
+        // Until its tenth is drawn, the nearest one already drawn stands in.
+        guard let wanted = cloudWanted, let texture = cloudTextures[wanted.tenths]
+                ?? cloudTextures.min(by: { abs($0.key-wanted.tenths) < abs($1.key-wanted.tenths) })?.value else { clouds.isEnabled = false; return }
+        var material = UnlitMaterial(applyPostProcessToneMap: false)
+        let c = wanted.color
+        material.color = .init(tint: UIColor(red: Self.srgb(c.x), green: Self.srgb(c.y), blue: Self.srgb(c.z), alpha: 1), texture: .init(texture))
+        material.blending = .transparent(opacity: .init(floatLiteral: Float(wanted.presence)))
+        material.writesDepth = false
+        material.faceCulling = .none
+        clouds.model?.materials = [material]
+        clouds.isEnabled = wanted.presence > 0.01
+    }
+
     /// True when moonlight has washed the band out enough that a label on the core would name nothing visible.
     nonisolated static func coreWashedOut(moonUp: Bool, washed: Double) -> Bool { moonUp && washed < 0.3 }
 
@@ -533,6 +607,7 @@ import UIKit
         // A label must not hide the additive sky behind its transparent margins.
         material.writesDepth = false
         face.model?.materials = [material]
+        Self.sort(face, 10)
         // About 0.9 mm per point at one metre, the size system text has at that distance.
         let metresPerPoint: Float = 0.00088
         face.scale = [Float(image.width)/3*metresPerPoint, Float(image.height)/3*metresPerPoint, 1]
@@ -637,16 +712,17 @@ import UIKit
         descriptor.primitives = .triangles(indices)
         return try MeshResource.generate(from: [descriptor])
     }
-    /// The inside of a sphere from 10° below the horizon to the zenith; u = 0.5 points ahead (−z).
-    /// Rows every 2°, so the twilight's low bands are not bent by long triangles.
-    static func domeMesh() throws -> MeshResource {
+    /// The inside of a sphere from `from` degrees (10° below the horizon) to the zenith; u = 0.5
+    /// points ahead (−z), v = 1 at the zenith. Rows every 2° for the dome, so the twilight's low
+    /// bands are not bent by long triangles. The cloud deck is the same shape, nearer.
+    static func domeMesh(radius: Float = domeRadius, from bottom: Double = -10) throws -> MeshResource {
         var positions: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
         let columns = 72, rows = 50
         for i in 0...columns {
             for j in 0...rows {
-                let u = Double(i)/Double(columns), altitude = 90-100*Double(j)/Double(rows)
+                let u = Double(i)/Double(columns), altitude = 90-(90-bottom)*Double(j)/Double(rows)
                 let angle = (u-0.5)*360
-                positions.append(SIMD3<Float>(SkyDome.direction(altitude: altitude, azimuth: angle, facing: 0))*domeRadius)
+                positions.append(SIMD3<Float>(SkyDome.direction(altitude: altitude, azimuth: angle, facing: 0))*radius)
                 uvs.append([Float(u), Float(1-Double(j)/Double(rows))])
             }
         }
@@ -732,8 +808,9 @@ import UIKit
         default: SIMD3(1, 1, 0.94)
         }
     }
-    static func summary(_ moment: SkyMoment) -> String {
+    static func summary(_ moment: SkyMoment, cloud: Double? = nil) -> String {
         var parts = [moment.twilight]
+        if let cloud { parts.append(String(localized: "Forecast clouds about \(Int((cloud*100).rounded()))% of the sky")) }
         parts.append(moment.moon.up ? String(localized: "Moon \(moment.moon.place), \(Int((moment.moonIllumination*100).rounded()))% lit") : String(localized: "Moon below the horizon"))
         parts += moment.visiblePlanets.map { "\($0.name) \($0.place)" }
         if moment.core.up && moment.sunAltitude < -15 { parts.append("\(moment.core.name) \(moment.core.place)") }
