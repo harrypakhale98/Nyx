@@ -1,8 +1,11 @@
 """Validate bundle facts from an unsigned/signed archive; no network required.
-Usage: python3 Scripts/verify_release.py [IOS_ARCHIVE] [VISION_ARCHIVE]. Never prints the NPS key, only whether it was expanded."""
+Usage: python3 Scripts/verify_release.py [--require-key] [IOS_ARCHIVE] [VISION_ARCHIVE]. Never prints the NPS key, only whether it was expanded.
+--require-key fails when the archive carries no NPS key (every upload to App Store Connect must)."""
 import json,plistlib,re,sys,subprocess
 from pathlib import Path
-root=Path(sys.argv[1] if len(sys.argv)>1 else '/tmp/Nyx.xcarchive')/'Products/Applications/Nyx.app'
+requireKey='--require-key' in sys.argv[1:]
+args=[a for a in sys.argv[1:] if not a.startswith('--')]
+root=Path(args[0] if args else '/tmp/Nyx.xcarchive')/'Products/Applications/Nyx.app'
 info=plistlib.loads((root/'Info.plist').read_bytes())
 # Universal since 1.1: iPhone stays portrait; iPad takes every orientation.
 assert info['UIDeviceFamily']==[1,2],info['UIDeviceFamily']
@@ -17,6 +20,13 @@ assert info.get('ITSAppUsesNonExemptEncryption') is False,'ITSAppUsesNonExemptEn
 assert 'NSLocationWhenInUseUsageDescription' in info
 assert 'NSLocationAlwaysAndWhenInUseUsageDescription' not in info
 assert 'NSPhotoLibraryUsageDescription' not in info
+# One background mode, for the saved-park refresh (explained in the review notes), and its task id.
+assert info.get('UIBackgroundModes')==['fetch'],info.get('UIBackgroundModes')
+assert info.get('BGTaskSchedulerPermittedIdentifiers')==['com.harrypakhale.nyx.refresh'],info.get('BGTaskSchedulerPermittedIdentifiers')
+assert info.get('CADisableMinimumFrameDurationOnPhone') is True
+# The journal export type, declared and opened by Nyx (copied in, never edited in place).
+assert [t.get('UTTypeIdentifier') for t in info.get('UTExportedTypeDeclarations',[])]==['com.harrypakhale.nyx.journal']
+assert info.get('LSSupportsOpeningDocumentsInPlace') is False
 watchApp=root/'Watch/NyxWatch.app'
 watchInfo=plistlib.loads((watchApp/'Info.plist').read_bytes())
 assert watchInfo['CFBundleIdentifier']=='com.harrypakhale.nyx.watchkitapp'
@@ -58,7 +68,7 @@ for f in shipping:
  assert not re.search(r'"https?://',text),f'web URL literal outside the guarded transport: {f}'
 # Pages opened in Safari at a tap (SwiftUI Link), never fetched by Nyx: exactly this list.
 browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()
-assert set(re.findall(r'page\(host:"([^"]+)"\)',browser))=={'globeatnight.org'}
+assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov'}
 # Version and build come from project.yml; the archive must carry them in both bundles.
 spec=Path('project.yml').read_text()
 marketing=re.search(r'MARKETING_VERSION:\s*"([^"]+)"',spec).group(1)
@@ -71,6 +81,7 @@ packages=project.count('XCRemoteSwiftPackageReference')
 manifests=sum((folder/'PrivacyInfo.xcprivacy').exists() for folder in [root,root/'PlugIns/NyxWidgets.appex',watchApp,watchApp/'PlugIns/NyxWatchWidgets.appex'])
 npsKey=info.get('NPS_API_KEY','')
 assert '$(' not in npsKey,'NPS_API_KEY was not expanded'
+assert not requireKey or npsKey.strip(),'NPS_API_KEY is empty: park alerts would never load (--require-key)'
 # The key comes from the git-ignored Config/Secrets.xcconfig on this Mac; compare without printing it.
 secrets=Path('Config/Secrets.xcconfig')
 if secrets.exists():
@@ -91,7 +102,7 @@ if signed:
 else: signing='unsigned archive; distribution validation pending'
 # Apple Vision Pro: a separate archive of the same bundle ID (universal purchase), no network code at all.
 vision=None
-visionArchive=Path(sys.argv[2]) if len(sys.argv)>2 else None
+visionArchive=Path(args[1]) if len(args)>1 else None
 if visionArchive:
  vroot=visionArchive/'Products/Applications/NyxVision.app'
  vinfo=plistlib.loads((vroot/'Info.plist').read_bytes())

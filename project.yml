@@ -22,8 +22,12 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     STRING_CATALOG_GENERATE_SYMBOLS: NO
     SWIFT_APPROACHABLE_CONCURRENCY: YES
-    GCC_TREAT_WARNINGS_AS_ERRORS: YES
-    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+  # Warnings fail Debug builds (every local and CI build and test), never a Release archive: a new
+  # deprecation in an Xcode point release must not block a launch-day fix.
+  configs:
+    Debug:
+      GCC_TREAT_WARNINGS_AS_ERRORS: YES
+      SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
 targets:
   Nyx:
     type: application
@@ -47,6 +51,26 @@ targets:
         UILaunchScreen:
           UIImageName: LaunchStars
           UIColorName: LaunchBlack
+        # One background mode: about every six hours iOS may let Nyx refresh saved parks' clouds (and
+        # park alerts when due) on the same hosts, then rewrite the widget, the watch and reminders.
+        UIBackgroundModes: [fetch]
+        BGTaskSchedulerPermittedIdentifiers: [com.harrypakhale.nyx.refresh]
+        # Custom animation (the time river, the gauge's count-up) may run at 120 Hz on ProMotion iPhones.
+        CADisableMinimumFrameDurationOnPhone: true
+        # Journal export: a private package Nyx writes and reads back (Journal → Export / Import).
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.harrypakhale.nyx.journal
+            UTTypeDescription: Nyx Journal
+            UTTypeConformsTo: [com.apple.package, public.composite-content]
+            UTTypeTagSpecification:
+              public.filename-extension: [nyxjournal]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Nyx Journal
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.harrypakhale.nyx.journal]
+        # Opened journals are copied in and merged; the original file is never edited in place.
+        LSSupportsOpeningDocumentsInPlace: false
     configFiles:
       Debug: Config/Nyx.xcconfig
       Release: Config/Nyx.xcconfig
@@ -220,6 +244,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Config/NyxWatchWidgets.entitlements
         SKIP_INSTALL: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+        # The same isolation as every other target, so shared files compile identically everywhere.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
   # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
   # bundled data by listing files; no network code is compiled in (see PRIVACY.md).
   NyxVision:
@@ -295,9 +321,10 @@ schemes:
         NyxTests: [test]
         NyxUITests: [test]
     test:
-      targets:
-        - NyxTests
-        - NyxUITests
+      # Unit and UI tests, plus a Release-like configuration (optimised, no warnings-as-errors).
+      testPlans:
+        - path: Nyx.xctestplan
+          defaultPlan: true
     run:
       config: Debug
     archive:

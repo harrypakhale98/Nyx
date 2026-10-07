@@ -1,0 +1,52 @@
+{
+  "configurations" : [
+    {
+      "id" : "3F0B6C1E-6A2D-4C7B-9E51-0D4F2A8B7C11",
+      "name" : "Default",
+      "options" : {
+
+      }
+    },
+    {
+      "id" : "8D2E4A90-1B3C-4F5D-A6E7-2C9B0F1D3E22",
+      "name" : "Release-like",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "NYX_RELEASE_LIKE",
+            "value" : "1"
+          }
+        ],
+        "language" : "en",
+        "mainThreadCheckerEnabled" : false,
+        "region" : "US"
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Nyx.xcodeproj",
+      "identifier" : "0A5547B7F4020EE942D01DA6",
+      "name" : "Nyx"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Nyx.xcodeproj",
+        "identifier" : "854F1CAF019EEA9E852C4585",
+        "name" : "NyxTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Nyx.xcodeproj",
+        "identifier" : "35EEA7F15A5144F18CBA3158",
+        "name" : "NyxUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
