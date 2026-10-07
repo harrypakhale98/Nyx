@@ -15,7 +15,7 @@ struct ShareCard:View {
                     MoonView(geometry:AstronomyEngine().moon(for:night).geometry).frame(width:26,height:26)
                     Text(night.park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.ink)
                 }
-                Text(night.score.hasForecast ? String(localized:"Forecast included · conditions may change") : String(localized:"Moon and darkness only · clouds unknown")).font(.caption).multilineTextAlignment(.center).foregroundStyle(palette.muted)
+                Text(basis).font(.caption).multilineTextAlignment(.center).foregroundStyle(palette.muted)
             }.padding(40)
         }.frame(width:420,height:580)
             // ImageRenderer does not inherit the window's dark scheme; every color here is explicit.
@@ -23,7 +23,14 @@ struct ShareCard:View {
             // This is fixed-size exported artwork, with a complete spoken alternative.
             .dynamicTypeSize(.large).accessibilityElement(children:.ignore).accessibilityLabel(summary)
     }
-    var summary:String { String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Forecast included · conditions may change") : String(localized:"Moon and darkness only · clouds unknown"))") }
+    var summary:String { String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label). \(basis)") }
+    private var basis:String {
+        switch night.basis {
+        case .forecast: String(localized:"Forecast included · conditions may change")
+        case .blended: String(localized:"Early look · forecast eased toward usual clouds")
+        case .usual: String(localized:"No cloud forecast yet · usual clouds for the month")
+        }
+    }
 }
 struct ShareCardButton:View {
     @Environment(\.nyx) private var palette

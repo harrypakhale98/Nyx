@@ -23,6 +23,8 @@ nonisolated struct WhatsUp: Sendable {
         var timed=false
     }
     let core: Item
+    /// The core's night as computed, for the clear window and the light-dome note.
+    let coreNight: SkyAlmanac.CoreNight
     let planets: [Item]
     let shower: Item?
     let eclipse: Item?
@@ -35,7 +37,8 @@ nonisolated struct WhatsUp: Sendable {
     init(park: Park, sky: SkyConditions, isTonight: Bool, table: SkyEvents = .shared, almanac: SkyAlmanac = SkyAlmanac()) {
         let events=Events(park: park, sky: sky, table: table, almanac: almanac)
         self.events=events
-        core=Self.coreItem(almanac.core(for: park, sky: sky), park: park, sky: sky, almanac: almanac)
+        coreNight=almanac.core(for: park, sky: sky)
+        core=Self.coreItem(coreNight, park: park, sky: sky, almanac: almanac)
         planets=almanac.planets(for: park, sky: sky).map { Self.planetItem($0, park: park, sky: sky) }
         shower=events.shower.map { Self.showerItem($0, park: park, sky: sky, isTonight: isTonight) }
         eclipse=events.eclipse.map { Self.eclipseItem($0, park: park) }
@@ -153,8 +156,9 @@ nonisolated struct WhatsUp: Sendable {
     // MARK: Planets
 
     /// Magnitude as a word: Schlyter's Mercury can be 0.7 magnitudes off, so no number is shown.
+    /// "Faint" only past +1.5: Mars at +1 is as bright as Spica.
     static func brightness(_ magnitude: Double) -> String {
-        magnitude <= -1.5 ? String(localized: "very bright") : magnitude <= 1 ? String(localized: "bright") : String(localized: "faint")
+        magnitude <= -1.5 ? String(localized: "very bright") : magnitude <= 1.5 ? String(localized: "bright") : String(localized: "faint")
     }
     static func planetItem(_ planet: SkyAlmanac.PlanetNight, park: Park, sky: SkyConditions) -> Item {
         let engine=AstronomyEngine(), almanac=SkyAlmanac()
@@ -200,8 +204,12 @@ nonisolated struct WhatsUp: Sendable {
 
     /// Rates are rounded to what they can honestly claim: units under 10, fives under 50, tens above.
     static func rounded(rate: Int) -> Int { rate<10 ? rate : rate<50 ? Int((Double(rate)/5).rounded())*5 : Int((Double(rate)/10).rounded())*10 }
+    /// A range, because the published rate is a trained observer's ceiling: casual watchers see
+    /// about half. "60–130 an hour"; "about 2 an hour" where the two ends meet.
     static func rateText(_ rate: Int) -> String {
-        rate<1 ? String(localized: "fewer than 1 an hour") : String(localized: "about \(rounded(rate: rate)) an hour")
+        guard rate>=1 else { return String(localized: "fewer than 1 an hour") }
+        let high=rounded(rate: rate), low=rounded(rate: max(1, Int((Double(rate)/2).rounded())))
+        return low>=high ? String(localized: "about \(high) an hour") : String(localized: "\(low)–\(high) an hour")
     }
     /// The peak's night relative to this one: "peak tonight", "peak in 3 nights", "peak was last night".
     static func peakNote(_ shower: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions, isTonight: Bool) -> String {
@@ -266,6 +274,15 @@ nonisolated struct WhatsUp: Sendable {
             let detail=String(localized: "Not visible from this park: the Moon is below the horizon.")
             return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "not visible here"), detail: detail, spoken: "\(title). \(detail)")
         }
+        // Only the partial phase is up here: the Moon rises already in Earth's shadow, or sets
+        // during it. Said plainly, with the times it can be seen.
+        if eclipse.type=="total", night.stage == .umbral {
+            let range=String(localized: "\(park.time(visible.start)) – \(park.time(visible.end))")
+            let rises=eclipse.u1.map { visible.start.timeIntervalSince($0)>120 } ?? false
+            let detail=rises ? String(localized: "Rises already in Earth's shadow; partial phase visible \(park.time(visible.start))–\(park.time(visible.end)). Totality is over before moonrise here.")
+                : String(localized: "Sets during the partial phase; visible \(park.time(visible.start))–\(park.time(visible.end)). Totality comes after moonset here.")
+            return Item(id: "eclipse", kind: .eclipse, title: title, note: String(localized: "partial phase here"), value: range, detail: detail, spoken: "\(title). \(detail)", timed: true)
+        }
         let engine=AstronomyEngine()
         let moment=night.greatestVisible ? eclipse.greatest : visible.start.addingTimeInterval(visible.duration/2)
         let moon=engine.equatorial(of: .moon, at: moment)
@@ -273,10 +290,10 @@ nonisolated struct WhatsUp: Sendable {
         let place=position.altitude>=45 ? String(localized: "Moon high in the \(Compass.name(position.azimuth))")
             : position.altitude<15 ? String(localized: "Moon low in the \(Compass.name(position.azimuth))")
             : String(localized: "Moon \(Int(position.altitude.rounded()))° up in the \(Compass.name(position.azimuth))")
-        let stage: String = switch eclipse.type {
-        case "total": String(localized: "Totality")
-        case "partial": String(localized: "In Earth's shadow")
-        default: String(localized: "A faint dimming")
+        let stage: String = switch night.stage ?? (eclipse.type=="total" ? .total : eclipse.type=="partial" ? .umbral : .penumbral) {
+        case .total: String(localized: "Totality")
+        case .umbral: String(localized: "In Earth's shadow")
+        case .penumbral: String(localized: "A faint dimming")
         }
         let range=String(localized: "\(park.time(visible.start)) – \(park.time(visible.end))")
         // The figure carries the times; the sentence says what and where. VoiceOver hears both.

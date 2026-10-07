@@ -43,7 +43,7 @@ struct CelestialGauge: View {
             }
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"Moon and darkness only. Cloud forecast unavailable."))")
+        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count."))")
         .accessibilityInputLabels([Text("Score"),Text("Darkness score")])
         .task(id:score) {
             // Count up once per appearance; later changes (scrubbing nights) glide on the spring.

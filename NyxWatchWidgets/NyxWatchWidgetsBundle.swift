@@ -25,7 +25,7 @@ struct TonightComplicationProvider: TimelineProvider {
     }
     func getSnapshot(in context: Context, completion: @escaping (WatchSkyEntry) -> Void) {
         var snapshot = SharedSettings.read()
-        // The face gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not an empty state.
+        // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         var cache: [String: SkyConditions] = [:]
         completion(WatchTimeline.entry(at: .now, snapshot: snapshot, nightVision: nightVision, cache: &cache))

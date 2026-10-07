@@ -9,6 +9,8 @@ struct WhatsUpPanel: View {
     @ScaledMetric(relativeTo:.headline) private var glyphSize=20.0
     let whatsUp: WhatsUp
     var isTonight=true
+    /// Aurora season, satellites, zodiacal light, the faintest stars, the core's light dome.
+    var notes:[SkyNote]=[]
     var body: some View {
         VStack(alignment:.leading,spacing:18) {
             Eyebrow(text:isTonight ? "What's up tonight" : "What's up this night")
@@ -19,6 +21,17 @@ struct WhatsUpPanel: View {
             if !whatsUp.planets.isEmpty {
                 Divider().overlay(palette.line)
                 planets
+            }
+            if !notes.isEmpty {
+                Divider().overlay(palette.line)
+                VStack(alignment:.leading,spacing:10) {
+                    ForEach(notes) { note in
+                        Label { Text(note.text).fixedSize(horizontal:false,vertical:true) } icon:{
+                            if !typeSize.isAccessibilitySize { Image(systemName:note.symbol).foregroundStyle(palette.accent).frame(width:glyphSize).accessibilityHidden(true) }
+                        }
+                        .font(.subheadline).foregroundStyle(palette.muted)
+                    }
+                }
             }
             VStack(alignment:.leading,spacing:0) {
                 NavigationLink { EssayView(essay:.milkyway) } label:{ Label("Finding the Milky Way",systemImage:"sparkle").font(.subheadline).frame(minHeight:44,alignment:.leading).contentShape(Rectangle()) }
@@ -94,5 +107,5 @@ struct WhatsUpPanel: View {
 }
 #Preview("Alaska") {
     let m=PlanModel()
-    if let p=m.park("dena") { NavigationStack { ScrollView { Panel { WhatsUpPanel(whatsUp:m.whatsUp(m.night(p))) }.padding() } }.environment(m).background(.black).preferredColorScheme(.dark) }
+    if let p=m.park("dena") { NavigationStack { ScrollView { Panel { WhatsUpPanel(whatsUp:m.whatsUp(m.night(p)),notes:m.skyNotes(m.night(p))) }.padding() } }.environment(m).background(.black).preferredColorScheme(.dark) }
 }
