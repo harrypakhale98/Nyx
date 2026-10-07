@@ -21,7 +21,7 @@ struct RealSky: View {
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night)
         let strength=palette.nightVision ? strength*0.45 : strength
-        TimelineView(.animation(minimumInterval:1/30,paused:still || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
