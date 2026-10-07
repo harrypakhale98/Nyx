@@ -189,7 +189,8 @@ struct EssayView:View {
     @Environment(\.nyx) private var palette
     let essay:Essay
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { _,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        let figure=EssayFigure(essay)
+        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { index,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled); if let figure, index==figure.afterParagraph { figure.view } };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct OnboardingView:View {
