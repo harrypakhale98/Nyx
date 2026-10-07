@@ -4,7 +4,7 @@
     2
   ],
   "version": "1.1",
-  "build": "6",
+  "build": "7",
   "bundledManifests": 4,
   "runtimeHTTPHosts": [
     "air-quality-api.open-meteo.com",
@@ -13,21 +13,21 @@
   ],
   "runtimePackages": 0,
   "npsKeyEmbedded": true,
-  "catalogKeys": 1139,
+  "catalogKeys": 1149,
   "privacyDeclaration": "Data Not Collected (PRIVACY.md); publisher confirms in App Store Connect",
   "signing": "development-signed Release; App Store export/validation pending",
   "verified": "2026-10-06",
   "archives": [
-    "/tmp/Nyx-1.1-6.xcarchive",
-    "/tmp/NyxVision-1.1-6.xcarchive"
+    "/tmp/Nyx-1.1-7.xcarchive",
+    "/tmp/NyxVision-1.1-7.xcarchive"
   ],
   "watchApp": {
     "version": "1.1",
-    "build": "6"
+    "build": "7"
   },
   "visionApp": {
     "version": "1.1",
-    "build": "6",
+    "build": "7",
     "deviceFamily": [
       7
     ],

@@ -28,7 +28,7 @@ struct NightListenView: View {
             .accessibilityInputLabels([Text("Listen"),Text("Listen to tonight"),Text("Stop")])
             Text(NightSonification.key).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             DisclosureGroup(isExpanded:Binding(get:{ showsTranscript ?? (expanded || playing) },set:{ showsTranscript=$0 })) { transcript } label:{
-                Text("Transcript").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+                Text("Transcript").font(.subheadline).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
             }.tint(palette.muted)
         }
         .onDisappear { if playing { listener.stop() } }

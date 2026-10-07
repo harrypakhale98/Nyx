@@ -109,7 +109,7 @@ struct ViewingSpotRow: View {
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
-                DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
+                DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
                     .tint(palette.accent)
             }
         }

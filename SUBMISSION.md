@@ -1,6 +1,6 @@
 # Nyx 1.1 submission package
 
-**Build 1.1 (6), archived 2026-10-06.** `/tmp/Nyx-1.1-6.xcarchive` (iPhone and iPad app with the Tonight's sky widget and the Apple Watch app inside) and `/tmp/NyxVision-1.1-6.xcarchive` (Apple Vision Pro), both Release, development-signed with team `DUHVN68KBA`, zero warnings, `python3 Scripts/verify_release.py` passing (`Research/release-verification.json`). Nothing is uploaded. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store. `/tmp` does not survive a restart, so if the archives are gone, archive again in Xcode (Product → Archive) after checking `project.yml` still says 1.1 / 6.
+**Build 1.1 (7), archived 2026-10-06.** `/tmp/Nyx-1.1-7.xcarchive` (iPhone and iPad app with the Tonight's sky widget and the Apple Watch app inside) and `/tmp/NyxVision-1.1-7.xcarchive` (Apple Vision Pro), both Release, development-signed with team `DUHVN68KBA`, zero warnings, `python3 Scripts/verify_release.py` passing (`Research/release-verification.json`). Nothing is uploaded. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store. `/tmp` does not survive a restart, so if the archives are gone, archive again in Xcode (Product → Archive) after checking `project.yml` still says 1.1 / 6.
 
 **Release gates remain open** until the owner finishes the ordered steps in `INPUT_NEEDED.md` (device pass, Spanish review, privacy page push).
 
@@ -18,7 +18,7 @@
 
 Every field below is in `Store/1.1/metadata.md` with character counts verified by script. Paste from there, not from memory.
 
-- **What's New:** the full text in `metadata.md` (3,251 of 4,000) or its 518-character fallback. It describes only features in build 6: What's up tonight, the honest forecast (three models, layers, dew, smoke and haze), field mode with Live Activity and alarms, Apple Watch, Apple Vision Pro, iPad, sky glow from NASA Black Marble, audio graphs and Listen to tonight, Feel the Moon, Reduce bright effects, step-free spots, Spanish, trip planner, your constellation, and the third optional data service.
+- **What's New:** the full text in `metadata.md` (3,251 of 4,000) or its 518-character fallback. It describes only features in build 7: What's up tonight, the honest forecast (three models, layers, dew, smoke and haze), field mode with Live Activity and alarms, Apple Watch, Apple Vision Pro, iPad, sky glow from NASA Black Marble, audio graphs and Listen to tonight, Feel the Moon, Reduce bright effects, step-free spots, Spanish, trip planner, your constellation, and the third optional data service.
 - **Promotional text (≤170):** `Plan the night, then follow it. The Milky Way core, planets and meteor showers, honest forecasts, and a red field mode for your eyes. Free. Data Not Collected.` (159). Seasonal alternates are in `metadata.md`; promotional text can change without a build.
 - **Description:** `metadata.md` § Description (3,978 of 4,000). It corrects the 1.0 sentence about smoke and haze. Delete "Voice Control" from the accessibility paragraph unless the Voice Control device pass is signed off.
 - **Keywords (≤100):** `stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,star` (96). "aurora" is dropped on purpose: Nyx does not forecast aurora.
@@ -68,7 +68,7 @@ Captions: calm, six words or fewer, no prices, no "new", no exclamation marks. F
 
 - **iPad:** included in the iOS build. Upload the iPad 13-inch set. **Mac availability:** App Store Connect → Pricing and Availability → Mac Availability → do not make the app available on Mac (field mode, compass, alarms and Live Activities were never tried there).
 - **Apple Watch:** included in the iOS build (`Nyx.app/Watch/NyxWatch.app` with its complications). The bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` are registered and carry the App Group (Xcode's automatic signing produced their profiles during the archive). Upload the watch set under the version's Apple Watch section. The watch app needs the iPhone app (companion).
-- **Apple Vision Pro:** App Store Connect → the app → **+ Add Platform → visionOS**, then upload `NyxVision-1.1-6` from Organizer (archive scheme NyxVision, destination Any visionOS Device), add the four 3840×2160 screenshots, and submit the visionOS version with iOS 1.1. Same bundle ID, so it is one universal purchase.
+- **Apple Vision Pro:** App Store Connect → the app → **+ Add Platform → visionOS**, then upload `NyxVision-1.1-7` from Organizer (archive scheme NyxVision, destination Any visionOS Device), add the four 3840×2160 screenshots, and submit the visionOS version with iOS 1.1. Same bundle ID, so it is one universal purchase.
 
 ## Privacy
 
@@ -98,8 +98,8 @@ App Store Connect → App Information → Accessibility, per device. Full reason
 
 ## App Store Connect checklist (1.1)
 
-1. If 1.0 (5) was never submitted, rename the pending version to 1.1 and use build 6; otherwise create version 1.1.
-2. Upload build 1.1 (6) (iOS, with watch inside) and the visionOS build from Organizer → Distribute App → App Store Connect. Wait for processing; complete export compliance (`ITSAppUsesNonExemptEncryption = NO`: standard HTTPS only).
+1. If 1.0 (5) was never submitted, rename the pending version to 1.1 and use build 7; otherwise create version 1.1.
+2. Upload build 1.1 (7) (iOS, with watch inside) and the visionOS build from Organizer → Distribute App → App Store Connect. Wait for processing; complete export compliance (`ITSAppUsesNonExemptEncryption = NO`: standard HTTPS only).
 3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass in `INPUT_NEEDED.md`.
 4. Version page: What's New, promotional text, description, keywords, subtitle (English, then Spanish after review); screenshots for iPhone 6.9", iPad 13", Apple Watch, Vision Pro, in both languages for iPhone.
 5. Mac Availability off; add the visionOS platform.
@@ -113,7 +113,7 @@ App Store Connect → App Information → Accessibility, per device. Full reason
 |---|---|
 | Privacy label | READY: Data Not Collected, `PRIVACY.md`; third host explained above |
 | Privacy page with the third host live | OPEN: push `docs/` to `main` |
-| Release archives | PASS locally: 1.1 (6) iOS + watch + widgets and visionOS, development-signed, `verify_release.py` passing; distribution export pending |
+| Release archives | PASS locally: 1.1 (7) iOS + watch + widgets and visionOS, development-signed, `verify_release.py` passing; distribution export pending |
 | Physical accessibility, field mode at night, haptics, ProMotion | OPEN: `INPUT_NEEDED.md` step 1, `AUDIT.md` |
 | Widgets, Live Activity, alarms, Siri, Spotlight, Smart Stack, available AI on device | OPEN: the simulator cannot host these |
 | Apple Watch and Vision Pro on hardware | OPEN |

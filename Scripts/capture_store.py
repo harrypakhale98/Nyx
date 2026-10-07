@@ -3,7 +3,7 @@
 Usage: python3 Scripts/capture_store.py [SIMULATOR_ID] [DERIVED_DATA] [en|es] [name,name…]
 Every frame uses live data (`-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time,
 scored by the shipping engine), except the journal, which is DEBUG seed data with no personal photo.
-Two frames need a scroll that simctl cannot perform: the script launches them and waits for you to
+One frame (trip) needs a scroll that simctl cannot perform: the script launches them and waits for you to
 scroll (or, with NYX_SKIP_MANUAL=1, skips them so another tool can drive the gesture and capture).
 Writes Store/Screenshots/NN-name-6.9.png (English) or Store/Screenshots/es/NN-name-6.9.png, no alpha,
 plus 1284×2778 copies in the matching 6.5-inch folder.
@@ -34,7 +34,7 @@ shots=[
  ('calendar',['-nyx-screen','calendar','-nyx-state','live'],None),
  ('trip',['-nyx-screen','trip','-nyx-state','live'],'Scroll until "The route" card sits under the title bar, with the first nights below it.'),
  ('journal',['-nyx-screen','journal','-nyx-state','populated'],None),
- ('listen',['-nyx-screen','detail','-nyx-state','live'],'Scroll to "The shape of the night" (card at the top) and open Transcript under "Listen to tonight".'),
+ ('listen',['-nyx-screen','detail','-nyx-state','live','-nyx-listen'],None),  # scrolled and opened by the DEBUG flag
  ('every-sky',['-nyx-screen','light','-nyx-state','live','-nyx-park','deva'],None),
 ]
 run('status_bar',sim,'override','--time','9:41','--batteryState','charged','--batteryLevel','100','--wifiMode','active','--wifiBars','3','--cellularMode','active','--cellularBars','4')
@@ -46,7 +46,10 @@ try:
   time.sleep(14 if 'live' in args else 8)
   if manual: input(f'{index:02d}-{name}: {manual} Press Return to capture. ')
   path=folder/f'{index:02d}-{name}-6.9.png'
-  run('io',sim,'screenshot',str(path))
+  # Captured to a temporary file and copied in: simctl may be refused when it overwrites a frame in place.
+  raw=pathlib.Path('/tmp')/path.name
+  run('io',sim,'screenshot',str(raw))
+  subprocess.run(['cp',str(raw),str(path)],check=True); raw.unlink()
   # App Store Connect rejects screenshots with an alpha channel: flatten through JPEG.
   flat=path.with_suffix('.flat.jpg')
   subprocess.run(['sips','-s','format','jpeg','-s','formatOptions','100',str(path),'--out',str(flat)],check=True,capture_output=True)

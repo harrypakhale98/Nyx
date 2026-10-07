@@ -3796,6 +3796,17 @@
         }
       }
     },
+    "Clear search": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear search"
+          }
+        }
+      }
+    },
     "Clearest forecast model": {
       "extractionState": "manual",
       "localizations": {
@@ -13180,6 +13191,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Los índices sin pronóstico de nubes se marcan como estimaciones."
+          }
+        }
+      }
+    },
+    "Search parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search parks"
           }
         }
       }

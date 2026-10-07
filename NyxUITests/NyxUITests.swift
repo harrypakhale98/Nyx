@@ -44,6 +44,21 @@ final class NyxUITests:XCTestCase {
         XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout:5))
         XCTAssertTrue(app.keyboards.firstMatch.exists || (app.searchFields.firstMatch.value(forKey:"hasKeyboardFocus") as? Bool ?? false),"⌘F did not focus search")
     }
+    /// At accessibility text sizes Parks searches from a field in the page (the bar's field draws
+    /// nothing at AX5 on iOS 27). Typing in it narrows the list.
+    func testAccessibilitySizeSearch() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","parks","-nyx-state","offline","-nyx-reduce-motion","-nyx-ax5"]
+        app.launch()
+        let field=app.textFields["Search parks"].firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout:15),"No search field at AX5")
+        field.tap()
+        field.typeText("Zion")
+        let gone=NSPredicate { _,_ in !app.staticTexts["Acadia"].exists }
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:gone,object:nil)],timeout:5),.completed,"Search did not narrow the list")
+        XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH 'Zion'")).firstMatch.exists,"Zion is not in the results")
+    }
     func testOfflineLaunchResponsiveness() {
         let app=offlineApp()
         let options=XCTMeasureOptions()

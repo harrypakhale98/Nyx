@@ -332,6 +332,12 @@
             "state": "translated",
             "value": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordenadas aproximadas. Confirma con un guardaparques el acceso, los horarios y los cierres actuales. Esto no es una guía de navegación."
+          }
         }
       }
     },
@@ -2094,6 +2100,12 @@
             "state": "translated",
             "value": "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Unidad Norte usa la hora del Centro, una hora más que las horas que Nyx muestra para este parque."
+          }
         }
       }
     },
@@ -2258,6 +2270,12 @@
             "state": "translated",
             "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization)."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante, el punto del que parecen salir los meteoros, en el cenit (Organización Internacional de Meteoros)."
+          }
         }
       }
     },
@@ -2268,6 +2286,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante, el punto del que parecen salir los meteoros, en el cenit (Organización Internacional de Meteoros); varía de un año a otro."
           }
         }
       }
