@@ -86,7 +86,7 @@ struct CelestialGauge: View {
     /// The milestones a step of the count from `old` to `new` crosses (70 and 90), for the medium ticks.
     nonisolated static func milestones(from old:Int,to new:Int)->[Int] { [70,90].filter { old<$0 && new>=$0 } }
     /// How long the count-up runs for a score: until the numeral rounds to it.
-    nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2*Double(score))+numeralLag }
+    nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2.2*Double(score))+numeralLag }
     private func reveal() async {
         if reduceMotion { arc=Double(score); shown=score; revealed=true; return }
         if revealed { withAnimation(NyxMotion.spring) { arc=Double(score); shown=score }; return }
