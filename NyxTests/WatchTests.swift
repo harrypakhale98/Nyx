@@ -41,10 +41,11 @@ struct WatchTests {
         let gappy = forecast(hours: 200, updated: now, gapAt: 50)
         #expect(CompactForecast(gappy, from: now.addingTimeInterval(-86400), to: now.addingTimeInterval(86400)) == nil)
         #expect(WatchContext.make(savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: false, forecasts: ["jotr": gappy], now: now).forecasts.isEmpty)
-        // Unknown versions and junk are ignored, never misread.
+        // Versions before the first shape and junk are ignored, never misread. (Newer versions are
+        // read leniently: see `contextDecodesAcrossVersions`.)
         let encoded = try #require(WatchContext.make(savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], now: now).data)
         var json = try #require(String(data: encoded, encoding: .utf8))
-        json = json.replacingOccurrences(of: "\"version\":1", with: "\"version\":99")
+        json = json.replacingOccurrences(of: "\"version\":1", with: "\"version\":0")
         #expect(WatchContext(data: Data(json.utf8)) == nil)
         #expect(WatchContext(dictionary: [WatchContext.key: Data("{}".utf8)]) == nil)
         #expect(WatchContext(dictionary: ["other": 1]) == nil)
