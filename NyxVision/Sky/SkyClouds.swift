@@ -18,9 +18,10 @@ nonisolated enum SkyClouds {
 
     static func altitude(row y: Int) -> Double { 90-(Double(y)+0.5)/Double(height)*(90-bottom) }
 
-    /// The deck seen from the ground: a flat layer, so clouds overhead look large and those near
-    /// the horizon crowd together, as real ones do. Noise of about 0…1 per pixel, seamless at 360°
-    /// because the azimuth wraps on the plane.
+    /// The deck seen from the ground: a layer, so clouds overhead look larger and those near the
+    /// horizon crowd together, as real ones do. The distance along the layer is softened (r^0.65):
+    /// a true flat plane left one blob overhead and streaks at the horizon. Noise of about 0…1 per
+    /// pixel, seamless at 360° because the azimuth wraps on the plane.
     static let field: [Float] = {
         var values = [Float](repeating: 0, count: width*height)
         values.withUnsafeMutableBufferPointer { buffer in
@@ -28,10 +29,10 @@ nonisolated enum SkyClouds {
             DispatchQueue.concurrentPerform(iterations: height) { y in
                 // Below about 4° the plane is too far to sample; the horizon blend takes over there.
                 let a = max(4, altitude(row: y))*Double.pi/180
-                let r = cos(a)/sin(a)
+                let r = 2.2*pow(cos(a)/sin(a), 0.65)
                 for x in 0..<width {
                     let azimuth = (Double(x)+0.5)/Double(width)*2*Double.pi
-                    let px = Float(r*sin(azimuth))*1.4, py = Float(r*cos(azimuth))*1.4
+                    let px = Float(r*sin(azimuth)), py = Float(r*cos(azimuth))
                     base[y*width+x] = SkyTextures.fbm(px+31.7, py+11.3, octaves: 5, period: 64)
                 }
             }

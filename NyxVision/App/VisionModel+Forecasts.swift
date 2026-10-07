@@ -59,11 +59,15 @@ extension VisionModel {
     }
 
     /// What the window and the plaque in the sky say about what is computed, and about clouds.
-    nonisolated static func honesty(_ plan: NightPlan) -> String {
+    /// `inSky` also owns up to the plaque's illustrative skyline.
+    nonisolated static func honesty(_ plan: NightPlan, inSky: Bool = false) -> String {
         let park = plan.park, night = park.dayLabel(plan.sky.evening)
-        return plan.night.basis == .usual
-            ? String(localized: "Computed for \(park.shortName), \(night). Not a live view. No cloud forecast reaches this night, so no clouds are shown.")
-            : String(localized: "Computed for \(park.shortName), \(night). Not a live view. Clouds follow the hourly forecast; their shapes are illustrative.")
+        switch (plan.night.basis == .usual, inSky) {
+        case (true, false): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. No cloud forecast reaches this night, so no clouds are shown.")
+        case (true, true): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. No cloud forecast reaches this night, so no clouds are shown, and the skyline is illustrative.")
+        case (false, false): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. Clouds follow the hourly forecast; their shapes are illustrative.")
+        case (false, true): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. Clouds follow the hourly forecast; their shapes and the skyline are illustrative.")
+        }
     }
 
     #if DEBUG

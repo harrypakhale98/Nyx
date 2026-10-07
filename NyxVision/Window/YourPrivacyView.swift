@@ -14,6 +14,8 @@ struct YourPrivacyView: View {
                 Section {
                     Text("Nyx has no account, no ads, no tracking.").font(.system(.title3, design: .serif))
                         .fixedSize(horizontal: false, vertical: true)
+                    Text("Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared.")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Section {
                     Toggle("Cloud forecasts (Open-Meteo)", isOn: $model.forecastsOn)
@@ -31,8 +33,6 @@ struct YourPrivacyView: View {
                     Text("Optional data update")
                 }
                 Section {
-                    Text("Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared.")
-                        .fixedSize(horizontal: false, vertical: true)
                     Text("Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. The Moon, the stars and every score still work offline.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 }
