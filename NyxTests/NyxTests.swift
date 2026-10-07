@@ -12,6 +12,12 @@ struct NyxTests {
         let f=DateFormatter(); f.dateFormat="yyyy-MM-dd HH:mm"; f.timeZone=park.timeZone
         return try #require(f.date(from:string))
     }
+    /// The 18 national parks certified as International Dark Sky Parks by DarkSky International:
+    /// the NPS Night Skies list (asterisked, updated July 2025) plus Badlands (July 2026).
+    @Test func darkSkyDesignationsMatchTheOfficialList() throws {
+        let designated=Set(try ParkData.load().filter(\.darkSkyDesignated).map(\.id))
+        #expect(designated==Set("arch badl bibe blca brca cany care deva glac grba grca grsa jotr maca meve pefo voya zion".split(separator:" ").map(String.init)))
+    }
     @Test func inventory() throws {
         let parks=try ParkData.load()
         #expect(parks.count==63); #expect(Set(parks.map(\.id)).count==63)
