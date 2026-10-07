@@ -159,7 +159,7 @@ nonisolated struct SkyMoment: Sendable {
     /// when the sky jumps straight there. While the immersive sky is open the sweep eases in and
     /// out and lasts long enough that the sky never turns faster than `comfortableTurn`.
     func move(to target: Double, reduceMotion: Bool) {
-        sweep?.cancel()
+        sweep?.cancel(); chase?.cancel(); chase = nil
         let start = fraction, goal = min(1, max(0, target))
         guard !reduceMotion, abs(goal-start) > 0.002 else { fraction = goal; return }
         let immersive = immersiveOpen
@@ -183,5 +183,33 @@ nonisolated struct SkyMoment: Sendable {
         guard let plan else { return }
         move(to: SkyDome.fraction(of: SkyDome.darkest(plan.sky), in: plan.span), reduceMotion: reduceMotion)
     }
-    func cancelSweep() { sweep?.cancel() }
+    func cancelSweep() { sweep?.cancel(); chase?.cancel(); chase = nil }
+
+    // MARK: Turning the sky by hand
+
+    /// Constellation figures in the immersive sky (the window's toggle). On by default; not
+    /// stored, since Nyx on Vision Pro keeps nothing between launches.
+    var constellations = true
+    private var chase: Task<Void, Never>?
+    private var chaseGoal = 0.0
+    /// For a drag across the immersive sky: the clock follows the hand toward `target`, but the
+    /// sky never turns faster than `comfortableTurn`, however fast the hand moves.
+    func turn(toward target: Double) {
+        sweep?.cancel()
+        chaseGoal = min(1, max(0, target))
+        guard chase == nil else { return }
+        chase = Task {
+            var last = Date.now
+            while !Task.isCancelled {
+                let now = Date.now, step = now.timeIntervalSince(last)
+                last = now
+                let degrees = (plan?.span.duration ?? 0)/3600*15.04
+                fraction = SkyDome.chaseStep(from: fraction, toward: chaseGoal, seconds: step, degreesPerNight: degrees, limit: Self.comfortableTurn)
+                if abs(chaseGoal-fraction) < 0.0001 { break }
+                try? await Task.sleep(for: .milliseconds(11))
+            }
+            // A cancelled chase may already have been replaced; only a finished one clears itself.
+            if !Task.isCancelled { chase = nil }
+        }
+    }
 }

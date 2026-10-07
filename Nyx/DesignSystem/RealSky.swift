@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The real sky over a park on a night: 904 stars from the Yale Bright Star Catalogue (to
+/// The real sky over a park on a night: 903 stars from the Yale Bright Star Catalogue (to
 /// magnitude 4.5) in their true colours, the Milky Way placed along the galactic plane, the
 /// naked-eye planets and, on shower nights, the meteor radiant.
 /// Seen facing south (north in the southern hemisphere) at the middle of that night's darkness.

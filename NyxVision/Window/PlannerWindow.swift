@@ -11,8 +11,10 @@ struct PlannerWindow: View {
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.dismissWindow) private var dismissWindow
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.scenePhase) private var scenePhase
     @State private var query = ""
+    @State private var showCredits = VisionDebug.isEnabled("vision-credits")
     /// True while the sky is opening or closing, so a second tap cannot start a second transition.
     @State private var skyBusy = false
     var body: some View {
@@ -22,11 +24,29 @@ struct PlannerWindow: View {
             ParkList(query: query)
                 .searchable(text: $query, prompt: Text("Search parks"))
                 .navigationTitle(Text("Nyx"))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showCredits = true } label: { Label("Credits", systemImage: "info.circle") }
+                            .help(Text("Credits"))
+                    }
+                }
         } detail: {
             NightDetail()
                 .toolbar {
                     // Always in reach, wherever the detail is scrolled: into the sky and back out.
                     ToolbarItem(placement: .topBarTrailing) { skyButton }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { openWindow(id: MoonVolume.id) } label: { Label("The Moon on your table", systemImage: "moon.circle") }
+                            .help(Text("The Moon on your table"))
+                            .accessibilityHint(Text("Opens this night's Moon as a globe you can place in the room"))
+                            .disabled(model.plan == nil)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Toggle(isOn: $model.constellations) { Label("Constellations", systemImage: "point.3.connected.trianglepath.dotted") }
+                            .toggleStyle(.button)
+                            .help(Text("Constellations"))
+                            .accessibilityHint(Text("Shows or hides the constellation figures in the sky"))
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Toggle(isOn: $model.nightVision) { Label("Night vision", systemImage: "eye") }
                             .toggleStyle(.button)
@@ -34,6 +54,7 @@ struct PlannerWindow: View {
                     }
                 }
         }
+        .sheet(isPresented: $showCredits) { CreditsView().environment(\.visionPalette, palette).modifier(DebugTypeSize()) }
         .ornament(visibility: model.parks.isEmpty ? .hidden : .visible, attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
             NightControls().environment(\.visionPalette, palette)
         }
@@ -42,6 +63,9 @@ struct PlannerWindow: View {
         .modifier(DebugTypeSize())
         .task {
             if let body = VisionDebug.body { model.selectedBody = body }
+            if VisionDebug.isEnabled("vision-no-lines") { model.constellations = false }
+            if VisionDebug.isEnabled("vision-moon") { openWindow(id: MoonVolume.id) }
+            if VisionDebug.isEnabled("vision-widget-shots") { VisionWidgetShots.render() }
             if VisionDebug.isEnabled("vision-immersive") { await toggleSky() }
             // DEBUG: `-nyx-vision-skyonly` closes the window once the sky is open, for screenshots of the sky alone.
             if VisionDebug.isEnabled("vision-skyonly"), model.immersiveOpen { dismissWindow(id: "planner") }
@@ -85,7 +109,7 @@ private struct NightVisionWindow: ViewModifier {
             .animation(VisionMotion.spring, value: enabled)
     }
 }
-private struct DebugTypeSize: ViewModifier {
+struct DebugTypeSize: ViewModifier {
     func body(content: Content) -> some View {
         if VisionDebug.isEnabled("ax5") { content.dynamicTypeSize(.accessibility3) } else { content }
     }

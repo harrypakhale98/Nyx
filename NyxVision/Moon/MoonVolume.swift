@@ -1,0 +1,287 @@
+import RealityKit
+import SwiftUI
+import UIKit
+import simd
+
+/// "The Moon on your table": a volume holding the chosen night's Moon as a globe, NASA's lunar
+/// map lit by a single sunlight at the true phase angle, turned as it appears from the chosen
+/// park at the Moon's best moment that night (bright limb, axis and libration from
+/// `AstronomyEngine.moonGeometry`). It works without leaving the room, which suits a short,
+/// seated look. A drag turns the globe; let go and it turns back to the face we always see.
+struct MoonVolume: View {
+    static let id = "moon"
+    @Environment(VisionModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
+    @State private var globe = MoonGlobe()
+    /// Nights after tonight, park-local. The volume keeps its own night, so scrubbing the Moon
+    /// does not move the planner.
+    @State private var nights = 0
+    @State private var view: MoonView?
+    var body: some View {
+        let stepper = $nights
+        RealityView { content in
+            await globe.build()
+            content.add(globe.root)
+            // VoiceOver's swipe up and down on the Moon step through the nights, as the ornament does.
+            globe.subscriptions = [
+                content.subscribe(to: AccessibilityEvents.Increment.self) { _ in stepper.wrappedValue = min(MoonView.lastNight, stepper.wrappedValue+1) },
+                content.subscribe(to: AccessibilityEvents.Decrement.self) { _ in stepper.wrappedValue = max(0, stepper.wrappedValue-1) },
+            ]
+        } update: { _ in
+            if let view { globe.show(view, nightVision: model.nightVision, reduceMotion: reduceMotion) }
+        }
+        .gesture(DragGesture(minimumDistance: 4).targetedToAnyEntity()
+            .onChanged { value in globe.turn(by: Float(value.translation.width)) }
+            .onEnded { _ in globe.settle(reduceMotion: reduceMotion) })
+        .ornament(attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
+            MoonControls(view: view, nights: $nights)
+                .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency))
+                .modifier(DebugTypeSize())
+        }
+        .task(id: "\(model.selectedID ?? "")-\(nights)") {
+            guard let park = model.park else { return }
+            let night = park.date(park.currentNight(at: model.now), addingDays: nights)
+            let tonight = nights == 0
+            let computed = await Task.detached(priority: .userInitiated) { MoonView(park: park, night: night, isTonight: tonight) }.value
+            guard !Task.isCancelled else { return }
+            view = computed
+        }
+        .onAppear { if let n = VisionDebug.moonNights { nights = n } }
+    }
+}
+
+/// One night's Moon as the volume shows it, computed off the main thread.
+nonisolated struct MoonView: Sendable, Equatable {
+    /// A lunar month of nights from tonight.
+    static let lastNight = 29
+    let park: Park
+    let night: Date
+    let isTonight: Bool
+    let moment: Date
+    let geometry: MoonGeometry
+    let phaseName: String
+    init(park: Park, night: Date, isTonight: Bool) {
+        let engine = AstronomyEngine()
+        self.park = park
+        self.night = night
+        self.isTonight = isTonight
+        moment = engine.moonViewTime(for: engine.conditions(for: park, on: night), park: park)
+        geometry = engine.moonGeometry(for: park, at: moment)
+        phaseName = engine.moonPhase(at: moment).name
+    }
+    var percent: Int { Int((geometry.illumination*100).rounded()) }
+    /// "Moon, waxing crescent, 23 percent lit".
+    var spoken: String { String(localized: "Moon, \(phaseName.lowercased()), \(percent) percent lit") }
+    static func == (a: MoonView, b: MoonView) -> Bool { a.park.id == b.park.id && a.moment == b.moment }
+
+    /// The Sun's direction as seen from the Moon, in the volume's frame (x right, y up, z toward
+    /// the viewer): the same vector the Moon shader lights the disc with.
+    var sunDirection: SIMD3<Float> {
+        let i = geometry.phaseAngle, a = geometry.brightLimb
+        return simd_normalize(SIMD3<Float>(Float(sin(i) * -sin(a)), Float(sin(i)*cos(a)), Float(cos(i))))
+    }
+    /// The globe's orientation: the inverse of the shader's screen-to-Moon turn (lunar north
+    /// from screen up, then libration in latitude and longitude), so the map's face matches the
+    /// window's disc exactly.
+    var orientation: simd_quatf {
+        let c = cos(geometry.north), s = sin(geometry.north)
+        let cb = cos(geometry.librationLatitude), sb = sin(geometry.librationLatitude)
+        let cl = cos(geometry.librationLongitude), sl = sin(geometry.librationLongitude)
+        let n = simd_double3x3(rows: [SIMD3(c, s, 0), SIMD3(-s, c, 0), SIMD3(0, 0, 1)])
+        let b = simd_double3x3(rows: [SIMD3(1, 0, 0), SIMD3(0, cb, sb), SIMD3(0, -sb, cb)])
+        let l = simd_double3x3(rows: [SIMD3(cl, 0, sl), SIMD3(0, 1, 0), SIMD3(-sl, 0, cl)])
+        let screenToMoon = l*b*n
+        let m = screenToMoon.transpose
+        return simd_quatf(simd_float3x3(columns: (SIMD3<Float>(m.columns.0), SIMD3<Float>(m.columns.1), SIMD3<Float>(m.columns.2))))
+    }
+}
+
+/// The globe, its sunlight, and the turn a drag gives it.
+@MainActor final class MoonGlobe {
+    let root = Entity()
+    let sphere = ModelEntity()
+    private let sun = DirectionalLight()
+    private var material: PhysicallyBasedMaterial?
+    private var shown: MoonView?
+    private var shownNightVision = false
+    private var spin: Float = 0
+    /// VoiceOver's increment and decrement, kept alive with the globe.
+    var subscriptions: [EventSubscription] = []
+    static let radius: Float = 0.14
+
+    func build() async {
+        if let image = UIImage(named: "MoonMap")?.cgImage, let texture = try? await TextureResource(image: image, options: .init(semantic: .color)) {
+            var material = PhysicallyBasedMaterial()
+            material.baseColor = .init(tint: .white, texture: .init(texture))
+            material.roughness = .init(floatLiteral: 1)
+            material.metallic = .init(floatLiteral: 0)
+            material.emissiveColor = .init(color: .white, texture: .init(texture))
+            material.emissiveIntensity = 0
+            self.material = material
+        }
+        if let mesh = try? Self.globeMesh() { sphere.model = ModelComponent(mesh: mesh, materials: material.map { [$0] } ?? []) }
+        // Sunlight only: the room's light would fill in the night side and erase the phase.
+        sphere.components.set(EnvironmentLightingConfigurationComponent(environmentLightingWeight: 0))
+        sphere.components.set(CollisionComponent(shapes: [.generateSphere(radius: Self.radius)]))
+        sphere.components.set(InputTargetComponent())
+        sphere.components.set(HoverEffectComponent())
+        root.addChild(sphere)
+        root.addChild(sun)
+    }
+
+    func show(_ view: MoonView, nightVision: Bool, reduceMotion: Bool) {
+        if shown != view || shownNightVision != nightVision {
+            let first = shown == nil
+            shown = view
+            shownNightVision = nightVision
+            // Natural light, or night vision's red; the night side keeps a trace of earthshine,
+            // strongest around new moon, as on the window's disc.
+            let red = UIColor(red: 1, green: 0.27, blue: 0.23, alpha: 1)
+            sun.light = DirectionalLightComponent(color: nightVision ? red : UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
+            if var material {
+                material.emissiveColor = .init(color: nightVision ? red : UIColor(red: 0.75, green: 0.85, blue: 1, alpha: 1), texture: material.emissiveColor.texture)
+                material.emissiveIntensity = nightVision ? 0 : Float(0.03*(1-cos(view.geometry.phaseAngle))/2)
+                sphere.model?.materials = [material]
+                self.material = material
+            }
+            // A directional light shines along its −z: point +z at the Sun.
+            let light = Transform(rotation: simd_quatf(from: [0, 0, 1], to: view.sunDirection))
+            let face = Transform(rotation: simd_quatf(angle: spin, axis: [0, 1, 0])*view.orientation)
+            if first || reduceMotion {
+                sun.transform = light
+                sphere.transform = face
+            } else {
+                sun.move(to: light, relativeTo: root, duration: 0.6, timingFunction: .easeInOut)
+                sphere.move(to: face, relativeTo: root, duration: 0.6, timingFunction: .easeInOut)
+            }
+            var access = AccessibilityComponent()
+            access.isAccessibilityElement = true
+            access.label = LocalizedStringResource(stringLiteral: view.spoken)
+            access.value = LocalizedStringResource(stringLiteral: MoonControls.caption(view))
+            access.systemActions = [.increment, .decrement]
+            sphere.components.set(access)
+        }
+    }
+    /// A drag turns the globe about the vertical, slowly: a third of a degree a point.
+    func turn(by points: Float) {
+        guard let shown else { return }
+        spin = points*0.006
+        sphere.transform.rotation = simd_quatf(angle: spin, axis: [0, 1, 0])*shown.orientation
+    }
+    /// Let go, and the Moon turns back to the face it always shows us (at once under Reduce Motion).
+    func settle(reduceMotion: Bool) {
+        spin = 0
+        guard let shown else { return }
+        let face = Transform(rotation: shown.orientation)
+        if reduceMotion { sphere.transform = face } else { sphere.move(to: face, relativeTo: root, duration: 1.4, timingFunction: .easeInOut) }
+    }
+
+    /// A globe whose texture coordinates follow the Moon shader's map lookup: longitude 0 (the
+    /// mean near side) toward +z, east toward +x, north up.
+    static func globeMesh() throws -> MeshResource {
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
+        let columns = 96, rows = 48
+        for i in 0...columns {
+            let lon = (Double(i)/Double(columns)-0.5)*2*Double.pi
+            for j in 0...rows {
+                let lat = (Double(j)/Double(rows)-0.5)*Double.pi
+                let n = SIMD3<Float>(Float(cos(lat)*sin(lon)), Float(sin(lat)), Float(cos(lat)*cos(lon)))
+                positions.append(n*radius)
+                normals.append(n)
+                uvs.append([Float(i)/Float(columns), Float(j)/Float(rows)])
+            }
+        }
+        for i in 0..<columns {
+            for j in 0..<rows {
+                let a = UInt32(i*(rows+1)+j), b = a+UInt32(rows+1)
+                // Counterclockwise seen from outside.
+                indices += [a, b, b+1, a, b+1, a+1]
+            }
+        }
+        var descriptor = MeshDescriptor(name: "moon")
+        descriptor.positions = MeshBuffers.Positions(positions)
+        descriptor.normals = MeshBuffers.Normals(normals)
+        descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        descriptor.primitives = .triangles(indices)
+        return try MeshResource.generate(from: [descriptor])
+    }
+}
+
+/// The ornament under the Moon: step or slide through a lunar month of nights.
+struct MoonControls: View {
+    @Environment(\.visionPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let view: MoonView?
+    @Binding var nights: Int
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 14) {
+                Button { nights -= 1 } label: { Image(systemName: "chevron.left") }
+                    .disabled(nights == 0)
+                    .accessibilityLabel(Text("Previous night"))
+                VStack(spacing: 2) {
+                    Text(title).font(.system(.headline, design: .serif))
+                    if let view { Text("\(view.phaseName) · \(view.percent)% lit").font(.callout).foregroundStyle(palette.muted) }
+                }
+                .frame(minWidth: 200)
+                .accessibilityElement(children: .combine)
+                Button { nights += 1 } label: { Image(systemName: "chevron.right") }
+                    .disabled(nights >= MoonView.lastNight)
+                    .accessibilityLabel(Text("Next night"))
+            }
+            .buttonBorderShape(.circle)
+            Slider(value: Binding(get: { Double(nights) }, set: { nights = Int($0.rounded()) }), in: 0...Double(MoonView.lastNight), step: 1) {
+                Text("Night")
+            }
+            .frame(minWidth: 320)
+            .accessibilityValue(Text(title))
+            if let view {
+                Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 420)
+            }
+            if nights > 0 {
+                Button("Back to tonight") { nights = 0 }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+            }
+        }
+        .padding(.horizontal, 26).padding(.vertical, 18)
+        .frame(maxWidth: typeSize.isAccessibilitySize ? 640 : 480)
+        .glassBackgroundEffect(displayMode: palette.nightVision || palette.solid ? .never : .always)
+        .background {
+            if palette.nightVision { RoundedRectangle(cornerRadius: 32).fill(palette.nightPanel) }
+            else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(Color(red: 0.07, green: 0.08, blue: 0.14)) }
+        }
+        .saturation(palette.nightVision ? 0 : 1)
+        .colorMultiply(palette.nightVision ? Color(red: 1, green: 0.27, blue: 0.23) : .white)
+    }
+    private var title: String {
+        guard let view else { return nights == 0 ? String(localized: "Tonight") : "" }
+        return view.isTonight ? String(localized: "Tonight") : view.park.dayLabel(view.night)
+    }
+    /// "As seen from Joshua Tree at 10:42 PM. Drag it to turn it."
+    static func caption(_ view: MoonView) -> String {
+        String(localized: "As seen from \(view.park.shortName) at \(view.park.time(view.moment)), its highest that night. Drag to turn it; it turns back to the face we always see.")
+    }
+}
+
+#Preview("Moon controls") {
+    let model = VisionModel(now: .now)
+    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
+}
+
+#Preview("Moon controls, a later night, night vision") {
+    let model = VisionModel(now: .now)
+    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 9), isTonight: false) }, nights: .constant(9))
+        .environment(\.visionPalette, VisionPalette(nightVision: true))
+}
+
+#Preview("Moon controls, accessibility size") {
+    let model = VisionModel(now: .now)
+    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.currentNight(at: .now), isTonight: true) }, nights: .constant(0))
+        .dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Moon volume", windowStyle: .volumetric) {
+    MoonVolume().environment(VisionModel(now: .now))
+}
