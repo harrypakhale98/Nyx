@@ -67,7 +67,9 @@ struct LightPollution: View {
     }
 }
 
-/// The viewing spots, each with its sky glow beside the park's and its step-free access from nps.gov.
+/// The viewing spots: each with its name, its sky glow beside the park's other spots, step-free
+/// access from nps.gov, and two plain actions (copy the coordinates, or hand them to Maps for
+/// directions). The one caveat about approximate coordinates stands once, at the foot.
 struct ViewingSpots: View {
     @Environment(\.nyx) private var palette
     let park: Park
@@ -79,39 +81,91 @@ struct ViewingSpots: View {
                 ViewingSpotRow(park:park,spot:spot)
                 if spot != park.viewingSpots.last { Divider().overlay(palette.line) }
             }
+            if !park.viewingSpots.isEmpty {
+                Text("Coordinates are approximate, from nps.gov. This is not a navigation guide: check current access, hours and closures with the park.")
+                    .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
         }
+    }
+}
+/// How a spot's sky glow compares with the park's other spots, or with the park's centre where it
+/// has none: only when the difference is worth saying. Never a ranking against all parks.
+nonisolated enum SpotGlow {
+    static func comparison(_ glow:Double,others:[Double],parkCentre:Double?)->String? {
+        let others=others.filter { $0>0 }
+        if !others.isEmpty {
+            let mean=others.reduce(0,+)/Double(others.count)
+            if glow>mean*1.25 { return others.count==1 ? String(localized:"Brighter than this park's other spot") : String(localized:"Brighter than this park's other spots") }
+            if glow<mean/1.25 { return others.count==1 ? String(localized:"Darker than this park's other spot") : String(localized:"Darker than this park's other spots") }
+            return String(localized:"About as dark as this park's other spots")
+        }
+        return parkCentre.flatMap { SkyGlow.comparison(spot:glow,park:$0) }
+    }
+    /// The note a spot carries without the shared caveat, which the panel says once.
+    static func lead(_ spot:ViewingSpot)->String? {
+        let note=spot.localizedNote
+        let caveat=String(localized:"Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.")
+        let lead=note.hasSuffix(caveat) ? String(note.dropLast(caveat.count)).trimmingCharacters(in:.whitespaces) : note
+        return lead.isEmpty ? nil : lead
+    }
+    /// Apple Maps, opened at the person's tap with driving directions to the spot. Nyx sends nothing;
+    /// Maps takes it from there.
+    static func directions(_ spot:ViewingSpot)->URL? {
+        var components=URLComponents()
+        components.scheme="maps"
+        components.queryItems=[URLQueryItem(name:"daddr",value:"\(spot.latitude),\(spot.longitude)"),URLQueryItem(name:"dirflg",value:"d")]
+        return components.url
     }
 }
 struct ViewingSpotRow: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     let spot: ViewingSpot
+    @State private var copied=false
     private var access: SpotAccess? { AccessData.shared.access(park:park.id,spot:spot.name) }
+    private var coordinates: String { "\(spot.latitude.formatted(.number.precision(.fractionLength(4)))), \(spot.longitude.formatted(.number.precision(.fractionLength(4))))" }
     var body: some View {
-        VStack(alignment:.leading,spacing:8) {
-            Text(spot.name).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
-            Text("\(spot.latitude.formatted(.number.precision(.fractionLength(3)))), \(spot.longitude.formatted(.number.precision(.fractionLength(3)))) · approximate").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).textSelection(.enabled)
-                // A 44-point target for the long-press "Copy coordinates" menu (iOS 26 audits the text's own height).
-                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
-                .contextMenu { Button("Copy coordinates",systemImage:"doc.on.doc") { UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)" } }
-            Text(spot.localizedNote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        VStack(alignment:.leading,spacing:10) {
+            Text(spot.name).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)
+            if let lead=SpotGlow.lead(spot) { Text(lead).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if let site=SkyGlow.shared.spot(spot.name,park:park.id) {
                 let level=SkyGlow.shared.level(site.glow)
-                let comparison=SkyGlow.shared.park(park.id).flatMap { SkyGlow.comparison(spot:site.glow,park:$0.glow) }
-                VStack(alignment:.leading,spacing:4) {
-                    Text("Sky glow here").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
-                    GlowLine(level:level,text:[SkyGlow.levelLabel(level),comparison].compactMap { $0 }.joined(separator:" · "),font:.footnote)
-                }
-                .padding(.top,2)
-                .accessibilityElement(children:.ignore)
-                .accessibilityLabel(String(localized:"Sky glow here: \([SkyGlow.levelLabel(level),comparison].compactMap { $0 }.joined(separator:". ")), level \(level) of 5."))
+                let others=(SkyGlow.shared.park(park.id)?.spots ?? []).filter { $0.name != spot.name }.map(\.glow)
+                let words=SpotGlow.comparison(site.glow,others:others,parkCentre:SkyGlow.shared.park(park.id)?.glow) ?? String(localized:"Sky glow here")
+                GlowLine(level:level,text:words,font:.footnote)
+                    .accessibilityElement(children:.ignore)
+                    .accessibilityLabel(String(localized:"Sky glow here: \(words). Level \(level) of 5 on the national parks' scale."))
             }
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
+            }
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:10) { actions }
+                VStack(alignment:.leading,spacing:6) { actions }
+            }
+            if copied { Text("Copied \(coordinates)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).transition(.opacity) }
+            if let access, access.summary != nil {
                 DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
                     .tint(palette.accent)
             }
+        }
+        .sensoryFeedback(.success,trigger:copied) { _,new in new }
+    }
+    @ViewBuilder private var actions: some View {
+        Button {
+            UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)"
+            copied=true
+            Task { try? await Task.sleep(for:.seconds(3)); copied=false }
+        } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
+            .buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.accent)
+            .accessibilityHint(String(localized:"Copies \(coordinates), approximate."))
+        if let url=SpotGlow.directions(spot) {
+            Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
+                .buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.accent)
+                .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
         }
     }
 }

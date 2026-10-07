@@ -1,8 +1,11 @@
 import SwiftUI
 
-/// Park detail's "What's up" card: an eclipse or a meteor shower when there is one, then the
-/// Milky Way's bright center and the planets, each as a glyph, a name, the figure to read at a
-/// glance and one plain sentence. VoiceOver reads each row as those sentences.
+/// Park detail's "What's up" card, by what the night is worth looking up for: the Milky Way's bright
+/// center, the planets (brightest first), then a meteor shower of ten or more an hour and a
+/// partial eclipse. A total lunar eclipse the park can see leads, being rare. Weak showers, a
+/// penumbral eclipse and one the park cannot see are a line each at the foot. Each row is a
+/// glyph, a name, the figure to read at a glance and one plain sentence; VoiceOver reads each row
+/// as those sentences.
 struct WhatsUpPanel: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -14,13 +17,22 @@ struct WhatsUpPanel: View {
     var body: some View {
         VStack(alignment:.leading,spacing:18) {
             Eyebrow(text:isTonight ? "What's up tonight" : "What's up this night")
-            ForEach(Array(whatsUp.leading.enumerated()),id:\.element.id) { index,item in
+            let layout=Self.layout(whatsUp)
+            ForEach(Array(layout.first.enumerated()),id:\.element.id) { index,item in
                 if index>0 { Divider().overlay(palette.line) }
                 row(item)
             }
             if !whatsUp.planets.isEmpty {
                 Divider().overlay(palette.line)
                 planets
+            }
+            ForEach(layout.after) { item in
+                Divider().overlay(palette.line)
+                row(item)
+            }
+            if !layout.mentions.isEmpty {
+                Divider().overlay(palette.line)
+                VStack(alignment:.leading,spacing:10) { ForEach(layout.mentions) { item in mention(item) } }
             }
             if !notes.isEmpty {
                 Divider().overlay(palette.line)
@@ -62,10 +74,46 @@ struct WhatsUpPanel: View {
                 VStack(alignment:.leading,spacing:4) { heading(item,event:event); figure(item,event:event) }
             }
             Text(item.detail).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            if let gloss=Self.gloss(whatsUp,item:item) { Text(gloss).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if let footnote=item.footnote { Text(footnote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,2) }
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(item.spoken)
+        .accessibilityLabel(item.spoken+(Self.gloss(whatsUp,item:item).map { " "+$0 } ?? ""))
+    }
+    /// A quieter thing in the sky, in one line: "October Draconids · about 2 an hour".
+    private func mention(_ item:WhatsUp.Item)->some View {
+        HStack(alignment:.firstTextBaseline,spacing:10) {
+            if !typeSize.isAccessibilitySize { SkyGlyph(SkyGlyph.Kind(item.kind),color:palette.muted).frame(width:glyphSize*0.7,height:glyphSize*0.7) }
+            Text([item.title,item.value ?? item.note].compactMap { $0 }.joined(separator:" · ")+(Self.gloss(whatsUp,item:item).map { ". "+$0 } ?? ""))
+                .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel(item.spoken+(Self.gloss(whatsUp,item:item).map { " "+$0 } ?? ""))
+    }
+    /// Where each row goes: `first` above the planets, `after` below them, `mentions` a line each.
+    struct Layout: Equatable { var first:[WhatsUp.Item]; var after:[WhatsUp.Item]; var mentions:[WhatsUp.Item] }
+    /// Showers under this many an hour are a mention, not a row.
+    static let showerRow=10
+    static func layout(_ whatsUp:WhatsUp)->Layout {
+        var layout=Layout(first:[whatsUp.core],after:[],mentions:[])
+        if let shower=whatsUp.shower {
+            if (whatsUp.events.shower?.hourlyRate ?? 0)>=showerRow { layout.after.append(shower) } else { layout.mentions.append(shower) }
+        }
+        if let eclipse=whatsUp.eclipse, let night=whatsUp.events.eclipse {
+            if night.visible == nil || night.eclipse.type == "penumbral" { layout.mentions.append(eclipse) }
+            else if night.eclipse.type == "total" { layout.first.insert(eclipse,at:0) }
+            else { layout.after.append(eclipse) }
+        }
+        return layout
+    }
+    /// One plain line for the eclipse words a newcomer may not know.
+    static func gloss(_ whatsUp:WhatsUp,item:WhatsUp.Item)->String? {
+        guard item.kind == .eclipse, let night=whatsUp.events.eclipse, night.visible != nil else { return nil }
+        switch night.eclipse.type {
+        case "total": return String(localized:"Totality: the whole Moon in Earth's shadow, often a deep red.")
+        case "partial": return String(localized:"Partial: part of the Moon in Earth's darkest shadow.")
+        default: return String(localized:"Penumbral: the Moon dims slightly; easy to miss.")
+        }
     }
     /// The planets under one heading, brightest first: a name, a word for brightness, one sentence.
     private var planets:some View {
