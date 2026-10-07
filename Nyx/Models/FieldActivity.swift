@@ -35,6 +35,13 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     /// phone's clock is set. Optional so an activity started by an earlier build still decodes.
     var timeZoneID: String? = nil
     var timeZone: TimeZone { timeZoneID.flatMap(TimeZone.init(identifier:)) ?? .current }
+    /// The one milestone every face names, so title, symbol and countdown never disagree: the
+    /// state's next milestone, or once that moment has passed with no update (stale), the one after
+    /// it. Nil when the night is over or only sunrise is left.
+    func shown(_ state: ContentState, isStale: Bool) -> Milestone? {
+        guard !state.finished, let next=state.next else { return nil }
+        return isStale ? after(next).first : next
+    }
 
     /// The milestones after the one the state points at, for when the state has gone stale.
     func after(_ milestone: Milestone?) -> [Milestone] {

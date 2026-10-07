@@ -9,7 +9,6 @@ struct NightDetail: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .largeTitle) private var numeral = 108
     @ScaledMetric(relativeTo: .largeTitle) private var moonSide = 190
-    let toggleSky: () async -> Void
     var body: some View {
         if let plan = model.plan, let moment = model.skyMoment {
             ScrollView {
@@ -31,6 +30,8 @@ struct NightDetail: View {
                 LinearGradient(colors: [Color(red: 0.043, green: 0.063, blue: 0.149).opacity(palette.solid ? 0.96 : 0.55), Color.black.opacity(palette.solid ? 0.96 : 0.45)], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea().accessibilityHidden(true)
             }
+        } else if model.parks.isEmpty {
+            ParkDataUnavailable()
         } else {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -89,15 +90,20 @@ struct NightDetail: View {
         case let (rise?, set?): rise < set ? String(localized: "Rises \(park.time(rise)), sets \(park.time(set))") : String(localized: "Sets \(park.time(set)), rises \(park.time(rise))")
         case let (rise?, nil): String(localized: "Rises \(park.time(rise))")
         case let (nil, set?): String(localized: "Sets \(park.time(set))")
-        default: sky.moonBelowFraction > 0.5 ? String(localized: "Down all night") : String(localized: "Up all night")
+        // Neither rises nor sets: the Moon's height at its highest says which (moonBelowFraction
+        // is 0 when there is no true darkness to measure it against).
+        default: plan.moonAllNight
         }
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
-        return layout { factCells(darkness, hours, moonLine, park) }
+        // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
+        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(Int(sky.moonBelowFraction*100))% of true darkness")
+            : String(localized: "The Moon counts only in true darkness, and this night has none.")
+        return layout { factCells(darkness, hours, moonLine, moonNote, park) }
     }
-    @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ park: Park) -> some View {
+    @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park) -> some View {
         Fact(title: "True darkness", value: darkness, note: hours.map { "\($0) · \(park.timeZoneName)" } ?? park.timeZoneName)
-        Fact(title: "Moon", value: moonLine, note: String(localized: "Down for \(Int((model.plan?.sky.moonBelowFraction ?? 0)*100))% of true darkness"))
+        Fact(title: "Moon", value: moonLine, note: moonNote)
         Fact(title: "Sky glow", value: String(localized: "Bortle \(park.bortleEstimate)"), note: park.darkSkyDesignated ? String(localized: "Estimate · International Dark Sky Park") : String(localized: "Estimate"))
     }
 
@@ -126,10 +132,7 @@ struct NightDetail: View {
         let park = plan.park
         let bodies = ([moment.moon] + moment.visiblePlanets + (moment.core.up && moment.sunAltitude < -12 ? [moment.core] : [])).filter(\.up)
         return VStack(alignment: .leading, spacing: 18) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) { skyTitle(park, moment); Spacer(); skyButton }
-                VStack(alignment: .leading, spacing: 14) { skyTitle(park, moment); skyButton }
-            }
+            VisionEyebrow(text: "The sky at \(park.time(moment.date))")
             Text(moment.twilight).font(.system(.title3, design: .serif))
             if bodies.isEmpty {
                 Text("No Moon or planets above the horizon. The stars have the sky to themselves.").foregroundStyle(palette.muted)
@@ -144,17 +147,6 @@ struct NightDetail: View {
                 .accessibilityElement(children: .combine)
             }
         }
-    }
-    private func skyTitle(_ park: Park, _ moment: SkyMoment) -> some View {
-        VisionEyebrow(text: "The sky at \(park.time(moment.date))")
-    }
-    private var skyButton: some View {
-        Button { Task { await toggleSky() } } label: {
-            Label(model.immersiveOpen ? "Leave the sky" : "Stand under this sky", systemImage: model.immersiveOpen ? "xmark" : "sparkles")
-                .font(.headline).padding(.horizontal, 6)
-        }
-        .buttonStyle(.borderedProminent).tint(palette.accent.opacity(0.85))
-        .accessibilityHint(Text("Surrounds you with this park's computed sky at the time on the clock below"))
     }
 
     private func honesty(_ plan: NightPlan) -> some View {
@@ -179,8 +171,50 @@ private struct Fact: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(18)
-        .background(palette.solid && !palette.nightVision ? AnyShapeStyle(Color(red: 0.07, green: 0.08, blue: 0.14)) : AnyShapeStyle(.thinMaterial.opacity(palette.nightVision ? 0 : 0.6)), in: .rect(cornerRadius: 20))
+        .background(background, in: .rect(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(palette.line, lineWidth: 0.5))
         .accessibilityElement(children: .combine)
     }
+    /// A full material on glass (a faded one let the room wash the words out), a solid panel under
+    /// Reduce Transparency, and nothing in night vision, where the window's dark panel shows.
+    private var background: AnyShapeStyle {
+        if palette.nightVision { return AnyShapeStyle(Color.clear) }
+        return palette.solid ? AnyShapeStyle(Color(red: 0.07, green: 0.08, blue: 0.14)) : AnyShapeStyle(.regularMaterial)
+    }
+}
+
+/// When the bundled park list cannot be read: say so plainly instead of an endless spinner.
+struct ParkDataUnavailable: View {
+    var body: some View {
+        ContentUnavailableView {
+            Label("Park data unavailable", systemImage: "exclamationmark.triangle")
+        } description: {
+            Text("Nyx could not read the park list that ships inside the app. Reinstalling Nyx restores it.")
+        }
+    }
+}
+
+#Preview("Night detail") {
+    NavigationStack { NightDetail() }.environment(VisionModel(now: .now))
+}
+
+#Preview("Night detail, Denali in June") {
+    // No true darkness: the moon line comes from its height, and the note says why there is no share.
+    let model = VisionModel(now: (try? Date("2026-06-21T21:00:00Z", strategy: .iso8601)) ?? .now)
+    model.selectedID = "dena"
+    return NavigationStack { NightDetail() }.environment(model)
+}
+
+#Preview("Night detail, accessibility size") {
+    NavigationStack { NightDetail() }.environment(VisionModel(now: .now)).dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Night detail, night vision and Reduce Transparency") {
+    let model = VisionModel(now: .now)
+    model.nightVision = true
+    return NavigationStack { NightDetail() }.environment(model).environment(\.visionPalette, VisionPalette(nightVision: true, solid: true))
+}
+
+#Preview("Park data unavailable") {
+    NavigationStack { NightDetail() }.environment(VisionModel(now: .now, parks: []))
 }

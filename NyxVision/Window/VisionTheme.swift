@@ -13,7 +13,12 @@ struct VisionPalette: Equatable {
     var accent: Color { nightVision ? .white : Color(red: 1, green: 0.706, blue: 0.329) }
     /// Words in the immersive sky, which no window filter reaches: red already in night vision.
     var skyInk: Color { nightVision ? Color(red: 1, green: 0.30, blue: 0.24) : Color(red: 0.961, green: 0.945, blue: 0.902) }
-    var muted: Color { ink.opacity(highContrast ? 0.95 : nightVision ? 0.9 : 0.72) }
+    /// Secondary text. On glass it is the system's vibrant secondary style, which keeps its
+    /// contrast over whatever the room shows through; night vision and Increase Contrast use a
+    /// near-solid ink instead.
+    var muted: AnyShapeStyle {
+        highContrast || nightVision ? AnyShapeStyle(ink.opacity(highContrast ? 0.95 : 0.9)) : AnyShapeStyle(.secondary)
+    }
     var line: Color { ink.opacity(highContrast ? 0.6 : 0.2) }
     /// Behind the window's content in night vision, where grey glass would read as a bright panel.
     var nightPanel: Color { Color(red: 0.07, green: 0.008, blue: 0.005) }
@@ -39,7 +44,7 @@ struct VisionEyebrow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     let text: LocalizedStringKey
     var body: some View {
-        Text(text).font(.caption.weight(.semibold)).kerning(typeSize.isAccessibilitySize ? 0 : 2.4)
+        Text(text).font(.footnote.weight(.semibold)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6)
             .textCase(typeSize.isAccessibilitySize ? nil : .uppercase).foregroundStyle(palette.muted)
             .accessibilityAddTraits(.isHeader)
     }
@@ -72,4 +77,17 @@ struct VisionMoon: View {
     static func describe(_ geometry: MoonGeometry) -> String {
         String(localized: "Moon, \(Int((geometry.illumination*100).rounded())) percent illuminated")
     }
+}
+
+#Preview("Eyebrow and Moon") {
+    VStack(alignment: .leading, spacing: 24) {
+        VisionEyebrow(text: "What's up tonight")
+        VisionEyebrow(text: "What's up tonight").environment(\.visionPalette, VisionPalette(highContrast: true))
+        HStack(spacing: 24) {
+            ForEach([0.0, 1.6, 2.6], id: \.self) { angle in
+                VisionMoon(geometry: MoonGeometry(phaseAngle: angle, brightLimb: 1.2, north: 0.3, librationLongitude: 0, librationLatitude: 0)).frame(width: 140, height: 140)
+            }
+        }
+    }
+    .padding(40).glassBackgroundEffect()
 }

@@ -19,6 +19,7 @@ struct FieldActivityLockView: View {
     let isStale: Bool
     private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision) }
     var body: some View {
+        let mark=attributes.shown(state,isStale:isStale)
         VStack(alignment:.leading,spacing:10) {
             HStack(spacing:6) {
                 Image(systemName:"moon.stars").accessibilityHidden(true)
@@ -28,23 +29,25 @@ struct FieldActivityLockView: View {
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {
                 Text("The night is over. Rest your eyes.").font(.system(.title3,design:.serif)).foregroundStyle(colors.ink)
-            } else if let next=state.next, !isStale {
+            } else if let mark {
                 HStack(alignment:.firstTextBaseline) {
-                    Label { Text(next.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:next.symbol).accessibilityHidden(true) }
+                    Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
                         .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
                     Spacer(minLength:8)
-                    Text(timerInterval:Date.now...max(Date.now,next.date),countsDown:true).font(.system(.title2,design:.serif)).monospacedDigit()
+                    // Stale: the countdown's moment passed with no update, so the next one is a clock time.
+                    Group {
+                        if isStale { Text(mark.date,style:.time) }
+                        else { Text(timerInterval:Date.now...max(Date.now,mark.date),countsDown:true) }
+                    }.font(.system(.title2,design:.serif)).monospacedDigit()
                         .foregroundStyle(colors.accent).multilineTextAlignment(.trailing).frame(maxWidth:110,alignment:.trailing)
                 }
-            } else if attributes.after(state.next).isEmpty {
-                // Past the last mark with no update since: only sunrise is left to say.
-                HStack(spacing:6) { Text("Sunrise at"); Text(attributes.dawn,style:.time) }.font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
             } else {
-                Text("Later tonight").font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
+                // Past the last mark: only sunrise is left to say.
+                Text("Sunrise at \(Text(attributes.dawn,style:.time))").font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
             }
             if !state.finished {
                 FieldNightLine(attributes:attributes,colors:colors).frame(height:16)
-                let later=Array(attributes.after(state.next).prefix(2))
+                let later=Array((mark.map { attributes.after($0) } ?? []).prefix(2))
                 if !later.isEmpty {
                     // Two marks when both fit whole, else one: never a truncated name.
                     ViewThatFits(in:.horizontal) {
@@ -86,28 +89,49 @@ struct FieldNightLine: View {
     }
 }
 
-/// The Dynamic Island's compact and minimal faces.
+/// What the Dynamic Island names: the shown milestone, sunrise when only that is left, dawn once over.
+struct FieldActivityMark {
+    let milestone: FieldActivityAttributes.Milestone?
+    let finished: Bool
+    init(attributes:FieldActivityAttributes,state:FieldActivityAttributes.ContentState,isStale:Bool) {
+        milestone=attributes.shown(state,isStale:isStale); finished=state.finished
+    }
+    var title: String { finished ? String(localized:"Dawn") : milestone?.title ?? String(localized:"Sunrise") }
+    var symbol: String { milestone?.symbol ?? "sunrise" }
+}
+/// The Dynamic Island's compact and minimal faces, spoken as the moment they stand for.
 struct FieldActivitySymbol: View {
-    let state: FieldActivityAttributes.ContentState
+    let mark: FieldActivityMark
+    let nightVision: Bool
+    init(attributes:FieldActivityAttributes,state:FieldActivityAttributes.ContentState,isStale:Bool) {
+        mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale); nightVision=state.nightVision
+    }
     var body: some View {
-        Image(systemName:state.finished ? "sunrise" : state.next?.symbol ?? "moon.stars")
-            .foregroundStyle(FieldActivityColors(nightVision:state.nightVision).accent)
-            .accessibilityLabel(state.finished ? Text("Dawn") : Text(state.next?.title ?? String(localized:"Later tonight")))
+        Image(systemName:mark.symbol)
+            .foregroundStyle(FieldActivityColors(nightVision:nightVision).accent)
+            .accessibilityLabel(mark.title)
     }
 }
+/// The countdown to the shown milestone; a clock time once stale, sunrise when nothing else is left.
 struct FieldActivityCountdown: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
     let isStale: Bool
+    /// Compact by default; the expanded island passes a larger face and a wider cap.
+    var font: Font = .caption.weight(.semibold)
+    var maxWidth: CGFloat = 56
     var body: some View {
         let colors=FieldActivityColors(nightVision:state.nightVision)
         Group {
-            if let next=state.next, !isStale, !state.finished {
-                Text(timerInterval:Date.now...max(Date.now,next.date),countsDown:true).monospacedDigit().frame(maxWidth:56)
-            } else if let later=attributes.after(state.next).first, !state.finished {
-                Text(later.date,style:.time).monospacedDigit()
+            if let mark=attributes.shown(state,isStale:isStale) {
+                if isStale { Text(mark.date,style:.time) }
+                else { Text(timerInterval:Date.now...max(Date.now,mark.date),countsDown:true) }
+            } else if !state.finished {
+                Text(attributes.dawn,style:.time)
             } else { Text("Dawn") }
-        }.font(.caption.weight(.semibold)).foregroundStyle(colors.accent)
+        }.monospacedDigit().lineLimit(1).minimumScaleFactor(0.8).multilineTextAlignment(.trailing)
+        .frame(maxWidth:maxWidth,alignment:.trailing)
+        .font(font).foregroundStyle(colors.accent)
         .environment(\.timeZone,attributes.timeZone)
     }
 }
@@ -125,7 +149,8 @@ extension FieldActivityAttributes {
         func at(_ minutes:Double)->Date { dusk.addingTimeInterval(minutes*60) }
         return FieldActivityAttributes(parkID:"jotr",parkName:"Joshua Tree",score:94,band:"Pristine",dusk:dusk,dawn:at(760),darkStart:at(85),darkEnd:at(670),
             milestones:[.init(title:"True darkness",date:at(85),symbol:"moon.stars"),.init(title:"Moonset",date:at(170),symbol:"moonset"),
-                        .init(title:"Geminids at their best",date:at(420),symbol:"sparkles"),.init(title:"Dawn twilight",date:at(670),symbol:"sun.horizon")])
+                        .init(title:"Geminids at their best",date:at(420),symbol:"sparkles"),.init(title:"Dawn twilight",date:at(670),symbol:"sun.horizon")],
+            timeZoneID:"America/Los_Angeles")
     }
 }
 #endif

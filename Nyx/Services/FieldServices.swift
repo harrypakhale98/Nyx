@@ -66,6 +66,7 @@ extension FieldActivityAttributes {
 /// Wake-ups for the night, through AlarmKit: they ring through Silent and Focus, which a
 /// notification cannot. Set on this iPhone only. AlarmKit's alert without a stop button needs
 /// iOS 26.1, so alarms are offered from 26.1; on 26.0 the rows are simply absent.
+enum FieldAlarmError: Error { case unsupported }
 @MainActor enum FieldAlarms {
     static var supported: Bool { if #available(iOS 26.1, *) { true } else { false } }
     static let tint=Color(red:1,green:0.27,blue:0.23)
@@ -97,7 +98,8 @@ extension FieldActivityAttributes {
             ledger[key]=nil
             return
         }
-        guard #available(iOS 26.1, *) else { return }
+        // The rows are hidden below iOS 26.1 (`supported`); if one is reached anyway, say so rather than do nothing.
+        guard #available(iOS 26.1, *) else { throw FieldAlarmError.unsupported }
         let id=UUID()
         let snooze=AlarmButton(text: "Snooze", textColor: tint, systemImageName: "zzz")
         let alert=AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: option.alarmTitle), secondaryButton: snooze, secondaryButtonBehavior: .countdown)

@@ -15,26 +15,31 @@ struct FieldLiveActivity: Widget {
                 .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
         } dynamicIsland: { context in
             let colors=FieldActivityColors(nightVision:context.state.nightVision)
+            // One milestone for title, symbol and countdown, so a stale activity never names one moment and times another.
+            let mark=FieldActivityMark(attributes:context.attributes,state:context.state,isStale:context.isStale)
+            let zone=context.attributes.timeZone
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label { Text(context.state.finished ? String(localized:"Dawn") : context.state.next?.title ?? String(localized:"Later tonight")).lineLimit(1).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(state:context.state) }
+                    // A long title drops below the camera rather than truncating beside it.
+                    Label { Text(mark.title).lineLimit(2).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale).accessibilityHidden(true) }
                         .font(.system(.subheadline,design:.serif)).foregroundStyle(colors.ink)
+                        .dynamicIsland(verticalPlacement:.belowIfTooWide)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale).font(.system(.title3,design:.serif))
+                    FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale,font:.system(.title3,design:.serif),maxWidth:90)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment:.leading,spacing:6) {
                         FieldNightLine(attributes:context.attributes,colors:colors).frame(height:14)
                         Text("\(context.attributes.parkName) · \(context.attributes.score) \(context.attributes.band)").font(.caption2).foregroundStyle(colors.muted)
-                    }
+                    }.environment(\.timeZone,zone)
                 }
             } compactLeading: {
-                FieldActivitySymbol(state:context.state)
+                FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale)
             } compactTrailing: {
                 FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale)
             } minimal: {
-                FieldActivitySymbol(state:context.state)
+                FieldActivitySymbol(attributes:context.attributes,state:context.state,isStale:context.isStale)
             }
             .keylineTint(colors.accent)
             .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
@@ -57,16 +62,23 @@ struct FieldAlarmLiveActivity: Widget {
             .foregroundStyle(context.attributes.tintColor).padding(16).activityBackgroundTint(Color.black.opacity(0.88))
         } dynamicIsland: { context in
             DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) { Text(context.attributes.presentation.alert.title).font(.subheadline).lineLimit(2) }
-                DynamicIslandExpandedRegion(.trailing) { countdown(context.state).monospacedDigit() }
-            } compactLeading: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor).accessibilityLabel("Alarm") }
+                DynamicIslandExpandedRegion(.leading) {
+                    Text(context.attributes.presentation.alert.title).font(.subheadline).lineLimit(2).foregroundStyle(context.attributes.tintColor)
+                        .dynamicIsland(verticalPlacement:.belowIfTooWide)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    countdown(context.state).monospacedDigit().frame(maxWidth:90,alignment:.trailing).foregroundStyle(context.attributes.tintColor)
+                }
+            } compactLeading: { alarmSymbol.foregroundStyle(context.attributes.tintColor) }
               compactTrailing: { countdown(context.state).monospacedDigit().frame(maxWidth:52).foregroundStyle(context.attributes.tintColor) }
-              minimal: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor).accessibilityLabel("Alarm") }
+              minimal: { alarmSymbol.foregroundStyle(context.attributes.tintColor) }
+              .keylineTint(context.attributes.tintColor)
         }
     }
+    private var alarmSymbol: some View { Image(systemName:"alarm").accessibilityLabel("Alarm") }
     @ViewBuilder private func countdown(_ state:AlarmPresentationState)->some View {
         if case .countdown(let countdown)=state.mode { Text(timerInterval:Date.now...max(Date.now,countdown.fireDate),countsDown:true) }
-        else { Image(systemName:"alarm").accessibilityLabel("Alarm") }
+        else { alarmSymbol }
     }
 }
 

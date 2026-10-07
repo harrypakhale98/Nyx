@@ -11,7 +11,10 @@ struct PlannerWindow: View {
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.dismissWindow) private var dismissWindow
+    @Environment(\.scenePhase) private var scenePhase
     @State private var query = ""
+    /// True while the sky is opening or closing, so a second tap cannot start a second transition.
+    @State private var skyBusy = false
     var body: some View {
         @Bindable var model = model
         let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency)
@@ -20,8 +23,10 @@ struct PlannerWindow: View {
                 .searchable(text: $query, prompt: Text("Search parks"))
                 .navigationTitle(Text("Nyx"))
         } detail: {
-            NightDetail(toggleSky: toggleSky)
+            NightDetail()
                 .toolbar {
+                    // Always in reach, wherever the detail is scrolled: into the sky and back out.
+                    ToolbarItem(placement: .topBarTrailing) { skyButton }
                     ToolbarItem(placement: .topBarTrailing) {
                         Toggle(isOn: $model.nightVision) { Label("Night vision", systemImage: "eye") }
                             .toggleStyle(.button)
@@ -29,7 +34,7 @@ struct PlannerWindow: View {
                     }
                 }
         }
-        .ornament(attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
+        .ornament(visibility: model.parks.isEmpty ? .hidden : .visible, attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
             NightControls().environment(\.visionPalette, palette)
         }
         .environment(\.visionPalette, palette)
@@ -41,8 +46,28 @@ struct PlannerWindow: View {
             // DEBUG: `-nyx-vision-skyonly` closes the window once the sky is open, for screenshots of the sky alone.
             if VisionDebug.isEnabled("vision-skyonly"), model.immersiveOpen { dismissWindow(id: "planner") }
         }
+        .onChange(of: scenePhase) { _, phase in
+            // The window holds every control for the sky. Closed, it would leave someone standing
+            // in a sky they cannot change or leave except by the Digital Crown, so the sky closes
+            // with it. Opening Nyx again brings the window back.
+            guard phase == .background, model.immersiveOpen, !VisionDebug.isEnabled("vision-skyonly") else { return }
+            Task { await dismissImmersiveSpace(); model.immersiveOpen = false }
+        }
+    }
+    private var skyButton: some View {
+        let open = model.immersiveOpen
+        return Button { Task { await toggleSky() } } label: {
+            Label(open ? "Leave the sky" : "Stand under this sky", systemImage: open ? "xmark" : "sparkles")
+        }
+        .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : Color(red: 1, green: 0.706, blue: 0.329).opacity(0.85))
+        .disabled(skyBusy || model.plan == nil)
+        .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
+                                : Text("Surrounds you with this park's computed sky at the time on the clock below the window"))
     }
     private func toggleSky() async {
+        guard !skyBusy else { return }
+        skyBusy = true
+        defer { skyBusy = false }
         if model.immersiveOpen { await dismissImmersiveSpace(); model.immersiveOpen = false; return }
         if case .opened = await openImmersiveSpace(id: SkySpace.id) { model.immersiveOpen = true }
     }
@@ -85,7 +110,8 @@ struct ParkList: View {
             }
         }
         .overlay {
-            if parks.isEmpty { ContentUnavailableView.search(text: query) }
+            if model.parks.isEmpty { ParkDataUnavailable() }
+            else if parks.isEmpty { ContentUnavailableView.search(text: query) }
         }
     }
     private var nightName: String {
@@ -117,4 +143,25 @@ struct ParkRow: View {
         .accessibilityLabel(Text(park.name))
         .accessibilityValue(score.map { Text("\($0.value) out of 100, \($0.band.label), moon and darkness only") } ?? Text("Computing"))
     }
+}
+
+#Preview("Park rows") {
+    let parks = VisionModel(now: .now).parks.prefix(2)
+    List {
+        if let park = parks.first {
+            ParkRow(park: park, score: DarknessScore(value: 94, moonPoints: 40, cloudPoints: nil, bortlePoints: 20, lengthPoints: 13))
+            ParkRow(park: park, score: nil)
+        }
+        if let park = parks.last {
+            ParkRow(park: park, score: DarknessScore(value: 38, moonPoints: 6, cloudPoints: nil, bortlePoints: 18, lengthPoints: 14))
+        }
+    }
+}
+
+#Preview("Planner") {
+    PlannerWindow().environment(VisionModel(now: .now))
+}
+
+#Preview("Planner, park data unavailable") {
+    PlannerWindow().environment(VisionModel(now: .now, parks: []))
 }

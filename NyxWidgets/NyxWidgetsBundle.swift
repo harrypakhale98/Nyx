@@ -6,15 +6,22 @@ import WidgetKit
     var body:some Widget { TonightWidget();NightVisionControl();FieldModeControl();FieldLiveActivity();FieldAlarmLiveActivity() }
 }
 struct TonightProvider:TimelineProvider {
-    func placeholder(in context:Context)->TonightEntry { TonightEntry(date:.now,night:nil,nightVision:false) }
+    /// The same sample sky as the gallery, so the system's redacted placeholder has the real shape
+    /// of the widget rather than the empty state's copy.
+    func placeholder(in context:Context)->TonightEntry {
+        var builder=TonightTimeline(snapshot:Self.sample,large:context.family == .systemLarge || context.family == .systemExtraLarge)
+        return builder.entry(at:.now)
+    }
     func getSnapshot(in context:Context,completion:@escaping(TonightEntry)->Void) {
         var snapshot=SharedSettings.read()
         // The widget gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not "save a park".
-        if context.isPreview, snapshot?.parks.isEmpty ?? true, let sample=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
-            snapshot=SavedSkySnapshot(parks:[sample],forecasts:[:])
-        }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot=Self.sample }
         var builder=TonightTimeline(snapshot:snapshot,large:context.family == .systemLarge || context.family == .systemExtraLarge)
         completion(builder.entry(at:.now))
+    }
+    /// Joshua Tree tonight, moon and darkness only. Nil only if the bundled parks cannot be read.
+    static var sample:SavedSkySnapshot? {
+        (try? ParkData.load().first(where:{ $0.id=="jotr" })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
     }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
     /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
@@ -86,7 +93,10 @@ struct TonightWidget:Widget {
 struct NightVisionControl:ControlWidget {
     var body:some ControlWidgetConfiguration {
         StaticControlConfiguration(kind:"NightVisionControl",provider:NightVisionProvider()) { value in
-            ControlWidgetToggle(isOn:value,action:NightVisionIntent()) { Label("Nyx night vision",systemImage:"moon") }
+            // The state reads in both word and symbol: "On" with a filled moon, "Off" with an outline.
+            ControlWidgetToggle(isOn:value,action:NightVisionIntent()) { Text("Night vision") } valueLabel:{ isOn in
+                if isOn { Label("On",systemImage:"moon.fill") } else { Label("Off",systemImage:"moon") }
+            }
         }.displayName("Night vision").description("Use Nyx's red palette to reduce glare at night.")
     }
 }

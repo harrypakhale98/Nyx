@@ -168,7 +168,7 @@ struct MilestonesPage: View {
                     }
                     .foregroundStyle(past ? palette.faint : palette.ink)
                     .accessibilityElement(children: .combine)
-                    .accessibilityHint(past ? String(localized: "Passed") : "")
+                    .accessibilityValue(past ? String(localized: "Passed") : milestone == next ? String(localized: "Next") : "")
                 }
                 if list.isEmpty { Text("No sunset, darkness or moonrise tonight.").font(.footnote) }
                 Rectangle().fill(palette.line).frame(height: 0.5).padding(.vertical, 2).accessibilityHidden(true)

@@ -18,13 +18,15 @@ struct TonightComplication: Widget {
 }
 struct TonightComplicationProvider: TimelineProvider {
     private var nightVision: Bool { WatchSky.nightVision(WatchSky.palette, context: WatchSky.readContext()) }
-    func placeholder(in context: Context) -> WatchSkyEntry { WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: true) }
+    /// The gallery's sample sky, so the system's redacted placeholder has the complication's real shape.
+    func placeholder(in context: Context) -> WatchSkyEntry {
+        var cache: [String: SkyConditions] = [:]
+        return WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, nightVision: true, cache: &cache)
+    }
     func getSnapshot(in context: Context, completion: @escaping (WatchSkyEntry) -> Void) {
         var snapshot = SharedSettings.read()
         // The face gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not an empty state.
-        if context.isPreview, snapshot?.parks.isEmpty ?? true, let sample = try? ParkData.load().first(where: { $0.id == "jotr" }) {
-            snapshot = SavedSkySnapshot(parks: [sample], forecasts: [:])
-        }
+        if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         var cache: [String: SkyConditions] = [:]
         completion(WatchTimeline.entry(at: .now, snapshot: snapshot, nightVision: nightVision, cache: &cache))
     }
@@ -73,13 +75,17 @@ struct DuskProvider: RelevanceEntriesProvider {
         let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: now)
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: nightVision))
     }
-    func placeholder(context: Context) -> DuskEntry { DuskEntry(entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: true)) }
+    func placeholder(context: Context) -> DuskEntry {
+        var cache: [String: SkyConditions] = [:]
+        return DuskEntry(entry: WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, nightVision: true, cache: &cache))
+    }
     private var nightVision: Bool { WatchSky.nightVision(WatchSky.palette, context: WatchSky.readContext()) }
 }
 struct DuskWidget: Widget {
     var body: some WidgetConfiguration {
         RelevanceConfiguration(kind: "NyxDusk", provider: DuskProvider()) { entry in
-            WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry.entry)
+            // The card is built once and may sit in the stack for hours: clock times, never a relative countdown.
+            WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry.entry, clockTimes: true)
         }
         .configurationDisplayName("Dark night ahead")
         .description("Appears in the Smart Stack at dusk on Good nights or better.")

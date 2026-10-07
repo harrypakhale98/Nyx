@@ -10,6 +10,9 @@ nonisolated struct NightPlan: Sendable {
     let whatsUp: WhatsUp
     let moon: MoonGeometry
     let moonMoment: Date
+    /// The Moon's topocentric altitude at `moonMoment`, its highest of the night: below the
+    /// horizon's −0.833° means it never rises that night.
+    let moonAltitude: Double
     var span: DateInterval { SkyDome.span(for: sky) }
     init(park: Park, night: Date, isTonight: Bool) {
         let engine = AstronomyEngine()
@@ -19,7 +22,10 @@ nonisolated struct NightPlan: Sendable {
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
+        moonAltitude = engine.lunarAltitude(at: moonMoment, park: park)
     }
+    /// The Moon's line when it neither rises nor sets this night.
+    var moonAllNight: String { moonAltitude > -0.833 ? String(localized: "Up all night") : String(localized: "Down all night") }
 }
 
 /// Where everything is at one moment of a night, for the immersive sky and for the window's
@@ -102,9 +108,9 @@ nonisolated struct SkyMoment: Sendable {
     private var listTask: Task<Void, Never>?
     let now: Date
 
-    init(now: Date = VisionDebug.date ?? .now) {
+    init(now: Date = VisionDebug.date ?? .now, parks: [Park]? = nil) {
         self.now = now
-        parks = ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        self.parks = (parks ?? (try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         nightVision = VisionDebug.isEnabled("night-vision")
         selectedID = VisionDebug.park ?? "jotr"
         refresh(resetTime: true)
@@ -145,19 +151,29 @@ nonisolated struct SkyMoment: Sendable {
             listScores = scores
         }
     }
+    /// The fastest the immersive sky may turn during a sweep, in degrees a second. The real sky
+    /// turns 15° an hour; a whole sky wheeling faster than this around someone standing in it is
+    /// uncomfortable.
+    static let comfortableTurn = 20.0
     /// Moves the night's clock. Sweeps on the shared spring's timing unless Reduce Motion is on,
-    /// when the sky jumps straight there.
+    /// when the sky jumps straight there. While the immersive sky is open the sweep eases in and
+    /// out and lasts long enough that the sky never turns faster than `comfortableTurn`.
     func move(to target: Double, reduceMotion: Bool) {
         sweep?.cancel()
         let start = fraction, goal = min(1, max(0, target))
         guard !reduceMotion, abs(goal-start) > 0.002 else { fraction = goal; return }
+        let immersive = immersiveOpen
+        // Sidereal rate: 15.04° of sky per hour of clock. A cosine ease peaks at π/2 times its mean speed.
+        let degrees = abs(goal-start)*(plan?.span.duration ?? 0)/3600*15.04
+        let duration = immersive ? max(1.1, degrees/Self.comfortableTurn*Double.pi/2) : 1.1
         sweep = Task {
-            let duration = 1.1, began = Date.now
+            let began = Date.now
             while !Task.isCancelled {
                 let t = min(1, Date.now.timeIntervalSince(began)/duration)
-                // Critically damped ease-out: quick to start, settling softly, like the app's spring.
-                let eased = 1 - (1 + 6*t)*exp(-6*t)
-                fraction = start + (goal-start)*(t >= 1 ? 1 : eased/(1 - 7*exp(-6)))
+                // In the window, a critically damped ease-out like the app's spring; in the sky, a
+                // gentle ease in and out, so the stars never lurch into motion.
+                let eased = immersive ? (1-cos(Double.pi*t))/2 : (1 - (1 + 6*t)*exp(-6*t))/(1 - 7*exp(-6))
+                fraction = start + (goal-start)*(t >= 1 ? 1 : eased)
                 if t >= 1 { break }
                 try? await Task.sleep(for: .milliseconds(11))
             }
