@@ -1,8 +1,11 @@
 import SwiftUI
+import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
-/// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa`, `-nyx-watch-palette red | phone | standard`.
+/// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`
+/// `-nyx-watch-state synced | unsynced | polar | samoa | expired`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
+/// (the adaptation clock started that long ago), `-nyx-watch-aod` (Always-On, which the simulator cannot show).
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
     static var screen: String? {
@@ -13,6 +16,13 @@ enum WatchDebug {
         #endif
     }
     static var initialPage: Int { ["milestones": 1, "week": 2][screen ?? ""] ?? 0 }
+    static var initialNight: Int {
+        #if DEBUG
+        return argument("-nyx-watch-night").flatMap(Int.init).map { min(6, max(0, $0)) } ?? 0
+        #else
+        return 0
+        #endif
+    }
     /// Screens that are Tonight itself (a page, or the dark-adaptation cover over it).
     static let homeScreens: Set<String> = ["tonight", "milestones", "week", "dark"]
     /// `-nyx-watch-ax`: the largest accessibility text size (the watch simulator cannot set it).
@@ -20,6 +30,26 @@ enum WatchDebug {
         func body(content: Content) -> some View {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-nyx-watch-ax") { content.dynamicTypeSize(.accessibility5) } else { content }
+            #else
+            content
+            #endif
+        }
+    }
+    /// `-nyx-watch-aod`: the wrist-down rendering, for review.
+    struct AlwaysOn: ViewModifier {
+        func body(content: Content) -> some View {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-nyx-watch-aod") { content.environment(\.isLuminanceReduced, true) } else { content }
+            #else
+            content
+            #endif
+        }
+    }
+    /// `-nyx-watch-scroll bottom`: scroll views open at their end, to review what sits below the fold.
+    struct ScrollEnd: ViewModifier {
+        func body(content: Content) -> some View {
+            #if DEBUG
+            content.defaultScrollAnchor(argument("-nyx-watch-scroll") == "bottom" ? .bottom : nil)
             #else
             content
             #endif
@@ -33,20 +63,31 @@ enum WatchDebug {
     }
     static func apply(to store: WatchStore) {
         if let palette = argument("-nyx-watch-palette").flatMap(PaletteChoice.init(rawValue:)) { store.palette = palette }
-        // Fixture contexts carry no forecast: a fixture never invents clouds.
+        // Fixture contexts carry no usable forecast: a fixture never invents clouds.
         let synced = WatchContext(sent: .now, savedParkIDs: ["jotr", "deva", "grba", "bibe"], homeParkID: "jotr", nightVision: true, forecasts: [:])
         switch argument("-nyx-watch-state") {
         case "unsynced": store.debugSet(context: nil, pinned: nil)
         case "synced": store.debugSet(context: synced, pinned: nil)
         case "polar": store.debugSet(context: synced, pinned: "dena")
         case "samoa": store.debugSet(context: synced, pinned: "npsa")
+        case "expired":
+            // A forecast the iPhone sent three days ago: too old to score, so the watch says so.
+            let old = Date.now.addingTimeInterval(-3*86400)
+            let hours = (0..<48).map { old.timeIntervalSince1970.rounded(.down) + Double($0)*3600 }
+            let forecast = Forecast(updated: old, times: hours, clouds: hours.map { _ in nil })
+            let compact = CompactForecast(forecast, from: old.addingTimeInterval(-3600), to: .now).map { ["jotr": $0] } ?? [:]
+            store.debugSet(context: WatchContext(sent: old, savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: true, forecasts: compact), pinned: nil)
         default: break
+        }
+        if let minutes = argument("-nyx-watch-adaptation").flatMap(Double.init) {
+            store.debugSet(adaptation: AdaptationClock(start: .now.addingTimeInterval(-minutes*60)))
         }
     }
     @MainActor @ViewBuilder static func view(_ screen: String) -> some View {
         switch screen {
         case "parks": ParksList()
         case "chooser": ParkChooser()
+        case "credits": WatchCredits()
         case "complications": DebugFeatured { ComplicationReview(park: $0) }
         default: EmptyView()
         }
@@ -62,22 +103,42 @@ private struct DebugFeatured<Content: View>: View {
         if let park = store.featured(at: .now) ?? store.park("jotr") { content(park) }
     }
 }
-/// Every complication family drawn from the live engine, for review; the face itself is checked on device.
+/// Every complication family of every kind, drawn from the live engine for review, in full colour
+/// and then tinted (accented); the face itself is checked on device.
 private struct ComplicationReview: View {
     @Environment(WatchStore.self) private var store
     let park: Park
     var body: some View {
         let night = store.tonight(park, at: .now)
-        let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: store.nightVision)
+        let red = store.nightVision(at: .now)
+        let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red)
+        let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park), nightVision: red)
+        let dark = NextDarkEntry(date: .now, park: park, moment: DarkMoment.next(at: park, now: .now), nightVision: red)
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 12) {
-                    WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50)
-                    WatchComplicationView(previewFamily: .accessoryCorner, entry: entry).frame(width: 50, height: 50)
+                ForEach(ProcessInfo.processInfo.arguments.contains("-nyx-watch-tinted") ? [WidgetRenderingMode.accented] : [.fullColor, .accented], id: \.description) { mode in
+                    Group {
+                        Text(mode == .fullColor ? "Full colour" : "Tinted").font(.caption2).foregroundStyle(.gray)
+                        HStack(spacing: 8) {
+                            WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50)
+                            MoonComplicationView(previewFamily: .accessoryCircular, entry: moon).frame(width: 50, height: 50)
+                            NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark).frame(width: 50, height: 50)
+                        }
+                        HStack(spacing: 8) {
+                            WatchComplicationView(previewFamily: .accessoryCorner, entry: entry).frame(width: 50, height: 50)
+                            MoonComplicationView(previewFamily: .accessoryCorner, entry: moon).frame(width: 50, height: 50)
+                            NextDarkComplicationView(previewFamily: .accessoryCorner, entry: dark).frame(width: 50, height: 50)
+                        }
+                        WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry).frame(height: 60)
+                        MoonComplicationView(previewFamily: .accessoryRectangular, entry: moon).frame(height: 60)
+                        NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: dark).frame(height: 60)
+                        WatchComplicationView(previewFamily: .accessoryInline, entry: entry).frame(height: 20)
+                        MoonComplicationView(previewFamily: .accessoryInline, entry: moon).frame(height: 20)
+                        NextDarkComplicationView(previewFamily: .accessoryInline, entry: dark).frame(height: 20)
+                    }
+                    .environment(\.widgetRenderingMode, mode)
                 }
-                WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry).frame(height: 60)
-                WatchComplicationView(previewFamily: .accessoryInline, entry: entry).frame(height: 20)
-                WatchComplicationView(previewFamily: .accessoryRectangular, entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: store.nightVision)).frame(height: 50)
+                WatchComplicationView(previewFamily: .accessoryRectangular, entry: WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: red)).frame(height: 50)
             }
         }
         .navigationTitle("Complications")

@@ -12,6 +12,30 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
 }
 
+/// The wearer's colour choice as the complications read it: Automatic is decided per entry, by
+/// the Sun at that entry's park and moment, so a face turns red at civil dusk.
+nonisolated struct WristLook: Sendable {
+    let choice: PaletteChoice
+    let phone: Bool?
+    static var current: WristLook { WristLook(choice: WatchSky.palette, phone: WatchSky.readContext()?.nightVision) }
+    /// Placeholders and the face gallery: red, as at a dark site.
+    static let red = WristLook(choice: .red, phone: nil)
+    func nightVision(park: Park?, at date: Date) -> Bool { choice.nightVision(phone: phone, park: park, at: date) }
+}
+
+/// Colours every Nyx complication shares. In full colour they follow the palette; in the tinted
+/// (accented) and vibrant face modes there are no opacity levels, because the system maps
+/// luminance itself and stacked opacities turn to mud: everything is one ink, and only the score
+/// and its gauge join the accent group.
+struct WristInk {
+    let nightVision: Bool
+    let mode: WidgetRenderingMode
+    var layered: Bool { mode == .fullColor }
+    var ink: Color { nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
+    var accent: Color { nightVision || !layered ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
+    var muted: Color { layered ? ink.opacity(nightVision ? NightRed.levels[1] : 0.72) : ink }
+}
+
 /// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
 /// parks, forecasts and engine as Tonight, so the face and the app never disagree.
 nonisolated enum WatchTimeline {
@@ -19,25 +43,40 @@ nonisolated enum WatchTimeline {
     static var sample: SavedSkySnapshot? {
         (try? ParkData.load().first(where: { $0.id == "jotr" })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
     }
-    static func entry(at date: Date, snapshot: SavedSkySnapshot?, nightVision: Bool, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
-        func night(_ park: Park) -> Night {
+    static func sky(_ park: Park, evening: Date, cache: inout [String: SkyConditions]) -> SkyConditions {
+        let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
+        let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
+        cache[key] = sky
+        return sky
+    }
+    /// The park Tonight would show at `date`: the darkest of the snapshot's parks.
+    static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Night? {
+        var nights: [Night] = []
+        for park in snapshot?.parks ?? [] {
             let evening = park.currentNight(at: date)
-            let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
-            let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
-            cache[key] = sky
-            return WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: date, sky: sky)
+            nights.append(WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: date, sky: sky(park, evening: evening, cache: &cache)))
         }
-        let best = (snapshot?.parks ?? []).map(night).max { $0.score.value < $1.score.value }
+        return nights.max { $0.score.value < $1.score.value }
+    }
+    static func entry(at date: Date, snapshot: SavedSkySnapshot?, look: WristLook, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
+        let best = best(at: date, snapshot: snapshot, cache: &cache)
         let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
-        return WatchSkyEntry(date: date, night: best, next: next, nightVision: nightVision, rank: best.map { rank(for: $0, at: date) })
+        return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) })
+    }
+    /// Moments a complication must redraw at besides the hour: Automatic changing colour at the
+    /// snapshot's parks over the next day.
+    static func paletteMoments(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [Date] {
+        guard look.choice == .automatic else { return [] }
+        return (snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
     }
     /// Entries now, at every milestone of the next day (so "next" turns over on time), and hourly
     /// (so tonight turns over at the park's sunrise). Countdown text updates itself in between.
-    static func entries(from now: Date, snapshot: SavedSkySnapshot?, nightVision: Bool) -> [WatchSkyEntry] {
+    static func entries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [WatchSkyEntry] {
         var cache: [String: SkyConditions] = [:]
-        let first = entry(at: now, snapshot: snapshot, nightVision: nightVision, cache: &cache)
+        let first = entry(at: now, snapshot: snapshot, look: look, cache: &cache)
         let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
         var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
+        moments.formUnion(paletteMoments(from: now, snapshot: snapshot, look: look))
         for park in snapshot?.parks ?? [] {
             for offset in 0..<2 {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
@@ -50,7 +89,7 @@ nonisolated enum WatchTimeline {
                 if let start = duskWindow(sky: sky)?.start, start > now, start < now.addingTimeInterval(86400) { moments.insert(start) }
             }
         }
-        return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, nightVision: nightVision, cache: &cache) }
+        return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, look: look, cache: &cache) }
     }
     /// From 45 minutes before sunset to the end of true darkness: when a stargazer wants Nyx on the wrist.
     static func duskWindow(sky: SkyConditions) -> DateInterval? {
@@ -95,10 +134,12 @@ struct WatchComplicationView: View {
     let entry: WatchSkyEntry
     /// Next moment as a clock time instead of a self-updating countdown, for cards built once.
     var clockTimes = false
+    @Environment(\.widgetRenderingMode) private var renderingMode
     private var family: WidgetFamily { previewFamily ?? systemFamily }
-    private var ink: Color { entry.nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
-    private var accent: Color { entry.nightVision ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
-    private var muted: Color { ink.opacity(entry.nightVision ? NightRed.levels[1] : 0.72) }
+    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
+    private var ink: Color { colors.ink }
+    private var accent: Color { colors.accent }
+    private var muted: Color { colors.muted }
     var body: some View {
         Group {
             if let night = entry.night {
@@ -122,13 +163,13 @@ struct WatchComplicationView: View {
         } currentValueLabel: {
             Text(night.score.value, format: .number).font(.system(.title3, design: .serif)).widgetAccentable()
         }
-        .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink)
+        .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink).widgetAccentable()
     }
     private func corner(_ night: Night) -> some View {
         // The numeral once, in the corner; the curved gauge alone carries the fill, without end labels.
         Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).foregroundStyle(accent).widgetAccentable()
             .widgetLabel {
-                Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent)
+                Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
             }
     }
     private func inline(_ night: Night) -> some View {
