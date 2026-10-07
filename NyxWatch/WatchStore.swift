@@ -10,6 +10,8 @@ import WidgetKit
     private(set) var context: WatchContext?
     var palette: PaletteChoice { didSet { WatchSky.palette = palette; publish() } }
     private(set) var pinned: String?
+    /// The dark-adaptation clock, if one is running; it survives relaunches for one night.
+    private(set) var adaptation: AdaptationClock?
     @ObservationIgnored private var skies: [String: SkyConditions] = [:]
     @ObservationIgnored private let receiver = WatchReceiver()
 
@@ -18,6 +20,7 @@ import WidgetKit
         context = WatchSky.readContext()
         palette = WatchSky.palette
         pinned = WatchSky.pinnedPark
+        adaptation = WatchSky.adaptationStart.map(AdaptationClock.init(start:))
         #if DEBUG
         WatchDebug.apply(to: self)
         #endif
@@ -32,7 +35,25 @@ import WidgetKit
         publish()
     }
     func park(_ id: String?) -> Park? { id.flatMap { id in parks.first { $0.id == id } } }
-    var nightVision: Bool { WatchSky.nightVision(palette, context: context) }
+    /// Red or not at `now`: Automatic follows the Sun at the park on Tonight.
+    func nightVision(at now: Date) -> Bool { WatchSky.nightVision(palette, context: context, park: featured(at: now), at: now) }
+    /// The Control Center control writes the palette from another process: read it again on return.
+    func reloadSettings() {
+        let stored = WatchSky.palette
+        if stored != palette { palette = stored }
+        if let clock = adaptation, clock.isStale(at: .now) { stopAdaptation() }
+    }
+    func startAdaptation(at now: Date = .now) {
+        let clock = AdaptationClock(start: now)
+        adaptation = clock
+        WatchSky.adaptationStart = now
+        AdaptationReminders.schedule(clock, now: now)
+    }
+    func stopAdaptation() {
+        adaptation = nil
+        WatchSky.adaptationStart = nil
+        AdaptationReminders.cancel()
+    }
     var savedParks: [Park] { (context?.savedParkIDs ?? []).compactMap(park) }
     /// The park on Tonight: the one kept on the watch, else the darkest saved park tonight, else the iPhone's starting park.
     func featured(at now: Date) -> Park? {
@@ -58,6 +79,8 @@ import WidgetKit
         WatchSky.publish(parks: WatchSky.candidates(in: parks, context: context, pinned: pinned), context: context)
         WidgetCenter.shared.reloadAllTimelines()
         WidgetCenter.shared.invalidateRelevance(ofKind: "NyxDusk")
+        WidgetCenter.shared.invalidateConfigurationRecommendations()
+        ControlCenter.shared.reloadControls(ofKind: WatchSky.redLightKind)
     }
     /// For a WatchConnectivity background wake: wait (briefly) for whatever the iPhone queued.
     func receivePending() async {
@@ -69,6 +92,7 @@ import WidgetKit
         self.context = context
         self.pinned = pinned
     }
+    func debugSet(adaptation: AdaptationClock?) { self.adaptation = adaptation }
     #endif
 }
 
