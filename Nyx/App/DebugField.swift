@@ -59,12 +59,12 @@ struct FieldActivityReview: View {
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dawn, nightVision: false), isStale: false) }
                 Eyebrow(text: "Dynamic Island")
                 HStack(spacing: 10) {
-                    island { HStack { FieldActivitySymbol(state: state); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
-                    island { FieldActivitySymbol(state: state) }.frame(width: 44)
+                    island { HStack { FieldActivitySymbol(attributes: attributes, state: state, isStale: false); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
+                    island { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.frame(width: 44)
                 }
                 island {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack { Label { Text(state.next?.title ?? "") } icon: { FieldActivitySymbol(state: state) }.font(.system(.subheadline, design: .serif)); Spacer(); FieldActivityCountdown(attributes: attributes, state: state, isStale: false).font(.system(.title3, design: .serif)) }
+                        HStack { Label { Text(FieldActivityMark(attributes: attributes, state: state, isStale: false).title) } icon: { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.font(.system(.subheadline, design: .serif)); Spacer(); FieldActivityCountdown(attributes: attributes, state: state, isStale: false, font: .system(.title3, design: .serif), maxWidth: 90) }
                         FieldNightLine(attributes: attributes, colors: FieldActivityColors(nightVision: false)).frame(height: 14)
                     }.padding(16)
                 }.frame(height: 110)

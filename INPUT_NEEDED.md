@@ -20,7 +20,7 @@ Build 1.1 (7) is archived, verified and uploaded (it supersedes 1.1 (6) with the
    - Store copy: `Store/1.1/metadata-es.md` and the Spanish screenshot captions in `Scripts/make_store_frames.swift` (`spanishFrames`); the Spanish description should gain the 1.1 features (Watch, Vision Pro, trip planner, sky glow) during the review. If captions change, run `swift Scripts/make_store_frames.swift es`.
    - Needed before the Spanish localization is submitted. If the review isn't done in time, submit 1.1 in English only and add Spanish metadata later (the app's Spanish UI still ships).
 
-5. **Publish the updated privacy page.** *Why only you:* it publishes to the public site. *Why it matters:* Nyx 1.1 contacts a third host, `air-quality-api.open-meteo.com` (smoke and haze, behind its own switch), and the store's privacy link must say so before review. `docs/privacy.html`, `support.html` and `index.html` already do. *How:* merge `roadmap` into `main` and `git push origin main`; check https://harrypakhale98.github.io/Nyx/privacy.html mentions air quality.
+5. **Take the repository out of iCloud Drive.** *Why only you:* it moves your files and changes where Xcode opens the project. *Why it matters:* `~/Documents` syncs to iCloud, and on 2026-10-07 iCloud dropped "name 2" copies of edited files (`WatchSky 2.swift`, `Nyx 2.xcodeproj`, …) into the source folders; synchronized folders compile every `.swift` file they hold, so a stray copy can break a build. *How:* quit Xcode, then either move the folder (for example to `~/Developer/Nyx`) or rename it `Nyx.nosync` (iCloud skips `.nosync` folders), and reopen `Nyx.xcodeproj` from the new place. Before building, check for strays with `find . -name "* [0-9].*" -not -path "./.git/*"`.
 
 6. **Set up the 1.1 version in App Store Connect.** *Why only you:* the account holder's login. *How* (details in `SUBMISSION.md`):
    - If 1.0 (5) was never submitted, rename the pending version to 1.1; otherwise + Version → 1.1.
@@ -45,6 +45,7 @@ Build 1.1 (7) is archived, verified and uploaded (it supersedes 1.1 (6) with the
 13. **Submit 1.1 for review, then release.** Select build 7 (and the visionOS build), manual release, Submit for Review once the gate table in `SUBMISSION.md` is signed. After approval, install from the App Store, try it offline, then release, and publish the In-App Events.
 
 ## Done
+- Privacy page naming the third host (`air-quality-api.open-meteo.com`) is live on GitHub Pages (checked 2026-10-07).
 - Build 1.1 (7) archived 2026-10-06 (build 6 before it, uploaded): iOS app with widgets and the watch app (watch bundle IDs registered, App Group in every profile) and the visionOS app, both development-signed with team `DUHVN68KBA`, zero warnings, `verify_release.py` passing (`Research/release-verification.json`).
 - Store screenshots captured with live data 2026-10-06 for iPhone (English and Spanish, captioned), iPad, Apple Watch and Vision Pro.
 - Builds 1.0 (4) and 1.0 (5) uploaded to App Store Connect (2026-10-04 and 2026-10-05). Privacy page (forecast and park-alert wording) pushed 2026-10-04. NPS key in `Config/Secrets.xcconfig` (git-ignored, this Mac only; copy it before building elsewhere). Icon Composer icons. Privacy label decision. Public pages live on GitHub Pages. Accessibility audit passes on every screen in both palettes.

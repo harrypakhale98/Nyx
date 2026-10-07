@@ -15,6 +15,10 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
 /// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
 /// parks, forecasts and engine as Tonight, so the face and the app never disagree.
 nonisolated enum WatchTimeline {
+    /// Joshua Tree tonight, moon and darkness only: the gallery's sky and the redacted placeholder's shape.
+    static var sample: SavedSkySnapshot? {
+        (try? ParkData.load().first(where: { $0.id == "jotr" })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
+    }
     static func entry(at date: Date, snapshot: SavedSkySnapshot?, nightVision: Bool, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
         func night(_ park: Park) -> Night {
             let evening = park.currentNight(at: date)
@@ -85,20 +89,12 @@ func inDuration(until date: Date, from now: Date) -> String {
     return String(localized: "in \(span)")
 }
 
-/// The phase as a symbol, turned for the southern sky (American Samoa sees the Moon upside down).
-struct MoonSymbol: View {
-    let night: Night
-    var body: some View {
-        Image(systemName: night.sky.moon.symbolName)
-            .scaleEffect(x: night.park.latitude < 0 ? -1 : 1, y: night.park.latitude < 0 ? -1 : 1)
-            .accessibilityLabel("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit")
-    }
-}
-
 struct WatchComplicationView: View {
     @Environment(\.widgetFamily) private var systemFamily
     var previewFamily: WidgetFamily?
     let entry: WatchSkyEntry
+    /// Next moment as a clock time instead of a self-updating countdown, for cards built once.
+    var clockTimes = false
     private var family: WidgetFamily { previewFamily ?? systemFamily }
     private var ink: Color { entry.nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
     private var accent: Color { entry.nightVision ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
@@ -129,17 +125,10 @@ struct WatchComplicationView: View {
         .gaugeStyle(.accessoryCircular).tint(accent).foregroundStyle(ink)
     }
     private func corner(_ night: Night) -> some View {
+        // The numeral once, in the corner; the curved gauge alone carries the fill, without end labels.
         Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).foregroundStyle(accent).widgetAccentable()
             .widgetLabel {
-                Gauge(value: Double(night.score.value), in: 0...100) {
-                    Text(night.score.band.label)
-                } currentValueLabel: {
-                    Text(night.score.value, format: .number)
-                } minimumValueLabel: {
-                    Text(verbatim: "0")
-                } maximumValueLabel: {
-                    Text(verbatim: "100")
-                }.tint(accent)
+                Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent)
             }
     }
     private func inline(_ night: Night) -> some View {
@@ -149,7 +138,15 @@ struct WatchComplicationView: View {
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.wristName)") }
         }.foregroundStyle(ink)
     }
+    /// Park, score and band, then the next moment; at large text sizes the moment line drops first.
     private func rectangular(_ night: Night) -> some View {
+        ViewThatFits(in: .vertical) {
+            rectangular(night, showsNext: true)
+            rectangular(night, showsNext: false)
+        }
+        .foregroundStyle(ink).frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private func rectangular(_ night: Night, showsNext: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 MoonSymbol(night: night).font(.caption2).foregroundStyle(muted)
@@ -160,9 +157,13 @@ struct WatchComplicationView: View {
                 Text(night.score.hasForecast ? night.score.band.label : String(localized: "\(night.score.band.label), clouds unknown"))
                     .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
             }
-            if let next = entry.next { countdownText(next).font(.caption2).lineLimit(1).minimumScaleFactor(0.8) }
+            if showsNext, let next = entry.next {
+                Group {
+                    if clockTimes { Text("\(next.title) at \(night.park.time(next.date))") } else { countdownText(next) }
+                }.font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
+            }
         }
-        .foregroundStyle(ink).frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     private var empty: some View {
         Group {

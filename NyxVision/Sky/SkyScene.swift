@@ -30,6 +30,8 @@ import UIKit
     private var moonTexture: TextureResource?
     private let sun = ModelEntity()
     private var planets: [String: ModelEntity] = [:]
+    /// The galactic core's glow: a generous tap target with no feedback of its own (its label,
+    /// closer to the eye, carries the hover effect and the accessibility element).
     private let coreTarget = Entity()
     private let coreLabel = Entity()
     private let card = Entity()
@@ -59,6 +61,8 @@ import UIKit
     private var domePark = ""
     private var ridgePark = ""
     private var labelKeys: [ObjectIdentifier: String] = [:]
+    /// VoiceOver's activate on a body, kept alive with the scene.
+    var activation: EventSubscription?
 
     init() {
         root.name = "sky"
@@ -129,7 +133,7 @@ import UIKit
 
     // MARK: Each moment
 
-    func update(plan: NightPlan, moment: SkyMoment, palette: VisionPalette, selected: String?) {
+    func update(plan: NightPlan, moment: SkyMoment, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?) {
         apply(palette: palette)
         let park = plan.park, facing = SkyDome.facing(for: park)
         let m = moment.rotation
@@ -205,15 +209,28 @@ import UIKit
         coreLabel.isEnabled = coreShown
         if coreShown {
             coreTarget.position = Self.point(moment.core.altitude, moment.core.azimuth, facing, Self.bodyRadius)
-            coreTarget.components.set(Self.access(moment.core.name, moment.core.place))
-            label(coreLabel, SkyLabel(title: moment.core.name, detail: nil, style: .whisper, palette: palette),
-                  key: "core\(palette.nightVision)", altitude: moment.core.altitude-2.4, azimuth: moment.core.azimuth, facing: facing)
+            let face = label(coreLabel, SkyLabel(title: moment.core.name, detail: nil, style: .whisper, palette: palette, typeSize: typeSize),
+                             key: "core\(palette.nightVision)", altitude: moment.core.altitude-2.4, azimuth: moment.core.azimuth, facing: facing)
+            if let face {
+                // The visible words are what the eye lands on: they light up under a look and answer a tap.
+                if face.name != "body:core" {
+                    face.name = "body:core"
+                    face.components.set(CollisionComponent(shapes: [.generateBox(size: [1, 1, 0.02])]))
+                    face.components.set(InputTargetComponent())
+                    face.components.set(HoverEffectComponent())
+                }
+                face.components.set(Self.access(moment.core.name, moment.core.place))
+            }
         }
-        placeCompass(facing: facing, palette: palette)
-        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette)
+        placeCompass(facing: facing, palette: palette, typeSize: typeSize)
+        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize)
         let night = park.dayLabel(plan.sky.evening)
-        label(plaque, SkyLabel(title: park.shortName, detail: String(localized: "Computed for \(park.shortName), \(night). Not a live view; clouds not shown, and the skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north."), style: .plaque, palette: palette),
-              key: "plaque\(park.id)\(night)\(palette.nightVision)", position: [0, -0.95, -1.9], scale: 1.4)
+        let plaqueText = String(localized: "Computed for \(park.shortName), \(night). Not a live view; clouds not shown, and the skyline is illustrative. Ahead is \(Compass.name(facing)), not your room's real north.")
+        // Scaled by its distance from the eye, so it reads at the size it would at one metre.
+        let plaquePosition: SIMD3<Float> = [0, -0.95, -1.9]
+        label(plaque, SkyLabel(title: park.shortName, detail: plaqueText, style: .plaque, palette: palette, typeSize: typeSize),
+              key: "plaque\(park.id)\(night)\(palette.nightVision)", position: plaquePosition, scale: simd_length(plaquePosition))
+        plaque.components.set(Self.access(park.shortName, plaqueText, activatable: false))
     }
 
     private func placeMoon(plan: NightPlan, moment: SkyMoment, facing: Double, palette: VisionPalette, light: SkyTextures.Light) {
@@ -269,17 +286,18 @@ import UIKit
         }
     }
 
-    private func placeCompass(facing: Double, palette: VisionPalette) {
+    private func placeCompass(facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize) {
         let points: [(String, Double)] = [(String(localized: "N"), 0), (String(localized: "E"), 90), (String(localized: "S"), 180), (String(localized: "W"), 270)]
         for (entity, point) in zip(compass, points) {
             // On the dark land just under the skyline, where a planetarium writes them.
-            label(entity, SkyLabel(title: point.0, detail: nil, style: .compass, palette: palette), key: "\(point.0)\(palette.nightVision)\(palette.highContrast)",
+            label(entity, SkyLabel(title: point.0, detail: nil, style: .compass, palette: palette, typeSize: typeSize), key: "\(point.0)\(palette.nightVision)\(palette.highContrast)",
                   altitude: -2.4, azimuth: point.1, facing: facing, radius: 12)
-            entity.components.set(Self.access(Compass.name(point.1).capitalized, String(localized: "Compass point on the horizon")))
+            // Nothing happens on activate, so VoiceOver offers no action.
+            entity.components.set(Self.access(Compass.name(point.1).capitalized, String(localized: "Compass point on the horizon"), activatable: false))
         }
     }
 
-    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette) {
+    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize) {
         let bodies = [moment.moon, moment.core] + moment.planets
         guard let selected, let body = bodies.first(where: { $0.id == selected }), body.up else { card.isEnabled = false; return }
         card.isEnabled = true
@@ -287,8 +305,9 @@ import UIKit
         if body.kind == .planet { detail += " · " + WhatsUp.brightness(body.magnitude) }
         if body.kind == .moon { detail += " · " + String(localized: "\(Int((moment.moonIllumination*100).rounded()))% lit") }
         if body.kind == .core { detail += " · " + String(localized: "the bright center of our galaxy") }
-        label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette), key: "card\(body.id)\(detail)\(palette.nightVision)",
+        label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(body.id)\(detail)\(palette.nightVision)",
               altitude: body.altitude-(body.kind == .moon ? 3.4 : 2.8), azimuth: body.azimuth, facing: facing)
+        card.components.set(Self.access(body.name, detail, activatable: false))
     }
 
     // MARK: Palette
@@ -346,21 +365,24 @@ import UIKit
         return simd_quatf(simd_float3x3(columns: (x, up, z)))
     }
     /// A SwiftUI label in the sky, scaled with distance so it reads at the size it would at one metre.
-    private func label(_ entity: Entity, _ view: SkyLabel, key: String, altitude: Double, azimuth: Double, facing: Double, radius: Float = SkyScene.labelRadius) {
+    @discardableResult
+    private func label(_ entity: Entity, _ view: SkyLabel, key: String, altitude: Double, azimuth: Double, facing: Double, radius: Float = SkyScene.labelRadius) -> ModelEntity? {
         let position = Self.point(altitude, azimuth, facing, radius)
-        label(entity, view, key: key, position: position, scale: radius)
+        return label(entity, view, key: key, position: position, scale: radius)
     }
     /// Labels are SwiftUI views rendered once into a texture on a quad (re-rendered only when their
-    /// words change): view attachments far out in an immersive sky appeared late or not at all.
-    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float) {
+    /// words or the person's text size change): view attachments far out in an immersive sky
+    /// appeared late or not at all. Returns the quad that shows the words.
+    @discardableResult
+    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float) -> ModelEntity? {
         entity.position = position
         entity.orientation = Self.facingViewer(position)
         entity.scale = [scale, scale, scale]
-        let id = ObjectIdentifier(entity)
-        guard labelKeys[id] != key else { return }
-        let renderer = ImageRenderer(content: view)
+        let id = ObjectIdentifier(entity), key = "\(key)|\(view.typeSize)|\(view.palette.highContrast)|\(view.palette.solid)"
+        guard labelKeys[id] != key else { return entity.children.first as? ModelEntity }
+        let renderer = ImageRenderer(content: view.environment(\.dynamicTypeSize, view.typeSize))
         renderer.scale = 3
-        guard let image = renderer.cgImage, let texture = try? TextureResource(image: image, options: .init(semantic: .color)) else { return }
+        guard let image = renderer.cgImage, let texture = try? TextureResource(image: image, options: .init(semantic: .color)) else { return entity.children.first as? ModelEntity }
         labelKeys[id] = key
         let face = entity.children.first as? ModelEntity ?? {
             let quad = ModelEntity(mesh: Self.quad(), materials: [])
@@ -375,6 +397,7 @@ import UIKit
         // About 0.9 mm per point at one metre, the size system text has at that distance.
         let metresPerPoint: Float = 0.00088
         face.scale = [Float(image.width)/3*metresPerPoint, Float(image.height)/3*metresPerPoint, 1]
+        return face
     }
 
     // MARK: Meshes
@@ -508,12 +531,14 @@ import UIKit
         entity.components.set(InputTargetComponent())
         entity.components.set(HoverEffectComponent())
     }
-    static func access(_ label: String, _ value: String) -> AccessibilityComponent {
+    /// An accessibility element. `activatable` bodies answer VoiceOver's activate as a tap does
+    /// (`SkySpace` handles `AccessibilityEvents.Activate`): the name card shows or hides.
+    static func access(_ label: String, _ value: String, activatable: Bool = true) -> AccessibilityComponent {
         var component = AccessibilityComponent()
         component.isAccessibilityElement = true
         component.label = LocalizedStringResource(stringLiteral: label)
         component.value = LocalizedStringResource(stringLiteral: value)
-        component.systemActions = [.activate]
+        if activatable { component.systemActions = [.activate] }
         return component
     }
     static func smooth(_ x: Double) -> Double { SkyTextures.smooth(x) }

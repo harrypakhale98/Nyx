@@ -953,6 +953,40 @@
         }
       }
     },
+    "Middle of the night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle of the night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitad de la noche"
+          }
+        }
+      }
+    },
+    "Middle of the night, halfway from sunset to sunrise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle of the night, halfway from sunset to sunrise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitad de la noche, entre la puesta y la salida del Sol"
+          }
+        }
+      }
+    },
     "Middle of true darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -1242,6 +1276,23 @@
         }
       }
     },
+    "Moves the clock halfway from sunset to sunrise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the clock halfway from sunset to sunrise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lleva el reloj a mitad de camino entre la puesta y la salida del Sol"
+          }
+        }
+      }
+    },
     "Moves the clock to the middle of true darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -1497,6 +1548,23 @@
         }
       }
     },
+    "Nyx could not read the park list that ships inside the app. Reinstalling Nyx restores it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx could not read the park list that ships inside the app. Reinstalling Nyx restores it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no pudo leer la lista de parques que viene con la app. Reinstalar Nyx la restaura."
+          }
+        }
+      }
+    },
     "Out of the night sky": {
       "extractionState": "manual",
       "localizations": {
@@ -1510,6 +1578,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fuera del cielo nocturno"
+          }
+        }
+      }
+    },
+    "Park data unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park data unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos de parques no disponibles"
           }
         }
       }
@@ -1595,6 +1680,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prístina"
+          }
+        }
+      }
+    },
+    "Returns to the room. The window stays where it is.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returns to the room. The window stays where it is."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a la habitación. La ventana se queda donde está."
           }
         }
       }
@@ -1990,19 +2092,19 @@
         }
       }
     },
-    "Surrounds you with this park's computed sky at the time on the clock below": {
+    "Surrounds you with this park's computed sky at the time on the clock below the window": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Surrounds you with this park's computed sky at the time on the clock below"
+            "value": "Surrounds you with this park's computed sky at the time on the clock below the window"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Te rodea con el cielo calculado de este parque a la hora del reloj de abajo"
+            "value": "Te rodea con el cielo calculado de este parque a la hora del reloj bajo la ventana"
           }
         }
       }
@@ -2020,6 +2122,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tan al norte, el centro brillante de la Vía Láctea se queda en el horizonte o por debajo. Su banda más tenue aún cruza los cielos oscuros."
+          }
+        }
+      }
+    },
+    "The Moon counts only in true darkness, and this night has none.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon counts only in true darkness, and this night has none."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna solo cuenta en la oscuridad total, y esta noche no la tiene."
           }
         }
       }

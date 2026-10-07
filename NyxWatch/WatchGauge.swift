@@ -40,7 +40,7 @@ struct WatchGauge: View {
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: .milliseconds(120))
-            withAnimation(.spring(response: 0.9, dampingFraction: 0.86)) { shown = Double(score) }
+            withAnimation(NyxMotion.spring) { shown = Double(score) }
         }
         .onChange(of: dimmed) { _, _ in shown = Double(score) }
     }

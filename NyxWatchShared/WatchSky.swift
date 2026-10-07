@@ -81,22 +81,6 @@ nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-extension MoonPhase {
-    /// The SF Symbol for this phase, for complications where a drawn disc would be too small.
-    nonisolated var symbolName: String {
-        switch fraction {
-        case ..<0.03, 0.97...: "moonphase.new.moon"
-        case ..<0.22: "moonphase.waxing.crescent"
-        case ..<0.28: "moonphase.first.quarter"
-        case ..<0.47: "moonphase.waxing.gibbous"
-        case ..<0.53: "moonphase.full.moon"
-        case ..<0.72: "moonphase.waning.gibbous"
-        case ..<0.78: "moonphase.last.quarter"
-        default: "moonphase.waning.crescent"
-        }
-    }
-}
-
 extension Park {
     /// The name as it fits a wrist: "American Samoa", not "National Park of American Samoa".
     nonisolated var wristName: String { shortName.replacingOccurrences(of: "National Park of ", with: "") }

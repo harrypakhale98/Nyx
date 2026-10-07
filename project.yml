@@ -85,6 +85,7 @@ targets:
       - path: NyxWidgets
       - path: Nyx/DesignSystem/TonightWidgetView.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
+      - path: Nyx/DesignSystem/MoonSymbol.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
       - path: Nyx/DesignSystem/RealSky.swift
@@ -148,6 +149,7 @@ targets:
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Services/WatchContext.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
+      - path: Nyx/DesignSystem/MoonSymbol.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
       - path: Nyx/DesignSystem/RealSky.swift
@@ -191,6 +193,7 @@ targets:
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Services/WatchContext.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
+      - path: Nyx/DesignSystem/MoonSymbol.swift
       - path: Nyx/DesignSystem/NyxTheme.swift
       - path: Nyx/DesignSystem/Starfield.swift
       - path: Nyx/DesignSystem/RealSky.swift

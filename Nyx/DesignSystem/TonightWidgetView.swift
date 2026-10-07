@@ -19,6 +19,7 @@ struct TonightWidgetView:View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.displayScale) private var displayScale
     var previewFamily:WidgetFamily?=nil
     private var family:WidgetFamily { previewFamily ?? systemFamily }
     let entry:TonightEntry
@@ -40,17 +41,19 @@ struct TonightWidgetView:View {
         if let night=entry.night {
             if family == .accessoryCircular {
                 // The Lock Screen ring echoes the app's celestial gauge.
+                // The Moon in the ring's opening is tonight's actual phase.
                 Gauge(value:Double(night.score.value),in:0...100) {
-                    Image(systemName:"moon.stars")
+                    MoonSymbol(night:night)
                 } currentValueLabel: {
-                    Text("\(night.score.value)").font(.system(.title3,design:.serif))
-                }.gaugeStyle(.accessoryCircular).summarized(summary(night))
+                    // Two digits inside a fixed ring: shrink rather than spill over the arc at large sizes.
+                    Text("\(night.score.value)").font(.system(.title3,design:.serif)).minimumScaleFactor(0.6).widgetAccentable()
+                }.gaugeStyle(.accessoryCircular).dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .accessoryRectangular {
-                // Lock Screen dimensions are fixed. Keep the complete spoken summary
-                // while bounding this compact visual annotation to the host's height.
-                VStack(alignment:.leading,spacing:2) {
-                    Text(night.park.shortName).font(.system(.caption,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                    Text("\(night.score.value)/100 · \(forecastLabel(night))").font(.caption2).fixedSize(horizontal:false,vertical:true)
+                // Lock Screen dimensions are fixed: the score is the hero, the band beside it, and a
+                // smaller numeral when large text would not fit. The spoken summary stays complete.
+                ViewThatFits(in:.vertical) {
+                    lockHero(night,numeral:.title)
+                    lockHero(night,numeral:.title3)
                 }.dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .systemExtraLarge, let month=entry.month, !typeSize.isAccessibilitySize {
                 extraLargeContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
@@ -69,6 +72,15 @@ struct TonightWidgetView:View {
                     compactContent(night).dynamicTypeSize(.small ... .xxxLarge)
                 }.summarized(summary(night))
             }
+        } else if family == .accessoryCircular {
+            ZStack { AccessoryWidgetBackground(); Image(systemName:"moon.stars").font(.title3) }
+                .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
+        } else if family == .accessoryRectangular {
+            VStack(alignment:.leading,spacing:2) {
+                Label("Nyx",systemImage:"moon.stars").font(.headline)
+                Text("Save a park in Nyx").font(.caption).lineLimit(2)
+            }.frame(maxWidth:.infinity,alignment:.leading).dynamicTypeSize(.small ... .xxxLarge)
+                .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
         } else {
             ViewThatFits(in:.vertical) {
                 VStack(alignment:.leading,spacing:8) {
@@ -89,22 +101,37 @@ struct TonightWidgetView:View {
                     Text("\(entry.position) of \(entry.savedCount)").monospacedDigit()
                     Image(systemName:"chevron.forward").fontWeight(.semibold)
                 }
-                .font(.system(size:10,weight:.medium)).foregroundStyle(ink)
+                .font(.caption2.weight(.medium)).foregroundStyle(ink)
                 .padding(.horizontal,9).padding(.vertical,5)
                 .background(ink.opacity(tinted ? 0.22 : 0.13),in:Capsule())
-                .contentShape(Capsule())
+                // The capsule stays small in the corner; the tap target reaches 44 by 36 around it.
+                .frame(minWidth:44,minHeight:36,alignment:.topTrailing)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain).dynamicTypeSize(.small ... .large)
             .accessibilityLabel("Next saved park")
             .accessibilityValue("Showing \(night.park.shortName), \(entry.position) of \(entry.savedCount)")
         }
     }
-    private func forecastLabel(_ night:Night)->String { night.score.hasForecast ? night.score.band.label : String(localized:"Clouds unknown") }
+    /// "Excellent" with a forecast; "Excellent, clouds unknown" without, as on the watch.
+    private func forecastLabel(_ night:Night)->String {
+        night.score.hasForecast ? night.score.band.label : String(localized:"\(night.score.band.label), clouds unknown")
+    }
+    /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it.
+    private func lockHero(_ night:Night,numeral:Font.TextStyle)->some View {
+        VStack(alignment:.leading,spacing:0) {
+            Text(night.park.shortName).font(.headline).lineLimit(1)
+            HStack(alignment:.firstTextBaseline,spacing:6) {
+                Text("\(night.score.value)").font(.system(numeral,design:.serif).weight(.light)).monospacedDigit().widgetAccentable()
+                Text(forecastLabel(night)).font(.caption).lineLimit(2).fixedSize(horizontal:false,vertical:true)
+            }
+        }.frame(maxWidth:.infinity,alignment:.leading)
+    }
     private func homeContent(_ night:Night)->some View {
         VStack(alignment:.leading,spacing:4) {
             if !typeSize.isAccessibilitySize {
                 HStack(alignment:.center) {
-                    Text("TONIGHT'S SKY").font(.system(size:9,weight:.medium)).tracking(1.4).foregroundStyle(muted)
+                    Text("TONIGHT'S SKY").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
                     Spacer(minLength:4)
                     moon(night).frame(width:18,height:18)
                 }
@@ -114,14 +141,24 @@ struct TonightWidgetView:View {
             Text(forecastLabel(night)).font(.caption2).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
-    /// The app's pre-rendered lit Moon when it exists; the vector Moon otherwise.
+    /// The app's pre-rendered lit Moon when it exists; the vector Moon, rendered to an image,
+    /// otherwise. An image either way, so a tinted or clear Home Screen can draw it desaturated
+    /// with its terminator intact instead of flattening it to a solid disc.
     @ViewBuilder private func moon(_ night:Night)->some View {
-        if let url=SharedSettings.moonImageURL(park:night.park.id,night:night.id),let image=UIImage(contentsOfFile:url.path) {
-            Image(uiImage:image).resizable().scaledToFit().modifier(NightVisionFilter(enabled:nightVision))
+        if let image=moonImage(night) {
+            Image(uiImage:image).resizable().widgetAccentedRenderingMode(.accentedDesaturated).scaledToFit()
+                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled:nightVision))
         } else {
             MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                 .environment(\.nyx,palette).modifier(NightVisionFilter(enabled:nightVision))
         }
+    }
+    private func moonImage(_ night:Night)->UIImage? {
+        if let url=SharedSettings.moonImageURL(park:night.park.id,night:night.id),let image=UIImage(contentsOfFile:url.path) { return image }
+        let renderer=ImageRenderer(content:MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
+            .environment(\.nyx,palette).frame(width:34,height:34))
+        renderer.scale=displayScale
+        return renderer.uiImage
     }
     /// Seven nights as small skies: the dot grows with the score, the best night gets a ring,
     /// nights without a cloud forecast are hollow.
@@ -129,28 +166,28 @@ struct TonightWidgetView:View {
         let best=week.max { $0.score.value<$1.score.value }?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
-                Text("NEXT SEVEN NIGHTS").font(.system(size:9,weight:.medium)).tracking(1.4).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
+                Text("NEXT SEVEN NIGHTS").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
                 // Room for the "2 of 3" button laid over the top corner.
                 Spacer(minLength:entry.savedCount>1 ? 62 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(spacing:0) {
                 ForEach(week) { night in
                     VStack(spacing:5) {
-                        Text(night.park.weekdayInitial(night.id)).font(.system(size:10,weight:night.id==best ? .bold : .regular)).foregroundStyle(night.id==best ? ink : muted)
+                        Text(night.park.weekdayInitial(night.id)).font(.caption2.weight(night.id==best ? .bold : .regular)).foregroundStyle(night.id==best ? ink : muted)
                         ZStack {
                             if night.id==best { Circle().stroke(accent.opacity(0.8),lineWidth:0.8).frame(width:22,height:22) }
                             let d=4+12*Double(night.score.value)/100
                             if night.score.hasForecast { Circle().fill(accent.opacity(0.45+Double(night.score.value)/200)).frame(width:d,height:d).widgetAccentable() }
                             else { Circle().stroke(accent,lineWidth:1).frame(width:d,height:d).widgetAccentable() }
                         }.frame(height:24)
-                        Text("\(night.score.value)").font(.system(size:10).monospacedDigit()).foregroundStyle(muted)
+                        Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
                 }
             }
             if let top=week.first(where:{ $0.id==best }) {
                 Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
             }
-        }
+        }.dynamicTypeSize(...DynamicTypeSize.large) // Seven fixed columns: 11 pt text that always fits.
     }
     private func compactContent(_ night:Night)->some View {
         VStack(alignment:.leading,spacing:4) {
@@ -165,7 +202,7 @@ struct TonightWidgetView:View {
     private func largeContent(_ night:Night,month:NightPlanner.Month)->some View {
         VStack(alignment:.leading,spacing:10) {
             HStack(spacing:0) {
-                Text("TONIGHT'S SKY").font(.system(size:9,weight:.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("TONIGHT'S SKY").font(.caption2.weight(.medium)).tracking(1.2).foregroundStyle(muted)
                 Spacer(minLength:entry.savedCount>1 ? 70 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(alignment:.center,spacing:12) {
@@ -191,7 +228,7 @@ struct TonightWidgetView:View {
                 Spacer(minLength:4)
                 if month.nights.contains(where:{ $0.map { !$0.score.hasForecast } ?? false }) {
                     Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
-                    Text("No forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
+                    Text("Moon and darkness only").font(.caption2).foregroundStyle(muted).lineLimit(1)
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
@@ -201,7 +238,7 @@ struct TonightWidgetView:View {
     private func extraLargeContent(_ night:Night,month:NightPlanner.Month)->some View {
         HStack(alignment:.top,spacing:28) {
             VStack(alignment:.leading,spacing:8) {
-                Text("TONIGHT'S SKY").font(.system(size:10,weight:.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("TONIGHT'S SKY").font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                 Text("\(night.score.value)").font(.system(size:72,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
                 Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted)
@@ -221,7 +258,7 @@ struct TonightWidgetView:View {
                 Color.clear.frame(height:entry.savedCount>1 ? 18 : 0)
                 monthGrid(night.park,month:month)
                 if month.nights.contains(where:{ $0.map { !$0.score.hasForecast } ?? false }) {
-                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("No forecast yet").font(.caption2).foregroundStyle(muted) }
+                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("Moon and darkness only").font(.caption2).foregroundStyle(muted) }
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
@@ -232,7 +269,7 @@ struct TonightWidgetView:View {
         return Grid(horizontalSpacing:0,verticalSpacing:4) {
             GridRow {
                 ForEach(0..<7,id:\.self) { column in
-                    Text(weekdayInitial(park,month:month,column:column)).font(.system(size:9,weight:.medium)).foregroundStyle(muted).frame(maxWidth:.infinity)
+                    Text(weekdayInitial(park,month:month,column:column)).font(.caption2.weight(.medium)).foregroundStyle(muted).frame(maxWidth:.infinity)
                 }
             }
             ForEach(Array(rows.enumerated()),id:\.offset) { _,row in
@@ -243,7 +280,7 @@ struct TonightWidgetView:View {
                     }
                 }
             }
-        }
+        }.dynamicTypeSize(...DynamicTypeSize.large) // Fixed 28 pt cells: 11 pt numerals, never clipped.
     }
     private func weekdayInitial(_ park:Park,month:NightPlanner.Month,column:Int)->String {
         let lead=month.nights.prefix { $0 == nil }.count
@@ -251,17 +288,17 @@ struct TonightWidgetView:View {
         return park.weekdayInitial(park.date(tonight.id,addingDays:column-lead))
     }
     private func nightCell(_ night:Night,best:Bool,tonight:Bool,event:WhatsUp.Events.Glyph?)->some View {
-        let d=4+11*Double(night.score.value)/100
-        return VStack(spacing:2) {
-            Text(night.park.calendar.component(.day,from:night.id),format:.number).font(.system(size:8,weight:tonight ? .bold : .regular)).monospacedDigit()
+        let d=4+9*Double(night.score.value)/100
+        return VStack(spacing:0) {
+            Text(night.park.calendar.component(.day,from:night.id),format:.number).font(.caption2.weight(tonight ? .bold : .regular)).monospacedDigit()
                 .foregroundStyle(tonight ? ink : muted)
             ZStack {
-                if best { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:19,height:19) }
+                if best { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:17,height:17) }
                 if night.score.hasForecast { Circle().fill(accent.opacity(0.45+Double(night.score.value)/200)).frame(width:d,height:d).widgetAccentable() }
                 else { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:d,height:d).widgetAccentable() }
                 // Beside the dot, never on it: the dot's size is the score and must stay readable.
-                if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12,height:12).offset(x:12,y:-6) }
-            }.frame(height:19)
+                if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12,height:12).offset(x:13,y:-3) }
+            }.frame(height:15)
         }.frame(maxWidth:.infinity).frame(height:28)
     }
     private func summary(_ night:Night)->String {

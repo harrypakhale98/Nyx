@@ -1531,23 +1531,6 @@
         }
       }
     },
-    "%lld/100 · %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld/100 · %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld/100 · %@"
-          }
-        }
-      }
-    },
     "%lld° below the horizon": {
       "extractionState": "manual",
       "localizations": {
@@ -4156,23 +4139,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aún no hay pronóstico de nubes."
-          }
-        }
-      }
-    },
-    "Clouds unknown": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clouds unknown"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nubes desconocidas"
           }
         }
       }
@@ -7510,23 +7476,6 @@
         }
       }
     },
-    "Later tonight": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Later tonight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más tarde esta noche"
-          }
-        }
-      }
-    },
     "Learn": {
       "extractionState": "manual",
       "localizations": {
@@ -10081,23 +10030,6 @@
         }
       }
     },
-    "No forecast yet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No forecast yet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún sin pronóstico"
-          }
-        }
-      }
-    },
     "No moonlight to wash it out.": {
       "extractionState": "manual",
       "localizations": {
@@ -10871,23 +10803,6 @@
         }
       }
     },
-    "Nyx night vision": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx night vision"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Visión nocturna de Nyx"
-          }
-        }
-      }
-    },
     "Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.": {
       "extractionState": "manual",
       "localizations": {
@@ -11112,6 +11027,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Los cálculos sin conexión están listos. Actualiza cuando vuelva la conexión."
+          }
+        }
+      }
+    },
+    "On": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activada"
           }
         }
       }
@@ -14636,19 +14568,19 @@
         }
       }
     },
-    "Sunrise at": {
+    "Sunrise at %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunrise at"
+            "value": "Sunrise at %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale el sol a las"
+            "value": "Sale el sol a las %@"
           }
         }
       }

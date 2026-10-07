@@ -29,7 +29,11 @@ struct NightControls: View {
                 .accessibilityLabel(Text("Previous night"))
             VStack(spacing: 0) {
                 Text(nightTitle).font(.system(.headline, design: .serif))
-                if model.nightOffset > 0 { Button("Back to tonight") { model.nightOffset = 0 }.font(.caption).buttonStyle(.borderless) }
+                if model.nightOffset > 0 {
+                    // Regular control size: a full 44 pt target, set small by its type.
+                    Button("Back to tonight") { model.nightOffset = 0 }
+                        .font(.callout).buttonStyle(.bordered).buttonBorderShape(.capsule).padding(.top, 6)
+                }
             }
             .frame(minWidth: 130)
             Button { model.nightOffset += 1 } label: { Image(systemName: "chevron.right") }
@@ -61,11 +65,31 @@ struct NightControls: View {
                 .accessibilityValue(Text("\(park.time(now)), \(SkyMoment(park: park, at: now).twilight)"))
             }
             Text(park.time(span.end)).font(.caption).foregroundStyle(palette.muted).monospacedDigit().accessibilityHidden(true)
+            // With no true darkness (an Alaskan summer), the same button goes to the middle of the night.
+            let dark = plan.sky.darkHours > 0
             Button { model.darkest(reduceMotion: reduceMotion) } label: {
-                Label("Middle of darkness", systemImage: "moon.stars")
+                Label(dark ? "Middle of darkness" : "Middle of the night", systemImage: "moon.stars")
             }
-            .help(Text("Middle of true darkness"))
-            .accessibilityHint(Text("Moves the clock to the middle of true darkness"))
+            .help(dark ? Text("Middle of true darkness") : Text("Middle of the night, halfway from sunset to sunrise"))
+            .accessibilityHint(dark ? Text("Moves the clock to the middle of true darkness") : Text("Moves the clock halfway from sunset to sunrise"))
         }
     }
+}
+
+#Preview("Night controls") {
+    NightControls().environment(VisionModel(now: .now))
+}
+
+#Preview("Night controls, a later night, no true darkness") {
+    // Denali in June: no true darkness, and a night after tonight (Back to tonight shown).
+    let model = VisionModel(now: (try? Date("2026-06-21T21:00:00Z", strategy: .iso8601)) ?? .now)
+    model.selectedID = "dena"
+    model.nightOffset = 2
+    return NightControls().environment(model)
+}
+
+#Preview("Night controls, night vision") {
+    let model = VisionModel(now: .now)
+    model.nightVision = true
+    return NightControls().environment(model).environment(\.visionPalette, VisionPalette(nightVision: true))
 }

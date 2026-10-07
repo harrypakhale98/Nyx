@@ -1,3 +1,12 @@
+# Nyx handoff — 2026-10-07 (Repository cleanup, recovered work)
+
+Branch `main`, still 1.1 (7) in `project.yml` (not bumped). Logged under "Repository cleanup" and "Recovered work" in `DECISIONS.md`. The score is unchanged.
+
+- **Done:** repository cleaned (stale planning docs, duplicate icon sources, 1.0 store sets and old drafts removed; README reorganized; GitHub description, website and topics set; merged branches and stale worktrees removed). Two uncommitted worktrees were finished and merged: Vision Pro labels that follow Dynamic Type, VoiceOver activation and comfortable sweeps in the immersive sky; one shared `MoonSymbol` for widgets and the watch; a Live Activity that names one moment even when stale; widget placeholders, text caps and Control Center wording. Review fix found by screenshot: the circular Lock Screen numeral overflowed its ring at AX5 (now capped at xxxLarge and shrinks).
+- **Verified 2026-10-07:** zero warnings from clean builds of Nyx (app, widgets, watch) and NyxVision; NyxWatch builds clean. iPhone 18 Pro / iOS 27.0: 166 Swift Testing tests and all UI tests, including the accessibility audit, pass. iPhone 17 Pro / iOS 26.5: 166 Swift Testing tests pass. `apply_translations.py --check` clean. Reviewed captures (kept as `Research/Screenshots/recovered-*` and `watch/recovered-*`): widgets normal, empty, night vision, large and AX5; Live Activity (fresh, stale, Dynamic Island); watch complications (Big Bend, American Samoa, accessibility size); Vision Pro window (Joshua Tree at AX, Denali in June), Jupiter's name card at default and accessibility size, and the plaque.
+- **Known issues:** `~/Documents` syncs to iCloud, which dropped "name 2" conflict copies of edited files into source folders on 2026-10-07 (deleted; all matched the last commit). Moving the repo out of iCloud, or renaming it `Nyx.nosync`, is the owner's call (`INPUT_NEEDED.md`).
+- **Next:** bump to build 8, archive and upload when the owner wants the backend-audit fixes and this work in review; the device pass in `INPUT_NEEDED.md` should include the Vision Pro labels at a large text size.
+
 # Nyx handoff — 2026-10-06 (Backend audit)
 
 Branch `main`, still 1.1 (7) in `project.yml` (not bumped; build 7 was already uploaded, so these fixes ship in the next build). Logged under "Backend audit" in `DECISIONS.md`.
