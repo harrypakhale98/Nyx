@@ -264,13 +264,19 @@ private struct ParkPill:ViewModifier {
 struct ParkPickerView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Binding var selection:String
     @State private var search=""
+    @FocusState private var searchFocused: Bool
     var body: some View {
-        List(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
-            Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark").accessibilityHidden(true) } } }.tint(.primary)
-                .accessibilityAddTraits(selection==park.id ? .isSelected : [])
-        }.searchable(text:$search,prompt:"Park or state").navigationTitle("Starting park")
+        List {
+            // The bar's search field fails at accessibility sizes on iOS 27 (see `SystemSearch`).
+            if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top:8,leading:16,bottom:8,trailing:16)) }
+            ForEach(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
+                Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark").accessibilityHidden(true) } } }.tint(.primary)
+                    .accessibilityAddTraits(selection==park.id ? .isSelected : [])
+            }
+        }.modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize)).navigationTitle("Starting park")
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
     }
 }

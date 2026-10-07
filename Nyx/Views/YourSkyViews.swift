@@ -65,7 +65,7 @@ struct SkiesSeenSection: View {
             }.padding(.top,10)
         } label:{
             Label { Text(seen.line).font(.system(.body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"sparkles").foregroundStyle(palette.accent).accessibilityHidden(true) }
-                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
         }.tint(palette.muted)
     }
     private func detail(_ place:SkiesSeen.Place)->some View {

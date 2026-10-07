@@ -4,7 +4,7 @@ A calm, offline-first dark-sky planner for the 63 US national parks. Nyx compare
 
 ## Version
 
-**1.1 (6)**, archived 2026-10-06 (`MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml`, inherited by every target). 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.0 (5) was the last uploaded build. Release steps: `SUBMISSION.md` and `INPUT_NEEDED.md`; archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json`; never prints the NPS key). Store screenshots: `Store/Screenshots`, `Store/Framed` (1.0 sets in `Store/1.0`).
+**1.1 (7)**, archived 2026-10-06 (`MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml`, inherited by every target). 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.0 (5) was the last uploaded build. Release steps: `SUBMISSION.md` and `INPUT_NEEDED.md`; archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json`; never prints the NPS key). Store screenshots: `Store/Screenshots`, `Store/Framed` (1.0 sets in `Store/1.0`).
 
 ## Run
 

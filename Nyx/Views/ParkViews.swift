@@ -70,6 +70,7 @@ struct ParksView: View {
     @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
     /// Beside the park on a wide iPad: rows choose the park shown in the detail column instead of pushing it.
     var selection: Binding<String?>?=nil
+    @Environment(\.dynamicTypeSize) private var typeSize
     @FocusState private var searchFocused: Bool
     @State private var search=""
     @State private var darkOnly=false
@@ -91,6 +92,7 @@ struct ParksView: View {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : narrowed ? LocalizedStringKey("\(filtered.count) of 63 parks") : LocalizedStringKey("63 places to look up"))
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
+                if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate".
                 if filtered.contains(where:{ !model.night($0).score.hasForecast }) { Text("Scores without a cloud forecast are marked as estimates.").font(.subheadline).foregroundStyle(palette.muted) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
@@ -111,10 +113,9 @@ struct ParksView: View {
                 let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
-            .searchable(text:$search,prompt:"Park or state")
+            .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize))
             .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
             // ⌘F from anywhere in the window.
-            .searchFocused($searchFocused)
             .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
             .onAppear { focusSearchIfAsked() }
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
@@ -223,6 +224,11 @@ struct ParkDetailView: View {
             }
             .onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
             .task {
+                // DEBUG store capture (`-nyx-listen`): the shape of the night at the top, transcript open.
+                if DebugScenario.isEnabled("listen") {
+                    try? await Task.sleep(for:.milliseconds(500))
+                    proxy.scrollTo("sky",anchor:.top); return
+                }
                 guard focusWhatsUp else { return }
                 // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
                 try? await Task.sleep(for:.milliseconds(500))
@@ -278,7 +284,7 @@ struct ParkDetailView: View {
             if let data=model.enrichments[park.id],!data.alerts.isEmpty {
                 DisclosureGroup {
                     ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
-                } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
+                } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
             }
              if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
     }
@@ -286,8 +292,8 @@ struct ParkDetailView: View {
         Panel { VStack(alignment:.leading,spacing:16) {
             SkyArc(night:night,isTonight:night.id==model.tonight(park),core:model.whatsUp(night).core)
             Divider().overlay(palette.line)
-            NightListenView(night:night,isTonight:night.id==model.tonight(park))
-        } }
+            NightListenView(night:night,isTonight:night.id==model.tonight(park),expanded:DebugScenario.isEnabled("listen"))
+        } }.id("sky")
         Panel {
             VStack(alignment:.leading,spacing:18) {
                 WhatsUpPanel(whatsUp:model.whatsUp(night),isTonight:night.id==model.tonight(park))
@@ -495,4 +501,44 @@ private struct SkyFullBleed: ViewModifier {
             VStack(alignment:.leading,spacing:4) { Text(park.shortName).font(.headline); AccessNoteLabel(park:park) }
         }
     }.padding(24).frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.topLeading).background(.black).preferredColorScheme(.dark)
+}
+
+/// The system search field in the navigation bar, except at accessibility text sizes, where the
+/// screen shows `InlineSearchField` instead: on iOS 27 the bar's field keeps its height while its
+/// text grows, so at AX5 it draws neither placeholder nor text and does not take a tap.
+struct SystemSearch: ViewModifier {
+    @Binding var text: String
+    var focused: FocusState<Bool>.Binding
+    let prompt: LocalizedStringKey
+    let enabled: Bool
+    func body(content:Content)->some View {
+        if enabled { content.searchable(text:$text,prompt:prompt).searchFocused(focused) } else { content }
+    }
+}
+/// A search field in the page itself, for accessibility text sizes: it grows and wraps with the text.
+struct InlineSearchField: View {
+    @Environment(\.nyx) private var palette
+    @Binding var text: String
+    let prompt: LocalizedStringKey
+    var focus: FocusState<Bool>.Binding
+    var body: some View {
+        HStack(alignment:.center,spacing:10) {
+            Image(systemName:"magnifyingglass").foregroundStyle(palette.muted).accessibilityHidden(true)
+            TextField(prompt,text:$text,axis:.vertical).lineLimit(1...3).submitLabel(.search).focused(focus)
+                .autocorrectionDisabled().textInputAutocapitalization(.words)
+                .onChange(of:text) { _,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:"") } }
+                .accessibilityLabel("Search parks")
+            if !text.isEmpty {
+                Button { text="" } label:{ Image(systemName:"xmark.circle.fill").foregroundStyle(palette.muted).frame(minWidth:44,minHeight:44) }
+                    .buttonStyle(.plain).accessibilityLabel("Clear search")
+            }
+        }
+        // Capped at AX3 (still very large) so the whole prompt fits beside the glass on a phone.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility3)
+        .padding(.horizontal,16).padding(.vertical,10).frame(minHeight:44)
+        // The whole capsule takes the tap, not only the line of text.
+        .contentShape(Rectangle()).onTapGesture { focus.wrappedValue=true }
+        .background(RoundedRectangle(cornerRadius:22,style:.continuous).fill(palette.panel))
+        .overlay(RoundedRectangle(cornerRadius:22,style:.continuous).stroke(palette.line,lineWidth:0.5))
+    }
 }
