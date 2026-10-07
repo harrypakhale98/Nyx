@@ -67,7 +67,7 @@ import CoreLocation
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
-         detail: any DetailProviding = ForecastDetailService()) {
+         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
         do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
         homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
@@ -77,7 +77,21 @@ import CoreLocation
         smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
         // The last forecasts and park updates are read by the services, off the main actor, while
         // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
-        if DebugScenario.screen == nil { hydration=Task { await hydrate() } }
+        if DebugScenario.screen == nil {
+            if let preload {
+                // Read in the background since launch began; taken now, before the first frame.
+                let cached=preload.wait()
+                forecasts=cached.forecasts; details=cached.details
+                apply(AlertsUpdate(cache:cached.alerts,busy:false))
+                LaunchSignposts.note("Caches ready")
+                let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+                hydration=Task {
+                    await weather.seed(cached.forecasts,parks:parks)
+                    await detailService.seed(cached.details,parks:parks)
+                    await parkStore.seed(cached.alerts)
+                }
+            } else { hydration=Task { await hydrate() } }
+        }
         #if DEBUG
         if DebugScenario.screen != nil { homeID="jotr" }
         if DebugScenario.state=="polar" { homeID="dena" }

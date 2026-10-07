@@ -158,6 +158,8 @@ struct RootView:View {
         case "onboarding": OnboardingView {}
         case "settings": SettingsView()
         case "privacy": PrivacyView()
+        // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
+        case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
         // Light pollution, viewing spots (sky glow, step-free) and Protect this sky for one park: `-nyx-park deva | grca | sequ`.
         case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { Panel { LightPollution(park:park) }; Panel { ViewingSpots(park:park) }; Panel { ProtectThisSky(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
@@ -182,6 +184,8 @@ struct RootView:View {
         case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
         case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "accessibility": SoundAndTouchView()
+        // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
+        case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
         // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
         case "trip": TripPlannerView()
         case "constellation": ScrollView { YourSkyPanel(nights:DebugScenario.state=="empty" ? [] : DebugJournal.nights(now:model.today)) { _ in }.padding(24) }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)

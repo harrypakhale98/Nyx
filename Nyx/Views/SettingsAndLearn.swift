@@ -102,7 +102,7 @@ struct PrivacyView:View {
                 Toggle("Cloud forecasts",isOn:$model.weatherEnabled).tint(palette.controlTint)
                 Text("Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Smoke and haze",isOn:$model.smokeEnabled).tint(palette.controlTint)
-                Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using park coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
+                Text("Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
                 Text("Alerts for all 63 parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
@@ -304,7 +304,8 @@ private struct ScoreAnatomy:View {
 struct NPSKeyField: View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
-    @State private var expanded=false
+    /// `-nyx-advanced` (DEBUG) opens it for screenshots.
+    @State private var expanded=DebugScenario.isEnabled("advanced")
     @State private var draft=""
     @State private var saved=NPSKeyStore().key != nil
     @State private var message:String?
