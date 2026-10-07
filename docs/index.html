@@ -4,21 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nyx — Plan a darker night</title>
-<meta name="description" content="Nyx compares the 63 US national parks and the nights ahead to find the darkest sky.">
+<meta name="description" content="Nyx compares the 63 US national parks night by night and tells you where and when the sky will be darkest. Free, offline-first, and it collects no data.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/nyx-icon-256.png">
+<link rel="canonical" href="https://harrypakhale98.github.io/Nyx/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nyx">
+<meta property="og:title" content="Nyx — Plan a darker night">
+<meta property="og:description" content="Which national park, and which night, for the darkest sky. Free, with no account, no ads and no tracking.">
+<meta property="og:url" content="https://harrypakhale98.github.io/Nyx/">
+<meta property="og:image" content="https://harrypakhale98.github.io/Nyx/images/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Milky Way core over Joshua Tree, as Nyx computes it for Apple Vision Pro.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
+<!--
+  Landing page. No scripts, no trackers, no external requests; every image is in docs/images.
+  LAUNCH DAY, one line: replace the <p class="status"> line below with
+    <p><a class="store-badge" href="https://apps.apple.com/app/id<APP_ID>">Download Nyx on the App Store</a></p>
+  using the App Store ID from App Store Connect (App Information → Apple ID). For Apple's badge artwork,
+  download the SVG from Apple Marketing Tools into docs/images and use it inside that link; do not hotlink it.
+-->
 </head>
 <body>
-<main>
-  <div class="moon" aria-hidden="true"></div>
-  <p class="eyebrow">Nyx for iPhone, iPad, Apple Watch and Apple Vision Pro</p>
-  <h1>Plan a darker night.</h1>
-  <p class="lead">Nyx compares the 63 US national parks and the nights ahead, and tells you where and when the sky will be darkest.</p>
-  <p>Moonlight, cloud cover, estimated light pollution and the length of true darkness become one Darkness Score, with a breakdown that explains it. Moon and twilight calculations work offline. There is no account, no advertising and no tracking.</p>
-  <nav aria-label="Pages">
-    <a href="privacy.html">Privacy policy</a>
-    <a href="support.html">Support</a>
-  </nav>
-  <footer>Weather data: <a href="https://open-meteo.com/">Open-Meteo</a>, CC BY 4.0. Air-quality data: Copernicus Atmosphere Monitoring Service (CAMS) via Open-Meteo, CC BY 4.0. Meteor shower data: International Meteor Organization. Lunar eclipse predictions: Fred Espenak, NASA/GSFC. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service.</footer>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+  <img class="icon" src="images/nyx-icon-256.png" width="88" height="88" alt="">
+  <p class="eyebrow">For iPhone, iPad, Apple Watch and Apple Vision Pro</p>
+  <h1>Where, and which night, for the darkest sky.</h1>
+  <p class="lead">Nyx compares the 63 US national parks night by night and tells you where and when the sky will be darkest. It turns the Moon, the clouds, the sky glow and the hours of true darkness into one score from 0 to 100, shows its reasons, and says what it cannot know. It is free, works offline, and collects nothing: no account, no ads, no tracking.</p>
+  <p class="status">Coming to the App Store</p>
+
+  <div class="hero">
+    <figure>
+      <img src="images/hero-whats-up.jpg" width="644" height="1400" alt="Nyx on iPhone: What's up tonight at Joshua Tree. The Milky Way core is timed from 7:43 to 8:54 PM, 19 degrees up in the southwest, with Jupiter, Mercury, Saturn and Mars listed below with their rise and set times.">
+      <figcaption>What's up tonight, timed for one park.</figcaption>
+    </figure>
+    <figure>
+      <img src="images/vision-sky.jpg" width="1600" height="900" alt="Nyx on Apple Vision Pro: the Milky Way core low over the horizon at Joshua Tree, computed on the device for tonight.">
+      <figcaption>The same sky on Apple Vision Pro, computed on the device.</figcaption>
+    </figure>
+  </div>
+  <p class="note">Screens from the pre-release build. Every number in them comes from the app's own engine.</p>
+
+  <ul class="links">
+    <li><a href="case-study.html">Case study<span>Designing for night-adapted eyes</span></a></li>
+    <li><a href="press/">Press kit<span>Facts, text and images</span></a></li>
+    <li><a href="privacy.html">Privacy<span>What leaves your device</span></a></li>
+    <li><a href="support.html">Support<span>Help and contact</span></a></li>
+  </ul>
+
+  <footer>Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Smoke and haze: Copernicus Atmosphere Monitoring Service, via Open-Meteo. Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Night lights and Moon imagery: NASA. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.</footer>
 </main>
 </body>
 </html>
