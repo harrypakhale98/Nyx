@@ -12,7 +12,7 @@ Character counts (verified with a script on 2026-10-05) are in brackets after ea
 
 - Version **1.1**, build number above 5 (integrator bumps `CURRENT_PROJECT_VERSION` in `project.yml`).
 - Release: **manual release** after approval, so the 1.1 In-App Events (`in-app-events.md`) and featuring nomination (`featuring-nominations.md`) line up.
-- Platforms in the 1.1 record: iPhone, iPad (new), Apple Watch (new, companion), Apple Vision Pro (new). Each new platform needs its own screenshot set before submission; the iPhone sets in `Store/Framed` do not cover them.
+- Platforms in the 1.1 record: iPhone, iPad (new), Apple Watch (new, companion), Apple Vision Pro (new). visionOS has its own version page with its own description, keywords, promotional text and review notes: `metadata-visionos.md`.
 
 ---
 
@@ -199,8 +199,11 @@ Spanish subtitle drafts (≤30, native review): `Planifica una noche oscura` (25
 - **Age rating:** re-answer the questionnaire; nothing in 1.1 changes the answers (no UGC feed, no web access beyond providers).
 - **Review notes (add to the existing text in `SUBMISSION.md`):** "1.1 adds a third provider host, `air-quality-api.open-meteo.com`, behind its own switch in Tonight, Settings, Your privacy, listed in `PrivacyInfo.xcprivacy`. Field mode (Live Activity, AlarmKit alarms, Core Motion for 'Where to look') is started by a person at a park's detail screen; on a simulator, `-nyx-screen field` is DEBUG only, so reviewers should use 'I'm here tonight' on any park's detail screen after sunset or in the evening. AlarmKit asks for permission in context after an explainer. The Apple Watch and visionOS targets share the same engine and make no network requests of their own. No login."
 - **App Privacy:** still "Data Not Collected". The new host receives only public park coordinates, as the forecast host does. Re-read `PRIVACY.md` before answering, because ASC asks again at each submission.
-- **Screenshots:** reuse the six frames in `Store/Framed/6.9-inch` only for screens that did not change. Recapture Tonight and park detail after 1.1 (What's up tonight card, forecast agreement). Add: Field mode (red), Where to look, What's up tonight, Watch, Vision Pro. Add an iPad set.
+- **Screenshots (done 2026-10-06, build 7):** iPhone required slot `Store/Framed/6.3-inch/` (1206×2622), optional `6.9-inch/` and `6.5-inch/`; iPad `Store/Framed/iPad-13-inch/`; Apple Watch `Store/Framed/Watch-Ultra/`; Vision Pro `Store/Framed/Vision-Pro/`. iPhone Duo screenshots become required in April 2027 (needs Xcode 27.1).
 - **Copyright:** `2026 Hardik Pakhale` (unchanged).
+- **Age rating (new question, September 2026):** App Store Connect now asks whether the app has social media capabilities (for the new Time Allowances). Answer **No**: Nyx has no accounts, feeds, messaging or sharing beyond the system share sheet.
+- **Creative assets (new, optional, October 2026):** product page header (21:9, 3840×1646 image or 5–30 s video) and search result asset (3:2, 1920×1280 to 3840×2560). Not required to submit. Check the page in App Store Connect's new preview tool before submitting, in each device and orientation.
+- **Accessibility Nutrition Labels:** answered per device, now including Apple Vision Pro (`accessibility-nutrition-labels.md`); declare only what the device pass confirms.
 
 ## Count table
 
