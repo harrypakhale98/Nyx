@@ -3,8 +3,7 @@
 Usage: python3 Scripts/capture_store.py [SIMULATOR_ID] [DERIVED_DATA] [en|es] [name,name…]
 Every frame uses live data (`-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time,
 scored by the shipping engine), except the journal, which is DEBUG seed data with no personal photo.
-One frame (trip) needs a scroll that simctl cannot perform: the script launches them and waits for you to
-scroll (or, with NYX_SKIP_MANUAL=1, skips them so another tool can drive the gesture and capture).
+Trip and Listen are scrolled by DEBUG flags (`-nyx-trip-route`, `-nyx-listen`), so no frame needs a hand scroll.
 Writes Store/Screenshots/NN-name-6.9.png (English) or Store/Screenshots/es/NN-name-6.9.png, no alpha,
 plus 1284×2778 copies in the matching 6.5-inch folder.
 """
@@ -32,7 +31,7 @@ shots=[
  # Beyond the forecast, so the header's score is labelled moon and darkness only.
  ('compass',['-nyx-screen','field-compass','-nyx-state','live','-nyx-date','2027-07-03','-nyx-field-minutes','225'],None),
  ('calendar',['-nyx-screen','calendar','-nyx-state','live'],None),
- ('trip',['-nyx-screen','trip','-nyx-state','live'],'Scroll until "The route" card sits under the title bar, with the first nights below it.'),
+ ('trip',['-nyx-screen','trip','-nyx-state','live','-nyx-trip-route'],None),  # scrolled to the route by the DEBUG flag
  ('journal',['-nyx-screen','journal','-nyx-state','populated'],None),
  ('listen',['-nyx-screen','detail','-nyx-state','live','-nyx-listen'],None),  # scrolled and opened by the DEBUG flag
  ('every-sky',['-nyx-screen','light','-nyx-state','live','-nyx-park','deva'],None),

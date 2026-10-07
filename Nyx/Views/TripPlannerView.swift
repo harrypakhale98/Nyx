@@ -33,7 +33,7 @@ struct TripPlannerView: View {
     private var days:[TripDay] { TripPlanner.days(first:TripDay(first),last:TripDay(last),weekendsOnly:weekendsOnly) }
     private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
     var body: some View {
-        ScrollView { VStack(alignment:.leading,spacing:24) {
+        ScrollViewReader { proxy in ScrollView { VStack(alignment:.leading,spacing:24) {
             Eyebrow(text:"Reasons to go")
             Text("Plan a trip").font(.system(.largeTitle,design:.serif))
             Text("The darkest park in reach for each night you are free.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -42,6 +42,9 @@ struct TripPlannerView: View {
             Panel { controls }
             results
         }.padding(24).readableColumn() }
+        // DEBUG store capture (`-nyx-trip-route`): the route card at the top, once the plan is in.
+        .onChange(of:plan?.best?.id) { _,_ in if DebugScenario.isEnabled("trip-route") { Task { try? await Task.sleep(for:.milliseconds(400)); proxy.scrollTo("route",anchor:.top) } } }
+        }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
         .navigationTitle("Plan a trip").navigationBarTitleDisplayMode(.inline)
@@ -131,7 +134,7 @@ struct TripPlannerView: View {
                     Eyebrow(text:"The route")
                     SkyMapView(content:routeContent(plan),summary:routeSummary(plan))
                     Text("Your nights as stars among the national parks, joined night to night. The ring marks the best night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                } }
+                } }.id("route")
                 VStack(spacing:0) {
                     // The access note once per park, on its first night, rather than on every row.
                     let firsts=Set(plan.stops.reduce(into:[String:String]()) { seen,stop in if seen[stop.night.park.id]==nil { seen[stop.night.park.id]=stop.id } }.values)
