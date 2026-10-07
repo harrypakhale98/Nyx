@@ -144,7 +144,7 @@ struct TripPlannerView: View {
                     }
                 }
                 VStack(alignment:.leading,spacing:6) {
-                    if plan.moonOnlyNights>0 { Text("Nights marked \"Moon and darkness only\" are beyond the cloud forecast, or not every park had one; parks are compared with their usual clouds for that month.").fixedSize(horizontal:false,vertical:true) }
+                    if plan.unforecastNights>0 { Text("Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part.").fixedSize(horizontal:false,vertical:true) }
                     Text("Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.").fixedSize(horizontal:false,vertical:true)
                 }.font(.caption).foregroundStyle(palette.muted)
                 ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.buttonStyle(.bordered)
@@ -167,7 +167,7 @@ struct TripPlannerView: View {
                 Text(park.dayLabel(best.night.id)).font(.subheadline).foregroundStyle(palette.muted)
                 Text("\(best.night.score.value)").font(.system(size:min(heroSize,150),weight:.light,design:.serif)).kerning(3).foregroundStyle(palette.accent)
                     .contentTransition(.numericText(value:Double(best.night.score.value)))
-                Text(best.night.score.hasForecast ? best.night.score.band.label : String(localized:"Moon and darkness only")).font(.subheadline).foregroundStyle(palette.ink)
+                Text(best.night.bandWithBasis).font(.subheadline).foregroundStyle(palette.ink)
                 Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                 if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
                 AccessNoteLabel(park:park,alignment:.center)
@@ -219,14 +219,14 @@ struct TripStopRow: View {
                         Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                         Text(stop.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                         if let hop=stop.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
-                        if !night.score.hasForecast { Text("Moon and darkness only").font(.caption).foregroundStyle(palette.muted) }
+                        if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
                         if let closure=stop.closure { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
                         if showsAccess { AccessNoteLabel(park:park) }
                     }
                     Spacer(minLength:8)
                     VStack(alignment:.trailing,spacing:0) {
                         Text("\(night.score.value)").font(.system(size:min(scoreSize,64),weight:.light,design:.serif)).foregroundStyle(palette.accent)
-                        Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted)
+                        Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
                     }
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain)
@@ -243,7 +243,7 @@ struct TripStopRow: View {
     private var spoken:String {
         let night=stop.night, park=night.park
         var parts=[stop.isBest ? String(localized:"Best night. \(park.dayLabel(night.id))") : park.dayLabel(night.id),park.shortName,
-                   String(localized:"\(night.score.value) out of 100, \(night.score.hasForecast ? night.score.band.label : String(localized:"moon and darkness only"))"),stop.reason]
+                   String(localized:"\(night.score.value) out of 100, \(night.bandWithBasis)"),stop.reason]
         if let hop=stop.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
         if let closure=stop.closure { parts.append(String(localized:"Closure alert: \(closure)")) }
         if let access=park.accessNote { parts.append(String(localized:"Getting there: \(access)")) }

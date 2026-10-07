@@ -14,12 +14,12 @@ struct TonightProvider:TimelineProvider {
     }
     func getSnapshot(in context:Context,completion:@escaping(TonightEntry)->Void) {
         var snapshot=SharedSettings.read()
-        // The widget gallery shows a real sky (Joshua Tree tonight, moon and darkness only), not "save a park".
+        // The widget gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not "save a park".
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot=Self.sample }
         var builder=TonightTimeline(snapshot:snapshot,large:context.family == .systemLarge || context.family == .systemExtraLarge)
         completion(builder.entry(at:.now))
     }
-    /// Joshua Tree tonight, moon and darkness only. Nil only if the bundled parks cannot be read.
+    /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
     static var sample:SavedSkySnapshot? {
         (try? ParkData.load().first(where:{ $0.id=="jotr" })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
     }
@@ -49,8 +49,8 @@ struct TonightTimeline {
     private var skies:[String:SkyConditions]=[:]
     private var months:[String:NightPlanner.Month]=[:]
     init(snapshot:SavedSkySnapshot?,large:Bool) { self.snapshot=snapshot; self.large=large }
-    private var planner:NightPlanner { NightPlanner(forecasts:snapshot?.forecasts ?? [:]) }
-    /// The sky is fixed; the score is taken at the entry's date, because a forecast expires after 36 hours.
+    private var planner:NightPlanner { snapshot?.planner ?? NightPlanner(forecasts:[:]) }
+    /// The sky is fixed; the score is taken at the entry's date (its forecast never expires; it fades by lead time).
     private mutating func night(_ park:Park,_ evening:Date,at date:Date)->Night {
         let key="\(park.id)-\(evening.timeIntervalSince1970)"
         let sky=skies[key] ?? AstronomyEngine().conditions(for:park,on:evening)
@@ -64,9 +64,9 @@ struct TonightTimeline {
         let week=shown.map { first in (0..<7).map { night(first.park,first.park.date(first.id,addingDays:$0),at:date) } } ?? []
         var month:NightPlanner.Month?
         if large, let shown {
-            // Recomputed when the night turns over or the cached forecast expires (36 hours), never showing stale clouds.
-            let fresh=snapshot?.forecasts[shown.park.id].map { date.timeIntervalSince($0.updated)<36*3600 } ?? false
-            let key="\(shown.park.id)-\(shown.id.timeIntervalSince1970)-\(fresh)"
+            // Recomputed when the night turns over. A forecast fades by how far ahead it was made,
+            // not by the entry's date, so the month is the same all night.
+            let key="\(shown.park.id)-\(shown.id.timeIntervalSince1970)"
             month=months[key] ?? planner.month(shown.park,at:date)
             months[key]=month
         }

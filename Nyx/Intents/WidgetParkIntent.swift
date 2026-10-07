@@ -36,7 +36,7 @@ nonisolated enum WidgetSelection {
     /// Moves to the next park; after the last, back to the best.
     static func cycle(snapshot:SavedSkySnapshot?,now:Date,defaults:UserDefaults = SharedSettings.defaults) {
         guard let snapshot, snapshot.parks.count>1 else { defaults.removeObject(forKey:key); return }
-        let planner=NightPlanner(forecasts:snapshot.forecasts)
+        let planner=snapshot.planner
         let tonight=snapshot.parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }
         let order=ordered(tonight)
         guard let shown=pick(tonight,defaults:defaults), let index=order.firstIndex(where:{ $0.park.id==shown.park.id }) else { return }

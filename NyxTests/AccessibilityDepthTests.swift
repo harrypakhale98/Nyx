@@ -84,7 +84,7 @@ import Testing
         #expect(chart.series.count == 3)
         let scores = chart.series[0]
         #expect(scores.continuous && scores.points.map(\.y) == nights.map { Double($0.score.value) })
-        #expect(scores.points[2].label == "Estimate, moon and darkness only. Geminids peak")
+        #expect(scores.points[2].label == "\(nights[2].score.band.label). No cloud forecast yet. Geminids peak")
         #expect(scores.points[0].label == nights[0].score.band.label)
         #expect(chart.series[1].points == [NightChart.Point(x: 1, y: 88, label: nil)] && chart.series[2].points == [NightChart.Point(x: 1, y: 70, label: nil)])
         #expect(chart.x.describe(1) == jotr.dayLabel(nights[1].id) && chart.y.describe(94) == "94 out of 100")

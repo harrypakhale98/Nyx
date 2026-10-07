@@ -71,6 +71,7 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
             }
             below /= b.timeIntervalSince(a)
         }
+        let light = darkStart.flatMap { a in darkEnd.map { b in moonlight(park: park, from: a, to: b) } } ?? 0
         // Nights run from local noon to noon, but in western Alaska's winter solar noon falls after
         // 13:00, so the Sun can rise after the window closes: look up to six hours further.
         let sunset = sun.down.first
@@ -81,8 +82,49 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         return SkyConditions(evening: start, end: end, sunset: sunset, sunrise: sunrise,
             civilDusk: civil.down.first, nauticalDusk: nautical.down.first, darkStart: darkStart, darkEnd: darkEnd,
             state: state, moon: moonPhase(at: start.addingTimeInterval(10*3600)),
-            moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours, lowestSun: lowestSun)
+            moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours, moonlight: light, lowestSun: lowestSun)
     }
+
+    // MARK: Moonlight
+
+    /// How much a full Moon high in the sky brightens a dark sky: about 30 times, 3.7 magnitudes
+    /// per square arcsecond over a 21.7 sky (Krisciunas & Schaefer 1991, Fig. 2 at 45–90°).
+    static let fullMoonBrightening = 30.0
+    /// Moonlight at one moment, 0 (none) to 1 (a full Moon at the zenith), on a magnitude scale.
+    ///
+    /// Krisciunas & Schaefer (1991, PASP 103, 1033): the Moon's brightness by phase angle α
+    /// (degrees, 0 at full) is 10^(−0.4 (0.026|α| + 4×10⁻⁹ α⁴)) of full (eq. 9), dimmed by
+    /// extinction 10^(−0.4 k X) with k = 0.172 (V band) and airmass X = 1/(cos z + 0.025 e^(−11 cos z))
+    /// (Rozenberg 1966, finite at the horizon), relative to the Moon at the zenith. What the eye
+    /// loses is the sky's brightening in magnitudes, 2.5 log10(1 + 30 b), divided by a full Moon's
+    /// at the zenith. So a half Moon high up counts about 38% of a full one, a quarter-lit
+    /// crescent 17%, and a full Moon two degrees up about a quarter. Below the horizon, 0.
+    static func moonlight(phaseAngle: Double, altitude: Double) -> Double {
+        guard altitude > 0, phaseAngle.isFinite else { return 0 }
+        let a = min(180, abs(phaseAngle))
+        let phase = pow(10, -0.4*(0.026*a + 4e-9*pow(a, 4)))
+        func transmitted(_ altitude: Double) -> Double {
+            let c = cos((90-min(90, altitude))*Double.pi/180)
+            return pow(10, -0.4*0.172/(c + 0.025*exp(-11*c)))
+        }
+        let brightness = phase*transmitted(altitude)/transmitted(90)
+        return log10(1 + fullMoonBrightening*brightness)/log10(1 + fullMoonBrightening)
+    }
+    /// The phase angle (degrees) that gives an illuminated fraction: k = (1 + cos α)/2.
+    static func phaseAngle(illumination: Double) -> Double { acos(min(1, max(-1, 2*illumination-1)))*180/Double.pi }
+    /// Moonlight averaged over `from`…`to`, sampled every 15 minutes at the middle of each step.
+    func moonlight(park: Park, from start: Date, to end: Date) -> Double {
+        let duration = end.timeIntervalSince(start)
+        guard duration > 0 else { return 0 }
+        let steps = max(1, Int((duration/900).rounded(.up))), step = duration/Double(steps)
+        var total = 0.0
+        for i in 0..<steps {
+            let t = start.addingTimeInterval((Double(i)+0.5)*step)
+            total += Self.moonlight(phaseAngle: Self.phaseAngle(illumination: moonPhase(at: t).illumination), altitude: lunarAltitude(at: t, park: park))
+        }
+        return min(1, max(0, total/Double(steps)))
+    }
+
     /// When the Sun is lowest between `start` and `end` (ten-minute steps, refined to a minute).
     private func lowestSolarMoment(start: Date, end: Date, park: Park) -> Date {
         var best = start, lowest = Double.infinity

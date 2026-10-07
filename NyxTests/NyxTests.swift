@@ -80,7 +80,7 @@ struct NyxTests {
         #expect(window.end>window.start)
         let hours=stride(from:sky.evening.timeIntervalSince1970,to:sky.end.timeIntervalSince1970,by:3600).map { $0 }
         let forecast=Forecast(updated:sky.evening,times:hours,clouds:hours.map { _ in 30 })
-        #expect(forecast.mean(from:window.start,to:window.end,now:sky.evening)==30)
+        #expect(forecast.mean(from:window.start,to:window.end)==30)
     }
     /// A few minutes of true darkness must not score like a full night (Wrangell–St. Elias, mid-April).
     @Test func briefDarknessIsCapped() throws {
@@ -178,11 +178,12 @@ struct NyxTests {
         let sky=SkyConditions(evening:start,end:start.addingTimeInterval(86400),sunset:nil,sunrise:nil,civilDusk:nil,nauticalDusk:nil,
                               darkStart:start.addingTimeInterval(8*3600),darkEnd:start.addingTimeInterval(16*3600),state:.normal,
                               moon:MoonPhase(fraction:0.25),moonrise:nil,moonset:nil,moonBelowFraction:0.5,darkHours:8)
-        // Moon 40·(0.5 + 0.5·0.5) = 30, clouds 25·0.6 = 15, Bortle 3 → 20·6/8 = 15, darkness 15·0.8 = 12.
+        // Moon 40·(0.5 + 0.5·0.5) = 30, clouds 25·0.6 = 15, Bortle 3 → 20·6/8 = 15, darkness 15·0.8 = 12:
+        // 72 added up, held to 64 by 40% cloud (100 − 0.9·40), the weakest link (score v2).
         let full=ScoreEngine().score(sky:sky,bortle:3,cloudCover:40)
-        #expect(full.value==72); #expect(abs(full.moonPoints-30)<1e-9); #expect(full.cloudPoints.map { abs($0-15)<1e-9 }==true)
+        #expect(full.value==64 && full.limit == .clouds(64)); #expect(abs(full.moonPoints-30)<1e-9); #expect(full.cloudPoints.map { abs($0-15)<1e-9 }==true)
         #expect(abs(full.bortlePoints-15)<1e-9); #expect(abs(full.lengthPoints-12)<1e-9)
-        // Beyond the forecast: (30 + 15 + 12) / 0.75 = 76.
+        // No cloud figure at all (no forecast and no usual clouds): (30 + 15 + 12) / 0.75 = 76.
         #expect(ScoreEngine().score(sky:sky,bortle:3,cloudCover:nil).value==76)
         #expect(ScoreEngine.cap(darkHours:0)==39); #expect(ScoreEngine.cap(darkHours:1)==59); #expect(ScoreEngine.cap(darkHours:3)==100)
     }
@@ -243,7 +244,8 @@ struct NyxTests {
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600))==50)
         #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==80)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(8000))==nil)
-        #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600),now:now.addingTimeInterval(40*3600))==nil)
+        // Never dropped for its age (score v2): an old forecast fades by lead time instead.
+        #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600))==50)
     }
     @Test func malformedForecastCannotFillGaps() {
         let now=Date.now, t=now.timeIntervalSince1970
@@ -309,12 +311,13 @@ struct NyxTests {
                 let predicted:Date?
                 switch event.phen { case "Rise": predicted=previous.sunrise; case "Set": predicted=sky.sunset; case "End Civil Twilight": predicted=sky.civilDusk; default: continue }
                 let actual=try date(ref.date+" "+event.time,park:p)
-                #expect(abs(try #require(predicted).timeIntervalSince(actual))<120,"\(p.id) \(ref.date) \(event.phen)")
+                #expect(abs(try #require(predicted).timeIntervalSince(actual))<60,"\(p.id) \(ref.date) \(event.phen)")
             }
             for event in ref.reference.properties.data.moondata where ["Rise","Set"].contains(event.phen) {
                 let actual=try date(ref.date+" "+event.time,park:p)
                 let predictions=(event.phen=="Rise" ? [previous.moonrise,sky.moonrise] : [previous.moonset,sky.moonset]).compactMap{$0}
-                #expect(predictions.contains { abs($0.timeIntervalSince(actual))<900 },"Moon \(p.id) \(ref.date) \(event.phen)")
+                // Measured at most 3.7 minutes at these mid-latitude parks (Research/accuracy.md); USNO rounds to the minute.
+                #expect(predictions.contains { abs($0.timeIntervalSince(actual))<240 },"Moon \(p.id) \(ref.date) \(event.phen)")
             }
         }
     }
