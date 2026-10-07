@@ -22,7 +22,7 @@ struct FindBestNightIntent: AppIntent {
             return .result(dialog:"Choose a park, or save parks in Nyx to compare them.",snippetIntent:EmptySnippetIntent())
         }
         let now=Date.now, day=start.map { TripDay($0) }
-        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved))
+        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
         guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else {
             return .result(dialog:"Nyx could not find those nights.",snippetIntent:EmptySnippetIntent())
         }
@@ -57,6 +57,12 @@ nonisolated enum BestNightSearch {
         return ranked.isEmpty ? nil : Answer(ranked:ranked,count:count)
     }
     /// Each park's newest forecast: the one the widget shares, or the app's own cache.
+    /// Smoke and cloud layers: the app's own cache, else what the widget was handed.
+    static func details(for parks: [Park], shared: SavedSkySnapshot?) -> [String: ForecastDetail] {
+        var result: [String: ForecastDetail]=[:]
+        for park in parks { result[park.id]=CacheDirectory.read(ForecastDetail.self,name:"detail-\(park.id)") ?? shared?.details?[park.id] }
+        return result
+    }
     static func forecasts(for parks: [Park], shared: SavedSkySnapshot?) -> [String: Forecast] {
         var result: [String: Forecast]=[:]
         for park in parks {
@@ -71,13 +77,13 @@ nonisolated enum BestNightSearch {
         let night=answer.best, park=night.park
         let day=park.programDate(park.isoDay(night.id))
         if voiceOnly {
-            let basis=night.score.hasForecast ? "" : " "+night.withTypicalClouds(String(localized:"Clouds aren't forecast yet."))
+            let basis=night.score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
             return String(localized:"\(day) at \(park.shortName): \(night.score.value), \(night.score.band.label).")+basis
         }
         if night.sky.darkHours==0 {
             return String(localized:"No true darkness at \(park.shortName) in the next \(answer.count) nights. The best is \(day), \(night.score.value) out of 100.")
         }
-        let basis=night.score.hasForecast ? String(localized:"Includes a cached cloud forecast.") : night.withTypicalClouds(String(localized:"Moon and darkness only; clouds are not forecast that far ahead."))
+        let basis=night.basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
         return String(localized:"The best of the next \(answer.count) nights: \(day) at \(park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(basis) Confirm park access before you go.")
     }
 }
@@ -103,7 +109,8 @@ struct BestNightSnippetIntent: SnippetIntent {
     func perform() async throws -> some IntentResult & ShowsSnippetView {
         let parks=try ParkData.load().filter { parkIDs.contains($0.id) }
         let now=Date.now
-        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:SharedSettings.read()))
+        let shared=SharedSettings.read()
+        let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else { return .result(view:EmptyView()) }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)
         return .result(view:BestNightSnippetView(night:answer.ranked[rank],rank:rank,total:answer.ranked.count,nights:answer.count))
@@ -146,7 +153,7 @@ struct BestNightSnippetView: View {
                 Text("\(night.score.value)").font(.system(size:56,weight:.light,design:.serif)).foregroundStyle(palette.accent)
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.score.band.label).font(.system(.headline,design:.serif))
-                    Text(night.score.hasForecast ? String(localized:"Cached forecast included") : String(localized:"Moon and darkness only")).font(.caption).foregroundStyle(palette.muted)
+                    Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
             .accessibilityElement(children:.combine)

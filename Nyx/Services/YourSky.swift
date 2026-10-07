@@ -85,7 +85,7 @@ nonisolated struct LoggedNight: Identifiable, Sendable, Hashable {
     let date: Date
     let parkID: String
     let observedBortle: Int
-    /// That night's darkness score at the park (Moon and darkness; past clouds are unknown).
+    /// That night's darkness score at the park (with its usual clouds; past clouds are not kept).
     var score: Int?
     /// What was written that night; only the on-device recap reads it, and only on this iPhone.
     var notes: String = ""

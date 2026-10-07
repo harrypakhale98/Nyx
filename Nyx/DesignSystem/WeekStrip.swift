@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// One park's coming week at a glance, in the calendar's vocabulary: a dot per night sized by
-/// score, filled with a forecast and hollow without one. The best night is ringed and named, so
+/// score, filled with a forecast, half-filled for an early look and hollow without one. The best night is ringed and named, so
 /// a list of places also answers "which night".
 struct WeekStrip: View {
     @Environment(\.nyx) private var palette
@@ -23,10 +23,8 @@ struct WeekStrip: View {
             for (index,night) in nights.enumerated() {
                 let center=CGPoint(x:6.5+CGFloat(index)*13,y:size.height/2)
                 let radius=1.3+3.6*pow(Double(night.score.value)/100,1.5)
-                let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
-                let circle=mark.path(center:center,radius:radius)
-                if mark.filled { context.fill(circle,with:.color(palette.accent.opacity(0.45+Double(night.score.value)/200))) }
-                else { context.stroke(circle,with:.color(palette.accent.opacity(0.8)),lineWidth:0.8) }
+                let mark=NightMark.mark(night,differentiate:access.differentiate)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.8)
                 if night.id==best.id {
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-6.5,y:center.y-6.5,width:13,height:13)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7)
                 }

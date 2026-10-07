@@ -61,10 +61,11 @@ struct DelightTests {
     @Test func tiesStayPutAndBestNightIsEarliest() throws {
         let deva=try park("deva"), jotr=try park("jotr"), grba=try park("grba")
         let days=[friday,friday.adding(1),friday.adding(2)]
-        // Equal scores everywhere: no reason to drive, and the first park by id.
+        // Equal scores everywhere: no reason to drive, and the darkest measured sky (Great Basin,
+        // NASA Black Marble) wins the tie rather than the first park by id.
         let grid=days.map { day in [night(deva,80,day:day),night(grba,80,day:day),night(jotr,80,day:day)] }
         let plan=TripPlanner.plan(days:days,grid:grid,closures:[:],maxHopMeters:.infinity)
-        #expect(Set(plan.stops.map(\.night.park.id)).count==1 && plan.stops[0].night.park.id=="deva")
+        #expect(Set(plan.stops.map(\.night.park.id)).count==1 && plan.stops[0].night.park.id=="grba")
         #expect(plan.best?.day==friday && plan.stops.filter(\.isBest).count==1)
         // The same inputs give the same plan.
         #expect(TripPlanner.plan(days:days,grid:grid,closures:[:],maxHopMeters:.infinity).stops.map(\.night.park.id)==plan.stops.map(\.night.park.id))
@@ -110,24 +111,30 @@ struct DelightTests {
         let draft=CalendarDraft(stop:try #require(plan.stops.first))
         #expect(draft.notes.contains(SkyConditions.noDarknessMessage(tonight:false)))
     }
-    @Test func mixedForecastsCompareOnMoonAndDarkness() throws {
+    /// Since score v2 every night counts clouds (forecast, early look or usual), so a park with a
+    /// forecast and one without compare directly; nothing falls back to Moon and darkness only.
+    @Test func mixedForecastsCompareDirectly() throws {
         let deva=try park("deva"), jotr=try park("jotr")
         let now=try #require(TripDay(iso:"2026-10-06")?.evening(in:jotr))
         let hours=(0..<(20*24)).map { now.timeIntervalSince1970-86400+Double($0)*3600 }
         let clear=Forecast(updated:now,times:hours,clouds:hours.map { _ in 5 })
-        let days=[TripDay(year:2026,month:10,day:9)]
+        let days=[TripDay(year:2026,month:10,day:7)]
         let both=TripPlanner.nights(parks:[deva,jotr],days:days,forecasts:["deva":clear,"jotr":clear],now:now)
         #expect(both[0].allSatisfy { $0.score.hasForecast && $0.cloudCover==5 })
         #expect(TripPlanner.reason(both[0][0]).contains(String(localized:"5% cloud forecast")))
-        // One park without a forecast: every park that night is compared on Moon and darkness, and says so.
+        // One park without a forecast: it is scored with its usual clouds and says so; the other keeps its forecast.
         let mixed=TripPlanner.nights(parks:[deva,jotr],days:days,forecasts:["jotr":clear],now:now)
-        #expect(mixed[0].allSatisfy { !$0.score.hasForecast && $0.cloudCover==nil })
+        #expect(mixed[0][0].basis == .usual && mixed[0][0].cloudCover==nil && mixed[0][0].usualCloud != nil)
+        #expect(mixed[0][1].score.hasForecast)
         let plan=TripPlanner.plan(days:days,grid:mixed,closures:[:],maxHopMeters:.infinity)
-        #expect(plan.moonOnlyNights==1)
-        #expect(TripPlanner.shareText(plan) { _ in "" }.contains(String(localized:"(moon and darkness only)")))
-        // Beyond the forecast's reach (or stale) also falls back.
-        let stale=TripPlanner.nights(parks:[deva,jotr],days:days,forecasts:["deva":clear,"jotr":clear],now:now+40*3600)
-        #expect(stale[0].allSatisfy { !$0.score.hasForecast })
+        #expect(plan.unforecastNights==(plan.stops[0].night.park.id=="deva" ? 1 : 0))
+        // A forecast is never dropped for its age: 40 hours later the same nights keep it.
+        let later=TripPlanner.nights(parks:[deva,jotr],days:days,forecasts:["deva":clear,"jotr":clear],now:now+40*3600)
+        #expect(later[0].map(\.score.value)==both[0].map(\.score.value))
+        // Ten days on, the same forecast for a night ten days after it was made counts not at all.
+        let far=TripPlanner.nights(parks:[deva],days:[TripDay(year:2026,month:10,day:17)],forecasts:["deva":clear],now:now)
+        #expect(far[0][0].basis == .usual && far[0][0].cloudCover==nil)
+        #expect(TripPlanner.shareText(TripPlanner.plan(days:[TripDay(year:2026,month:10,day:17)],grid:far,closures:[:],maxHopMeters:.infinity)) { _ in "" }.contains(String(localized:"usual clouds")))
     }
     @Test func calendarDraftIsHonest() throws {
         let grba=try park("grba")
@@ -137,7 +144,7 @@ struct DelightTests {
         #expect(draft.start==real.sky.darkStart && draft.end==real.sky.darkEnd && draft.timeZone==grba.timeZone)
         #expect(draft.title==String(localized:"Stargazing at Great Basin"))
         #expect(draft.notes.contains("Wheeler Peak Scenic Drive closed") && draft.notes.contains(String(localized:"Check closures and the forecast before you go.")))
-        #expect(draft.notes.contains(String(localized:"Moon and darkness only. No cloud forecast reached this night yet.").suffix(20)))
+        #expect(draft.notes.contains(String(localized:"No cloud forecast yet.")) && draft.notes.contains(String(localized:"This score uses the usual October clouds at Great Basin.")))
         #expect(draft.url?.absoluteString=="nyx://whatsup?date=2026-10-10&park=grba")
     }
 

@@ -1,6 +1,6 @@
 # sky-events.json: sources, method, caveats
 
-Retrieved 2026-10-05. Output: `Nyx/Resources/sky-events.json` (13 meteor showers, 17 lunar eclipses 2026-2032, 5 solar eclipses 2026-2032). Everything is reference data only. The app computes visibility itself.
+Retrieved 2026-10-05. Output: `Nyx/Resources/sky-events.json` (13 meteor showers, 17 lunar eclipses 2026-2032). Five 2026-2032 solar eclipses were also compiled but removed from the bundle on 2026-10-07: they are daytime events a night-sky planner never shows, and nothing decoded them (git history keeps the table). Everything is reference data only. The app computes visibility itself.
 
 ## 1. Meteor showers
 

@@ -9,15 +9,19 @@
 /* Begin PBXBuildFile section */
 		049E9DDFA74D45F3606A13C3 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		0726F99AC834BEFF893CE378 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
+		07452633FD403601FE40038F /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
 		0A68ED255315EC895D086670 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E051542A3954F87E88506B77 /* SharedSettings.swift */; };
+		0CACD8AB978C667557FBD009 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = 0EC4079E4E4CADB5A3BA140C /* skyglow.json */; };
 		0F3EA1357E1E4AA6D12F4D4E /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		10CEC4D49F967048006DAAF2 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AED34DC99F5465D2537837E /* WristSky.swift */; };
 		10FAB9D1532627D428A96400 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE93CD7AB4547DBEB7286F4 /* stars.json */; };
 		11B90E182CC3165966D5397D /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
+		15B8E6DA2B344842AA3EA3FE /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
 		177350E4B2A2743E313A5CEF /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */; };
 		181813D2F2A04B5EDC0379EA /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
 		1955A73A85BE9FC6A49A222B /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		1A5AFE67C4BDAB939D2AF211 /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */; };
+		1A7CD42E7791F7985CEE1925 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0137EBFA177A1C2DE1B28B /* ForecastDetail.swift */; };
 		1C6D08EFBF637C65B498A99C /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5FC0F768120358CF62DD01 /* Forecast.swift */; };
 		21B8DE71E196C277435299DD /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C895A9689DFB8444878E5C /* MotionTilt.swift */; };
 		22544183874160C251ADF466 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
@@ -30,6 +34,7 @@
 		41387D8F7190223079A9C3F7 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC9AFF046F0EA36B22DE657 /* NightPlanner.swift */; };
 		4358BF3C0862D6216B672F42 /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		44CE6CD4D4D1F6D7BD9DC6A9 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE93CD7AB4547DBEB7286F4 /* stars.json */; };
+		45626EDB75B5D793647BBEBD /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
 		457521DD78197DE21C2CE796 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		5601254E1A52A60E49349439 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
@@ -37,9 +42,12 @@
 		59D3404A935B2CDA53D6982D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
 		5B498F6A6EDBD2A2639B9801 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F42E226920E038011BF3AFD /* MoonSymbol.swift */; };
 		5E1E332EC803EFCE01226606 /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */; };
+		5E7B1668BB6E4D12C552F23C /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
 		5F72A9FC37012AEA57BF74CE /* FieldModeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A895C83D02E79E01979EF8EB /* FieldModeIntent.swift */; };
 		604E8E80F1487290DF7A6303 /* NyxWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		685A55072DAD5E5203082FC7 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
+		6BA1B7F2E381CF72702E60AD /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC9AFF046F0EA36B22DE657 /* NightPlanner.swift */; };
+		70D0DF6FDAB1A2576F61AE48 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
 		7126506427BA9508A5AFDC21 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		75AD3B6F8090CAAC59990329 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
@@ -57,6 +65,7 @@
 		930BF15F93CC4AEE6462ABBC /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F344E96BCA1734C9A363158 /* WatchContext.swift */; };
 		94328E704B9544BAF802DCB1 /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726A6308FC0202124828D798 /* RealSky.swift */; };
 		9776E9A5B3B7E9EBBCBD27BF /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
+		9779E4E86BB8D023AC48FFD8 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = 0EC4079E4E4CADB5A3BA140C /* skyglow.json */; };
 		9E65115B2CD6361AB2847D76 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
 		9F85E185775C4F36716C9B97 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F42E226920E038011BF3AFD /* MoonSymbol.swift */; };
 		A0988DA463FFFCAC89CC7812 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
@@ -64,6 +73,7 @@
 		A46F22AEA6C4CBF0ECD340BB /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967BB7A4C4C54513C5F3A49 /* Starfield.swift */; };
 		A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53D0C95B34F3513BFD765F3B /* AppIntents.framework */; };
 		AF24D894FCF0DEF9CC4E43E1 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2DDCA9223A4636BA869DB4 /* Park.swift */; };
+		B09B625E966428526409F07B /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC9AFF046F0EA36B22DE657 /* NightPlanner.swift */; };
 		B1CEAD366FA8DD91ED983982 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
 		B2446209627F83B21E96F5A0 /* SkyGlyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FBDD03996921F54CE5824 /* SkyGlyph.swift */; };
 		B5BD25158E365A4FFF040E6E /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F344E96BCA1734C9A363158 /* WatchContext.swift */; };
@@ -73,19 +83,23 @@
 		BA2AA27675E433A331C36C54 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
 		BB1B6D0DCC666F1829D14DA7 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE93CD7AB4547DBEB7286F4 /* stars.json */; };
 		BDB69286DF11E225C221AB19 /* FieldActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8D4F4BF7CFEFF14C466234 /* FieldActivity.swift */; };
+		BDCFAF14FA877C071B2F9098 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5FC0F768120358CF62DD01 /* Forecast.swift */; };
 		C10A4FF7D4DDE8D0803DBA78 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 108FD5759687C9571D417768 /* Moon.metal */; };
 		C1680990853BED13F996A8E1 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */; };
 		C3E806A51F64FB74632252EF /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A820E0228800E1EC62C207A /* SkyConditions.swift */; };
+		C5D41F9AE92031E31A8BE75B /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = FB0AF4CCD977A189AB255205 /* cloud-climate.json */; };
 		C5F77BDB74CED23B46469C93 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FFF00C5D20BECAF203358C /* ScoreEngine.swift */; };
 		C98BD15C9A5D28CCFD59EB20 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = D82B7C8F3A98528CF0A9E37E /* sky-events.json */; };
 		C9F0768C052F087567974AC7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
 		CB46F08FAFDF778EAF696E47 /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967BB7A4C4C54513C5F3A49 /* Starfield.swift */; };
 		CBED16D90E475AD922F0CF69 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5FC0F768120358CF62DD01 /* Forecast.swift */; };
+		CD65A7EFF497224D965A5074 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = 0EC4079E4E4CADB5A3BA140C /* skyglow.json */; };
 		D0A792F6F7DBD42F08B7C72E /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
 		D16E58AC5F0496C22A386F10 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
 		D62DC582CFEE25E121C3775F /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B6DFF357D0AF7D5547721C /* NyxTheme.swift */; };
 		D834EB601972A430F035563F /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F42E226920E038011BF3AFD /* MoonSymbol.swift */; };
 		D881D1AF471027FE558CE94D /* SkyDome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590ECA2B40434C0323AF6FD2 /* SkyDome.swift */; };
+		DAB6D068A7BF39FC8E46E5A0 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC9AFF046F0EA36B22DE657 /* NightPlanner.swift */; };
 		DBCBDDF1E0419F473F1FD36F /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		E6D51DC90B31507FF16EA8AF /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1D2CCA8EC9E74859246851 /* WhatsUp.swift */; };
 		EA82E991DF1FAC4ED58FA806 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A76A00580A8263E5EDC2F /* SkyAlmanac.swift */; };
@@ -175,6 +189,7 @@
 		0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0B8CFEEF4D0FA553056E4D4D /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = parks.json; sourceTree = "<group>"; };
 		0C5FC0F768120358CF62DD01 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
+		0EC4079E4E4CADB5A3BA140C /* skyglow.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = skyglow.json; sourceTree = "<group>"; };
 		108FD5759687C9571D417768 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Moon.metal; sourceTree = "<group>"; };
 		177FBDD03996921F54CE5824 /* SkyGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyGlyph.swift; sourceTree = "<group>"; };
 		1C8D4F4BF7CFEFF14C466234 /* FieldActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldActivity.swift; sourceTree = "<group>"; };
@@ -331,6 +346,7 @@
 				0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */,
 				0B8CFEEF4D0FA553056E4D4D /* parks.json */,
 				D82B7C8F3A98528CF0A9E37E /* sky-events.json */,
+				0EC4079E4E4CADB5A3BA140C /* skyglow.json */,
 				FBE93CD7AB4547DBEB7286F4 /* stars.json */,
 			);
 			path = Resources;
@@ -674,8 +690,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				59D3404A935B2CDA53D6982D /* Localizable.xcstrings in Resources */,
+				5E7B1668BB6E4D12C552F23C /* cloud-climate.json in Resources */,
 				4358BF3C0862D6216B672F42 /* parks.json in Resources */,
 				C98BD15C9A5D28CCFD59EB20 /* sky-events.json in Resources */,
+				CD65A7EFF497224D965A5074 /* skyglow.json in Resources */,
 				10FAB9D1532627D428A96400 /* stars.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -688,6 +706,7 @@
 				A0988DA463FFFCAC89CC7812 /* cloud-climate.json in Resources */,
 				4F83D43656FA1ABA1181846D /* parks.json in Resources */,
 				7126506427BA9508A5AFDC21 /* sky-events.json in Resources */,
+				0CACD8AB978C667557FBD009 /* skyglow.json in Resources */,
 				F959A114149CD1E965A35078 /* stars.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -697,8 +716,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				2CC5C704564DCAB64168A31E /* Localizable.xcstrings in Resources */,
+				C5D41F9AE92031E31A8BE75B /* cloud-climate.json in Resources */,
 				0F3EA1357E1E4AA6D12F4D4E /* parks.json in Resources */,
 				049E9DDFA74D45F3606A13C3 /* sky-events.json in Resources */,
+				9779E4E86BB8D023AC48FFD8 /* skyglow.json in Resources */,
 				BB1B6D0DCC666F1829D14DA7 /* stars.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -722,6 +743,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				91255766FCE2F2D9848CC32A /* Assets.xcassets in Resources */,
+				07452633FD403601FE40038F /* cloud-climate.json in Resources */,
 				D0A792F6F7DBD42F08B7C72E /* parks.json in Resources */,
 				344B1A768B08154C9D54CC30 /* sky-events.json in Resources */,
 				44CE6CD4D4D1F6D7BD9DC6A9 /* stars.json in Resources */,
@@ -736,7 +758,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				D16E58AC5F0496C22A386F10 /* AstronomyEngine.swift in Sources */,
+				15B8E6DA2B344842AA3EA3FE /* CloudClimate.swift in Sources */,
+				BDCFAF14FA877C071B2F9098 /* Forecast.swift in Sources */,
+				1A7CD42E7791F7985CEE1925 /* ForecastDetail.swift in Sources */,
 				C10A4FF7D4DDE8D0803DBA78 /* Moon.metal in Sources */,
+				B09B625E966428526409F07B /* NightPlanner.swift in Sources */,
 				685A55072DAD5E5203082FC7 /* Park.swift in Sources */,
 				B1CEAD366FA8DD91ED983982 /* ScoreEngine.swift in Sources */,
 				B9CE014CFB69BD0A59617FDD /* SkyAlmanac.swift in Sources */,
@@ -751,11 +777,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				5601254E1A52A60E49349439 /* AstronomyEngine.swift in Sources */,
+				45626EDB75B5D793647BBEBD /* CloudClimate.swift in Sources */,
 				1C6D08EFBF637C65B498A99C /* Forecast.swift in Sources */,
 				413530352A319A41E65C76B9 /* ForecastDetail.swift in Sources */,
 				457521DD78197DE21C2CE796 /* MoonDisc.swift in Sources */,
 				D834EB601972A430F035563F /* MoonSymbol.swift in Sources */,
 				83861F6BF7B440BF14891B13 /* MotionTilt.swift in Sources */,
+				6BA1B7F2E381CF72702E60AD /* NightPlanner.swift in Sources */,
 				5E1E332EC803EFCE01226606 /* NyxTheme.swift in Sources */,
 				22544183874160C251ADF466 /* Park.swift in Sources */,
 				11B90E182CC3165966D5397D /* RealSky.swift in Sources */,
@@ -821,11 +849,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				81C6712F9A1E75CEA6DC6866 /* AstronomyEngine.swift in Sources */,
+				70D0DF6FDAB1A2576F61AE48 /* CloudClimate.swift in Sources */,
 				7D1A45C798C492287079F860 /* Forecast.swift in Sources */,
 				7773E0D2CDE42342AA5B3E28 /* ForecastDetail.swift in Sources */,
 				9776E9A5B3B7E9EBBCBD27BF /* MoonDisc.swift in Sources */,
 				5B498F6A6EDBD2A2639B9801 /* MoonSymbol.swift in Sources */,
 				21B8DE71E196C277435299DD /* MotionTilt.swift in Sources */,
+				DAB6D068A7BF39FC8E46E5A0 /* NightPlanner.swift in Sources */,
 				1A5AFE67C4BDAB939D2AF211 /* NyxTheme.swift in Sources */,
 				9058DCA146450C71871CA104 /* Park.swift in Sources */,
 				94328E704B9544BAF802DCB1 /* RealSky.swift in Sources */,

@@ -156,8 +156,8 @@ struct TonightFace: View {
                 if looking {
                     NightGlance(night: shown, isTonight: offset == 0).layoutPriority(1)
                 } else {
-                    // Clouds unknown rides on the clock-time line, so the "now" line costs the gauge nothing.
-                    NextMoment(night: night, now: now, cloudsUnknown: !night.score.hasForecast).layoutPriority(1)
+                    // "No cloud forecast" rides on the clock-time line, so the "now" line costs the gauge nothing.
+                    NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual).layoutPriority(1)
                     if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
                         Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1).nonEssential()
                     }
@@ -210,7 +210,7 @@ struct NightGlance: View {
                 Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             }
             if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
-            else if !night.score.hasForecast { Text("Moon and darkness only").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+            else if !night.score.hasForecast { Text("No cloud forecast yet").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
@@ -249,7 +249,7 @@ struct NextMoment: View {
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                         .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
-                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · clouds unknown") } else { Text("at \(night.park.time(next.date))") }
+                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast") } else { Text("at \(night.park.time(next.date))") }
                     }
                     .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).minimumScaleFactor(0.8).nonEssential()
                 }
@@ -372,7 +372,7 @@ struct WeekPage: View {
                 }
                 Group {
                     if nights.contains(where: { !$0.score.hasForecast }) {
-                        Text("Hollow nights are moon and darkness only.")
+                        Text("Hollow nights have no full cloud forecast yet.")
                     }
                     if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
                 }
@@ -406,7 +406,7 @@ struct WeekPage: View {
     }
     private func label(_ night: Night) -> String {
         let base = String(localized: "\(park.dayLabel(night.id)), \(night.score.value), \(night.score.band.label)")
-        return night.score.hasForecast ? base : base + ", " + String(localized: "moon and darkness only")
+        return night.basisLabel.map { base + ", " + $0 } ?? base
     }
 }
 
@@ -464,7 +464,7 @@ struct ParksList: View {
     }
 }
 
-/// Before the iPhone has sent anything: pick a park, and Nyx works from the Moon and darkness alone.
+/// Before the iPhone has sent anything: pick a park, and Nyx scores it with its usual clouds.
 struct ParkChooser: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
@@ -473,7 +473,7 @@ struct ParkChooser: View {
             Section {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Choose a park").font(.system(.title3, design: .serif))
-                    Text("Nyx on iPhone sends your saved parks and clouds. Until then, the score is moon and darkness only.").font(.caption2).foregroundStyle(palette.muted)
+                    Text("Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.").font(.caption2).foregroundStyle(palette.muted)
                 }.listRowBackground(Color.clear)
             }
             Section("Dark-sky parks") { ForEach(store.parks.filter(\.darkSkyDesignated)) { row($0) } }

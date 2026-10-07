@@ -24,7 +24,7 @@ import simd
         #expect(night.milestones.first { $0.kind == .darkness }?.date == sky.darkStart)
         #expect(night.milestones.first { $0.kind == .dawn }?.date == sky.darkEnd)
         let shower = try #require(night.milestones.first { $0.kind == .shower })
-        #expect(shower.title == "Geminids at their best" && shower.detail.hasPrefix("About"))
+        #expect(shower.title == "Geminids at their best" && shower.detail.contains("an hour from this park"))
         #expect(Set(night.milestones.map(\.id)).count == night.milestones.count)
         // Venus sets in the evening twilight; nothing is invented outside the night.
         let window = SkyAlmanac.nightWindow(sky)

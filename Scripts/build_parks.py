@@ -10,7 +10,7 @@ source=json.load(open('/tmp/nyx-nps-parks.json'))['data']
 zones={
 'acad':'America/New_York','arch':'America/Denver','badl':'America/Denver','bibe':'America/Chicago','bisc':'America/New_York','blca':'America/Denver','brca':'America/Denver','cany':'America/Denver','care':'America/Denver','cave':'America/Denver','chis':'America/Los_Angeles','cong':'America/New_York','crla':'America/Los_Angeles','cuva':'America/New_York','deva':'America/Los_Angeles','dena':'America/Anchorage','drto':'America/New_York','ever':'America/New_York','gaar':'America/Anchorage','jeff':'America/Chicago','glba':'America/Juneau','glac':'America/Denver','grca':'America/Phoenix','grte':'America/Denver','grba':'America/Los_Angeles','grsa':'America/Denver','grsm':'America/New_York','gumo':'America/Denver','hale':'Pacific/Honolulu','havo':'Pacific/Honolulu','hosp':'America/Chicago','indu':'America/Chicago','isro':'America/Detroit','jotr':'America/Los_Angeles','katm':'America/Anchorage','kefj':'America/Anchorage','kova':'America/Anchorage','lacl':'America/Anchorage','lavo':'America/Los_Angeles','maca':'America/Chicago','meve':'America/Denver','mora':'America/Los_Angeles','neri':'America/New_York','noca':'America/Los_Angeles','olym':'America/Los_Angeles','pefo':'America/Phoenix','pinn':'America/Los_Angeles','romo':'America/Denver','sagu':'America/Phoenix','seki':'America/Los_Angeles','shen':'America/New_York','thro':'America/Denver','viis':'America/St_Thomas','voya':'America/Chicago','whsa':'America/Denver','wica':'America/Denver','wrst':'America/Anchorage','yell':'America/Denver','yose':'America/Los_Angeles','zion':'America/Denver','npsa':'Pacific/Pago_Pago','redw':'America/Los_Angeles'}
 designated=set('arch badl bibe blca brca cany care deva glac grca grba grsa jotr maca meve pefo voya zion'.split())
-bortle={'jeff':8,'cuva':6,'hosp':5,'indu':6,'bisc':5,'cong':4,'acad':3,'grsm':3,'shen':3,'sagu':4,'pinn':3,'jotr':3,'maca':4,'meve':3,'neri':3,'ever':3,'whsa':3,'mora':3,'olym':3,'noca':2,'redw':3,'yose':3,'seki':3,'hale':2,'havo':3,'viis':3,'npsa':3,'zion':3,'arch':3,'brca':2,'cany':2,'care':2,'bibe':2,'deva':2,'grba':2,'grsa':2,'grca':2,'pefo':2,'blca':2}
+bortle={'jeff':8,'cuva':6,'hosp':5,'indu':6,'bisc':5,'cong':4,'acad':3,'grsm':3,'shen':3,'sagu':5,'pinn':3,'jotr':3,'maca':4,'meve':3,'neri':3,'ever':3,'whsa':3,'mora':3,'olym':3,'noca':2,'redw':3,'yose':3,'seki':3,'hale':2,'havo':3,'viis':3,'npsa':3,'zion':3,'arch':3,'brca':2,'cany':2,'care':2,'bibe':2,'deva':2,'grba':2,'grsa':2,'grca':2,'pefo':2,'blca':2}
 # Explicit NPS night-sky recommendations. Unverified areas are omitted, not invented.
 spots={
 'zion':[('Checkerboard Mesa Pullout',37.224,-112.882,'https://www.nps.gov/zion/planyourvisit/sunset-stargazing.htm')],
@@ -44,6 +44,10 @@ for p in source:
 access=json.loads(pathlib.Path('Research/park-access.json').read_text()) if pathlib.Path('Research/park-access.json').exists() else {}
 for park in parks:
  if park['id'] in access: park['access']=access[park['id']]
+# Saguaro: Bortle 5, not 4 (Black Marble computes 5.1; the park sits beside Tucson).
+ if park['id']=='sagu': park['sourceNote']+=' Bortle 5 rather than 4: NASA Black Marble night lights put the park at 5.1, beside Tucson (Research/skyglow.md).'
+# Haleakalā's summit sits above the trade-wind inversion: score from mid and high cloud.
+ if park['id']=='hale': park['aboveInversion']=True
 assert len(parks)==63,len(parks)
 pathlib.Path('Nyx/Resources/parks.json').write_text(json.dumps(sorted(parks,key=lambda p:p['name']),indent=2,ensure_ascii=False)+'\n')
 print('Wrote',len(parks),'parks')

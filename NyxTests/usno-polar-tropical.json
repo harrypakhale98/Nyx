@@ -1,0 +1,26 @@
+{
+  "source": "U.S. Naval Observatory, Astronomical Applications API (aa.usno.navy.mil/api/rstt/oneday), queried 2026-10-07 at each park's parks.json coordinates; times are park-local, to the minute. Recorded in Research/audit-2026-10-07/astronomy-score.md, Numeric evidence.",
+  "night": "Each case names the park-local night (local noon to the next local noon) its events fall in.",
+  "cases": [
+    { "park": "dena", "night": "2026-10-15", "event": "sunset", "local": "2026-10-15 18:46" },
+    { "park": "dena", "night": "2026-10-15", "event": "moonBelowAllNight" },
+    { "park": "gaar", "night": "2026-10-15", "event": "sunset", "local": "2026-10-15 18:39" },
+    { "park": "gaar", "night": "2026-10-15", "event": "moonBelowAllNight" },
+    { "park": "kova", "night": "2026-11-15", "event": "moonrise", "local": "2026-11-15 16:38" },
+    { "park": "kova", "night": "2026-11-15", "event": "moonset", "local": "2026-11-15 21:05" },
+    { "park": "npsa", "night": "2026-10-15", "event": "moonset", "local": "2026-10-15 23:04" },
+    { "park": "npsa", "night": "2026-10-15", "event": "moonrise", "local": "2026-10-16 10:27" },
+    { "park": "hale", "night": "2026-10-15", "event": "moonset", "local": "2026-10-15 21:47" },
+    { "park": "hale", "night": "2026-10-15", "event": "moonrise", "local": "2026-10-16 11:48" },
+    { "park": "viis", "night": "2026-10-15", "event": "moonset", "local": "2026-10-15 21:34" },
+    { "park": "viis", "night": "2026-10-15", "event": "moonrise", "local": "2026-10-16 11:24" },
+    { "park": "glba", "night": "2026-12-01", "event": "moonset", "local": "2026-12-01 12:55" },
+    { "park": "glba", "night": "2026-12-01", "event": "moonrise", "local": "2026-12-02 01:00" },
+    { "park": "katm", "night": "2026-10-20", "event": "moonrise", "local": "2026-10-20 17:44" },
+    { "park": "katm", "night": "2026-10-20", "event": "moonset", "local": "2026-10-21 03:06" },
+    { "park": "wrst", "night": "2027-01-20", "event": "moonrise", "local": "2027-01-20 12:37" },
+    { "park": "wrst", "night": "2027-01-20", "event": "moonset", "local": "2027-01-21 09:42" },
+    { "park": "dena", "night": "2027-03-20", "event": "moonrise", "local": "2027-03-20 18:24" },
+    { "park": "dena", "night": "2027-03-20", "event": "moonset", "local": "2027-03-21 07:39" }
+  ]
+}

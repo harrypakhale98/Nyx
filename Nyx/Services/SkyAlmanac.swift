@@ -81,7 +81,8 @@ nonisolated struct SkyAlmanac: Sendable {
         var id: Planet { planet }
         let planet: Planet
         let magnitude: Double
-        /// Above 5° with the Sun at least 6° down: the stretch of the night it can be seen.
+        /// Above 8° in a sky dark enough for its brightness (`twilightLimit`): the stretch of the
+        /// night it can be seen.
         let visible: DateInterval
         let best: Date
         let bestAltitude: Double
@@ -91,15 +92,29 @@ nonisolated struct SkyAlmanac: Sendable {
         let sets: Date?
     }
 
-    /// Planets that clear 5° in a dark-enough sky during the night, brightest first.
+    /// A planet counts as seen 8° up or higher: lower, extinction and haze take a magnitude or more.
+    static let planetMinimumAltitude = 8.0
+    /// How far the Sun must be below the horizon for a planet of `magnitude` to show to the eye:
+    /// civil twilight (−6°) for Venus and Jupiter at their brightest (brighter than −3), nautical
+    /// mid-twilight (−9°) for anything brighter than magnitude 0, and −12° for the rest.
+    static func twilightLimit(magnitude: Double) -> Double { magnitude < -3 ? -6 : magnitude < 0 ? -9 : -12 }
+    /// Mercury fainter than this is not worth naming: it is never far from the twilight glow.
+    static let mercuryFaintest = 1.5
+
+    /// Planets that clear 8° in a sky dark enough for their brightness during the night, brightest first.
     func planets(for park: Park, sky: SkyConditions) -> [PlanetNight] {
         let window = Self.nightWindow(sky)
+        let middle = window.start.addingTimeInterval(window.duration/2)
         return Planet.allCases.compactMap { planet -> PlanetNight? in
             let altitude = { (date: Date) -> Double in
                 let p = position(of: planet, at: date)
                 return engine.horizontal(date: date, park: park, ra: p.ra, dec: p.dec).altitude
             }
-            let seen = { (date: Date) in engine.solarAltitude(at: date, park: park) <= -6 && altitude(date) >= 5 }
+            // Brightness changes little within a night: the middle of it sets the twilight rule.
+            let magnitude = position(of: planet, at: middle).magnitude
+            if planet == .mercury && magnitude > Self.mercuryFaintest { return nil }
+            let sunLimit = Self.twilightLimit(magnitude: magnitude)
+            let seen = { (date: Date) in engine.solarAltitude(at: date, park: park) <= sunLimit && altitude(date) >= Self.planetMinimumAltitude }
             guard let visible = longest(in: window, where: seen) else { return nil }
             var best = visible.start, bestAltitude = -90.0
             sample(visible) { date in let a = altitude(date); if a > bestAltitude { bestAltitude = a; best = date } }
@@ -328,26 +343,33 @@ nonisolated struct SkyAlmanac: Sendable {
         var penumbralMagnitude: Double?
     }
     struct EclipseNight: Sendable, Equatable {
+        /// Totality (u2–u3), the umbral phase (u1–u4, partial with totality inside it) or the penumbral (p1–p4).
+        enum Stage: Sendable, Equatable { case total, umbral, penumbral }
         let eclipse: LunarEclipse
-        /// The stage worth seeing (totality, else the partial phase, else the penumbral) as visible from the park:
-        /// clipped to the time the Moon is up.
+        /// The deepest stage seen from the park, clipped to the time the Moon is up: totality if
+        /// any of it is above the horizon, else the umbral (partial) phase, else the penumbral.
         let visible: DateInterval?
         let greatestVisible: Bool
         let altitudeAtGreatest: Double
+        /// Which stage `visible` belongs to; nil when none of the eclipse is above the horizon.
+        var stage: Stage? = nil
     }
     func lunarEclipse(_ table: [LunarEclipse], for park: Park, sky: SkyConditions) -> EclipseNight? {
         guard let eclipse = table.first(where: { $0.greatest >= sky.evening && $0.greatest < sky.end }) else { return nil }
-        let stage: DateInterval? = {
-            if let a = eclipse.u2, let b = eclipse.u3, b > a { return DateInterval(start: a, end: b) }
-            if let a = eclipse.u1, let b = eclipse.u4, b > a { return DateInterval(start: a, end: b) }
-            if let a = eclipse.p1, let b = eclipse.p4, b > a { return DateInterval(start: a, end: b) }
-            return nil
-        }()
+        // The penumbral fringe of an umbral eclipse cannot be seen by eye, so a total or partial
+        // eclipse falls back only as far as its partial phase; a penumbral eclipse has only its own.
+        let stages: [(EclipseNight.Stage, Date?, Date?)] = eclipse.u1 == nil ? [(.penumbral, eclipse.p1, eclipse.p4)]
+            : [(.total, eclipse.u2, eclipse.u3), (.umbral, eclipse.u1, eclipse.u4)]
         // The same horizon as moonrise: upper limb on the refracted horizon.
         let moonUp = { (date: Date) in engine.lunarAltitude(at: date, park: park) > -0.833 }
-        let visible = stage.flatMap { longest(in: $0, where: moonUp) }
         let altitude = engine.lunarAltitude(at: eclipse.greatest, park: park)
-        return EclipseNight(eclipse: eclipse, visible: visible, greatestVisible: altitude > -0.833, altitudeAtGreatest: altitude)
+        // The deepest stage any of which is above the horizon: a Moon that sets before totality
+        // still shows the partial phase, and one that rises already eclipsed shows the end of it.
+        for (stage, a, b) in stages {
+            guard let a, let b, b > a, let visible = longest(in: DateInterval(start: a, end: b), step: 120, where: moonUp) else { continue }
+            return EclipseNight(eclipse: eclipse, visible: visible, greatestVisible: altitude > -0.833, altitudeAtGreatest: altitude, stage: stage)
+        }
+        return EclipseNight(eclipse: eclipse, visible: nil, greatestVisible: altitude > -0.833, altitudeAtGreatest: altitude)
     }
 
     // MARK: Shared time search

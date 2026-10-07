@@ -106,7 +106,7 @@ struct ParkList: View {
                     ParkRow(park: park, score: model.listScores[park.id]).tag(park.id)
                 }
             } header: {
-                Text(model.nightOffset == 0 ? "Tonight · moon and darkness" : "\(nightName) · moon and darkness")
+                Text(model.nightOffset == 0 ? "Tonight · usual clouds" : "\(nightName) · usual clouds")
             }
         }
         .overlay {
@@ -141,7 +141,7 @@ struct ParkRow: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(park.name))
-        .accessibilityValue(score.map { Text("\($0.value) out of 100, \($0.band.label), moon and darkness only") } ?? Text("Computing"))
+        .accessibilityValue(score.map { Text("\($0.value) out of 100, \($0.band.label), with the park's usual clouds") } ?? Text("Computing"))
     }
 }
 

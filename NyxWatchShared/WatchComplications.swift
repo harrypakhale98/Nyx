@@ -39,7 +39,7 @@ struct WristInk {
 /// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
 /// parks, forecasts and engine as Tonight, so the face and the app never disagree.
 nonisolated enum WatchTimeline {
-    /// Joshua Tree tonight, moon and darkness only: the gallery's sky and the redacted placeholder's shape.
+    /// Joshua Tree tonight, with its usual clouds: the gallery's sky and the redacted placeholder's shape.
     static var sample: SavedSkySnapshot? {
         (try? ParkData.load().first(where: { $0.id == "jotr" })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
     }
@@ -195,7 +195,7 @@ struct WatchComplicationView: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).font(.system(.title2, design: .serif).weight(.light)).foregroundStyle(accent).widgetAccentable()
-                Text(night.score.hasForecast ? night.score.band.label : String(localized: "\(night.score.band.label), clouds unknown"))
+                Text(night.bandWithBasis)
                     .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
             }
             if showsNext, let next = entry.next {
@@ -222,7 +222,7 @@ struct WatchComplicationView: View {
     }
     private func summary(_ night: Night) -> String {
         var text = String(localized: "\(night.park.wristName), \(night.score.value) out of 100, \(night.score.band.label).")
-        if !night.score.hasForecast { text += " " + String(localized: "Moon and darkness only, clouds unknown.") }
+        if let caption = night.basisCaption() { text += " " + caption }
         if let next = entry.next { text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).") }
         return text
     }

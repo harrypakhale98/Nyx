@@ -48,12 +48,10 @@ nonisolated enum WatchSky {
         return context.flatMap { byID[$0.homeParkID] }.map { [$0] } ?? []
     }
     /// One night at one park, scored on the watch from the bundled park, the astronomy engine and,
-    /// when the iPhone sent one, the cached cloud forecast. A missing forecast is never treated as clear.
+    /// when the iPhone sent one, the cached cloud forecast, by the iPhone's own rule
+    /// (`NightPlanner.night`): without a forecast, the park's usual clouds for the month.
     static func night(_ park: Park, evening: Date, forecast: Forecast?, now: Date, sky cached: SkyConditions? = nil) -> Night {
-        let sky = cached ?? AstronomyEngine().conditions(for: park, on: evening)
-        let clouds = forecast?.mean(from: sky.cloudWindow.start, to: sky.cloudWindow.end, now: now)
-        return Night(park: park, sky: sky, score: ScoreEngine().score(sky: sky, bortle: park.bortleEstimate, cloudCover: clouds),
-                     cloudCover: clouds, forecastUpdated: clouds == nil ? nil : forecast?.updated)
+        NightPlanner.night(park: park, sky: cached ?? AstronomyEngine().conditions(for: park, on: evening), forecast: forecast, detail: nil, now: now)
     }
     /// Write what the complications read: the candidate parks and their forecasts.
     static func publish(parks: [Park], context: WatchContext?) {
@@ -64,12 +62,12 @@ nonisolated enum WatchSky {
     static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {
         choice.nightVision(phone: context?.nightVision, park: park, at: now)
     }
-    /// Why a score has no clouds in it, in one short honest line.
+    /// What a score's clouds rest on when there is no full forecast, in one short honest line.
     static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false) -> String? {
-        guard !night.score.hasForecast else { return nil }
-        if short { return String(localized: "Moon and darkness only") }
-        return context == nil ? String(localized: "Moon and darkness only. Open Nyx on iPhone for clouds.")
-            : String(localized: "Moon and darkness only. No cloud forecast for this night.")
+        guard let label = night.basisLabel else { return nil }
+        if short { return label }
+        if context == nil, night.basis == .usual { return String(localized: "No cloud forecast yet. Open Nyx on iPhone for clouds.") }
+        return night.basisCaption()
     }
 }
 

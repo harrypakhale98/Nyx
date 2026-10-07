@@ -6,8 +6,9 @@ struct RiverScrubbingKey:PreferenceKey {
     static func reduce(value:inout Bool,nextValue:()->Bool) { value = value || nextValue() }
 }
 /// Thirty nights as one flowing line. Drag across it (or swipe up/down with VoiceOver)
-/// to scrub; the moon above the selected night morphs as you go. Nights beyond the cloud
-/// forecast are dashed and hollow, and the best nights glow amber. Within the seven-day model
+/// to scrub; the moon above the selected night morphs as you go. Nights without a full cloud
+/// forecast are dashed (hollow beyond the forecast, half-filled for an early look), and the best
+/// nights glow amber. Within the seven-day model
 /// horizon a pale bar through each night spans the scores the clearest and cloudiest of three
 /// forecast models would give, so uncertainty is something you can see, not a footnote.
 struct TimeRiver: View {
@@ -37,9 +38,8 @@ struct TimeRiver: View {
     /// rather than pretending the first one is chosen.
     private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
     private var current:Night? { index.map { nights[$0] } }
-    /// The three best nights, at least Good, receive the amber glow: ranked as every list of
-    /// nights is (`Night.rankScore`), so a night beyond the forecast is weighed with its park's
-    /// typical clouds, not as if clear.
+    /// The three best nights, at least Good, receive the amber glow: by score, which beyond the
+    /// forecast already counts the park's usual clouds, never a clear sky.
     private var peaks:Set<Int> {
         let ranks=nights.map(\.rankScore)
         return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
@@ -123,7 +123,7 @@ struct TimeRiver: View {
                 Text(current.park.dayLabel(current.id)).font(.subheadline)
                 Spacer(minLength:8)
                 Text("\(current.score.value)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
-                Text(current.score.hasForecast ? current.score.band.label : String(localized:"Estimate")).font(.caption).foregroundStyle(palette.muted)
+                Text(current.compactBandLabel).font(.caption).foregroundStyle(palette.muted)
                 // Where the models part, the range the score could fall in, beside the score itself.
                 if let outlook=outlooks[current.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
                     Text("· \(range.lowerBound)–\(range.upperBound)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
@@ -144,7 +144,7 @@ struct TimeRiver: View {
 
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
-        let clouds=current.score.hasForecast ? String(localized:"Forecast included") : current.withTypicalClouds(String(localized:"Moon and darkness only. Clouds unknown."))
+        let clouds=current.basisCaption(typical:true) ?? String(localized:"Forecast included")
         return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
     }
     private func agreementSpoken(_ night:Night)->String? {
@@ -155,9 +155,9 @@ struct TimeRiver: View {
     }
     private var hasRanges:Bool { nights.contains { outlooks[$0.id]?.scoreRange != nil } }
     private var legend: String {
-        if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet.") }
-        var base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models; dashed, hollow nights are moon and darkness only.")
-            : String(localized:"Drag along the river. Dashed, hollow nights are moon and darkness only.")
+        if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet and use the usual clouds; half-filled nights are an early look.") }
+        var base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models. Hollow nights have no cloud forecast yet; half-filled nights are an early look.")
+            : String(localized:"Drag along the river. Hollow nights have no cloud forecast yet; half-filled nights are an early look.")
         if access.differentiate { base+=" "+NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.") }
         return markers.isEmpty ? base : base+" "+String(localized:"Small marks above a night are a meteor shower's peak or a lunar eclipse.")
     }
@@ -248,10 +248,8 @@ struct TimeRiver: View {
                 SkyGlyph.draw(SkyGlyph.Kind(marker.glyph),in:&context,rect:CGRect(x:p.x-5,y:p.y-21,width:10,height:10),color:palette.ink)
             }
             let r=i==index ? 5.0 : 2.4
-            let mark=NightMark.mark(score:night.score.value,hasForecast:night.score.hasForecast,differentiate:access.differentiate)
-            let dot=mark.path(center:p,radius:r)
-            if mark.filled { context.fill(dot,with:.color(palette.accent)) }
-            else { context.fill(dot,with:.color(.black)); context.stroke(dot,with:.color(palette.accent),lineWidth:1.1) }
+            let mark=NightMark.mark(night,differentiate:access.differentiate)
+            mark.draw(in:&context,center:p,radius:r,fill:night.basis.fill,color:palette.accent,fillOpacity:1,hollowBackground:.black)
         }
 
         // Sparse date labels: the selected night first, then the first night, then the first night

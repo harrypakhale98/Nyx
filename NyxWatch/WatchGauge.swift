@@ -40,7 +40,7 @@ struct WatchGauge: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Darkness score")
-        .accessibilityValue("\(nightLabel.map { $0 + ", " } ?? "")\(score) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized: "Includes cloud forecast.") : String(localized: "Moon and darkness only. Cloud forecast unavailable.")) \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.")
+        .accessibilityValue("\(nightLabel.map { $0 + ", " } ?? "")\(score) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized: "Includes cloud forecast.")) \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.")
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: .milliseconds(120))
@@ -77,7 +77,7 @@ private struct GaugeArc: View, Animatable {
             let tip = start + sweep*min(100, value)/100
             var arc = Path()
             arc.addArc(center: center, radius: radius, startAngle: .degrees(start), endAngle: .degrees(tip), clockwise: false)
-            // Dashed when clouds are unknown, as on the iPhone: the score is moon and darkness only.
+            // Dashed without a full forecast, as on the iPhone: the clouds are an early look or the usual ones.
             let dash: [CGFloat] = hasForecast ? [] : [3, 5]
             if !dimmed {
                 context.drawLayer { glow in

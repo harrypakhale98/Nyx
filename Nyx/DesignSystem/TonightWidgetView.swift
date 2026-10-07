@@ -113,10 +113,8 @@ struct TonightWidgetView:View {
             .accessibilityValue("Showing \(night.park.shortName), \(entry.position) of \(entry.savedCount)")
         }
     }
-    /// "Excellent" with a forecast; "Excellent, clouds unknown" without, as on the watch.
-    private func forecastLabel(_ night:Night)->String {
-        night.score.hasForecast ? night.score.band.label : String(localized:"\(night.score.band.label), clouds unknown")
-    }
+    /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
+    private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
     /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it.
     private func lockHero(_ night:Night,numeral:Font.TextStyle)->some View {
         VStack(alignment:.leading,spacing:0) {
@@ -177,8 +175,7 @@ struct TonightWidgetView:View {
                         ZStack {
                             if night.id==best { Circle().stroke(accent.opacity(0.8),lineWidth:0.8).frame(width:22,height:22) }
                             let d=4+12*Double(night.score.value)/100
-                            if night.score.hasForecast { Circle().fill(accent.opacity(0.45+Double(night.score.value)/200)).frame(width:d,height:d).widgetAccentable() }
-                            else { Circle().stroke(accent,lineWidth:1).frame(width:d,height:d).widgetAccentable() }
+                            NightDot(fill:night.basis.fill,color:accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:1).frame(width:d,height:d).widgetAccentable()
                         }.frame(height:24)
                         Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
@@ -226,9 +223,9 @@ struct TonightWidgetView:View {
                     Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
                 }
                 Spacer(minLength:4)
-                if month.nights.contains(where:{ $0.map { !$0.score.hasForecast } ?? false }) {
+                if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
                     Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
-                    Text("Moon and darkness only").font(.caption2).foregroundStyle(muted).lineLimit(1)
+                    Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
@@ -257,8 +254,8 @@ struct TonightWidgetView:View {
                 // Room for the "2 of 3" button laid over the top corner.
                 Color.clear.frame(height:entry.savedCount>1 ? 18 : 0)
                 monthGrid(night.park,month:month)
-                if month.nights.contains(where:{ $0.map { !$0.score.hasForecast } ?? false }) {
-                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("Moon and darkness only").font(.caption2).foregroundStyle(muted) }
+                if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
+                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted) }
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
@@ -294,15 +291,14 @@ struct TonightWidgetView:View {
                 .foregroundStyle(tonight ? ink : muted)
             ZStack {
                 if best { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:17,height:17) }
-                if night.score.hasForecast { Circle().fill(accent.opacity(0.45+Double(night.score.value)/200)).frame(width:d,height:d).widgetAccentable() }
-                else { Circle().stroke(accent.opacity(0.85),lineWidth:0.9).frame(width:d,height:d).widgetAccentable() }
+                NightDot(fill:night.basis.fill,color:accent.opacity(night.basis.fill == .full ? 1 : 0.85),fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.9).frame(width:d,height:d).widgetAccentable()
                 // Beside the dot, never on it: the dot's size is the score and must stay readable.
                 if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12,height:12).offset(x:13,y:-3) }
             }.frame(height:15)
         }.frame(maxWidth:.infinity).frame(height:28)
     }
     private func summary(_ night:Night)->String {
-        let tonight=String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.score.hasForecast ? String(localized:"Cached forecast included") : String(localized:"Moon and darkness only, clouds unknown"))")
+        let tonight=String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Cached forecast included"))")
         if family == .systemLarge || family == .systemExtraLarge, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
             let count=month.nights.compactMap { $0 }.count
             let events=month.nights.compactMap { $0 }.filter { month.events[$0.id] != nil }
@@ -392,3 +388,26 @@ struct WidgetReviewView:View {
     }
 }
 #endif
+
+/// A night's dot in SwiftUI shapes, for the widgets: filled with a forecast, hollow without one,
+/// and hollow with its lower half filled for an early look (the same marks as the app's calendar).
+struct NightDot: View {
+    let fill: NightFill
+    let color: Color
+    var fillOpacity = 0.6
+    var lineWidth = 1.0
+    var body: some View {
+        switch fill {
+        case .full: Circle().fill(color.opacity(fillOpacity))
+        case .hollow: Circle().stroke(color, lineWidth: lineWidth)
+        case .half:
+            ZStack {
+                Circle().fill(color.opacity(fillOpacity)).mask { VStack(spacing: 0) { Color.clear; Rectangle() } }
+                Circle().stroke(color, lineWidth: lineWidth)
+            }
+        }
+    }
+}
+#Preview("Night dots") {
+    HStack(spacing: 16) { ForEach([NightFill.full, .half, .hollow], id: \.self) { NightDot(fill: $0, color: .orange).frame(width: 14, height: 14) } }.padding().background(.black)
+}

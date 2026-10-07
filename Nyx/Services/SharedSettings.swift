@@ -21,15 +21,16 @@ nonisolated enum SharedSettings {
 nonisolated struct SavedSkySnapshot:Codable,Sendable {
     let parks:[Park]
     let forecasts:[String:Forecast]
+    /// Smoke and cloud layers for the same parks, so widgets and reminders score as the app does.
+    /// Optional: snapshots written before it existed still decode.
+    var details:[String:ForecastDetail]?=nil
+    var planner:NightPlanner { NightPlanner(forecasts:forecasts,details:details ?? [:]) }
     /// Bulk reminder planning is safe to run off the main actor. It never reads
     /// preferences, does I/O, or assumes missing clouds are clear.
     func nights(from date:Date,count:Int,forecastAsOf:Date = .now)->[Night] {
-        let astronomy=AstronomyEngine(),scoring=ScoreEngine()
+        let planner=planner
         return parks.flatMap { park in (0..<max(0,count)).map { offset in
-            let sky=astronomy.conditions(for:park,on:park.date(park.currentNight(at:date),addingDays:offset))
-            let forecast=forecasts[park.id]
-            let cloud=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:forecastAsOf)
-            return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:cloud),cloudCover:cloud,forecastUpdated:cloud==nil ? nil : forecast?.updated)
+            planner.night(park,on:park.date(park.currentNight(at:date),addingDays:offset),now:forecastAsOf)
         } }
     }
 }
