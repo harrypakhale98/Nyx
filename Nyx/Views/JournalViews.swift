@@ -52,7 +52,8 @@ struct JournalView: View {
                         .disabled(entries.isEmpty || model.journalUnavailable)
                     Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable)
                 } label:{ Image(systemName:"ellipsis") }.accessibilityLabel("Journal options") }
-                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night") }
+                // Nothing is recorded into a journal that could not be opened: it would be lost.
+                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night").disabled(model.journalUnavailable) }
             }
             .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
             .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
@@ -85,7 +86,7 @@ struct JournalView: View {
         }
     }
     @ViewBuilder private var entryList: some View {
-        if entries.isEmpty { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) }
+        if entries.isEmpty { if !model.journalUnavailable { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) } }
         else {
             LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
             if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }

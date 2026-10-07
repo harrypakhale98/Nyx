@@ -10,12 +10,14 @@ import UserNotifications
     init() {
         LaunchSignposts.start()
         let launch=LaunchSignposts.begin("App init")
+        // The offline caches start loading on background threads at once.
+        let preload=DebugScenario.screen == nil ? CachePreload.start() : nil
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
         container=opened.container
         LaunchSignposts.end(store)
         let planner=LaunchSignposts.begin("PlanModel init")
-        let model=PlanModel()
+        let model=PlanModel(preload:preload)
         // `-nyx-journal-unavailable` (DEBUG) shows the journal banner for screenshots.
         model.journalUnavailable=opened.failed || DebugScenario.isEnabled("journal-unavailable")
         _model=State(initialValue:model)

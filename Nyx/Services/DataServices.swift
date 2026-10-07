@@ -148,6 +148,8 @@ nonisolated protocol WeatherProviding: Sendable {
     func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast]
     /// The cached forecasts, read once from disk off the main actor at launch.
     func hydrate(_ parks: [Park]) async -> [String: Forecast]
+    /// Forecasts already read at launch (`CachePreload`), so no file is read again.
+    func seed(_ cached: [String: Forecast], parks: [Park]) async
 }
 nonisolated extension WeatherProviding {
     func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
@@ -172,6 +174,9 @@ actor WeatherService: WeatherProviding {
     func hydrate(_ parks: [Park]) async -> [String: Forecast] {
         for park in parks { load(park.id) }
         return memory
+    }
+    func seed(_ cached: [String: Forecast], parks: [Park]) {
+        for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     private func load(_ id: String) {
         guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: "weather-\(id)") else { return }
@@ -252,6 +257,8 @@ nonisolated protocol DetailProviding: Sendable {
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool) async -> [String: ForecastDetail]
     /// The cached detail, read once from disk off the main actor at launch.
     func hydrate(_ parks: [Park]) async -> [String: ForecastDetail]
+    /// Detail already read at launch (`CachePreload`).
+    func seed(_ cached: [String: ForecastDetail], parks: [Park]) async
     /// True when the last detail request was held back by Low Data Mode.
     func pausedForLowData() async -> Bool
 }
@@ -284,6 +291,9 @@ actor ForecastDetailService: DetailProviding {
     func hydrate(_ parks: [Park]) async -> [String: ForecastDetail] {
         for park in parks { load(park.id) }
         return memory
+    }
+    func seed(_ cached: [String: ForecastDetail], parks: [Park]) {
+        for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     func pausedForLowData() -> Bool { lowData }
     private func load(_ id: String) {
@@ -416,6 +426,8 @@ nonisolated protocol ParkProviding: Sendable {
     func programs(for park: Park, key: String, network: Bool, force: Bool) async -> ProgramsCache?
     /// The cached alerts, read once from disk off the main actor at launch.
     func hydrate(_ parks: [Park]) async -> AlertsUpdate
+    /// Alerts already read at launch (`CachePreload`).
+    func seed(_ cached: ParkAlertsCache?) async
 }
 /// Every install shares one NPS key and its hourly quota (1,000 requests), so requests are spent
 /// carefully. Alerts for all 63 parks arrive in one request every six hours, whichever screen asks
@@ -452,14 +464,23 @@ actor ParkStore: ParkProviding {
         guard !alertsLoaded else { return }
         alertsLoaded=true
         guard persist, alertCache == nil else { return }
-        if let shared=CacheDirectory.read(ParkAlertsCache.self, name: "alerts") { alertCache=shared; return }
+        alertCache=Self.stored(parks)
+    }
+    func seed(_ cached: ParkAlertsCache?) {
+        guard !alertsLoaded else { return }
+        alertsLoaded=true
+        if alertCache == nil { alertCache=cached }
+    }
+    /// The alerts on disk: the shared file, or the per-park files of earlier versions.
+    nonisolated static func stored(_ parks: [Park]) -> ParkAlertsCache? {
+        if let shared=CacheDirectory.read(ParkAlertsCache.self, name: "alerts") { return shared }
         var alerts: [String: [ParkAlert]] = [:], oldest: Date?
         for park in parks {
             guard let old=CacheDirectory.read(ParkEnrichment.self, name: "park-\(park.id)") else { continue }
             alerts[park.apiCode]=old.alerts
             oldest=min(oldest ?? old.updated, old.updated)
         }
-        if let oldest { alertCache=ParkAlertsCache(updated: oldest, alerts: alerts) }
+        return oldest.map { ParkAlertsCache(updated: $0, alerts: alerts) }
     }
     func alerts(for parks: [Park], key: String, network: Bool, force: Bool = false) async -> AlertsUpdate {
         loadAlerts(parks)
@@ -580,5 +601,44 @@ actor ParkStore: ParkProviding {
     static func plain(_ html: String) -> String {
         html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&nbsp;", with: " ").replacingOccurrences(of: "&amp;", with: "&")
+    }
+}
+/// The offline caches (forecasts, forecast detail and park alerts for 63 parks, about 190 small
+/// files), read on background threads from the first moment of launch, while the store opens and
+/// the parks load on the main thread. The model takes them just before the first frame, so the
+/// first screen shows exactly what it always did, and the services are seeded so no file is read twice.
+nonisolated final class CachePreload: @unchecked Sendable {
+    nonisolated struct Contents: Sendable {
+        var forecasts: [String: Forecast]=[:]
+        var details: [String: ForecastDetail]=[:]
+        var alerts: ParkAlertsCache?
+    }
+    private let group=DispatchGroup()
+    private let lock=NSLock()
+    /// Written on the reading threads under `lock`, read only after `group` has finished.
+    private var contents=Contents()
+    static func start() -> CachePreload {
+        let preload=CachePreload()
+        preload.group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            preload.read()
+            preload.group.leave()
+        }
+        return preload
+    }
+    private func read() {
+        guard let parks=try? ParkData.load() else { return }
+        DispatchQueue.concurrentPerform(iterations: parks.count) { index in
+            let id=parks[index].id
+            let forecast=CacheDirectory.read(Forecast.self, name: "weather-\(id)"), detail=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)")
+            lock.withLock { contents.forecasts[id]=forecast; contents.details[id]=detail }
+        }
+        let alerts=ParkStore.stored(parks)
+        lock.withLock { contents.alerts=alerts }
+    }
+    /// Waits for the reads to finish (they began at launch, so usually they already have).
+    func wait() -> Contents {
+        group.wait()
+        return lock.withLock { contents }
     }
 }
