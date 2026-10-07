@@ -22,7 +22,7 @@ struct FieldActivityLockView: View {
         VStack(alignment:.leading,spacing:10) {
             HStack(spacing:6) {
                 Image(systemName:"moon.stars").accessibilityHidden(true)
-                Text(attributes.parkName).lineLimit(1).layoutPriority(1)
+                Text(attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
                 Spacer(minLength:8)
                 Text("\(attributes.score) · \(attributes.band)").monospacedDigit()
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
@@ -30,7 +30,7 @@ struct FieldActivityLockView: View {
                 Text("The night is over. Rest your eyes.").font(.system(.title3,design:.serif)).foregroundStyle(colors.ink)
             } else if let next=state.next, !isStale {
                 HStack(alignment:.firstTextBaseline) {
-                    Label { Text(next.title).lineLimit(1) } icon:{ Image(systemName:next.symbol).accessibilityHidden(true) }
+                    Label { Text(next.title).lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:next.symbol).accessibilityHidden(true) }
                         .font(.system(.headline,design:.serif)).foregroundStyle(colors.ink)
                     Spacer(minLength:8)
                     Text(timerInterval:Date.now...max(Date.now,next.date),countsDown:true).font(.system(.title2,design:.serif)).monospacedDigit()
@@ -91,6 +91,7 @@ struct FieldActivitySymbol: View {
     var body: some View {
         Image(systemName:state.finished ? "sunrise" : state.next?.symbol ?? "moon.stars")
             .foregroundStyle(FieldActivityColors(nightVision:state.nightVision).accent)
+            .accessibilityLabel(state.finished ? Text("Dawn") : Text(state.next?.title ?? String(localized:"Later tonight")))
     }
 }
 struct FieldActivityCountdown: View {

@@ -63,6 +63,8 @@ struct NightCell: View {
 /// The long-press preview: one night at a glance.
 struct NightPeek: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo:.largeTitle) private var scoreSize=44.0
     let night:Night
     var isTonight=false
     /// The night's eclipse or shower peak, when it has one.
@@ -77,7 +79,7 @@ struct NightPeek: View {
                 }
                 Spacer(minLength:12)
                 VStack(alignment:.trailing,spacing:2) {
-                    Text("\(night.score.value)").font(.system(size:44,weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                    Text("\(night.score.value)").font(.system(size:min(scoreSize,72),weight:.light,design:.serif)).foregroundStyle(palette.accent)
                     Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption).foregroundStyle(palette.muted)
                 }
             }
@@ -94,7 +96,7 @@ struct NightPeek: View {
                     }
                 }
             }
-        }.padding(20).frame(width:320).background(Color.black)
+        }.padding(20).frame(width:typeSize.isAccessibilitySize ? 380 : 320).background(Color.black)
     }
 }
 struct CalendarView: View {

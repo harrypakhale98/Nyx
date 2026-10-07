@@ -140,9 +140,9 @@ struct AboutDataView:View {
             block("The map under your constellation","The faint outline of the United States beneath your stars is simplified from the US Census Bureau's cartographic boundary file of the nation (cb_2023_us_nation_20m), which is in the public domain. It is decoration, drawn at a scale where small islands disappear.")
             block("Access comes first","A score never confirms that a road or park is open. Park updates may be unavailable. Cached alerts and programs show their update time. Check with the park before traveling, especially when Nyx has not checked alerts.")
             block("Park-local time","Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them.")
-        }.padding(24).readableColumn(WideLayout.proseWidth) }.background(NightBackground()).navigationTitle("About the data").navigationBarTitleDisplayMode(.inline)
+        }.padding(24).readableColumn(WideLayout.proseWidth) }.background(NightBackground(veil:0.6)).navigationTitle("About the data").navigationBarTitleDisplayMode(.inline)
     }
-    private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif));Text(content).font(.body).lineSpacing(4).textSelection(.enabled).foregroundStyle(palette.muted) } }
+    private func block(_ title:LocalizedStringKey,_ content:LocalizedStringKey)->some View { VStack(alignment:.leading,spacing:10) { Text(title).font(.system(.title2,design:.serif)).accessibilityAddTraits(.isHeader);Text(content).font(.body).lineSpacing(4).textSelection(.enabled).foregroundStyle(palette.muted) } }
 }
 enum Essay: String,CaseIterable,Identifiable {
     case darkness,milkyway,meteors,bortle,etiquette,access
@@ -160,21 +160,24 @@ private struct EssayIcon:View {
     let essay:Essay
     let size:Double
     var body:some View {
-        if essay == .meteors { SkyGlyph(.meteors,color:palette.accent).frame(width:size,height:size) }
-        else { Image(systemName:essay.symbol).font(.system(size:size,weight:.ultraLight)).foregroundStyle(palette.accent).accessibilityHidden(true) }
+        // One square box for every symbol, so the titles beneath line up across the grid.
+        Group {
+            if essay == .meteors { SkyGlyph(.meteors,color:palette.accent).frame(width:size,height:size) }
+            else { Image(systemName:essay.symbol).font(.system(size:size,weight:.ultraLight)).foregroundStyle(palette.accent).accessibilityHidden(true) }
+        }.frame(width:size*1.3,height:size*1.3,alignment:.leading)
     }
 }
 struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));LazyVGrid(columns:[GridItem(.adaptive(minimum:340),spacing:22,alignment:.top)],spacing:26) { ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:22) { EssayIcon(essay:essay,size:28);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86)) } } }.buttonStyle(.plain).hoverEffect(.lift) } };NavigationLink("About the data") { AboutDataView() } }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:26) { Eyebrow(text:"A little knowledge. A wider sky.");Text("Learn to look up").font(.system(.largeTitle,design:.serif));LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:22,alignment:.top)],spacing:26) { ForEach(Essay.allCases) { essay in NavigationLink { EssayView(essay:essay) } label:{ Panel { VStack(alignment:.leading,spacing:0) { VStack(alignment:.leading,spacing:22) { EssayIcon(essay:essay,size:28);Text(essay.title).font(.system(.title2,design:.serif));Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted) };Spacer(minLength:22);HStack { Text("\(essay.minutes) minute read").font(.caption);Spacer();Image(systemName:"arrow.up.right").accessibilityHidden(true) }.foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86)) }.frame(maxHeight:.infinity,alignment:.top) }.frame(maxHeight:.infinity) }.buttonStyle(.plain).hoverEffect(.lift) } };NavigationLink { AboutDataView() } label:{ HStack { Label("About the data",systemImage:"info.circle");Spacer();Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true) }.frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.ink) }.padding(24).readableColumn(1080) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct EssayView:View {
     @Environment(\.nyx) private var palette
     let essay:Essay
     var body:some View {
-        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { _,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.background(NightBackground()).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { _,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
 }
 struct OnboardingView:View {
@@ -189,16 +192,20 @@ struct OnboardingView:View {
     private let messages:[LocalizedStringKey]=["Find the national parks and nights that give the stars their best chance.","Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.","Nyx has no account, no ads, no tracking. Your journal never leaves this phone."]
     var body:some View {
         VStack(spacing:0) {
-            HStack { Spacer();Button("Skip") { finish() } }.overlay { Text("NYX").font(.caption).tracking(8).accessibilityHidden(true) }.padding(.horizontal,28).padding(.top,28)
+            // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
+            HStack { Spacer();Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.horizontal,28).padding(.top,28)
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {
-                        VStack(spacing:28) {
+                        VStack(spacing:index==1 && !typeSize.isAccessibilitySize ? 16 : 28) {
                             art(index)
                             Text(titles[index]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                             Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
-                        }.padding(28).frame(maxWidth:.infinity)
-                    }.scrollBounceBehavior(.basedOnSize).tag(index)
+                        }.padding(.horizontal,28).padding(.vertical,index==1 ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
+                    }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
+                    // Copy that runs past the controls fades out instead of being cut mid-line.
+                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:24) } }
+                    .tag(index)
                 }
             }.tabViewStyle(.page(indexDisplayMode:.never))
             VStack(spacing:20) {
@@ -248,9 +255,9 @@ private struct ScoreAnatomy:View {
     @State private var filled=0
     private let parts:[(LocalizedStringKey,Int,Int)]=[("Moonlight",40,38),("Clouds",25,24),("Light pollution",20,18),("Length of darkness",15,14)]
     var body:some View {
-        VStack(spacing:18) {
-            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 210) // fresh count-up each time the page arrives
-            VStack(spacing:10) {
+        VStack(spacing:10) {
+            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 188) // fresh count-up each time the page arrives
+            VStack(spacing:6) {
                 ForEach(parts.indices,id:\.self) { i in
                     VStack(alignment:.leading,spacing:5) {
                         HStack { Text(parts[i].0).font(.caption);Spacer();Text("\(parts[i].1)%").font(.caption.monospacedDigit()).foregroundStyle(palette.muted) }

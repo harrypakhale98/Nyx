@@ -17,7 +17,7 @@ struct FieldLiveActivity: Widget {
             let colors=FieldActivityColors(nightVision:context.state.nightVision)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label { Text(context.state.finished ? String(localized:"Dawn") : context.state.next?.title ?? String(localized:"Later tonight")).lineLimit(1) } icon:{ FieldActivitySymbol(state:context.state) }
+                    Label { Text(context.state.finished ? String(localized:"Dawn") : context.state.next?.title ?? String(localized:"Later tonight")).lineLimit(1).minimumScaleFactor(0.75) } icon:{ FieldActivitySymbol(state:context.state) }
                         .font(.system(.subheadline,design:.serif)).foregroundStyle(colors.ink)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
@@ -59,14 +59,14 @@ struct FieldAlarmLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) { Text(context.attributes.presentation.alert.title).font(.subheadline).lineLimit(2) }
                 DynamicIslandExpandedRegion(.trailing) { countdown(context.state).monospacedDigit() }
-            } compactLeading: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor) }
+            } compactLeading: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor).accessibilityLabel("Alarm") }
               compactTrailing: { countdown(context.state).monospacedDigit().frame(maxWidth:52).foregroundStyle(context.attributes.tintColor) }
-              minimal: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor) }
+              minimal: { Image(systemName:"alarm").foregroundStyle(context.attributes.tintColor).accessibilityLabel("Alarm") }
         }
     }
     @ViewBuilder private func countdown(_ state:AlarmPresentationState)->some View {
         if case .countdown(let countdown)=state.mode { Text(timerInterval:Date.now...max(Date.now,countdown.fireDate),countsDown:true) }
-        else { Image(systemName:"alarm") }
+        else { Image(systemName:"alarm").accessibilityLabel("Alarm") }
     }
 }
 

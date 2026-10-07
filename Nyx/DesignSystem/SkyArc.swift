@@ -21,7 +21,13 @@ struct SkyArc: View {
     }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
+            // The heading stays its own element, so the heading rotor still finds this section.
             Eyebrow(text:"The shape of the night")
+            chart
+        }
+    }
+    private var chart: some View {
+        VStack(alignment:.leading,spacing:14) {
             Canvas { context,size in draw(in:&context,size:size) } symbols: {
                 MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
                     .frame(width:20,height:20).tag("moon")

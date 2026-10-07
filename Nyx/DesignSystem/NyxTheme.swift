@@ -74,12 +74,15 @@ struct NightBackground: View {
     /// The park and night whose real sky to show; otherwise the starting park tonight.
     var park: Park?=nil
     var night: Date?=nil
+    /// Dims the sky behind long reading, where a star beside a word reads as stray punctuation.
+    var veil: Double=0
     var body: some View {
         let twinkle=score.map { pow(Double($0)/100,2) } ?? 0.3
         ZStack {
             Color.black
             if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle) }
             else { Starfield(seed:seed,twinkle:twinkle) }
+            if veil>0 { Color.black.opacity(veil) }
         }.ignoresSafeArea().accessibilityHidden(true)
     }
 }

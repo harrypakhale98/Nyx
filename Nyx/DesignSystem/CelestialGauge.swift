@@ -15,6 +15,8 @@ struct CelestialGauge: View {
     @State private var revealed=false
     /// Where an iPad's pointer rests over the dial: the glint on the glass follows it, like light on a real instrument.
     @State private var pointer: CGPoint?
+    /// The dial's side; the labels inside scale with it.
+    @State private var side: CGFloat=300
     var body: some View {
         Group {
             if typeSize.isAccessibilitySize {
@@ -24,8 +26,12 @@ struct CelestialGauge: View {
                     units
                 }.frame(maxWidth:.infinity)
             } else {
-                ZStack { bezel; orbit;VStack(spacing:5) { numeral;band;units.padding(.top,8) } }
+                // The labels are laid out for a full 300 pt dial and scaled with it, so a smaller dial
+                // (onboarding) keeps the hero's proportions instead of crowding the ring.
+                ZStack { bezel; orbit }
+                    .overlay { VStack(spacing:5) { numeral;band;units.padding(.top,8) }.frame(width:300).scaleEffect(dialScale) }
                     .frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
+                    .onGeometryChange(for:CGFloat.self) { min($0.size.width,$0.size.height) } action:{ side=$0 }
                     // No taller than on the widest iPhone, so a wide column does not open a gap around the dial.
                     .frame(maxWidth:354)
                     .onContinuousHover { phase in
@@ -62,6 +68,7 @@ struct CelestialGauge: View {
             .font(.system(size:typeSize.isAccessibilitySize ? 82 : 108,weight:.light,design:.serif)).tracking(-5)
             .foregroundStyle(palette.accent).contentTransition(.numericText())
     }
+    private var dialScale:CGFloat { min(1,max(0.5,side/300)) }
     private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     /// The instrument's body: a ring of Liquid Glass the arc runs along, so the dial reads as an

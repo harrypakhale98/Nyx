@@ -161,7 +161,7 @@ struct TonightView: View {
                 Text(text).multilineTextAlignment(.leading)
                 Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
+            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
             .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
         }.buttonStyle(.plain).padding(.top,4)
         .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
@@ -202,7 +202,7 @@ struct TonightView: View {
                 Text(text).multilineTextAlignment(.leading)
                 Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16)
+            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
             .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
         }.buttonStyle(.plain).padding(.top,4)
         .accessibilityHint(hint)
@@ -230,9 +230,9 @@ struct TonightView: View {
                     else { Label("From your location",systemImage:"location.fill") }
                 }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a starting park")
                 Spacer(minLength:8)
-                if location.locating { ProgressView() }
-                else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings") }
-                else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location") }
+                if location.locating { ProgressView().accessibilityLabel("Finding your location") }
+                else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
+                else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
             }
             ViewThatFits(in:.horizontal) {
                 HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
@@ -268,7 +268,8 @@ struct ParkPickerView: View {
     @State private var search=""
     var body: some View {
         List(model.parks.filter { search.isEmpty || $0.matches(search) }) { park in
-            Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark") } } }.tint(.primary)
+            Button { selection=park.id;dismiss() } label:{ HStack { VStack(alignment:.leading) { Text(park.shortName);Text(park.state).font(.caption).foregroundStyle(.secondary) };Spacer();if selection==park.id { Image(systemName:"checkmark").accessibilityHidden(true) } } }.tint(.primary)
+                .accessibilityAddTraits(selection==park.id ? .isSelected : [])
         }.searchable(text:$search,prompt:"Park or state").navigationTitle("Starting park")
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
     }

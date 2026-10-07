@@ -9,6 +9,8 @@ struct FirstLightView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     let park: Park
     let night: Date
     let moment: Date
@@ -58,7 +60,8 @@ struct FirstLightView: View {
             AccessibilityNotification.Announcement(String(localized:"First light at \(park.shortName). The stars above you now.")).post()
             // Leave quietly if nobody touches it.
             try? await Task.sleep(for:.seconds(14))
-            if !Task.isCancelled && leavesOnItsOwn { dismiss() }
+            // Never on a timer for someone reading it with VoiceOver or Switch Control.
+            if !Task.isCancelled && leavesOnItsOwn && !voiceOver && !switchControl { dismiss() }
         }
     }
     private func dismiss() {

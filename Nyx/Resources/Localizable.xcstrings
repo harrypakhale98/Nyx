@@ -953,19 +953,19 @@
         }
       }
     },
-    "%@; %@; score %lld/100 %@; %@; %@": {
+    "%@; %@; score %lld/100 %@; %@. %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@; %@; score %lld/100 %@; %@; %@"
+            "value": "%@; %@; score %lld/100 %@; %@. %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@; %@; índice %lld/100 %@; %@; %@"
+            "value": "%@; %@; índice %lld/100 %@; %@. %@"
           }
         }
       }
@@ -1191,19 +1191,19 @@
         }
       }
     },
-    "%lld of 8 · marked in amber": {
+    "%lld of 8 · the phases you met are lit": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld of 8 · marked in amber"
+            "value": "%lld of 8 · the phases you met are lit"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld de 8 · marcadas en ámbar"
+            "value": "%lld de 8 · las fases que viste están iluminadas"
           }
         }
       }
@@ -2228,6 +2228,23 @@
         }
       }
     },
+    "Add %@ to Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add %@ to Calendar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar %@ a Calendario"
+          }
+        }
+      }
+    },
     "Add to Calendar": {
       "extractionState": "manual",
       "localizations": {
@@ -2296,23 +2313,6 @@
         }
       }
     },
-    "Aerosol forecast from CAMS. Not part of the score.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aerosol forecast from CAMS. Not part of the score."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronóstico de aerosoles de CAMS. No forma parte del índice."
-          }
-        }
-      }
-    },
     "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score. Smoke is context, not part of the score. Air-quality data: CAMS via Open-Meteo, CC BY 4.0. You can switch this request off in Your privacy.": {
       "extractionState": "manual",
       "localizations": {
@@ -2360,6 +2360,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aire"
+          }
+        }
+      }
+    },
+    "Alarm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarma"
           }
         }
       }
@@ -2769,6 +2786,23 @@
         }
       }
     },
+    "Answer ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer ready"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta lista"
+          }
+        }
+      }
+    },
     "App icon": {
       "extractionState": "manual",
       "localizations": {
@@ -3156,6 +3190,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mejor noche: %@ en %@."
+          }
+        }
+      }
+    },
+    "Best night: %@, %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best night: %@, %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor noche: %@, %lld"
           }
         }
       }
@@ -5897,6 +5948,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Encontrar la Vía Láctea"
+          }
+        }
+      }
+    },
+    "Finding your location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding your location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscando tu ubicación"
           }
         }
       }
@@ -11973,6 +12041,40 @@
         }
       }
     },
+    "Preparing your constellation to share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing your constellation to share"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando tu constelación para compartir"
+          }
+        }
+      }
+    },
+    "Preparing your year to share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing your year to share"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando tu año para compartir"
+          }
+        }
+      }
+    },
     "Previous": {
       "extractionState": "manual",
       "localizations": {
@@ -13646,6 +13748,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Humo y bruma"
+          }
+        }
+      }
+    },
+    "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de humo y bruma de Copernicus (CAMS), el servicio atmosférico europeo. No forma parte del índice."
           }
         }
       }
@@ -15612,36 +15731,36 @@
         }
       }
     },
-    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO).": {
+    "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization).": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO)."
+            "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization)."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO)."
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante, el punto del que parecen salir los meteoros, en el cenit (Organización Internacional de Meteoros)."
           }
         }
       }
     },
-    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year.": {
+    "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year."
+            "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO); varía de un año a otro."
+            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante, el punto del que parecen salir los meteoros, en el cenit (Organización Internacional de Meteoros); varía de un año a otro."
           }
         }
       }
@@ -16455,6 +16574,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prueba otro nombre o amplía los filtros."
+          }
+        }
+      }
+    },
+    "Turn on location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar la ubicación"
           }
         }
       }
@@ -17901,19 +18037,19 @@
         }
       }
     },
-    "Your estimate of artificial sky brightness. Class 1 is darkest.": {
+    "Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your estimate of artificial sky brightness. Class 1 is darkest."
+            "value": "Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu estimación del brillo artificial del cielo. La clase 1 es la más oscura."
+            "value": "Tu estimación en la escala de Bortle del brillo del cielo: 1 es el cielo más oscuro y 9, el de una gran ciudad."
           }
         }
       }

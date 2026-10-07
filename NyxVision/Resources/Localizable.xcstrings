@@ -324,6 +324,17 @@
         }
       }
     },
+    "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+          }
+        }
+      }
+    },
     "Astronomical twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -2075,6 +2086,17 @@
         }
       }
     },
+    "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park."
+          }
+        }
+      }
+    },
     "The Sun is up": {
       "extractionState": "manual",
       "localizations": {
@@ -2228,36 +2250,24 @@
         }
       }
     },
-    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO).": {
+    "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization).": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO)."
+            "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization)."
           }
         }
       }
     },
-    "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year.": {
+    "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The published peak rate is %lld an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La tasa máxima publicada es de %lld por hora con un cielo perfecto y el radiante en el cenit (IMO); varía de un año a otro."
+            "value": "The published peak rate is %lld an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year."
           }
         }
       }
