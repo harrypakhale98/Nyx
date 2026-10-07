@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Designing for night-adapted eyes — Nyx</title>
+<meta name="description" content="How Nyx, a dark-sky planner for the US national parks, was designed: one honest score, uncertainty drawn rather than hidden, a red palette with measured contrast, a shader Moon, and accessibility built in.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="canonical" href="https://harrypakhale98.github.io/Nyx/case-study.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Designing for night-adapted eyes">
+<meta property="og:description" content="A case study in honest scores, red light and a Moon you could print.">
+<meta property="og:url" content="https://harrypakhale98.github.io/Nyx/case-study.html">
+<meta property="og:image" content="https://harrypakhale98.github.io/Nyx/images/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css">
+<!-- Case study. About a three-minute read. No scripts, no trackers, no external requests.
+     Figures: test count from the unit suite on main (2026-10-07); accuracy from Research/accuracy.md and
+     the polar and tropical USNO fixtures; contrast from Research/contrast.json. -->
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="wide">
+  <p class="eyebrow">Nyx · Case study · A three-minute read</p>
+  <h1>Designing for night-adapted eyes</h1>
+  <p class="lead">Nyx answers one question for the 63 US national parks: where should I go, and on which night, for the darkest sky? Everything in its design follows from who asks it, and where they are standing when they do.</p>
+
+  <h2>The problem, at one park</h2>
+  <p>Joshua Tree sits two to three hours from Los Angeles. On a clear night with no Moon, its darkest corners are dark enough to show the Milky Way's structure. On the same date a month later, a gibbous Moon can wash most of that out, and the drive is the same. A weather app tells you about clouds. An almanac tells you about the Moon. A light-pollution map tells you about Palm Springs on the horizon. Nobody joined them for a park and a night, and nobody put a closed road beside the answer.</p>
+
+  <h2>One score, and the weakest link</h2>
+  <p>Each night gets a Darkness Score from 0 to 100. Four parts add up: the Moon up to 40 points (by its phase and how high it stands through true darkness), clouds up to 25, sky glow up to 20 (from the park's estimated Bortle class) and the hours of true darkness up to 15. Then the weakest part may cap the sum. An early version only added, and an overcast desert night with no Moon still read as good. People do not experience a night as a sum; one problem spoils it.</p>
+  <div class="panel">
+    <p><strong>A worked example, using the published rules.</strong> A clear, moonless November night at Joshua Tree (Bortle 3, about eleven hours of true darkness):</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th scope="col">Part</th><th scope="col">Clear</th><th scope="col">40% cloud</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Moon</th><td>40 of 40</td><td>40 of 40</td></tr>
+        <tr><th scope="row">Clouds</th><td>25 of 25</td><td>15 of 25</td></tr>
+        <tr><th scope="row">Sky glow</th><td>15 of 20</td><td>15 of 20</td></tr>
+        <tr><th scope="row">Dark hours</th><td>15 of 15</td><td>15 of 15</td></tr>
+        <tr><th scope="row">Sum</th><td>95</td><td>85</td></tr>
+        <tr><th scope="row">Cap that applies</th><td>Sky glow: Bortle 3 holds any night to 89</td><td>Clouds: 100 − 0.9 × 40 = 64</td></tr>
+        <tr><th scope="row">Score</th><td><strong>89, Excellent</strong></td><td><strong>64, Good</strong></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">The app writes the binding cap under the number, for example "Sky glow limits tonight to 89", so four meters that add to 95 never sit beside an 89 without a reason. Only a Bortle 2 sky or darker can read Pristine.</p>
+  </div>
+
+  <h2>Drawing honesty</h2>
+  <p>A forecast is good for a few days and guesswork after that, and the design has to show the difference without a paragraph of caveats.</p>
+  <ul>
+    <li><strong>Filled, half-filled, hollow.</strong> On the calendar, the time river and the widgets, a filled night has a full forecast. A half-filled night is an early look, where the forecast is eased toward the park's usual clouds for that month. A hollow night has no forecast yet and uses the usual clouds alone, from ten years of ERA5 reanalysis. A night nobody can forecast is never treated as clear.</li>
+    <li><strong>Model bands.</strong> For the next seven days, three independent weather models are compared. When they disagree, the river draws the range of scores they allow, and the words say "Models differ".</li>
+    <li><strong>Estimates named as estimates.</strong> Bortle classes, sky glow from satellite night lights and meteor rates all carry the word, and About the data says what each cannot do.</li>
+    <li><strong>Access first.</strong> Park closures from the National Park Service sit beside the score. A score never confirms that a road is open, and the app says so.</li>
+  </ul>
+
+  <h2>Red light, measured</h2>
+  <p>Eyes take twenty to thirty minutes to adapt to the dark, and a white screen undoes it in a second. Nyx is dark by default, and its night-vision mode turns every surface red, native controls included. Red at low brightness is easy to make unreadable, so the palette was tuned against WCAG contrast rather than by eye:</p>
+  <ul class="swatches">
+    <li class="on-black">Red text on black<br><strong>6.2 : 1</strong></li>
+    <li class="on-panel">Red text on a red panel<br><strong>5.6 : 1</strong>, secondary 5.3 : 1</li>
+    <li class="on-ink">Starlight on indigo<br><strong>16.7 : 1</strong>, secondary 8.9 : 1</li>
+    <li class="on-amber">Black on amber<br><strong>11.9 : 1</strong></li>
+  </ul>
+  <p class="note">Ratios are computed from the design tokens. Antialiased and composited pixels on a real screen still need sampling on a device, and that pass is not finished.</p>
+
+  <h2>A Moon you could print</h2>
+  <p>The Moon is not an image. A Metal shader draws it as a lit sphere, pixel by pixel, from NASA's lunar colour map. The light comes from the Sun's real direction for that night. The disc is turned so its north pole points where it does from the park, with the Moon's libration applied, and the dark side carries a faint earthshine. Reflectance follows Lommel–Seeliger, so a full Moon stays evenly bright to its edge, as the real one does. On Apple Vision Pro the same map wraps a globe you can place on a table, lit at the night's true phase. Drag it and it turns back to the face we always see.</p>
+
+  <h2>For more people</h2>
+  <ul>
+    <li><strong>Hear it.</strong> Audio graphs let VoiceOver users hear a month of darkness, the thirty-night river and the shape of the night. "Listen to tonight" plays the night as tones with a transcript.</li>
+    <li><strong>Feel it.</strong> Haptics can follow the Moon's phase, and the river ticks once per night as you scrub.</li>
+    <li><strong>Read it.</strong> Every custom control speaks a summary of its data. Layouts reflow at the largest text sizes instead of shrinking; the river becomes a native stepper.</li>
+    <li><strong>Get there.</strong> 60 of the 85 viewing spots carry step-free or partly step-free notes, each quoting the park's own accessibility page.</li>
+  </ul>
+  <p class="note">Apple's automated accessibility audit passes on every screen, in both palettes, in the simulator. Testing with people who use VoiceOver and Voice Control, on real devices, is the next step.</p>
+
+  <h2>What was left out, and why</h2>
+  <ul>
+    <li><strong>A camera sky overlay.</strong> It would light up the screen and ask for the camera. "Where to look" turns a drawn sky with the phone's motion sensors instead.</li>
+    <li><strong>Driving times.</strong> Routing would mean a new service that learns where you are. The radius is a straight line, and it says "as the crow flies".</li>
+    <li><strong>Aurora forecasts.</strong> There is no free, reliable source for a single park and night. Alaska's parks get a season note that says Nyx does not forecast aurora.</li>
+    <li><strong>Accounts, sync and analytics.</strong> None. The journal stays on the device and can be exported as a file you keep.</li>
+    <li><strong>A cloud AI.</strong> Ask Nyx appears only where Apple's on-device model is available, and reasons only over the records Nyx hands it.</li>
+  </ul>
+
+  <h2>The numbers</h2>
+  <ul class="figures">
+    <li><span class="num">63</span>national parks, 85 named viewing spots</li>
+    <li><span class="num">0</span>data collected; three public services, each with its own switch</li>
+    <li><span class="num" id="tests">232</span>unit tests, run on iOS 26 and iOS 27</li>
+    <li><span class="num">3.7 min</span>largest Moon rise or set difference from the U.S. Naval Observatory at mid-latitude parks; under a minute for the Sun</li>
+  </ul>
+  <p class="note">Moon times were also checked at parks in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, where they agree to within a minute. Terrain and the atmosphere can shift what you actually see by a few minutes more.</p>
+
+  <nav aria-label="Pages">
+    <a href="./">Nyx</a>
+    <a href="press/">Press kit</a>
+    <a href="privacy.html">Privacy policy</a>
+    <a href="support.html">Support</a>
+  </nav>
+  <footer>Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Moon: NASA's Scientific Visualization Studio; LRO LROC and LOLA teams. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.</footer>
+</main>
+</body>
+</html>
