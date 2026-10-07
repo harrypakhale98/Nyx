@@ -4,7 +4,7 @@ Native-resolution captures, no alpha channel, captured 2026-10-06; the iPhone (E
 
 - `NN-name-6.9.png`: iPhone 18 Pro Max, iOS 27.0, 1320×2868. `6.5-inch/`: 1284×2778 (scaled to width 1284, 6 px trimmed top and bottom).
 - `es/`: the same ten in Spanish (`-AppleLanguages "(es)" -AppleLocale es_MX`), with its own `6.5-inch/`.
-- `iPad/`: six 13-inch landscape captures, 2752×2064 (iPad Pro 13-inch (M5), iOS 27.0), from 2026-10-06; raw is what App Store Connect takes.
+- `iPad/`: six 13-inch portrait captures, 2064×2752 (iPad Pro 13-inch (M5), iOS 27.0), retaken 2026-10-06 evening from build 7 with live data. Captioned in `Store/Framed/iPad-13-inch/`.
 - `Watch/`: six Apple Watch Ultra 3 captures, 422×514, watchOS 27 (Tonight, milestones, week, Parks, dark adaptation, Tonight in red). No paired iPhone in the simulator, so scores are moon and darkness only and say so.
 - `Vision/`: four Apple Vision Pro captures, 3840×2160, visionOS 27 (window, immersive core, moonlit, Jupiter's name card).
 

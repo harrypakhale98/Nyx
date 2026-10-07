@@ -122,3 +122,5 @@ App Store Connect → App Information → Accessibility, per device. Full reason
 | App Store export and account metadata | OPEN: publisher account workflow |
 
 **iPhone screenshot slots (checked against Apple's specification 2026-10-06):** "iPhone with Dynamic Island (medium display)" is the required slot and takes only 1206×2622 or 1179×2556: upload `Store/Framed/6.3-inch/`. The large-display slot (1320×2868) takes `Store/Framed/6.9-inch/`; the 6.5" Face ID slot (1284×2778) is optional and takes `Store/Framed/6.5-inch/`.
+
+**Captioned sets for the other devices (English), from `swift Scripts/make_device_frames.swift`:** iPad 13" `Store/Framed/iPad-13-inch/` (six, 2064×2752 portrait, captured on iPad Pro 13-inch (M5) / iOS 27.0 from build 7 with live data: Tonight, score, field mode, calendar, constellation, Where to look on the 3 July 2027 night), Apple Vision Pro `Store/Framed/Vision-Pro/` (four, 3840×2160; computed skies say so under the scene), Apple Watch `Store/Framed/Watch-Ultra/` (six, 422×514). Upload these in place of the raw captures.
