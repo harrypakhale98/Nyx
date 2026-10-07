@@ -123,10 +123,10 @@ KEEP A LITTLE OF THE NIGHT
 Save parks and receive optional local reminders for promising nights. Keep a private journal with notes and selected photos; each night becomes a star in your own constellation. Widgets show the best sky among your saved parks.
 
 BUILT FOR MORE PEOPLE
-Nyx works with VoiceOver, Voice Control, larger text, Reduce Motion, Reduce Transparency, Increase Contrast and Bold Text. Audio graphs let you hear the timeline, the calendar and the sky arc. Haptics follow the Moon's phase. Step-free viewing spots are marked and can be filtered. Night-vision mode renders everything in red. Spanish is included.
+Nyx works with VoiceOver, larger text, Reduce Motion, Reduce Transparency, Increase Contrast and Bold Text. Audio graphs let you hear the timeline, the calendar and the sky arc. Haptics follow the Moon's phase. Step-free viewing spots are marked and can be filtered. Night-vision mode renders everything in red. Spanish is included.
 
 PRIVATE BY DESIGN
-No account, no advertising, no tracking. Your location and your journal stay on your iPhone. Three optional services supply data, each with its own switch under Your privacy: park alerts from the National Park Service, forecasts from Open-Meteo, and smoke and haze from Open-Meteo's air-quality service. They receive the public coordinates of national parks, not yours.
+No account, no advertising, no tracking. Your location and your journal stay on your device. Three optional services supply data, each with its own switch under Your privacy: park alerts from the National Park Service, forecasts from Open-Meteo, and smoke and haze from Open-Meteo's air-quality service. They receive the public coordinates of national parks, not yours.
 
 WORKS OFFLINE
 Moon, sun and twilight calculations, the core, planets, the park library, the calendar, the journal and saved parks work without a connection. Forecasts reach about sixteen days. Light-pollution classes are estimates. Moonrise and moonset are approximate, to about 15 minutes.
@@ -137,11 +137,11 @@ Scores do not confirm clear skies or safe access. Check current road and park co
 Weather data: Open-Meteo, CC BY 4.0. Air quality: Copernicus Atmosphere Monitoring Service via Open-Meteo, CC BY 4.0. Night lights and Moon imagery: NASA. Meteor showers: International Meteor Organization. Lunar eclipses: Fred Espenak, NASA/GSFC. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service or NASA.
 ```
 
-[3,978 of 4,000 characters. It is tight on purpose: if you add a sentence, cut one.]
+[4,044 of 4,000 characters. It is tight on purpose: if you add a sentence, cut one.]
 
 Notes for the owner:
 - The 1.0 description said "Forecasts do not include smoke, haze or telescope seeing." That sentence is now false for smoke and haze (the forecast adds them, as a caveat); this draft changes it. Keep that correction.
-- "Voice Control" appears in the list above only after the on-device pass in `accessibility-nutrition-labels.md` is signed off. Delete the words if it is not.
+- "Voice Control" was taken out of the accessibility list on 2026-10-06 until the on-device pass in `accessibility-nutrition-labels.md` confirms it; add "Voice Control, " back after "VoiceOver, " once it does.
 - "Nyx is not affiliated with or endorsed by ... NASA" is added because the Moon map and Black Marble are NASA data; NASA's media guidelines ask that use not imply endorsement.
 
 ---
