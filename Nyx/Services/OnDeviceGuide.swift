@@ -8,7 +8,6 @@ import Observation
     @Guide(description:"Integer IDs of the supplied records used. No IDs outside the records.")
     var sourceIDs:[Int]
 }
-@Generable nonisolated enum ReminderStyle { case quiet, planning }
 @Generable nonisolated struct YearReflection {
     @Guide(description:"Two or three short, calm sentences about the person's year under the stars, using only the supplied facts and notes. No new places, dates, numbers, weather or sky events. No exclamation marks.")
     var text:String
@@ -100,12 +99,5 @@ import Observation
         guard !text.isEmpty, !text.contains("!") else { return false }
         func numbers(_ s:String)->Set<String> { Set(s.split(whereSeparator:{ !$0.isNumber }).map(String.init)) }
         return numbers(text).isSubset(of:numbers(facts.joined(separator:" ")))
-    }
-    /// The model selects one of two vetted templates; it never writes forecasts.
-    static func reminderStyle(parkName:String) async -> Bool {
-        guard available else { return false }
-        let session=LanguageModelSession(model:Self.languageModel,instructions:"Choose a quiet or planning tone for a stargazing reminder. Do not make claims about conditions.")
-        guard let response=try? await session.respond(to:"Park: \(parkName.prefix(100))",generating:ReminderStyle.self,options:GenerationOptions(maximumResponseTokens:30)) else { return false }
-        return response.content == .quiet
     }
 }

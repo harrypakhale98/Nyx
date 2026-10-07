@@ -15,9 +15,6 @@ struct RootView:View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("showerReminders") private var showerReminders=true
-    @State private var savedUpdating=false
-    /// Something changed while an update ran; run again when it ends.
-    @State private var savedAgain=false
     /// This window's tab and keyboard commands (each iPad window has its own).
     @State private var commands=SceneCommands()
     @State private var intro=false
@@ -29,8 +26,10 @@ struct RootView:View {
     @State private var launchNight:(date:Date,whatsUp:Bool)?
     /// First light's park, while the sky reveals itself over the app.
     @State private var firstLight:Park?
-    /// The Tonight tab icon is today's real moon phase; refreshed whenever Nyx returns.
-    @State private var moonIcon=RootView.currentMoonIcon()
+    /// The Tonight tab icon is today's real moon phase, drawn just after the first frame (the tab
+    /// bar is still fading in) and again whenever Nyx returns.
+    @State private var moonIcon=Image(systemName:"moon")
+
     private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
     var body:some View {
         Group {
@@ -58,6 +57,7 @@ struct RootView:View {
             }
         }
         .environment(commands).focusedSceneValue(commands)
+        .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(DebugTypeSize())
@@ -68,8 +68,11 @@ struct RootView:View {
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
+        .onAppear { LaunchSignposts.firstFrame() }
         .task {
-            NotificationRouter.shared.connect { parkID in open(parkID) }
+            moonIcon=RootView.currentMoonIcon()
+            model.savedSync.palette=palette
+            NotificationRouter.shared.connect { route in openReminder(route) }
             if let screen=DebugScenario.screen { commands.tab=["tonight":0,"parks":1,"calendar":2,"journal":3,"learn":4][screen] ?? 0 }
             #if DEBUG
             if DebugScenario.state=="populated" {
@@ -93,7 +96,10 @@ struct RootView:View {
             if DebugScenario.screen == nil { firstLight=await FirstLightWatcher.check(model:model) }
             if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.index(model.parks);await updateSaved() }
         }
-        .onChange(of:scenePhase) { _,phase in if phase == .active {
+        .onChange(of:scenePhase) { _,phase in
+            // Ask iOS for the next background refresh whenever Nyx leaves the screen.
+            if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
+            if phase == .active {
             model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
             openRequestedField(); openRequestedPark()
@@ -106,6 +112,7 @@ struct RootView:View {
             // Keep "tonight" honest on a screen left open through sunrise.
             while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
         }
+        .onChange(of:palette.nightVision) { _,_ in model.savedSync.palette=palette }
         .onChange(of:nightVision) { _,_ in
             // Keep the Control Center toggle and widgets in step with the in-app switch.
             WidgetCenter.shared.reloadAllTimelines()
@@ -118,7 +125,11 @@ struct RootView:View {
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
         }
-        .onOpenURL { url in handle(DeepLink(url)) }
+        .onOpenURL { url in
+            // A journal export opened from Files: the Journal tab offers to import it.
+            if url.isFileURL, url.pathExtension.lowercased() == JournalArchive.fileExtension { commands.tab=3; model.journalFile=url; return }
+            handle(DeepLink(url))
+        }
         // Differentiate Without Color, Reduce Highlighting, Cross-Fade, reduced resources: read once, for every screen and sheet.
         .nyxAccessibility()
     }
@@ -127,7 +138,7 @@ struct RootView:View {
         switch link {
         case .park(let id): launchNight=nil; open(id)
         case .tonight: commands.tab=0
-        case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model) }
+        case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) }
         case .whatsUp(let id,let day):
             guard let park=model.park(id) else { return }
             open(id,night:(day.evening(in:park),true))
@@ -193,10 +204,8 @@ struct RootView:View {
     private func open(_ parkID:String?,night:(date:Date,whatsUp:Bool)?=nil) {
         guard let parkID,let park=model.park(parkID) else { return }
         launchNight=night
-        let root=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows).first(where:\.isKeyWindow)?.rootViewController
-        guard var top=root?.presentedViewController else { launchParkID=parkID; return }
-        while let next=top.presentedViewController { top=next }
+        // This window's own stack: a link or reminder never opens over another iPad window.
+        guard let top=commands.topController, top.presentingViewController != nil else { launchParkID=parkID; return }
         let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
@@ -206,33 +215,17 @@ struct RootView:View {
         guard DebugScenario.screen == nil, let request=FieldModeRequest.take() else { return }
         let id=request.parkID ?? SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey) ?? model.homeID
         guard let park=model.park(id) ?? model.home else { return }
-        FieldPresenter.present(park:park,model:model)
+        FieldPresenter.present(park:park,model:model,from:commands.topController)
+    }
+    /// A tapped reminder opens the night it announced (a shower reminder at What's up).
+    private func openReminder(_ route:ReminderRoute) {
+        guard let park=model.park(route.parkID) else { return }
+        open(route.parkID,night:route.day.map { ($0.evening(in:park),route.whatsUp) })
     }
     /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`).
     private func openRequestedPark() {
         guard DebugScenario.screen == nil else { return }
         open(ParkOpenRequest.take())
-    }
-    /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
-    private func renderWidgetMoons(for parks:[Park]) {
-        let engine=AstronomyEngine()
-        var keep=Set<String>()
-        for park in parks {
-            for offset in 0..<2 {
-                let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
-                guard let url=SharedSettings.moonImageURL(park:park.id,night:night.id) else { continue }
-                keep.insert(url.lastPathComponent)
-                if FileManager.default.fileExists(atPath:url.path) { continue }
-                let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,palette))
-                renderer.scale=3
-                try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)
-            }
-        }
-        // Forget pictures of nights that have passed or parks no longer saved.
-        if let folder=SharedSettings.moonImageURL(park:"x",night:.now)?.deletingLastPathComponent(),
-           let files=try? FileManager.default.contentsOfDirectory(atPath:folder.path) {
-            for file in files where file.hasPrefix("moon-") && !keep.contains(file) { try? FileManager.default.removeItem(at:folder.appendingPathComponent(file)) }
-        }
     }
     private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)
@@ -240,50 +233,10 @@ struct RootView:View {
         renderer.scale=3
         return renderer.uiImage.map{Image(uiImage:$0).renderingMode(.template)} ?? Image(systemName:"moon")
     }
-    /// Brings the widget, the watch, Siri's park list and reminders in line with the saved parks.
-    /// It publishes from what is cached first, so unsaving a park or switching shower reminders
-    /// off takes effect at once even on a weak signal, then again once fresh forecasts arrive.
-    /// A change made while a run is under way is never dropped: the run goes again when it ends.
+    /// The widget, the watch, Siri's park list and reminders follow the saved parks; the work is
+    /// the model's (`SavedSkySync`), once per process however many windows are open.
     private func updateSaved() async {
-        guard DebugScenario.screen == nil else { return }
-        guard !savedUpdating else { savedAgain=true; return }
-        savedUpdating=true
-        defer {
-            savedUpdating=false
-            if savedAgain { savedAgain=false; Task { await updateSaved() } }
-        }
-        let parks=saved.compactMap{model.park($0.parkID)}
-        let ids=Set(parks.map(\.id))
-        let cached=model.forecasts.filter { ids.contains($0.key) }.mapValues(\.updated)
-        await publishSaved(parks)
-        // The widget and reminders need only forecasts; park alerts follow once they are done,
-        // so a quick visit still leaves both up to date.
-        await model.refreshForecasts(watching:parks)
-        if !savedAgain, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publishSaved(parks) }
-        await model.refreshParkUpdates(parks)
-    }
-    private func publishSaved(_ parks:[Park]) async {
-        let ids=Set(parks.map(\.id))
-        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) })
-        SharedSettings.write(snapshot)
-        // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
-        NyxShortcuts.updateAppShortcutParameters()
-        WatchBridge.shared.push(savedParkIDs:parks.map(\.id),homeParkID:model.homeID,forecasts:model.forecasts)
-        renderWidgetMoons(for:parks)
-        WidgetCenter.shared.reloadAllTimelines()
-        // The Smart Stack's dusk hints come from the same snapshot; a timeline reload alone may not refresh them.
-        WidgetCenter.shared.invalidateRelevance(ofKind:WidgetSelection.kind)
-        if notificationsEnabled {
-            let today=model.today
-            let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
-            let names=Dictionary(parks.map { ($0.id,$0.shortName) },uniquingKeysWith:{ first,_ in first })
-            // Reminders may have been switched off while the nights were computed.
-            if notificationsEnabled { await NotificationScheduler().reschedule(nights:nights,showers:showerReminders) { plan in
-                // The on-device model may only choose between two vetted titles; it never writes forecasts.
-                guard let name=names[plan.parkID], await OnDeviceGuide.reminderStyle(parkName:name) else { return nil }
-                return String(localized:"A night to consider at \(name)")
-            } }
-        }
+        await model.savedSync.update(model,parkIDs:saved.map(\.parkID))
     }
 }
 /// A park opened from a reminder, Spotlight or a widget. It reads night vision and Increase

@@ -7,6 +7,18 @@ import SwiftUI
     /// The tabs in order, for ⌘1–⌘5.
     static let tabs:[LocalizedStringKey]=["Tonight","Parks","Calendar","Journal","Learn"]
     var tab=0
+    /// This window's scene, so a park or field mode opened from a link, a reminder or a menu is
+    /// presented in the window that asked, never in whichever window happens to be key.
+    @ObservationIgnored weak var windowScene:UIWindowScene?
+    /// The top of this window's presentation stack (else the key window's, before the scene is known).
+    var topController:UIViewController? { Self.top(in:windowScene) }
+    /// The top of a scene's presentation stack; without a scene, the key window's.
+    static func top(in scene:UIWindowScene?)->UIViewController? {
+        let windows=scene?.windows ?? UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows)
+        guard var top=(windows.first(where:\.isKeyWindow) ?? windows.first)?.rootViewController else { return nil }
+        while let next=top.presentedViewController { top=next }
+        return top
+    }
     /// Whether the tabs stand in an iPad sidebar, where the selected row is white text on the tint.
     var sidebar=false
     /// Bumped by ⌘F: the Parks list focuses its search field.
@@ -21,6 +33,17 @@ import SwiftUI
     func stepNight(_ delta:Int) { step=NightStep(id:(step?.id ?? 0)+1,delta:delta,tab:tab) }
 }
 nonisolated struct NightStep: Equatable { let id:Int; let delta:Int; let tab:Int }
+/// Hands a window's scene to its `SceneCommands` once the view is in that window.
+struct WindowSceneReader: UIViewRepresentable {
+    let commands:SceneCommands
+    func makeUIView(context:Context)->Probe { let view=Probe(); view.commands=commands; view.isUserInteractionEnabled=false; return view }
+    func updateUIView(_ view:Probe,context:Context) { view.commands=commands; view.report() }
+    final class Probe: UIView {
+        weak var commands:SceneCommands?
+        override func didMoveToWindow() { super.didMoveToWindow(); report() }
+        func report() { if let scene=window?.windowScene { commands?.windowScene=scene } }
+    }
+}
 
 private struct TabKey: EnvironmentKey { static let defaultValue:Int?=nil }
 extension EnvironmentValues {
