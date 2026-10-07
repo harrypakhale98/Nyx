@@ -116,8 +116,9 @@ import Testing
         let meteors = plans.filter { $0.id.contains("-meteors-") }
         #expect(meteors.count == 1)
         let plan = try #require(meteors.first)
-        #expect(plan.title.hasPrefix("Geminids peak tonight at"))
-        #expect(plan.body.hasPrefix("About") && plan.body.contains("Moon down"))
+        #expect(plan.title == "Geminids at Joshua Tree tonight")
+        #expect(plan.userInfo["night"] == "2026-12-13" && plan.userInfo["whatsUp"] == "1")
+        #expect(plan.body.hasPrefix("About") && plan.body.contains("Moon down") && plan.body.hasSuffix("check clouds and park alerts."))
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = plan.timeZone
         #expect(calendar.component(.hour, from: plan.fireDate) == 16)
         // Off, overcast, or already issued: nothing.
@@ -126,7 +127,7 @@ import Testing
         #expect(scheduler.plans(nights: [peak], now: morning, delivered: [NotificationScheduler.showerIdentifier(park: jotr, night: peak.id)], showers: true).isEmpty)
     }
     /// A shower reminder keeps its own title, shares the 64 budget and the ledger.
-    @Test func showerReminderIsScheduledOnceAndNeverRetitled() async throws {
+    @Test func showerReminderIsScheduledOnce() async throws {
         let jotr = try park("jotr"), peak = try night(jotr, "2026-12-13")
         let morning = try #require(try? Date("2026-12-13T15:00:00Z", strategy: .iso8601))
         let center = StubNotifications(ids: (0..<64).map { "unrelated-\($0)" })
@@ -135,8 +136,8 @@ import Testing
         await full.reschedule(nights: [peak], now: morning, showers: true)
         #expect(await center.requests.isEmpty)
         let open = StubNotifications(), scheduler = NotificationScheduler(center: open, ledger: ledger)
-        await scheduler.reschedule(nights: [peak], now: morning, showers: true) { _ in "A night to consider" }
-        #expect(await open.requests.map(\.title) == ["Geminids peak tonight at Joshua Tree"])
+        await scheduler.reschedule(nights: [peak], now: morning, showers: true)
+        #expect(await open.requests.map(\.title) == ["Geminids at Joshua Tree tonight"])
         let id = try #require(await open.requests.first?.id)
         await open.remove([id])
         await scheduler.reschedule(nights: [peak], now: morning.addingTimeInterval(60), showers: true)
