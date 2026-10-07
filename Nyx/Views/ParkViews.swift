@@ -229,6 +229,20 @@ struct ParkDetailView: View {
                     try? await Task.sleep(for:.milliseconds(500))
                     proxy.scrollTo("sky",anchor:.top); return
                 }
+                #if DEBUG
+                // DEBUG promo capture (`-nyx-demo-river`): the river in view, then a slow scrub along its
+                // thirty nights and back to the best one, as a finger would drag it. Never in Release.
+                if DebugScenario.isEnabled("demo-river") {
+                    try? await Task.sleep(for:.milliseconds(600))
+                    proxy.scrollTo("river",anchor:.center)
+                    try? await Task.sleep(for:.seconds(2.5))
+                    let nights=model.nights(park,from:riverStart,count:30)
+                    for night in nights { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(110)) }
+                    let best=nights.prefix(20).max { $0.score.value < $1.score.value }
+                    for night in nights.reversed() where night.id >= (best?.id ?? night.id) { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(70)) }
+                    return
+                }
+                #endif
                 guard focusWhatsUp else { return }
                 // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
                 try? await Task.sleep(for:.milliseconds(500))
@@ -277,7 +291,7 @@ struct ParkDetailView: View {
         }
     }
     private var river: some View {
-        Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }
+        Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }.id("river")
     }
     private var alerts: some View {
         Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
