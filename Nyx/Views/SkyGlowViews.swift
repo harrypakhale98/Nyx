@@ -169,6 +169,9 @@ struct ProtectThisSky: View {
 /// so they are not network hosts of Nyx's (`Scripts/verify_release.py` checks this list).
 enum BrowserLink {
     static let globeAtNight=page(host:"globeatnight.org")
+    /// The credit Open-Meteo's licence asks for, and the licence itself (About the data).
+    static let openMeteo=page(host:"open-meteo.com")
+    static let creativeCommonsBY=page(host:"creativecommons.org",path:"/licenses/by/4.0/")
     /// The park's current conditions and alerts on nps.gov, for when Nyx's own alerts are unavailable.
     static func parkConditions(_ park:Park)->URL? { page(host:"www.nps.gov",path:"/\(park.apiCode)/planyourvisit/conditions.htm") }
     private static func page(host:String,path:String="")->URL? {
