@@ -17,6 +17,9 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     let viewingSpots: [ViewingSpot]
     /// How a visitor reaches the night sky, for parks a car cannot simply drive to (nps.gov "Getting there").
     var access: Access?
+    /// True for a viewing summit above the trade-wind inversion (Haleakalā): low cloud there lies
+    /// below the observer, so the score counts mid and high cloud when the layer forecast has them.
+    var aboveInversion: Bool?
     nonisolated struct Access: Codable, Hashable, Sendable {
         let note: String
         /// False when the night sky here needs a boat or a plane from the road network you drove on.

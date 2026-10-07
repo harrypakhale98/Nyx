@@ -60,8 +60,8 @@ nonisolated struct TripPlan: Sendable {
     /// Parks inside the radius, so an empty plan can say why.
     let candidates: Int
     var best: TripStop? { stops.first { $0.isBest } }
-    /// Nights compared on Moon and darkness alone because the cloud forecast does not reach them.
-    var moonOnlyNights: Int { stops.filter { !$0.night.score.hasForecast }.count }
+    /// Nights scored without a full cloud forecast: an early look, or the park's usual clouds.
+    var unforecastNights: Int { stops.filter { !$0.night.score.hasForecast }.count }
 }
 
 /// Assigns the best reachable park to each night of a trip.
@@ -70,15 +70,15 @@ nonisolated struct TripPlan: Sendable {
 /// darkness score, less `closurePenalty` when its last park update lists a closure. Between two
 /// back-to-back nights the straight-line hop may not exceed `maxHopMeters`; nights separated by a
 /// gap (weekends only) are independent, since you go home in between. The plan maximises the total
-/// value; ties go to the shorter total distance driven, then to the park whose id sorts first, so the
+/// value; ties go to the darker measured skies and longer true darkness (`NightPlanner.better`'s
+/// order), then the shorter total distance driven, then the park whose id sorts first, so the
 /// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps.
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
 ///
-/// **Honest comparison.** A night is compared with clouds only if every candidate park has a cloud
-/// forecast for it; otherwise all of them are compared without the forecast (and labelled Moon and
-/// darkness only), because a renormalised score and a score with clouds are not the same measure.
-/// Without a forecast, parks are weighed with their typical clouds for that month (`Night.rankScore`,
-/// ERA5 2015–2024), so a park whose winter nights are usually overcast does not tie a desert.
+/// **Honest comparison.** Every night is scored by `NightPlanner.night`, so every score counts
+/// clouds: the forecast, an early look eased toward the park's usual clouds, or the usual clouds
+/// for the month alone (ERA5 2015–2024). Scores therefore compare directly across parks, and a park
+/// whose winter nights are usually overcast does not tie a desert.
 nonisolated enum TripPlanner {
     static let maxNights = 14
     /// A closure in the last park update costs a park this many points in the assignment only; the
@@ -102,17 +102,12 @@ nonisolated enum TripPlanner {
     }
     /// Every candidate's night for every day, `[day][park]`, scored as `PlanModel.night` scores it.
     /// Pure and off the main actor: astronomy, the cached forecasts and nothing else.
-    static func nights(parks: [Park], days: [TripDay], forecasts: [String:Forecast], now: Date = .now,
-                       astronomy: AstronomyEngine = AstronomyEngine(), scoring: ScoreEngine = ScoreEngine()) -> [[Night]] {
+    static func nights(parks: [Park], days: [TripDay], forecasts: [String:Forecast], details: [String:ForecastDetail] = [:], now: Date = .now,
+                       astronomy: AstronomyEngine = AstronomyEngine()) -> [[Night]] {
         days.map { day in
-            let nights=parks.map { park -> Night in
-                let sky=astronomy.conditions(for:park,on:day.evening(in:park))
-                let forecast=forecasts[park.id]
-                let cloud=forecast?.mean(from:sky.cloudWindow.start,to:sky.cloudWindow.end,now:now)
-                return Night(park:park,sky:sky,score:scoring.score(sky:sky,bortle:park.bortleEstimate,cloudCover:cloud),cloudCover:cloud,forecastUpdated:cloud==nil ? nil : forecast?.updated)
+            parks.map { park in
+                NightPlanner.night(park:park,sky:astronomy.conditions(for:park,on:day.evening(in:park)),forecast:forecasts[park.id],detail:details[park.id],now:now)
             }
-            guard nights.contains(where:{ !$0.score.hasForecast }) else { return nights }
-            return nights.map { Night(park:$0.park,sky:$0.sky,score:scoring.score(sky:$0.sky,bortle:$0.park.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil) }
         }
     }
     /// `grid[d][p]` is park `p`'s night on `days[d]`; every row lists the same parks in the same order.
@@ -125,12 +120,16 @@ nonisolated enum TripPlanner {
         for a in 0..<n { for b in 0..<n where a != b { hop[a][b]=Park.distance(parks[a].latitude,parks[a].longitude,parks[b].latitude,parks[b].longitude) } }
         let ranks=grid.map { $0.map(\.rankScore) }
         func value(_ d: Int, _ p: Int) -> Int { ranks[d][p]-(closures[parks[p].id] == nil ? 0 : closurePenalty) }
-        struct Cell { var total: Int; var distance: Double; var previous: Int? }
+        // Equal totals go to the darker measured sky, then the longer true darkness: under 1 a night.
+        func tie(_ d: Int, _ p: Int) -> Double { (1-NightPlanner.glowRank(parks[p].id))*0.5+min(24,grid[d][p].sky.darkHours)/48 }
+        struct Cell { var total: Int; var tie: Double; var distance: Double; var previous: Int? }
         func better(_ a: Cell, than b: Cell?) -> Bool {
             guard let b else { return true }
-            return a.total != b.total ? a.total>b.total : a.distance<b.distance-1e-6
+            if a.total != b.total { return a.total>b.total }
+            if abs(a.tie-b.tie)>1e-9 { return a.tie>b.tie }
+            return a.distance<b.distance-1e-6
         }
-        var table:[[Cell]]=[(0..<n).map { Cell(total:value(0,$0),distance:0,previous:nil) }]
+        var table:[[Cell]]=[(0..<n).map { Cell(total:value(0,$0),tie:tie(0,$0),distance:0,previous:nil) }]
         for d in 1..<max(1,days.count) {
             let backToBack=days[d-1].adding(1)==days[d]
             var row:[Cell]=[]
@@ -138,11 +137,11 @@ nonisolated enum TripPlanner {
                 var best:Cell?
                 for q in 0..<n {
                     if backToBack && hop[q][p]>maxHopMeters { continue }
-                    let cell=Cell(total:table[d-1][q].total+value(d,p),distance:table[d-1][q].distance+(backToBack ? hop[q][p] : 0),previous:q)
+                    let cell=Cell(total:table[d-1][q].total+value(d,p),tie:table[d-1][q].tie+tie(d,p),distance:table[d-1][q].distance+(backToBack ? hop[q][p] : 0),previous:q)
                     if better(cell,than:best) { best=cell }
                 }
                 // Unreachable only if no park is within a hop, which staying put rules out.
-                row.append(best ?? Cell(total:Int.min/4,distance:0,previous:p))
+                row.append(best ?? Cell(total:Int.min/4,tie:0,distance:0,previous:p))
             }
             table.append(row)
         }
@@ -153,10 +152,14 @@ nonisolated enum TripPlanner {
             let park=chosen[d], backToBack=d>0 && days[d-1].adding(1)==days[d]
             return TripStop(day:days[d],night:grid[d][park],closure:closures[parks[park].id],hopMeters:backToBack ? hop[chosen[d-1]][park] : nil)
         }
-        // The single best night: highest value (closures count against it here too), earliest on a tie.
+        // The single best night: highest value (closures count against it here too), then
+        // `NightPlanner.better`'s tie-breaks (darker sky, longer darkness), then the earliest.
         if let best=stops.indices.max(by:{ a,b in
             let va=stops[a].night.rankScore-(stops[a].closure == nil ? 0 : closurePenalty), vb=stops[b].night.rankScore-(stops[b].closure == nil ? 0 : closurePenalty)
-            return va != vb ? va<vb : a>b
+            if va != vb { return va<vb }
+            if NightPlanner.better(stops[a].night,stops[b].night) { return false }
+            if NightPlanner.better(stops[b].night,stops[a].night) { return true }
+            return a>b
         }) { stops[best].isBest=true }
         return TripPlan(stops:stops,candidates:n)
     }
@@ -168,7 +171,8 @@ nonisolated enum TripPlanner {
         else if lit<=1 { parts.append(String(localized:"New moon")) }
         else if night.sky.moonBelowFraction>=0.95 { parts.append(String(localized:"Moon down through the dark hours")) }
         else { parts.append(String(localized:"Moon \(lit)% lit")) }
-        if let cloud=night.cloudCover { parts.append(String(localized:"\(Int(cloud.rounded()))% cloud forecast")) }
+        if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
+        else if let usual=night.usualCloud { parts.append(String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud")) }
         else { parts.append(String(localized:"no cloud forecast yet")) }
         parts.append(String(localized:"Bortle \(night.park.bortleEstimate)"))
         return parts.joined(separator:", ")
@@ -178,7 +182,7 @@ nonisolated enum TripPlanner {
         var lines=[String(localized:"A dark-sky trip, planned with Nyx")]
         for stop in plan.stops {
             let park=stop.night.park
-            var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value)/100 \(stop.night.score.hasForecast ? stop.night.score.band.label : String(localized:"(moon and darkness only)")). \(stop.reason).")
+            var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value)/100 \(stop.night.bandWithBasis). \(stop.reason).")
             if let hop=stop.hopMeters, hop>1000 { line+=" "+String(localized:"\(distance(hop)) from the night before.") }
             if let closure=stop.closure { line+=" "+String(localized:"Closure alert: \(closure)") }
             if let access=park.accessNote { line+=" "+access }
@@ -211,7 +215,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         location=park.name
         var lines=[night.score.hasForecast
                    ? String(localized:"Darkness score \(night.score.value)/100 (\(night.score.band.label)), with the cloud forecast as Nyx last saw it.")
-                   : night.withTypicalClouds(String(localized:"Darkness score \(night.score.value)/100, Moon and darkness only. No cloud forecast reached this night yet.")),
+                   : String(localized:"Darkness score \(night.score.value)/100 (\(night.score.band.label)).")+" "+(night.basisCaption(typical:true) ?? ""),
                    TripPlanner.reason(night)+"."]
         if sky.darkHours==0 { lines.append(SkyConditions.noDarknessMessage(tonight:false)) }
         if let closure { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }

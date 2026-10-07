@@ -24,12 +24,12 @@ struct WatchTests {
         let rebuilt = try #require(decoded.cloudForecasts["jotr"])
         // A window between the fixture's missing hours (a window touching one has no mean, by design).
         let start = now.addingTimeInterval(9*3600+600), end = now.addingTimeInterval(14*3600+1200)
-        let phone = try #require(full.mean(from: start, to: end, now: now))
-        #expect(rebuilt.mean(from: start, to: end, now: now) == phone)
+        let phone = try #require(full.mean(from: start, to: end))
+        #expect(rebuilt.mean(from: start, to: end) == phone)
         #expect(rebuilt.updated == full.updated)
         // Missing hours travel as missing, never as a value.
         #expect(rebuilt.clouds.contains { $0 == nil })
-        #expect(rebuilt.mean(from: now.addingTimeInterval(8*3600), to: now.addingTimeInterval(9*3600), now: now) == nil)
+        #expect(rebuilt.mean(from: now.addingTimeInterval(8*3600), to: now.addingTimeInterval(9*3600)) == nil)
         // Trimmed to last night through nine days ahead.
         #expect(rebuilt.times.first ?? 0 >= now.timeIntervalSince1970 - 25*3600)
         #expect(rebuilt.times.last ?? .infinity <= now.timeIntervalSince1970 + 9*86400)

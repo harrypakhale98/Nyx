@@ -108,6 +108,8 @@ targets:
       - path: Nyx/Services/NightPlanner.swift
       - path: Nyx/Models/CloudClimate.swift
       - path: Nyx/Resources/cloud-climate.json
+      # Measured sky glow breaks ties between equal scores (`NightPlanner.glowRank`).
+      - path: Nyx/Resources/skyglow.json
       - path: Nyx/DesignSystem/SkyGlyph.swift
       - path: Nyx/Models/FieldActivity.swift
       - path: Nyx/DesignSystem/FieldActivityView.swift
@@ -145,6 +147,11 @@ targets:
       - path: Nyx/Models/Forecast.swift
       - path: Nyx/Services/AstronomyEngine.swift
       - path: Nyx/Services/ScoreEngine.swift
+      # One rule for a night everywhere (`NightPlanner.night`): usual clouds where no forecast reaches.
+      - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/Models/CloudClimate.swift
+      - path: Nyx/Resources/cloud-climate.json
+      - path: Nyx/Resources/skyglow.json
       - path: Nyx/Services/ForecastDetail.swift
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Services/WatchContext.swift
@@ -189,6 +196,11 @@ targets:
       - path: Nyx/Models/Forecast.swift
       - path: Nyx/Services/AstronomyEngine.swift
       - path: Nyx/Services/ScoreEngine.swift
+      # One rule for a night everywhere (`NightPlanner.night`): usual clouds where no forecast reaches.
+      - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/Models/CloudClimate.swift
+      - path: Nyx/Resources/cloud-climate.json
+      - path: Nyx/Resources/skyglow.json
       - path: Nyx/Services/ForecastDetail.swift
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Services/WatchContext.swift
@@ -231,6 +243,12 @@ targets:
       - path: Nyx/Models/SkyConditions.swift
       - path: Nyx/Services/AstronomyEngine.swift
       - path: Nyx/Services/ScoreEngine.swift
+      # The phone's night rule, with no forecast: every night uses the park's usual clouds.
+      - path: Nyx/Services/NightPlanner.swift
+      - path: Nyx/Models/CloudClimate.swift
+      - path: Nyx/Models/Forecast.swift
+      - path: Nyx/Services/ForecastDetail.swift
+      - path: Nyx/Resources/cloud-climate.json
       - path: Nyx/Services/SkyAlmanac.swift
       - path: Nyx/Services/WhatsUp.swift
       - path: Nyx/Services/SkyDome.swift

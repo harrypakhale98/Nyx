@@ -9,7 +9,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// Bumped when the shape changes; an older or newer context is ignored, never misread.
     static let currentVersion = 1
     /// WatchConnectivity rejects large contexts; forecasts that would pass this are left out
-    /// (those parks show moon and darkness only, labelled as such).
+    /// (those parks are scored with their usual clouds, labelled as such).
     static let byteBudget = 48_000
     let version: Int
     let sent: Date

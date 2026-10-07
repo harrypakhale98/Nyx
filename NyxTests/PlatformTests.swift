@@ -73,9 +73,11 @@ import Testing
         #expect(result.tonight?.id == jotr.currentNight(at: now))
         let nights = result.nights.compactMap { $0 }
         #expect(result.best == nights.sorted(by: NightPlanner.better).first?.id)
-        // Clouds only where the forecast reaches (16 days from yesterday); hollow after that.
-        #expect(!nights.prefix(10).contains { !$0.score.hasForecast })
-        #expect(!nights.suffix(10).contains { $0.score.hasForecast })
+        // A full forecast for three days, then an early look fading toward the usual clouds;
+        // past the forecast's reach (16 days from yesterday), the usual clouds alone.
+        #expect(!nights.prefix(3).contains { !$0.score.hasForecast })
+        #expect(nights[5].basis.isEarlyLook)
+        #expect(nights.suffix(10).allSatisfy { $0.basis == .usual })
         // The Geminids peak (Dec 13-14, 2026) carries the meteor glyph.
         let marked = nights.filter { result.events[$0.id] == .meteors }.map { jotr.isoDay($0.id) }
         #expect(marked.contains { $0.hasPrefix("2026-12-1") })
@@ -161,7 +163,7 @@ import Testing
         let answer = try #require(BestNightSearch.answer(parks: [jotr], planner: planner, from: now, nights: 30, now: now))
         let full = BestNightSearch.dialog(answer, voiceOnly: false), voice = BestNightSearch.dialog(answer, voiceOnly: true)
         #expect(full.contains("Joshua Tree") && full.contains("\(answer.best.score.value) out of 100"))
-        #expect(full.contains("Moon and darkness only") && full.contains("Confirm park access"))
+        #expect(full.contains("No cloud forecast yet.") && full.contains("Confirm park access"))
         #expect(voice.count < full.count && voice.contains("Clouds aren't forecast yet."))
         // Gates of the Arctic in June: no true darkness, said plainly.
         let gaar = try park("gaar")

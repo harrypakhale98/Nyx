@@ -10,7 +10,7 @@ import SwiftUI
         let now=model.today
         let ids=[model.homeID]+["grba","brca","deva"].filter { $0 != model.homeID }.prefix(2)
         let parks=ids.compactMap(model.park)
-        let planner=NightPlanner(forecasts:model.forecasts)
+        let planner=NightPlanner(forecasts:model.forecasts,details:model.details)
         let tonight=parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }
         guard let shown=tonight.first else { return TonightEntry(date:now,night:nil,nightVision:false) }
         let week=planner.nights(shown.park,from:now,count:7,now:now)
@@ -24,7 +24,7 @@ struct DebugSnippetView: View {
     var body: some View {
         ScrollView { VStack(alignment:.leading,spacing:16) {
             Text("Snippet review").font(.system(size:20,design:.serif))
-            if let park=model.home, let answer=BestNightSearch.answer(parks:[park],planner:NightPlanner(forecasts:model.forecasts),from:model.today,nights:30,now:model.today) {
+            if let park=model.home, let answer=BestNightSearch.answer(parks:[park],planner:NightPlanner(forecasts:model.forecasts,details:model.details),from:model.today,nights:30,now:model.today) {
                 Text(BestNightSearch.dialog(answer,voiceOnly:false)).font(.callout)
                 BestNightSnippetView(night:answer.best,rank:0,total:answer.ranked.count,nights:answer.count)
                 Text("Voice only (iOS 27):").font(.caption)
