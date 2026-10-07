@@ -191,6 +191,7 @@ struct GuideRecord: Equatable {
 /// and one line. A record about a park's night opens that night.
 struct GuideRecordRow: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     let number:Int
     let record:GuideRecord
     var lit=false
@@ -213,7 +214,7 @@ struct GuideRecordRow: View {
                     Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
                     if let night=record.night { Text(park.dayLabel(night)).font(.caption).foregroundStyle(palette.muted) }
                 }
-                if !record.line.isEmpty { Text(record.line).font(.subheadline).foregroundStyle(record.park == nil ? palette.ink : palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if !record.line.isEmpty { Text(record.line).font(.subheadline).foregroundStyle(record.park == nil ? palette.ink : palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : 3).fixedSize(horizontal:false,vertical:true) }
             }
             Spacer(minLength:8)
             if let score=record.score {

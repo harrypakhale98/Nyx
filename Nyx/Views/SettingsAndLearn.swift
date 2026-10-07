@@ -12,7 +12,7 @@ struct SettingsView:View {
     @Environment(\.scenePhase) private var scenePhase
     var body:some View {
         Form {
-            Section("Night vision") {
+            Section("In the dark") {
                 Toggle("Night vision",isOn:$nightVision).tint(palette.controlTint)
                 Text("A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
             }.listRowBackground(palette.panel)
