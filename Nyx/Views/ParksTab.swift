@@ -13,7 +13,7 @@ struct ParksTab: View {
         Group {
             if sizeClass == .regular {
                 NavigationSplitView {
-                    ParksView(selection:$selection).navigationSplitViewColumnWidth(min:330,ideal:390,max:460)
+                    ParksView(selection:$selection).tabRootToolbar().navigationSplitViewColumnWidth(min:330,ideal:390,max:460)
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
@@ -22,7 +22,7 @@ struct ParksTab: View {
                 }
                 .navigationSplitViewStyle(.balanced)
             } else {
-                NavigationStack(path:$path) { ParksView() }
+                NavigationStack(path:$path) { ParksView().tabRootToolbar() }
             }
         }
         // The page never opens empty: the starting park until another is chosen.
