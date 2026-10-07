@@ -1,3 +1,12 @@
+# Nyx handoff — 2026-10-06 (UI and UX review)
+
+Branch `main`, still 1.1 (6) in `project.yml` (no new build archived). Logged under "UI and UX review" in `DECISIONS.md`. The score is unchanged.
+
+- **Done:** every DEBUG route reviewed by screenshot on iPhone 18 Pro / iOS 27.0, iPhone 17 Pro / iOS 26.5 and iPad Pro 13-inch / iOS 27.0, in normal, night vision, AX5, empty, error and polar states, plus a static sweep of the view code. Fixed: the onboarding gauge's numeral crossing its ring (gauge labels now scale with the dial), onboarding overflow on 6.3" phones, onboarding centred at a readable measure on iPad, the off-centre wordmark, stars reading as punctuation behind essays and About the data (`NightBackground(veil:)`), Learn cards' ragged titles and heights, AX5 park-row score alignment, jargon (CAMS, IMO, radiant, Bortle), 44 pt targets, Voice Control names, Live Activity labels and scaling, the calendar peek's Dynamic Type, a silent save failure in the park-row menu, and field mode's escape action. `sync_catalog.py` no longer deletes App Intents summaries (three restored with their Spanish). The uncommitted accessibility pass found in the tree at the start is included and verified.
+- **Verified 2026-10-06:** zero warnings (Nyx app + widgets + tests, NyxVision). Swift Testing 152 pass on iPhone 18 Pro / iOS 27.0 and iPhone 17 Pro / iOS 26.5. iOS 27: all UI tests and the full accessibility audit (29 screens, both palettes) pass after the field-mode fix (field and field-compass re-audited). iOS 26.5: all UI tests and the audit for tonight, parks, detail, learn, onboarding, article, data, journal, trip, constellation, field, entry, editor and calendar in both palettes pass. `apply_translations.py --check` clean for all three catalogs.
+- **Not done / known issues:** NyxWatch was not rebuilt (no watch source changed). Store frames were not retaken: onboarding, Learn and essays are not in the store set; the detail and Tonight gauges render as before (dial at full size). VoiceOver's escape gesture in field mode needs the device pass (simulator audits do not perform gestures). At AX5 on iOS 27 the system search field shows no placeholder (Apple's control).
+- **Next:** unchanged — owner follows `INPUT_NEEDED.md` 1–13; a new build number is needed before these changes can reach TestFlight.
+
 # Nyx handoff — 2026-10-06 (Store frame review: the Milky Way in "Where to look")
 
 Branch `roadmap`, still 1.1 (6). Logged under "Store frame review: the Milky Way in 'Where to look'" in `DECISIONS.md`. The score is unchanged.

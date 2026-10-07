@@ -67,10 +67,10 @@ struct MoonDisc: View, Animatable {
             let lit=min(1,max(0,illumination))
             let litPath=Self.litPath(center:center,radius:r,illumination:lit,litRight:waxing != southern,samples:iconMode ? 48 : 96)
             if iconMode {
-                // In the tab bar the limb is always outlined, so a new moon is a ring, not nothing.
+                // The unlit disc is a faint ghost (template icons keep alpha), so a new moon is still
+                // a moon, and a crescent reads as a crescent rather than as the letter O.
+                context.fill(circle,with:.color(palette.ink.opacity(0.22)))
                 context.fill(litPath,with:.color(palette.ink))
-                let limb=max(1,diameter/16)
-                context.stroke(Path(ellipseIn:disc.insetBy(dx:limb/2,dy:limb/2)),with:.color(palette.ink),lineWidth:limb)
                 return
             }
             // The unlit side: earthshine, never quite black.

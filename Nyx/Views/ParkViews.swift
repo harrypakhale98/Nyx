@@ -51,7 +51,7 @@ struct ParkRow: View {
     }
     private var number: some View {
         // The score never wraps, whatever the column width; the name beside it does.
-        VStack(alignment:.trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
+        VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
     }
 }
 /// The Parks list's narrowing switches, kept apart from the view so they can be tested.
@@ -75,6 +75,7 @@ struct ParksView: View {
     @State private var darkOnly=false
     @State private var stepFreeOnly=DebugScenario.state=="step-free"
     @State private var savedOnly=false
+    @State private var saveFailed=false
     @AppStorage("parksByScore") private var byScore=false
     @Namespace private var zoom
     private var filtered:[Park] {
@@ -111,6 +112,7 @@ struct ParksView: View {
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .searchable(text:$search,prompt:"Park or state")
+            .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
             // ⌘F from anywhere in the window.
             .searchFocused($searchFocused)
             .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
@@ -151,7 +153,7 @@ struct ParksView: View {
         let isSaved=saved.contains { $0.parkID==park.id }
         Button(isSaved ? "Unsave park" : "Save park",systemImage:isSaved ? "bookmark.slash" : "bookmark") {
             if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
-            do { try context.save() } catch { context.rollback() }
+            do { try context.save() } catch { context.rollback();saveFailed=true }
         }
         Button("Show in Calendar",systemImage:"calendar") { model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
     }
@@ -272,11 +274,11 @@ struct ParkDetailView: View {
         Panel { let river=model.nights(park,from:riverStart,count:30); TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river)) }
     }
     private var alerts: some View {
-        Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
+        Panel { VStack(alignment:.leading,spacing:8) { Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader); Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted);
             if let data=model.enrichments[park.id],!data.alerts.isEmpty {
-                DisclosureGroup("All park alerts (\(data.alerts.count))") {
-                    ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
-                }
+                DisclosureGroup {
+                    ForEach(data.alerts) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.title).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
+                } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
             }
              if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) } } }
     }
@@ -319,7 +321,7 @@ struct ParkDetailView: View {
             if let clarity=outlook?.clarity {
                 VStack(alignment:.leading,spacing:6) {
                     LabeledContent("Air",value:clarity.label)
-                    Text("Aerosol forecast from CAMS. Not part of the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text("Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
             } else if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted) }
@@ -351,7 +353,7 @@ struct ParkDetailView: View {
     @ViewBuilder private var footer: some View {
         ShareCardButton(night:night)
         Text("\(park.description)").font(.subheadline).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
-        NavigationLink("About the data") { AboutDataView() }.font(.subheadline)
+        NavigationLink { AboutDataView() } label:{ Text("About the data").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.subheadline)
     }
     @ToolbarContentBuilder private var saveToolbar: some ToolbarContent {
         if #available(iOS 27.0,*) {

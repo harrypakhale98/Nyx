@@ -225,8 +225,8 @@ nonisolated struct WhatsUp: Sendable {
     }
     static func showerItem(_ night: SkyAlmanac.ShowerNight, park: Park, sky: SkyConditions, isTonight: Bool) -> Item {
         let shower=night.shower, note=peakNote(night, park: park, sky: sky, isTonight: isTonight)
-        let published=shower.variable == true ? String(localized: "The published peak rate is \(Int(shower.zhr)) an hour for a perfect sky with the radiant overhead (IMO); it varies from year to year.")
-            : String(localized: "The published peak rate is \(Int(shower.zhr)) an hour for a perfect sky with the radiant overhead (IMO).")
+        let published=shower.variable == true ? String(localized: "The published peak rate is \(Int(shower.zhr)) an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization); it varies from year to year.")
+            : String(localized: "The published peak rate is \(Int(shower.zhr)) an hour under a perfect sky, with the radiant, the point the meteors seem to come from, overhead (International Meteor Organization).")
         let value: String, lead: String
         if let best=night.best {
             value=rateText(night.hourlyRate)

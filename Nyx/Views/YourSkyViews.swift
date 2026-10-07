@@ -65,6 +65,7 @@ struct SkiesSeenSection: View {
             }.padding(.top,10)
         } label:{
             Label { Text(seen.line).font(.system(.body,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"sparkles").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }.tint(palette.muted)
     }
     private func detail(_ place:SkiesSeen.Place)->some View {
@@ -110,10 +111,9 @@ struct ConstellationShareButton: View {
     }
     var body: some View {
         Group {
-            if let image { ShareLink(item:image,preview:SharePreview(title,image:image)) { Label("Share",systemImage:"square.and.arrow.up").labelStyle(.iconOnly).frame(minWidth:44,minHeight:44) } }
-            else { ProgressView().frame(minWidth:44,minHeight:44) }
+            if let image { ShareLink(item:image,preview:SharePreview(title,image:image)) { Label("Share",systemImage:"square.and.arrow.up").labelStyle(.iconOnly).frame(minWidth:44,minHeight:44) }.accessibilityLabel("Share your constellation") }
+            else { ProgressView().frame(minWidth:44,minHeight:44).accessibilityLabel("Preparing your constellation to share") }
         }
-        .accessibilityLabel("Share your constellation")
         .task(id:"\(layout.stars.count)-\(palette.nightVision)") {
             let card=ConstellationCard(layout:layout,title:title).environment(\.nyx,palette).environment(model)
             let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision)))
@@ -169,7 +169,7 @@ struct YearRecapView: View {
             Panel { VStack(alignment:.leading,spacing:14) {
                 Text("The Moon's phases you met").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 MoonPhaseRow(met:recap.phases)
-                Text(String(localized:"\(recap.phases.count) of 8 · marked in amber")).font(.subheadline).foregroundStyle(palette.muted)
+                Text(String(localized:"\(recap.phases.count) of 8 · the phases you met are lit")).font(.subheadline).foregroundStyle(palette.muted)
             } }
             if let event=recap.event {
                 Label { Text(event).fixedSize(horizontal:false,vertical:true) } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:16,height:16) }.font(.subheadline)
@@ -272,7 +272,7 @@ struct RecapShareButton: View {
     var body: some View {
         Group {
             if let image { ShareLink(item:image,preview:SharePreview(String(localized:"My year under the stars, \(String(recap.year))"),image:image)) { Label("Share your year",systemImage:"square.and.arrow.up") } }
-            else { ProgressView() }
+            else { ProgressView().accessibilityLabel("Preparing your year to share") }
         }.buttonStyle(.bordered)
         .task(id:"\(recap.year)-\(recap.nights)-\(palette.nightVision)") {
             let card=RecapCard(recap:recap,layout:layout).environment(\.nyx,palette).environment(model)

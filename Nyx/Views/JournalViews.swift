@@ -117,6 +117,8 @@ struct PhotoView:View {
     let maxPixels:Int
     var fill=false
     @State private var image:UIImage?
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     var body:some View {
         Group {
             if let image {
@@ -127,7 +129,7 @@ struct PhotoView:View {
         .task(id:data.count ^ data.prefix(64).hashValue) {
             let data=data, size=maxPixels
             let decoded=await Task.detached(priority:.utility) { PhotoScaling.image(data,maxPixels:size).map { UIImage(cgImage:$0) } }.value
-            withAnimation(.easeOut(duration:0.25)) { image=decoded }
+            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : .easeOut(duration:0.25)) { image=decoded }
         }
     }
 }
@@ -196,7 +198,7 @@ struct JournalEditorView:View {
                 Stepper(value:$editor.observedBortle,in:1...9) {
                     Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
                 }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
-                Text("Your estimate of artificial sky brightness. Class 1 is darkest.").font(.caption).foregroundStyle(palette.muted)
+                Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
             }
             Section("What you noticed") { TextEditor(text:$editor.notes).frame(minHeight:160).accessibilityLabel("Observation notes") }
             Section {
@@ -205,7 +207,7 @@ struct JournalEditorView:View {
                         PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10)).accessibilityLabel("Journal photo \(index+1)")
                         Spacer()
                         // Borderless, so only the button removes the photo, not a tap anywhere in the row.
-                        Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent) }
+                        Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle()) }
                             .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
                     }
                 }

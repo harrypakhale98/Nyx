@@ -9,6 +9,8 @@ struct TripPlannerView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @State private var first=Date.now
     @State private var last=Date.now.addingTimeInterval(6*86400)
     @State private var radius=300.0
@@ -74,7 +76,9 @@ struct TripPlannerView: View {
             guard let point else { planning=false; return }
             let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
-            withAnimation(NyxMotion.spring) { plan=result }
+            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { plan=result }
+            // The plan changes above and below the controls; say what it now leads with.
+            AccessibilityNotification.Announcement(result.best.map { String(localized:"Best night: \($0.night.park.shortName), \($0.night.score.value)") } ?? String(localized:"No nights to plan")).post()
             planning=false
             if result.best != nil { planned+=1 }
         }
@@ -93,7 +97,7 @@ struct TripPlannerView: View {
                         // otherwise sets the contrast of this control's text (amber text there fell short of 4.5:1).
                         HStack { Label { Text(origin?.shortName ?? "").foregroundStyle(palette.ink) } icon:{ Image(systemName:"mappin.and.ellipse").foregroundStyle(palette.accent) }.fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true) }
                             .frame(minHeight:44).contentShape(Rectangle()).background(palette.panel)
-                    }.buttonStyle(.plain).accessibilityLabel("Starting park").accessibilityValue(origin?.shortName ?? "").accessibilityHint("Choose a starting park")
+                    }.buttonStyle(.plain).accessibilityLabel("Starting park").accessibilityValue(origin?.shortName ?? "").accessibilityInputLabels([Text("Starting park"),Text(origin?.shortName ?? "")]).accessibilityHint("Choose a starting park")
                 }
             }
             Divider().overlay(palette.line)
@@ -194,6 +198,7 @@ struct TripPlannerView: View {
 struct TripStopRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo:.title) private var scoreSize=40.0
     let stop: TripStop
     let addToCalendar: ()->Void
     let distance: (Double)->String
@@ -217,7 +222,7 @@ struct TripStopRow: View {
                     }
                     Spacer(minLength:8)
                     VStack(alignment:.trailing,spacing:0) {
-                        Text("\(night.score.value)").font(.system(size:typeSize.isAccessibilitySize ? 34 : 40,weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                        Text("\(night.score.value)").font(.system(size:min(scoreSize,64),weight:.light,design:.serif)).foregroundStyle(palette.accent)
                         Text(night.score.hasForecast ? night.score.band.label : String(localized:"Estimate")).font(.caption2).foregroundStyle(palette.muted)
                     }
                 }.contentShape(Rectangle())
@@ -228,6 +233,7 @@ struct TripStopRow: View {
             Button(action:addToCalendar) { Label("Add to Calendar",systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
                 .buttonStyle(.plain).foregroundStyle(palette.accent)
                 .accessibilityLabel(String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))
+                .accessibilityInputLabels([Text("Add to Calendar"),Text("Add \(park.shortName) to Calendar")])
         }.padding(.vertical,14)
         .background { if stop.isBest { RoundedRectangle(cornerRadius:18).fill(palette.accent.opacity(palette.nightVision ? 0.08 : 0.07)).padding(.horizontal,-12) } }
     }

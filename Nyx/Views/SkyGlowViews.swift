@@ -109,7 +109,7 @@ struct ViewingSpotRow: View {
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
-                DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote) }
+                DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
                     .tint(palette.accent)
             }
         }
@@ -123,7 +123,7 @@ private struct AccessSource: View {
         VStack(alignment:.leading,spacing:8) {
             if let evidence=access.evidence { Text("“\(evidence)”").font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if let note=access.note { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-            if let url=access.source { Link(destination:url) { Label("Open the park's page in Safari",systemImage:"safari").font(.footnote) }.foregroundStyle(palette.accent) }
+            if let url=access.source { Link(destination:url) { Label("Open the park's page in Safari",systemImage:"safari").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.accent) }
             Text("National Park Service, retrieved October 5, 2026. Conditions change; check with the park.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
     }
@@ -181,7 +181,7 @@ struct GlobeAtNightLink: View {
     var body: some View {
         if let url=BrowserLink.globeAtNight {
             VStack(alignment:.leading,spacing:8) {
-                Link(destination:url) { Label("Share your observation with Globe at Night",systemImage:"safari") }.font(.body.weight(.medium)).foregroundStyle(palette.accent)
+                Link(destination:url) { Label("Share your observation with Globe at Night",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.body.weight(.medium)).foregroundStyle(palette.accent)
                 Text("A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
         }

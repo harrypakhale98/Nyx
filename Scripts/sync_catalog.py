@@ -18,8 +18,9 @@ for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*sim
   if item.get('comment'): strings[key]['comment']=item['comment']
 # Drop copy that no longer appears in code. Only auto-added entries (value == key) are pruned;
 # hand-written entries such as the Learn essays (essay.*) are never touched.
+# App Intents summaries ("Darkness at ${park} tonight") never reach .stringsdata, so they are kept.
 if extracted:
- for key in [k for k,v in strings.items() if k not in extracted and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
+ for key in [k for k,v in strings.items() if k not in extracted and '${' not in k and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
   del strings[key]
 # iPad wording for strings that name the device (see device_strings.py).
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))

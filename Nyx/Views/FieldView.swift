@@ -48,6 +48,11 @@ struct FieldView: View {
             footer
         }
         .background(Color.black.ignoresSafeArea())
+        // VoiceOver's two-finger scrub leaves field mode, as it would leave any modal screen. On a
+        // container, so the action is not copied onto every caption inside (which would make them
+        // read as small buttons).
+        .accessibilityElement(children:.contain)
+        .accessibilityAction(.escape) { NightListener.shared.stop(); close() }
         .animation(reduceMotion ? nil : NyxMotion.spring,value:session.reset)
         .environment(\.nyx,palette)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent)
@@ -74,7 +79,7 @@ struct FieldView: View {
             Button { NightListener.shared.stop(); close() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
                 .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
             VStack(alignment:.leading,spacing:2) {
-                Text(session.park.shortName).font(.system(.headline,design:.serif)).lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
+                Text(session.park.shortName).font(.system(.headline,design:.serif)).lineLimit(typeSize.isAccessibilitySize ? 3 : 2).minimumScaleFactor(0.85)
                 Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit()
             }
             // One spoken line; the visible caption keeps its own short text.
@@ -261,7 +266,7 @@ struct EyeClock: View {
                         }
                         Spacer(minLength:0)
                         Image(systemName:expanded ? "chevron.down" : "info.circle").font(.caption).accessibilityHidden(true)
-                    }.contentShape(Rectangle())
+                    }.frame(minHeight:44).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityElement(children:.ignore)
@@ -313,12 +318,12 @@ struct FieldAlarmRows: View {
                     .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain).disabled(working)
-                .accessibilityValue(on ? "Set" : "Off").accessibilityHint(on ? "Removes the alarm" : "Sets an alarm on this iPhone")
+                .accessibilityAddTraits(.isToggle).accessibilityValue(on ? "Set" : "Off").accessibilityHint(on ? "Removes the alarm" : "Sets an alarm on this iPhone")
             }
             Text("Alarms ring through Silent and Focus. They are set on this iPhone and nowhere else.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if let message {
                 Text(message).font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
-                if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption) }
+                if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption).frame(minHeight:44).contentShape(Rectangle()) }
             }
         }
         .task { refresh() }
