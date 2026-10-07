@@ -68,7 +68,8 @@ extension FieldActivityAttributes {
 /// iOS 26.1, so alarms are offered from 26.1; on 26.0 the rows are simply absent.
 enum FieldAlarmError: Error { case unsupported }
 @MainActor enum FieldAlarms {
-    static var supported: Bool { if #available(iOS 26.1, *) { true } else { false } }
+    /// Not on a Mac running the iPad app, where alarms were never designed or tried.
+    static var supported: Bool { if #available(iOS 26.1, *) { !ProcessInfo.processInfo.isiOSAppOnMac } else { false } }
     static let tint=Color(red:1,green:0.27,blue:0.23)
     private static let ledgerKey="fieldAlarms"
     enum Access { case allowed, notAsked, denied }
@@ -137,10 +138,26 @@ enum FieldAlarmError: Error { case unsupported }
     private(set) var trueNorth=false
     /// True when the compass would be steadier after a figure-eight.
     private(set) var needsCalibration=false
-    var available: Bool { manager.isDeviceMotionAvailable && !CMMotionManager.availableAttitudeReferenceFrames().intersection([.xTrueNorthZVertical,.xMagneticNorthZVertical]).isEmpty }
+    /// Never on a Mac running the iPad app: the compass is for a device held up to the sky.
+    var available: Bool { !ProcessInfo.processInfo.isiOSAppOnMac && manager.isDeviceMotionAvailable && !CMMotionManager.availableAttitudeReferenceFrames().intersection([.xTrueNorthZVertical,.xMagneticNorthZVertical]).isEmpty }
     var running: Bool { manager.isDeviceMotionActive }
+    /// A view wants attitude updates.
+    private var wanted=false
+    /// Resting while the phone is hot (thermal state serious or critical).
+    private(set) var resting=false
+    /// Stops the sensor while the phone is hot and starts it again once it cools; the pose stays
+    /// where it was, so the sky view holds still rather than going blank.
+    func rest(_ on: Bool) {
+        guard on != resting else { return }
+        resting=on
+        if on { manager.stopDeviceMotionUpdates() } else if wanted { begin() }
+    }
     func start() {
-        guard available, !manager.isDeviceMotionActive else { return }
+        wanted=true
+        begin()
+    }
+    private func begin() {
+        guard available, !resting, !manager.isDeviceMotionActive else { return }
         MotionTilt.shared.suspend(true)
         let status=CLLocationManager().authorizationStatus
         let located=status == .authorizedWhenInUse || status == .authorizedAlways
@@ -165,6 +182,7 @@ enum FieldAlarmError: Error { case unsupported }
         }
     }
     func stop() {
+        wanted=false
         manager.stopDeviceMotionUpdates()
         MotionTilt.shared.suspend(false)
         pose=nil

@@ -27,8 +27,13 @@ import Foundation
         wanted = !reduceMotion
         if wanted { begin() }
     }
+    /// Low Power Mode switched on or off while a view wants tilt.
+    func powerChanged() {
+        if PowerState.shared.lowPower { manager.stopDeviceMotionUpdates(); x=0; y=0 }
+        else if wanted && clients>0 { begin() }
+    }
     private func begin() {
-        guard !suspended,!manager.isDeviceMotionActive,!ProcessInfo.processInfo.isLowPowerModeEnabled,manager.isDeviceMotionAvailable else { return }
+        guard !suspended,!manager.isDeviceMotionActive,!PowerState.shared.lowPower,manager.isDeviceMotionAvailable else { return }
         manager.deviceMotionUpdateInterval=1/30
         manager.startDeviceMotionUpdates(to:.main) { [weak self] motion,_ in
             guard let gravity=motion?.gravity else { return }
@@ -46,4 +51,31 @@ import Foundation
         manager.stopDeviceMotionUpdates()
         x=0; y=0
     }
+}
+
+/// Low Power Mode and the device's thermal state as they change, not only as they were when a
+/// view first appeared: a sky drawn every frame stills itself the moment Low Power Mode comes on.
+@MainActor @Observable final class PowerState {
+    static let shared=PowerState()
+    private(set) var lowPower: Bool
+    /// The device is hot (serious or critical); sensors and animation should rest.
+    private(set) var thermalSerious: Bool
+    @ObservationIgnored private var observers: [NSObjectProtocol]=[]
+    private init() {
+        let info=ProcessInfo.processInfo
+        lowPower=info.isLowPowerModeEnabled
+        thermalSerious=Self.serious(info.thermalState)
+        let center=NotificationCenter.default
+        observers=[
+            center.addObserver(forName: .NSProcessInfoPowerStateDidChange, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.update() } },
+            center.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.update() } },
+        ]
+    }
+    private func update() {
+        let info=ProcessInfo.processInfo
+        let low=info.isLowPowerModeEnabled, hot=Self.serious(info.thermalState)
+        if low != lowPower { lowPower=low; MotionTilt.shared.powerChanged() }
+        if hot != thermalSerious { thermalSerious=hot }
+    }
+    nonisolated static func serious(_ state: ProcessInfo.ThermalState) -> Bool { state == .serious || state == .critical }
 }

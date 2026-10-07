@@ -358,6 +358,7 @@ struct FieldAlarmRows: View {
 /// the night's countdown on the Lock Screen without opening the field screen.
 struct FieldEntry: View {
     @Environment(PlanModel.self) private var model
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
@@ -366,11 +367,13 @@ struct FieldEntry: View {
     @State private var following=false
     var body: some View {
         VStack(spacing:6) {
-            Button { FieldPresenter.present(park:park,model:model) } label:{
-                Label("I'm here tonight",systemImage:"scope").font(.headline).padding(.horizontal,10).frame(minHeight:44)
+            if FieldPresenter.supported {
+                Button { FieldPresenter.present(park:park,model:model,from:commands?.topController ?? SceneCommands.top(in:nil)) } label:{
+                    Label("I'm here tonight",systemImage:"scope").font(.headline).padding(.horizontal,10).frame(minHeight:44)
+                }
+                .modifier(FieldButtonStyle())
+                .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
             }
-            .modifier(FieldButtonStyle())
-            .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
             if FieldActivities.enabled && !FieldNight.isOver(night.sky,at:.now) {
                 Button {
                     Task {

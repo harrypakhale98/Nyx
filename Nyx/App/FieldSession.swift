@@ -6,6 +6,9 @@ import WidgetKit
 /// One stretch of time in field mode: the park, its night, the eye's dark-adaptation clock, and
 /// what field mode changed on the phone (night vision, screen brightness, auto-lock), each put back
 /// exactly as it was on the way out. Leaving the app restores the brightness for other apps.
+/// It guards the battery through a long night: auto-lock returns after ten minutes without a touch
+/// (the Live Activity carries the night on the Lock Screen), the compass rests while the phone is
+/// hot, and Low Power Mode turned on mid-session stills the sky.
 @MainActor @Observable final class FieldSession {
     let park: Park
     let night: FieldNight
@@ -26,6 +29,11 @@ import WidgetKit
     @ObservationIgnored private var prior: (nightVision: Bool, brightness: CGFloat?, idle: Bool)?
     @ObservationIgnored private var observers: [NSObjectProtocol]=[]
     @ObservationIgnored private var ticker: Task<Void,Never>?
+    @ObservationIgnored private var idleWatch: Task<Void,Never>?
+    /// The last touch anywhere on the field screen.
+    @ObservationIgnored private var lastTouch=Date.now
+    /// Without a touch for this long, the screen may lock again.
+    static let idleAfter: TimeInterval=600
     /// Below this the screen is never raised; above it, field mode lowers it here.
     static let brightness: CGFloat=0.12
 
@@ -47,6 +55,7 @@ import WidgetKit
         setNightVision(true)
         dim()
         UIApplication.shared.isIdleTimerDisabled=true
+        lastTouch=Date.now
         defaults.set(park.id, forKey: FieldModeRequest.lastParkKey)
         let center=NotificationCenter.default
         observers=[
@@ -54,12 +63,36 @@ import WidgetKit
             center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.restoreBrightness() } },
             center.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.dim() } },
             center.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.returned() } },
+            // A hot phone rests its compass until it cools; the sky view keeps the last direction.
+            center.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: .main) { _ in MainActor.assumeIsolated { FieldSession.applyThermalState() } },
         ]
+        FieldSession.applyThermalState()
         if UserDefaults.standard.object(forKey: "fieldLiveActivity") as? Bool ?? true { follow(true) }
         ticker=Task { [weak self] in await self?.run() }
+        idleWatch=Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                self?.checkIdle()
+            }
+        }
+    }
+    /// A touch on the field screen: the screen stays awake again.
+    func touched(at now: Date = .now) {
+        lastTouch=now
+        if changesPhone, prior != nil, !UIApplication.shared.isIdleTimerDisabled { UIApplication.shared.isIdleTimerDisabled=true }
+    }
+    /// Auto-lock returns once the screen has gone untouched for `idleAfter`.
+    static func autoLockReturns(lastTouch: Date, now: Date) -> Bool { now.timeIntervalSince(lastTouch)>=idleAfter }
+    private func checkIdle(now: Date = .now) {
+        guard changesPhone, let prior, Self.autoLockReturns(lastTouch: lastTouch, now: now), UIApplication.shared.isIdleTimerDisabled else { return }
+        UIApplication.shared.isIdleTimerDisabled=prior.idle
+    }
+    private static func applyThermalState() {
+        FieldMotion.shared.rest(PowerState.serious(ProcessInfo.processInfo.thermalState))
     }
     func end() {
         ticker?.cancel(); ticker=nil
+        idleWatch?.cancel(); idleWatch=nil
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
         observers=[]
         FieldMotion.shared.stop()
@@ -127,22 +160,26 @@ import WidgetKit
 
 /// Field mode covers the whole screen from wherever it is opened: park detail, Tonight, a park
 /// sheet over another sheet, Control Center, Siri or the Live Activity. Presented from the top of
-/// UIKit's stack, like parks opened from reminders, so nothing the person was doing is dismissed.
+/// the asking window's stack (`SceneCommands.topController`), like parks opened from reminders, so
+/// nothing the person was doing is dismissed and another iPad window is never covered.
 @MainActor enum FieldPresenter {
-    static func present(park: Park, model: PlanModel) {
-        let root=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows).first(where: \.isKeyWindow)?.rootViewController
-        guard var top=root else { return }
+    /// Field mode is for a phone or iPad held up to the sky. On a Mac running the iPad app there is
+    /// no sky to point at and no Lock Screen, so it is simply not offered.
+    static var supported: Bool { !ProcessInfo.processInfo.isiOSAppOnMac }
+    static func present(park: Park, model: PlanModel, from controller: UIViewController?) {
+        guard supported, var top=controller else { return }
         while let next=top.presentedViewController { top=next }
         if let open=top as? FieldHostingController {
             // Already in the field: a different park replaces it; the same park stays.
             guard open.parkID != park.id else { return }
-            open.close { present(park: park, model: model) }
+            open.close { [weak top=open.presentingViewController] in present(park: park, model: model, from: top) }
             return
         }
         let session=FieldSession(park: park, model: model)
         let host=FieldHostingController(parkID: park.id)
         host.rootView=AnyView(FieldView(session: session) { [weak host] in host?.close() }.environment(model).nyxAccessibility())
         host.onClose={ session.end() }
+        host.onTouch={ [weak session] in session?.touched() }
         host.modalPresentationStyle = .fullScreen
         host.modalTransitionStyle = .crossDissolve
         top.present(host, animated: true) { session.begin() }
@@ -151,7 +188,14 @@ import WidgetKit
 final class FieldHostingController: UIHostingController<AnyView> {
     let parkID: String
     var onClose: (()->Void)?
+    var onTouch: (()->Void)?
     init(parkID: String) { self.parkID=parkID; super.init(rootView: AnyView(EmptyView())) }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Watches touches without taking any: every control works exactly as before.
+        let watcher=TouchWatcher { [weak self] in self?.onTouch?() }
+        view.addGestureRecognizer(watcher)
+    }
     @available(*, unavailable) required init?(coder: NSCoder) { nil }
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
@@ -159,4 +203,21 @@ final class FieldHostingController: UIHostingController<AnyView> {
         onClose?(); onClose=nil
         dismiss(animated: true) { then?() }
     }
+}
+/// Sees each touch begin and then steps aside, so it never delays or cancels another gesture.
+final class TouchWatcher: UIGestureRecognizer, UIGestureRecognizerDelegate {
+    private let action: () -> Void
+    init(_ action: @escaping () -> Void) {
+        self.action=action
+        super.init(target: nil, action: nil)
+        cancelsTouchesInView=false
+        delaysTouchesBegan=false
+        delaysTouchesEnded=false
+        delegate=self
+    }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        action()
+        state = .failed
+    }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
 }
