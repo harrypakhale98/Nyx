@@ -6,3 +6,4 @@ build/
 *.xcresult
 Research/Traces/*.trace/
 Config/Secrets.xcconfig
+Store/Social/*.mp4
