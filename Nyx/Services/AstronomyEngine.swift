@@ -71,10 +71,26 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
             }
             below /= b.timeIntervalSince(a)
         }
-        return SkyConditions(evening: start, end: end, sunset: sun.down.first, sunrise: sun.up.first(where: { $0 > (sun.down.first ?? start) }),
+        // Nights run from local noon to noon, but in western Alaska's winter solar noon falls after
+        // 13:00, so the Sun can rise after the window closes: look up to six hours further.
+        let sunset = sun.down.first
+        let sunrise = sun.up.first(where: { $0 > (sunset ?? start) })
+            ?? sunset.flatMap { _ in crossings(start: end, end: end.addingTimeInterval(6*3600)) { solarAltitude(at: $0, park: park) + 0.833 }.up.first }
+        // Under the midnight sun, the clouds that matter are those around the Sun's lowest point.
+        let lowestSun = sunAlwaysUp ? lowestSolarMoment(start: start, end: end, park: park) : nil
+        return SkyConditions(evening: start, end: end, sunset: sunset, sunrise: sunrise,
             civilDusk: civil.down.first, nauticalDusk: nautical.down.first, darkStart: darkStart, darkEnd: darkEnd,
             state: state, moon: moonPhase(at: start.addingTimeInterval(10*3600)),
-            moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours)
+            moonrise: moon.up.first, moonset: moon.down.first, moonBelowFraction: min(1,max(0,below)), darkHours: hours, lowestSun: lowestSun)
+    }
+    /// When the Sun is lowest between `start` and `end` (ten-minute steps, refined to a minute).
+    private func lowestSolarMoment(start: Date, end: Date, park: Park) -> Date {
+        var best = start, lowest = Double.infinity
+        var t = start
+        while t <= end { let a = solarAltitude(at: t, park: park); if a < lowest { lowest = a; best = t }; t = t.addingTimeInterval(600) }
+        var fine = best.addingTimeInterval(-600)
+        while fine <= best.addingTimeInterval(600) { let a = solarAltitude(at: fine, park: park); if a < lowest { lowest = a; best = fine }; fine = fine.addingTimeInterval(60) }
+        return best
     }
     private func julian(_ date: Date) -> Double { date.timeIntervalSince1970/86400 + 2440587.5 }
     private func normalized(_ value: Double) -> Double { value - floor(value/360)*360 }

@@ -6,12 +6,17 @@ import Testing
 actor StubHTTP:HTTPTransport {
     var urls:[URL]=[]
     var fail=false
-    let responses:[String:Data]
+    var status:Int?
+    var responses:[String:Data]
     init(_ responses:[String:String]) { self.responses=responses.mapValues{Data($0.utf8)} }
     func setFailure() { fail=true }
+    /// The server answers with this status (429, 503…) instead of data.
+    func setStatus(_ code:Int?) { status=code }
+    func setResponse(_ path:String,_ body:String) { responses[path]=Data(body.utf8) }
     func get(_ url:URL) async throws -> Data {
         urls.append(url)
         if fail { throw URLError(.notConnectedToInternet) }
+        if let status { throw HTTPStatusError(status:status) }
         guard let data=responses[url.path] else { throw URLError(.badServerResponse) };return data
     }
 }
@@ -21,7 +26,9 @@ actor StubNotifications:LocalNotificationCenter {
     var delivered:[String]=[]
     init(ids:[String]=[]) { self.ids=ids }
     func deliver(_ id:String) { delivered.append(id) }
-    func authorized() async -> Bool { true }
+    var allowed=true
+    func setAllowed(_ value:Bool) { allowed=value }
+    func authorized() async -> Bool { allowed }
     func request() async -> Bool { true }
     func pendingIDs() async -> [String] { ids+requests.map(\.id) }
     func deliveredIDs() async -> [String] { delivered }
@@ -94,9 +101,54 @@ struct ServiceTests {
         async let second=store.enrichment(for:p,key:"test",network:true,force:true,programs:false)
         _=await (first,second)
         #expect(await http.urls.map(\.path)==["/api/v1/alerts"])
+        // Opening the park's detail a moment later still asks for its programs, and only for them.
+        let detail=await store.enrichment(for:p,key:"test",network:true,force:true,programs:true)
+        #expect(detail?.programsUpdated != nil)
+        #expect(await http.urls.map(\.path)==["/api/v1/alerts","/api/v1/events"])
+        // Both parts are now fresh: nothing more within ten minutes, forced or not.
         #expect(await store.enrichment(for:p,key:"test",network:true,force:true,programs:true) != nil)
-        #expect(await http.urls.count==1)
+        #expect(await http.urls.count==2)
         #expect(await http.urls.allSatisfy { $0.path != "/api/v1/parks" })
+    }
+    /// NPS caps a page of events at 50 whatever pageSize asks for, so pages are counted in fifties.
+    @Test func eventsArePagedInFifties() async throws {
+        let p=try park()
+        let tomorrow=Date.now.addingTimeInterval(86400).formatted(.iso8601.year().month().day().dateSeparator(.dash))
+        let event={ (id:String,title:String) in "{\"id\":\"\(id)\",\"title\":\"\(title)\",\"datestart\":\"\(tomorrow)\",\"description\":\"\"}" }
+        let page=(0..<50).map { event("e\($0)","Morning hike") }.joined(separator:",")
+        let http=StubHTTP(["/api/v1/alerts":"{\"data\":[]}","/api/v1/events":"{\"total\":\"51\",\"data\":[\(page)]}"])
+        _=await ParkStore(transport:http,persist:false).enrichment(for:p,key:"test",network:true,force:true,programs:true)
+        let events=await http.urls.filter { $0.path=="/api/v1/events" }
+        #expect(events.count==2)
+        #expect(events.allSatisfy { $0.query?.contains("pageSize=50") == true })
+        #expect(events.last?.query?.contains("pageNumber=2") == true)
+    }
+    /// After the server refuses a request (the shared key's quota spent), nobody asks again for a
+    /// while, even by pulling to refresh; being offline never waits.
+    @Test func refusedRequestsBackOff() async throws {
+        let p=try park()
+        let http=StubHTTP(["/api/v1/alerts":"{\"data\":[]}"])
+        let store=ParkStore(transport:http,persist:false)
+        await http.setStatus(429)
+        #expect(await store.enrichment(for:p,key:"test",network:true,force:true,programs:false) == nil)
+        await http.setStatus(nil)
+        #expect(await store.enrichment(for:p,key:"test",network:true,force:true,programs:false) == nil)
+        #expect(await http.urls.count==1)
+        #expect(Backoff.delay(after:HTTPStatusError(status:429))==3600)
+        #expect(Backoff.delay(after:HTTPStatusError(status:503))==900)
+        #expect(Backoff.delay(after:URLError(.notConnectedToInternet))==nil)
+        let weather=StubHTTP([:])
+        await weather.setStatus(503)
+        let service=WeatherService(transport:weather,persist:false)
+        _=await service.forecasts(for:[p],network:true,force:true)
+        _=await service.forecasts(for:[p],network:true,force:true)
+        #expect(await weather.urls.count==1)
+    }
+    @Test func nightSkyProgramsAreRecognised() {
+        #expect(ParkStore.isNightSky(title:"Space Explorations with NASA's James Webb Space Telescope",tags:[]))
+        #expect(ParkStore.isNightSky(title:"Astronomical Society Star Party",tags:[]))
+        #expect(ParkStore.isNightSky(title:"Evening program",tags:["Night Sky"]))
+        #expect(!ParkStore.isNightSky(title:"Morning bird walk",tags:["birding"]))
     }
     /// Forecasts are always requested for every park, so the request never reflects where someone is.
     @MainActor @Test func forecastsAreRequestedForEveryPark() async throws {
@@ -133,6 +185,21 @@ struct ServiceTests {
         }
         let first=NotificationScheduler.identifier(park:p,night:nights[0].id)
         #expect(!ledger.ids.contains(first))
+    }
+    /// With notifications off in Settings nothing new is added, but a reminder for a night that
+    /// no longer qualifies is still cancelled, so it cannot fire when they are turned back on.
+    @Test func remindersAreCancelledWithoutPermission() async throws {
+        let p=try park(),now=Date(timeIntervalSince1970:1790899200),engine=AstronomyEngine()
+        let night=Night(park:p,sky:engine.conditions(for:p,on:p.date(now,addingDays:2)),score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:now)
+        let center=StubNotifications(),ledger=ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)")
+        let scheduler=NotificationScheduler(center:center,ledger:ledger)
+        await scheduler.reschedule(nights:[night],now:now)
+        #expect(await center.pendingIDs().count==1)
+        await center.setAllowed(false)
+        await scheduler.reschedule(nights:[],now:now)
+        #expect(await center.pendingIDs().isEmpty)
+        await scheduler.reschedule(nights:[night],now:now)
+        #expect(await center.pendingIDs().isEmpty)
     }
     @Test func rejectsOtherHosts() async {
         guard let url=URL(string:"https://example.com/forecast") else { Issue.record("Bad fixture URL");return }

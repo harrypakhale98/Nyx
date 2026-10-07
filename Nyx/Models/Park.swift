@@ -75,6 +75,14 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         if morning, AstronomyEngine().solarAltitude(at: now, park: self) > -0.833 { return today }
         return self.date(today, addingDays: -1)
     }
+    /// The latest night that has begun at `now`: tonight once the Sun has set, otherwise last
+    /// night. A journal entry records a night already seen, so one written at 1 AM or over
+    /// breakfast belongs to the evening before. Without a sunset (midnight sun), 6 PM stands in.
+    func lastNightBegun(at now: Date) -> Date {
+        let today = evening(now)
+        let dusk = AstronomyEngine().conditions(for: self, on: today).sunset ?? today.addingTimeInterval(6*3600)
+        return now >= dusk ? today : self.date(today, addingDays: -1)
+    }
     func date(_ date: Date, addingDays days: Int) -> Date {
         calendar.date(byAdding: .day, value: days, to: date) ?? date
     }

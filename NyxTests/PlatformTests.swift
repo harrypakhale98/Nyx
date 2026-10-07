@@ -125,6 +125,33 @@ import Testing
         let sure = night(jotr, offset: 3, value: 80, forecast: true), unsure = night(jotr, offset: 1, value: 80, forecast: false)
         #expect(NightPlanner.best([unsure, sure])?.id == sure.id)
     }
+    /// A picked day is that day's night, whatever the time attached to it: midnight Pacific, or
+    /// 9 AM Eastern (before sunrise in California), never starts the night before. A day already
+    /// past starts tonight.
+    @Test func pickedStartDayIsThatNight() throws {
+        let jotr = try park("jotr")
+        let planner = NightPlanner(forecasts: [:])
+        var pacific = Calendar(identifier: .gregorian); pacific.timeZone = try #require(TimeZone(identifier: "America/Los_Angeles"))
+        let midnight = try #require(pacific.date(from: DateComponents(year: 2026, month: 12, day: 10)))
+        let picked = TripDay(midnight, calendar: pacific)
+        #expect(picked.iso == "2026-12-10")
+        let answer = try #require(BestNightSearch.answer(parks: [jotr], planner: planner, day: picked, nights: 3, now: now))
+        #expect(answer.ranked.allSatisfy { jotr.isoDay($0.id) >= "2026-12-10" })
+        #expect(Set(answer.ranked.map { jotr.isoDay($0.id) }) == ["2026-12-10", "2026-12-11", "2026-12-12"])
+        let past = try #require(BestNightSearch.answer(parks: [jotr], planner: planner, day: TripDay(year: 2020, month: 1, day: 1), nights: 1, now: now))
+        #expect(past.best.id == jotr.currentNight(at: now))
+        #expect(BestNightSearch.answer(parks: [jotr], planner: planner, day: nil, nights: 1, now: now)?.best.id == jotr.currentNight(at: now))
+    }
+    /// A journal entry written after midnight or the next morning belongs to the night before;
+    /// one written after sunset, to tonight.
+    @Test func journalNightIsTheLastNightBegun() throws {
+        let jotr = try park("jotr")
+        var pacific = Calendar(identifier: .gregorian); pacific.timeZone = jotr.timeZone
+        func at(_ day: Int, _ hour: Int) throws -> Date { try #require(pacific.date(from: DateComponents(year: 2026, month: 12, day: day, hour: hour))) }
+        #expect(jotr.isoDay(jotr.lastNightBegun(at: try at(5, 1))) == "2026-12-04")
+        #expect(jotr.isoDay(jotr.lastNightBegun(at: try at(5, 10))) == "2026-12-04")
+        #expect(jotr.isoDay(jotr.lastNightBegun(at: try at(5, 21))) == "2026-12-05")
+    }
     @Test func bestNightDialogIsHonestAndShorterForVoice() throws {
         let jotr = try park("jotr")
         let planner = NightPlanner(forecasts: [:])

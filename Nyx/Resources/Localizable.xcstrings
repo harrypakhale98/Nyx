@@ -3804,6 +3804,12 @@
             "state": "translated",
             "value": "Clear search"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar búsqueda"
+          }
         }
       }
     },
@@ -13203,6 +13209,12 @@
             "state": "translated",
             "value": "Search parks"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar parques"
+          }
         }
       }
     },
@@ -18827,6 +18839,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "brillante"
+          }
+        }
+      }
+    },
+    "cloud forecast included": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloud forecast included"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "con pronóstico de nubes"
           }
         }
       }

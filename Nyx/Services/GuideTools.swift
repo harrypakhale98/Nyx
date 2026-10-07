@@ -15,6 +15,8 @@ nonisolated struct NightLookup: Sendable {
     /// A park by name: an exact short name first, then the app's own search (aliases included).
     func park(named name: String) -> Park? {
         let folded=Park.folded(name)
+        // An empty name matches every park in search; here it must match none.
+        guard !folded.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
         return parks.first { Park.folded($0.shortName)==folded || Park.folded($0.name)==folded } ?? parks.first { $0.matches(name) }
     }
     /// "2026-11-14" in the park's time zone, or tonight for "tonight", empty or unreadable text.
@@ -37,8 +39,9 @@ nonisolated struct NightLookup: Sendable {
     }
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
         guard let park=park(named: name) else { return [String(localized: "No national park matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks.")] }
-        let start=night(first, at: park)
-        let ranked=planner.bestNights([park], from: start, count: min(30, max(1, nights)), now: now, limit: limit)
+        // A named day is that day's night (never one already past); anything else is tonight.
+        let ranked=TripDay(iso: first).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
+            ?? planner.bestNights([park], from: now, count: min(30, max(1, nights)), now: now, limit: limit)
         return ranked.map(describe)
     }
     func whatsUp(park name: String, on day: String) -> [String] {
@@ -63,7 +66,8 @@ nonisolated struct NightLookup: Sendable {
         guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.shortName), straight-line.")] }
         return ranked.map { park, miles in
             let night=tonight[park.id]
-            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+access(park)
+            let basis=night.map { $0.score.hasForecast ? String(localized: "cloud forecast included") : String(localized: "moon and darkness only, clouds not yet forecast") } ?? ""
+            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
 }

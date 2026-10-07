@@ -143,7 +143,10 @@ struct JournalThumbnail:View {
     }
 }
 @MainActor @Observable final class JournalEditorModel {
-    var date=Date.now
+    var date=Date.now { didSet { if oldValue != date, settled { dateChosen=true } } }
+    /// The person picked a date, so appearing again never replaces it.
+    private(set) var dateChosen=false
+    @ObservationIgnored private var settled=false
     var parkID="jotr"
     var observedBortle=3
     var notes=""
@@ -152,6 +155,7 @@ struct JournalThumbnail:View {
     var error:String?
     var saved=false
     init(entry:JournalEntry?=nil) {
+        defer { settled=true }
         if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos }
         else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
         #if DEBUG
@@ -216,6 +220,10 @@ struct JournalEditorView:View {
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone.").foregroundStyle(palette.muted) }
             if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
         }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // A new entry starts on the night just seen, not the calendar day it is written on.
+            if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)) }
+        }
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { dismiss() } }.disabled(editor.loadingPhotos) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)

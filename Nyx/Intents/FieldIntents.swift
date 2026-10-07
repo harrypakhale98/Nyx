@@ -57,7 +57,8 @@ nonisolated enum StargazingFocus {
             defaults.set(defaults.bool(forKey:"nightVision"),forKey:priorKey)
             defaults.set(true,forKey:"nightVision")
         } else if !nightVision && defaults.bool(forKey:holdKey) {
-            if defaults.object(forKey:priorKey) != nil { defaults.set(defaults.bool(forKey:priorKey),forKey:"nightVision") }
+            // Put it back only if it is still as the Focus left it (on); a person who turned it off meanwhile keeps it off.
+            if defaults.bool(forKey:"nightVision"), defaults.object(forKey:priorKey) != nil { defaults.set(defaults.bool(forKey:priorKey),forKey:"nightVision") }
             defaults.removeObject(forKey:priorKey)
         }
         defaults.set(nightVision,forKey:holdKey)

@@ -3,6 +3,21 @@ import Foundation
 nonisolated protocol HTTPTransport: Sendable {
     func get(_ url: URL) async throws -> Data
 }
+/// The server answered, but not with success: 429 when the shared quota is spent, 403 for a
+/// refused key, 5xx when it is struggling. Unlike being offline, asking again at once only adds
+/// to the load, so the services wait before the next request (`Backoff`).
+nonisolated struct HTTPStatusError: Error, Sendable {
+    let status: Int
+}
+/// How long to leave a host alone after it refused a request: an hour after 429 (the NPS key is
+/// shared by every install, 1,000 requests an hour), fifteen minutes after anything else. Being
+/// offline or a switch turned off never waits; those requests never reached a server.
+nonisolated enum Backoff {
+    static func delay(after error: any Error) -> TimeInterval? {
+        guard let status = (error as? HTTPStatusError)?.status else { return nil }
+        return status == 429 ? 3600 : 900
+    }
+}
 /// A redirect is never followed. Runtime requests can reach exactly three hosts, each behind its
 /// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05, with the owner's
 /// approval) the aerosol forecast that warns of smoke.
@@ -31,7 +46,8 @@ nonisolated struct SafeHTTP: HTTPTransport {
         let session = URLSession(configuration: configuration, delegate: HostGuard(), delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
         let (data,response) = try await session.data(from: url)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(http.statusCode) else { throw HTTPStatusError(status: http.statusCode) }
         return data
     }
 }
@@ -76,6 +92,8 @@ actor WeatherService: WeatherProviding {
     private var memory: [String: Forecast] = [:]
     /// Requests already on their way, so Tonight, Parks and saved parks never fetch the same park twice at once.
     private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
+    /// No request before this after the server refused one, forced or not (`Backoff`).
+    private var retryAfter: Date = .distantPast
     init(transport: any HTTPTransport = SafeHTTP(),persist:Bool=true) { self.transport=transport;self.persist=persist }
     /// Cached forecasts for every park, refreshed in as few requests as possible: Open-Meteo
     /// accepts many coordinates at once, so all 63 parks cost one request, not 63.
@@ -88,7 +106,7 @@ actor WeatherService: WeatherProviding {
             if let cached { memory[park.id]=cached; result[park.id]=cached }
             // A forced refresh still waits ten minutes between requests for the same park.
             let age=cached.map { Date.now.timeIntervalSince($0.updated) } ?? .infinity
-            if network && (age>=6*3600 || (force && age>=600)) { due.append(park) }
+            if network && Date.now >= retryAfter && (age>=6*3600 || (force && age>=600)) { due.append(park) }
         }
         var waits: [Task<[String: Forecast], Never>] = due.compactMap { inFlight[$0.id] }
         let fresh = due.filter { inFlight[$0.id] == nil }
@@ -126,7 +144,11 @@ actor WeatherService: WeatherProviding {
             URLQueryItem(name:"timeformat",value:"unixtime"),URLQueryItem(name:"timezone",value:"GMT")]
         guard let url=parts.url else { return [] }
         struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
-        guard let data=try? await transport.get(url) else { return [] }
+        let data: Data
+        do { data=try await transport.get(url) } catch {
+            if let delay=Backoff.delay(after: error) { retryAfter = .now.addingTimeInterval(delay) }
+            return []
+        }
         // One coordinate returns an object; several return an array in request order.
         let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
         guard decoded.count == parks.count else { return [] }
@@ -154,6 +176,8 @@ actor ForecastDetailService: DetailProviding {
     private var memory: [String: ForecastDetail] = [:]
     /// A refresh already under way; later callers wait for it instead of asking again.
     private var running: Task<Void, Never>?
+    /// Per kind (the two hosts fail independently): no request before this after a refusal.
+    private var retryAfter: [Kind: Date] = [:]
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true) { self.transport=transport; self.persist=persist }
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
         for park in parks where memory[park.id] == nil {
@@ -163,7 +187,7 @@ actor ForecastDetailService: DetailProviding {
         else {
             let now=Date.now
             var jobs: [(Kind, [Park])] = []
-            for kind in Kind.allCases where kind == .air ? smoke : weather {
+            for kind in Kind.allCases where (kind == .air ? smoke : weather) && now >= retryAfter[kind, default: .distantPast] {
                 let due=parks.filter { park in
                     let age=Self.series(memory[park.id], kind).map { now.timeIntervalSince($0.updated) } ?? .infinity
                     return age>=6*3600 || (force && age>=600)
@@ -224,7 +248,12 @@ actor ForecastDetailService: DetailProviding {
         }
         parts.queryItems=items+[URLQueryItem(name: "forecast_days", value: "7"), URLQueryItem(name: "past_days", value: "1"),
                                 URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
-        guard let url=parts.url, let data=try? await transport.get(url) else { return [] }
+        guard let url=parts.url else { return [] }
+        let data: Data
+        do { data=try await transport.get(url) } catch {
+            if let delay=Backoff.delay(after: error) { retryAfter[kind] = .now.addingTimeInterval(delay) }
+            return []
+        }
         struct Response: Decodable { let hourly: [String: [Double?]] }
         // One coordinate returns an object; several return an array in request order.
         let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
@@ -256,36 +285,54 @@ nonisolated protocol ParkProviding: Sendable {
 }
 /// Every install shares one NPS key and its hourly quota, so requests are spent carefully: alerts
 /// only unless programs are on screen, no repeat request for the same park within ten minutes (even
-/// when forced), and one request at a time per park however many screens ask.
+/// when forced), one request at a time per park however many screens ask, and none at all for a
+/// while after the server refuses one (`Backoff`).
 actor ParkStore: ParkProviding {
     private let transport: any HTTPTransport
     private let persist:Bool
     private var memory: [String:ParkEnrichment]=[:]
     private var inFlight: [String:Task<ParkEnrichment?,Never>]=[:]
+    private var retryAfter: Date = .distantPast
     init(transport: any HTTPTransport = SafeHTTP(),persist:Bool=true) { self.transport=transport;self.persist=persist }
     func enrichment(for park: Park, key: String, network: Bool, force: Bool = false, programs: Bool = true) async -> ParkEnrichment? {
-        let cached=memory[park.id] ?? (persist ? CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") : nil)
+        var cached=memory[park.id] ?? (persist ? CacheDirectory.read(ParkEnrichment.self,name:"park-\(park.id)") : nil)
         guard network, !key.isEmpty, !key.contains("$(") else { return cached }
-        if let cached {
-            let now=Date.now
-            if now.timeIntervalSince(cached.updated)<600 { return cached }
-            // Fresh only when everything asked for is: a failed events request retries next time.
-            let oldest=programs ? min(cached.updated,cached.programsUpdated ?? .distantPast) : cached.updated
-            if !force, now.timeIntervalSince(oldest)<6*3600 { return cached }
-        }
-        if let running=inFlight[park.id] { return await running.value }
-        let task=Task { await self.fetch(park,key:key,cached:cached,programs:programs) }
+        // A request for this park is already on its way: use it, then ask only for what it lacked
+        // (an alerts-only update does not answer a request for programs).
+        if let running=inFlight[park.id] { cached=await running.value ?? cached }
+        let need=Self.due(cached,programs:programs,force:force,now:.now)
+        guard need.alerts || need.programs, Date.now >= retryAfter, inFlight[park.id] == nil else { return cached }
+        let task=Task { await self.fetch(park,key:key,cached:cached,alerts:need.alerts,programs:need.programs) }
         inFlight[park.id]=task
         let result=await task.value
         inFlight[park.id]=nil
         return result
     }
-    private func fetch(_ park: Park, key: String, cached: ParkEnrichment?, programs wanted: Bool) async -> ParkEnrichment? {
+    /// What needs asking for: each part is fresh for six hours, and even a forced refresh waits
+    /// ten minutes since that part's last success. Programs are only due when they are wanted, so
+    /// opening a park whose alerts Tonight fetched a minute ago still costs one events request.
+    static func due(_ cached: ParkEnrichment?, programs: Bool, force: Bool, now: Date) -> (alerts: Bool, programs: Bool) {
+        func stale(_ updated: Date?) -> Bool {
+            guard let updated else { return true }
+            let age=now.timeIntervalSince(updated)
+            return age>=6*3600 || (force && age>=600)
+        }
+        return (stale(cached?.updated), programs && stale(cached?.programsUpdated))
+    }
+    private func fetch(_ park: Park, key: String, cached: ParkEnrichment?, alerts fetchAlerts: Bool, programs wanted: Bool) async -> ParkEnrichment? {
         func url(_ path: String, page:Int=1) throws -> URL {
             var c=URLComponents(); c.scheme="https"; c.host="developer.nps.gov"; c.path="/api/v1/\(path)"
-            c.queryItems=[URLQueryItem(name:"parkCode",value:park.apiCode),URLQueryItem(name:"api_key",value:key),URLQueryItem(name:"limit",value:"100")]
-            if path=="events" { c.queryItems?.append(contentsOf:[URLQueryItem(name:"dateStart",value:park.isoDay(.now)),URLQueryItem(name:"pageSize",value:"100"),URLQueryItem(name:"pageNumber",value:String(page))]) }
+            c.queryItems=[URLQueryItem(name:"parkCode",value:park.apiCode),URLQueryItem(name:"api_key",value:key)]
+            // Events page with pageSize, which the server caps at 50 whatever is asked for.
+            if path=="events" { c.queryItems?.append(contentsOf:[URLQueryItem(name:"dateStart",value:park.isoDay(.now)),URLQueryItem(name:"pageSize",value:String(Self.eventsPage)),URLQueryItem(name:"pageNumber",value:String(page))]) }
+            else { c.queryItems?.append(URLQueryItem(name:"limit",value:"100")) }
             guard let url=c.url else { throw URLError(.badURL) }; return url
+        }
+        func get<T: Decodable>(_ type: T.Type, _ path: String, page: Int = 1) async -> T? {
+            do { return try JSONDecoder().decode(type,from:await transport.get(url(path,page:page))) } catch {
+                if let delay=Backoff.delay(after:error) { retryAfter = .now.addingTimeInterval(delay) }
+                return nil
+            }
         }
         struct AlertResponse: Decodable { let data: [ParkAlert] }
         struct EventResponse: Decodable {
@@ -295,32 +342,41 @@ actor ParkStore: ParkProviding {
         // Alerts are the safety signal: they are saved as soon as they arrive. A slow or failing
         // events request keeps the last known programs instead of discarding fresh closures.
         // A failed alerts request never wipes known closures.
-        guard let alerts=try? JSONDecoder().decode(AlertResponse.self,from:await transport.get(url("alerts"))).data else { return cached }
+        var alerts=cached?.alerts ?? [], updated=cached?.updated ?? .distantPast
+        if fetchAlerts {
+            guard let fresh=await get(AlertResponse.self,"alerts")?.data else { return cached }
+            alerts=fresh; updated = .now
+        }
         let today=park.isoDay(.now)
         var programs=(cached?.programs ?? []).filter { $0.date >= today }
         var programsUpdated=cached?.programsUpdated
-        if wanted, let firstPage=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events"))) {
+        if wanted, let firstPage=await get(EventResponse.self,"events") {
             var events:[EventResponse.Event]?=firstPage.data
-            let pages=min(10,Int(ceil((Double(firstPage.total ?? "0") ?? 0)/100)))
+            let pages=min(10,Int(ceil((Double(firstPage.total ?? "0") ?? 0)/Double(Self.eventsPage))))
             if pages>1 {
                 for page in 2...pages {
-                    guard let more=try? JSONDecoder().decode(EventResponse.self,from:await transport.get(url("events",page:page))).data else { events=nil;break }
+                    guard let more=await get(EventResponse.self,"events",page:page)?.data else { events=nil;break }
                     events?.append(contentsOf:more)
                 }
             }
             if let events {
-                programs=events.filter {
-                    let text=($0.title+" "+($0.tags ?? []).joined(separator:" ")).lowercased()
-                    return ["astronomy","stargaz","night sky","night-sky","star party"].contains(where:text.contains)
-                }.flatMap { event in
+                programs=events.filter { Self.isNightSky(title:$0.title,tags:$0.tags ?? []) }.flatMap { event in
                     (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id:event.id+day,title:event.title,date:day,description:Self.plain(event.description)) }
                 }.sorted { $0.date<$1.date }
                 programsUpdated = .now
             }
         }
+        guard fetchAlerts || programsUpdated != cached?.programsUpdated else { return cached }
         // The park description is bundled in parks.json; it is never fetched.
-        let result=ParkEnrichment(updated:.now,alerts:alerts,programs:programs,description:cached?.description,programsUpdated:programsUpdated)
+        let result=ParkEnrichment(updated:updated,alerts:alerts,programs:programs,description:cached?.description,programsUpdated:programsUpdated)
         memory[park.id]=result; if persist { CacheDirectory.write(result,name:"park-\(park.id)") }; return result
+    }
+    static let eventsPage=50
+    /// A ranger program about the night sky, from its title and tags. "astronom" covers astronomy
+    /// and astronomical; a telescope talk with no tags is still a night-sky program.
+    static func isNightSky(title: String, tags: [String]) -> Bool {
+        let text=(title+" "+tags.joined(separator:" ")).lowercased()
+        return ["astronom","stargaz","night sky","night-sky","star party","star parties","telescope","milky way","dark sky","dark-sky","constellation","meteor"].contains(where:text.contains)
     }
     private static func plain(_ html:String)->String {
         html.replacingOccurrences(of:"<[^>]+>",with:"",options:.regularExpression)

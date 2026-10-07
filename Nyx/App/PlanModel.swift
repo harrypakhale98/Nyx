@@ -164,10 +164,11 @@ import CoreLocation
             .filter { $0.1<=1 }.min { $0.1<$1.1 }?.0
     }
     func ranked(_ candidates:[Park])->[Park] {
-        let scores=Dictionary(candidates.map { ($0.id,night($0).score.value) },uniquingKeysWith:{ first,_ in first })
+        // Ranked as every other surface ranks nights: on a tie, a forecast before an estimate.
+        let nights=Dictionary(candidates.map { ($0.id,night($0)) },uniquingKeysWith:{ first,_ in first })
         return candidates.sorted { a,b in
-            let first=scores[a.id] ?? 0, second=scores[b.id] ?? 0
-            return first==second ? a.name<b.name : first>second
+            guard let x=nights[a.id], let y=nights[b.id] else { return a.name<b.name }
+            return x.score.value==y.score.value && x.score.hasForecast==y.score.hasForecast ? a.name<b.name : NightPlanner.better(x,y)
         }
     }
     var npsKey: String { Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }

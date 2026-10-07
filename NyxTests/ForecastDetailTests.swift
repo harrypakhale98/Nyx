@@ -102,21 +102,22 @@ struct ForecastDetailTests {
         #expect(AirClarity.band(0.5) == .heavy)
         #expect(!AirClarity.lightHaze.isCaveat && AirClarity.haze.isCaveat && AirClarity.heavy.isCaveat)
     }
-    /// Coldest hour, dew margin and strongest gust come only from hours inside the window;
-    /// an hour that merely touches the window's end does not count.
+    /// Coldest hour, dew margin and strongest gust come only from moments inside the window: an
+    /// instant value stands for the half hour around it, a gust for the hour before it, and one
+    /// that merely touches the window's ends does not count.
     @Test func coldDewAndWind() throws {
         let updated=Date(timeIntervalSince1970:t0)
         let layers=HourlySeries(updated:updated,times:hours(8),values:[
             "cloud_cover_low":[0,0,5,5,5,5,0,0],"cloud_cover_mid":[0,0,5,5,5,5,0,0],"cloud_cover_high":[0,0,60,60,60,60,0,0],
             "temperature_2m":[10,9,8,7,6,5,4,3],"dew_point_2m":[0,0,0,0,0,3.5,0,0],
-            "wind_gusts_10m":[5,5,40,20,10,30,60,5],"visibility":[30000,30000,8000,8000,8000,8000,30000,30000]])
+            "wind_gusts_10m":[5,5,40,20,10,30,25,60],"visibility":[30000,30000,8000,8000,8000,8000,30000,30000]])
         let detail=ForecastDetail(layers:layers)
-        let start=Date(timeIntervalSince1970:t0+2.5*3600), end=Date(timeIntervalSince1970:t0+6*3600)
+        let start=Date(timeIntervalSince1970:t0+2.5*3600), end=Date(timeIntervalSince1970:t0+5.5*3600)
         let outlook=detail.outlook(from:start,to:end,now:updated)
         #expect(outlook.coldest==5)
         #expect(outlook.coldestAt==Date(timeIntervalSince1970:t0+5*3600))
         #expect(outlook.dewMargin==1.5 && outlook.dewLikely)
-        #expect(outlook.gust==40)
+        #expect(outlook.gust==30)
         #expect(outlook.layers?.note=="Thin high cloud; bright stars only.")
         #expect(outlook.visibility==8000)
         #expect(outlook.hazeHint==8000)
@@ -133,13 +134,13 @@ struct ForecastDetailTests {
         let models=HourlySeries(updated:updated,times:hours(4),values:["cloud_cover_gfs_seamless":[10,10,10,10],"cloud_cover_ecmwf_ifs025":[20,30,20,30],"cloud_cover_icon_seamless":[50,50,50,50]])
         let air=HourlySeries(updated:updated,times:hours(4),values:["aerosol_optical_depth":[0.3,0.4,nil,nil],"pm2_5":[1,1,nil,nil]])
         let detail=ForecastDetail(models:models,air:air)
-        let early=detail.outlook(from:Date(timeIntervalSince1970:t0),to:Date(timeIntervalSince1970:t0+2*3600),now:updated)
+        let early=detail.outlook(from:Date(timeIntervalSince1970:t0),to:Date(timeIntervalSince1970:t0+3600),now:updated)
         #expect(early.agreement==ModelAgreement(low:10,high:50))
         #expect(early.agreement?.band == .disagree)
         #expect(abs((early.aerosol ?? 0)-0.35)<1e-9)
         #expect(early.clarity == .haze)
         #expect(early.hazeHint==nil)
-        let late=detail.outlook(from:Date(timeIntervalSince1970:t0+3600),to:Date(timeIntervalSince1970:t0+4*3600),now:updated)
+        let late=detail.outlook(from:Date(timeIntervalSince1970:t0+1.5*3600),to:Date(timeIntervalSince1970:t0+3.5*3600),now:updated)
         #expect(late.aerosol==nil && late.clarity==nil)
         #expect(late.agreement != nil)
     }

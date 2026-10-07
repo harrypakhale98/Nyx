@@ -21,16 +21,16 @@ struct FindBestNightIntent: AppIntent {
         guard !parks.isEmpty else {
             return .result(dialog:"Choose a park, or save parks in Nyx to compare them.",snippetIntent:EmptySnippetIntent())
         }
-        let now=Date.now, from=start ?? now
+        let now=Date.now, day=start.map { TripDay($0) }
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,from:from,nights:nights,now:now) else {
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else {
             return .result(dialog:"Nyx could not find those nights.",snippetIntent:EmptySnippetIntent())
         }
         BestNightBrowse.reset()
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
         return .result(dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly)),
-                       snippetIntent:BestNightSnippetIntent(parkIDs:parks.map(\.id),start:from,nights:answer.count))
+                       snippetIntent:BestNightSnippetIntent(parkIDs:parks.map(\.id),start:start,nights:answer.count))
     }
 }
 
@@ -45,6 +45,15 @@ nonisolated enum BestNightSearch {
     static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date) -> Answer? {
         let count=min(30,max(1,nights))
         let ranked=planner.bestNights(parks,from:start,count:count,now:now,limit:5)
+        return ranked.isEmpty ? nil : Answer(ranked:ranked,count:count)
+    }
+    /// From the night of a picked day (the day as the person's calendar shows it, so a date
+    /// picked at midnight or before a western park's sunrise never starts the night before),
+    /// or from tonight when no day was picked.
+    static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date) -> Answer? {
+        guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now) }
+        let count=min(30,max(1,nights))
+        let ranked=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:5)
         return ranked.isEmpty ? nil : Answer(ranked:ranked,count:count)
     }
     /// Each park's newest forecast: the one the widget shares, or the app's own cache.
@@ -87,15 +96,15 @@ struct BestNightSnippetIntent: SnippetIntent {
     static let title: LocalizedStringResource="Best night"
     static let isDiscoverable=false
     @Parameter(title:"Parks") var parkIDs: [String]
-    @Parameter(title:"Starting") var start: Date
+    @Parameter(title:"Starting") var start: Date?
     @Parameter(title:"Nights") var nights: Int
     init() {}
-    init(parkIDs: [String], start: Date, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
+    init(parkIDs: [String], start: Date?, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
     func perform() async throws -> some IntentResult & ShowsSnippetView {
         let parks=try ParkData.load().filter { parkIDs.contains($0.id) }
         let now=Date.now
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:SharedSettings.read()))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,from:start,nights:nights,now:now) else { return .result(view:EmptyView()) }
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else { return .result(view:EmptyView()) }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)
         return .result(view:BestNightSnippetView(night:answer.ranked[rank],rank:rank,total:answer.ranked.count,nights:answer.count))
     }

@@ -16,6 +16,8 @@ struct RootView:View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("showerReminders") private var showerReminders=true
     @State private var savedUpdating=false
+    /// Something changed while an update ran; run again when it ends.
+    @State private var savedAgain=false
     /// This window's tab and keyboard commands (each iPad window has its own).
     @State private var commands=SceneCommands()
     @State private var intro=false
@@ -238,18 +240,29 @@ struct RootView:View {
         renderer.scale=3
         return renderer.uiImage.map{Image(uiImage:$0).renderingMode(.template)} ?? Image(systemName:"moon")
     }
+    /// Brings the widget, the watch, Siri's park list and reminders in line with the saved parks.
+    /// It publishes from what is cached first, so unsaving a park or switching shower reminders
+    /// off takes effect at once even on a weak signal, then again once fresh forecasts arrive.
+    /// A change made while a run is under way is never dropped: the run goes again when it ends.
     private func updateSaved() async {
-        guard DebugScenario.screen == nil, !savedUpdating else { return }
-        let initialIDs=saved.map(\.parkID)
+        guard DebugScenario.screen == nil else { return }
+        guard !savedUpdating else { savedAgain=true; return }
         savedUpdating=true
         defer {
             savedUpdating=false
-            if saved.map(\.parkID) != initialIDs { Task { await updateSaved() } }
+            if savedAgain { savedAgain=false; Task { await updateSaved() } }
         }
         let parks=saved.compactMap{model.park($0.parkID)}
+        let ids=Set(parks.map(\.id))
+        let cached=model.forecasts.filter { ids.contains($0.key) }.mapValues(\.updated)
+        await publishSaved(parks)
         // The widget and reminders need only forecasts; park alerts follow once they are done,
         // so a quick visit still leaves both up to date.
         await model.refreshForecasts(watching:parks)
+        if !savedAgain, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publishSaved(parks) }
+        await model.refreshParkUpdates(parks)
+    }
+    private func publishSaved(_ parks:[Park]) async {
         let ids=Set(parks.map(\.id))
         let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) })
         SharedSettings.write(snapshot)
@@ -258,6 +271,8 @@ struct RootView:View {
         WatchBridge.shared.push(savedParkIDs:parks.map(\.id),homeParkID:model.homeID,forecasts:model.forecasts)
         renderWidgetMoons(for:parks)
         WidgetCenter.shared.reloadAllTimelines()
+        // The Smart Stack's dusk hints come from the same snapshot; a timeline reload alone may not refresh them.
+        WidgetCenter.shared.invalidateRelevance(ofKind:WidgetSelection.kind)
         if notificationsEnabled {
             let today=model.today
             let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
@@ -269,7 +284,6 @@ struct RootView:View {
                 return String(localized:"A night to consider at \(name)")
             } }
         }
-        await model.refreshParkUpdates(parks)
     }
 }
 /// A park opened from a reminder, Spotlight or a widget. It reads night vision and Increase

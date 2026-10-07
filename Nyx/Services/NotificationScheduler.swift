@@ -31,7 +31,8 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
         if #available(iOS 27.0,*) { content.appEntityIdentifiers=[EntityIdentifier(for:ParkEntity.self,identifier:reminder.parkID)] }
         var calendar=Calendar(identifier:.gregorian);calendar.timeZone=reminder.timeZone
         // Gregorian components need their calendar attached, or a device set to another calendar reads 2026 as a different year.
-        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute],from:reminder.fireDate);components.calendar=calendar;components.timeZone=reminder.timeZone
+        // Seconds too: a reminder due "in a minute" rounded down to the minute could already be past.
+        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute,.second],from:reminder.fireDate);components.calendar=calendar;components.timeZone=reminder.timeZone
         let request=UNNotificationRequest(identifier:reminder.id,content:content,trigger:UNCalendarNotificationTrigger(dateMatching:components,repeats:false))
         try await UNUserNotificationCenter.current().add(request)
     }
@@ -120,8 +121,11 @@ nonisolated struct NotificationScheduler {
     /// cancelled and may be planned again later. `retitle` may offer a calmer title for a newly
     /// added reminder at a fixed time; reminders due within two minutes skip it, so a slow
     /// model can never push their trigger into the past.
+    /// Without permission nothing is added, but reminders that no longer qualify are still
+    /// cancelled: iOS keeps pending ones while notifications are off and delivers them if they
+    /// are turned back on.
     func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,retitle:(@Sendable (NightReminder) async -> String?)?=nil) async {
-        guard await center.authorized() else { return }
+        let allowed=await center.authorized()
         let pending=await center.pendingIDs()
         let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
         let issued=ledger.ids
@@ -133,7 +137,7 @@ nonisolated struct NotificationScheduler {
         let cancelled=ours.subtracting(plannedIDs)
         await center.remove(cancelled.sorted())
         var added=ours.intersection(plannedIDs)
-        for plan in planned where !ours.contains(plan.id) {
+        for plan in planned where allowed && !ours.contains(plan.id) {
             var reminder=plan
             // Only score reminders may be retitled; a shower reminder's title names the shower.
             if plan.fireDate>now.addingTimeInterval(120), !plan.id.contains("-meteors-"), let title=await retitle?(plan) {
