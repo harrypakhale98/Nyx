@@ -22,8 +22,16 @@ nonisolated enum WatchSky {
         try? data.write(to: url, options: .atomic)
     }
     static var palette: PaletteChoice {
-        get { PaletteChoice(rawValue: defaults.string(forKey: paletteKey) ?? "") ?? .red }
+        get { PaletteChoice(rawValue: defaults.string(forKey: paletteKey) ?? "") ?? .automatic }
         set { defaults.set(newValue.rawValue, forKey: paletteKey) }
+    }
+    static let adaptationKey = "watchAdaptationStart"
+    /// The Control Center control's kind, reloaded whenever the palette changes.
+    static let redLightKind = "NyxRedLight"
+    /// When the dark-adaptation clock was started, if it is running.
+    static var adaptationStart: Date? {
+        get { defaults.object(forKey: adaptationKey) as? Date }
+        set { defaults.set(newValue, forKey: adaptationKey) }
     }
     /// A park kept on Tonight from the watch; nil follows the iPhone.
     static var pinnedPark: String? {
@@ -52,13 +60,9 @@ nonisolated enum WatchSky {
         let ids = Set(parks.map(\.id))
         SharedSettings.write(SavedSkySnapshot(parks: parks, forecasts: (context?.cloudForecasts ?? [:]).filter { ids.contains($0.key) }))
     }
-    static func nightVision(_ choice: PaletteChoice, context: WatchContext?) -> Bool {
-        switch choice {
-        case .red: true
-        case .standard: false
-        // Before the first sync, red: at a dark site that is the safe default.
-        case .phone: context?.nightVision ?? true
-        }
+    /// Red or not, for the park Tonight follows at that moment (Automatic reads its Sun).
+    static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {
+        choice.nightVision(phone: context?.nightVision, park: park, at: now)
     }
     /// Why a score has no clouds in it, in one short honest line.
     static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false) -> String? {
@@ -66,18 +70,6 @@ nonisolated enum WatchSky {
         if short { return String(localized: "Moon and darkness only") }
         return context == nil ? String(localized: "Moon and darkness only. Open Nyx on iPhone for clouds.")
             : String(localized: "Moon and darkness only. No cloud forecast for this night.")
-    }
-}
-
-nonisolated enum PaletteChoice: String, CaseIterable, Identifiable, Sendable {
-    case red, phone, standard
-    var id: String { rawValue }
-    var title: String {
-        switch self {
-        case .red: String(localized: "Red light")
-        case .phone: String(localized: "Match iPhone")
-        case .standard: String(localized: "Starlight")
-        }
     }
 }
 

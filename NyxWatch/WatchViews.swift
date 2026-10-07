@@ -1,11 +1,15 @@
 import SwiftUI
 
-/// Red first: at a dark site the wrist is the screen, and red light keeps the eyes adapted.
+/// Red at night: at a dark site the wrist is the screen, and red light keeps the eyes adapted.
+/// Automatic (the default) wears Nyx's standard colours by day and turns red at civil dusk.
 struct WatchRootView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.scenePhase) private var scenePhase
+    /// Read once a minute, so Automatic turns red at civil dusk with the app open.
+    @State private var clock = Date.now
     var body: some View {
-        let palette = NyxPalette(nightVision: store.nightVision, highContrast: contrast == .increased)
+        let palette = NyxPalette(nightVision: store.nightVision(at: clock), highContrast: contrast == .increased)
         NavigationStack {
             #if DEBUG
             if let screen = WatchDebug.screen, !WatchDebug.homeScreens.contains(screen) { WatchDebug.view(screen) }
@@ -20,7 +24,21 @@ struct WatchRootView: View {
         .modifier(WatchDebug.TypeSize())
         // The complication review draws in the widgets' own colours, so it is not filtered twice.
         .modifier(NightVisionFilter(enabled: palette.nightVision && WatchDebug.screen != "complications"))
+        .modifier(AlwaysOnDim(nightVision: palette.nightVision))
         .background(Color.black)
+        .modifier(WatchDebug.AlwaysOn())
+        .modifier(WatchDebug.ScrollEnd())
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(61 - Double(Calendar.current.component(.second, from: .now))))
+                clock = .now
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            store.reloadSettings()
+            clock = .now
+        }
     }
     @ViewBuilder private var home: some View {
         TimelineView(.everyMinute) { timeline in
@@ -28,6 +46,22 @@ struct WatchRootView: View {
             else { ParkChooser() }
         }
     }
+}
+
+/// Wrist down, Starlight's cream and amber step down with the screen; red is already the dimmest light.
+private struct AlwaysOnDim: ViewModifier {
+    @Environment(\.isLuminanceReduced) private var dimmed
+    let nightVision: Bool
+    func body(content: Content) -> some View { content.opacity(dimmed && !nightVision ? 0.8 : 1) }
+}
+/// Text that matters only with the wrist raised (hints, notes, footers) fades further in Always-On,
+/// so the score, the countdown and the adaptation minutes are what a lowered wrist shows.
+private struct NonEssential: ViewModifier {
+    @Environment(\.isLuminanceReduced) private var dimmed
+    func body(content: Content) -> some View { content.opacity(dimmed ? 0.55 : 1) }
+}
+extension View {
+    func nonEssential() -> some View { modifier(NonEssential()) }
 }
 
 /// One park's night in three pages the Digital Crown moves through: the score and what comes
@@ -42,13 +76,17 @@ struct ParkNightView: View {
     var body: some View {
         TimelineView(.everyMinute) { timeline in
             let now = timeline.date
-            let night = store.tonight(park, at: now)
+            let week = store.week(park, at: now)
+            let night = week.first ?? store.tonight(park, at: now)
             TabView(selection: $page) {
-                TonightFace(night: night, now: now, context: store.context).tag(0)
-                MilestonesPage(night: night, now: now, context: store.context).tag(1)
-                WeekPage(park: park, nights: store.week(park, at: now), isHome: isHome).tag(2)
+                // (The DEBUG Always-On override is repeated per page: pages take the scene's value.)
+                TonightFace(night: night, week: week, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(0)
+                MilestonesPage(night: night, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(1)
+                WeekPage(park: park, nights: week, now: now, isHome: isHome).modifier(WatchDebug.AlwaysOn()).tag(2)
             }
             .tabViewStyle(.verticalPage)
+            // A wrist tap as a moment of the night passes, while its countdown is on screen.
+            .modifier(MilestoneTap(park: park, next: NightMilestone.next(after: now, in: night.sky), active: page < 2 && !darkMode))
         }
         .nyxTitle(park.wristName)
         .toolbar {
@@ -58,44 +96,136 @@ struct ParkNightView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
+                // Double Tap opens it: a hand holding binoculars can still start adapting.
                 Button { darkMode = true } label: { Label("Dark adaptation", systemImage: "eye") }.tint(palette.toolbarTint)
+                    .handGestureShortcut(.primaryAction, isEnabled: !darkMode)
             }
         }
         .fullScreenCover(isPresented: $darkMode) { DarkAdaptationView(park: park) }
     }
 }
 
+/// One wrist tap when a moment of the night passes (sunset, true darkness, moonrise…) while the
+/// screen counting down to it is up. Never for a change of park.
+struct MilestoneTap: ViewModifier {
+    let park: Park
+    let next: NightMilestone?
+    let active: Bool
+    private struct Key: Equatable { let park: String; let next: NightMilestone? }
+    func body(content: Content) -> some View {
+        content.sensoryFeedback(.start, trigger: Key(park: park.id, next: next)) { old, new in
+            active && old.park == new.park && old.next != nil && old.next != new.next
+        }
+    }
+}
+
 /// One glance: the gauge first, then what happens next. Scrolls only at accessibility sizes,
-/// where the gauge keeps its size and the words flow below it.
+/// where the gauge keeps its size and the words flow below it. Tap the dial, then turn the
+/// Digital Crown to step through the week: the score and the Moon change night by night, with a
+/// detent tap for each. VoiceOver adjusts the same nights by swiping up or down on the dial.
 struct TonightFace: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let night: Night
+    let week: [Night]
     let now: Date
     let context: WatchContext?
+    @State private var offset = WatchDebug.initialNight
+    /// The dial takes the Crown only after a tap; otherwise the Crown pages, as everywhere on the watch.
+    @State private var engaged = WatchDebug.initialNight > 0
+    @FocusState private var scrubbing: Bool
+    private var shown: Night { week.indices.contains(offset) ? week[offset] : night }
+    private var looking: Bool { engaged || offset != 0 }
     var body: some View {
         if typeSize.isAccessibilitySize {
             ScrollView {
                 VStack(spacing: 6) {
-                    WatchGauge(night: night).frame(width: 112, height: 112)
-                    Text(night.score.band.label).font(.system(.headline, design: .serif))
-                    NextMoment(night: night, now: now)
-                    if let note = WatchSky.forecastNote(night, context: context) { Text(note).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center) }
+                    gauge.frame(width: 112, height: 112)
+                    Text(shown.score.band.label).font(.system(.headline, design: .serif))
+                    if looking { NightGlance(night: shown, isTonight: offset == 0) } else { NextMoment(night: night, now: now) }
+                    ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
+                        Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
+                    }
                 }.frame(maxWidth: .infinity)
             }
         } else {
             VStack(spacing: 3) {
                 // The gauge takes what the words leave: larger on Ultra, never crowding them on 42 mm.
-                WatchGauge(night: night).frame(maxWidth: 150, minHeight: 0)
-                // Clouds unknown rides on the clock-time line, so the "now" line costs the gauge nothing.
-                NextMoment(night: night, now: now, cloudsUnknown: !night.score.hasForecast).layoutPriority(1)
-                if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
-                    Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1)
+                gauge.frame(maxWidth: 150, minHeight: 0)
+                if looking {
+                    NightGlance(night: shown, isTonight: offset == 0).layoutPriority(1)
+                } else {
+                    // Clouds unknown rides on the clock-time line, so the "now" line costs the gauge nothing.
+                    NextMoment(night: night, now: now, cloudsUnknown: !night.score.hasForecast).layoutPriority(1)
+                    if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
+                        Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1).nonEssential()
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
+    private var gauge: some View {
+        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id))
+            .contentShape(Circle())
+            .focusable(engaged)
+            .focused($scrubbing)
+            .focusEffectDisabled()
+            .digitalCrownRotation(detent: $offset, from: 0, through: max(0, week.count-1), by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: true)
+            .onTapGesture {
+                // Focus once the dial has become focusable, on the next turn of the run loop.
+                if engaged { engaged = false } else { engaged = true; Task { scrubbing = true } }
+            }
+            // Back to tonight when the Crown is let go of: a second tap, or another page.
+            .onChange(of: scrubbing) { _, focused in
+                if !focused { engaged = false }
+            }
+            .onChange(of: engaged) { _, on in
+                if !on { scrubbing = false; withAnimation(reduceMotion ? nil : NyxMotion.spring) { offset = 0 } }
+            }
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: offset = min(max(0, week.count-1), offset+1)
+                case .decrement: offset = max(0, offset-1)
+                @unknown default: break
+                }
+            }
+            .onAppear { if engaged { Task { scrubbing = true } } }
+    }
+}
+
+/// A night chosen with the Crown: which night, and its true darkness in park time.
+struct NightGlance: View {
+    @Environment(\.nyx) private var palette
+    let night: Night
+    let isTonight: Bool
+    var body: some View {
+        VStack(spacing: 0) {
+            Group { if isTonight { Text("Tonight") } else { Text(night.park.dayLabel(night.id)) } }
+                .font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+            if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
+                Text("Dark \(night.park.time(start)) to \(night.park.time(end))").font(.system(.subheadline, design: .serif))
+            } else {
+                Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
+            }
+            if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+            else if !night.score.hasForecast { Text("Moon and darkness only").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+        }
+        .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Where the clouds came from and how old they are, after any line saying the score has none.
+func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
+    let source = CloudSource.of(context: context, park: night.park, now: now)
+    // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
+    let refreshable = source.isStale || source == .missing(followed: false)
+    var lines: [String] = []
+    if let note = WatchSky.forecastNote(night, context: context, short: refreshable) { lines.append(note) }
+    if let line = source.line(for: night.park) { lines.append(line) }
+    return lines
 }
 
 /// The next moment of the night and how long until it, rewritten by the screen's minute timeline.
@@ -106,20 +236,22 @@ struct NextMoment: View {
     let now: Date
     var cloudsUnknown = false
     var body: some View {
+        // At accessibility sizes every line wraps instead of shrinking or cutting off.
+        let limit = typeSize.isAccessibilitySize ? nil : 1 as Int?
         Group {
             if let next = NightMilestone.next(after: now, in: night.sky) {
                 VStack(spacing: 0) {
                     // At the site the first question is "is it dark yet": answer it before the countdown.
                     if let state = nowLine {
                         Text(state).font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
-                            .lineLimit(1).minimumScaleFactor(0.8)
+                            .lineLimit(limit).minimumScaleFactor(0.8)
                     }
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
-                        .lineLimit(typeSize.isAccessibilitySize ? nil : 1).minimumScaleFactor(0.7)
+                        .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
                         if cloudsUnknown { Text("at \(night.park.time(next.date)) · clouds unknown") } else { Text("at \(night.park.time(next.date))") }
                     }
-                    .font(.caption2).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8)
+                    .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).minimumScaleFactor(0.8).nonEssential()
                 }
             } else if night.sky.darkHours == 0 {
                 Text(SkyConditions.noDarknessMessage(tonight: true)).font(.footnote)
@@ -167,21 +299,24 @@ struct MilestonesPage: View {
                         }
                     }
                     .foregroundStyle(past ? palette.faint : palette.ink)
+                    .modifier(PastDim(past: past))
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(past ? String(localized: "Passed") : milestone == next ? String(localized: "Next") : "")
                 }
                 if list.isEmpty { Text("No sunset, darkness or moonrise tonight.").font(.footnote) }
                 Rectangle().fill(palette.line).frame(height: 0.5).padding(.vertical, 2).accessibilityHidden(true)
                 Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.footnote)
-                if let note = WatchSky.forecastNote(night, context: context) { Text(note).font(.caption2).foregroundStyle(palette.muted) }
+                ForEach(cloudLines(night, context: context, now: now), id: \.self) {
+                    Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
+                }
                 if night.sky.darkHours > 0 {
                     Text("\(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))) of true darkness").font(.footnote)
-                    Text(moonLine).font(.caption2).foregroundStyle(palette.muted)
+                    Text(moonLine).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 } else {
                     Text(SkyConditions.noDarknessMessage(tonight: true)).font(.footnote)
                 }
                 if night.park.timeZone.secondsFromGMT(for: now) != TimeZone.current.secondsFromGMT(for: now) {
-                    Text("Times in \(night.park.timeZoneName)").font(.caption2).foregroundStyle(palette.muted)
+                    Text("Times in \(night.park.timeZoneName)").font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -197,13 +332,20 @@ struct MilestonesPage: View {
         }
     }
 }
+/// Passed milestones are not news: they fade in Always-On.
+private struct PastDim: ViewModifier {
+    let past: Bool
+    func body(content: Content) -> some View { if past { content.nonEssential() } else { content } }
+}
 
 struct WeekPage: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.isLuminanceReduced) private var dimmed
     let park: Park
     let nights: [Night]
+    let now: Date
     let isHome: Bool
     var body: some View {
         let best = nights.max { $0.score.value < $1.score.value }
@@ -228,9 +370,13 @@ struct WeekPage: View {
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
                 }
-                if nights.contains(where: { !$0.score.hasForecast }) {
-                    Text("Hollow nights are moon and darkness only.").font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                Group {
+                    if nights.contains(where: { !$0.score.hasForecast }) {
+                        Text("Hollow nights are moon and darkness only.")
+                    }
+                    if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
                 }
+                .font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true).nonEssential()
                 if !isHome || store.pinned == park.id {
                     let kept = store.pinned == park.id
                     Button { store.pin(kept ? nil : park) } label: {
@@ -248,7 +394,8 @@ struct WeekPage: View {
             ZStack {
                 if best { Circle().stroke(palette.accent.opacity(0.8), lineWidth: 1).frame(width: 20, height: 20) }
                 let d = 4 + 11*Double(night.score.value)/100
-                if night.score.hasForecast { Circle().fill(palette.accent.opacity(0.5+Double(night.score.value)/200)).frame(width: d, height: d) }
+                // Wrist down the fills drop to one quiet level; only the sizes still rank the nights.
+                if night.score.hasForecast { Circle().fill(palette.accent.opacity(dimmed ? 0.5 : 0.5+Double(night.score.value)/200)).frame(width: d, height: d) }
                 else { Circle().stroke(palette.accent, lineWidth: 1).frame(width: d, height: d) }
             }.frame(height: 22)
             Text(night.score.value, format: .number).font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.7)
@@ -271,7 +418,7 @@ struct WatchEyebrow: View {
     }
 }
 
-/// Every park, saved ones first with tonight's score; the palette choice lives here too.
+/// Every park, saved ones first with tonight's score; the palette choice and the credits live here too.
 struct ParksList: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
@@ -290,8 +437,10 @@ struct ParksList: View {
                 Section("All parks") { ForEach(store.parks) { row($0, now: timeline.date, scored: false) } }
                 Section {
                     Picker("Colors", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
-                } footer: { Text("Red light keeps your eyes adapted to the dark.") }
-                Section {} footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }
+                } footer: { Text("Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
+                Section {
+                    NavigationLink { WatchCredits() } label: { Label("Credits", systemImage: "text.book.closed") }
+                } footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }
             }
         }
         .nyxTitle(String(localized: "Parks"))
@@ -342,65 +491,6 @@ struct ParkChooser: View {
     }
 }
 
-/// Field mode on the wrist: red only, black everywhere, one large countdown to the next moment.
-struct DarkAdaptationView: View {
-    @Environment(WatchStore.self) private var store
-    @Environment(\.isLuminanceReduced) private var dimmed
-    @Environment(\.dynamicTypeSize) private var typeSize
-    @ScaledMetric(relativeTo: .largeTitle) private var timerSize = 40
-    let park: Park
-    @Environment(\.dismiss) private var dismiss
-    private let palette = NyxPalette(nightVision: true, highContrast: false)
-    var body: some View {
-        // Its own stack, filtered as a whole: the system's close button would otherwise be the one
-        // white thing on the screen. A dark, red-glyphed Done replaces it.
-        NavigationStack {
-            content
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button { dismiss() } label: { Label("Done", systemImage: "xmark") }.tint(palette.toolbarTint)
-                    }
-                }
-        }
-        .foregroundStyle(palette.ink)
-        .tint(palette.accent)
-        .environment(\.nyx, palette)
-        .modifier(NightVisionFilter(enabled: true))
-        .background(Color.black)
-    }
-    private var content: some View {
-        TimelineView(.everyMinute) { timeline in
-            let now = timeline.date
-            let night = store.tonight(park, at: now)
-            let list = NightMilestone.list(for: night.sky)
-            ScrollView {
-                VStack(spacing: 6) {
-                    if let next = list.first(where: { $0.date > now }) {
-                        Text(next.title).font(.system(.headline, design: .serif))
-                        Group {
-                            // Wrist down, the seconds would only drain the battery: minutes are enough.
-                            if dimmed { Text(inDuration(until: next.date, from: now)) }
-                            else { Text(timerInterval: now...max(now, next.date), countsDown: true) }
-                        }
-                        .font(.system(size: timerSize, weight: .light, design: .serif)).monospacedDigit()
-                        .lineLimit(1).minimumScaleFactor(0.5).foregroundStyle(palette.accent)
-                        Text("at \(park.time(next.date))").font(.footnote).foregroundStyle(palette.muted)
-                        if let after = list.first(where: { $0.date > next.date }) {
-                            Text("Next: \(after.title), \(park.time(after.date))").font(.caption2).foregroundStyle(palette.muted)
-                        }
-                    } else {
-                        Text("Nothing more tonight").font(.system(.headline, design: .serif))
-                    }
-                    Text("Red light only. Eyes take 20 to 30 minutes to adapt to the dark; a bright screen resets them.")
-                        .font(.caption2).foregroundStyle(palette.faint).padding(.top, 6)
-                }
-                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-}
-
 extension NyxPalette {
     /// Toolbar buttons fill with the tint on watchOS. A bright fill would be the brightest thing on
     /// the screen at night, so they sit dark: nebula violet, or near-black under red light.
@@ -414,8 +504,41 @@ private struct NyxTitle: ViewModifier {
     @Environment(\.nyx) private var palette
     let title: String
     func body(content: Content) -> some View {
-        // Long names ("Black Canyon of the Gunnison") shrink before they truncate.
+        // Long names ("Black Canyon of the Gunnison") shrink before they truncate. One line even at
+        // accessibility sizes: a second line would run into the system clock above it.
         content.navigationTitle { Text(title).foregroundStyle(palette.ink).lineLimit(1).minimumScaleFactor(0.6) }
             .toolbarForegroundStyle(palette.ink, for: .navigationBar)
+    }
+}
+
+#Preview("Tonight • Automatic by day") {
+    WatchPreviewHost(nightVision: false) { park, store in TonightFace(night: store.tonight(park, at: .now), week: store.week(park, at: .now), now: .now, context: nil) }
+}
+#Preview("Tonight • red • AX5") {
+    WatchPreviewHost(nightVision: true) { park, store in TonightFace(night: store.tonight(park, at: .now), week: store.week(park, at: .now), now: .now, context: nil) }
+        .dynamicTypeSize(.accessibility5)
+}
+#Preview("Night glance • Friday") {
+    WatchPreviewHost(nightVision: true) { park, store in NightGlance(night: store.week(park, at: .now)[3], isTonight: false) }
+}
+#Preview("Milestones • Always-On") {
+    WatchPreviewHost(nightVision: false) { park, store in MilestonesPage(night: store.tonight(park, at: .now), now: .now, context: nil) }
+        .environment(\.isLuminanceReduced, true)
+}
+#Preview("Parks") {
+    WatchPreviewHost(nightVision: false) { _, _ in NavigationStack { ParksList() } }
+}
+
+/// Previews: Joshua Tree from the real engine, in either palette.
+struct WatchPreviewHost<Content: View>: View {
+    @State private var store = WatchStore()
+    let nightVision: Bool
+    @ViewBuilder let content: (Park, WatchStore) -> Content
+    var body: some View {
+        if let park = store.park("jotr") {
+            let palette = NyxPalette(nightVision: nightVision, highContrast: false)
+            content(park, store).environment(store).environment(\.nyx, palette)
+                .foregroundStyle(palette.ink).tint(palette.accent).modifier(NightVisionFilter(enabled: nightVision)).background(Color.black)
+        }
     }
 }
