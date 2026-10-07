@@ -1,83 +1,35 @@
-# Nyx 1.1 — App Store metadata
+# Nyx 1.1 — App Store metadata (first public release)
 
-Paste-ready copy for App Store Connect. Voice follows the Nyx voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives.
+Paste-ready copy for App Store Connect. Version 1.1 is the **first public release**: 1.0 never shipped, so there is **no What's New** field to fill (App Store Connect does not show one for an app's first version). Voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives, nothing says "only", "first" or "best".
 
-**Before pasting, remove every line for a feature that does not ship in the 1.1 build you submit.** The copy below assumes the full list from the brief: honest forecast, What's up tonight, Field mode, Apple Watch, Apple Vision Pro, deep accessibility, measured sky glow, step-free viewing spots, Spanish, iPad, trip planner, personal constellation journal. Every claim is something the app does or is built to do. Nothing says "only", "first" or "best".
+Character counts were verified with a script on 2026-10-07 (`len()` of the text between the fences; App Store Connect may count a line break as two characters, so each field keeps a margin). Apple's limits: name 30, subtitle 30, promotional text 170, description 4,000, keywords 100.
 
-Character counts (verified with a script on 2026-10-05) are in brackets after each field. Apple's limits (checked in App Store Connect help on 2026-10-05): What's New 4,000; promotional text 170; description 4,000; keywords 100; subtitle 30; name 30.
+## Confirm before pasting (integrator)
+
+The description names features from main as of 2026-10-07 plus wave 2 and 3 items. Before pasting, confirm each of these is in build 8, and delete its sentence if not:
+
+| Feature | Where it appears | Status on 2026-10-07 |
+|---|---|---|
+| Plan tab with "My free nights" (trip planner) | PLAN | Trip planner on main; the Plan tab is wave 2 |
+| Starting from a town or city (Census places) | PLAN | Wave 2 (another lane); not on main |
+| Spanish (Mexico) in the app | Last line of FOR MORE PEOPLE | On main; may be cut if the native review is not done (AM-12) |
+| Apple Vision Pro: star names, constellation figures, Moon on your table, widget | ON YOUR WRIST AND IN THE ROOM | On main (vision lane); the visionOS build may be submitted separately |
+| Apple Watch: Crown scrub, adaptation clock, Red light control, Moon and Next dark complications | ON YOUR WRIST AND IN THE ROOM | On main (watch lane) |
+| Journal export and import | KEEP A LITTLE OF THE NIGHT | On main (data lane) |
+| Translation of park text | not mentioned | Planned for wave 3; add nothing until it ships |
+| Open a viewing spot in Maps | not mentioned | Planned; add nothing until it ships |
 
 ---
 
-## Version
+## The record
 
-- Version **1.1**, build number above 5 (integrator bumps `CURRENT_PROJECT_VERSION` in `project.yml`).
-- Release: **manual release** after approval, so the 1.1 In-App Events (`in-app-events.md`) and featuring nomination (`featuring-nominations.md`) line up.
-- Platforms in the 1.1 record: iPhone, iPad (new), Apple Watch (new, companion), Apple Vision Pro (new). visionOS has its own version page with its own description, keywords, promotional text and review notes: `metadata-visionos.md`.
-
----
-
-## What's New (1.1)
-
-```
-Nyx 1.1 follows the night from the plan to the dawn.
-
-TONIGHT'S SKY
-- The Milky Way core, timed for each park: when it rises, when it is highest and where, and when the Moon is out of the way.
-- Planets, with rise and set times and the direction to look.
-- Meteor showers, with the Moon's interference and a rate estimate from the International Meteor Organization. Lunar eclipses are listed when the park can see them.
-- None of this changes the Darkness Score. These are reasons to go, not points.
-
-AN HONEST FORECAST
-- Three weather models are compared. Nyx says when they agree and shows the range when they do not.
-- Cloud layers: thin high cloud and thick low cloud are different nights.
-- Dew, cold and wind for the dark hours, in your units.
-- Wildfire smoke and haze appear beside the score as a caveat. This uses one new, optional data service (see Privacy below).
-
-FIELD MODE
-- "I'm here tonight" turns Nyx into a red, dimmed screen made for night-adapted eyes: a countdown to true darkness, each milestone in turn, and a dark-adaptation clock.
-- Where to look: the real sky follows your iPhone, with the Moon, the core, planets and a shower's radiant marked in red. No camera.
-- A Live Activity and Dynamic Island carry the countdown on the Lock Screen. Alarms can wake you when true darkness begins or the core rises (iOS 26.1 and later).
-- A Stargazing Focus and a Control Center control start it for you.
-
-ON YOUR WRIST AND IN THE ROOM
-- Apple Watch: a red-first countdown, the Moon, and complications.
-- Apple Vision Pro: stand under the real sky for a park and a night, and scrub the hours.
-- iPad: the calendar and park detail side by side.
-
-SKY GLOW YOU CAN READ
-- Sky glow at each named viewing spot is now compared with the other national parks, from NASA's Black Marble night-lights data, and each park names the towns whose glow rises on its horizon and which way they lie. It is a comparison, not a measurement, and says so.
-
-THE SKY FOR MORE PEOPLE
-- Hear the night: audio graphs for the timeline, calendar and sky arc, and a short sonification of tonight.
-- Feel the Moon: haptics that follow the phase.
-- Reduce bright effects (iOS 26.4 and later) softens the glow, halos and shooting star.
-- Step-free viewing spots are marked and can be filtered, sourced from park accessibility pages.
-- Spanish.
-
-PLANNING AND MEMORY
-- Trip planner: give Nyx your free dates and a straight-line radius, and it suggests a park for each night.
-- Your constellation: every journal night becomes a star on a map of the parks. It stays on your iPhone.
-
-PRIVACY
-- Nyx still collects no data. No account, no advertising, no tracking.
-- A third network service, Open-Meteo's air-quality forecast, supplies smoke and haze. It has its own switch in Settings, Your privacy, like forecasts and park updates. It receives the public coordinates of national parks, never your location.
-
-GOOD TO KNOW
-- Scores and forecasts are estimates. They do not confirm clear skies or open roads. Check park conditions before you travel.
-- Moonrise and moonset are approximate, to about 15 minutes, and vary with terrain.
-- Meteor rates are a rough guide: the nominal rate assumes a perfect sky.
-- Apple Intelligence features appear only on devices where Apple's on-device model is available.
-
-Questions or problems: harry.pakhale98@gmail.com
-```
-
-[3,251 of 4,000 characters]
-
-Short fallback (about 600 characters) if the full text feels long for the release:
-
-```
-Nyx 1.1 follows the night from the plan to the dawn. The Milky Way core, planets and meteor showers are timed for each park. The forecast compares three weather models and shows smoke and haze. Field mode puts a countdown, a dark-adaptation clock and "where to look" on a red screen, the Lock Screen and your wrist. Sky glow at viewing spots is now estimated from NASA data. New: Apple Watch, Apple Vision Pro, iPad, Spanish, audio graphs, step-free viewing spots and a trip planner. Still no account, ads or tracking.
-```
+- **Name (≤30):** `Nyx: Dark Sky Planner` (21). Home Screen name Nyx. Fallback name: Noctis.
+- **Subtitle (≤30):** `Stargazing in national parks` (28). See "Subtitle decision" below.
+- **Categories:** Travel (primary), Weather (secondary).
+- **Price:** Free. No subscriptions, advertising or in-app purchases (a standing condition of Open-Meteo's free, non-commercial terms).
+- **Copyright:** `2026 Hardik Pakhale`.
+- **Version / build:** 1.1 (8). **Manual release** after approval.
+- **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
 
@@ -86,133 +38,114 @@ Nyx 1.1 follows the night from the plan to the dawn. The Milky Way core, planets
 Primary:
 
 ```
-Plan the night, then follow it. The Milky Way core, planets and meteor showers, honest forecasts, and a red field mode for your eyes. Free. Data Not Collected.
+Which park, and which night, for the darkest sky. The Milky Way timed for each park, an honest forecast, and a red field mode for your eyes. Free, with no tracking.
 ```
 
-Alternates (use for seasonal swaps; promotional text can change without a new build):
+[164 characters]
 
-- Meteor season, Dec: `Geminids peak December 13 to 14 under a 23 percent Moon that sets early. See which national park skies are darkest each night. Free, no account, no tracking.`
-- Quiet/ranger tone: `Which park, which night, and when the Milky Way clears the horizon. Nyx compares the 63 national parks and says plainly what the forecast cannot know.`
-- Accessibility angle: `Hear the night, feel the Moon, read it in red. Nyx plans dark-sky trips to the national parks and works with VoiceOver, larger text and night-adapted eyes.`
+Alternates (promotional text changes without a new build):
+
+- New moon weekend: `The Moon is new this weekend. See which national parks have the darkest skies each night, and when the Milky Way clears the horizon. Free, no account, no tracking.` [163]
+- Geminids, December 2026: `The Geminids peak December 13 to 14 under a thin evening Moon that sets early. See which national park skies are darkest each night. Free, no account, no tracking.` [163]
 
 ---
 
 ## Description (≤4000)
 
 ```
-Make time for a darker sky.
+Which park, and which night? Nyx compares the 63 US national parks night by night and gives each a Darkness Score from 0 to 100, from the Moon, the clouds, the sky glow and the hours of true darkness. It tells you what it doesn't know. Free. No account, no ads, no tracking.
 
-Nyx compares nights across the 63 US national parks. Moonlight, cloud cover, estimated sky glow and the length of true darkness become one Darkness Score from 0 to 100, with a breakdown that explains it.
+ONE SCORE, WITH ITS REASONS
+Four parts add up, and the weakest can cap the total, so a cloudy night never looks good. The line under the score names the cap. Park closures from the National Park Service sit beside the number.
 
 PLAN
-Find nearby parks within a straight-line radius, or sort every park by tonight's darkness. Browse the calendar's five-night new moon window. Follow thirty nights on a timeline that draws in the range the forecast models allow. Give the trip planner your free dates and it suggests a park for each night. Times are park-local.
+See tonight's darkest parks within a straight-line radius, or sort every park by darkness. Choose a park and see its month as a calendar, with the best stretch of nights marked. Scrub thirty nights on a timeline and watch the Moon change shape. Give Nyx your free nights and it suggests a park for each. Times are always park-local.
 
-SEE WHAT IS UP
-Each park's night lists the Milky Way core with its rise, highest point, direction and Moon-free hours; planets with rise and set times; meteor showers with the Moon's interference and a rate estimate from the International Meteor Organization; and lunar eclipses the park can see. These are reasons to go. They never change the score.
+AN HONEST FORECAST
+For the next few days the cloud forecast counts in full. Further out it is eased toward each park's usual clouds for the month, and beyond the forecast the usual clouds count alone; those nights say so. Three weather models are compared, with the range drawn when they disagree. Cloud layers, dew, cold and wind are shown for the dark hours, and heavy smoke can cap the score.
 
-A FORECAST THAT SAYS WHAT IT DOES NOT KNOW
-Nyx compares three weather models and tells you when they agree and when they do not. It separates thin high cloud from thick low cloud, notes dew, cold and wind for the dark hours, and shows wildfire smoke and haze beside the score. Beyond the forecast horizon Nyx scores the Moon and darkness alone, and labels those nights that way.
+WHAT'S UP TONIGHT
+Each park's night lists the Milky Way core with its rise, highest point and Moon-free hours; the planets; meteor showers with a rate range; and lunar eclipses the park can see. These are reasons to go. They never change the score.
 
 FIELD MODE
-At the park, "I'm here tonight" opens a red, dimmed screen made for night-adapted eyes: the countdown to true darkness, each milestone of the night, and a dark-adaptation clock. "Where to look" turns the real sky to your iPhone's direction, with no camera. A Live Activity keeps the countdown on the Lock Screen, and alarms can wake you for true darkness or the core's rise (iOS 26.1 and later). On Apple Watch, the countdown and the Moon are on your wrist, in red. On Apple Vision Pro, you can stand under the real sky for a park and a night.
+At the park, "I'm here tonight" opens a red, dimmed screen for night-adapted eyes: a countdown to true darkness, each milestone of the night, and a dark-adaptation clock. "Where to look" turns the real sky to wherever you point your iPhone, with no camera. A Live Activity keeps the countdown on the Lock Screen, and alarms can wake you for true darkness or the core's rise.
 
-SKY GLOW
-Each named viewing spot shows how its sky glow compares with the other national parks, from NASA Black Marble night-lights data, and each park names the direction of the city glow on its horizon. It compares places; it is not a measurement taken at the spot.
+ON YOUR WRIST AND IN THE ROOM
+On Apple Watch: tonight's score, the Digital Crown to look ahead, a dark-adaptation clock that taps your wrist, and complications that turn red at dusk. On Apple Vision Pro: stand under a park's computed sky on a chosen night, with star names and constellation figures, and place the Moon on your table, lit at its true phase. On iPad: the calendar and a park side by side.
+
+SKY GLOW AND ACCESS
+Each viewing spot shows how its sky glow compares with the other parks, from NASA's Black Marble night-lights data, and which towns light its horizon. It compares places; it is not a measurement. Step-free notes quote the park's own accessibility pages.
 
 KEEP A LITTLE OF THE NIGHT
-Save parks and receive optional local reminders for promising nights. Keep a private journal with notes and selected photos; each night becomes a star in your own constellation. Widgets show the best sky among your saved parks.
+Save parks and get optional local reminders for promising nights. Keep a private journal with notes and selected photos; each night becomes a star in your own constellation. Export it as a file you keep. Widgets show the best sky among your saved parks.
 
-BUILT FOR MORE PEOPLE
-Nyx works with VoiceOver, larger text, Reduce Motion, Reduce Transparency, Increase Contrast and Bold Text. Audio graphs let you hear the timeline, the calendar and the sky arc. Haptics follow the Moon's phase. Step-free viewing spots are marked and can be filtered. Night-vision mode renders everything in red. Spanish is included.
+FOR MORE PEOPLE
+Nyx is designed for VoiceOver and the largest text sizes. Audio graphs let you hear a month of darkness, haptics can follow the Moon's phase, and a red mode keeps the whole app readable to night-adapted eyes. Spanish is included.
 
-PRIVATE BY DESIGN
-No account, no advertising, no tracking. Your location and your journal stay on your device. Three optional services supply data, each with its own switch under Your privacy: park alerts from the National Park Service, forecasts from Open-Meteo, and smoke and haze from Open-Meteo's air-quality service. They receive the public coordinates of national parks, not yours.
-
-WORKS OFFLINE
-Moon, sun and twilight calculations, the core, planets, the park library, the calendar, the journal and saved parks work without a connection. Forecasts reach about sixteen days. Moonrise and moonset are approximate, to about 15 minutes.
+PRIVATE AND OFFLINE
+Your location, journal and photos stay on your device. Three public services supply data, each with its own switch under Your privacy: park alerts from the National Park Service, and forecasts and smoke from Open-Meteo. They never receive your location. The Moon, twilight, the Milky Way, the park library, the calendar and your journal work without a connection.
 
 PLEASE NOTE
-Scores do not confirm clear skies or safe access. Check current road and park conditions before traveling. Park alerts and ranger programs come from the National Park Service and may be unavailable.
+Scores are planning estimates. They do not confirm clear skies or open roads. Check current park conditions before you travel.
 
-Weather data: Open-Meteo, CC BY 4.0. Air quality: Copernicus Atmosphere Monitoring Service via Open-Meteo, CC BY 4.0. Night lights and Moon imagery: NASA. Meteor showers: International Meteor Organization. Lunar eclipses: Fred Espenak, NASA/GSFC. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service or NASA.
+Weather data by Open-Meteo.com (CC BY 4.0). Smoke and usual clouds: Copernicus (CAMS, C3S). Night lights and Moon imagery: NASA. Meteor showers: IMO. Lunar eclipses: Fred Espenak, NASA's GSFC. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.
 ```
 
-[3,946 of 4,000 characters; 3,980 even if App Store Connect counts each line break twice. If you add a sentence, cut one.]
+[3,936 of 4,000 characters; 3,971 if each line break counts twice]
 
-Notes for the owner:
-- The 1.0 description said "Forecasts do not include smoke, haze or telescope seeing." That sentence is now false for smoke and haze (the forecast adds them, as a caveat); this draft changes it. Keep that correction.
-- "Voice Control" was taken out of the accessibility list on 2026-10-06 until the on-device pass in `accessibility-nutrition-labels.md` confirms it; add "Voice Control, " back after "VoiceOver, " once it does.
-- "Nyx is not affiliated with or endorsed by ... NASA" is added because the Moon map and Black Marble are NASA data; NASA's media guidelines ask that use not imply endorsement.
+Notes:
+- The opening three lines are what shows before "more" on the product page; they carry the question, the answer and the promise (ST-3).
+- **Accessibility sentence (C11).** "Designed for VoiceOver and the largest text sizes" says what the simulator audit and the design work support. Do not list Reduce Motion, Reduce Transparency, Increase Contrast, Bold Text or Voice Control as supported in the description until the device pass in `accessibility-nutrition-labels.md` confirms them; then the sentence may become "Nyx works with VoiceOver, larger text, …".
+- Smoke is described as a cap (score v2), not as "a caveat, never points", which is no longer true.
+- "Nyx is not affiliated with or endorsed by … DarkSky International" is added (C10); no DarkSky logo is used anywhere.
+- Alarms need iOS 26.1 or later on device (AlarmKit); the description does not promise a version, and the app hides the alarm rows where they cannot work.
 
 ---
 
 ## Keywords (≤100)
 
-Rules: App Store indexes name, subtitle and keywords together, so none of those words repeat here. "Nyx", "Dark", "Sky", "Planner" are in the name; Travel and Weather are the categories. Singular and plural both match, so use singular where possible. Commas, no spaces.
-
-Primary (re-optimized):
-
 ```
-stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,star
+milky way,meteor shower,moon phase,astronomy,light pollution,astrophotography,planet,eclipse,night
 ```
 
-Changes from 1.0 (`stargazing,national parks,moon phase,astronomy,milky way,night sky,bortle,camping,meteor,aurora`):
-- **Dropped `aurora`.** Nyx does not forecast aurora (the roadmap lists it under "what not to add"). Keeping it would mislead and attract the wrong reviews.
-- Dropped `camping` (high competition, weak intent match) and `night sky` (its words overlap the name).
-- Added `meteor shower`, `planet`, `eclipse` (1.1 features) and `star`.
-- `national park` singular covers both forms.
-- `astrophotography` (core audience) was tried and does not fit in 100 characters with the rest. Swap it in for `star` and `planet` if the photography audience matters more than planet searches.
+[98 characters]
 
-Alternate (97 characters), trading `star` for `photo`:
+Rules: App Store indexes the name, subtitle and keywords together, so no word repeats across them. The name already holds "Nyx", "Dark", "Sky", "Planner"; the subtitle holds "Stargazing", "national", "parks". Singular matches plural.
 
-```
-stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,photo
-```
+Changes from the draft of 2026-10-05 (`stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,star`):
+- `stargazing` and `national park` moved into the subtitle, where they weigh more.
+- Added `light pollution` and `astrophotography` (the Milky Way photographers are a core audience, ST-3) and `night` (pairs with "sky" from the name for "night sky").
+- Dropped `bortle` (low search volume) and `star` (generic).
+- `aurora` stays out: Nyx does not forecast aurora.
 
-Spanish keywords (draft; the owner's native-speaker review in `INPUT_NEEDED.md` covers these too):
-
-```
-estrellas,vía láctea,lluvia de meteoros,fases lunares,parque nacional,astronomía,planeta,eclipse
-```
+Spanish keywords: `metadata-es.md`.
 
 ---
 
-## Subtitle options (≤30)
+## Subtitle decision
 
-| # | Subtitle | Count | Note |
-|---|---|---|---|
-| 1 | `Plan a darker night` | 19 | Current 1.0 subtitle; keeps continuity. |
-| 2 | `Where the sky is darkest` | 24 | Answers the one question. Plain. |
-| 3 | `The night sky, park by park` | 27 | Says the scope; 63 parks. |
-| 4 | `Plan the night. Then see it.` | 28 | Covers planning plus field mode. |
-| 5 | `Dark skies in national parks` | 28 | Strongest for search because "national parks" is not in the name. If chosen, remove `national park` from keywords and add `camping`. |
+**`Stargazing in national parks` (28).** Logged reasoning: the name already says "Dark Sky Planner", so the subtitle's job is the two highest-intent search words the name lacks, "stargazing" and "national parks", in the field the store weighs above keywords (ST-3). It also tells people who remember Apple's discontinued Dark Sky weather app that this is a stargazing planner, not a weather app (AM-11). AM-11's preference for `The night sky, park by park` rested on avoiding a repeat of "dark" and "sky", which this subtitle also avoids. The calmer line survives as the website's and press kit's tagline. A subtitle changes only with a new version, so revisit with 1.2 using App Store Connect's search-term data.
 
-Recommendation: **#3, `The night sky, park by park`.** It states the scope, adds "park" and "night" to the indexed words, and is the calmest of the five. #5 is the strongest for search ("national parks" is not in the name) but repeats "dark" and "sky" from the name; if you choose it, drop `national park` from the keywords and add `camping` in its place. A subtitle changes only with a new version.
-
-Spanish subtitle drafts (≤30, native review): `Planifica una noche oscura` (25), `Dónde el cielo es más oscuro` (28).
+Spanish subtitle: `metadata-es.md`.
 
 ---
 
-## Other fields to revisit with 1.1
+## Other fields
 
-- **Category:** keep Travel (primary), Weather (secondary). Do not move to Education or Reference.
-- **Age rating:** re-answer the questionnaire; nothing in 1.1 changes the answers (no UGC feed, no web access beyond providers).
-- **Review notes (add to the existing text in `SUBMISSION.md`):** "1.1 adds a third provider host, `air-quality-api.open-meteo.com`, behind its own switch in Tonight, Settings, Your privacy, listed in `PrivacyInfo.xcprivacy`. Field mode (Live Activity, AlarmKit alarms, Core Motion for 'Where to look') is started by a person at a park's detail screen; on a simulator, `-nyx-screen field` is DEBUG only, so reviewers should use 'I'm here tonight' on any park's detail screen after sunset or in the evening. AlarmKit asks for permission in context after an explainer. The Apple Watch and visionOS targets share the same engine and make no network requests of their own. No login."
-- **App Privacy:** still "Data Not Collected". The new host receives only public park coordinates, as the forecast host does. Re-read `PRIVACY.md` before answering, because ASC asks again at each submission.
-- **Screenshots (done 2026-10-06, build 7):** iPhone required slot `Store/Framed/6.3-inch/` (1206×2622), optional `6.9-inch/` and `6.5-inch/`; iPad `Store/Framed/iPad-13-inch/`; Apple Watch `Store/Framed/Watch-Ultra/`; Vision Pro `Store/Framed/Vision-Pro/`. iPhone Duo screenshots become required in April 2027 (needs Xcode 27.1).
-- **Copyright:** `2026 Hardik Pakhale` (unchanged).
-- **Age rating (new question, September 2026):** App Store Connect now asks whether the app has social media capabilities (for the new Time Allowances). Answer **No**: Nyx has no accounts, feeds, messaging or sharing beyond the system share sheet.
-- **Creative assets (new, optional, October 2026):** product page header (21:9, 3840×1646 image or 5–30 s video) and search result asset (3:2, 1920×1280 to 3840×2560). Not required to submit. Check the page in App Store Connect's new preview tool before submitting, in each device and orientation.
-- **Accessibility Nutrition Labels:** answered per device, now including Apple Vision Pro (`accessibility-nutrition-labels.md`); declare only what the device pass confirms.
+- **Age rating:** answer the current questionnaire. Expected result 4+: no user-generated content feed, no unrestricted web access (links open in Safari), no social features, no gambling or mature themes. New question (September 2026), social media capabilities: **No**. Age assurance (Texas SB 2420) is handled in the app by Declared Age Range; see `SUBMISSION.md`.
+- **App Privacy:** Data Not Collected (`PRIVACY.md`).
+- **Review notes:** `SUBMISSION.md` § Review notes (paste from there).
+- **Screenshots:** `SUBMISSION.md` § Screenshots. The build 7 frames show scores computed before score v2 (for example Joshua Tree 93); they must be recaptured from build 8 before upload.
+- **App Preview (optional):** `app-preview-script.md`.
+- **Accessibility Nutrition Labels:** declare only what the device pass confirms (`accessibility-nutrition-labels.md`).
+- **Creative assets (optional):** product page header (21:9) and search result asset (3:2) can wait for 1.2.
 
 ## Count table
 
 | Field | Limit | Characters |
 |---|---|---|
-| What's New | 4,000 | 3,251 |
-| What's New short | 4,000 | 518 |
-| Promotional text (primary) | 170 | 159 |
-| Description | 4,000 | 3,946 |
-| Keywords (primary) | 100 | 96 |
-| Keywords (alternate) | 100 | 97 |
-| Keywords (Spanish draft) | 100 | 96 |
+| Name | 30 | 21 |
+| Subtitle | 30 | 28 |
+| Promotional text (primary) | 170 | 164 |
+| Description | 4,000 | 3,936 |
+| Keywords | 100 | 98 |

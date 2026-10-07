@@ -1,126 +1,142 @@
-# Nyx 1.1 submission package
+# Nyx 1.1 submission package (first public release)
 
-**Build 1.1 (7), archived 2026-10-06.** `/tmp/Nyx-1.1-7.xcarchive` (iPhone and iPad app with the Tonight's sky widget and the Apple Watch app inside) and `/tmp/NyxVision-1.1-7.xcarchive` (Apple Vision Pro), both Release, development-signed with team `DUHVN68KBA`, zero warnings, `python3 Scripts/verify_release.py` passing (`Research/release-verification.json`). Nothing is uploaded. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store. `/tmp` does not survive a restart, so if the archives are gone, archive again in Xcode (Product → Archive) after checking `project.yml` still says 1.1 / 7.
+**Build 1.1 (8)** is Nyx's **first public release**: 1.0 was never released, and 1.1 (7) was uploaded but never submitted. App Store Connect therefore shows no What's New field, and the featuring nomination is an **App Launch** (`Store/1.1/featuring-nominations.md`). Release is **manual** after approval.
 
-**Release gates remain open** until the owner finishes the ordered steps in `INPUT_NEEDED.md` (device pass, Spanish review, privacy page push).
+Archive both builds from the integrated `main` after the integrator bumps `CURRENT_PROJECT_VERSION` to 8: the iOS archive (iPhone and iPad app with the widgets and the Apple Watch app inside) and the visionOS archive (`NyxVision`, same bundle ID). Before uploading, run `python3 Scripts/verify_release.py --require-key <ios archive> <vision archive>`; it must pass, including the new checks for the age-range entitlement and the Safari link hosts. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store.
+
+**Release gates** (owner, `INPUT_NEEDED.md`): the device pass, the Spanish decision, the privacy page push, the Declared Age Range capability on the App ID, counsel on age assurance, the trademark search and the storefront decision below.
 
 ## The record
 
-- App Store name: **Nyx: Dark Sky Planner** ("Nyx" alone is taken; owner's choice 2026-10-03). Home Screen name **Nyx**. Fallback: **Noctis**.
-- Subtitle (≤30): **The night sky, park by park** (27). Recommended in `Store/1.1/metadata.md`; the 1.0 subtitle "Plan a darker night" stays valid if you prefer continuity. A subtitle changes only with a new version.
-- Categories: Travel (primary), Weather (secondary). Price: Free; no subscriptions, ads or in-app purchases (required by Open-Meteo's free, non-commercial terms).
-- Platforms in this version: **iPhone, iPad (new), Apple Watch (new, inside the iOS build), Apple Vision Pro (new, its own build, same bundle ID `com.harrypakhale.nyx`, universal purchase).** iOS/iPadOS 26.0+, watchOS 26.0+, visionOS 26.0+.
-- Languages: English (U.S.) and **Spanish (Mexico)** (the app ships an `es` localization; see below).
-- Copyright `2026 Hardik Pakhale`. Privacy policy https://harrypakhale98.github.io/Nyx/privacy.html · Support https://harrypakhale98.github.io/Nyx/support.html · Marketing https://harrypakhale98.github.io/Nyx/ (GitHub Pages from `docs/`, submission metadata, not app endpoints). Contact harry.pakhale98@gmail.com.
-- Release: **manual** after approval, so the In-App Events and the featuring nomination line up.
+- **Name:** Nyx: Dark Sky Planner ("Nyx" alone is taken). Home Screen name **Nyx**. Fallback: **Noctis**.
+- **Subtitle:** **Stargazing in national parks** (28). Reasoning in `Store/1.1/metadata.md` § Subtitle decision.
+- **Categories:** Travel (primary), Weather (secondary). **Price:** Free; no subscriptions, ads or in-app purchases. Keep it that way: Open-Meteo's free tier is for non-commercial apps without subscriptions or advertising.
+- **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build, companion), Apple Vision Pro (own build, same bundle ID `com.harrypakhale.nyx`, universal purchase). iOS/iPadOS 26.0+, watchOS 26.0+, visionOS 26.0+. Vision Pro may be submitted a week after iOS if it threatens the date.
+- **Languages:** English (U.S.). Spanish (Mexico) store metadata only after native review (`Store/1.1/metadata-es.md`); the in-app Spanish is the owner's AM-12 decision.
+- **Copyright:** `2026 Hardik Pakhale`. **URLs:** privacy https://harrypakhale98.github.io/Nyx/privacy.html · support https://harrypakhale98.github.io/Nyx/support.html · marketing https://harrypakhale98.github.io/Nyx/ (GitHub Pages from `docs/`; not app endpoints). Contact harry.pakhale98@gmail.com.
 
-## English metadata (paste from `Store/1.1/metadata.md`)
+## Metadata (paste from the files, not from memory)
 
-Every field below is in `Store/1.1/metadata.md` with character counts verified by script. Paste from there, not from memory.
+- English: `Store/1.1/metadata.md` (promotional text, description, keywords, subtitle; counts verified by script). Confirm the feature table at its top against build 8 first.
+- visionOS version page: `Store/1.1/metadata-visionos.md`.
+- Spanish: `Store/1.1/metadata-es.md`, only after the native review.
+- App Preview (optional): `Store/1.1/app-preview-script.md`.
 
-- **What's New:** the full text in `metadata.md` (3,251 of 4,000) or its 518-character fallback. It describes only features in build 7: What's up tonight, the honest forecast (three models, layers, dew, smoke and haze), field mode with Live Activity and alarms, Apple Watch, Apple Vision Pro, iPad, sky glow from NASA Black Marble, audio graphs and Listen to tonight, Feel the Moon, Reduce bright effects, step-free spots, Spanish, trip planner, your constellation, and the third optional data service.
-- **Promotional text (≤170):** `Plan the night, then follow it. The Milky Way core, planets and meteor showers, honest forecasts, and a red field mode for your eyes. Free. Data Not Collected.` (159). Seasonal alternates are in `metadata.md`; promotional text can change without a build.
-- **Description:** `metadata.md` § Description. It corrects the 1.0 sentence about smoke and haze. "Voice Control" is out of the accessibility paragraph until the device pass confirms it.
-- **Keywords (≤100):** `stargazing,milky way,meteor shower,moon phase,national park,astronomy,bortle,planet,eclipse,star` (96). "aurora" is dropped on purpose: Nyx does not forecast aurora.
-- **Review notes:** the 1.0 notes below, plus: "1.1 adds a third provider host, `air-quality-api.open-meteo.com`, behind its own switch in Tonight → Settings → Your privacy, listed in `PrivacyInfo.xcprivacy`. Field mode (Live Activity, AlarmKit alarms, Core Motion for 'Where to look') starts from 'I'm here tonight' on any park's detail screen; best tried in the evening. AlarmKit asks for permission in context after an explainer. The Apple Watch and Apple Vision Pro apps share the engine and make no network requests of their own. No login."
-  - 1.0 notes, still true: no account or reviewer login; onboarding requests no permissions and can be skipped; manual starting-park selection works with location denied; each data service is switchable in Tonight → Settings → Your privacy; core astronomy and the bundled park library work offline; unknown cloud forecasts have hollow calendar and timeline marks and a caveat beside the score; a polar summer night has no true darkness and is capped below 40; notifications are local, opt-in, for saved parks with complete recent forecasts and scores of at least 90; PhotosPicker accesses only selected photos; SwiftData stores observations on the device, no CloudKit; widgets and Control Center share `group.com.harrypakhale.nyx`; Siri and Shortcuts answer without network; Apple Intelligence features appear only when the on-device model is available; the build includes the publisher's NPS key (from git-ignored `Config/Secrets.xcconfig`); no developer screenshot launch arguments exist in Release.
-- **Age rating:** re-answer the questionnaire; nothing in 1.1 changes the answers (no public UGC, no web browsing beyond the providers, no account).
+## Review notes (paste into App Review Information → Notes)
 
-## Spanish (Mexico) localization
+```
+Nyx has no account and no login; nothing needs a demo account. Onboarding asks for no permissions and can be skipped. Choosing a starting park by hand works with location denied.
 
-- App: Spanish ships in the app, widgets, watch and Vision Pro catalogs. Machine-drafted, marked translated, **native-speaker review pending** (`INPUT_NEEDED.md`). Do not submit Spanish metadata before that review.
-- Metadata: `Store/1.1/metadata-es.md`. Name: keep **Nyx: Dark Sky Planner**. Subtitle: `Planea una noche más oscura` (27). Keywords: the list in that file (95 bytes). Description: the Spanish text **plus** its "Optional paragraph" (What's up and field mode now ship). What's New: the Spanish draft with the field-mode paragraph. The Spanish description covers fewer 1.1 features than the English one (no Watch, Vision Pro, trip planner); extending it is part of the native review.
-- Screenshots: `Store/Framed/es/6.9-inch` and `es/6.5-inch` (ten captioned frames, Spanish captions in `Scripts/make_store_frames.swift`). Raw captures in `Store/Screenshots/es/`.
-- Spanish (Mexico) is offered on the US storefront as an additional metadata language; confirm in App Store Connect → App Information → Localizable Information.
+Data and network: the app contacts exactly three public services, each with its own switch in Settings → Your privacy: developer.nps.gov (park alerts and ranger programs), api.open-meteo.com (cloud forecasts) and air-quality-api.open-meteo.com (smoke and haze). Alert requests always name all 63 parks in one request; forecast requests always carry the public coordinates of all 63 parks. No request depends on the person's location. The Apple Watch and Apple Vision Pro apps make no network requests.
 
-## Screenshots per device
+Background App Refresh (one background mode, fetch): about every six hours, when iOS allows, Nyx refreshes saved parks' cloud forecasts and park alerts from the same two public services (api.open-meteo.com, developer.nps.gov), so local reminders and the widget never rely on an old forecast. No user data is sent.
 
-All captures are real renders, no alpha channel, verified sizes. Live = `-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time (2026-10-06, around 12:15 PM Pacific), scored by the shipping engine. Nothing is mocked. Sizes checked against Apple's [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) on 2026-10-06.
+Field mode: on any park's detail screen, "I'm here tonight" opens a red, dimmed screen with a countdown to true darkness, a dark-adaptation clock, a Live Activity started on the device (no push) and "Where to look", which reads Core Motion attitude only while open. Best tried in the evening. Alarms use AlarmKit (iOS 26.1 and later); permission is requested in context, after an in-app explainer, when the person sets the first alarm.
 
-**iPhone, required slot "Dynamic Island, medium display", 1206×2622: `Store/Framed/6.3-inch/`.** Optional: large display 1320×2868 `Store/Framed/6.9-inch/`, 6.5-inch 1284×2778 `Store/Framed/6.5-inch/` (captioned; raw in `Store/Screenshots/`, iPhone 18 Pro Max, iOS 27.0, retaken 2026-10-06 evening from build 7). Upload in this order:
+Age assurance: where iOS reports that the account is subject to an age-assurance law (Declared Age Range: requiredRegulatoryFeatures contains declaredAgeRangeRequired, or isEligibleForAgeFeatures on iOS 26.2–26.3), Nyx requests an age range once per launch with gates 13, 16 and 18. Nyx has no age-restricted content: the response is not stored and changes nothing, and errors or a refusal leave the app unchanged. Elsewhere nothing is shown.
 
-| # | File | Eyebrow / caption | Screen (all Joshua Tree unless named) |
-|---|---|---|---|
-| 1 | `01-tonight.png` | TONIGHT / Where is the sky darkest tonight? | Tonight: Death Valley 96, closure line beside the score (live) |
-| 2 | `02-score.png` | THE DARKNESS SCORE / One number, and its reasons. | Park detail: gauge 93, four meters, "Models agree", I'm here tonight (live) |
-| 3 | `03-whats-up.png` | WHAT'S UP TONIGHT / The Milky Way, and when to look. | What's up: core 7:43–8:54 PM, Jupiter, Mercury, Saturn, Mars, Wake me (live, via `nyx://whatsup`) |
-| 4 | `04-field-mode.png` | FIELD MODE / Red light for dark-adapted eyes. | Field mode in red: 93 like the detail frame, "True darkness in 22:37", milestones, eye clock (tonight, live refresh, clock moved to 60 min after sunset) |
-| 5 | `05-where-to-look.png` | WHERE TO LOOK / Point your iPhone. Find the core. | Compass sky: the Milky Way band rising from the core, 27° up in the south, Antares, Mars marked at the edge (computed for Sat 3 July 2027, new Moon, 11:40 PM; fixed pose 10° above the core; header 86 with "Moon and darkness only. Clouds unknown.", as that night is beyond the forecast) |
-| 6 | `06-calendar.png` | BEST NIGHTS / Choose the night worth the drive. | October 2026: new-moon window halos, cloud glyphs, Orionids mark on the 20th, hollow nights past the forecast (live) |
-| 7 | `07-trip.png` | PLAN A TRIP / A park for every free night. | The route and the first nights, best night Wed Oct 7 Death Valley 97 (live) |
-| 8 | `08-constellation.png` | YOUR CONSTELLATION / Every night becomes a star. + privacy line | Journal: constellation, "4 of 63", an entry (illustrative DEBUG journal, no personal photos) |
-| 9 | `09-listen.png` | SOUND AND TOUCH / Hear the shape of the night. | Shape of the night, Listen to tonight, transcript (live) |
-| 10 | `10-every-sky.png` | SKY GLOW AND ACCESS / City glow, named. Step-free spots, marked. | Death Valley: NASA night-lights rank, glow from Las Vegas, Ridgecrest, Visalia; partly step-free spot |
+Links: park pages on nps.gov, Globe at Night, Open-Meteo and the Creative Commons licence open in Safari only when tapped; Nyx itself never requests them.
 
-Captions: calm, six words or fewer, no prices, no "new", no exclamation marks. Frames 4–5 use signal red. Reproduce: `python3 Scripts/capture_store.py SIM DERIVED en|es` (trip and listen scroll themselves through DEBUG flags), then `swift Scripts/make_store_frames.swift [es]`.
+Reminders are local notifications, opt-in, for saved parks only: nights scoring 90 or more, up to five days ahead, with a recent full cloud forecast, at most one a week per park. Photos come only through PhotosPicker. The journal lives in SwiftData on the device (no CloudKit) and can be exported as a file the person saves. Siri, Shortcuts, widgets and Spotlight answer from data already on the device. Apple Intelligence features appear only where Apple's on-device model is available. The build includes the publisher's National Park Service API key. Developer screenshot launch arguments are compiled out of Release.
+```
 
-**iPad 13-inch (required now that Nyx runs on iPad), 2064×2752 portrait: `Store/Framed/iPad-13-inch/`**, six captioned frames from build 7 (iPad Pro 13-inch (M5), iOS 27.0, live data except the journal): Tonight, score, field mode, calendar, constellation, Where to look.
+Add these sentences only if the feature is in build 8 (integrator to confirm):
 
-**Apple Watch, 422×514 (Ultra 3 / Ultra 4 class): `Store/Framed/Watch-Ultra/`** (captioned; raw in `Store/Screenshots/Watch/`), six captures from the NyxWatch scheme on Apple Watch Ultra 3 (watchOS 27): Tonight gauge, milestones, the week, Parks, dark-adaptation cover (red), Tonight in night vision. Apple requires **one** watch size used consistently across localizations; this set is it. The Series 11 42 mm simulator captures at 374×446, which App Store Connect does not accept (accepted: 422×514, 410×502, 416×496, 396×484, 368×448, 312×390), so it was not used. The watch simulator has no paired iPhone, so its scores are moon and darkness only and say "clouds unknown" (honest, not mocked); the clock shows the capture time because the watch simulator ignores status-bar overrides.
+- **Maps hand-off:** `Viewing spots can open in Apple Maps when the person taps "Open in Maps": the app hands the spot's public coordinates to Maps through a maps:// link. Nyx makes no request itself and uses no MapKit.`
+- **Translation of park text:** `Park descriptions and alerts from the National Park Service can be translated on the device with Apple's Translation framework (translationPresentation), only when the person asks. Nyx sends nothing for this.`
 
-**Apple Vision Pro, 3840×2160: `Store/Screenshots/Vision/`**, four captures from NyxVision on the Vision Pro simulator (visionOS 27): `01-window` (the planner window in a room, tonight, Joshua Tree 91, moon and darkness only), `02-immersive-core` (Joshua Tree tonight, the Milky Way setting in the west), `03-moonlit` (Great Basin, 2027-07-15, the Moon beside the core), `04-name-card` (Jupiter's name card, 24° up in the east before dawn at Joshua Tree, the thin crescent Moon rising below it). Sky scenes are computed by the engine for the stated park and date. Retaken 2026-10-06 evening for build 7; reproduce with `-nyx-vision-immersive -nyx-vision-skyonly` plus `-nyx-vision-look 305,-24 -nyx-vision-time 0.11` (02), `-nyx-date 2027-07-15 -nyx-park grba -nyx-vision-time 0.2 -nyx-vision-look 0,-18` (03), `-nyx-vision-time 0.82 -nyx-vision-body jupiter -nyx-vision-look 90,-20` (04); the look yaw runs opposite to compass bearing (facing = 540° − yaw), and a negative pitch looks up.
+## Age assurance (Texas SB 2420)
 
-**App Preview video (optional):** storyboard and specs in `Store/1.1/app-preview-script.md`.
+What Apple asks: since 2026-06-04, Apple tells developers that "in those regions, you must check the age of the people using your app" ([age assurance Q&A](https://developer.apple.com/support/age-assurance/), [Apple news](https://developer.apple.com/news/?id=sg176nne), read 2026-10-07 by the compliance audit). Nyx has no age-restricted content, accounts, messaging or purchases.
 
-**History:** the 1.0 sets left the tree on 2026-10-06; they are in git history (last present at commit `1a27187`).
+What Nyx does (`Nyx/Services/AgeAssurance.swift`, hook in `NyxApp`):
+
+1. About 1.5 s after the first frame, once per launch, Nyx asks iOS whether this account needs an age range: on iOS 26.4 and later, `isEligibleForAgeFeatures` and then `requiredRegulatoryFeatures` containing `.declaredAgeRangeRequired`; on iOS 26.2–26.3, `isEligibleForAgeFeatures`. On iOS 26.0–26.1 the system cannot say, so Nyx never asks.
+2. Only when the answer is yes, Nyx calls `requestAgeRange(ageGates: 13, 16, 18, in:)`. iOS shows its own sheet (or answers from its cache).
+3. The response is dropped at once. Nothing is stored, logged or sent; no feature is gated; a refusal, an error or "not available" changes nothing.
+4. Never in DEBUG screenshot scenarios; never blocks the interface.
+
+Requirements: the **Declared Age Range** entitlement (`com.apple.developer.declared-age-range`, in `Config/Nyx.entitlements`; `verify_release.py` checks it). **Owner:** enable the Declared Age Range capability on the App ID `com.harrypakhale.nyx` in Certificates, Identifiers & Profiles (or let Xcode's automatic signing add it at archive), otherwise the request fails at runtime with a missing-entitlement error (harmless, but then Nyx does not comply). Test in the age-assurance sandbox (Settings → Developer, or App Store Connect test scenarios) before release.
+
+Not done, and why: no `SignificantAppUpdate`/PermissionKit flow (Nyx has nothing a parent must approve; revisit if a social feature or an age-rating change ever happens), no App Store Server Notifications (Nyx has no server, so it cannot receive `RESCIND_CONSENT`; with nothing gated, a withdrawn consent changes nothing in the app). **Counsel review is still recommended** (an hour on SB 2420, and on Utah, effective 2027-05-06, and Louisiana, 2027-07-01, both from secondary sources). Keep the age rating at 4+ and answer the current questionnaire.
+
+## Export compliance
+
+`ITSAppUsesNonExemptEncryption = NO` on iPhone, Watch and Vision Pro (`project.yml`). Nyx uses only the encryption built into iOS for HTTPS, no CryptoKit or CommonCrypto (verified by grep, compliance audit C16). No export documentation is needed; answer "No" if App Store Connect asks.
+
+## Storefronts and the EU Digital Services Act (C6)
+
+**Recommendation: launch in the United States, Canada and Mexico only.** The data covers US parks only, and Spanish (Mexico) is the one other language. Leave the EU and the UK out until the owner decides whether he is a "trader" under the DSA (traders publish an address, phone and email on the EU product page; [Apple's DSA page](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements)). Leave China mainland out (it needs an ICP filing; from memory, unverified). App Store Connect → Pricing and Availability → Countries or Regions. **Mac availability:** do not make the iPad app available on Mac (field mode, compass, alarms and Live Activities are hidden there and were never tried).
+
+## The name (C10)
+
+Before submitting, the owner runs a **USPTO trademark search** (https://tmsearch.uspto.gov) for "NYX" in classes 9, 42, 38 and 41. Other apps named Nyx exist on the App Store, and NYX Professional Makeup is a well-known mark in cosmetics; a complaint is unlikely but would come under Guidelines 4.1(c) and 5.2.1. Keep **Noctis** as the agreed fallback. Never use the NPS arrowhead or the DarkSky logo; every public surface says Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.
+
+## Data permissions on file (Guideline 5.2.2)
+
+App Review may ask for proof of permission to use third-party data. Before submitting, the owner emails and keeps the replies:
+
+- **Open-Meteo** (info@open-meteo.com): a free app with no ads, subscriptions or in-app purchases; 63-park batches about every six hours; credit as a link "Weather data by Open-Meteo.com" in About the data. Ask them to confirm non-commercial use.
+- **National Park Service** (the API contact): the key ships in a public app; ask for a raised hourly limit (`INPUT_NEEDED.md` #10).
+- **International Meteor Organization:** a courtesy note that Nyx shows dates, radiants and rates from the 2026 calendar, credited.
+
+## Screenshots
+
+**Recapture every set from build 8 before upload.** The build 7 frames in `Store/Framed/` show scores from before score v2 (for example Joshua Tree 93 or 94, which the Bortle 3 cap now limits to 89) and copy that has since changed ("Moon and darkness only. Clouds unknown."). Showing them would contradict the app (Guideline 2.3). Reproduce with `python3 Scripts/capture_store.py SIM DERIVED en|es` and `swift Scripts/make_store_frames.swift [es]`, then `swift Scripts/make_device_frames.swift`.
+
+Slots (checked against Apple's [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) on 2026-10-06):
+
+- **iPhone**, required "Dynamic Island, medium display" 1206×2622: `Store/Framed/6.3-inch/`; optional 1320×2868 `6.9-inch/` and 1284×2778 `6.5-inch/`.
+- **iPad 13-inch**, 2064×2752 portrait: `Store/Framed/iPad-13-inch/`.
+- **Apple Watch**, 422×514: `Store/Framed/Watch-Ultra/` (one size across localizations).
+- **Apple Vision Pro**, 3840×2160: `Store/Framed/Vision-Pro/` (add a star-names frame and the Moon on your table).
+
+Order (hero order, DX-19 and ST-2): (1) Tonight answering where *and* when, with no amenity alert in view; (2) the score and its reasons; (3) What's up tonight; (4) the calendar; then field mode and Where to look (red, mostly black thumbnails belong after the calendar, because search results show only the first three); then the trip planner, the constellation (caption footnote "Sample entries"), Listen, sky glow and access. Captions: calm, six words or fewer, no prices, no "new", no exclamation marks.
 
 ## Platform steps
 
-- **iPad:** included in the iOS build. Upload the iPad 13-inch set. **Mac availability:** App Store Connect → Pricing and Availability → Mac Availability → do not make the app available on Mac (field mode, compass, alarms and Live Activities were never tried there).
-- **Apple Watch:** included in the iOS build (`Nyx.app/Watch/NyxWatch.app` with its complications). The bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` are registered and carry the App Group (Xcode's automatic signing produced their profiles during the archive). Upload the watch set under the version's Apple Watch section. The watch app needs the iPhone app (companion).
-- **Apple Vision Pro:** App Store Connect → the app → **+ Add Platform → visionOS**, then upload `NyxVision-1.1-7` from Organizer (archive scheme NyxVision, destination Any visionOS Device), add the four 3840×2160 screenshots, and submit the visionOS version with iOS 1.1. Same bundle ID, so it is one universal purchase.
+- **iPad:** in the iOS build. Mac availability off (above).
+- **Apple Watch:** in the iOS build (`Nyx.app/Watch/NyxWatch.app`, complications and the Red light control). Bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` carry the App Group. `WKRunsIndependentlyOfCompanionApp = NO`: the watch app needs the iPhone app.
+- **Apple Vision Pro:** App Store Connect → + Add Platform → visionOS, upload `NyxVision` 1.1 (8) with its widget (`NyxVisionWidgets`, ID `com.harrypakhale.nyx.widgets`), add the screenshots and the visionOS page, and submit.
 
 ## Privacy
 
-- App Privacy: **"No, we do not collect data from this app" (Data Not Collected), no tracking.** Reasoning in `PRIVACY.md`.
-- The third host, `air-quality-api.open-meteo.com` (smoke and haze, approved by the owner 2026-10-05), receives only the public coordinates of national parks, as the forecast host does; it has its own switch under Your privacy, is named in `PrivacyInfo.xcprivacy` and the privacy policy, and does not change the label. `verify_release.py` checks that the code contacts exactly `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com`, that the watch and Vision Pro targets contain no network code, and that all five bundled manifests declare no tracking and no collected data.
-- The published privacy page must already mention the third host before review: push `docs/` to `main` (`INPUT_NEEDED.md`).
+- App Privacy: **"No, we do not collect data from this app" (Data Not Collected), no tracking.** Reasoning in `PRIVACY.md`. Nothing in build 8 changes it: bulk alerts name all 63 parks, so a request says nothing about the person; background refresh repeats the same requests; age assurance stores and sends nothing; journal export is a file the person saves; diagnostics stay on the device.
+- Push `docs/` (privacy page dated October 7, 2026, with the age-range and links paragraphs) before review.
+- Run Xcode's "Generate Privacy Report" on the final archive.
 
 ## Accessibility Nutrition Labels
 
-App Store Connect → App Information → Accessibility, per device. Full reasoning and the device pass in `Store/1.1/accessibility-nutrition-labels.md`.
-
-| Feature | iPhone | iPad | Apple Watch | Vision Pro | Declare when |
-|---|---|---|---|---|---|
-| VoiceOver | Yes | Yes | Yes | Yes | after the device pass on each |
-| Voice Control | Yes | Yes | n/a | Yes | only after the Voice Control pass |
-| Larger Text | Yes | Yes | Yes | Yes | after checking Live Activity, watch and Vision Pro |
-| Dark Interface | Yes | Yes | Yes | Yes | now |
-| Differentiate Without Color Alone | Yes | Yes | Yes | Yes | after a grayscale pass |
-| Sufficient Contrast | Yes | Yes | Yes | Yes | after device sampling |
-| Reduced Motion | Yes | Yes | Yes | Yes | after the device check |
-| Captions / Audio Descriptions | No (no video or speech) | No | n/a | No | — |
+Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-labels.md`). Dark Interface can be declared now. The same gate governs the description's accessibility sentence (C11): "designed for VoiceOver and the largest text sizes" until the pass.
 
 ## In-App Events and featuring
 
-- **In-App Events:** eleven paste-ready events in `Store/1.1/in-app-events.md` (Geminids under a thin Moon, Quadrantids, seven new-moon weekends, Eta Aquariids, Perseids 2027), badge Special Event, deep links `nyx://whatsup?date=…&park=…` (supported in build 6). Submit each at least 7 days before its publish date; publish up to 14 days before start. Event media (16:9 card, 9:16 details) still has to be produced (`in-app-events.md` § Media).
-- **Featuring:** `Store/1.1/featuring-nominations.md`. Nomination 2, **App Enhancements (Nyx 1.1)**, needs at least three weeks' lead: for a mid-November release, file by about **Oct 28**. Nomination 3a (Geminids event) by Nov 20. File Nomination 1 (App Launch) only if 1.0 has not shipped yet.
+- **Featuring:** one **App Launch** nomination for 1.1, publish window **Nov 6–8, 2026** (the new-moon weekend), filed **by Oct 16**; then a **New Content** nomination for the Geminids event (Dec 12–15), filed **by Nov 20**. No App Enhancements nomination until 1.2. Texts in `Store/1.1/featuring-nominations.md`.
+- **In-App Events:** `Store/1.1/in-app-events.md` (artwork in `Store/1.1/events/`). Submit each at least 7 days before its publish date, once build 8 is approved.
 
-## App Store Connect checklist (1.1)
+## App Store Connect checklist
 
-1. If 1.0 (5) was never submitted, rename the pending version to 1.1 and use build 7; otherwise create version 1.1.
-2. Upload build 1.1 (7) (iOS, with watch inside) and the visionOS build from Organizer → Distribute App → App Store Connect. Wait for processing; complete export compliance (`ITSAppUsesNonExemptEncryption = NO`: standard HTTPS only).
-3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass in `INPUT_NEEDED.md`.
-4. Version page: What's New, promotional text, description, keywords, subtitle (English, then Spanish after review); screenshots for iPhone 6.9", iPad 13", Apple Watch, Vision Pro, in both languages for iPhone.
-5. Mac Availability off; add the visionOS platform.
-6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only the features the device pass confirmed), age rating, review notes.
-7. Select builds, manual release, Submit for Review. Attach In-App Events and file the featuring nomination per the dates above.
-8. After approval: install from the App Store, offline sanity check, then release.
+1. Rename the pending version to 1.1 if needed; select build 8 (iOS, with the watch inside) and the visionOS build 8.
+2. Export compliance: No (above).
+3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass; enable the public TestFlight link for the nomination.
+4. Version page: promotional text, description, keywords, subtitle, screenshots (build 8 captures), optional App Preview; no What's New.
+5. Pricing and Availability: US, Canada, Mexico; Mac availability off.
+6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only passed features), age rating (expected 4+; social media capabilities: No), review notes (above).
+7. Manual release → Submit for Review. File the App Launch nomination (by Oct 16) and attach the events once approved.
+8. After approval: install from the App Store, run an offline sanity check, then release; flip the website's one line to the App Store link (`docs/index.html` comment).
 
 ## Owner sign-off
 
-| Gate | Status / evidence |
+| Gate | Status |
 |---|---|
-| Privacy label | READY: Data Not Collected, `PRIVACY.md`; third host explained above |
-| Privacy page with the third host live | DONE 2026-10-06: live, covering iPad, Apple Watch and Apple Vision Pro |
-| Release archives | PASS locally: 1.1 (7) iOS + watch + widgets and visionOS, development-signed, `verify_release.py` passing; distribution export pending |
-| Physical accessibility, field mode at night, haptics, ProMotion | OPEN: `INPUT_NEEDED.md` step 1, `AUDIT.md` |
-| Widgets, Live Activity, alarms, Siri, Spotlight, Smart Stack, available AI on device | OPEN: the simulator cannot host these |
-| Apple Watch and Vision Pro on hardware | OPEN |
+| Privacy label | READY: Data Not Collected (`PRIVACY.md`) |
+| Privacy page with age range and links | READY in the repo; push `docs/` |
+| Declared Age Range capability on the App ID | OPEN (owner) |
+| Counsel on SB 2420 | RECOMMENDED (owner) |
+| USPTO search for NYX | OPEN (owner) |
+| Storefronts and DSA trader status | OPEN: recommendation US, Canada, Mexico |
+| Open-Meteo, NPS, IMO emails | OPEN (owner) |
+| Build 8 archives and `verify_release.py --require-key` | OPEN (integrator) |
+| Screenshots recaptured from build 8 | OPEN |
+| Physical device pass (accessibility, field mode at night, Watch, Vision Pro) | OPEN (`AUDIT.md`) |
 | Spanish native review | OPEN |
-| Screenshots | READY: iPhone 6.9"/6.5" English and Spanish, iPad 13", Watch, Vision Pro |
-| App Store export and account metadata | OPEN: publisher account workflow |
-
-**iPhone screenshot slots (checked against Apple's specification 2026-10-06):** "iPhone with Dynamic Island (medium display)" is the required slot and takes only 1206×2622 or 1179×2556: upload `Store/Framed/6.3-inch/`. The large-display slot (1320×2868) takes `Store/Framed/6.9-inch/`; the 6.5" Face ID slot (1284×2778) is optional and takes `Store/Framed/6.5-inch/`.
-
-**Captioned sets for the other devices (English), from `swift Scripts/make_device_frames.swift`:** iPad 13" `Store/Framed/iPad-13-inch/` (six, 2064×2752 portrait, captured on iPad Pro 13-inch (M5) / iOS 27.0 from build 7 with live data: Tonight, score, field mode, calendar, constellation, Where to look on the 3 July 2027 night), Apple Vision Pro `Store/Framed/Vision-Pro/` (four, 3840×2160; computed skies say so under the scene), Apple Watch `Store/Framed/Watch-Ultra/` (six, 422×514). Upload these in place of the raw captures.
