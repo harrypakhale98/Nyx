@@ -1,6 +1,6 @@
 // Builds captioned App Store screenshots from the raw captures in Store/Screenshots.
 // Usage: swift Scripts/make_store_frames.swift [es]  (run from the repo root)
-// Writes Store/Framed/6.9-inch (1320×2868) and Store/Framed/6.5-inch (1284×2778), flattened, no alpha.
+// Writes Store/Framed/6.9-inch (1320×2868), 6.3-inch (1206×2622, the required slot) and 6.5-inch (1284×2778), flattened, no alpha.
 import AppKit
 
 struct Frame {
@@ -154,7 +154,8 @@ func render(_ frame: Frame, index: Int, width W: CGFloat, height H: CGFloat) -> 
     return NSBitmapImageRep(cgImage: out).representation(using: .png, properties: [:])
 }
 
-for (folder, w, h) in [("6.9-inch", 1320.0, 2868.0), ("6.5-inch", 1284.0, 2778.0)] {
+// 6.3-inch: App Store Connect's required iPhone slot ("Dynamic Island, medium display") takes 1206×2622.
+for (folder, w, h) in [("6.9-inch", 1320.0, 2868.0), ("6.3-inch", 1206.0, 2622.0), ("6.5-inch", 1284.0, 2778.0)] {
     let dir = URL(fileURLWithPath: outputFolder + folder, isDirectory: true)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     for (i, frame) in frames.enumerated() {

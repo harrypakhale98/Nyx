@@ -120,3 +120,5 @@ App Store Connect → App Information → Accessibility, per device. Full reason
 | Spanish native review | OPEN |
 | Screenshots | READY: iPhone 6.9"/6.5" English and Spanish, iPad 13", Watch, Vision Pro |
 | App Store export and account metadata | OPEN: publisher account workflow |
+
+**iPhone screenshot slots (checked against Apple's specification 2026-10-06):** "iPhone with Dynamic Island (medium display)" is the required slot and takes only 1206×2622 or 1179×2556: upload `Store/Framed/6.3-inch/`. The large-display slot (1320×2868) takes `Store/Framed/6.9-inch/`; the 6.5" Face ID slot (1284×2778) is optional and takes `Store/Framed/6.5-inch/`.
