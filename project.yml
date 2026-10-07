@@ -94,7 +94,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Dark
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find nearby national parks. Your coordinates are never sent to a service.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find nearby national parks, notice when you are at one, and point the sky to true north. Your location never leaves this device.
         CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Settings → App icon: the Moon's other phases, each its own Icon Composer document in Resources.

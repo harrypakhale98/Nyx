@@ -32,7 +32,8 @@ import UserNotifications
     }
     var body:some Scene {
         WindowGroup {
-            if let container { RootView().environment(model).modelContainer(container) }
+            // Age assurance only where the system says the law requires it; stores and gates nothing (`AgeAssurance`).
+            if let container { RootView().environment(model).modelContainer(container).modifier(AgeAssuranceCheck()) }
             else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
         // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night.
