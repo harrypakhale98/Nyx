@@ -2,8 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.harrypakhale.nyx.refresh</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Nyx Journal</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.harrypakhale.nyx.journal</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -27,12 +48,18 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
 	<key>NPS_API_KEY</key>
 	<string>$(NPS_API_KEY)</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
@@ -40,5 +67,26 @@
 		<key>UIImageName</key>
 		<string>LaunchStars</string>
 	</dict>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+				<string>public.composite-content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Nyx Journal</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.harrypakhale.nyx.journal</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>nyxjournal</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

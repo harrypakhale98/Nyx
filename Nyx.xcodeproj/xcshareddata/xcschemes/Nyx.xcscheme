@@ -57,6 +57,12 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       onlyGenerateCoverageForSpecifiedTargets = "NO">
+      <TestPlans>
+         <TestPlanReference
+            default = "YES"
+            reference = "container:Nyx.xctestplan">
+         </TestPlanReference>
+      </TestPlans>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -67,28 +73,6 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "854F1CAF019EEA9E852C4585"
-               BuildableName = "NyxTests.xctest"
-               BlueprintName = "NyxTests"
-               ReferencedContainer = "container:Nyx.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "35EEA7F15A5144F18CBA3158"
-               BuildableName = "NyxUITests.xctest"
-               BlueprintName = "NyxUITests"
-               ReferencedContainer = "container:Nyx.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
