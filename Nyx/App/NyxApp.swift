@@ -41,5 +41,10 @@ import UserNotifications
         // About every six hours, when iOS allows: saved parks' clouds (and alerts when due), the
         // widget, the watch and reminders, so a reminder never rests on a stale forecast.
         .backgroundTask(.appRefresh(SavedSkySync.refreshTask)) { [model] in await model.savedSync.backgroundRefresh(model) }
+        // Assistive Access (Settings › Accessibility): one park, one word, the Moon and when it gets dark.
+        AssistiveAccess {
+            if let container { AssistiveAccessRoot().environment(model).modelContainer(container) }
+            else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+        }
     }
 }
