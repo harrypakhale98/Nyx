@@ -12,6 +12,7 @@ import UserNotifications
         let launch=LaunchSignposts.begin("App init")
         // The offline caches start loading on background threads at once.
         let preload=DebugScenario.screen == nil ? CachePreload.start() : nil
+        BundledData.warm()
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
         container=opened.container
@@ -56,5 +57,18 @@ import UserNotifications
             if let container { ParkWindowRoot(value:$value).environment(model).modelContainer(container) }
         }
         .handlesExternalEvents(matching:[])
+    }
+}
+
+/// The bundled tables every first screen reads (sky glow, usual clouds, sky events, step-free
+/// spots, the star catalogue), decoded on a background thread at launch instead of on the main
+/// thread at first use. Each is a `static let`, initialised once and thread-safely: a screen that
+/// asks first simply waits for the same read.
+nonisolated enum BundledData {
+    static func warm() {
+        DispatchQueue.global(qos:.userInitiated).async {
+            _=SkyGlow.shared; _=NightPlanner.glowRank(""); _=CloudClimate.shared
+            _=SkyEvents.shared; _=AccessData.shared; _=SkyProjection.catalogue.count
+        }
     }
 }

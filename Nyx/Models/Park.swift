@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     let id: String
@@ -38,12 +39,21 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     }
     var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .gmt }
     /// Search should forgive spelling: "Hawaii Volcanoes" finds Hawaiʻi, "Wrangell St Elias" finds the en dash.
-    func matches(_ query: String) -> Bool {
-        let needle = Self.folded(query)
+    func matches(_ query: String) -> Bool { matches(folded: Self.folded(query)) }
+    /// With the query already `folded`: the list folds it once for all 63 parks.
+    func matches(folded needle: String) -> Bool {
         guard !needle.isEmpty else { return true }
-        let aliases = Self.aliases[id] ?? []
-        return ([name, state] + aliases).contains { Self.folded($0).contains(needle) }
+        return searchTerms.contains { $0.contains(needle) }
     }
+    /// The name, state and aliases, folded once per park and kept.
+    private var searchTerms: [String] {
+        let key = id+"|"+name+"|"+state
+        if let kept = Self.foldedTerms.withLock({ $0[key] }) { return kept }
+        let terms = ([name, state] + (Self.aliases[id] ?? [])).map(Self.folded)
+        Self.foldedTerms.withLock { $0[key] = terms }
+        return terms
+    }
+    private static let foldedTerms = Mutex<[String: [String]]>([:])
     nonisolated static func folded(_ text: String) -> String {
         text.replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
             .replacingOccurrences(of: "&", with: " and ")

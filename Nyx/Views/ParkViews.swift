@@ -108,37 +108,40 @@ struct ParksView: View {
     @State private var saveFailed=false
     @AppStorage("parksByScore") private var byScore=false
     @Namespace private var zoom
+    /// Worked out once per update of the list (the body reads it into `shown`): ranking 63 parks is not free.
     private var filtered:[Park] {
         let filter=ParkFilter(darkOnly:darkOnly,stepFreeOnly:stepFreeOnly)
-        let matching=model.parks.filter { p in filter.includes(p) && (!savedOnly || saved.contains{$0.parkID==p.id}) && (search.isEmpty || p.matches(search)) }
+        let savedIDs=Set(saved.map(\.parkID)), query=Park.folded(search)
+        let matching=model.parks.filter { p in filter.includes(p) && (!savedOnly || savedIDs.contains(p.id)) && (query.isEmpty || p.matches(folded:query)) }
         return byScore ? model.ranked(matching) : matching
     }
     /// Saved parks lead the list only when nothing narrows it.
     private var narrowed:Bool { darkOnly || stepFreeOnly || savedOnly }
     private var showsSavedSection:Bool { !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && !stepFreeOnly }
     var body: some View {
+        let shown=filtered
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
-                Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : narrowed ? LocalizedStringKey("\(filtered.count) of 63 parks") : LocalizedStringKey("63 places to look up"))
+                Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : narrowed ? LocalizedStringKey("\(shown.count) of 63 parks") : LocalizedStringKey("63 places to look up"))
                 Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate".
-                if filtered.contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if shown.contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
-                else if filtered.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
+                else if shown.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else {
                     if showsSavedSection {
                         Eyebrow(text:"Saved for later")
                         ForEach(model.parks.filter{p in saved.contains{$0.parkID==p.id}}) { p in link(p) }
                         Eyebrow(text:"All national parks")
                     }
-                    LazyVStack(spacing:0) { ForEach(filtered.filter { p in !(showsSavedSection && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
+                    LazyVStack(spacing:0) { ForEach(shown.filter { p in !(showsSavedSection && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
                 }
             }.padding(24)
             // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
-            .accessibilityRotor(Text("Closures"),entries:rotor { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
-            .accessibilityRotor(Text("Pristine nights"),entries:rotor { park in
+            .accessibilityRotor(Text("Closures"),entries:rotor(shown) { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
+            .accessibilityRotor(Text("Pristine nights"),entries:rotor(shown) { park in
                 let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
@@ -158,10 +161,10 @@ struct ParksView: View {
     }
     struct RotorPark: Identifiable { let id: String; let label: String }
     /// One rotor stop for each park on screen that `label` names, in the order shown.
-    private func rotor(_ label:(Park)->String?)->[RotorPark] {
+    private func rotor(_ shown:[Park],_ label:(Park)->String?)->[RotorPark] {
         let sectioned = showsSavedSection
         let first=sectioned ? model.parks.filter { p in saved.contains { $0.parkID==p.id } } : []
-        let rest=filtered.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
+        let rest=shown.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
         return (first+rest).compactMap { park in label(park).map { RotorPark(id:park.id,label:$0) } }
     }
     @ViewBuilder private func link(_ park:Park)->some View {
@@ -697,15 +700,23 @@ struct ScoreBreakdownView: View {
                 .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
         }
     }
+    private var scoreNumeral: some View {
+        Text("\(night.score.value)").font(.system(size:numeralSize,weight:.light,design:.serif)).tracking(-3).foregroundStyle(palette.accent)
+    }
+    private var scoreBand: some View {
+        VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
+    }
     private var content: some View {
         VStack(alignment:.leading,spacing:26) {
             VStack(alignment:.leading,spacing:10) {
                 Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
                 Text("A number with a reason").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
             }
-            HStack(alignment:.firstTextBaseline,spacing:12) {
-                Text("\(night.score.value)").font(.system(size:numeralSize,weight:.light,design:.serif)).tracking(-3).foregroundStyle(palette.accent)
-                VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
+            // The band keeps its whole width beside the numeral (a one-word band cannot wrap, so a squeezed
+            // frame clips it); when both do not fit, as at accessibility sizes, the band goes underneath.
+            ViewThatFits(in:.horizontal) {
+                HStack(alignment:.firstTextBaseline,spacing:12) { scoreNumeral; scoreBand.fixedSize() }
+                VStack(alignment:.leading,spacing:4) { scoreNumeral; scoreBand }
             }
             .accessibilityElement(children:.combine)
             // The weakest link, said beside the number it sets, before the parts that add up to more.

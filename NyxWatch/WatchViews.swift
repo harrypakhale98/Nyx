@@ -6,13 +6,26 @@ struct WatchRootView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.scenePhase) private var scenePhase
-    /// Read once a minute, so Automatic turns red at civil dusk with the app open.
-    @State private var clock = Date.now
+    /// When Nyx last became active: between two minute marks, "now" is never earlier than this.
+    @State private var woke = Date.now
     /// A park and night opened from a complication or the Smart Stack, above Tonight.
     @State private var path: [WatchLink] = []
     var body: some View {
-        let palette = NyxPalette(nightVision: store.nightVision(at: clock), highContrast: contrast == .increased)
-        NavigationStack(path: $path) {
+        // The app's one clock, read once a minute: Automatic turns red at civil dusk with the app
+        // open, and every page below reads the same minute (`\.watchNow`).
+        TimelineView(.everyMinute) { timeline in
+            let now = max(timeline.date, woke)
+            content(now: now).environment(\.watchNow, now)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            store.reloadSettings()
+            woke = .now
+        }
+    }
+    private func content(now: Date) -> some View {
+        let palette = NyxPalette(nightVision: store.nightVision(at: now), highContrast: contrast == .increased)
+        return NavigationStack(path: $path) {
             Group {
                 #if DEBUG
                 if let screen = WatchDebug.screen, !WatchDebug.homeScreens.contains(screen) { WatchDebug.view(screen) }
@@ -37,17 +50,6 @@ struct WatchRootView: View {
         .background(Color.black)
         .modifier(WatchDebug.AlwaysOn())
         .modifier(WatchDebug.ScrollEnd())
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(61 - Double(Calendar.current.component(.second, from: .now))))
-                clock = .now
-            }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            guard phase == .active else { return }
-            store.reloadSettings()
-            clock = .now
-        }
     }
     /// A complication's park and night (`WatchLink`): pushed above Tonight, or Tonight itself when
     /// it is tonight at the park Tonight already shows.
@@ -58,11 +60,22 @@ struct WatchRootView: View {
         path = [link]
     }
     @ViewBuilder private var home: some View {
-        TimelineView(.everyMinute) { timeline in
-            if let park = store.featured(at: timeline.date) { ParkNightView(park: park, isHome: true) }
-            else { ParkChooser() }
-        }
+        HomeNight()
     }
+}
+
+/// Tonight's park on the root's minute, or the chooser when there is none.
+private struct HomeNight: View {
+    @Environment(WatchStore.self) private var store
+    @Environment(\.watchNow) private var now
+    var body: some View {
+        if let park = store.featured(at: now) { ParkNightView(park: park, isHome: true) }
+        else { ParkChooser() }
+    }
+}
+extension EnvironmentValues {
+    /// The minute every watch page is drawn for, from `WatchRootView`'s single timeline.
+    @Entry var watchNow: Date = .now
 }
 
 /// Wrist down, Starlight's cream and amber step down with the screen; red is already the dimmest light.
@@ -92,9 +105,9 @@ struct ParkNightView: View {
     var startNight = WatchDebug.initialNight
     @State private var page = WatchDebug.initialPage
     @State private var darkMode = WatchDebug.screen == "dark"
+    @Environment(\.watchNow) private var now
     var body: some View {
-        TimelineView(.everyMinute) { timeline in
-            let now = timeline.date
+        Group {
             let week = store.week(park, at: now)
             let night = week.first ?? store.tonight(park, at: now)
             TabView(selection: $page) {
@@ -471,9 +484,10 @@ struct WatchEyebrow: View {
 struct ParksList: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
+    @Environment(\.watchNow) private var now
     var body: some View {
         @Bindable var store = store
-        TimelineView(.everyMinute) { timeline in
+        Group {
             List {
                 if let pinned = store.park(store.pinned) {
                     Section {
@@ -481,9 +495,9 @@ struct ParksList: View {
                     } footer: { Text("Tonight shows \(pinned.wristName).") }
                 }
                 if !store.savedParks.isEmpty {
-                    Section("Saved on iPhone") { ForEach(store.savedParks) { row($0, now: timeline.date, scored: true) } }
+                    Section("Saved on iPhone") { ForEach(store.savedParks) { row($0, now: now, scored: true) } }
                 }
-                Section("All parks") { ForEach(store.parks) { row($0, now: timeline.date, scored: false) } }
+                Section("All parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
                 Section {
                     Picker("Colors", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
                 } footer: { Text("Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }

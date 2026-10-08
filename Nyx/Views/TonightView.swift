@@ -21,6 +21,7 @@ struct TonightView: View {
     @State private var nearMeAfterPicker=false
     @Namespace private var zoom
     private var candidates:[Park] { model.nearby(latitude:location.latitude,longitude:location.longitude) }
+    /// Ranked once per update of the page (the body reads it into `best` and passes it down).
     private var best:[Park] { Array(model.ranked(candidates).prefix(5)) }
     @State private var width=0.0
     /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
@@ -29,15 +30,17 @@ struct TonightView: View {
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     private var loading:Bool { DebugScenario.state=="loading" }
-    private var empty:Bool { best.isEmpty || DebugScenario.state=="empty" }
     var body: some View {
+        let best=self.best
+        let empty=best.isEmpty || DebugScenario.state=="empty"
+        let worthy=worthyNight(best.first,empty:empty)
         ScrollView {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     HStack(alignment:.top,spacing:36) {
-                        VStack(spacing:26) { hero(park); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; fromHome; extras }.frame(maxWidth:500)
+                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(alignment:.leading,spacing:22) { startingPoint; more(best); footnote; fromHome; extras }.frame(maxWidth:500)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -48,10 +51,10 @@ struct TonightView: View {
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
                     else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint;fromHome }
                     else if let park=best.first {
-                        hero(park)
+                        hero(park,others:Array(best.dropFirst()))
                         farther(than:park)
                         startingPoint
-                        more
+                        more(best)
                         footnote
                         fromHome
                     }
@@ -86,7 +89,7 @@ struct TonightView: View {
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .sensoryFeedback(.impact(weight:.light,intensity:0.8),trigger:found)
-            .task(id:worthyNight) { await feelFound(worthyNight) }
+            .task(id:worthy) { await feelFound(worthy) }
             .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
@@ -182,14 +185,14 @@ struct TonightView: View {
         guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
         withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { riverNight=next }
     }
-    private func hero(_ park:Park)->some View {
+    private func hero(_ park:Park,others:[Park])->some View {
         let night=model.night(park)
         return VStack(spacing:10) {
             // The first line is the answer's own context: the night, and from where.
             answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize ? nil : .uppercase)
                 .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
-            ParkPillPicker(park:park,others:Array(best.dropFirst()),score:{ model.night($0).score.value },zoom:zoom)
+            ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
             let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
@@ -211,8 +214,8 @@ struct TonightView: View {
     }
     /// Tonight's answer when a reminder would announce it (`NotificationScheduler.worthAReminder`),
     /// as "park-day"; nil otherwise, and until a starting point is chosen.
-    private var worthyNight: String? {
-        guard model.startChosen, !loading, !empty, let park=best.first else { return nil }
+    private func worthyNight(_ best:Park?,empty:Bool)->String? {
+        guard model.startChosen, !loading, !empty, let park=best else { return nil }
         let night=model.night(park)
         return NotificationScheduler.worthAReminder(night) ? park.id+"-"+park.isoDay(night.id) : nil
     }
@@ -226,7 +229,7 @@ struct TonightView: View {
         try? await Task.sleep(for:.milliseconds(120))
         found+=1
     }
-    @ViewBuilder private var more: some View {
+    @ViewBuilder private func more(_ best:[Park])->some View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
             ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).hoverEffect(.highlight).draggable(park);Divider().overlay(palette.line) }

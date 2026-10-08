@@ -168,6 +168,30 @@ extension Park {
         viewingSpots.first.map { ($0.latitude, $0.longitude) } ?? (latitude, longitude)
     }
 }
+/// Waiting on a request that several callers share (`WeatherService`, `ParkStore`). A cancelled
+/// caller stops waiting at once and gets nil, without cancelling the request for the others; the
+/// service decides whether anyone is still waiting.
+nonisolated enum SharedRequest {
+    static func value<T: Sendable>(of task: Task<T, Never>) async -> T? {
+        let waiter=Waiter<T>()
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                waiter.set(continuation)
+                Task { waiter.resume(await task.value) }
+                // Cancelled before the continuation was set: the handler below found nothing to resume.
+                if Task.isCancelled { waiter.resume(nil) }
+            }
+        } onCancel: {
+            waiter.resume(nil)
+        }
+    }
+    /// Resumes its continuation once, with the value or with nil, whichever comes first.
+    private final class Waiter<T: Sendable>: Sendable {
+        private let state=Mutex<CheckedContinuation<T?, Never>?>(nil)
+        func set(_ continuation: CheckedContinuation<T?, Never>) { state.withLock { $0=continuation } }
+        func resume(_ value: T?) { state.withLock { $0.take() }?.resume(returning: value) }
+    }
+}
 nonisolated protocol WeatherProviding: Sendable {
     func forecasts(for parks: [Park], network: Bool, force: Bool) async -> [String: Forecast]
     /// The cached forecasts, read once from disk off the main actor at launch.
@@ -191,6 +215,8 @@ actor WeatherService: WeatherProviding {
     private var loaded=Set<String>()
     /// Requests already on their way, so Tonight, Parks and saved parks never fetch the same park twice at once.
     private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
+    /// How many callers are still waiting on each request in flight.
+    private var waiters: [Task<[String: Forecast], Never>: Int] = [:]
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
@@ -229,23 +255,40 @@ actor WeatherService: WeatherProviding {
             let task=Task { () -> [String: Forecast] in
                 var fetched: [String: Forecast] = [:]
                 for (park, forecast) in await self.fetch(chunk) { fetched[park.id]=forecast }
+                // Kept by the request itself, not by whoever waits: a forecast that arrives after
+                // every caller stopped waiting still counts.
+                self.keep(fetched)
                 return fetched
             }
             for park in chunk { inFlight[park.id]=task }
             waits.append(task)
         }
         var seen=Set<Task<[String: Forecast], Never>>()
-        for task in waits where seen.insert(task).inserted {
-            for (id, forecast) in await task.value {
-                if memory[id].map({ $0.updated < forecast.updated }) ?? true {
-                    memory[id]=forecast
-                    if persist, let park=due.first(where: { $0.id == id }) { CacheDirectory.write(forecast, name: "weather-\(park.id)") }
-                }
-                if due.contains(where: { $0.id == id }) { result[id]=memory[id] }
-            }
+        let shared=waits.filter { seen.insert($0).inserted }
+        for task in shared { waiters[task, default: 0]+=1 }
+        for task in shared {
+            // A cancelled caller (a background refresh out of time) stops waiting at once and
+            // returns what is cached; the request goes on for anyone else still waiting.
+            let fetched=await SharedRequest.value(of: task)
+            leave(task, finished: fetched != nil)
+            for id in (fetched ?? [:]).keys where due.contains(where: { $0.id == id }) { result[id]=memory[id] }
         }
-        for park in fresh where inFlight[park.id] != nil { inFlight[park.id]=nil }
         return result
+    }
+    private func keep(_ fetched: [String: Forecast]) {
+        for (id, forecast) in fetched where memory[id].map({ $0.updated < forecast.updated }) ?? true {
+            memory[id]=forecast
+            if persist { CacheDirectory.write(forecast, name: "weather-\(id)") }
+        }
+    }
+    /// One caller has stopped waiting. A finished request leaves `inFlight`; one nobody waits for
+    /// any more is cancelled, so a background refresh out of time leaves nothing running.
+    private func leave(_ task: Task<[String: Forecast], Never>, finished: Bool) {
+        let remaining=(waiters[task] ?? 1)-1
+        waiters[task]=remaining>0 ? remaining : nil
+        guard finished || remaining == 0 else { return }
+        if !finished { task.cancel() }
+        inFlight=inFlight.filter { $0.value != task }
     }
     private func fetch(_ parks: [Park]) async -> [(Park, Forecast)] {
         guard !parks.isEmpty else { return [] }

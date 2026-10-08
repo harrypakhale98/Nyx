@@ -201,6 +201,13 @@ struct CalendarView: View {
             .onChange(of:typeSize) { _,_ in syncInspector() }
             .onChange(of:inspectorWanted) { _,_ in syncInspector() }
             .task(id:park?.id) { if let park { await model.refresh([park]) } }
+            // The months either side, worked out off the main thread so a swipe finds them ready
+            // (with the four nights before and 38 after that a month's darkest stretch looks across).
+            .task(id:"\(park?.id ?? "")-\(monthOffset)") {
+                guard let park else { return }
+                let base=Self.baseMonth(park,tonight:model.tonight(park)), offset=monthOffset
+                await model.prepareNights([park],from:{ park in park.date(park.calendar.date(byAdding:.month,value:offset-1,to:base) ?? base,addingDays:-4) },count:136)
+            }
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()

@@ -24,8 +24,10 @@ import CoreLocation
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
     /// What's up each night. Astronomy only, so never invalidated by a forecast.
-    @ObservationIgnored private var skyCache: [String:WhatsUp] = [:]
-    @ObservationIgnored private var eventCache: [String:WhatsUp.Events] = [:]
+    @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
+    @ObservationIgnored private var eventCache: [SkyKey:WhatsUp.Events] = [:]
+    /// A park's night, worded for tonight or not (events ignore the wording: always false).
+    nonisolated private struct SkyKey: Hashable, Sendable { let park:String; let night:Date; let isTonight:Bool }
     /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
@@ -110,6 +112,17 @@ import CoreLocation
     func tick(_ now:Date = .now) {
         guard parks.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
         clock=now
+        trimPastNights()
+    }
+    /// Once a night turns over, the kept astronomy, outlooks and what's-up of nights that have
+    /// passed are let go (a screen that shows one again simply works it out again).
+    private func trimPastNights() {
+        let tonights=Dictionary(parks.map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
+        func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
+        for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
+        for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
+        skyCache=skyCache.filter { current($0.key.park,$0.key.night) }
+        eventCache=eventCache.filter { current($0.key.park,$0.key.night) }
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
@@ -133,6 +146,7 @@ import CoreLocation
                 // Read in the background since launch began; taken now, before the first frame.
                 let cached=preload.wait()
                 forecasts=cached.forecasts; details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
+                seed(cached.conditions)
                 apply(AlertsUpdate(cache:cached.alerts,busy:false))
                 LaunchSignposts.note("Caches ready")
                 let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
@@ -199,7 +213,7 @@ import CoreLocation
     }
     /// Only the shower and eclipse: cheap enough for every night of a calendar month.
     func events(_ night:Night)->WhatsUp.Events {
-        let key="\(night.park.id)-\(Int(night.id.timeIntervalSince1970))"
+        let key=SkyKey(park:night.park.id,night:night.id,isTonight:false)
         if let cached=eventCache[key] { return cached }
         let value=skyCache[Self.skyKey(night,isTonight:night.id==tonight(night.park))]?.events ?? WhatsUp.Events(park:night.park,sky:night.sky)
         eventCache[key]=value
@@ -217,7 +231,25 @@ import CoreLocation
         let computed=await Task.detached(priority:.utility) { inputs.map { ($0.key,WhatsUp(park:$0.park,sky:$0.sky,isTonight:$0.isTonight)) } }.value
         for (key,value) in computed where skyCache[key] == nil { skyCache[key]=value }
     }
-    private static func skyKey(_ night:Night,isTonight:Bool)->String { "\(night.park.id)-\(Int(night.id.timeIntervalSince1970))-\(isTonight)" }
+    /// Works out the astronomy of these parks' next `count` nights off the main thread, so a
+    /// first look (Parks, a calendar month) finds them ready. The same engine and the same inputs
+    /// as `night(_:on:)`, kept only where nothing is yet: no score can differ.
+    func prepareNights(_ parks:[Park],from start:((Park)->Date)?=nil,count:Int) async {
+        let wanted=parks.flatMap { park in
+            let first=start?(park) ?? tonight(park)
+            return (0..<count).map { (park,park.evening(park.date(first,addingDays:$0))) }
+        }.filter { conditions[$0.0.id]?[$0.1] == nil }
+        guard !wanted.isEmpty else { return }
+        let astronomy=self.astronomy
+        let computed=await Task.detached(priority:.utility) { wanted.map { ($0.0.id,$0.1,astronomy.conditions(for:$0.0,on:$0.1)) } }.value
+        for (id,evening,sky) in computed where conditions[id]?[evening] == nil { conditions[id,default:[:]][evening]=sky }
+    }
+    /// Conditions worked out at launch for the parks near the starting point (`CachePreload`).
+    private func seed(_ prepared:[String:[Date:SkyConditions]]) {
+        guard astronomy is AstronomyEngine else { return }
+        for (id,nights) in prepared { conditions[id,default:[:]].merge(nights) { kept,_ in kept } }
+    }
+    private static func skyKey(_ night:Night,isTonight:Bool)->SkyKey { SkyKey(park:night.park.id,night:night.id,isTonight:isTonight) }
     func outlooks(_ nights:[Night])->[Date:NightOutlook] {
         Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
@@ -338,11 +370,12 @@ import CoreLocation
     /// Alerts for every park arrive in one request (whichever screen asks first, at most every six
     /// hours), so the request never says which parks are near you; ranger programs follow only for
     /// the park whose page is open.
-    func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false) async {
+    /// `alertPages`: one in a background refresh, where time is short (`SavedSkySync`).
+    func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false,alertPages:Int=ParkStore.alertPages) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
         let network=npsEnabled && live, key=npsKey
         await hydration?.value
-        apply(await parkStore.alerts(for:self.parks,key:key,network:network,force:force))
+        apply(await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages))
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }
