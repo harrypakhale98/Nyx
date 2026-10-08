@@ -566,7 +566,7 @@ struct WidgetReviewView:View {
                 standBy(card(.systemMedium,entry,height:158,mode:.vibrant))
             }
             Text("Content preview. Check the actual Home Screen, Lock Screen and StandBy hosts on device.").font(.caption)
-        }.padding(24) }.background(Color.black)
+        }.padding(24) }.defaultScrollAnchor(ProcessInfo.processInfo.arguments.contains("-nyx-bottom") ? .bottom : .top).background(Color.black)
     }
 }
 #endif
