@@ -26,6 +26,8 @@ import CoreLocation
     /// A link asked the Calendar tab for one park's month (`nyx://calendar/<park>?month=…`).
     var calendarRequest: CalendarRequest?
     var enrichments: [String:ParkEnrichment] = [:]
+    /// Campgrounds for every park, once "Where to stay" has asked (`refreshCampgrounds`).
+    var campgrounds: CampgroundsCache?
     /// The journal's store could not be opened; Nyx runs with an empty one in memory and says so on the Journal tab.
     var journalUnavailable=false
     /// A `.nyxjournal` opened from Files or another app, waiting for the Journal tab to import it.
@@ -328,6 +330,14 @@ import CoreLocation
     /// itself, never an amenity notice. Shown beside every score for that park.
     func closure(_ park:Park)->String? {
         AlertRanking.closure(enrichments[park.id]?.alerts ?? [])?.displayTitle(park:park)
+    }
+    /// Every park's campgrounds from the NPS, asked for only when a park's "Where to stay" opens,
+    /// in one request for all 63 parks, kept seven days (`ParkStore.campgrounds`).
+    func refreshCampgrounds(force:Bool=false) async {
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        await hydration?.value
+        let fresh=await parkStore.campgrounds(for:parks,key:npsKey,network:npsEnabled && live,force:force)
+        if let fresh, fresh != campgrounds { campgrounds=fresh }
     }
     func alertSummary(_ park:Park)->String {
         guard let data=enrichments[park.id] else {

@@ -174,6 +174,10 @@ struct RootView:View {
         // Light pollution, viewing spots (sky glow, step-free) and Protect this sky for one park: `-nyx-park deva | grca | sequ`.
         case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { Panel { LightPollution(park:park) }; Panel { ViewingSpots(park:park) }; Panel { ProtectThisSky(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
+        // Where to stay for one park (`-nyx-park`; `-nyx-state live` loads campgrounds), and From home
+        // tonight for the starting point (`-nyx-place "Chicago, IL"`, `-nyx-date`).
+        case "stay": if let park=model.home { ScrollView { WhereToStayPanel(park:park).padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
+        case "from-home": if let origin=HomeSky.origin(location:nil,place:model.homePlace,park:model.home) { ScrollView { FromHomePanel(origin:origin,now:model.today).padding(24) }.background(NightBackground()).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline) }
         case "ask": GuideView(mode:.planning)
         case "widgets": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),large:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }

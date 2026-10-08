@@ -181,6 +181,12 @@ nonisolated protocol ParkProviding: Sendable {
     func hydrate(_ parks: [Park]) async -> AlertsUpdate
     /// Alerts already read at launch (`CachePreload`).
     func seed(_ cached: ParkAlertsCache?) async
+    /// Every park's campgrounds from one request (all 63 park codes), fresh for seven days.
+    func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache?
+}
+extension ParkProviding {
+    /// A provider without campgrounds (a test double) has none to show.
+    nonisolated func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache? { nil }
 }
 /// Every install shares one NPS key and its hourly quota (1,000 requests), so requests are spent
 /// carefully. Alerts for all 63 parks arrive in one request every six hours, whichever screen asks
@@ -202,6 +208,9 @@ actor ParkStore: ParkProviding {
     private var programCache: [String: ProgramsCache] = [:]
     private var programsLoaded=Set<String>()
     private var programTasks: [String: Task<Void, Never>] = [:]
+    private var campgroundCache: CampgroundsCache?
+    private var campgroundsLoaded=false
+    private var campgroundsTask: Task<Void, Never>?
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
@@ -268,6 +277,42 @@ actor ParkStore: ParkProviding {
         await task.value
         return programCache[park.id]
     }
+    /// Campgrounds change with the seasons, not the hour: one request for all the parks (so it
+    /// never says which park someone is looking at), kept seven days, and never on a Low Data Mode
+    /// network (the full answer is about 2 MB).
+    func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool = false) async -> CampgroundsCache? {
+        if !campgroundsLoaded {
+            campgroundsLoaded=true
+            if persist, campgroundCache == nil { campgroundCache=CacheDirectory.read(CampgroundsCache.self, name: "campgrounds") }
+        }
+        guard network, Self.usable(key) else { return campgroundCache }
+        while let running=campgroundsTask { await running.value }
+        guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return campgroundCache }
+        let codes=Array(Set(parks.map(\.apiCode))).sorted()
+        let task=Task {
+            await self.fetchCampgrounds(codes: codes, key: key)
+            self.campgroundsTask=nil
+        }
+        campgroundsTask=task
+        await task.value
+        return campgroundCache
+    }
+    static let campgroundsFresh: TimeInterval=7*86400
+    /// Pages with `start`, as alerts do. A request that fails part-way keeps the last complete set.
+    private func fetchCampgrounds(codes: [String], key: String) async {
+        var all: [Campground] = [], read=0
+        for _ in 0..<4 {
+            guard let data=await data(url("campgrounds", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key, constrained: false),
+                  let page=try? Campground.page(data) else { return }
+            all+=page.campgrounds; read+=page.count
+            guard let total=page.total, read<total, page.count>0 else { break }
+        }
+        var grouped=Dictionary(uniqueKeysWithValues: codes.map { ($0, [Campground]()) })
+        for campground in all where grouped[campground.parkCode] != nil { grouped[campground.parkCode]?.append(campground) }
+        let fresh=CampgroundsCache(updated: clock(), campgrounds: grouped)
+        campgroundCache=fresh
+        if persist { CacheDirectory.write(fresh, name: "campgrounds") }
+    }
     /// A part is due once it is older than `maxAge`; even a forced refresh waits ten minutes
     /// since that part's last success.
     static func stale(_ updated: Date?, maxAge: TimeInterval, force: Bool, now: Date) -> Bool {
@@ -288,6 +333,21 @@ actor ParkStore: ParkProviding {
             refused=false
             return try JSONDecoder().decode(type, from: data)
         } catch {
+            if error is HTTPStatusError { refused=true }
+            backoff.record(error, host: Self.host, now: clock())
+            return nil
+        }
+    }
+    /// The body of a request that may wait for an unconstrained network: Low Data Mode holding it
+    /// back is not a refusal and starts no backoff.
+    private func data(_ url: URL?, key: String, constrained: Bool) async -> Data? {
+        guard let url else { return nil }
+        do {
+            let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: constrained)
+            refused=false
+            return data
+        } catch {
+            if Backoff.constrained(error) { return nil }
             if error is HTTPStatusError { refused=true }
             backoff.record(error, host: Self.host, now: clock())
             return nil

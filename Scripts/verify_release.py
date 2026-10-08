@@ -90,8 +90,11 @@ for f in shipping:
  assert 'URLSession' not in text,f'URLSession outside the guarded transport: {f}'
  assert not re.search(r'"https?://',text),f'web URL literal outside the guarded transport: {f}'
 # Pages opened in Safari at a tap (SwiftUI Link), never fetched by Nyx: exactly this list.
-browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()+Path('Nyx/Views/SettingsSupport.swift').read_text()
-assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov','open-meteo.com','creativecommons.org','get-nyx.com','apps.apple.com'},set(re.findall(r'page\(host:"([^"]+)"',browser))
+browser=Path('Nyx/Views/SkyGlowViews.swift').read_text()+Path('Nyx/Views/SettingsSupport.swift').read_text()+Path('Nyx/Views/WhereToStayPanel.swift').read_text()
+assert set(re.findall(r'page\(host:"([^"]+)"',browser))=={'globeatnight.org','www.nps.gov','open-meteo.com','creativecommons.org','get-nyx.com','apps.apple.com','www.recreation.gov'},set(re.findall(r'page\(host:"([^"]+)"',browser))
+# Campground reservation links come from NPS data; Safari opens only these hosts' pages (Where to stay).
+stay=re.search(r'reservationHosts: Set<String> = \[([^\]]*)\]',Path('Nyx/Models/Campground.swift').read_text())
+assert stay and set(re.findall(r'"([^"]+)"',stay.group(1)))=={'recreation.gov','www.recreation.gov','nps.gov','www.nps.gov'},stay and stay.group(1)
 # Version and build come from project.yml; the archive must carry them in both bundles.
 spec=Path('project.yml').read_text()
 marketing=re.search(r'MARKETING_VERSION:\s*"([^"]+)"',spec).group(1)

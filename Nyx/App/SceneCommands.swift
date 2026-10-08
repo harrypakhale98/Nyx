@@ -9,6 +9,8 @@ import SwiftUI
     /// A screenshot route's tab: `calendar` and `plan` are both Plan. Nil for routes that are not tabs.
     nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"parks":1,"calendar":2,"plan":2,"journal":3][route] }
     var tab=0
+    /// Bumped to close this window's Settings sheet, so a link from Learn shows where it leads.
+    var closeSettings=0
     /// This window's scene, so a park or field mode opened from a link, a reminder or a menu is
     /// presented in the window that asked, never in whichever window happens to be key.
     @ObservationIgnored weak var windowScene:UIWindowScene?

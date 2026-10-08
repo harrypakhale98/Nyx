@@ -482,6 +482,8 @@ struct ParkDetailView: View {
         chapterHeading(.place,detail:eyebrow)
         Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"Sky glow"); LightPollution(park:park) } }
         Panel { ViewingSpots(park:park) }.id("spots")
+        // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
+        WhereToStayPanel(park:park).id("stay")
         Panel { VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"Ranger night-sky programs")
             if let data=model.enrichments[park.id] {

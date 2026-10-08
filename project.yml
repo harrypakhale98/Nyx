@@ -123,6 +123,8 @@ targets:
       - path: Nyx/Resources/sky-events.json
       - path: Nyx/Services/ScoreEngine.swift
       - path: Nyx/Services/DataServices.swift
+      # The campground types `ParkStore` reads and caches (the widget never asks for them).
+      - path: Nyx/Models/Campground.swift
       - path: Nyx/Services/CloudForecastClient.swift
       - path: Nyx/Models/Forecast.swift
       - path: Nyx/Services/ForecastDetail.swift

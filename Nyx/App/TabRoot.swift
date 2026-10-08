@@ -4,6 +4,7 @@ import SwiftUI
 /// dark, and Settings. Screen actions (add, share, sort) stay on the trailing side.
 struct TabRootToolbar: ViewModifier {
     @State private var settings=false
+    @Environment(SceneCommands.self) private var commands:SceneCommands?
     func body(content:Content)->some View {
         content
             .toolbar {
@@ -14,6 +15,7 @@ struct TabRootToolbar: ViewModifier {
                 }
             }
             .sheet(isPresented:$settings) { SettingsSheet() }
+            .onChange(of:commands?.closeSettings) { settings=false }
     }
 }
 extension View {

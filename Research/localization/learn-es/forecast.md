@@ -1,0 +1,15 @@
+Lo que un pronóstico no puede decirte
+
+Un pronóstico de nubes es la mejor estimación de un modelo de computadora, calculada sobre una cuadrícula cuyas celdas miden varios kilómetros, o unas cuantas millas, de lado. Suele acertar, y nunca es seguro. Saber dónde es más débil te ayuda a leer un índice con honestidad.
+
+Los modelos discrepan. Nyx compara tres, de Estados Unidos, Europa y Alemania. Cuando los tres muestran una noche despejada, el pronóstico pisa terreno firme. Cuando uno muestra cielo despejado y otro muestra nubes, la verdad podría ser cualquiera de los dos, y la página del parque dice que los modelos discrepan y muestra el rango de índices al que llevaría cada uno. Una discrepancia no es un mal pronóstico. Es el pronóstico diciéndote qué tan seguro está.
+
+Las nubes altas y delgadas son difíciles de juzgar. Un velo de cristales de hielo a varios kilómetros de altura puede apagar las estrellas tenues y esparcir la luz de la Luna por el cielo mientras el pronóstico todavía se ve casi despejado. O puede contarse como nubosidad mientras las estrellas brillantes se ven a través de él. Un porcentaje dice cuánto del cielo está cubierto, no qué tan gruesa es la capa.
+
+El humo y la bruma no son nubes. El humo de un incendio forestal puede viajar 1,600 km (mil millas) y opacar la Vía Láctea en una noche sin nubes. Nyx lee un pronóstico aparte de humo y bruma y limita el índice cuando son densos, pero esos pronósticos son más burdos que los de nubes, y el polvo o el aire húmedo cerca del suelo pueden borrar el horizonte sin aparecer en ninguno de los dos.
+
+Las noches lejanas se acercan a la nubosidad habitual. Un pronóstico para mañana es mucho mejor que una suposición. Uno para dentro de diez días apenas es mejor que saber cómo suele estar el tiempo aquí en ese mes. Por eso Nyx usa el pronóstico de nubes completo durante unos tres días, luego lo acerca poco a poco a la nubosidad habitual del parque, y más allá de diez días usa solo la nubosidad habitual. Esas noches aparecen rellenas a medias o sin relleno, porque su índice cambiará conforme se acerque la noche. Vuelve a revisar uno o dos días antes de salir.
+
+El tiempo local se esconde entre los puntos de la cuadrícula. La niebla puede llenar un valle o llegar desde la costa mientras una cresta unos 100 m (unos cientos de pies) más arriba sigue despejada. En las noches sin viento, el aire frío se acumula en las zonas bajas. Cuando el aire se enfría hasta su punto de rocío, se forma rocío en lentes, oculares y parabrisas; un calentador de manos junto al lente ayuda. Las montañas suelen formar sus propias nubes por la tarde, que casi siempre se disipan después de la puesta del sol, aunque no siempre.
+
+Lo que más ayuda es mirar el cielo por tu cuenta. Mira hacia el oeste al final de la tarde, de donde llega la mayor parte del tiempo. Pregunta a un guardaparques por la niebla local. Y cuando el pronóstico no sea seguro, elige un parque con más de una buena noche a tu alcance, y deja que el cielo decida.
