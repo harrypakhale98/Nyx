@@ -43,6 +43,9 @@ struct WatchRootView: View {
         .foregroundStyle(palette.ink)
         .tint(palette.accent)
         .modifier(WatchDebug.TypeSize())
+        // Scroll bars and Tonight's page dots are system chrome the red filter cannot reach: they
+        // would be the one white thing on the screen, so under red light they go.
+        .scrollIndicators(palette.nightVision ? .never : .automatic)
         // The complication review draws in the widgets' own colours, so it is not filtered twice.
         // Under Increase Contrast the brighter red, as on the iPhone (`NyxPalette.red`).
         .modifier(NightVisionFilter(enabled: palette.nightVision && WatchDebug.screen != "complications", red: palette.red))
@@ -513,7 +516,7 @@ struct ParksList: View {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.wristName).font(.system(.body, design: .serif)).lineLimit(2)
-                    Text(park.state).font(.caption2).foregroundStyle(palette.muted)
+                    Text(park.state.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
                 if store.pinned == park.id { Image(systemName: "pin.fill").font(.caption2).accessibilityLabel("On Tonight") }
@@ -548,7 +551,7 @@ struct ParkChooser: View {
         Button { store.pin(park) } label: {
             VStack(alignment: .leading, spacing: 1) {
                 Text(park.wristName).font(.system(.body, design: .serif))
-                Text(park.state).font(.caption2).foregroundStyle(palette.muted)
+                Text(park.state.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
             }
         }
     }

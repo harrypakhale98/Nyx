@@ -177,7 +177,7 @@ struct ParkRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(park.shortName).font(.system(.body, design: .serif))
-                Text(park.state).font(.caption).foregroundStyle(palette.muted)
+                Text(park.state.replacingOccurrences(of: ",", with: " · ")).font(.caption).foregroundStyle(palette.muted)
             }
             Spacer(minLength: 8)
             if let night {

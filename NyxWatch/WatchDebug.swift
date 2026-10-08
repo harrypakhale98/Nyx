@@ -3,9 +3,9 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | expired`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
-/// (the adaptation clock started that long ago), `-nyx-watch-aod` (Always-On, which the simulator cannot show).
+/// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show).
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
     static var screen: String? {
@@ -21,6 +21,14 @@ enum WatchDebug {
         return argument("-nyx-watch-night").flatMap(Int.init).map { min(6, max(0, $0)) } ?? 0
         #else
         return 0
+        #endif
+    }
+    /// `-nyx-watch-info` (with `-nyx-watch-screen dark`): the dark-adaptation info sheet open.
+    static var showsInfo: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("-nyx-watch-info")
+        #else
+        return false
         #endif
     }
     /// Screens that are Tonight itself (a page, or the dark-adaptation cover over it).
@@ -70,6 +78,11 @@ enum WatchDebug {
         case "synced": store.debugSet(context: synced, pinned: nil)
         case "polar": store.debugSet(context: synced, pinned: "dena")
         case "samoa": store.debugSet(context: synced, pinned: "npsa")
+        case "closure":
+            // A fixture closure, for reviewing the line beside the score; it never touches a score.
+            let closed = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
+                                      closures: ["jotr": "Keys View Road closed for repairs through November"])
+            store.debugSet(context: closed, pinned: nil)
         case "expired":
             // A forecast the iPhone sent three days ago: too old to score, so the watch says so.
             let old = Date.now.addingTimeInterval(-3*86400)
