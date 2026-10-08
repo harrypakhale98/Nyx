@@ -132,3 +132,24 @@ struct ShareCardButton:View {
 }
 #Preview("Share card") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p),why:"Moon-free through all of true darkness").environment(\.nyxReduceMotion,true) } }
 #Preview("Share story") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p),shape:.story,why:"Milky Way core 8:10 PM – 11:30 PM").environment(\.nyxReduceMotion,true) } }
+#if DEBUG
+/// `-nyx-screen share`: the card as people receive it, the rendered image (fixed-size artwork, never
+/// live text) with its spoken summary. Drawn in starlight; the app's night vision turns it red on screen,
+/// as the export does.
+struct ShareCardReview:View {
+    @Environment(\.displayScale) private var displayScale
+    let night:Night
+    @State private var render=ShareRender()
+    var body:some View {
+        Group {
+            if let image=render.images[.card] {
+                image.resizable().scaledToFit().frame(maxWidth:ShareCard.Format.card.size.width)
+                    .clipShape(RoundedRectangle(cornerRadius:24)).padding(16)
+                    .accessibilityLabel(ShareCard(night:night).summary).accessibilityIgnoresInvertColors()
+            } else { Color.black }
+        }
+        .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color.black)
+        .task { render.render(night:night,why:nil,palette:NyxPalette(nightVision:false,highContrast:false),scale:displayScale,key:"review") }
+    }
+}
+#endif
