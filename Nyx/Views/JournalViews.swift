@@ -205,6 +205,7 @@ struct JournalThumbnail:View {
         #if DEBUG
         if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
         if DebugScenario.state=="photo",let image=UIImage(named:"LaunchStars")?.pngData() { photos=[image] }
+        if DebugScenario.isEnabled("suggest-fixture"), !photos.isEmpty { suggestions[0]="A dark ridge under a sky full of stars, with a faint band of light above it." }
         #endif
         // Observers do not run inside init: one description per photo from the start.
         descriptions=Self.aligned(descriptions,to:photos.count)

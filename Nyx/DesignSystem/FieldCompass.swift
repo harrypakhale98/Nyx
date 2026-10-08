@@ -108,7 +108,8 @@ struct FieldCompassView: View {
         if sensing {
             Button { listed = !showsList } label:{ Label(showsList ? "Sky" : "List",systemImage:showsList ? "scope" : "list.bullet") }.buttonStyle(.bordered)
         }
-        if sensing && fixedPose == nil && SkyBeacon.supported {
+        // DEBUG captures pin the pose; `-nyx-beacon` shows the switch there too.
+        if sensing && SkyBeacon.supported && (fixedPose == nil || DebugScenario.isEnabled("beacon")) {
             Toggle(isOn:Binding(get:{ beacon.isOn },set:{ switchBeacon($0) })) { Label("Sound",systemImage:"headphones") }
                 .toggleStyle(.button).buttonStyle(.bordered)
                 .accessibilityLabel("Where to look by sound")

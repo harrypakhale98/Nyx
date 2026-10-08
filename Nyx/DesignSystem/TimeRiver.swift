@@ -378,6 +378,16 @@ private struct RiverAccessibility: ViewModifier {
 #Preview("River • Steps") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyxAccess,NyxAccess(preferSteps:true)).background(.black) } }
 #Preview("River • Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
 #Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }
+#if DEBUG
+/// The river route's own selection, so a scrub, a step or an activation can move it (or not) as in a park page.
+struct DebugRiverHost: View {
+    let nights:[Night]
+    @State var start:Date
+    var outlooks:[Date:NightOutlook]=[:]
+    var markers:[Date:WhatsUp.Events.Marker]=[:]
+    var body: some View { TimeRiver(nights:nights,selected:$start,outlooks:outlooks,markers:markers) }
+}
+#endif
 /// The river explains itself once, then gets out of the way: it closes after the first scrub.
 struct RiverTip: Tip {
     var title: Text { Text("Drag along the nights") }

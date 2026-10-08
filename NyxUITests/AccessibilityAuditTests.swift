@@ -54,7 +54,7 @@ final class AccessibilityAuditTests:XCTestCase {
                 let label=issue.element?.label ?? ""
                 let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
                 print(line)
-                if Self.isKnownFalsePositive(issue,screen:screen,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
+                if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
                 if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
                 failures.append(line)
                 return true // collect everything; fail once at the end with the full list
@@ -66,9 +66,18 @@ final class AccessibilityAuditTests:XCTestCase {
 
     /// Elements the audit calls "partially" Dynamic Type, each checked by hand at AX5 (screen, label
     /// prefix). Replaces a blanket exemption, so a new element that stops scaling fails the audit.
-    private static let partialDynamicType:[(screen:String,label:String)]=[]
+    /// An empty label matches only an element without one.
+    private static let partialDynamicType:[(screen:String,label:String)]=[
+        // The park's name in the navigation bar once the serif title scrolls away: a system bar, which caps its own type.
+        ("detail","Joshua Tree"),
+        // Plan's park menu steps from largeTitle down to title2 at accessibility sizes, by design, so long names wrap
+        // in two lines rather than six; title2 still grows to about 42 pt at AX5 (checked in a system AX5 capture).
+        ("plan","Joshua Tree"),
+        // An unlabelled element of the system search bar (no frame; reported at AX5 only).
+        ("parks",""),
+    ]
     /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
-    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
+    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
         // scrolling through that band is dimmed by design, whatever the app's colours.
         // On iPad the tab bar floats at the top of the window and the edge effect runs below it (to about 84 pt).
@@ -79,11 +88,14 @@ final class AccessibilityAuditTests:XCTestCase {
         let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
         switch issue.auditType {
         case .dynamicType:
-            // The share card is fixed-size exported artwork with a full spoken summary. Elsewhere only
-            // the elements below, each checked in a system AX5 capture, may report "partially
-            // unsupported": text that does scale but that the audit measures through a container.
+            // The share card is fixed-size exported artwork with a full spoken summary. "Fully
+            // unsupported" always fails. At the default size the audit calls dozens of scaling texts
+            // "partially unsupported", system controls included (Done, Cancel, Form headers): noise.
+            // At AX5, where it matters, only the elements below (each checked in a system AX5 capture) may.
             let label=issue.element?.label ?? ""
-            return screen=="share" || (issue.compactDescription.contains("partially") && partialDynamicType.contains { $0.screen==screen && label.hasPrefix($0.label) })
+            guard issue.compactDescription.contains("partially") else { return screen=="share" }
+            if pass != "ax5" { return true }
+            return screen=="share" || partialDynamicType.contains { $0.screen==screen && ($0.label.isEmpty ? label.isEmpty : label.hasPrefix($0.label)) }
         case .contrast:
             // Text measured against the translucent tab bar, or glass with no element, not against its own background.
             // "Nearly passed" is not a failure; it is measured where a star sits beside small text.
