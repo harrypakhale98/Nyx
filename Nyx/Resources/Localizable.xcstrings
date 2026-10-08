@@ -4042,6 +4042,23 @@
         }
       }
     },
+    "American Samoa": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "American Samoa"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samoa Americana"
+          }
+        }
+      }
+    },
     "Among the brightest national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -25356,6 +25373,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sitio verdaderamente oscuro típico"
+          }
+        }
+      }
+    },
+    "U.S. Virgin Islands": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "U.S. Virgin Islands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Islas Vírgenes de EE. UU."
           }
         }
       }

@@ -72,6 +72,8 @@ enum DebugScenario {
         return false
         #endif
     }
+    /// Parks opens its map: the `parks-map` route (as the accessibility audit launches it) or `-nyx-parks-map`.
+    static var parksMap: Bool { screen == "parks-map" || isEnabled("parks-map") }
     private static func argument(_ key:String)->String? {
         let args=ProcessInfo.processInfo.arguments
         guard let index=args.firstIndex(of:key),index+1<args.count else { return nil }

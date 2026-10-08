@@ -24,6 +24,14 @@ nonisolated enum SkyMap {
             case .virginIslands: String(localized:"Virgin Is.")
             }
         }
+        /// The name in full, for VoiceOver: the drawn one is abbreviated to fit the map.
+        var spokenName: String {
+            switch region {
+            case .samoa: String(localized:"American Samoa")
+            case .virginIslands: String(localized:"U.S. Virgin Islands")
+            default: name
+            }
+        }
     }
     static let insets: [Inset] = [
         Inset(region:.lower48,frame:CGRect(x:0.02,y:0.02,width:0.96,height:0.53),longitudes:(-125)...(-66.5),latitudes:24...49.5),

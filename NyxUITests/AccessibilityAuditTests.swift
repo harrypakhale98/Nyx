@@ -11,7 +11,7 @@ import AppIntents
 final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","calendar","journal","learn","detail","breakdown","editor","entry",
+        return ["tonight","parks","parks-map","calendar","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
                 "field","field-compass","alarm-explainer","light","listen","accessibility","trip","constellation","recap","icons","first-light"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
@@ -21,7 +21,7 @@ final class AccessibilityAuditTests:XCTestCase {
     /// The screens people live in, for the heavier passes.
     private var keyScreens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","detail","plan","journal","settings","field"]
+        return ["tonight","parks","parks-map","detail","plan","journal","settings","field"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }
@@ -49,6 +49,8 @@ final class AccessibilityAuditTests:XCTestCase {
             let fieldFade=screen=="field" ? CGRect(x:0,y:window.height*0.7,width:window.width,height:window.height*0.3) : .null
             let tabBar=app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame : .null
             let navigationBar=app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame : .null
+            // The bars each pass measured against, so a finding near an edge can be read in context.
+            print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
             try app.performAccessibilityAudit { issue in
                 let frame=issue.element?.frame ?? .null
                 let label=issue.element?.label ?? ""
