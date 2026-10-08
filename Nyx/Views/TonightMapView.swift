@@ -151,7 +151,7 @@ struct TonightMapView: View {
             Text("\(mark.name) \(mark.score)").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink)
                 // The plate reaches past the words, fills its corners and starts clear of the mark (the gap below),
                 // so nothing bright shows beside the words.
-                .background(RoundedRectangle(cornerRadius:4,style:.continuous).fill(Color.black.opacity(0.9)).padding(.horizontal,-TonightMapLabels.plate.width).padding(.vertical,-TonightMapLabels.plate.height))
+                .background(RoundedRectangle(cornerRadius:4,style:.continuous).fill(Color.black).padding(.horizontal,-TonightMapLabels.plate.width).padding(.vertical,-TonightMapLabels.plate.height))
                 .opacity(namesShown ? 1 : 0)
                 .accessibilityHidden(true)
                 .layoutValue(key:TonightMapLabels.Key.self,value:.tag(id:mark.id,point:point(mark,size:size),gap:mark.radius*size1+4+TonightMapLabels.plate.width,holds:fixed.contains { $0.id==mark.id }))
