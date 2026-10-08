@@ -6,18 +6,21 @@ Character counts were verified with a script on 2026-10-07 (`len()` of the text 
 
 ## Confirm before pasting (integrator)
 
-The description names features from main as of 2026-10-07 plus wave 2 and 3 items. Before pasting, confirm each of these is in build 8, and delete its sentence if not:
+The description and What's New name features from main. Each row below was checked against the code on main on 2026-10-08. Before pasting, confirm the build you submit still has it, and delete its sentence if not:
 
-| Feature | Where it appears | Status on 2026-10-07 |
+| Feature | Where it appears | Status on main, 2026-10-08 |
 |---|---|---|
-| Plan tab with "My free nights" (trip planner) | PLAN | Trip planner on main; the Plan tab is wave 2 |
-| Starting from a town or city (Census places) | PLAN | Wave 2 (another lane); not on main |
-| Spanish (Mexico) in the app | Last line of FOR MORE PEOPLE | On main; may be cut if the native review is not done (AM-12) |
-| Apple Vision Pro: star names, constellation figures, Moon on your table, widget | ON YOUR WRIST AND IN THE ROOM | On main (vision lane); the visionOS build may be submitted separately |
-| Apple Watch: Crown scrub, adaptation clock, Red light control, Moon and Next dark complications | ON YOUR WRIST AND IN THE ROOM | On main (watch lane) |
-| Journal export and import | KEEP A LITTLE OF THE NIGHT | On main (data lane) |
-| Translation of park text | not mentioned | Planned for wave 3; add nothing until it ships |
-| Open a viewing spot in Maps | not mentioned | Planned; add nothing until it ships |
+| Plan tab with "My free nights" (trip planner) | PLAN | In build 8 (`PlanView`, `TripPlannerView`; the tabs are Tonight, Parks, Plan, Journal) |
+| Starting from a town or city (Census places) | What's New | In build 8 (`StartingPointPicker`, bundled `places.json`) |
+| Spanish (Mexico) in the app | Last line of FOR MORE PEOPLE | In build 8 (the String Catalogs hold `es`); cut the line if the native review is not done (AM-12) |
+| Apple Vision Pro: star names, constellation figures, Moon on your table, widget | ON YOUR WRIST AND IN THE ROOM | In build 8 (`star-names.json`, `constellations.json`, `MoonVolume`, `NyxVisionWidgets`); the visionOS build is a separate upload |
+| Apple Watch: Crown scrub, adaptation clock, Red light control, Moon and Next dark complications | ON YOUR WRIST AND IN THE ROOM | In build 8 (`WatchViews`, `DarkAdaptation`, `NyxWatchWidgetsBundle`) |
+| Journal export and import | KEEP A LITTLE OF THE NIGHT | In build 8 (`JournalArchive`) |
+| Follow this night (Live Activity), Handoff, Assistive Access | What's New | In build 8 (`BestNightIntent`, `Handoff.swift`, `AssistiveAccessViews`) |
+| Where to look by sound, Feel tonight, map of every park | What's New | In build 8 (`SkyBeacon`, `MoonHaptics`, `TonightMapView`) |
+| Photo descriptions in the journal | What's New | In build 8, but only on iOS 27 with Apple Intelligence; the sentence is accurate only for those devices |
+| Translation of park text | not mentioned | Shipped in build 8 (`TranslateButton`); optional to add to the description |
+| Open a viewing spot in Maps | not mentioned | Shipped in build 8 ("Directions in Maps", `SkyGlowViews`); optional to add to the description |
 
 ---
 
@@ -28,7 +31,7 @@ The description names features from main as of 2026-10-07 plus wave 2 and 3 item
 - **Categories:** Travel (primary), Weather (secondary).
 - **Price:** Free. No subscriptions, advertising or in-app purchases (a standing condition of Open-Meteo's free, non-commercial terms).
 - **Copyright:** `2026 Hardik Pakhale`.
-- **Version / build:** 1.1 (8). **Manual release** after approval.
+- **Version / build:** 1.2 (8). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
@@ -165,7 +168,7 @@ Spanish subtitle: `metadata-es.md`.
 - **Age rating:** answer the current questionnaire. Expected result 4+: no user-generated content feed, no unrestricted web access (links open in Safari), no social features, no gambling or mature themes. New question (September 2026), social media capabilities: **No**. Age assurance (Texas SB 2420) is handled in the app by Declared Age Range; see `SUBMISSION.md`.
 - **App Privacy:** Data Not Collected (`PRIVACY.md`).
 - **Review notes:** `SUBMISSION.md` § Review notes (paste from there).
-- **Screenshots:** `SUBMISSION.md` § Screenshots. The build 7 frames show scores computed before score v2 (for example Joshua Tree 93); they must be recaptured from build 8 before upload.
+- **Screenshots:** `SUBMISSION.md` § Screenshots. Upload the build 8 set in `Store/1.1 v8/` (captured 2026-10-08); the build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
 - **App Preview (optional):** `app-preview-script.md`.
 - **Accessibility Nutrition Labels:** declare only what the device pass confirms (`accessibility-nutrition-labels.md`).
 - **Creative assets (optional):** product page header (21:9) and search result asset (3:2) can wait for 1.2.

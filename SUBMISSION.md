@@ -4,7 +4,7 @@
 
 Archive both builds from the integrated `main` after the integrator sets version 1.2 and `CURRENT_PROJECT_VERSION` to 8 (done 2026-10-08): the iOS archive (iPhone and iPad app with the widgets and the Apple Watch app inside) and the visionOS archive (`NyxVision`, same bundle ID). Before uploading, run `python3 Scripts/verify_release.py --require-key <ios archive> <vision archive>`; it must pass, including the new checks for the age-range entitlement and the Safari link hosts. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store.
 
-**Release gates** (owner, `INPUT_NEEDED.md`): the device pass, the Spanish decision, the privacy page push, the Declared Age Range capability on the App ID, counsel on age assurance, the trademark search and the storefront decision below.
+**Release gates** (owner, `INPUT_NEEDED.md`): the device pass, the Spanish decision, the privacy page check, the Declared Age Range capability on the App ID, counsel on age assurance, the trademark search and the storefront decision below.
 
 ## The record
 
@@ -27,11 +27,11 @@ Archive both builds from the integrated `main` after the integrator sets version
 ```
 Nyx has no account and no login; nothing needs a demo account. Onboarding asks for no permissions and can be skipped. Choosing a starting park by hand works with location denied.
 
-Data and network: the app contacts exactly three public services, each with its own switch in Settings → Your privacy: developer.nps.gov (park alerts and ranger programs), api.open-meteo.com (cloud forecasts) and air-quality-api.open-meteo.com (smoke and haze). Alert requests always name all 63 parks in one request; forecast requests always carry the public coordinates of all 63 parks. No request depends on the person's location. The Apple Watch app makes no network requests. The Apple Vision Pro app makes one: the same cloud forecast request to api.open-meteo.com for the 63 parks' public coordinates, behind its own switch in its Your privacy sheet; it cannot reach the other two hosts.
+Data and network: the app contacts exactly three public services, each with its own switch in Settings → Your privacy: developer.nps.gov (park alerts, ranger programs and campgrounds), api.open-meteo.com (cloud forecasts) and air-quality-api.open-meteo.com (smoke and haze). Alert requests always name all 63 parks in one request; the campground request also names all 63 parks, is made at most once every seven days, only after a park's "Where to stay" first appears, and is held back on a Low Data Mode network; forecast requests always carry the public coordinates of all 63 parks. No request depends on the person's location. The Apple Watch app makes no network requests. The Apple Vision Pro app makes one: the same cloud forecast request to api.open-meteo.com for the 63 parks' public coordinates, behind its own switch in its Your privacy sheet; it cannot reach the other two hosts.
 
 Background App Refresh (one background mode, fetch): about every six hours, when iOS allows, Nyx refreshes saved parks' cloud forecasts and park alerts from the same two public services (api.open-meteo.com, developer.nps.gov), so local reminders and the widget never rely on an old forecast. No user data is sent.
 
-Field mode: on any park's detail screen, "I'm here tonight" opens a red, dimmed screen with a countdown to true darkness, a dark-adaptation clock, a Live Activity started on the device (no push) and "Where to look", which reads Core Motion attitude only while open. Best tried in the evening. Alarms use AlarmKit (iOS 26.1 and later); permission is requested in context, after an in-app explainer, when the person sets the first alarm.
+Field mode: on any park's detail screen, "I'm here tonight" opens a red, dimmed screen with a countdown to true darkness, a dark-adaptation clock, a Live Activity started on the device (no push) and "Where to look", which reads Core Motion attitude only while open. Its optional "Sound" switch (off by default, after an in-app explainer) places a tone in headphones; with headphones that report head motion, iOS asks once for Motion & Fitness access (NSMotionUsageDescription), and the motion never leaves the device. Best tried in the evening. Alarms use AlarmKit (iOS 26.1 and later); permission is requested in context, after an in-app explainer, when the person sets the first alarm.
 
 Age assurance: where iOS reports that the account is subject to an age-assurance law (Declared Age Range: requiredRegulatoryFeatures contains declaredAgeRangeRequired, or isEligibleForAgeFeatures on iOS 26.2–26.3), Nyx requests an age range once per launch with gates 13, 16 and 18. Nyx has no age-restricted content: the response is not stored and changes nothing, and errors or a refusal leave the app unchanged. Elsewhere nothing is shown.
 
@@ -85,7 +85,7 @@ App Review may ask for proof of permission to use third-party data. Before submi
 
 ## Screenshots
 
-**Recapture every set from build 8 before upload.** The build 7 frames in `Store/Framed/` show scores from before score v2 (for example Joshua Tree 93 or 94, which the Bortle 3 cap now limits to 89) and copy that has since changed ("Moon and darkness only. Clouds unknown."). Showing them would contradict the app (Guideline 2.3). Reproduce with `python3 Scripts/capture_store.py SIM DERIVED en|es` and `swift Scripts/make_store_frames.swift [es]`, then `swift Scripts/make_device_frames.swift`.
+**Upload the build 8 set in `Store/1.1 v8/` (captured 2026-10-08), not the build 7 frames.** The build 7 frames in `Store/Framed/` show scores from before score v2 (for example Joshua Tree 93 or 94, which the Bortle 3 cap now limits to 89) and copy that has since changed ("Moon and darkness only. Clouds unknown."). Showing them would contradict the app (Guideline 2.3). Reproduce with `python3 Scripts/capture_store.py SIM DERIVED en|es` and `swift Scripts/make_store_frames.swift [es]`, then `swift Scripts/make_device_frames.swift`.
 
 Slots (checked against Apple's [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) on 2026-10-06):
 
@@ -100,12 +100,12 @@ Order (hero order, DX-19 and ST-2): (1) Tonight answering where *and* when, with
 
 - **iPad:** in the iOS build. Mac availability off (above).
 - **Apple Watch:** in the iOS build (`Nyx.app/Watch/NyxWatch.app`, complications and the Red light control). Bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` carry the App Group. `WKRunsIndependentlyOfCompanionApp = NO`: the watch app needs the iPhone app.
-- **Apple Vision Pro:** App Store Connect → + Add Platform → visionOS, upload `NyxVision` 1.1 (8) with its widget (`NyxVisionWidgets`, ID `com.harrypakhale.nyx.widgets`), add the screenshots and the visionOS page, and submit.
+- **Apple Vision Pro:** App Store Connect → + Add Platform → visionOS, upload `NyxVision` 1.2 (8) with its widget (`NyxVisionWidgets`, ID `com.harrypakhale.nyx.widgets`), add the screenshots and the visionOS page, and submit.
 
 ## Privacy
 
 - App Privacy: **"No, we do not collect data from this app" (Data Not Collected), no tracking.** Reasoning in `PRIVACY.md`. Nothing in build 8 changes it: bulk alerts name all 63 parks, so a request says nothing about the person; background refresh repeats the same requests; age assurance stores and sends nothing; journal export is a file the person saves; diagnostics stay on the device.
-- Push `docs/` (privacy page dated October 7, 2026, with the age-range and links paragraphs) before review.
+- Confirm once, before review, that https://get-nyx.com/privacy serves the page dated October 8, 2026 (for Nyx 1.2: age range, links, campgrounds, Maps, translation, sound and Vision Pro). The site already serves it; this is a check, not a push.
 - Run Xcode's "Generate Privacy Report" on the final archive.
 
 ## Accessibility Nutrition Labels
@@ -133,13 +133,13 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 | Gate | Status |
 |---|---|
 | Privacy label | READY: Data Not Collected (`PRIVACY.md`) |
-| Privacy page with age range and links | READY in the repo; push `docs/` |
+| Privacy page dated October 8, 2026 live at get-nyx.com/privacy | CONFIRM (owner): already served; open it once before submitting |
 | Declared Age Range capability on the App ID | OPEN (owner) |
 | Counsel on SB 2420 | RECOMMENDED (owner) |
 | USPTO search for NYX | OPEN (owner) |
 | Storefronts and DSA trader status | OPEN: recommendation US, Canada, Mexico |
 | Open-Meteo, NPS, IMO emails | OPEN (owner) |
-| Build 8 archives and `verify_release.py --require-key` | OPEN (integrator) |
-| Screenshots recaptured from build 8 | OPEN |
+| Build 8 archives and `verify_release.py --require-key` | DONE 2026-10-08: iOS (with the Watch app) and visionOS uploaded (`INPUT_NEEDED.md` #12); confirm the processed build in App Store Connect |
+| Screenshots recaptured from build 8 | DONE for English, one required size per device (`Store/1.1 v8/`, 2026-10-08); recapture only if the device pass changes a screen |
 | Physical device pass (accessibility, field mode at night, Watch, Vision Pro) | OPEN (`AUDIT.md`) |
 | Spanish native review | OPEN |

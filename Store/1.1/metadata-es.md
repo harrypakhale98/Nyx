@@ -1,6 +1,6 @@
-# App Store metadata: Spanish (Mexico), first release
+# App Store metadata: Spanish (Mexico), version 1.2
 
-> **Must be rewritten after the native-speaker review.** Everything below is a draft by a non-native writer, updated on 2026-10-07 to match the English first-release page (`metadata.md`). Do not paste any Spanish field into App Store Connect until a native speaker of Mexican Spanish has reviewed and rewritten it (`INPUT_NEEDED.md`). If the review is not done before submission, ship the store page in English only; the in-app Spanish is a separate decision (AM-12).
+> **Must be rewritten after the native-speaker review.** Everything below is a draft by a non-native writer, updated on 2026-10-08 to match the English 1.2 page (`metadata.md`), including the What's New below. Do not paste any Spanish field into App Store Connect until a native speaker of Mexican Spanish has reviewed and rewritten it (`INPUT_NEEDED.md`). If the review is not done before submission, ship the store page in English only; the in-app Spanish is a separate decision (AM-12).
 
 One App Store Connect localization, **Spanish (Mexico)**, serves the Mexico storefront and Spanish-speaking customers on the US storefront (confirm in App Store Connect → App Information → Localizable Information). Glossary: `Research/localization/glossary-es.md` (tú throughout, *Luna* capitalized for the body, *Índice de oscuridad*). Counts were checked by script on 2026-10-07; keywords are counted in UTF-8 bytes, because accented letters take two.
 
@@ -106,6 +106,26 @@ Align with the English captions when the frames are recaptured from build 8:
 | Hear the shape of the night. | Escucha la forma de la noche. |
 | City glow, named. Step-free spots, marked. | El brillo de cada ciudad, con nombre. Los puntos sin escalones, marcados. |
 
-## What's New
+## What's New (1.2)
 
-None: 1.1 is the first public release, so App Store Connect shows no What's New field.
+**Draft by a non-native writer; a native speaker of Mexican Spanish must review and rewrite it, like every field above.** It translates the full English text in `metadata.md` § What's New in 1.2 and follows the glossary (tú, *índice*, *Mejor periodo*, *Corona*, *Hacia dónde mirar*). Delete any sentence for a feature that is not in the build, as in the table at the top of `metadata.md`. Nyx 1.1 is live, so App Store Connect asks for What's New on the Spanish (Mexico) localization too. If the store page ships in English only (the review is not done), skip this.
+
+```
+Nyx 1.2 es una actualización grande, hecha tras revisar con cuidado cada parte de la app.
+
+Un índice más honesto. Las nubes, el humo y la luz de las ciudades ahora limitan el índice de una noche, en lugar de solo restarle: una noche nublada en el desierto ya no aparece como Buena, y un parque junto a una ciudad ya no puede aparecer como Prístino. Más allá del pronóstico, las noches usan la nubosidad habitual de cada parque en ese mes, y el índice no sube cuando te quedas sin conexión. La página del parque dice qué limita esta noche y muestra el mejor periodo despejado.
+
+Planea tus noches. Una pestaña nueva, Planear, reúne el mes de un parque y Mis noches libres para un viaje. Parte desde tu ciudad, no solo desde un parque. Sigue una noche y su cuenta regresiva aparece sola en tu pantalla bloqueada al anochecer. Agrega cualquier noche a Calendario y guárdala en tu diario al amanecer.
+
+La página del parque, en tres partes: Esta noche; El cielo, con la Luna a tamaño completo y el cielo de esta noche en pantalla completa; y El lugar, con el brillo del cielo, los puntos de observación, los campamentos y los programas con guardaparques.
+
+Para más personas. Acceso asistido, un rojo más claro para ojos con daltonismo, Sentir esta noche con el Taptic Engine, Hacia dónde mirar con sonido y AirPods, descripciones de fotos en tu diario y mejor VoiceOver en toda la app.
+
+En cada dispositivo. Widgets que puedes fijar a un parque, un widget de la Luna, un widget en línea para la pantalla bloqueada, respuestas de Siri con el índice y Handoff. En el Apple Watch, un reloj de adaptación a la oscuridad, complicaciones de la Luna y de la próxima oscuridad, y la Corona para recorrer la semana. En el Apple Vision Pro, estrellas y constelaciones con nombre, girar la noche con la mano, la Luna sobre tu mesa y las nubes de esta noche. En el iPad, parques en ventanas propias y arrastrar y soltar.
+
+También nuevo: un mapa de todos los parques esta noche, cuatro ensayos en Aprender y Desde casa esta noche.
+
+Sigue sin cuenta, sin anuncios y sin rastreo.
+```
+
+Notes for the reviewer: «Siri answers with the gauge» became *respuestas de Siri con el índice*, because the app shows the score dial; settle *medidor* or *indicador* if the app's Spanish uses one. *Campamentos* for campgrounds should match the in-app word. *Acceso asistido* is Apple's name for Assistive Access; confirm it. *Desde casa esta noche* has no matching string in the app's catalog to copy, so choose the wording to match the app. *Campamentos* and *Mejor periodo* match the app. The photo-description sentence applies only to iOS 27 with Apple Intelligence, as in English.
