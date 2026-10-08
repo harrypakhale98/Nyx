@@ -373,7 +373,6 @@ struct FieldEntry: View {
     @Environment(\.modelContext) private var context
     let park: Park
     let night: Night
-    @State private var following=false
     var body: some View {
         VStack(spacing:6) {
             if FieldPresenter.supported {
@@ -383,21 +382,18 @@ struct FieldEntry: View {
                 .modifier(FieldButtonStyle())
                 .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
             }
-            if FieldActivities.enabled && !FieldNight.isOver(night.sky,at:.now) {
-                Button {
-                    Task {
-                        if following { await FieldActivities.stop() }
-                        else { await FieldActivities.start(night:FieldNight(park:park,sky:night.sky),score:night.score,nightVision:nightVision) }
-                        following=FieldActivities.isFollowing(park)
-                    }
-                } label:{
+            // Tonight, followed: scheduled for half an hour before sunset, or at once after that (`FollowNight`).
+            if FollowNight.offered(night) {
+                let following=NightFollowing.shared.isFollowing(park:park,night:night.id)
+                Button { Task { await FollowNight.toggle(night,closure:model.closure(park),nightVision:nightVision) } } label:{
                     // The whole 44-point row is the target, not just the line of text.
                     Text(following ? "On your Lock Screen tonight. Stop" : "Follow tonight on the Lock Screen")
                         .font(.footnote).multilineTextAlignment(.center).padding(.horizontal,12).frame(minHeight:44).contentShape(Rectangle())
                 }
+                .accessibilityValue(FollowNight.caption(night,following:following))
             }
         }
-        .task { following=FieldActivities.isFollowing(park) }
+        .task { NightFollowing.shared.reload() }
         // Field mode is presented over the app; its dawn "Keep this night" needs the journal's store.
         .onAppear { KeepThisNight.container=context.container }
     }
