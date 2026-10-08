@@ -56,6 +56,10 @@
 	<string>Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.harrypakhale.nyx.park</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
