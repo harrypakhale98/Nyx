@@ -19,6 +19,7 @@ struct FieldView: View {
     @State private var alarmsShown: Bool?
     @State private var aboutEyes=false
     @Environment(\.colorSchemeContrast) private var contrast
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -29,7 +30,7 @@ struct FieldView: View {
     /// footer, so the countdown keeps the room it needs.
     private var inline: Bool { typeSize.isAccessibilitySize }
     var body: some View {
-        let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased)
+        let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"))
         VStack(spacing:0) {
             header
             // Without a full cloud forecast (offline with nothing cached, or a stale one) the score says
@@ -57,7 +58,7 @@ struct FieldView: View {
         .animation(reduceMotion ? nil : NyxMotion.spring,value:session.reset)
         .environment(\.nyx,palette)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent)
-        .modifier(NightVisionFilter(enabled:true))
+        .modifier(NightVisionFilter(enabled:true,red:palette.red))
         .preferredColorScheme(.dark)
         .statusBarHidden(true).persistentSystemOverlays(.hidden)
         // Remembered so the park's page can offer "Keep this night" the morning after.
@@ -99,6 +100,11 @@ struct FieldView: View {
                 // Tonight as twelve seconds of sound; best with headphones, out of respect for the dark around you.
                 if NightListener.shared.isPlaying { Button("Stop listening",systemImage:"stop.fill") { NightListener.shared.stop() } }
                 else { Button("Listen to tonight",systemImage:"waveform") { NightListener.shared.play(NightSonification(park:session.park,sky:session.night.sky)) } }
+                // For the eyes reading it: a red that holds its contrast for colour-blind eyes, and the person's own brightness.
+                Section {
+                    Toggle(isOn:$brighterRed) { Label("Brighter red",systemImage:"circle.lefthalf.filled") }
+                    Toggle(isOn:Binding(get:{ session.keepsBrightness },set:{ session.keepBrightness($0) })) { Label("Keep my brightness",systemImage:"sun.max") }
+                }
             } label:{ Image(systemName:"ellipsis").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
                 .accessibilityLabel("Field mode options").accessibilityInputLabels([Text("Options"),Text("Field mode options")])
         }

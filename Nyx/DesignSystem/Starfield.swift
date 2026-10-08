@@ -33,7 +33,7 @@ struct Starfield: View {
                     context.fill(Path(ellipseIn:point),with:.color(palette.ink.opacity(shimmer*strength)))
                 }
             }
-        }.allowsHitTesting(false).accessibilityHidden(true)
+        }.allowsHitTesting(false).accessibilityHidden(true).accessibilityIgnoresInvertColors()
     }
 }
 #Preview("Living") { Starfield(seed:"jotr").background(.black) }
