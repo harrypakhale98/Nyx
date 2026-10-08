@@ -17,7 +17,7 @@ struct WatchCredits: View {
                 ForEach(lines.indices, id: \.self) { index in
                     Text(lines[index]).font(.footnote)
                 }
-                Text("Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.")
+                Text("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")
                     .font(.caption2).foregroundStyle(palette.muted)
             }
             .fixedSize(horizontal: false, vertical: true)

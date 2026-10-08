@@ -56,7 +56,7 @@ extension JournalEntryEntity {
 /// editor's default too). Photos are kept as the editor keeps them: images only, up to four, each
 /// within the editor's size limit, as JPEG; anything that cannot be read as a photo is left out.
 struct AddJournalEntryIntent: AppIntent {
-    static let title: LocalizedStringResource="Add to journal"
+    static let title: LocalizedStringResource="Record a night"
     static let description=IntentDescription("Adds a note about tonight to your Nyx journal, at tonight's park.")
     @Parameter(title: "Note", requestValueDialog: "What would you like to remember about tonight?")
     var message: String

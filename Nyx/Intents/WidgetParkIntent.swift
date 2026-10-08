@@ -6,7 +6,7 @@ import WidgetKit
 /// runs: it moves the widget to the next saved park in order of tonight's score.
 struct CycleWidgetParkIntent: AppIntent {
     static let title: LocalizedStringResource="Show the next saved park"
-    static let description=IntentDescription("Moves Nyx's Tonight's sky widget to your next saved park, in order of tonight's score. The next day it returns to the darkest one.")
+    static let description=IntentDescription("Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park.")
     static let isDiscoverable=false
     init() {}
     func perform() async throws -> some IntentResult {

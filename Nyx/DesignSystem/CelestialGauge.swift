@@ -133,7 +133,7 @@ struct CelestialGauge: View {
         return max(160,min(width>0 ? width : 300,wanted))
     }
     private var band:some View { Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
-    private var units:some View { Text("DARKNESS / 100").font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5*min(1,max(0.4,(side-200)/100))).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
+    private var units:some View { Text("Darkness / 100").textCase(.uppercase).font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5*min(1,max(0.4,(side-200)/100))).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
     /// The instrument's body: a ring of Liquid Glass the arc runs along, so the dial reads as an
     /// object, not a chart. Solid and dark under Reduce Transparency and in night vision, where
     /// glass would flatten toward the text colour.

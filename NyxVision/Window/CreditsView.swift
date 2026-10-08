@@ -10,7 +10,7 @@ struct CreditsView: View {
         ("Moon map", "NASA's Scientific Visualization Studio; LRO LROC and LOLA teams."),
         ("Stars", "Yale Bright Star Catalogue (HEASARC)."),
         ("Star names", "IAU Working Group on Star Names."),
-        ("Constellation figures", "Drawn for Nyx between catalogue stars."),
+        ("Constellation figures", "Drawn for Nyx between catalog stars."),
         ("Cloud forecasts", "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx."),
         ("Usual clouds", "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024)."),
         ("Park data", "National Park Service."),
@@ -26,7 +26,7 @@ struct CreditsView: View {
                         }
                         .accessibilityElement(children: .combine)
                     }
-                    Text("Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.")
+                    Text("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")
                         .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 6)
                 }

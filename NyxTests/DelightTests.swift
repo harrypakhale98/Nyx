@@ -235,16 +235,16 @@ struct DelightTests {
         let text=recap.template
         #expect(text.contains("3 nights") && text.contains("2 of them new to you") && text.contains("Great Basin") && text.contains("Bortle 1"))
         #expect(!text.contains("!"))
-        #expect(recap.facts.contains(String(localized:"Nights logged: 3")))
+        #expect(recap.facts.contains(String(localized:"Nights recorded: 3")))
         let empty=YearRecap(year:2024,nights:nights,parks:parks,calendar:calendar)
-        #expect(empty.nights==0 && empty.template.contains("No nights logged in 2024"))
+        #expect(empty.nights==0 && empty.template.contains("No nights recorded in 2024"))
         let first=YearRecap(year:2025,nights:nights,parks:parks,calendar:calendar)
         #expect(first.template.contains("one night") && first.template.contains("each one new to you"))
         for fraction in stride(from:0.0,to:1,by:0.01) { #expect(MoonPhase(fraction:fraction).name==MoonPhase(fraction:YearRecap.phaseFraction(YearRecap.phaseIndex(fraction))).name) }
     }
 
     @Test func reflectionMayNotInventNumbers() {
-        let facts=["Year: 2026","Nights logged: 3","Darkest observed sky: Great Basin, August 12, 2026, Bortle 1"]
+        let facts=["Year: 2026","Nights recorded: 3","Darkest observed sky: Great Basin, August 12, 2026, Bortle 1"]
         #expect(OnDeviceGuide.grounded("Three quiet nights in 2026, the darkest at Great Basin under a Bortle 1 sky.",facts:facts))
         #expect(!OnDeviceGuide.grounded("You saw 40 meteors at Great Basin.",facts:facts))
         #expect(!OnDeviceGuide.grounded("What a year!",facts:facts) && !OnDeviceGuide.grounded("",facts:facts))

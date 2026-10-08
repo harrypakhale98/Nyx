@@ -244,7 +244,7 @@ struct RecapCard: View {
             Color.black
             Starfield(seed:"recap-\(recap.year)",twinkle:0)
             VStack(alignment:.leading,spacing:16) {
-                Text("NYX · YEAR UNDER THE STARS").font(.caption).tracking(4).foregroundStyle(palette.muted)
+                Text("Nyx · Year under the stars").textCase(.uppercase).font(.caption).tracking(4).foregroundStyle(palette.muted)
                 Text(String(recap.year)).font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:28) {
                     figure(recap.nights,String(localized:"nights out"))

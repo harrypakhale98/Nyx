@@ -161,7 +161,7 @@ struct TripPlannerView: View {
             Text("\(days.count) nights, at most \(TripPlanner.maxNights)").font(.caption).foregroundStyle(palette.muted)
             Divider().overlay(palette.line)
             distancePicker(title:"Within",selection:$radius,values:[100,200,300,500,1000],note:"as the crow flies")
-            distancePicker(title:"Longest drive between nights",selection:$maxHop,values:[100,200,300,500],note:"straight line, back-to-back nights")
+            distancePicker(title:"Farthest between nights",selection:$maxHop,values:[100,200,300,500],note:"straight line, back-to-back nights")
             Toggle(isOn:$drivableOnly) { VStack(alignment:.leading,spacing:2) { Text("Parks you can drive to"); Text("Leaves out parks reached only by boat or plane").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) } }.tint(palette.controlTint)
         }
     }

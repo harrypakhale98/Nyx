@@ -149,8 +149,8 @@ struct BestNightSnippetView: View {
         VStack(alignment:.leading,spacing:14) {
             HStack(alignment:.top) {
                 VStack(alignment:.leading,spacing:3) {
-                    Text(rank==0 ? "BEST OF THE NEXT \(nights) NIGHTS" : "NUMBER \(rank+1) OF THE NEXT \(nights) NIGHTS")
-                        .font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                    Text(rank==0 ? "Best of the next \(nights) nights" : "Number \(rank+1) of the next \(nights) nights")
+                        .textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
                     Text(night.park.shortName).font(.system(.title3,design:.serif))
                     Text(night.park.programDate(night.park.isoDay(night.id))).font(.subheadline).foregroundStyle(palette.muted)
                 }

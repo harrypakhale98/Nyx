@@ -89,7 +89,7 @@ import Testing
         #expect(chart.series[1].points == [NightChart.Point(x: 1, y: 88, label: nil)] && chart.series[2].points == [NightChart.Point(x: 1, y: 70, label: nil)])
         #expect(chart.x.describe(1) == jotr.dayLabel(nights[1].id) && chart.y.describe(94) == "94 out of 100")
         #expect(chart.y.range == 0...100 && chart.x.range == 0...2)
-        #expect(chart.summary.contains("1 of 3 nights have no cloud forecast yet."))
+        #expect(chart.summary.contains("Nights without a cloud forecast yet: 1 of 3."))
         // Without a spread, one series.
         #expect(NightChart.nights(nights, title: "River").series.count == 1)
     }

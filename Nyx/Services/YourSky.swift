@@ -273,7 +273,7 @@ nonisolated struct YearRecap: Sendable {
     static func phaseFraction(_ index: Int) -> Double { [0.0,0.125,0.25,0.375,0.5,0.625,0.75,0.875][max(0,min(7,index))] }
     /// The deterministic recap, in Nyx's voice. Every sentence is a fact from the journal.
     var template: String {
-        guard nights>0 else { return String(localized:"No nights logged in \(String(year)) yet. Your first night will be your first star.") }
+        guard nights>0 else { return String(localized:"No nights recorded in \(String(year)) yet. Your first night will be your first star.") }
         var lines:[String]=[]
         let nightsText=nights==1 ? String(localized:"one night") : String(localized:"\(nights) nights")
         let parksText=parkNames.count==1 ? String(localized:"one national park") : String(localized:"\(parkNames.count) national parks")
@@ -289,7 +289,7 @@ nonisolated struct YearRecap: Sendable {
     }
     /// Facts for the on-device model, one per line, never more than the template already says.
     var facts: [String] {
-        var facts=[String(localized:"Year: \(String(year))"),String(localized:"Nights logged: \(nights)"),String(localized:"Parks: \(parkNames.joined(separator:", "))")]
+        var facts=[String(localized:"Year: \(String(year))"),String(localized:"Nights recorded: \(nights)"),String(localized:"Parks: \(parkNames.joined(separator:", "))")]
         if !newParkNames.isEmpty { facts.append(String(localized:"New parks this year: \(newParkNames.joined(separator:", "))")) }
         if let darkest { facts.append(String(localized:"Darkest observed sky: \(darkest.parkName), \(darkest.dateLabel), Bortle \(darkest.bortle)")) }
         facts.append(String(localized:"Moon phases met: \(phases.count) of 8"))

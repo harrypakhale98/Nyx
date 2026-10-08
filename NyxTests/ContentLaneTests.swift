@@ -23,7 +23,7 @@ struct ContentLaneTests {
             #expect(essay.minutes>=1 && essay.minutes<=3, "\(essay)")
         }
         #expect(Essay.allCases.first == .score)
-        #expect(Essay.text("score").hasPrefix("Reading the Darkness Score\n\n"))
+        #expect(Essay.text("score").hasPrefix("Reading the darkness score\n\n"))
         #expect(Essay.text("no-such-essay").isEmpty)
     }
     /// The score essay's worked night is the engine's own arithmetic: four parts adding to 86,

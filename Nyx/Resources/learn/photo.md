@@ -14,7 +14,7 @@ Focus by hand. Autofocus cannot find faint stars. Switch to manual focus, point 
 
 Shoot in RAW. It keeps far more of the faint detail and lets you set the color afterward. A white balance near 4000 K is a good place to begin.
 
-Time it. The Milky Way's bright center is the part most people want, and it is up for only part of the year and part of the night. Nyx's What's up shows when the core is up during true darkness at each park, where it will stand and whether the Moon will be down. The calendar's ringed nights mark the darkest stretches.
+Time it. The Milky Way's bright center is the part most people want, and it is up for only part of the year and part of the night. Nyx's What's up shows when the core is up during true darkness at each park, where it will stand and whether the Moon will be down. The ringed nights in Plan mark the darkest stretches.
 
 Give the picture a place. A tree, a rock formation or a ridgeline against the sky turns a picture of stars into a picture of one night somewhere. Arrive in daylight to find your spot and frame it. Light painting and stray lights can spoil other people's photos and night vision, so keep lights off when others are near, and follow the park's rules. Flying a drone is not allowed in national parks.
 

@@ -54,7 +54,7 @@ import Observation
             // Every number in the answer must come from the records, the tools' results, the
             // question or today's date; a misquoted score is no answer at all.
             let facts=context+ledger.all+[question,today]+citations.map { String($0) }
-            if citations.isEmpty || text.isEmpty || !Self.grounded(text,facts:facts) { error=String(localized:"Nyx could not ground an answer in these records. The original data is still available below.");text="";citations=[] }
+            if citations.isEmpty || text.isEmpty || !Self.grounded(text,facts:facts) { error=String(localized:"Nyx could not match an answer to these records. The original data is below.");text="";citations=[] }
         } catch { if !Task.isCancelled { self.error=String(localized:"This explanation is unavailable right now. The original data is ready below.") };text="" }
     }
     /// The records as numbered lines, trimmed from the end to fit the model's real context window

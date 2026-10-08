@@ -198,7 +198,7 @@ nonisolated enum TripPlanner {
             if let access=park.accessNote { line+=" "+access }
             lines.append(line)
         }
-        if let best=plan.best { lines.append(String(localized:"Best night: \(best.night.park.dayLabel(best.night.id)) at \(best.night.park.shortName).")) }
+        if let best=plan.best { lines.append(String(localized:"Best night: \(best.night.park.dayLabel(best.night.id)), \(best.night.park.shortName).")) }
         lines.append(String(localized:"Distances are straight lines, not driving routes. Scores are estimates. Check closures and the forecast before you go."))
         return lines.joined(separator:"\n")
     }

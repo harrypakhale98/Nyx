@@ -81,7 +81,7 @@ struct VisionMoon: View {
             .float4(cos(geometry.north), sin(geometry.north), geometry.librationLongitude, geometry.librationLatitude), .image(Image("MoonMap")))
     }
     static func describe(_ geometry: MoonGeometry) -> String {
-        String(localized: "Moon, \(Int((geometry.illumination*100).rounded())) percent illuminated")
+        String(localized: "Moon, \(Int((geometry.illumination*100).rounded())) percent lit")
     }
 }
 

@@ -118,7 +118,7 @@ private struct ComplicationReview: View {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(ProcessInfo.processInfo.arguments.contains("-nyx-watch-tinted") ? [WidgetRenderingMode.accented] : [.fullColor, .accented], id: \.description) { mode in
                     Group {
-                        Text(mode == .fullColor ? "Full colour" : "Tinted").font(.caption2).foregroundStyle(.gray)
+                        Text(mode == .fullColor ? "Full color" : "Tinted").font(.caption2).foregroundStyle(.gray)
                         HStack(spacing: 8) {
                             WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50)
                             MoonComplicationView(previewFamily: .accessoryCircular, entry: moon).frame(width: 50, height: 50)

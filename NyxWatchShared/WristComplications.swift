@@ -137,7 +137,7 @@ struct MoonComplicationView: View {
         var text = String(localized: "\(entry.moon.phase.name), \(entry.moon.percent) percent lit.")
         if let up = entry.moon.isUp { text += " " + (up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
         if let park = entry.park, let next = entry.moon.next {
-            text += " " + (next.rises ? String(localized: "Moonrise at \(park.time(next.date)) at \(park.wristName).") : String(localized: "Moonset at \(park.time(next.date)) at \(park.wristName)."))
+            text += " " + (next.rises ? String(localized: "Moonrise at \(park.time(next.date)), \(park.wristName).") : String(localized: "Moonset at \(park.time(next.date)), \(park.wristName)."))
         }
         return text
     }

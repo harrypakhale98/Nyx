@@ -63,7 +63,7 @@ nonisolated struct NightChart: Sendable {
         let first=String(localized:"Best night: \(best.park.dayLabel(best.id)), \(best.score.value) out of 100, \(best.score.band.label).")
         let second=estimates==0 ? (nights.allSatisfy { $0.score.hasForecast } ? String(localized:"Every night includes a cloud forecast.") : String(localized:"Every night includes a cloud forecast; the later ones are an early look."))
             : estimates==nights.count ? String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds.")
-            : String(localized:"\(estimates) of \(nights.count) nights have no cloud forecast yet.")
+            : String(localized:"Nights without a cloud forecast yet: \(estimates) of \(nights.count).")
         return first+" "+second
     }
 

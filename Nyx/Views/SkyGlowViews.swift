@@ -175,7 +175,7 @@ private struct AccessSource: View {
     let access: SpotAccess
     var body: some View {
         VStack(alignment:.leading,spacing:8) {
-            if let evidence=access.evidence { Text("“\(evidence)”").font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
+            if let evidence=access.evidence { Text("\"\(evidence)\"").font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if let note=access.note { Text(note).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if let url=access.source { Link(destination:url) { Label("Open the park's page in Safari",systemImage:"safari").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.foregroundStyle(palette.accent) }
             Text("National Park Service, retrieved October 5, 2026. Conditions change; check with the park.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -213,7 +213,7 @@ struct ProtectThisSky: View {
                 }
             }
             NavigationLink { EssayView(essay:.darkness) } label:{
-                HStack { Text("Read “\(Essay.darkness.title)”").fixedSize(horizontal:false,vertical:true); Spacer(); Image(systemName:"chevron.right").font(.footnote).accessibilityHidden(true) }.frame(minHeight:44).contentShape(Rectangle())
+                HStack { Text("Read \"\(Essay.darkness.title)\"").fixedSize(horizontal:false,vertical:true); Spacer(); Image(systemName:"chevron.right").font(.footnote).accessibilityHidden(true) }.frame(minHeight:44).contentShape(Rectangle())
             }.font(.subheadline).foregroundStyle(palette.accent)
         }
     }

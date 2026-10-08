@@ -3,7 +3,7 @@ import SwiftUI
 /// A screen that accepts a dragged park (iPad, or iPhone with a long-press drag): Plan opens that
 /// park's month, Journal starts an entry for it. While a park hovers over the screen, a quiet amber
 /// frame and one line say what letting go will do. VoiceOver users reach the same actions from
-/// each park's own menu ("Show in Calendar") and the journal's "Record a night".
+/// each park's own menu ("Show in Plan") and the journal's "Record a night".
 struct ParkDropTarget: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
