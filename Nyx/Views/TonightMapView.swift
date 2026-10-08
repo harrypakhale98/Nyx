@@ -252,11 +252,12 @@ struct ParksMapView: View {
         HStack(alignment:.firstTextBaseline,spacing:14) {
             Text("\(mark.score)").font(.system(.title2,design:.serif).monospacedDigit()).foregroundStyle(palette.accent).frame(minWidth:44,alignment:.leading)
             VStack(alignment:.leading,spacing:3) {
-                Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
-                Text("\(park.state.replacingOccurrences(of:",",with:", ")) · \(model.night(park).bandWithBasis)").font(.subheadline).foregroundStyle(palette.muted)
+                Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                Text("\(park.state.replacingOccurrences(of:",",with:", ")) · \(model.night(park).bandWithBasis)").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent) }
             }.fixedSize(horizontal:false,vertical:true)
-            Spacer(minLength:0)
+            // The words take the row's width, so a long name wraps in place rather than meeting the chevron.
+            .frame(maxWidth:.infinity,alignment:.leading)
             Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
         }
         .padding(.vertical,12).frame(minHeight:44).contentShape(Rectangle())
