@@ -20,7 +20,16 @@ nonisolated struct MoonGeometry: Sendable, Equatable {
     let north: Double
     let librationLongitude: Double
     let librationLatitude: Double
+    /// Whether the Moon is waxing; nil for a hand-built geometry (a morph between two nights).
+    var waxing: Bool?=nil
     var illumination: Double { (1+cos(phaseAngle))/2 }
+    /// The phase as named in words ("Waxing crescent"), when the direction is known.
+    var phase: MoonPhase? {
+        guard let waxing else { return nil }
+        // Phase angle π is new, 0 full; the synodic fraction runs 0 → 0.5 waxing, 0.5 → 1 waning.
+        let half=(Double.pi-phaseAngle)/(2*Double.pi)
+        return MoonPhase(fraction: waxing ? half : 1-half)
+    }
 }
 nonisolated struct AstronomyEngine: AstronomyProviding {
     static let synodicDays = 29.530588853
@@ -231,7 +240,10 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         let y = sin(inclination)*cos(node)*cos(sun.epsilon)-cos(inclination)*sin(sun.epsilon)
         let omega = atan2(x, y)
         let axis = asin(max(-1,min(1,sqrt(x*x+y*y)*cos(moon.ra-omega)/cos(bPrime))))
-        return MoonGeometry(phaseAngle: phaseAngle, brightLimb: chi-q, north: axis-q, librationLongitude: lPrime, librationLatitude: bPrime)
+        // Waxing while the Moon is less than 180° east of the Sun in ecliptic longitude.
+        let east=(lambda-sun.lambda).truncatingRemainder(dividingBy: 2*Double.pi)
+        let waxing=(east<0 ? east+2*Double.pi : east)<Double.pi
+        return MoonGeometry(phaseAngle: phaseAngle, brightLimb: chi-q, north: axis-q, librationLongitude: lPrime, librationLatitude: bPrime, waxing: waxing)
     }
     /// The moment a night's Moon is best seen: its highest point between sunset and sunrise
     /// (or the local 22:00–02:00 window under the midnight sun). Used for its drawn orientation.

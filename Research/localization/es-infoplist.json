@@ -1,4 +1,5 @@
 {
   "NSAlarmKitUsageDescription": "Nyx programa las alarmas que eliges para momentos de la noche, como la salida del núcleo de la Vía Láctea. Se configuran solo en este dispositivo.",
-  "NSLocationWhenInUseUsageDescription": "Nyx usa tu ubicación en este dispositivo para encontrar parques nacionales cercanos, saber cuándo estás en uno y orientar el cielo hacia el norte verdadero. Tu ubicación nunca sale de este dispositivo."
+  "NSLocationWhenInUseUsageDescription": "Nyx usa tu ubicación en este dispositivo para encontrar parques nacionales cercanos, saber cuándo estás en uno y orientar el cielo hacia el norte verdadero. Tu ubicación nunca sale de este dispositivo.",
+  "NSMotionUsageDescription": "Nyx sigue cómo gira tu cabeza con audífonos que detectan movimiento, para que el tono del modo de campo se mantenga hacia la parte del cielo que elegiste. El movimiento nunca sale de este dispositivo."
 }

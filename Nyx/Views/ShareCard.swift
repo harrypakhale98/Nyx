@@ -94,7 +94,7 @@ struct ShareNightMenu:View {
         Menu {
             ForEach(ShareCard.Format.allCases) { shape in
                 if let image=render.images[shape], render.key == key {
-                    ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:image)) {
+                    ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:image)) {
                         Label(shape == .card ? String(localized:"Share as a card") : String(localized:"Share as a story (9:16)"),systemImage:shape == .card ? "rectangle.portrait" : "rectangle.portrait.fill")
                     }
                 }
@@ -123,7 +123,7 @@ struct ShareCardButton:View {
         let card=ShareCard(night:night,why:why)
         Group {
             if let image=render.images[.card] {
-                ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value)/100 at \(night.park.shortName)"),image:image)) { Label("Share this night",systemImage:"square.and.arrow.up") }.disabled(render.key != key)
+                ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:image)) { Label("Share this night",systemImage:"square.and.arrow.up") }.disabled(render.key != key)
             } else { Button("Prepare share card") { render.render(night:night,why:why,palette:palette,scale:displayScale,key:key) } }
         }.buttonStyle(.bordered).accessibilityValue(card.summary).task(id:key) {
             try? await Task.sleep(for:.milliseconds(450)); if !Task.isCancelled { render.render(night:night,why:why,palette:palette,scale:displayScale,key:key) }

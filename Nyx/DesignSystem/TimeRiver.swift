@@ -13,10 +13,17 @@ struct RiverScrubbingKey:PreferenceKey {
 /// horizon a soft vertical glow behind each night spans the scores the clearest and cloudiest of
 /// three forecast models would give, so uncertainty is something you can see, not a footnote.
 /// The selected night's caption carries the meaning (date, score, what its clouds rest on); a
-/// one-time tip explains the marks instead of a standing legend.
+/// one-time tip explains the marks instead of a standing legend. The chosen night sits under a
+/// small Liquid Glass lens that bends the river beneath it and answers the finger (solid in night
+/// vision, under Reduce Transparency and Increase Contrast).
+/// Without a long drag: VoiceOver and Voice Control adjust it a night at a time (activating it
+/// says the night, never jumps to the middle one); with "prefers action slider alternative" or
+/// Switch Control, previous and next night buttons sit under it; at accessibility sizes it becomes
+/// a stepper.
 struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyxAccess) private var access
@@ -29,6 +36,9 @@ struct TimeRiver: View {
     var outlooks:[Date:NightOutlook]=[:]
     /// A visible eclipse or a notable shower's peak, drawn small above that night's point.
     var markers:[Date:WhatsUp.Events.Marker]=[:]
+    /// Activating the river (VoiceOver double-tap, Voice Control "Tap River", Switch Control's
+    /// select) opens the chosen night's breakdown when the page offers one; otherwise it is spoken.
+    var open:((Night)->Void)?=nil
     /// Whether the current drag is a horizontal scrub; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
@@ -47,7 +57,7 @@ struct TimeRiver: View {
         let ranks=nights.map(\.rankScore)
         return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
-    private let inset=14.0, moonSize=30.0
+    private let inset=14.0, moonSize=30.0, lensSize=30.0
     private let tip=RiverTip()
 
     var body: some View {
@@ -61,7 +71,12 @@ struct TimeRiver: View {
             } else {
                 river
                 summary
+                if access.preferSteps { stepButtons }
             }
+            #if DEBUG
+            // UI tests: activates the river as VoiceOver would (`accessibilityActivate`), not as a touch.
+            if DebugScenario.isEnabled("activate-river") { Button { _=DebugAccessibility.activate(label:String(localized:"Thirty-night darkness timeline")) } label:{ Text(verbatim:"Activate the river") } }
+            #endif
             // Shapes stand in for colour under Differentiate Without Color; they need their key.
             if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
@@ -86,6 +101,7 @@ struct TimeRiver: View {
                         .frame(width:moonSize,height:moonSize)
                         .offset(x:x(index,width:width)-moonSize/2,y:0)
                         .accessibilityHidden(true)
+                    lens.offset(x:x(index,width:width)-lensSize/2,y:y(current.score.value,height:proxy.size.height)-lensSize/2)
                 }
             }
             .contentShape(Rectangle())
@@ -107,7 +123,10 @@ struct TimeRiver: View {
         .accessibilityElement()
         .accessibilityLabel("Thirty-night darkness timeline")
         .accessibilityValue(spokenValue)
-        .accessibilityHint("Swipe up or down to move one night at a time. An audio graph is available.")
+        .accessibilityHint("Moves one night at a time. An audio graph is available.")
+        // An explicit activation, so a double-tap or "Tap River" says the night (or opens it) instead
+        // of landing a tap on the middle of the river and choosing whichever night lies there.
+        .accessibilityAction { activate() }
         .accessibilityInputLabels([Text("River"),Text("Nights"),Text("Timeline")])
         .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
         .accessibilityAdjustableAction { direction in
@@ -145,12 +164,41 @@ struct TimeRiver: View {
         if let marker=markers[night.id] { parts.append(marker.name) }
         return parts.joined(separator:" · ")
     }
+    /// The scrub position: a small lens of Liquid Glass over the chosen night, which bends the river
+    /// under it and responds to the finger. Solid where glass would cost legibility or is unwanted.
+    @ViewBuilder private var lens: some View {
+        if palette.nightVision || palette.highContrast || reduceTransparency {
+            Circle().fill(palette.panel.opacity(0.35)).overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2))
+                .frame(width:lensSize,height:lensSize).allowsHitTesting(false).accessibilityHidden(true)
+        } else {
+            Color.clear.frame(width:lensSize,height:lensSize)
+                .glassEffect(.regular.interactive(),in:.circle)
+                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8))
+                .accessibilityHidden(true)
+        }
+    }
+    /// Previous and next night, for anyone who prefers buttons to a long drag.
+    private var stepButtons: some View {
+        HStack(spacing:12) {
+            Button { choose((index ?? 1)-1) } label:{ Label("Previous night",systemImage:"chevron.backward").frame(maxWidth:.infinity,minHeight:44) }
+                .disabled((index ?? 0)<=0)
+            Button { choose((index ?? -1)+1) } label:{ Label("Next night",systemImage:"chevron.forward").frame(maxWidth:.infinity,minHeight:44) }
+                .disabled((index ?? nights.count)>=nights.count-1)
+        }
+        .buttonStyle(.bordered).tint(palette.accent).font(.subheadline.weight(.medium))
+        .accessibilityElement(children:.contain)
+    }
+    /// The river's default action: the chosen night opens, or is spoken.
+    private func activate() {
+        if let current, let open { open(current); return }
+        AccessibilityNotification.Announcement(spokenValue).post()
+    }
     /// At accessibility text sizes the drawn river gives way to a plain, large stepper.
     private var stepper: some View {
         Stepper(value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1)) {
             Text(spokenValue).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
         }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
-            .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Adjust to move one night at a time.")
+            .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Moves one night at a time.")
             .accessibilityInputLabels([Text("Night"),Text("Selected night")])
             .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
     }
@@ -173,6 +221,11 @@ struct TimeRiver: View {
         return peaks.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }
     }
 
+    /// A score's height on the river, as `draw` places it.
+    private func y(_ score:Int,height:Double)->Double {
+        let top=moonSize+12, bottom=height-22
+        return bottom-(bottom-top)*Double(score)/100
+    }
     private func x(_ i:Int,width:Double)->Double {
         guard nights.count>1 else { return width/2 }
         return inset+Double(i)*(width-2*inset)/Double(nights.count-1)
@@ -322,7 +375,19 @@ private struct RiverAccessibility: ViewModifier {
 }
 #Preview("River") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().background(.black) } }
 #Preview("River • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().dynamicTypeSize(.accessibility5).background(.black) } }
+#Preview("River • Steps") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyxAccess,NyxAccess(preferSteps:true)).background(.black) } }
+#Preview("River • Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
 #Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }
+#if DEBUG
+/// The river route's own selection, so a scrub, a step or an activation can move it (or not) as in a park page.
+struct DebugRiverHost: View {
+    let nights:[Night]
+    @State var start:Date
+    var outlooks:[Date:NightOutlook]=[:]
+    var markers:[Date:WhatsUp.Events.Marker]=[:]
+    var body: some View { TimeRiver(nights:nights,selected:$start,outlooks:outlooks,markers:markers) }
+}
+#endif
 /// The river explains itself once, then gets out of the way: it closes after the first scrub.
 struct RiverTip: Tip {
     var title: Text { Text("Drag along the nights") }

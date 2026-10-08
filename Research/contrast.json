@@ -3,18 +3,48 @@
     "palette": "Normal",
     "primaryOnPanel": 16.66,
     "secondaryOnPanel": 8.89,
-    "primaryOnBlack": 18.61
+    "primaryOnBlack": 18.61,
+    "primaryOnPanelProtan": 16.37,
+    "secondaryOnPanelProtan": 8.77,
+    "primaryOnBlackProtan": 18.48,
+    "primaryOnPanelDeutan": 16.84,
+    "secondaryOnPanelDeutan": 8.96,
+    "primaryOnBlackDeutan": 18.68
   },
   {
     "palette": "Night vision",
-    "primaryOnPanel": 5.62,
-    "secondaryOnPanel": 5.26,
-    "primaryOnBlack": 6.16
+    "primaryOnPanel": 6.08,
+    "secondaryOnPanel": 5.65,
+    "primaryOnBlack": 6.16,
+    "primaryOnPanelProtan": 4.25,
+    "secondaryOnPanelProtan": 3.98,
+    "primaryOnBlackProtan": 4.3,
+    "primaryOnPanelDeutan": 7.28,
+    "secondaryOnPanelDeutan": 6.74,
+    "primaryOnBlackDeutan": 7.39
+  },
+  {
+    "palette": "Night vision, brighter red",
+    "primaryOnPanel": 6.78,
+    "secondaryOnPanel": 6.29,
+    "primaryOnBlack": 6.89,
+    "primaryOnPanelProtan": 5.04,
+    "secondaryOnPanelProtan": 4.7,
+    "primaryOnBlackProtan": 5.11,
+    "primaryOnPanelDeutan": 7.92,
+    "secondaryOnPanelDeutan": 7.33,
+    "primaryOnBlackDeutan": 8.06
   },
   {
     "palette": "Filled controls",
     "blackOnAmber": 11.91,
     "blackOnSignalRed": 6.16,
     "redThumbOnDarkTrack": 4.95
+  },
+  {
+    "palette": "Lines (graphical objects)",
+    "starlight40OnBlack": 3.36,
+    "starlight40OnPanel": 3.5,
+    "nightRed70OnBlack": 3.36
   }
 ]

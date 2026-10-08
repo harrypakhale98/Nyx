@@ -42,6 +42,23 @@ Per Apple, third-party content (the parks' NPS descriptions, alerts and event te
 
 Not applicable: login, purchase, account recovery.
 
+## What changed on 2026-10-07 (accessibility lane, wave 2)
+
+Built and unit-tested in the simulator; **none of it changes a gate below**: every label still waits for its device pass.
+
+- **Red for every eye.** Night vision and field mode switch to a slightly brighter red under Increase Contrast, or by choice ("Brighter red" in Settings › In the dark and in field mode's options). `Research/contrast.json` now has protan and deutan columns (Machado 2009): the standard red is 4.3:1 for protanopes, the brighter red 5.1:1 (primary) and 4.7:1 (secondary); a unit test asserts ≥ 4.5:1 for all three visions.
+- **Field mode brightness.** It dims to 12% as before, but to 20% under Increase Contrast or accessibility text sizes, and "Keep my brightness" leaves the screen alone.
+- **Time river without a drag.** VoiceOver double-tap, Voice Control "Tap River" and Switch Control's select now say the chosen night (an explicit default action) instead of landing a tap in the middle of the river; a UI test proves activation leaves the night unchanged. With iOS 26.1's "Prefers action slider alternative" (read live) or Switch Control, Previous night and Next night buttons sit under the river at every text size. The hint is "Moves one night at a time."
+- **Park rows** (Parks list, Tonight's other parks): VoiceOver says the name, score, band and any closure; the rest (closure first, clouds, this week, step-free, road access, state) is under "More content".
+- **The Moon by name:** "Waxing crescent, 34 percent lit, lit from the right". "Bortle" is pronounced BOR-tl on iOS 26 too (phonetic notation), SSML on iOS 27.
+- **First light** never leaves on a timer and no longer closes on a stray tap: Continue, VoiceOver's escape or the Escape key.
+- **Show Borders (Button Shapes):** text-only actions (Add to Calendar, Feel the Moon, Feel tonight) gain a hairline capsule.
+- **Graphical objects:** hairlines and tracks are 3:1 by default (starlight at 40%, 70% through the red).
+- **Journal photos:** a "Describe this photo" field per photo, read by VoiceOver as that photo's label; on iOS 27, when the on-device model can see images, "Suggest a description" drafts one line labelled "Suggested on this iPhone" that the person uses or dismisses. Never saved by itself.
+- **Assistive Access:** an `AssistiveAccess` scene and `UISupportsAssistiveAccess`: Tonight (one park, one word, the Moon, "Dark from 8:40 PM", any closure, Remind me) and Saved parks. Not a Nutrition Label, but part of the Inclusivity story; check it on a device in Settings › Accessibility › Assistive Access.
+- **Feel tonight:** the night as 24 seconds of touch (Core Haptics), with its moments in words and announced to VoiceOver. **Where to look by sound:** in field mode's compass, an optional tone placed in the headphones toward the core, a planet or the Moon (head tracking with AirPods that report motion). Neither is speech, so Captions stays not applicable; both have text equivalents.
+- **Audit coverage:** two new passes on the key screens (Tonight, Parks, park detail, Plan, Journal, Settings, field mode) at the system's largest accessibility size with Increase Contrast and Bold Text, in both palettes. The blanket "partially supports Dynamic Type" exemption is replaced by a per-element allow-list.
+
 ## What to declare, per feature
 
 "Evidence" is what the repository shows today (README, AUDIT.md, DECISIONS.md, the accessibility audit tests). "Gap" is what only a device can settle. **Do not declare a label until its gap is closed and signed in `AUDIT.md`.** The simulator audit (Apple's `performAccessibilityAudit`) is evidence of structure, not a certification, and `AUDIT.md` says so itself.
@@ -57,6 +74,7 @@ Not applicable: login, purchase, account recovery.
 
 - **Answer:** Do not declare yet. Declare only after a pass.
 - **Evidence:** every custom control and icon-only button now has short `accessibilityInputLabels` (time river "River"/"Nights", its accessibility-size stepper "Night", gauge "Score", each calendar night by day number or weekday and day, month arrows "Previous"/"Next", save, filter, sky arc, "Listen", "Feel the Moon", field mode's "Leave" and "Options"); the river also takes VoiceOver/Voice Control actions "Best night" and "Next of the best nights". Nyx uses system buttons, lists, toggles, steppers, search, sheets and menus almost everywhere, which Voice Control handles. Custom controls (time river drag, calendar night cells, celestial gauge tap targets, the compass "Hold still") are the risk. The roadmap itself says: "add a Voice Control pass to the audit first."
+- **Since 2026-10-07:** activating the river by voice ("Tap River") says the chosen night instead of choosing the middle one; with "Prefers action slider alternative" on, named Previous night and Next night buttons sit under it.
 - **Gap, the test:** with Voice Control on, "Show numbers" and "Show names", complete every common task above by voice. Check that every control has a spoken name (visible text matches the accessibility label, so "Tap Why this score" works), that the time river can be moved by voice (the adjustable stepper at accessibility sizes helps; add `accessibilityAdjustableAction` and test "Swipe left on the river" or a button for previous and next night), that calendar nights are individually addressable, and that Dwell and swipe gestures are never the only route.
 - **If it fails:** add visible, named previous and next night buttons beside the river and the calendar; ensure `accessibilityInputLabels` for controls whose spoken label differs from the visible label.
 - **Not available on Apple Watch** (Apple lists iPhone, iPad, Mac and Vision Pro only).
@@ -86,6 +104,7 @@ Not applicable: login, purchase, account recovery.
 
 - **Answer:** Yes after the sampling below.
 - **Evidence:** `Scripts/contrast.py` computes WCAG relative luminance for the design tokens (`Research/contrast.json`): primary and secondary text on the normal panel 16.7:1 and 8.9:1; signal red on black 6.2:1, red primary and secondary on the dark panel 5.6:1 and 5.3:1; black labels on amber 11.9:1 and on red 6.2:1. Increase Contrast and Reduce Transparency switch glass panels to opaque. The audit's contrast checks run in both palettes; documented exclusions cover text behind the tab bar and animated stars. 1.1 adds a "Reduce bright effects" mode (iOS 26.4 and later) for glow and halos.
+- **Since 2026-10-07:** protan and deutan columns in `Research/contrast.json`; under Increase Contrast night vision uses the brighter red (5.1:1 for protanopes); lines and tracks reach 3:1 by default.
 - **Gap:** `AUDIT.md` states plainly that token ratios do not prove every antialiased, disabled or composited native pixel; native glass and forms in red need device sampling. Test with Increase Contrast on and off, in both palettes, outdoors at low brightness. Sample the new 1.1 surfaces: field mode, the Watch app in red, Vision Pro windows.
 
 ### Reduced Motion — declare after the check

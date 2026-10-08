@@ -36,6 +36,23 @@ import WidgetKit
     static let idleAfter: TimeInterval=600
     /// Below this the screen is never raised; above it, field mode lowers it here.
     static let brightness: CGFloat=0.12
+    /// The floor under Increase Contrast or accessibility text sizes, where 12% is too dim to read.
+    static let legibleBrightness: CGFloat=0.2
+    /// "Keep my brightness" in field mode's options: the screen is left as the person set it.
+    static let keepBrightnessKey="fieldKeepsBrightness"
+    /// Whether field mode leaves the screen's brightness alone (remembered on this iPhone).
+    var keepsBrightness=UserDefaults.standard.bool(forKey: FieldSession.keepBrightnessKey)
+    /// Where field mode sets the screen: never brighter than it was, 12% at most, or 20% when the
+    /// person needs more light to read (Increase Contrast, accessibility text sizes). Nil leaves it.
+    static func dimmed(from prior: CGFloat?, legible: Bool, keep: Bool) -> CGFloat? {
+        guard !keep else { return nil }
+        let floor=legible ? legibleBrightness : brightness
+        return min(prior ?? floor, floor)
+    }
+    /// Increase Contrast or an accessibility text size.
+    private static var needsLegibleLight: Bool {
+        UIAccessibility.isDarkerSystemColorsEnabled || UIApplication.shared.preferredContentSizeCategory.isAccessibilityCategory
+    }
 
     init(park: Park, model: PlanModel, changesPhone: Bool=true, offset: TimeInterval=0, adaptedFor: TimeInterval=0) {
         let tonight=model.night(park)
@@ -126,7 +143,15 @@ import WidgetKit
     }
     private func dim() {
         guard let screen, let prior else { return }
-        screen.brightness=min(prior.brightness ?? Self.brightness, Self.brightness)
+        if let level=Self.dimmed(from: prior.brightness, legible: Self.needsLegibleLight, keep: keepsBrightness) { screen.brightness=level }
+        else if let brightness=prior.brightness { screen.brightness=brightness }
+    }
+    /// "Keep my brightness": the screen goes back to the person's own level, and stays there each time.
+    func keepBrightness(_ on: Bool) {
+        keepsBrightness=on
+        guard changesPhone else { return }
+        UserDefaults.standard.set(on, forKey: Self.keepBrightnessKey)
+        dim()
     }
     private func restoreBrightness() {
         if let brightness=prior?.brightness { screen?.brightness=brightness }
