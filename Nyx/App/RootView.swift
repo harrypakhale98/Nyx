@@ -32,6 +32,9 @@ struct RootView:View {
     /// The Tonight tab icon is today's real moon phase, drawn just after the first frame (the tab
     /// bar is still fading in) and again whenever Nyx returns.
     @State private var moonIcon=Image(systemName:"moon")
+    /// The launch's own update of the saved parks has run: until then, becoming active (which
+    /// also happens at launch) leaves it to that one rather than publishing twice.
+    @State private var launchPublished=false
 
     private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
     var body:some View {
@@ -106,9 +109,12 @@ struct RootView:View {
             if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
             else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
             openRequestedField(); openRequestedPark()
+            // Every park's week, worked out off the main thread once the first frame is up, so Parks opens ready.
+            Task(priority:.utility) { await model.prepareNights(model.parks,count:7) }
             if let link=DebugScenario.link { try? await Task.sleep(for:.seconds(1)); handle(DeepLink(link)) }
             if DebugScenario.screen == nil { firstLight=await FirstLightWatcher.check(model:model) }
-            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.index(model.parks);await updateSaved() }
+            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.indexIfNeeded(model.parks);await updateSaved() }
+            launchPublished=true
         }
         .onChange(of:scenePhase) { _,phase in
             // Ask iOS for the next background refresh whenever Nyx leaves the screen.
@@ -121,7 +127,8 @@ struct RootView:View {
                 Task.detached(priority:.utility) { JournalInbox.sweep(keeping:waiting) }
             }
             if phase == .active {
-            model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
+            model.tick(); moonIcon=RootView.currentMoonIcon()
+            if launchPublished { Task { await updateSaved() } }
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
             openRequestedField(); openRequestedPark()
             // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.

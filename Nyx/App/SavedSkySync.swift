@@ -16,7 +16,8 @@ import WidgetKit
     /// The palette the widget's Moon pictures are drawn in; the window keeps it current.
     var palette=NyxPalette(nightVision:false,highContrast:false)
 
-    func update(_ model:PlanModel,parkIDs ids:[String]?=nil) async {
+    /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`).
+    func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false) async {
         guard DebugScenario.screen == nil else { return }
         // When the store could not open, the windows read their saved parks from an empty stand-in.
         // That empty list must never reach the widget, the watch or reminders: the parks of the last
@@ -30,7 +31,8 @@ import WidgetKit
         model.tick()
         defer {
             running=false
-            if again { again=false; Task { await update(model) } }
+            // A run cut short (background time ran out) does not start another: the next opening of Nyx runs one.
+            if again { again=false; if !Task.isCancelled { Task { await update(model) } } }
         }
         let parks=current.compactMap { model.park($0) }
         let ids=Set(parks.map(\.id))
@@ -38,10 +40,14 @@ import WidgetKit
         await publish(model,parks)
         // The widget and reminders need only forecasts; park alerts follow once they are done,
         // so a quick visit still leaves both up to date.
+        let started=ContinuousClock.now
         await model.refreshForecasts(watching:parks)
         if !again, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
+        // In the background, alerts wait for the next run when time is up or the forecasts were
+        // slow, and ask for one page only; the next refresh was already requested.
+        if background, Task.isCancelled || ContinuousClock.now-started>Self.alertsAfter { return }
         let closures=Self.closures(model)
-        await model.refreshParkUpdates(parks)
+        await model.refreshParkUpdates(parks,alertPages:background ? 1 : ParkStore.alertPages)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
         if !again, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model) }
         Self.scheduleRefresh()
@@ -49,13 +55,30 @@ import WidgetKit
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
     /// snapshot, the watch and reminders, then the next request about six hours on. Same hosts and
     /// the same requests as in the app; nothing about the person is sent.
+    /// iOS allows about 30 seconds: the run stops at `backgroundBudget`, and the next request is
+    /// made first, so a run cut short still leaves one.
     func backgroundRefresh(_ model:PlanModel) async {
+        Self.scheduleRefresh()
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         model.tick()
-        await update(model)
-        // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
-        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
-        Self.scheduleRefresh()
+        await Self.run(within:Self.backgroundBudget) {
+            await self.update(model,background:true)
+            // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
+            if !Task.isCancelled { await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision")) }
+        }
+    }
+    static let backgroundBudget:Duration = .seconds(20)
+    /// Forecasts slower than this leave park alerts to the next background run.
+    static let alertsAfter:Duration = .seconds(10)
+    /// Runs `work`, cancelling it once `limit` has passed. True when it finished in time.
+    @discardableResult static func run(within limit:Duration,_ work:@escaping @MainActor @Sendable ()async->Void) async -> Bool {
+        await withTaskGroup(of:Bool.self) { group in
+            group.addTask { await work(); return true }
+            group.addTask { try? await Task.sleep(for:limit); return false }
+            let finished=await group.next() ?? false
+            group.cancelAll()
+            return finished
+        }
     }
     /// Asks iOS for the next background refresh, about six hours from now (iOS decides when).
     static func scheduleRefresh(after delay:TimeInterval=6*3600,now:Date = .now) {
@@ -97,7 +120,7 @@ import WidgetKit
                                 aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)))
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
-        let moonsDrawn=renderWidgetMoons(model,parks)
+        let moonsDrawn=await renderWidgetMoons(model,parks)
         let snapshot=writeSnapshot(model,parks,moonsDrawn:moonsDrawn)
         // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
         NyxShortcuts.updateAppShortcutParameters()
@@ -112,10 +135,14 @@ import WidgetKit
     /// The next week's Moons for each saved park, drawn once each for the widgets, so a widget left
     /// for days without Nyx being opened still shows the real Moon (`MoonImages.nearest`).
     static let moonNights=7
-    /// True when a picture was drawn that the widgets have not seen.
-    @discardableResult private func renderWidgetMoons(_ model:PlanModel,_ parks:[Park])->Bool {
+    /// True when a picture was drawn that the widgets have not seen. Drawn only with Nyx on
+    /// screen: the Moon is a Metal shader, which a background run may not use (a failed draw would
+    /// leave a blank picture in place of that night's Moon). One picture at a time, letting the
+    /// screen draw in between; a picture that comes back empty is not kept.
+    @discardableResult private func renderWidgetMoons(_ model:PlanModel,_ parks:[Park]) async -> Bool {
         let engine=AstronomyEngine()
         var drawn=false
+        let visible=UIApplication.shared.applicationState != .background
         // Drawn in starlight: the widget turns its own pictures red in night vision, so a picture
         // drawn red would stay red once night vision is off.
         let neutral=NyxPalette(nightVision:false,highContrast:palette.highContrast)
@@ -125,10 +152,12 @@ import WidgetKit
                 let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
                 guard let url=SharedSettings.moonImageURL(park:park.id,night:night.id) else { continue }
                 keep.insert(url.lastPathComponent)
-                if FileManager.default.fileExists(atPath:url.path) { continue }
+                guard visible, !FileManager.default.fileExists(atPath:url.path) else { continue }
+                await Task.yield()
                 let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,neutral))
                 renderer.scale=3
-                if (try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)) != nil { drawn=true }
+                guard let image=renderer.uiImage, let cgImage=image.cgImage, Self.drawn(cgImage), let png=image.pngData() else { continue }
+                if (try? png.write(to:url,options:.atomic)) != nil { drawn=true }
             }
         }
         // Forget pictures of nights that have passed or parks no longer saved.
@@ -137,5 +166,17 @@ import WidgetKit
             for file in files where file.hasPrefix("moon-") && !keep.contains(file) { try? FileManager.default.removeItem(at:folder.appendingPathComponent(file)) }
         }
         return drawn
+    }
+    /// The picture's centre is not transparent: the disc is drawn on an opaque square, so a draw
+    /// that failed comes back clear there.
+    nonisolated static func drawn(_ image:CGImage)->Bool {
+        var pixel=[UInt8](repeating:0,count:4)
+        return pixel.withUnsafeMutableBytes { buffer in
+            guard let context=CGContext(data:buffer.baseAddress,width:1,height:1,bitsPerComponent:8,bytesPerRow:4,space:CGColorSpaceCreateDeviceRGB(),
+                                        bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            // The image's centre pixel lands on the one-pixel canvas.
+            context.draw(image,in:CGRect(x:-CGFloat(image.width/2),y:-CGFloat(image.height/2),width:CGFloat(image.width),height:CGFloat(image.height)))
+            return buffer[3]>0
+        }
     }
 }

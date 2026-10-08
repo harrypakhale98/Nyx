@@ -21,7 +21,8 @@ struct RealSky: View {
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night)
         let strength=palette.nightVision ? strength*0.45 : strength
-        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
+        // Rests in Low Power Mode and while the device is hot, as the sensors do.
+        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
@@ -209,7 +210,9 @@ private struct DomeLayer: View, Equatable {
     private var cache:[String:Sky]=[:]
     private var recent:[String]=[]
     private let capacity=40
-    private lazy var catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)]={
+    private var catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)] { Self.catalogue }
+    /// Read once per process, on whichever thread asks first (the app warms it off the main thread at launch).
+    nonisolated static let catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)]={
         guard let url=Bundle.main.url(forResource:"stars",withExtension:"json"),let data=try? Data(contentsOf:url),
               let rows=try? JSONDecoder().decode([[Double]].self,from:data) else { return [] }
         return rows.compactMap { $0.count==4 ? (ra:$0[0]*Double.pi/180,dec:$0[1]*Double.pi/180,mag:$0[2],bv:$0[3]) : nil }
