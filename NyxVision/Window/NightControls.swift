@@ -24,7 +24,7 @@ struct NightControls: View {
     private var nightStepper: some View {
         @Bindable var model = model
         return HStack(spacing: 10) {
-            Button { model.nightOffset -= 1 } label: { Image(systemName: "chevron.left") }
+            Button { model.nightOffset -= 1 } label: { Image(systemName: "chevron.backward") }
                 .disabled(model.nightOffset == 0)
                 .accessibilityLabel(Text("Previous night"))
             VStack(spacing: 0) {
@@ -36,7 +36,7 @@ struct NightControls: View {
                 }
             }
             .frame(minWidth: 130)
-            Button { model.nightOffset += 1 } label: { Image(systemName: "chevron.right") }
+            Button { model.nightOffset += 1 } label: { Image(systemName: "chevron.forward") }
                 .disabled(model.nightOffset >= 365)
                 .accessibilityLabel(Text("Next night"))
         }

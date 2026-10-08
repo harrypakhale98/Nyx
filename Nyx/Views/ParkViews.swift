@@ -38,7 +38,26 @@ struct ParkRow: View {
             if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
         }.padding(.vertical,14)
             .accessibilityElement(children:.ignore)
-            .accessibilityLabel("\(night.park.shortName), \(night.park.state). \(stepFree ? String(localized:"Step-free viewing.") : "") \(night.park.drivable ? "" : String(localized:"No road access.")) Darkness score \(night.score.value), \(night.score.band.label). \(night.basisLabel.map { $0+"." } ?? String(localized:"Cloud forecast included.")) \(WeekStrip.summary(week) ?? "") \(closure.map { String(localized:"Closure alert: \($0)") } ?? "")")
+            // Short, so a list of 63 parks is quick to swipe through: the name, the score, the band and
+            // any closure. The rest is a "More content" swipe away (the closure first there too).
+            .accessibilityLabel(ParkRow.spokenLabel(night:night,closure:closure))
+            .modifier(ParkRowContent(items:ParkRow.moreContent(night:night,closure:closure,week:week,stepFree:stepFree)))
+    }
+    /// "Zion. Darkness score 88, Excellent. Closure alert: Kolob Canyons Road closed."
+    static func spokenLabel(night:Night,closure:String?)->String {
+        let main=String(localized:"\(night.park.shortName). Darkness score \(night.score.value), \(night.score.band.label).")
+        return closure.map { main+" "+String(localized:"Closure alert: \($0)") } ?? main
+    }
+    /// The row's custom content, most important first.
+    static func moreContent(night:Night,closure:String?,week:[Night],stepFree:Bool)->[ParkRowContent.Item] {
+        var items:[ParkRowContent.Item]=[]
+        if let closure { items.append(.init(label:String(localized:"Closure alert"),value:closure,high:true)) }
+        items.append(.init(label:String(localized:"Clouds"),value:night.basisLabel ?? String(localized:"Cloud forecast included"),high:false))
+        if let summary=WeekStrip.summary(week) { items.append(.init(label:String(localized:"This week"),value:summary,high:false)) }
+        if stepFree { items.append(.init(label:String(localized:"Step-free viewing"),value:String(localized:"Yes"),high:false)) }
+        if !night.park.drivable { items.append(.init(label:String(localized:"Getting there"),value:String(localized:"No road access"),high:false)) }
+        items.append(.init(label:String(localized:"State"),value:night.park.state.replacingOccurrences(of:",",with:", "),high:false))
+        return items
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
@@ -52,6 +71,16 @@ struct ParkRow: View {
     private var number: some View {
         // The score never wraps, whatever the column width; the name beside it does.
         VStack(alignment:typeSize.isAccessibilitySize ? .leading : .trailing,spacing:2) { Text("\(night.score.value)").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.accent); Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted) }.fixedSize()
+    }
+}
+/// A row's "More content" for VoiceOver (`accessibilityCustomContent`).
+struct ParkRowContent: ViewModifier {
+    struct Item: Equatable { let label: String; let value: String; let high: Bool }
+    let items: [Item]
+    func body(content:Content)->some View {
+        items.reduce(AnyView(content)) { view,item in
+            AnyView(view.accessibilityCustomContent(Text(item.label),Text(item.value),importance:item.high ? .high : .default))
+        }
     }
 }
 /// The Parks list's narrowing switches, kept apart from the view so they can be tested.
@@ -584,7 +613,7 @@ struct SoundAndTouchRow: View {
                 NightListenView(night:night,isTonight:isTonight,expanded:expanded)
                 if MoonHaptics.enabled {
                     Button { feel() } label:{ Label("Feel the Moon",systemImage:"hand.tap").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle()) }
-                        .buttonStyle(.plain).foregroundStyle(palette.accent)
+                        .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
                         .accessibilityHint("Plays the Moon's phase as a texture: sharp, sparse taps for a new moon, a broad swell for a full moon.")
                 }
             }.padding(.top,8)

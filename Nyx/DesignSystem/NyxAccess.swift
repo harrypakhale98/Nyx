@@ -8,13 +8,36 @@ extension View {
 }
 private struct NyxAccessReader: ViewModifier {
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiate
+    @Environment(\.accessibilityShowBorders) private var showBorders
+    @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
+    /// iOS 26.1's "prefers action slider alternative", read at appear and whenever it changes.
+    @State private var actionSliderAlternative=ActionSliderPreference.current
     @ViewBuilder func body(content:Content)->some View {
         let base=NyxAccess(differentiate:differentiate || DebugScenario.isEnabled("differentiate"),
                            reduceHighlighting:DebugScenario.isEnabled("reduce-highlighting"),
                            crossFade:DebugScenario.isEnabled("crossfade"),
-                           reducedResources:DebugScenario.isEnabled("reduced-resources"))
-        if #available(iOS 26.4, *) { content.modifier(NyxAccessReader264(base:base)) }
-        else { content.environment(\.nyxAccess,base) }
+                           reducedResources:DebugScenario.isEnabled("reduced-resources"),
+                           showBorders:showBorders || DebugScenario.isEnabled("borders"),
+                           preferSteps:actionSliderAlternative || switchControl || DebugScenario.isEnabled("steps"))
+        Group {
+            if #available(iOS 26.4, *) { content.modifier(NyxAccessReader264(base:base)) }
+            else { content.environment(\.nyxAccess,base) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for:ActionSliderPreference.changed)) { _ in actionSliderAlternative=ActionSliderPreference.current }
+    }
+}
+/// "Prefers action slider alternative" (Settings › Accessibility › Touch, iOS 26.1): items that rely
+/// on a prolonged, continuous swipe should offer something needing less dexterity. Before 26.1 the
+/// setting does not exist; Switch Control and accessibility text sizes bring the same buttons.
+enum ActionSliderPreference {
+    static var current: Bool {
+        if #available(iOS 26.1, *) { return AccessibilitySettings.prefersActionSliderAlternative }
+        return false
+    }
+    /// The change notification; before iOS 26.1, a name nothing posts.
+    static var changed: Notification.Name {
+        if #available(iOS 26.1, *) { return AccessibilitySettings.prefersActionSliderAlternativeDidChangeNotification }
+        return Notification.Name("com.harrypakhale.nyx.actionSliderUnavailable")
     }
 }
 @available(iOS 26.4, *)
@@ -22,9 +45,13 @@ private struct NyxAccessReader264: ViewModifier {
     @Environment(\.accessibilityReduceHighlightingEffects) private var reduceHighlighting
     @Environment(\.accessibilityPrefersCrossFadeTransitions) private var crossFade
     let base: NyxAccess
+    private var access: NyxAccess {
+        var access=base
+        access.reduceHighlighting=base.reduceHighlighting || reduceHighlighting
+        access.crossFade=base.crossFade || crossFade
+        return access
+    }
     @ViewBuilder func body(content:Content)->some View {
-        let access=NyxAccess(differentiate:base.differentiate,reduceHighlighting:base.reduceHighlighting || reduceHighlighting,
-                             crossFade:base.crossFade || crossFade,reducedResources:base.reducedResources)
         if #available(iOS 27.0, *) { content.modifier(NyxAccessReader27(base:access)) }
         else { content.environment(\.nyxAccess,access) }
     }
@@ -59,13 +86,27 @@ struct ParkTransition: ViewModifier {
 // MARK: Speech
 
 /// How VoiceOver should say Nyx's few unusual words. On iOS 27 each is annotated with an SSML
-/// fragment (`accessibilitySpeechSSML`); the text itself, and Braille, are unchanged. Before
-/// iOS 27 the plain words are spoken as they are.
+/// fragment (`accessibilitySpeechSSML`); before it, words with an IPA spelling get the iOS 15
+/// phonetic notation instead, so "Bortle" is never "bottle" on iOS 26 either. The text itself, and
+/// Braille, are unchanged.
 nonisolated enum NyxSpeech {
+    static let bortleIPA="ˈbɔɹtəl"
+    /// Word → IPA, for iOS 26's `accessibilitySpeechPhoneticNotation` (words SSML only substitutes
+    /// or switches language for are left as they are).
+    static let phonetic:[(word:String,ipa:String)]=[("Bortle",bortleIPA)]
+    /// Every range of `text` that has an IPA spelling, with it. Pure, for tests.
+    static func phoneticAnnotations(in text:String)->[(range:Range<String.Index>,ipa:String)] {
+        var found:[(Range<String.Index>,String)]=[]
+        for entry in phonetic {
+            var start=text.startIndex
+            while let range=text.range(of:entry.word,range:start..<text.endIndex) { found.append((range,entry.ipa)); start=range.upperBound }
+        }
+        return found.sorted { $0.0.lowerBound<$1.0.lowerBound }
+    }
     /// Word → SSML fragment. "Bortle" is said BOR-tl, not "bottle"; the Milky Way's centre is
     /// "Sagittarius A star", as astronomers say it.
     static let pronunciations:[(word:String,ssml:String)]=[
-        ("Bortle","<phoneme alphabet=\"ipa\" ph=\"ˈbɔɹtəl\">Bortle</phoneme>"),
+        ("Bortle","<phoneme alphabet=\"ipa\" ph=\"\(bortleIPA)\">Bortle</phoneme>"),
         ("Sagittarius A*","Sagittarius A <sub alias=\"star\">*</sub>"),
         ("Gemínidas","<lang xml:lang=\"es-US\">Gemínidas</lang>")
     ]
@@ -85,15 +126,69 @@ extension View {
 }
 enum SpokenText {
     static func make(_ text:String)->Text {
-        guard #available(iOS 27.0, *), !NyxSpeech.annotations(in:text).isEmpty else { return Text(verbatim:text) }
+        if #available(iOS 27.0, *) {
+            return NyxSpeech.annotations(in:text).isEmpty ? Text(verbatim:text) : Text(ssml(text))
+        }
+        return NyxSpeech.phoneticAnnotations(in:text).isEmpty ? Text(verbatim:text) : Text(phonetic(text))
+    }
+    /// iOS 27: each word with a pronunciation carries its SSML fragment.
+    @available(iOS 27.0, *)
+    static func ssml(_ text:String)->AttributedString {
         var attributed=AttributedString(text)
         for annotation in NyxSpeech.annotations(in:text) {
             guard let lower=AttributedString.Index(annotation.range.lowerBound,within:attributed),
                   let upper=AttributedString.Index(annotation.range.upperBound,within:attributed) else { continue }
             attributed[lower..<upper].accessibilitySpeechSSML=annotation.ssml
         }
-        return Text(attributed)
+        return attributed
     }
+    /// Before iOS 27: each word with an IPA spelling carries it as phonetic notation (iOS 15+).
+    static func phonetic(_ text:String)->AttributedString {
+        var attributed=AttributedString(text)
+        for annotation in NyxSpeech.phoneticAnnotations(in:text) {
+            guard let lower=AttributedString.Index(annotation.range.lowerBound,within:attributed),
+                  let upper=AttributedString.Index(annotation.range.upperBound,within:attributed) else { continue }
+            attributed[lower..<upper].accessibilitySpeechPhoneticNotation=annotation.ipa
+        }
+        return attributed
+    }
+}
+
+// MARK: Actions
+
+/// For actions that are only words (amber text, a small capsule): pressed, they dim like a plain
+/// button; with Show Borders (Button Shapes) on, a hairline capsule, or an underline for a link in
+/// running text, says "this is a button" without colour. Rows and cards that draw their own
+/// outline keep `.plain`.
+struct NyxActionStyle: ButtonStyle {
+    enum Border { case capsule, underline }
+    var border: Border = .capsule
+    func makeBody(configuration:Configuration)->some View { NyxActionLabel(configuration:configuration,border:border) }
+}
+private struct NyxActionLabel: View {
+    let configuration: ButtonStyleConfiguration
+    let border: NyxActionStyle.Border
+    @Environment(\.nyxAccess) private var access
+    @Environment(\.nyx) private var palette
+    @Environment(\.isEnabled) private var enabled
+    var body: some View {
+        configuration.label
+            .padding(.horizontal,access.showBorders && border == .capsule ? 12 : 0)
+            .overlay {
+                if access.showBorders {
+                    switch border {
+                    case .capsule: Capsule().strokeBorder(palette.line,lineWidth:1)
+                    case .underline: Rectangle().fill(palette.line).frame(height:1).frame(maxHeight:.infinity,alignment:.bottom).padding(.bottom,6)
+                    }
+                }
+            }
+            .contentShape(Rectangle())
+            .opacity(configuration.isPressed ? 0.55 : enabled ? 1 : 0.45)
+    }
+}
+extension ButtonStyle where Self == NyxActionStyle {
+    /// A text-only action that gains an outline under Show Borders.
+    static var nyxAction: NyxActionStyle { NyxActionStyle() }
 }
 
 // MARK: Colour independence

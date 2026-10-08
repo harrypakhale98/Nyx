@@ -17,7 +17,7 @@ struct AddNightToCalendar: View {
             Label("Add to Calendar",systemImage:"calendar.badge.plus").font(.subheadline)
                 .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
         }
-        .buttonStyle(.plain).foregroundStyle(palette.accent)
+        .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
         .accessibilityLabel(String(localized:"Add \(night.park.shortName) on \(night.park.dayLabel(night.id)) to Calendar"))
         .accessibilityHint("Opens a calendar event to review and save. Nyx does not read your calendars.")
         .accessibilityInputLabels([Text("Add to Calendar"),Text("Calendar")])

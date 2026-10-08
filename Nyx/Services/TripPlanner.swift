@@ -192,7 +192,7 @@ nonisolated enum TripPlanner {
         var lines=[String(localized:"A dark-sky trip, planned with Nyx")]
         for stop in plan.stops {
             let park=stop.night.park
-            var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value)/100 \(stop.night.bandWithBasis). \(stop.reason).")
+            var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value) out of 100, \(stop.night.bandWithBasis). \(stop.reason).")
             if let hop=stop.hopMeters, hop>1000 { line+=" "+String(localized:"\(distance(hop)) from the night before.") }
             if let closure=stop.closure { line+=" "+String(localized:"Closure alert: \(closure)") }
             if let access=park.accessNote { line+=" "+access }
@@ -222,7 +222,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         guard stay.count>1 else { self.init(stop:first); return }
         let park=first.night.park
         let opening=CalendarDraft(night:first.night,closure:first.closure), closing=CalendarDraft(night:last.night,closure:last.closure)
-        var lines=stay.map { stop in String(localized:"\(park.dayLabel(stop.night.id)): darkness score \(stop.night.score.value)/100 (\(stop.night.bandWithBasis)). \(stop.reason).") }
+        var lines=stay.map { stop in String(localized:"\(park.dayLabel(stop.night.id)): darkness score \(stop.night.score.value) out of 100 (\(stop.night.bandWithBasis)). \(stop.reason).") }
         if let closure=stay.compactMap(\.closure).first { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
         lines.append(String(localized:"Scores are estimates. Check closures and the forecast before you go."))
         self.init(title:opening.title,start:opening.start,end:max(opening.start.addingTimeInterval(3600),closing.end),timeZone:park.timeZone,location:park.name,notes:lines.joined(separator:"\n"),url:opening.url)
@@ -239,8 +239,8 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         timeZone=park.timeZone
         location=park.name
         var lines=[night.score.hasForecast
-                   ? String(localized:"Darkness score \(night.score.value)/100 (\(night.score.band.label)), with the cloud forecast as Nyx last saw it.")
-                   : String(localized:"Darkness score \(night.score.value)/100 (\(night.score.band.label)).")+" "+(night.basisCaption(typical:true) ?? ""),
+                   ? String(localized:"Darkness score \(night.score.value) out of 100 (\(night.score.band.label)), with the cloud forecast as Nyx last saw it.")
+                   : String(localized:"Darkness score \(night.score.value) out of 100 (\(night.score.band.label)).")+" "+(night.basisCaption(typical:true) ?? ""),
                    TripPlanner.reason(night)+"."]
         if sky.darkHours==0 { lines.append(SkyConditions.noDarknessMessage(tonight:false)) }
         if let closure { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
