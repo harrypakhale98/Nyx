@@ -12,6 +12,7 @@ struct RootView:View {
     @Environment(\.modelContext) private var context
     @AppStorage("onboardingComplete") private var onboarded=false
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("showerReminders") private var showerReminders=true
@@ -30,7 +31,7 @@ struct RootView:View {
     /// bar is still fading in) and again whenever Nyx returns.
     @State private var moonIcon=Image(systemName:"moon")
 
-    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast")) }
+    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
@@ -66,11 +67,11 @@ struct RootView:View {
         .modifier(DebugTypeSize())
         .modifier(DebugWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
-        .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? "")))
+        .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? ""),red:palette.red))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
-        .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
+        .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
         // Field mode can open from Tonight or Control Center before any park page has appeared; its dawn
         // "Keep this night" needs the journal's store.
@@ -188,7 +189,7 @@ struct RootView:View {
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park)),notes:model.skyNotes(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
-        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { TimeRiver(nights:nights,selected:.constant(model.tonight(park)),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
+        case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { DebugRiverHost(nights:nights,start:model.tonight(park),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
         case "loader": ConstellationLoader().background(NightBackground())
@@ -198,6 +199,10 @@ struct RootView:View {
         case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
         case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "accessibility": SoundAndTouchView()
+        // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on).
+        case "assistive": AssistiveHome().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
+        case "assistive-tonight": AssistiveTonight().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
+        case "assistive-saved": AssistiveSaved().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
         // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
         case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
         // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
@@ -205,7 +210,7 @@ struct RootView:View {
         case "constellation": ScrollView { YourSkyPanel(nights:DebugScenario.state=="empty" ? [] : DebugJournal.nights(now:model.today)) { _ in }.padding(24) }.background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
         case "recap": YearRecapView(nights:DebugJournal.nights(now:model.today))
         case "icons": AppIconPicker()
-        case "first-light": if let park=model.home { FirstLightView(park:park,night:model.tonight(park),moment:FirstLightDebug.moment(park:park,model:model),leavesOnItsOwn:false) {} }
+        case "first-light": if let park=model.home { FirstLightView(park:park,night:model.tonight(park),moment:FirstLightDebug.moment(park:park,model:model)) {} }
         // Store art (In-App Event media): the park's computed sky for the night alone, edge to edge,
         // a little brighter than behind text. Same stars, Milky Way, planets and radiant as every screen.
         case "sky": if let park=model.home { RealSky(park:park,night:model.tonight(park),twinkle:pow(Double(model.night(park).score.value)/100,2),strength:0.9).background(Color.black).ignoresSafeArea().toolbarVisibility(.hidden,for:.navigationBar) }
@@ -267,11 +272,12 @@ private struct ParkSheet:View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     var body:some View {
         NavigationStack {
             ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
         }
-        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)).nyxPresentation().nyxAccessibility()
+        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed)).nyxPresentation().nyxAccessibility()
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }

@@ -96,13 +96,22 @@ struct MoonDisc: View, Animatable {
                     edge.fill(shadow,with:.color(.black.opacity(0.55)))
                 }
             }
-            context.stroke(Path(ellipseIn:disc.insetBy(dx:0.3,dy:0.3)),with:.color(palette.line),lineWidth:0.6)
+            // The disc's edge is drawn faintly; the lit part, not the outline, is what reads.
+            context.stroke(Path(ellipseIn:disc.insetBy(dx:0.3,dy:0.3)),with:.color(palette.ink.opacity(palette.highContrast ? 0.6 : 0.22)),lineWidth:0.6)
         }
         .aspectRatio(1,contentMode:.fit)
         .background { if !iconMode { halo } }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Moon, \(Int((illumination*100).rounded())) percent illuminated, \(waxing ? String(localized:"waxing") : String(localized:"waning"))")
+        .accessibilityLabel(MoonDisc.label(illumination:illumination,waxing:waxing))
         .accessibilityIgnoresInvertColors()
+    }
+}
+extension MoonDisc {
+    /// "Waxing crescent, 34 percent lit": the phase's name first, then how much is lit.
+    nonisolated static func label(illumination:Double,waxing:Bool)->String {
+        let lit=min(1,max(0,illumination))
+        let half=acos(1-2*lit)/(2*Double.pi)
+        return String(localized:"\(MoonPhase(fraction:waxing ? half : 1-half).name), \(Int((lit*100).rounded())) percent lit")
     }
 }
 #Preview("Phases") {

@@ -200,7 +200,7 @@ struct CalendarView: View {
     }
     private func monthBar(_ park:Park,_ data:Month)->some View {
         HStack {
-            Button { move(-1) } label:{ Image(systemName:"chevron.left").frame(width:44,height:44) }.accessibilityLabel("Previous month").accessibilityInputLabels([Text("Previous month"),Text("Previous")])
+            Button { move(-1) } label:{ Image(systemName:"chevron.backward").frame(width:44,height:44) }.accessibilityLabel("Previous month").accessibilityInputLabels([Text("Previous month"),Text("Previous")])
                 .hoverEffect(.highlight)
             Spacer(minLength:0)
             // The month's name carries its Audio Graph: the darkness of every night, as a tone.
@@ -209,7 +209,7 @@ struct CalendarView: View {
                 .accessibilityHint("An audio graph of this month's nights is available.")
                 .nightChart { [nights=data.nights,events=monthEvents(data.nights,park:park),title=String(localized:"Darkness score by night, \(park.monthLabel(data.date))")] in NightChart.nights(nights,title:title,events:events) }
             Spacer(minLength:0)
-            Button { move(1) } label:{ Image(systemName:"chevron.right").frame(width:44,height:44) }.accessibilityLabel("Next month").accessibilityInputLabels([Text("Next month"),Text("Next")])
+            Button { move(1) } label:{ Image(systemName:"chevron.forward").frame(width:44,height:44) }.accessibilityLabel("Next month").accessibilityInputLabels([Text("Next month"),Text("Next")])
                 .hoverEffect(.highlight)
         }
     }
@@ -265,7 +265,7 @@ struct CalendarView: View {
                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
                         if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night } }
-                    } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
+                    } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
             }
         }
         .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)

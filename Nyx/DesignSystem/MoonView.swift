@@ -42,12 +42,15 @@ struct MoonView: View {
             .opacity(geometry.illumination>0.02 ? 1 : 0)
             .allowsHitTesting(false)
     }
-    private var label:String {
+    private var label:String { MoonView.label(geometry,moment:moment) }
+    /// "Waxing crescent, 34 percent lit, lit from the right": the phase first, as people name it.
+    static func label(_ geometry:MoonGeometry,moment:String?=nil)->String {
         let percent=Int((geometry.illumination*100).rounded())
         let degrees=Int((geometry.brightLimb*180/Double.pi).rounded())
         let side=MoonView.side(ofDegrees:degrees)
-        if let moment { return String(localized:"Moon, \(percent) percent illuminated, lit from the \(side), as seen \(moment)") }
-        return String(localized:"Moon, \(percent) percent illuminated, lit from the \(side)")
+        let name=geometry.phase?.name ?? String(localized:"Moon")
+        if let moment { return String(localized:"\(name), \(percent) percent lit, lit from the \(side), as seen \(moment)") }
+        return String(localized:"\(name), \(percent) percent lit, lit from the \(side)")
     }
     /// Plain words for the direction of the lit side.
     static func side(ofDegrees value:Int)->String {

@@ -35,6 +35,8 @@ nonisolated struct SkyMapContent: Sendable {
 /// The sky map, drawn in Canvas. `progress` runs 0…1 across all figures, in order.
 struct SkyMapCanvas: View {
     @Environment(\.nyx) private var palette
+    /// The insets' names grow with the reader's text size, to the size their frames can hold.
+    @ScaledMetric(relativeTo:.caption2) private var insetNameSize=9.0
     let content: SkyMapContent
     var progress: Double = 1
     /// Every park, as faint background stars.
@@ -52,7 +54,7 @@ struct SkyMapCanvas: View {
                     let rect=CGRect(origin:screen(inset.frame.origin),size:CGSize(width:inset.frame.width*scale,height:inset.frame.height*scale)).insetBy(dx:-3,dy:-3)
                     context.stroke(Path(roundedRect:rect,cornerRadius:4),with:.color(palette.line.opacity(0.7)),style:StrokeStyle(lineWidth:0.5,dash:[2,3]))
                     // Kept inside the canvas: a longer name ("I. Vírgenes") ends at the right edge instead of past it.
-                    let name=context.resolve(Text(inset.name).font(.system(size:8,weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)))
+                    let name=context.resolve(Text(inset.name).font(.system(size:min(15,insetNameSize),weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)))
                     let width=name.measure(in:size).width
                     context.draw(name,at:CGPoint(x:max(1,min(rect.minX+1,size.width-width-1)),y:rect.maxY+2),anchor:.topLeading)
                 }
@@ -140,12 +142,19 @@ struct SkyMapView: View {
     private func hitTargets(size:CGSize,onSelect:@escaping (String)->Void)->some View {
         let view=content.viewport, scale=min(size.width/view.width,size.height/view.height)
         let dx=(size.width-view.width*scale)/2, dy=(size.height-view.height*scale)/2
-        return ForEach(content.stars) { star in
+        // West to east, so VoiceOver crosses the country as a reader would cross the map.
+        return ForEach(SkyMapView.geographic(content.stars)) { star in
             Button { onSelect(star.id) } label:{ Color.clear.frame(width:44,height:44).contentShape(Circle()) }
                 .buttonStyle(.plain)
                 .position(x:dx+(star.point.x-view.minX)*scale,y:dy+(star.point.y-view.minY)*scale)
                 .accessibilityLabel(star.label)
         }
+    }
+}
+extension SkyMapView {
+    /// Stars in map order, west to east (north to south where they share a meridian).
+    nonisolated static func geographic(_ stars:[SkyMapContent.Star])->[SkyMapContent.Star] {
+        stars.sorted { abs($0.point.x-$1.point.x)>0.002 ? $0.point.x<$1.point.x : $0.point.y<$1.point.y }
     }
 }
 #Preview("Sky map • parks only") { SkyMapView(content:SkyMapContent(stars:[],figures:[]),summary:"").padding().background(.black).environment(PlanModel()) }

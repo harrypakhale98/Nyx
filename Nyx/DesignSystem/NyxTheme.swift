@@ -3,13 +3,20 @@ import SwiftUI
 struct NyxPalette {
     let nightVision: Bool
     let highContrast: Bool
+    /// The person chose the brighter red (Settings › In the dark, or field mode's options).
+    var brighterRed=false
+    /// Night vision's red is lifted under Increase Contrast or by choice, so it stays above 4.5:1
+    /// for protan and deutan eyes too (`NightTint`).
+    var red: NightTint { highContrast || brighterRed ? .brighter : .standard }
     var ink: Color { nightVision ? .white : Color(red:0.961,green:0.945,blue:0.902) }
     var accent: Color { nightVision ? ink : Color(red:1,green:0.706,blue:0.329) }
     // Filled tracks must remain distinct from the white system thumb after the red filter.
     var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
     var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
     var panel: Color { nightVision ? Color(red:0.07,green:0.008,blue:0.005) : Color(red:0.043,green:0.063,blue:0.149) }
-    var line: Color { ink.opacity(highContrast ? 0.6 : 0.22) }
+    /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for
+    /// graphical objects): starlight at 40%, and at 70% through night vision's red, which dims it.
+    var line: Color { ink.opacity(nightVision ? 0.7 : highContrast ? 0.6 : 0.4) }
 }
 private struct MotionOverrideKey: EnvironmentKey { static let defaultValue=false }
 private struct PaletteKey: EnvironmentKey { static let defaultValue=NyxPalette(nightVision:false,highContrast:false) }
@@ -31,6 +38,11 @@ nonisolated struct NyxAccess: Equatable, Sendable {
     var crossFade=false
     /// The system asks apps to use less (iOS 27): the sky holds still and draws fewer stars.
     var reducedResources=false
+    /// Show Borders (Button Shapes): text-only actions gain a hairline outline (`NyxActionStyle`).
+    var showBorders=false
+    /// Controls that rely on a long, continuous drag (the time river) offer buttons too:
+    /// "Prefers action slider alternative" (iOS 26.1) or Switch Control.
+    var preferSteps=false
     /// How strong a decorative glow may be.
     var glow: Double { reduceHighlighting ? 0.35 : 1 }
 }
@@ -80,6 +92,8 @@ struct NightBackground: View {
             else { Starfield(seed:seed,twinkle:twinkle) }
             if veil>0 { Color.black.opacity(veil) }
         }.ignoresSafeArea().accessibilityHidden(true)
+        // A night sky inverted under Smart Invert would read as a white page with black stars.
+        .accessibilityIgnoresInvertColors()
     }
 }
 /// A hero object floats on its own plane: as the page scrolls, it lags slightly behind the
@@ -122,8 +136,46 @@ struct CalmState: View {
 
 struct NightVisionFilter: ViewModifier {
     let enabled:Bool
+    var red:NightTint = .standard
     @ViewBuilder func body(content:Content)->some View {
-        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? Color(red:1,green:0.27,blue:0.23) : .white)
+        content.saturation(enabled ? 0 : 1).colorMultiply(enabled ? red.color : .white)
+    }
+}
+/// Night vision's red: everything drawn in grey, then multiplied by one red. The standard red is
+/// the deepest that keeps text at 6.2:1 on black for typical colour vision; the brighter one lets a
+/// little more green and blue through, so protan eyes (which barely see long-wavelength red) still
+/// get 5.1:1 and deutan eyes 8.1:1, while it still reads red. Chosen under Increase Contrast or by hand.
+nonisolated enum NightTint: String, Sendable, CaseIterable {
+    case standard, brighter
+    /// The multiplier, gamma-encoded sRGB.
+    var rgb: SIMD3<Double> { self == .standard ? SIMD3(1,0.27,0.23) : SIMD3(1,0.36,0.31) }
+    var color: Color { Color(red:rgb.x,green:rgb.y,blue:rgb.z) }
+    /// The setting's key in the shared defaults (the widgets and Control Center read the same suite).
+    static let key="brighterRed"
+}
+/// How text contrast holds up for the commonest colour-vision deficiencies: Machado, Oliveira and
+/// Fernandes (2009) full-severity matrices, applied in linear RGB, then WCAG 2 contrast. Mirrors
+/// `Scripts/contrast.py`, so `Research/contrast.json` and the unit tests agree.
+nonisolated enum ColorVision: String, Sendable, CaseIterable {
+    case typical, protan, deutan
+    private var matrix: [[Double]] {
+        switch self {
+        case .typical: [[1,0,0],[0,1,0],[0,0,1]]
+        case .protan: [[0.152286,1.052583,-0.204868],[0.114503,0.786281,0.099216],[-0.003882,-0.048116,1.051998]]
+        case .deutan: [[0.367322,0.860646,-0.227968],[0.280085,0.672501,0.047413],[-0.011820,0.042940,0.968881]]
+        }
+    }
+    /// Relative luminance of a gamma-encoded sRGB colour as these eyes see it.
+    func luminance(_ rgb: SIMD3<Double>) -> Double {
+        func linear(_ v: Double) -> Double { v<=0.04045 ? v/12.92 : pow((v+0.055)/1.055,2.4) }
+        let l=[linear(rgb.x),linear(rgb.y),linear(rgb.z)]
+        let seen=matrix.map { row in min(1,max(0,zip(row,l).map(*).reduce(0,+))) }
+        return 0.2126*seen[0]+0.7152*seen[1]+0.0722*seen[2]
+    }
+    /// WCAG contrast ratio between two colours, as these eyes see them.
+    func contrast(_ a: SIMD3<Double>, _ b: SIMD3<Double>) -> Double {
+        let x=luminance(a), y=luminance(b)
+        return (max(x,y)+0.05)/(min(x,y)+0.05)
     }
 }
 
@@ -131,7 +183,7 @@ private struct PresentationStyle:ViewModifier {
     @Environment(\.nyx) private var palette
     func body(content:Content)->some View {
         content.foregroundStyle(palette.ink).tint(palette.accent)
-            .modifier(NightVisionFilter(enabled:palette.nightVision)).preferredColorScheme(.dark)
+            .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)).preferredColorScheme(.dark)
     }
 }
 extension View {

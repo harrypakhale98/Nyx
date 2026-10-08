@@ -34,6 +34,23 @@
           }
         }
       }
+    },
+    "NSMotionUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx sigue cómo gira tu cabeza con audífonos que detectan movimiento, para que el tono del modo de campo se mantenga hacia la parte del cielo que elegiste. El movimiento nunca sale de este dispositivo."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

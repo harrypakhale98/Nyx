@@ -2,20 +2,18 @@ import SwiftUI
 
 /// First light: the first time Nyx opens at a park after astronomical dusk, the sky overhead
 /// appears once, slowly, the brightest stars first, the way eyes find them after a car's
-/// headlights go out. Then the park's name. Any tap ends it; it fades on its own after a while.
+/// headlights go out. Then the park's name. It stays until Continue (or VoiceOver's escape, or
+/// Escape on a keyboard): no timer and no tap-anywhere, so nobody who reads slowly, uses Voice
+/// Control, Switch Control or a keyboard, or nudges the screen by accident loses the moment.
 /// Under Reduce Motion it is one gentle fade. It never holds the app back.
 struct FirstLightView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
-    @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     let park: Park
     let night: Date
     let moment: Date
-    /// Fades away on its own after a while; off in screenshot scenarios.
-    var leavesOnItsOwn = true
     let close: ()->Void
     @State private var started: Date?
     @State private var visible=false
@@ -38,14 +36,13 @@ struct FirstLightView: View {
                 Eyebrow(text:"First light")
                 Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
                 Text("Your first night under this sky. These are the stars above you now, facing \(park.latitude<0 ? String(localized:"north") : String(localized:"south")).").font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                Button("Continue",action:dismiss).buttonStyle(.bordered).padding(.top,10)
+                Button("Continue",action:dismiss).buttonStyle(.bordered).padding(.top,10).keyboardShortcut(.cancelAction)
                 Spacer().frame(height:40)
             }.padding(32)
             .opacity(visible ? 1 : 0).offset(y:visible || reduceMotion ? 0 : 12)
         }
         .ignoresSafeArea()
-        .contentShape(Rectangle())
-        .onTapGesture(perform:dismiss)
+        .accessibilityIgnoresInvertColors()
         .opacity(leaving ? 0 : 1)
         .accessibilityElement(children:.contain)
         .accessibilityAddTraits(.isModal)
@@ -58,10 +55,6 @@ struct FirstLightView: View {
                 withAnimation(.spring(response:1.6,dampingFraction:1)) { visible=true }
             }
             AccessibilityNotification.Announcement(String(localized:"First light at \(park.shortName). The stars above you now.")).post()
-            // Leave quietly if nobody touches it.
-            try? await Task.sleep(for:.seconds(14))
-            // Never on a timer for someone reading it with VoiceOver or Switch Control.
-            if !Task.isCancelled && leavesOnItsOwn && !voiceOver && !switchControl { dismiss() }
         }
     }
     private func dismiss() {
