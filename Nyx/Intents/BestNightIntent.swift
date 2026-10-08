@@ -14,22 +14,20 @@ struct FindBestNightIntent: AppIntent {
         Summary("Find the best night at \(\.$park) in the next \(\.$nights) nights") { \.$start }
     }
     init() {}
-    func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetIntent {
+    /// Returns the moment the best night's true darkness begins (sunset where there is none), so a
+    /// shortcut can put it in a calendar or a reminder.
+    func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
         let library=try ParkData.load()
         let saved=SharedSettings.read()
         let parks=park.map { chosen in library.filter { $0.id==chosen.id } } ?? (saved?.parks ?? [])
-        guard !parks.isEmpty else {
-            return .result(dialog:"Choose a park, or save parks in Nyx to compare them.",snippetIntent:EmptySnippetIntent())
-        }
+        guard !parks.isEmpty else { throw NyxIntentError.noParks }
         let now=Date.now, day=start.map { TripDay($0) }
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else {
-            return .result(dialog:"Nyx could not find those nights.",snippetIntent:EmptySnippetIntent())
-        }
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else { throw NyxIntentError.noNights }
         BestNightBrowse.reset()
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        return .result(dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly)),
+        return .result(value:BestNightSearch.value(answer),dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly)),
                        snippetIntent:BestNightSnippetIntent(parkIDs:parks.map(\.id),start:start,nights:answer.count))
     }
 }
@@ -70,6 +68,12 @@ nonisolated enum BestNightSearch {
             result[park.id]=candidates.max { $0.updated<$1.updated }
         }
         return result
+    }
+    /// The intent's value: when the best night's true darkness begins, or its sunset (or evening)
+    /// where the Sun never goes far enough down.
+    static func value(_ answer: Answer) -> Date {
+        let sky=answer.best.sky
+        return sky.darkStart ?? sky.sunset ?? sky.evening
     }
     /// The full answer names the night, the score and what it rests on. Voice-only (iOS 27, no
     /// screen in view) keeps the night, the score and the one caveat that matters.
@@ -113,7 +117,10 @@ struct BestNightSnippetIntent: SnippetIntent {
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else { return .result(view:EmptyView()) }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)
-        return .result(view:BestNightSnippetView(night:answer.ranked[rank],rank:rank,total:answer.ranked.count,nights:answer.count))
+        let night=answer.ranked[rank]
+        // "Follow this night" where Live Activities are on and the night is still ahead.
+        let follow: Bool?=FieldActivities.enabled && !FieldNight.isOver(night.sky,at:now) ? FieldActivities.isFollowing(park:night.park,night:night.id) : nil
+        return .result(view:BestNightSnippetView(night:night,rank:rank,total:answer.ranked.count,nights:answer.count,following:follow))
     }
 }
 /// "Next best": steps the snippet to the next of the ranked nights, then back to the best.
@@ -135,6 +142,8 @@ struct BestNightSnippetView: View {
     let rank: Int
     let total: Int
     let nights: Int
+    /// Whether this night is followed on the Lock Screen; nil where following is not offered.
+    var following: Bool?=nil
     private let palette=NyxPalette(nightVision:false,highContrast:false)
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
@@ -167,6 +176,15 @@ struct BestNightSnippetView: View {
                 Button(intent:OpenParkIntent(target:ParkEntity(night.park))) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
             }
             .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+            if let following {
+                // Puts the night on the Lock Screen before its sunset, with no need to open Nyx.
+                Button(intent:FollowNightIntent(park:ParkEntity(night.park),night:night.id)) {
+                    Label(following ? "Following. Stop" : "Follow this night",systemImage:following ? "moon.stars.fill" : "moon.stars")
+                }
+                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+                .accessibilityLabel(following ? "Stop following this night" : "Follow this night")
+                .accessibilityHint("Puts the night's countdown on your Lock Screen before sunset.")
+            }
         }
         .foregroundStyle(palette.ink)
         .padding(18)

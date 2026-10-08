@@ -13,9 +13,29 @@ nonisolated enum SharedSettings {
     static func moonImageURL(park:String,night:Date)->URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:group)?.appendingPathComponent("moon-\(park)-\(Int(night.timeIntervalSince1970)).png")
     }
+    /// The app's picture of this park's Moon on this night, or on the nearest night it drew (within
+    /// three nights, where the phase has moved less than a tenth of its cycle); nil past that.
+    static func moonImage(park:String,night:Date)->URL? {
+        guard let exact=moonImageURL(park:park,night:night) else { return nil }
+        if FileManager.default.fileExists(atPath:exact.path) { return exact }
+        let folder=exact.deletingLastPathComponent()
+        let files=(try? FileManager.default.contentsOfDirectory(atPath:folder.path)) ?? []
+        return MoonImages.nearest(in:files,park:park,night:night).map { folder.appendingPathComponent($0) }
+    }
     static func read()->SavedSkySnapshot? {
         guard let url=snapshotURL,let data=try? Data(contentsOf:url) else { return nil }
         return try? JSONDecoder().decode(SavedSkySnapshot.self,from:data)
+    }
+}
+/// Finding the pre-rendered Moon nearest a night among the files the app left ("moon-jotr-1797210000.png").
+nonisolated enum MoonImages {
+    static let window:TimeInterval=3*86400+3600
+    static func nearest(in files:[String],park:String,night:Date)->String? {
+        let prefix="moon-\(park)-"
+        return files.compactMap { file -> (String,TimeInterval)? in
+            guard file.hasPrefix(prefix), file.hasSuffix(".png"), let stamp=Double(file.dropFirst(prefix.count).dropLast(4)) else { return nil }
+            return (file,abs(stamp-night.timeIntervalSince1970))
+        }.filter { $0.1<=window }.min { $0.1<$1.1 }?.0
     }
 }
 /// What the app hands its widgets (and the watch app writes for its complications). Versioned and
