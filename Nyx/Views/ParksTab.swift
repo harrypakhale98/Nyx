@@ -37,7 +37,12 @@ struct ParksTab: View {
             }
         }
         // The page never opens empty: the starting park until another is chosen.
-        .onAppear { if selection == nil { selection=path.last?.id ?? model.home?.id } }
+        .onAppear {
+            if selection == nil { selection=path.last?.id ?? model.home?.id }
+            // A screen route (DEBUG captures and the accessibility audit) opens what it names, not the map or
+            // list a previous run left in the window's restored state.
+            if DebugScenario.screen != nil { showsMap=DebugScenario.isEnabled("parks-map") }
+        }
         .onChange(of:sizeClass) { old,new in
             guard !showsMap else { return }
             if new == .compact, old == .regular, let park=selection.flatMap({ model.park($0) }) { path=[park] }
