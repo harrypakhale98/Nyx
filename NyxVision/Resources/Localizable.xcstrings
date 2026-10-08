@@ -2755,6 +2755,40 @@
         }
       }
     },
+    "Open planner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open planner"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir el planificador"
+          }
+        }
+      }
+    },
+    "Opens the window with every park and the night's controls": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the window with every park and the night's controls"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la ventana con todos los parques y los controles de la noche"
+          }
+        }
+      }
+    },
     "Opens this night's Moon as a globe you can place in the room": {
       "extractionState": "manual",
       "localizations": {

@@ -73,6 +73,45 @@ nonisolated enum WatchSky {
     }
 }
 
+/// A complication's or the Smart Stack card's tap: the park and night it shows, opened in the
+/// watch app. The iPhone's park link with the park-local evening added
+/// (`nyx://park/<id>?date=YYYY-MM-DD`, the date as the iPhone's What's up link writes it). A
+/// widget's URL goes straight to its own app, so no URL scheme is registered on the watch.
+nonisolated struct WatchLink: Hashable, Sendable {
+    let parkID: String
+    /// The evening's park-local calendar day; nil opens tonight.
+    let day: DateComponents?
+    init(park: Park, evening: Date?) {
+        parkID = park.id
+        day = evening.map { park.calendar.dateComponents([.year, .month, .day], from: $0) }
+    }
+    init?(_ url: URL) {
+        guard url.scheme?.lowercased() == "nyx", url.host()?.lowercased() == "park",
+              let id = url.pathComponents.first(where: { $0 != "/" })?.lowercased(),
+              (2...8).contains(id.count), id.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
+        parkID = id
+        let date = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "date" }?.value
+        let parts = date?.split(separator: "-").compactMap { Int($0) } ?? []
+        day = parts.count == 3 ? DateComponents(year: parts[0], month: parts[1], day: parts[2]) : nil
+    }
+    var url: URL? {
+        var components = URLComponents()
+        components.scheme = "nyx"
+        components.host = "park"
+        components.path = "/" + parkID
+        if let day, let year = day.year, let month = day.month, let date = day.day {
+            components.queryItems = [URLQueryItem(name: "date", value: String(format: "%04d-%02d-%02d", year, month, date))]
+        }
+        return components.url
+    }
+    /// Nights after tonight at `park` (0…`limit`); a night already past, or none given, is tonight.
+    func offset(in park: Park, now: Date, limit: Int) -> Int {
+        guard let day, let evening = park.calendar.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 12)) else { return 0 }
+        let days = park.calendar.dateComponents([.day], from: park.currentNight(at: now), to: evening).day ?? 0
+        return min(limit, max(0, days))
+    }
+}
+
 extension Park {
     /// The name as it fits a wrist: "American Samoa", not "National Park of American Samoa".
     nonisolated var wristName: String { shortName.replacingOccurrences(of: "National Park of ", with: "") }

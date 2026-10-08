@@ -157,6 +157,8 @@ struct WatchComplicationView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(entry.night.map(summary) ?? String(localized: "Nyx. Choose a park in Nyx on Apple Watch."))
         .containerBackground(for: .widget) { Color.black }
+        // A tap opens this park on this night, not whatever Tonight would show.
+        .widgetURL(entry.night.flatMap { WatchLink(park: $0.park, evening: $0.sky.evening).url })
     }
     private func circular(_ night: Night) -> some View {
         // The system's open ring echoes the app's celestial gauge; the Moon sits in its opening.

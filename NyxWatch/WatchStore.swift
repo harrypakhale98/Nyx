@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UserNotifications
 import WatchConnectivity
 import WidgetKit
 
@@ -43,11 +44,13 @@ import WidgetKit
         if stored != palette { palette = stored }
         if let clock = adaptation, clock.isStale(at: .now) { stopAdaptation() }
     }
-    func startAdaptation(at now: Date = .now) {
+    /// Starts the clock at once, then schedules the reminders (asking for permission the first
+    /// time) and returns the answer, so the screen knows whether to tap the wrist itself.
+    @discardableResult func startAdaptation(at now: Date = .now) async -> UNAuthorizationStatus {
         let clock = AdaptationClock(start: now)
         adaptation = clock
         WatchSky.adaptationStart = now
-        AdaptationReminders.schedule(clock, now: now)
+        return await AdaptationReminders.schedule(clock, now: now)
     }
     func stopAdaptation() {
         adaptation = nil

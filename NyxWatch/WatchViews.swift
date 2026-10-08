@@ -8,22 +8,31 @@ struct WatchRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     /// Read once a minute, so Automatic turns red at civil dusk with the app open.
     @State private var clock = Date.now
+    /// A park and night opened from a complication or the Smart Stack, above Tonight.
+    @State private var path: [WatchLink] = []
     var body: some View {
         let palette = NyxPalette(nightVision: store.nightVision(at: clock), highContrast: contrast == .increased)
-        NavigationStack {
-            #if DEBUG
-            if let screen = WatchDebug.screen, !WatchDebug.homeScreens.contains(screen) { WatchDebug.view(screen) }
-            else { home }
-            #else
-            home
-            #endif
+        NavigationStack(path: $path) {
+            Group {
+                #if DEBUG
+                if let screen = WatchDebug.screen, !WatchDebug.homeScreens.contains(screen) { WatchDebug.view(screen) }
+                else { home }
+                #else
+                home
+                #endif
+            }
+            .navigationDestination(for: WatchLink.self) { link in
+                if let park = store.park(link.parkID) { ParkNightView(park: park, startNight: link.offset(in: park, now: .now, limit: 6)) }
+            }
         }
+        .onOpenURL { open($0) }
         .environment(\.nyx, palette)
         .foregroundStyle(palette.ink)
         .tint(palette.accent)
         .modifier(WatchDebug.TypeSize())
         // The complication review draws in the widgets' own colours, so it is not filtered twice.
-        .modifier(NightVisionFilter(enabled: palette.nightVision && WatchDebug.screen != "complications"))
+        // Under Increase Contrast the brighter red, as on the iPhone (`NyxPalette.red`).
+        .modifier(NightVisionFilter(enabled: palette.nightVision && WatchDebug.screen != "complications", red: palette.red))
         .modifier(AlwaysOnDim(nightVision: palette.nightVision))
         .background(Color.black)
         .modifier(WatchDebug.AlwaysOn())
@@ -39,6 +48,14 @@ struct WatchRootView: View {
             store.reloadSettings()
             clock = .now
         }
+    }
+    /// A complication's park and night (`WatchLink`): pushed above Tonight, or Tonight itself when
+    /// it is tonight at the park Tonight already shows.
+    private func open(_ url: URL) {
+        guard let link = WatchLink(url), let park = store.park(link.parkID) else { return }
+        let now = Date.now
+        if link.offset(in: park, now: now, limit: 6) == 0, store.featured(at: now)?.id == park.id { path = []; return }
+        path = [link]
     }
     @ViewBuilder private var home: some View {
         TimelineView(.everyMinute) { timeline in
@@ -71,6 +88,8 @@ struct ParkNightView: View {
     @Environment(\.nyx) private var palette
     let park: Park
     var isHome = false
+    /// Nights after tonight the dial opens on (a complication's later night), turned with the Crown.
+    var startNight = WatchDebug.initialNight
     @State private var page = WatchDebug.initialPage
     @State private var darkMode = WatchDebug.screen == "dark"
     var body: some View {
@@ -80,7 +99,7 @@ struct ParkNightView: View {
             let night = week.first ?? store.tonight(park, at: now)
             TabView(selection: $page) {
                 // (The DEBUG Always-On override is repeated per page: pages take the scene's value.)
-                TonightFace(night: night, week: week, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(0)
+                TonightFace(night: night, week: week, now: now, context: store.context, startNight: startNight).modifier(WatchDebug.AlwaysOn()).tag(0)
                 MilestonesPage(night: night, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(1)
                 WeekPage(park: park, nights: week, now: now, isHome: isHome).modifier(WatchDebug.AlwaysOn()).tag(2)
             }
@@ -131,10 +150,19 @@ struct TonightFace: View {
     let week: [Night]
     let now: Date
     let context: WatchContext?
-    @State private var offset = WatchDebug.initialNight
+    @State private var offset: Int
     /// The dial takes the Crown only after a tap; otherwise the Crown pages, as everywhere on the watch.
-    @State private var engaged = WatchDebug.initialNight > 0
+    /// Opened on a later night, it holds the Crown already, so the night shown stays until let go.
+    @State private var engaged: Bool
     @FocusState private var scrubbing: Bool
+    init(night: Night, week: [Night], now: Date, context: WatchContext?, startNight: Int = WatchDebug.initialNight) {
+        self.night = night
+        self.week = week
+        self.now = now
+        self.context = context
+        _offset = State(initialValue: startNight)
+        _engaged = State(initialValue: startNight > 0)
+    }
     private var shown: Night { week.indices.contains(offset) ? week[offset] : night }
     /// The park's closure from the iPhone's last park update, worded as on the iPhone.
     private var closure: String? { context?.closures[night.park.id] }

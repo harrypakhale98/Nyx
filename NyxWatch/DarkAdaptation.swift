@@ -7,10 +7,12 @@ import UserNotifications
 struct DarkAdaptationView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorSchemeContrast) private var contrast
     let park: Park
     @State private var showsInfo = false
     @State private var permission: UNAuthorizationStatus?
-    private let palette = NyxPalette(nightVision: true, highContrast: false)
+    /// Always red; under Increase Contrast the brighter red, as everywhere in Nyx (`NyxPalette.red`).
+    private var palette: NyxPalette { NyxPalette(nightVision: true, highContrast: contrast == .increased) }
     var body: some View {
         // Its own stack, filtered as a whole: the system's close button would otherwise be the one
         // white thing on the screen. A dark, red-glyphed Done replaces it.
@@ -30,12 +32,12 @@ struct DarkAdaptationView: View {
                         Spacer()
                     }
                 }
-                .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(NightVisionFilter(enabled: true)) }
+                .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette) }
         }
         .foregroundStyle(palette.ink)
         .tint(palette.accent)
         .environment(\.nyx, palette)
-        .modifier(NightVisionFilter(enabled: true))
+        .modifier(NightVisionFilter(enabled: true, red: palette.red))
         .background(Color.black)
         .task { permission = await AdaptationReminders.status() }
         .onAppear { store.reloadSettings() }
@@ -67,7 +69,7 @@ struct DarkAdaptationView: View {
                 .padding(.bottom, 30)
             }
             // Without permission for reminders, the taps come from the screen while it is up.
-            .sensoryFeedback(.success, trigger: clock?.isAdapted(at: now) ?? false) { old, new in !old && new && permission != .authorized }
+            .sensoryFeedback(.success, trigger: clock?.isAdapted(at: now) ?? false) { old, new in !old && new && !AdaptationReminders.allowed(permission) }
             .modifier(MilestoneTap(park: park, next: next, active: true))
         }
     }
@@ -84,12 +86,9 @@ struct DarkAdaptationView: View {
         }
     }
     private func start() {
-        store.startAdaptation()
-        Task {
-            // The request happens in `schedule`; read the answer back for the screen's own haptic.
-            try? await Task.sleep(for: .seconds(1))
-            permission = await AdaptationReminders.status()
-        }
+        // The clock starts at once; the answer (after the system's question, the first time)
+        // decides whether the screen taps the wrist itself at 30 minutes or leaves it to the reminder.
+        Task { permission = await store.startAdaptation() }
     }
 }
 
@@ -188,21 +187,38 @@ private struct RingArc: View, Animatable {
     }
 }
 
-/// Why the clock exists, in a sheet so the field screen stays one glance.
+/// Why the clock exists, in a sheet so the field screen stays one glance. Like the cover, its own
+/// stack filtered as a whole, with a dark Done in place of the system's white close button and a
+/// black container, so nothing on it is brighter than the red.
 private struct AdaptationInfo: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Dark adaptation").font(.system(.headline, design: .serif))
-                Text("Eyes take 20 to 30 minutes to adapt to the dark. A bright screen or a white light resets them.")
-                Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
-                    .foregroundStyle(palette.muted)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Dark adaptation").font(.system(.headline, design: .serif))
+                    Text("Eyes take 20 to 30 minutes to adapt to the dark. A bright screen or a white light resets them.")
+                    Text("Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.")
+                        .foregroundStyle(palette.muted)
+                    // watchOS returns to the watch face two minutes after the wrist drops, by default.
+                    Text("To keep Nyx on screen between glances, open Settings › General › Return to Clock › Nyx and choose After 1 hour.")
+                        .foregroundStyle(palette.muted)
+                }
+                .font(.footnote).fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .font(.footnote).fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Label("Done", systemImage: "xmark") }.tint(palette.toolbarTint)
+                }
+            }
+            .containerBackground(Color.black, for: .navigation)
         }
-        .foregroundStyle(palette.ink).background(Color.black)
+        .foregroundStyle(palette.ink)
+        .tint(palette.accent)
+        .modifier(NightVisionFilter(enabled: true, red: palette.red))
+        .background(Color.black)
     }
 }
 
@@ -214,30 +230,32 @@ enum AdaptationReminders {
     static func status() async -> UNAuthorizationStatus {
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
-    static func schedule(_ clock: AdaptationClock, now: Date) {
-        Task {
-            let center = UNUserNotificationCenter.current()
-            var status = await status()
-            if status == .notDetermined {
-                status = (try? await center.requestAuthorization(options: [.alert, .sound])) == true ? .authorized : .denied
-            }
-            // Stopped while the question was up: nothing to remind.
-            guard status == .authorized || status == .provisional, WatchSky.adaptationStart == clock.start else { return }
-            center.removePendingNotificationRequests(withIdentifiers: identifiers)
-            for reminder in clock.reminders(after: .now) {
-                let content = UNMutableNotificationContent()
-                if reminder.minutes < AdaptationClock.minutes {
-                    content.title = String(localized: "Nearly adapted")
-                    content.body = String(localized: "Five more minutes for full dark adaptation. Keep the screen red.")
-                } else {
-                    content.title = String(localized: "Eyes adapted")
-                    content.body = String(localized: "Your eyes have adapted. Keep the screen red.")
-                }
-                content.sound = .default
-                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, reminder.date.timeIntervalSinceNow), repeats: false)
-                try? await center.add(UNNotificationRequest(identifier: prefix + String(reminder.minutes), content: content, trigger: trigger))
-            }
+    /// Whether reminders can tap the wrist.
+    static func allowed(_ status: UNAuthorizationStatus?) -> Bool { status == .authorized || status == .provisional }
+    /// Schedules the two reminders, asking for permission the first time, and returns the answer.
+    @discardableResult static func schedule(_ clock: AdaptationClock, now: Date) async -> UNAuthorizationStatus {
+        let center = UNUserNotificationCenter.current()
+        var status = await status()
+        if status == .notDetermined {
+            status = (try? await center.requestAuthorization(options: [.alert, .sound])) == true ? .authorized : .denied
         }
+        // Stopped while the question was up: nothing to remind.
+        guard allowed(status), WatchSky.adaptationStart == clock.start else { return status }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        for reminder in clock.reminders(after: .now) {
+            let content = UNMutableNotificationContent()
+            if reminder.minutes < AdaptationClock.minutes {
+                content.title = String(localized: "Nearly adapted")
+                content.body = String(localized: "Five more minutes for full dark adaptation. Keep the screen red.")
+            } else {
+                content.title = String(localized: "Eyes adapted")
+                content.body = String(localized: "Your eyes have adapted. Keep the screen red.")
+            }
+            content.sound = .default
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, reminder.date.timeIntervalSinceNow), repeats: false)
+            try? await center.add(UNNotificationRequest(identifier: prefix + String(reminder.minutes), content: content, trigger: trigger))
+        }
+        return status
     }
     static func cancel() {
         let center = UNUserNotificationCenter.current()

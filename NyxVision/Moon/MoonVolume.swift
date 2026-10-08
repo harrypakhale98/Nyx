@@ -14,6 +14,7 @@ struct MoonVolume: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.scenePhase) private var scenePhase
     @State private var globe = MoonGlobe()
     /// Nights after tonight, park-local. The volume keeps its own night, so scrubbing the Moon
     /// does not move the planner.
@@ -36,20 +37,27 @@ struct MoonVolume: View {
             .onChanged { value in globe.turn(by: Float(value.translation.width)) }
             .onEnded { _ in globe.settle(reduceMotion: reduceMotion) })
         .ornament(attachmentAnchor: .scene(.bottom), contentAlignment: .top) {
-            MoonControls(view: view, nights: $nights)
+            MoonControls(view: view, nights: $nights, offersPlanner: !model.plannerOpen)
                 .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency))
                 .modifier(DebugTypeSize())
         }
-        .task(id: "\(model.selectedID ?? "")-\(nights)") {
-            guard let park = model.park else { return }
-            let night = park.date(park.currentNight(at: model.now), addingDays: nights)
+        // Keyed by the night itself, so the Moon moves on when tonight does (`VisionModel.tick`).
+        .task(id: "\(model.selectedID ?? "")-\(evening.map { Int($0.timeIntervalSince1970) } ?? 0)") {
+            guard let park = model.park, let night = evening else { return }
             let tonight = nights == 0
             let computed = await Task.detached(priority: .userInitiated) { MoonView(park: park, night: night, isTonight: tonight) }.value
             guard !Task.isCancelled else { return }
             view = computed
         }
         .onAppear { if let n = VisionDebug.moonNights { nights = n } }
+        // Left on the table for days, the volume still shows tonight's Moon when looked at again.
+        .task(id: scenePhase == .active) {
+            guard scenePhase == .active else { return }
+            await model.keepClock()
+        }
     }
+    /// The night on show: tonight at the planner's park, or a later one.
+    private var evening: Date? { model.park.map { $0.date($0.currentNight(at: model.now), addingDays: nights) } }
 }
 
 /// One night's Moon as the volume shows it, computed off the main thread.
@@ -213,8 +221,11 @@ nonisolated struct MoonView: Sendable, Equatable {
 struct MoonControls: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.openWindow) private var openWindow
     let view: MoonView?
     @Binding var nights: Int
+    /// The planner is closed: the volume is the only Nyx window left, so it offers the way back.
+    var offersPlanner = false
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 14) {
@@ -241,8 +252,16 @@ struct MoonControls: View {
                 Text(Self.caption(view)).font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 420)
             }
-            if nights > 0 {
-                Button("Back to tonight") { nights = 0 }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+            if nights > 0 || offersPlanner {
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
+                layout {
+                    if nights > 0 { Button("Back to tonight") { nights = 0 } }
+                    if offersPlanner {
+                        Button { openWindow(id: PlannerWindow.id) } label: { Label("Open planner", systemImage: "list.bullet") }
+                            .accessibilityHint(Text("Opens the window with every park and the night's controls"))
+                    }
+                }
+                .buttonStyle(.bordered).buttonBorderShape(.capsule)
             }
         }
         .padding(.horizontal, 26).padding(.vertical, 18)
@@ -253,7 +272,7 @@ struct MoonControls: View {
             else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(Color(red: 0.07, green: 0.08, blue: 0.14)) }
         }
         .saturation(palette.nightVision ? 0 : 1)
-        .colorMultiply(palette.nightVision ? Color(red: 1, green: 0.27, blue: 0.23) : .white)
+        .colorMultiply(palette.nightVision ? palette.red : .white)
     }
     private var title: String {
         guard let view else { return nights == 0 ? String(localized: "Tonight") : "" }
@@ -274,6 +293,11 @@ struct MoonControls: View {
     let model = VisionModel(now: .now)
     return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 9), isTonight: false) }, nights: .constant(9))
         .environment(\.visionPalette, VisionPalette(nightVision: true))
+}
+
+#Preview("Moon controls, planner closed") {
+    let model = VisionModel(now: .now)
+    return MoonControls(view: model.park.map { MoonView(park: $0, night: $0.date($0.currentNight(at: .now), addingDays: 3), isTonight: false) }, nights: .constant(3), offersPlanner: true)
 }
 
 #Preview("Moon controls, accessibility size") {

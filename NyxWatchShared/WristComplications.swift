@@ -111,6 +111,8 @@ struct MoonComplicationView: View {
         .accessibilityLabel(summary)
         .accessibilityIgnoresInvertColors()
         .containerBackground(for: .widget) { Color.black }
+        // A tap opens tonight at the park whose Moon this is.
+        .widgetURL(entry.park.flatMap { WatchLink(park: $0, evening: $0.currentNight(at: entry.date)).url })
     }
     /// "34% lit · up now", or the phase's light alone before a park is chosen.
     private var litLine: String {
@@ -188,6 +190,8 @@ struct NextDarkComplicationView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(summary)
         .containerBackground(for: .widget) { Color.black }
+        // A tap opens the night the countdown points into.
+        .widgetURL(entry.park.flatMap { WatchLink(park: $0, evening: $0.currentNight(at: target ?? entry.date)).url })
     }
     /// "7:48", park time, without AM/PM: the circle has room for the digits only.
     static func shortTime(_ date: Date, in park: Park) -> String {

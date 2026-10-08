@@ -166,6 +166,8 @@
   "Nyx has no account, no ads, no tracking.": "Nyx no tiene cuentas, anuncios ni rastreo.",
   "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.": "Nyx no está afiliado ni respaldado por el NPS, la NASA ni DarkSky International.",
   "One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address.": "Una solicitud a api.open-meteo.com para todos los parques a la vez, como máximo cada seis horas mientras Nyx está abierto, solo de nubes. El servicio recibe información de red, como tu dirección IP.",
+  "Open planner": "Abrir el planificador",
+  "Opens the window with every park and the night's controls": "Abre la ventana con todos los parques y los controles de la noche",
   "Opens this night's Moon as a globe you can place in the room": "Abre la Luna de esta noche como un globo que puedes colocar en la habitación",
   "Optional data update": "Actualización de datos opcional",
   "Out of the night sky": "Fuera del cielo nocturno",
