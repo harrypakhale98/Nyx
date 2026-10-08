@@ -26,16 +26,20 @@ struct YourSkyPanel: View {
     let open: (UUID)->Void
     var body: some View {
         let layout=ConstellationLayout(nights:nights,parks:model.parks)
+        // A journal that could not open is not an empty one: no promise of a first star.
+        let unavailable=nights.isEmpty && model.journalUnavailable
         Panel { VStack(alignment:.leading,spacing:16) {
             HStack(alignment:.center) {
                 Eyebrow(text:"Your constellation")
                 Spacer(minLength:8)
                 if !nights.isEmpty { ConstellationShareButton(layout:layout,year:Calendar.current.component(.year,from:.now)) }
             }
-            SkyMapView(content:layout.content(parks:model.parks),summary:layout.summary) { id in
+            SkyMapView(content:layout.content(parks:model.parks),summary:unavailable ? String(localized:"Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary) { id in
                 if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) }
             }
-            if nights.isEmpty {
+            if unavailable {
+                Text("Your stars are drawn from your journal, which could not be opened.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            } else if nights.isEmpty {
                 Text("Your first night will be your first star").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text("Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {

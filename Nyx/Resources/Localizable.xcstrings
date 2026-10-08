@@ -654,36 +654,19 @@
         }
       }
     },
-    "%@ · Darkest within %@ of %@": {
+    "%@ · Darkest within %@": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Darkest within %@ of %@"
+            "value": "%@ · Darkest within %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ · Lo más oscuro a menos de %2$@ de %3$@"
-          }
-        }
-      }
-    },
-    "%@ · Darkest within %@ of you": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · Darkest within %@ of you"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ · Lo más oscuro a menos de %2$@ de ti"
+            "value": "%1$@ · Lo más oscuro a menos de %2$@"
           }
         }
       }
@@ -4021,6 +4004,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Casi sin luz de luna"
+          }
+        }
+      }
+    },
+    "Almost no moonlight tonight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almost no moonlight tonight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casi sin luz de luna esta noche."
           }
         }
       }
@@ -9024,6 +9024,23 @@
         }
       }
     },
+    "Finding the Milky Way": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding the Milky Way"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encontrar la Vía Láctea"
+          }
+        }
+      }
+    },
     "Finding your location": {
       "extractionState": "manual",
       "localizations": {
@@ -12143,6 +12160,23 @@
         }
       }
     },
+    "Milky Way core up %@ – %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core up %@ – %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "núcleo de la Vía Láctea a la vista %@ – %@"
+          }
+        }
+      }
+    },
     "Milky Way core up at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -12156,6 +12190,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sale el núcleo de la Vía Láctea: %@"
+          }
+        }
+      }
+    },
+    "Milky Way core up throughout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core up throughout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "núcleo de la Vía Láctea a la vista todo el periodo"
           }
         }
       }
@@ -13489,23 +13540,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Luna nueva"
-          }
-        }
-      }
-    },
-    "New moon: no moonlight tonight.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New moon: no moonlight tonight."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna nueva: sin luz de luna esta noche."
           }
         }
       }
@@ -27029,6 +27063,23 @@
         }
       }
     },
+    "Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu constelación. Un mapa de los 63 parques nacionales dibujados como estrellas tenues. No se pudo abrir tu diario, así que tus noches no aparecen."
+          }
+        }
+      }
+    },
     "Your constellation: %lld nights at %lld parks across %lld seasons, each a star at its park on a map of the United States.": {
       "extractionState": "manual",
       "localizations": {
@@ -27289,19 +27340,19 @@
         }
       }
     },
-    "Your first Milky Way photo": {
+    "Your first Milky Way photo": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your first Milky Way photo"
+            "value": "Your first Milky Way photo"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu primera foto de la Vía Láctea"
+            "value": "Tu primera foto de la Vía Láctea"
           }
         }
       }
@@ -27472,6 +27523,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tu privacidad"
+          }
+        }
+      }
+    },
+    "Your stars are drawn from your journal, which could not be opened.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your stars are drawn from your journal, which could not be opened."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus estrellas salen de tu diario, que no se pudo abrir."
           }
         }
       }
@@ -28152,40 +28220,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "aún no se conocen las nubes"
-          }
-        }
-      }
-    },
-    "core up": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "core up"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "núcleo en el cielo"
-          }
-        }
-      }
-    },
-    "core up %@ – %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "core up %@ – %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "núcleo en el cielo %@ – %@"
           }
         }
       }

@@ -125,7 +125,8 @@ nonisolated struct ModelAgreement: Sendable, Equatable {
     }
     private var range: String {
         let a=Int(low.rounded()), b=Int(high.rounded())
-        return a==b ? String(localized:"about \(a)%") : String(localized:"\(a)–\(b)%")
+        // Word joiners around the dash keep "0–17%" on one line.
+        return a==b ? String(localized:"about \(a)%") : String(localized:"\(a)–\(b)%").replacingOccurrences(of:"–",with:"\u{2060}–\u{2060}")
     }
     /// One calm sentence. `tonight` changes only the advice for a disagreement.
     func sentence(tonight: Bool) -> String {

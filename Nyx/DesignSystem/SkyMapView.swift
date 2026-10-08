@@ -48,15 +48,13 @@ struct SkyMapCanvas: View {
             let dx=(size.width-view.width*scale)/2, dy=(size.height-view.height*scale)/2
             func screen(_ p:CGPoint)->CGPoint { CGPoint(x:dx+(p.x-view.minX)*scale,y:dy+(p.y-view.minY)*scale) }
             let zoom=min(3,max(1,1/view.width))
-            // The insets' quiet frames and names, only on the whole map.
+            // The insets' quiet frames, only on the whole map (their names are drawn last, above everything).
+            var boxes:[SkyMap.Region:CGRect]=[:]
             if content.showsInsets && view.width>0.9 {
                 for inset in SkyMap.insets.dropFirst() {
                     let rect=CGRect(origin:screen(inset.frame.origin),size:CGSize(width:inset.frame.width*scale,height:inset.frame.height*scale)).insetBy(dx:-3,dy:-3)
+                    boxes[inset.region]=rect
                     context.stroke(Path(roundedRect:rect,cornerRadius:4),with:.color(palette.line.opacity(0.7)),style:StrokeStyle(lineWidth:0.5,dash:[2,3]))
-                    // Kept inside the canvas: a longer name ("I. Vírgenes") ends at the right edge instead of past it.
-                    let name=context.resolve(Text(inset.name).font(.system(size:min(15,insetNameSize),weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)))
-                    let width=name.measure(in:size).width
-                    context.draw(name,at:CGPoint(x:max(1,min(rect.minX+1,size.width-width-1)),y:rect.maxY+2),anchor:.topLeading)
                 }
             }
             // The country, barely there: coasts and borders so the stars read as places.
@@ -94,14 +92,26 @@ struct SkyMapCanvas: View {
             for star in content.stars {
                 let p=screen(star.point), b=star.brightness
                 let core=1.2+2.6*b, halo=core*3.2
-                context.drawLayer { glow in
-                    glow.addFilter(.blur(radius:halo/2.4))
-                    glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35+0.4*b)))
+                context.drawLayer { kept in
+                    // A star in an inset keeps its halo inside the inset's frame, clear of the names beneath.
+                    if let box=boxes[SkyMap.region(at:star.point)] { kept.clipToLayer { mask in TonightMapCanvas.softBox(&mask,box) } }
+                    kept.drawLayer { glow in
+                        glow.addFilter(.blur(radius:halo/2.4))
+                        glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35+0.4*b)))
+                    }
                 }
                 context.fill(Path(ellipseIn:CGRect(x:p.x-core/2,y:p.y-core/2,width:core,height:core)),with:.color(palette.ink.opacity(0.55+0.45*b)))
                 if star.ringed {
                     context.stroke(Path(ellipseIn:CGRect(x:p.x-9,y:p.y-9,width:18,height:18)),with:.color(palette.accent.opacity(0.8)),lineWidth:0.9)
                 }
+            }
+            // The insets' names under their frames, on one baseline, above the stars and figures.
+            for inset in SkyMap.insets.dropFirst() {
+                guard let rect=boxes[inset.region] else { continue }
+                // Kept inside the canvas: a longer name ("I. Vírgenes") ends at the right edge instead of past it.
+                let name=context.resolve(Text(inset.name).font(.system(size:min(15,insetNameSize),weight:.medium)).foregroundStyle(palette.muted.opacity(0.85)))
+                let width=name.measure(in:size).width
+                context.draw(name,at:CGPoint(x:max(1,min(rect.minX+1,size.width-width-1)),y:rect.maxY+2),anchor:.topLeading)
             }
         }
         .accessibilityIgnoresInvertColors()

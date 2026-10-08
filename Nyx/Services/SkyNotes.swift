@@ -14,16 +14,17 @@ nonisolated struct ClearWindow: Sendable, Equatable {
     /// Shorter stretches are not worth naming.
     static let minimum: TimeInterval = 1800
 
-    /// "Best window: 11:40 PM – 3:10 AM · clear, Moon down, core up", park-local, to ten minutes.
+    /// "Best window: 11:40 PM – 3:10 AM · clear, Moon down; Milky Way core up throughout", park-local, to ten minutes.
     func line(park: Park) -> String {
         func t(_ d: Date) -> String { WhatsUp.around(d, park: park) }
         let tolerance = 600.0
         let coreAll = core.map { abs($0.start.timeIntervalSince(interval.start)) <= tolerance && abs($0.end.timeIntervalSince(interval.end)) <= tolerance } ?? false
         var parts = [String(localized: "clear")]
         if moonDown { parts.append(String(localized: "Moon down")) }
-        if coreAll { parts.append(String(localized: "core up")) }
         var text = String(localized: "Best window: \(t(interval.start)) – \(t(interval.end)) · \(parts.joined(separator: ", "))")
-        if let core, !coreAll { text += "; "+String(localized: "core up \(t(core.start)) – \(t(core.end))") }
+        // The core in words of its own, as field mode names it: through the whole window, or for part of it.
+        if coreAll { text += "; "+String(localized: "Milky Way core up throughout") }
+        else if let core { text += "; "+String(localized: "Milky Way core up \(t(core.start)) – \(t(core.end))") }
         return text
     }
 

@@ -272,7 +272,8 @@ struct FieldNightPager: View {
     /// Where the Moon is now, in one line.
     private func moonLine(_ now:Date)->String {
         let night=session.night, sky=night.sky
-        if sky.moon.illumination<0.05 { return String(localized:"New moon: no moonlight tonight.") }
+        // Under 5% lit, as reminders say it; "new moon" is the phase name, under 3% (`MoonPhase.name`).
+        if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight tonight.") }
         let lit=Int((sky.moon.illumination*100).rounded())
         let up=AstronomyEngine().lunarAltitude(at:now,park:night.park) > -0.833
         if up { return sky.moonset.flatMap { $0>now ? String(localized:"Moon up, \(lit)% lit. It sets at \(night.park.time($0)).") : nil } ?? String(localized:"Moon up, \(lit)% lit.") }

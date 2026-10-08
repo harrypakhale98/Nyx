@@ -33,13 +33,21 @@ nonisolated enum SkyMap {
             }
         }
     }
+    /// The insets share one bottom edge (`insetBottom`), so their names sit on one baseline, and
+    /// stand at least 0.04 apart, so the frames (drawn 3 points outside these) never touch and
+    /// Hawaiʻi's name ends before Am. Samoa's begins.
+    static let insetBottom = 0.57
     static let insets: [Inset] = [
         Inset(region:.lower48,frame:CGRect(x:0.02,y:0.02,width:0.96,height:0.53),longitudes:(-125)...(-66.5),latitudes:24...49.5),
-        Inset(region:.alaska,frame:CGRect(x:0.02,y:0.40,width:0.17,height:0.17),longitudes:(-166)...(-134),latitudes:56...70),
-        Inset(region:.hawaii,frame:CGRect(x:0.20,y:0.47,width:0.08,height:0.08),longitudes:(-157.2)...(-154.6),latitudes:18.7...21.3),
-        Inset(region:.samoa,frame:CGRect(x:0.32,y:0.50,width:0.05,height:0.05),longitudes:(-171)...(-169),latitudes:(-15)...(-13.5)),
-        Inset(region:.virginIslands,frame:CGRect(x:0.88,y:0.47,width:0.06,height:0.06),longitudes:(-65.5)...(-64),latitudes:17.8...18.8),
+        Inset(region:.alaska,frame:CGRect(x:0.02,y:insetBottom-0.17,width:0.17,height:0.17),longitudes:(-166)...(-134),latitudes:56...70),
+        Inset(region:.hawaii,frame:CGRect(x:0.23,y:insetBottom-0.08,width:0.08,height:0.08),longitudes:(-157.2)...(-154.6),latitudes:18.7...21.3),
+        Inset(region:.samoa,frame:CGRect(x:0.39,y:insetBottom-0.05,width:0.05,height:0.05),longitudes:(-171)...(-169),latitudes:(-15)...(-13.5)),
+        Inset(region:.virginIslands,frame:CGRect(x:0.88,y:insetBottom-0.06,width:0.06,height:0.06),longitudes:(-65.5)...(-64),latitudes:17.8...18.8),
     ]
+    /// The inset a point on the canvas lies in (`lower48` outside every inset): where a mark's glow is kept.
+    static func region(at point: CGPoint) -> Region {
+        insets.dropFirst().first { $0.frame.insetBy(dx:-0.001,dy:-0.001).contains(point) }?.region ?? .lower48
+    }
     static func region(_ park: Park) -> Region {
         switch park.state { case "AK": .alaska; case "HI": .hawaii; case "AS": .samoa; case "VI": .virginIslands; default: .lower48 }
     }

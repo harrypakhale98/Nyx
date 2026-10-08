@@ -105,9 +105,9 @@ struct ForecastDetailTests {
         #expect(ModelAgreement.band(spread:35.1) == .disagree)
         #expect(ModelAgreement(low:2,high:9).sentence(tonight:true)=="Clear in all three forecast models.")
         #expect(ModelAgreement(low:80,high:92).sentence(tonight:true)=="Cloudy in all three forecast models.")
-        #expect(ModelAgreement(low:20,high:30).sentence(tonight:false)=="All three forecast models agree: 20–30% cloud.")
-        #expect(ModelAgreement(low:0,high:40).sentence(tonight:false)=="Models disagree: 0–40% cloud. Check again tomorrow.")
-        #expect(ModelAgreement(low:0,high:40).sentence(tonight:true)=="Models disagree: 0–40% cloud. Check again before you leave.")
+        #expect(ModelAgreement(low:20,high:30).sentence(tonight:false)=="All three forecast models agree: 20\u{2060}–\u{2060}30% cloud.")
+        #expect(ModelAgreement(low:0,high:40).sentence(tonight:false)=="Models disagree: 0\u{2060}–\u{2060}40% cloud. Check again tomorrow.")
+        #expect(ModelAgreement(low:0,high:40).sentence(tonight:true)=="Models disagree: 0\u{2060}–\u{2060}40% cloud. Check again before you leave.")
     }
     /// Aerosol optical depth bands; from 0.25 the caveat stands beside the score.
     @Test func aerosolBands() {
