@@ -18,7 +18,11 @@ import WidgetKit
 
     func update(_ model:PlanModel,parkIDs ids:[String]?=nil) async {
         guard DebugScenario.screen == nil else { return }
-        if let ids { parkIDs=ids }
+        // When the store could not open, the windows read their saved parks from an empty stand-in.
+        // That empty list must never reach the widget, the watch or reminders: the parks of the last
+        // snapshot stay, and their forecasts keep being refreshed.
+        if model.journalUnavailable { if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) } }
+        else if let ids { parkIDs=ids }
         guard let current=parkIDs else { return }
         guard !running else { again=true; return }
         running=true

@@ -32,17 +32,22 @@ watchInfo=plistlib.loads((watchApp/'Info.plist').read_bytes())
 assert watchInfo['CFBundleIdentifier']=='com.harrypakhale.nyx.watchkitapp'
 assert watchInfo['WKCompanionAppBundleIdentifier']=='com.harrypakhale.nyx'
 assert watchInfo['UIDeviceFamily']==[4],watchInfo['UIDeviceFamily']
-# `reasons`: the UserDefaults reasons a bundle declares (its only required-reason API), or None for none at all.
-def check_manifest(folder,reasons=frozenset({'CA92.1','1C8F.1'})):
+# `reasons`: the UserDefaults reasons a bundle declares, or None for no required-reason API at all;
+# `extra`: any other required-reason categories it declares (the app checks free space before moving
+# journal photos, DiskSpace E174.1).
+def check_manifest(folder,reasons=frozenset({'CA92.1','1C8F.1'}),extra=None):
  manifest=plistlib.loads((folder/'PrivacyInfo.xcprivacy').read_bytes())
  assert manifest['NSPrivacyTracking']==False
  assert manifest['NSPrivacyTrackingDomains']==[]
  assert manifest['NSPrivacyCollectedDataTypes']==[] # Data Not Collected; reasoning in PRIVACY.md
  apis=manifest['NSPrivacyAccessedAPITypes']
  if reasons is None: assert apis==[],apis; return
- assert len(apis)==1 and apis[0]['NSPrivacyAccessedAPIType']=='NSPrivacyAccessedAPICategoryUserDefaults'
- assert set(apis[0]['NSPrivacyAccessedAPITypeReasons'])==set(reasons),apis
-for folder in [root,root/'PlugIns/NyxWidgets.appex',watchApp,watchApp/'PlugIns/NyxWatchWidgets.appex']: check_manifest(folder)
+ declared={api['NSPrivacyAccessedAPIType']:set(api['NSPrivacyAccessedAPITypeReasons']) for api in apis}
+ assert len(declared)==len(apis),apis
+ expected={'NSPrivacyAccessedAPICategoryUserDefaults':set(reasons),**{k:set(v) for k,v in (extra or {}).items()}}
+ assert declared==expected,apis
+check_manifest(root,extra={'NSPrivacyAccessedAPICategoryDiskSpace':{'E174.1'}})
+for folder in [root/'PlugIns/NyxWidgets.appex',watchApp,watchApp/'PlugIns/NyxWatchWidgets.appex']: check_manifest(folder)
 # The app's manifest source names exactly the three hosts it may contact (a comment, stripped when bundled; none is a tracking domain).
 assert set(re.findall(r'[a-z-]+(?:\.[a-z-]+)*\.(?:gov|com)',' '.join(re.findall(r'<!--(.*?)-->',Path('Nyx/Resources/PrivacyInfo.xcprivacy').read_text(),re.S))))=={'developer.nps.gov','api.open-meteo.com','air-quality-api.open-meteo.com'}
 for name in ['Nyx','NyxWidgets','NyxWatch','NyxWatchWidgets']:

@@ -1,3 +1,4 @@
+import AppIntents
 import Foundation
 import SwiftData
 import UIKit
@@ -32,6 +33,14 @@ actor HeaderHTTP: HTTPTransport {
 private func alert(_ id: String, _ title: String, _ category: String, _ code: String) -> String {
     "{\"id\":\"\(id)\",\"title\":\"\(title)\",\"description\":\"<p>Details</p>\",\"category\":\"\(category)\",\"parkCode\":\"\(code)\",\"url\":\"\"}"
 }
+/// A small real JPEG, as the journal stores photos.
+private func jpeg(_ color: UIColor) throws -> Data {
+    try #require(UIGraphicsImageRenderer(size: CGSize(width: 40, height: 30)).image { context in
+        color.setFill(); context.fill(CGRect(x: 0, y: 0, width: 40, height: 30))
+    }.jpegData(compressionQuality: 0.8))
+}
+/// An import's result as [added, skipped].
+private func counts(_ result: (added: Int, skipped: Int)) -> [Int] { [result.added, result.skipped] }
 private func query(_ url: URL, _ name: String) -> String? { URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == name }?.value }
 
 struct DataLaneTests {
@@ -330,7 +339,8 @@ struct DataLaneTests {
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         let entry=JournalEntry(date: Date(timeIntervalSince1970: 1790899200), parkID: "jotr", observedBortle: 2, notes: "Saturn's rings.")
         phone.insert(entry); try phone.save()
-        entry.photos=[Data([9,9,9]), Data([1])]
+        let photos=[try jpeg(.orange), try jpeg(.blue)]
+        entry.photos=photos
         entry.orderedPhotos.first?.altText="The Milky Way over Joshua trees."
         phone.insert(JournalEntry(date: Date(timeIntervalSince1970: 1790999200), parkID: "deva", notes: "Windy."))
         try phone.save()
@@ -340,13 +350,120 @@ struct DataLaneTests {
         let ipad=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         ipad.insert(JournalEntry(date: Date(timeIntervalSince1970: 1790999200+3600), parkID: "deva", notes: "Same night, written here."))
         try ipad.save()
-        let result=try reread.merge(into: ipad, parks: parks)
-        #expect(result.added == 1 && result.skipped == 1)
+        // A different entry from the same night at Death Valley is written on each device: both are kept.
+        let result=try reread.merge(into: ipad)
+        #expect(counts(result) == [2, 0])
         let imported=try #require(try ipad.fetch(FetchDescriptor<JournalEntry>()).first { $0.id == entry.id })
-        #expect(imported.photos == [Data([9,9,9]), Data([1])] && imported.notes == "Saturn's rings.")
+        #expect(imported.photos == photos && imported.notes == "Saturn's rings.")
         #expect(imported.orderedPhotos.first?.altText == "The Milky Way over Joshua trees.")
-        #expect(try reread.merge(into: ipad, parks: parks).added == 0)
-        #expect(try ipad.fetch(FetchDescriptor<JournalEntry>()).count == 2)
+        #expect(counts(try reread.merge(into: ipad)) == [0, 2])
+        #expect(try ipad.fetch(FetchDescriptor<JournalEntry>()).count == 3)
+    }
+    /// Two different entries from one night in one archive both arrive; importing the archive again
+    /// adds nothing, and an entry already here under another id (same park, moment and words) is not doubled.
+    @MainActor @Test func importKeepsEveryEntryOfANight() throws {
+        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let night=Date(timeIntervalSince1970: 1790899200)
+        let archive=JournalArchive(manifest: .init(format: 1, exported: night, entries: [
+            .init(id: UUID(), date: night, parkID: "jotr", observedBortle: 2, notes: "Saturn first.", photos: []),
+            .init(id: UUID(), date: night+5400, parkID: "jotr", observedBortle: 2, notes: "Then the core.", photos: [])]), photos: [:])
+        let context=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
+        // The same words at the same second, saved here before (a fraction of a second later) under its own id.
+        context.insert(JournalEntry(date: night+5400.4, parkID: "jotr", notes: "Then the core."))
+        try context.save()
+        #expect(counts(try archive.merge(into: context)) == [1, 1])
+        #expect(counts(try archive.merge(into: context)) == [0, 2])
+        let notes=try context.fetch(FetchDescriptor<JournalEntry>()).map(\.notes).sorted()
+        #expect(notes == ["Saturn first.", "Then the core."])
+        let empty=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
+        #expect(counts(try archive.merge(into: empty)) == [2, 0])
+    }
+    /// A damaged or unknown archive is refused before anything is inserted, and a photo that is
+    /// missing or is not an image is left out of an otherwise sound entry.
+    @MainActor @Test func malformedArchivesInsertNothing() throws {
+        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let context=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
+        func package(_ json: String, photos: [String: Data] = [:]) -> FileWrapper {
+            let folder=FileWrapper(directoryWithFileWrappers: [:])
+            folder.addRegularFile(withContents: Data(json.utf8), preferredFilename: "entries.json")
+            let pictures=FileWrapper(directoryWithFileWrappers: photos.mapValues { FileWrapper(regularFileWithContents: $0) })
+            pictures.preferredFilename="Photos"
+            folder.addFileWrapper(pictures)
+            return folder
+        }
+        let id=UUID().uuidString
+        let entry="{\"id\":\"\(id)\",\"date\":\"2026-10-01T04:00:00Z\",\"parkID\":\"jotr\",\"observedBortle\":2,\"notes\":\"Clear.\",\"photos\":[{\"file\":\"a.jpg\"},{\"file\":\"b.jpg\"},{\"file\":\"gone.jpg\"}]}"
+        #expect(throws: JournalArchive.ArchiveError.newerFormat) { try JournalArchive(wrapper: package("{\"format\":2,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}")) }
+        #expect(throws: JournalArchive.ArchiveError.unreadable) { try JournalArchive(wrapper: package("{\"format\":0,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}")) }
+        #expect(throws: (any Error).self) { try JournalArchive(wrapper: package("{\"format\":1,\"entries\":[\(entry)")) }
+        #expect(throws: JournalArchive.ArchiveError.unreadable) { try JournalArchive(wrapper: FileWrapper(regularFileWithContents: Data())) }
+        #expect(try context.fetch(FetchDescriptor<JournalEntry>()).isEmpty)
+        // a.jpg is a photo, b.jpg is not an image, gone.jpg is missing: the entry keeps a.jpg alone.
+        let photo=try jpeg(.orange)
+        let sound=try JournalArchive(wrapper: package("{\"format\":1,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}",
+                                                      photos: ["a.jpg": photo, "b.jpg": Data("not a photo".utf8)]))
+        #expect(counts(try sound.merge(into: context)) == [1, 0])
+        let kept=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
+        #expect(kept.photos == [photo] && kept.thumbnail != nil)
+        #expect(try context.fetch(FetchDescriptor<JournalPhoto>()).count == 1)
+    }
+    /// A journal another app opened in Nyx is a copy in Documents/Inbox: removed once handled, and
+    /// cleared when Nyx leaves the screen unless still waiting; a file outside the Inbox is never touched.
+    @Test func openedJournalsDoNotPileUpInTheInbox() throws {
+        let manager=FileManager.default
+        let root=manager.temporaryDirectory.appendingPathComponent("nyx-inbox-\(UUID().uuidString)", isDirectory: true)
+        defer { try? manager.removeItem(at: root) }
+        let inbox=root.appendingPathComponent("Inbox", isDirectory: true)
+        try manager.createDirectory(at: inbox, withIntermediateDirectories: true)
+        func journal(_ folder: URL, _ name: String) throws -> URL {
+            let url=folder.appendingPathComponent(name+".nyxjournal", isDirectory: true)
+            try manager.createDirectory(at: url, withIntermediateDirectories: true)
+            try Data("{}".utf8).write(to: url.appendingPathComponent("entries.json"))
+            return url
+        }
+        let opened=try journal(inbox, "Opened"), picked=try journal(root, "Picked")
+        #expect(JournalInbox.contains(opened, folder: inbox) && !JournalInbox.contains(picked, folder: inbox))
+        JournalInbox.remove(picked, folder: inbox)
+        JournalInbox.remove(opened, folder: inbox)
+        #expect(manager.fileExists(atPath: picked.path) && !manager.fileExists(atPath: opened.path))
+        let waiting=try journal(inbox, "Waiting"), left=try journal(inbox, "Left")
+        JournalInbox.sweep(folder: inbox, keeping: waiting)
+        #expect(manager.fileExists(atPath: waiting.path) && !manager.fileExists(atPath: left.path))
+        JournalInbox.sweep(folder: inbox)
+        #expect(!manager.fileExists(atPath: waiting.path))
+    }
+    /// When the store on disk could not open, Siri and Shortcuts refuse plainly: nothing is written
+    /// to the stand-in in memory, which would be gone on the next launch.
+    @MainActor @Test func failedStoreRefusesJournalIntents() async throws {
+        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let standIn=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
+        let before=(JournalAccess.container, JournalAccess.unavailable)
+        defer { JournalAccess.configure(container: before.0, unavailable: before.1) }
+        JournalAccess.configure(container: standIn, unavailable: true)
+        await #expect(throws: NyxIntentError.journalUnavailable) {
+            _=try await JournalAccess.add(title: nil, message: "Clear and still.", date: .now, location: nil, files: [])
+        }
+        await #expect(throws: NyxIntentError.journalUnavailable) { _=try await JournalAccess.entities(FetchDescriptor<JournalEntry>()) }
+        #expect(try standIn.mainContext.fetch(FetchDescriptor<JournalEntry>()).isEmpty)
+        // The same store, opened: the entry is saved and found again by its words.
+        JournalAccess.configure(container: standIn, unavailable: false)
+        let added=try await JournalAccess.add(title: nil, message: "Clear and still.", date: .now, location: nil,
+                                              files: [IntentFile(data: Data("text".utf8), filename: "note.txt", type: .plainText)])
+        #expect(added.mediaItems.isEmpty)
+        #expect(try await JournalAccess.entities(matching: "clear").map(\.id) == [added.id])
+    }
+    /// The size of a store on disk counts its external photo records, and a device with room is told so.
+    @Test func migrationChecksForRoomFirst() throws {
+        let manager=FileManager.default
+        let folder=manager.temporaryDirectory.appendingPathComponent("nyx-room-\(UUID().uuidString)", isDirectory: true)
+        defer { try? manager.removeItem(at: folder) }
+        let external=folder.appendingPathComponent(".default_SUPPORT/_EXTERNAL_DATA", isDirectory: true)
+        try manager.createDirectory(at: external, withIntermediateDirectories: true)
+        let store=folder.appendingPathComponent("default.store")
+        try Data(count: 1000).write(to: store)
+        try Data(count: 5000).write(to: external.appendingPathComponent("photo"))
+        #expect(JournalMigration.footprint(ofStoreAt: store) == 6000)
+        #expect(JournalMigration.hasRoom(forStoreAt: store))
     }
     /// The journal's export is gathered on a background context and an import's thumbnails are
     /// drawn before the inserts, as the Journal tab does off the main thread: same archive, same cards.
@@ -367,7 +484,7 @@ struct DataLaneTests {
         let thumbnails=await Task.detached { made.thumbnails() }.value
         let thumbnail=try #require(thumbnails[entry.id])
         let other=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
-        #expect(try made.merge(into: other, parks: parks, thumbnails: thumbnails).added == 1)
+        #expect(try made.merge(into: other, thumbnails: thumbnails).added == 1)
         #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.thumbnail == thumbnail)
     }
 

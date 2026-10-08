@@ -169,6 +169,32 @@ struct ForecastDetailTests {
         do { _=try await SafeHTTP(suite:suite).get(other); Issue.record("Unknown host was not rejected") }
         catch let error as URLError { #expect(error.code == .unsupportedURL) }
     }
+    /// Each of the three hosts has its own switch: turning one off refuses that host before any
+    /// connection and leaves the other two allowed. No other host, and nothing but HTTPS, is ever allowed.
+    @Test func eachHostHasItsOwnSwitch() async throws {
+        #expect(SafeHTTP.hosts == ["developer.nps.gov", "api.open-meteo.com", "air-quality-api.open-meteo.com"])
+        #expect(SafeHTTP.preferences == ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": "weatherEnabled", "air-quality-api.open-meteo.com": "smokeEnabled"])
+        let urls=try SafeHTTP.hosts.sorted().map { try #require(URL(string: "https://\($0)/v1/test")) }
+        for off in SafeHTTP.hosts.sorted() {
+            let suite="nyx-switch-test-\(UUID().uuidString)"
+            let defaults=try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            defaults.set(false, forKey: try #require(SafeHTTP.preferences[off]))
+            for url in urls {
+                let expected: URLError.Code?=url.host == off ? .cancelled : nil
+                #expect(SafeHTTP.refusal(url, defaults: defaults) == expected)
+            }
+            // The transport itself refuses before connecting (a connection would fail differently, or succeed).
+            let refused=try #require(urls.first { $0.host == off })
+            do { _=try await SafeHTTP(suite: suite).get(refused); Issue.record("\(off) was contacted with its switch off") }
+            catch let error as URLError { #expect(error.code == .cancelled) }
+        }
+        let fresh=try #require(UserDefaults(suiteName: "nyx-switch-test-\(UUID().uuidString)"))
+        for url in urls { #expect(SafeHTTP.refusal(url, defaults: fresh) == nil) }
+        for text in ["http://api.open-meteo.com/v1/forecast", "https://open-meteo.com/v1/forecast", "https://example.com/", "https://developer.nps.gov.example.com/"] {
+            #expect(SafeHTTP.refusal(try #require(URL(string: text)), defaults: fresh) == .unsupportedURL)
+        }
+    }
     /// With the smoke switch off the service never asks; with forecasts off it asks only for smoke.
     @Test func serviceRespectsEachSwitch() async throws {
         let one=try parks(1)

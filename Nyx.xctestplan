@@ -4,7 +4,8 @@
       "id" : "3F0B6C1E-6A2D-4C7B-9E51-0D4F2A8B7C11",
       "name" : "Default",
       "options" : {
-
+        "language" : "en",
+        "region" : "US"
       }
     },
     {

@@ -29,7 +29,7 @@ struct JournalView: View {
         let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
-                if model.journalUnavailable { JournalUnavailableBanner() }
+                if model.journalUnavailable { JournalUnavailableBanner(needsSpace:model.journalNeedsSpace) }
                 // A journal lives on the device it was written on; say so where a second device is likely.
                 if UIDevice.current.userInterfaceIdiom == .pad || sizeClass == .regular {
                     Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -81,8 +81,13 @@ struct JournalView: View {
             .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
             .task(id:model.journalFile) {
                 // A journal opened from Files or another app.
-                guard let url=model.journalFile, !model.journalUnavailable else { return }
+                guard let url=model.journalFile else { return }
                 model.journalFile=nil
+                guard !model.journalUnavailable else {
+                    Task.detached(priority:.utility) { JournalInbox.remove(url) }
+                    importResult=String(localized:"Your journal couldn't be opened, so this file was not imported. Nothing was changed.")
+                    return
+                }
                 await importJournal(url)
             }
     }
@@ -102,17 +107,18 @@ struct JournalView: View {
         }
     }
     /// Adds the nights the journal does not have yet; nothing already here is changed. The package
-    /// is read and its thumbnails drawn off the main thread; only the inserts happen here.
+    /// is read and its thumbnails drawn off the main thread; only the inserts happen here. A copy
+    /// another app left in Documents/Inbox is removed afterwards, imported or not.
     private func importJournal(_ url:URL) async {
         working="Importing your journal"
-        defer { working=nil }
+        defer { working=nil; Task.detached(priority:.utility) { JournalInbox.remove(url) } }
         let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data])? in
             guard let archive=try? JournalArchive(url:url) else { return nil }
             return (archive,archive.thumbnails())
         }.value
         do {
             guard let read else { throw JournalArchive.ArchiveError.unreadable }
-            let result=try read.archive.merge(into:context,parks:model.parks,thumbnails:read.thumbnails)
+            let result=try read.archive.merge(into:context,thumbnails:read.thumbnails)
             importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
         } catch {
             context.rollback()
@@ -187,6 +193,13 @@ struct JournalCard:View {
 }
 /// Image I/O downsampling: decodes straight to the target size, never the full photo.
 nonisolated enum PhotoScaling {
+    /// The largest photo the journal accepts, from the editor or from Shortcuts.
+    static let maxSourceBytes=40_000_000
+    /// True when Image I/O recognizes the data as an image (read from its header; nothing is decoded).
+    static func isImage(_ data:Data)->Bool {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return false }
+        return CGImageSourceGetType(source) != nil && CGImageSourceGetCount(source)>0
+    }
     static func image(_ data:Data,maxPixels:Int)->CGImage? {
         guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return nil }
         let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,
@@ -262,7 +275,7 @@ struct JournalThumbnail:View {
         loadingPhotos=true;error=nil;defer { loadingPhotos=false }
         for item in items.prefix(max(0,4-photos.count)) {
             do {
-                if let data=try await item.loadTransferable(type:Data.self), data.count<=40_000_000 {
+                if let data=try await item.loadTransferable(type:Data.self), data.count<=PhotoScaling.maxSourceBytes {
                     // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded.
                     photos.append(await Task.detached(priority:.userInitiated) { PhotoScaling.jpeg(data,maxPixels:2400) ?? data }.value)
                 }
@@ -462,8 +475,10 @@ struct JournalDetailView:View {
 /// The journal's store could not be opened. Everything else works, and the file on disk is left alone.
 struct JournalUnavailableBanner:View {
     @Environment(\.nyx) private var palette
+    /// The device is nearly full: the one thing that may help is said first.
+    var needsSpace=false
     var body:some View {
-        Label { Text("Your journal couldn't be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
+        Label { Text(needsSpace ? "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched." : "Your journal couldn't be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
             icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.ink)
             .padding(14).frame(maxWidth:.infinity,alignment:.leading)
@@ -472,3 +487,4 @@ struct JournalUnavailableBanner:View {
     }
 }
 #Preview("Journal unavailable") { JournalUnavailableBanner().padding(24).background(Color.black).preferredColorScheme(.dark) }
+#Preview("Journal unavailable, device full") { JournalUnavailableBanner(needsSpace:true).padding(24).background(Color.black).preferredColorScheme(.dark) }

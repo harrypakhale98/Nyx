@@ -112,7 +112,13 @@ struct RootView:View {
         }
         .onChange(of:scenePhase) { _,phase in
             // Ask iOS for the next background refresh whenever Nyx leaves the screen.
-            if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
+            if phase == .background, DebugScenario.screen == nil {
+                SavedSkySync.scheduleRefresh()
+                // Journals opened from other apps are copied into Documents/Inbox; ones left behind
+                // by an import cut short are cleared, keeping one still waiting to be imported.
+                let waiting=model.journalFile
+                Task.detached(priority:.utility) { JournalInbox.sweep(keeping:waiting) }
+            }
             if phase == .active {
             model.tick(); moonIcon=RootView.currentMoonIcon(); Task { await updateSaved() }
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
@@ -131,7 +137,10 @@ struct RootView:View {
             // Keep the Control Center toggle and widgets in step with the in-app switch.
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
-            WatchBridge.shared.push(savedParkIDs:saved.map(\.parkID),homeParkID:model.homeID,forecasts:model.forecasts)
+            // The watch hears the parks the widget has, never the empty list of a store that could not open.
+            if let ids=model.journalUnavailable ? model.savedSync.parkIDs : saved.map(\.parkID) {
+                WatchBridge.shared.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts)
+            }
         }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }

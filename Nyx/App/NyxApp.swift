@@ -15,13 +15,15 @@ import UserNotifications
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
         container=opened.container
-        // Journal entries from Siri (`AddJournalEntryIntent`) go to the same store as the windows.
-        JournalAccess.container=opened.container
         LaunchSignposts.end(store)
         let planner=LaunchSignposts.begin("PlanModel init")
         let model=PlanModel(preload:preload)
         // `-nyx-journal-unavailable` (DEBUG) shows the journal banner for screenshots.
         model.journalUnavailable=opened.failed || DebugScenario.isEnabled("journal-unavailable")
+        model.journalNeedsSpace=opened.shortOfSpace
+        // Journal entries from Siri (`AddJournalEntryIntent`) go to the same store as the windows, and
+        // are refused when that store is only the stand-in in memory.
+        JournalAccess.configure(container:opened.container,unavailable:model.journalUnavailable)
         _model=State(initialValue:model)
         LaunchSignposts.end(planner)
         try? Tips.configure([.datastoreLocation(.applicationDefault)])

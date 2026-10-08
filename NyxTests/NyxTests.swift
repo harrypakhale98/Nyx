@@ -245,7 +245,9 @@ struct NyxTests {
         #expect(forecast.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==80)
         #expect(forecast.mean(from:now,to:now.addingTimeInterval(8000))==nil)
         // Never dropped for its age (score v2): an old forecast fades by lead time instead.
-        #expect(forecast.mean(from:now,to:now.addingTimeInterval(3600))==50)
+        let old=Forecast(updated:now.addingTimeInterval(-3*86_400),times:forecast.times,clouds:forecast.clouds)
+        #expect(old.mean(from:now,to:now.addingTimeInterval(3600))==50)
+        #expect(old.mean(from:now.addingTimeInterval(1800),to:now.addingTimeInterval(5400))==80)
     }
     @Test func malformedForecastCannotFillGaps() {
         let now=Date.now, t=now.timeIntervalSince1970
