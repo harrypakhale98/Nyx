@@ -35,25 +35,27 @@ struct TonightView: View {
                     if !model.startChosen { firstRun }
                     HStack(alignment:.top,spacing:36) {
                         VStack(spacing:26) { hero(park); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; extras }.frame(maxWidth:500)
+                        VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; fromHome; extras }.frame(maxWidth:500)
                     }
                 }.padding(24)
             } else {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint;fromHome }
                     else if let park=best.first {
                         hero(park)
                         farther(than:park)
                         startingPoint
                         more
                         footnote
+                        fromHome
                     }
                     extras
                 }.padding(24).readableColumn()
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
@@ -188,6 +190,13 @@ struct TonightView: View {
             Eyebrow(text:"More skies within reach")
             ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight);Divider().overlay(palette.line) }
         }
+    }
+    /// The sky over the starting point itself, for anyone not travelling tonight: the device's
+    /// location only when Near me is already in use, else the chosen city or park. Not on first
+    /// run, where the starting point is only an example.
+    @ViewBuilder private var fromHome: some View {
+        let here=location.latitude.flatMap { lat in location.longitude.map { (latitude:lat,longitude:$0) } }
+        if model.startChosen, let origin=HomeSky.origin(location:here,place:model.homePlace,park:model.home) { FromHomePanel(origin:origin,now:model.today) }
     }
     private var footnote: some View {
         Text("Each park uses its own local date. Scores without a full forecast can change when one arrives.").font(.caption).foregroundStyle(palette.muted)
