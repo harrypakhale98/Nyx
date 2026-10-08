@@ -320,9 +320,10 @@ struct TonightView: View {
     }
     private var radiusPicker:some View {
         @Bindable var model=model
+        // Its own size both ways: vertically flexible, it left the panel a tall empty band under the row.
         return Picker("Radius",selection:$model.radiusMiles) {
             ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).fixedSize().tag(miles) }
-        }.pickerStyle(.menu).fixedSize(horizontal:true,vertical:false)
+        }.pickerStyle(.menu).fixedSize()
     }
 }
 struct PermissionExplainer: View {
