@@ -2,6 +2,22 @@
 
 *October 7, 2026 · build 1.1 (7) at `c7918ba` · nine review lenses, each written up in full in `Research/audit-2026-10-07/`*
 
+## Implementation status (build 1.1 (8), October 7, 2026)
+
+Everything below was implemented on `main` the same day, version still 1.1, decisions in `DECISIONS.md` ("Award audit implementation", waves 1–3), handoff in `PHASE_STATUS.md`. What is left needs the owner: accounts, a lawyer, a native Spanish reviewer and the device pass (`INPUT_NEEDED.md`).
+
+| Area | Status |
+|---|---|
+| Ship-blockers S1–S12 | Done: score caps for clouds, sky glow and smoke; clouds fade toward each park's usual clouds by lead time (never rise offline); reminders only ≤5 days out on a fresh forecast, one per park per week; eclipse partial phases; one bulk NPS alerts request; Open-Meteo credit linked; privacy, support, credits and version in Settings; Texas age assurance through Declared Age Range (counsel review still the owner's); versioned journal store with migration; public pages and store copy as a first release |
+| Also before submission | Done: state search, field countdown in minutes, closure beside the score on the park page, river activation, brighter red for colour-blind eyes, location purpose string, gated accessibility claim, archives moved out of `/tmp`. Store frames: recaptured once, after the device pass (the build 7 frames show scores the new rules no longer allow, so they must not be uploaded) |
+| Score v2 and science | Done, with hard caps kept (see `DECISIONS.md`), best clear window, moonlight by phase and height, glow tie-breaks, planets and meteor ranges, aurora, satellite, zodiacal-light and limiting-magnitude notes, Haleakalā above the inversion; the false bright star T CrB removed |
+| Close the loop, IA, first run | Done: four tabs with Plan, the park in three chapters, Where do you start from (with an offline US places list), Add to Calendar, Follow this night, Keep this night, one vocabulary, plural variations |
+| Accessibility | Done: Assistive Access, Feel tonight, where to look by sound, action-slider alternative, Show Borders, photo descriptions, AX5 audits; device pass pending |
+| Platform | Done: scheduled Live Activity, small family for Watch and CarPlay, stale face, tab accessory, glass lens and pill, widgets with a park setting, Moon widget, inline, controls, Siri values and snippet, journal by voice, Handoff, translation, Open sky alarms |
+| Watch, Vision Pro, iPad | Done: Automatic palette, adaptation clock, Crown and Double Tap, Moon and Next dark complications; named stars and constellations, turn the night by hand, darker room, Moon volume, visionOS widget, forecast clouds behind a switch; new windows, drag and drop, inspector, the week across parks, field mode side by side |
+| Content and reach | Done: four new Learn essays with links into Nyx, the Bortle figure, the map of tonight, campgrounds (Where to stay), from home tonight, website, press kit and case study |
+| Not built, by decision | SharePlay on Vision Pro (needs the owner to relax the social and host rules); a native Mac target |
+
 ## How this audit was done
 
 Each lens was reviewed separately against the product brief, `DECISIONS.md`, the earlier audits (`AUDIT.md`, `Research/award-roadmap.md`, `Research/depth-and-realism-audit.md`) and the installed iOS 27, watchOS 27 and visionOS 27 SDKs. Nothing already built was re-recommended. The question each time was whether what exists reaches award depth, and what is still missing.
