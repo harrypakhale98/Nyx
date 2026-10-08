@@ -4,8 +4,10 @@ import SwiftUI
 /// owns one, so ⌘2 in one window never moves another; the menu bar reaches the focused window's
 /// through `focusedSceneValue`.
 @MainActor @Observable final class SceneCommands {
-    /// The tabs in order, for ⌘1–⌘5.
-    static let tabs:[LocalizedStringKey]=["Tonight","Parks","Calendar","Journal","Learn"]
+    /// The tabs in order, for ⌘1–⌘4.
+    static let tabs:[LocalizedStringKey]=["Tonight","Parks","Plan","Journal"]
+    /// A screenshot route's tab: `calendar` and `plan` are both Plan. Nil for routes that are not tabs.
+    nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"parks":1,"calendar":2,"plan":2,"journal":3][route] }
     var tab=0
     /// This window's scene, so a park or field mode opened from a link, a reminder or a menu is
     /// presented in the window that asked, never in whichever window happens to be key.
@@ -51,7 +53,7 @@ extension EnvironmentValues {
     var nyxTab: Int? { get { self[TabKey.self] } set { self[TabKey.self]=newValue } }
 }
 
-/// The menu bar and the ⌘-hold overlay on iPad: the five tabs, Find a Park, and the night keys.
+/// The menu bar and the ⌘-hold overlay on iPad: the four tabs, Find a Park, and the night keys.
 struct NyxCommands: Commands {
     @FocusedValue(SceneCommands.self) private var scene
     var body: some Commands {

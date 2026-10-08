@@ -11,6 +11,8 @@ nonisolated struct NightLookup: Sendable {
     let now: Date
     var table: SkyEvents = .shared
     var details: [String: ForecastDetail] = [:]
+    /// Cities and towns a question may start from (`places.json`).
+    var places: [StartingPlace] = StartingPlaces.all
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
     /// A park by name: an exact short name first, then the app's own search (aliases included).
@@ -59,9 +61,17 @@ nonisolated struct NightLookup: Sendable {
         let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: now), table: table)
         return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
     }
-    /// Parks within a straight-line radius of a starting park, best tonight first. Never a drive time.
+    /// Where "near" is measured from: a park by its exact name, then a US city or town from the
+    /// bundled Census list ("Denver", "Denver, CO"), then any park the app's search finds.
+    func origin(named name: String) -> (label: String, latitude: Double, longitude: Double)? {
+        let folded=Park.folded(name)
+        if let park=parks.first(where: { Park.folded($0.shortName)==folded || Park.folded($0.name)==folded }) { return (park.shortName, park.latitude, park.longitude) }
+        if let place=StartingPlaces.named(name, in: places) { return (place.label, place.latitude, place.longitude) }
+        return park(named: name).map { ($0.shortName, $0.latitude, $0.longitude) }
+    }
+    /// Parks within a straight-line radius of a starting park or place, best tonight first. Never a drive time.
     func parksNear(park name: String, radiusMiles: Int, limit: Int = 6) -> [String] {
-        guard let origin=park(named: name) else { return [String(localized: "No national park matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks.")] }
+        guard let origin=origin(named: name) else { return [String(localized: "No national park or US city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.")] }
         let radius=Double(min(1500, max(10, radiusMiles)))
         let near=parks.compactMap { park -> (Park, Double)? in
             let miles=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/1609.344
@@ -72,11 +82,11 @@ nonisolated struct NightLookup: Sendable {
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }
             return NightPlanner.better(x, y)
         }.prefix(limit)
-        guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.shortName), straight-line.")] }
+        guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.label), straight-line.")] }
         return ranked.map { park, miles in
             let night=tonight[park.id]
             let basis=night.map(Self.basis) ?? ""
-            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.shortName); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
+            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.label); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
 }
@@ -130,9 +140,9 @@ nonisolated struct WhatsUpTool: Tool {
 }
 nonisolated struct ParksNearTool: Tool {
     let name="parksNear"
-    let description="National parks within a straight-line radius of a starting park, with tonight's score. Distances are straight-line miles, never drive times."
+    let description="National parks within a straight-line radius of a starting park or US city, with tonight's score. Distances are straight-line miles, never drive times."
     @Generable struct Arguments {
-        @Guide(description: "The starting national park")
+        @Guide(description: "The starting national park, or a US city or town such as Denver")
         var park: String
         @Guide(description: "Straight-line radius in miles", .range(10...1500))
         var radiusMiles: Int
