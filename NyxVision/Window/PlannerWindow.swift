@@ -186,6 +186,7 @@ struct ParkRow: View {
     }
 }
 
+#if DEBUG
 #Preview("Park rows: forecast, early look, usual clouds, computing") {
     let parks = Array(VisionModel(now: .now).parks.prefix(2))
     let now = Date.now
@@ -211,3 +212,4 @@ struct ParkRow: View {
 #Preview("Planner, park data unavailable") {
     PlannerWindow().environment(VisionModel(now: .now, parks: []))
 }
+#endif
