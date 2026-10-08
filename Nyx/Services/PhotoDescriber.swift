@@ -9,13 +9,14 @@ import FoundationModels
 enum PhotoDescriber {
     static var available: Bool {
         guard !DebugScenario.isEnabled("no-ai") else { return false }
+        if DebugScenario.isEnabled("suggest-fixture") { return true }
         if #available(iOS 27.0, *) { return VisionDescriber.available }
         return false
     }
     /// One line, or nil if the model declined or failed.
     static func suggest(_ data: Data) async -> String? {
         #if DEBUG
-        if DebugScenario.isEnabled("suggest-fixture") { return String(localized: "A dark ridge under a sky full of stars, with a faint band of light above it.") }
+        if DebugScenario.isEnabled("suggest-fixture") { return "A dark ridge under a sky full of stars, with a faint band of light above it." }
         #endif
         guard #available(iOS 27.0, *), VisionDescriber.available else { return nil }
         guard let image=await Task.detached(priority: .userInitiated, operation: { PhotoScaling.image(data, maxPixels: 1024) }).value else { return nil }
