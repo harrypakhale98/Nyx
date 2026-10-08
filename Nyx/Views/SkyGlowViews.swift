@@ -52,7 +52,7 @@ struct LightPollution: View {
                 }
                 .padding(.top,4)
                 .accessibilityElement(children:.ignore)
-                .accessibilityLabel(String(localized:"Night lights from space: \(SkyGlow.levelLabel(level)), level \(level) of 5."))
+                .accessibilityLabel(String(localized:"Night lights from space: \(SkyGlow.levelLabel(level)), level \(level) of 5.")).accessibilityAddTraits(.isStaticText)
                 let lines=SkyGlow.domeLines(site.domes)
                 if !lines.isEmpty {
                     VStack(alignment:.leading,spacing:4) {
@@ -136,7 +136,7 @@ struct ViewingSpotRow: View {
                 let words=SpotGlow.comparison(site.glow,others:others,parkCentre:SkyGlow.shared.park(park.id)?.glow) ?? String(localized:"Sky glow here")
                 GlowLine(level:level,text:words,font:.footnote)
                     .accessibilityElement(children:.ignore)
-                    .accessibilityLabel(String(localized:"Sky glow here: \(words). Level \(level) of 5 on the national parks' scale."))
+                    .accessibilityLabel(String(localized:"Sky glow here: \(words). Level \(level) of 5 on the national parks' scale.")).accessibilityAddTraits(.isStaticText)
             }
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }

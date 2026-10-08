@@ -812,3 +812,8 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - **Plan "My free nights"** was already two columns on wide windows (inputs left, results right; checked in the capture).
 - XL widget's layout left to the platform lane, as briefed.
 - 2026-10-07 · Nyx 1.1 is on the App Store (ID 6818817800, worldwide). The website's two "Coming to the App Store" pills become "Download on the App Store" links to the US listing, every page carries the Smart App Banner tag, and the press fact sheet gives the release date and store link.
+
+### Accessibility audit fixes (integration)
+- The full UI run after the redesign failed the accessibility audit on several screens. Fixed and merged: Plan's past dates keep readable contrast in their own text frame, scores at medium weight; field mode's park name, the breakdown's band and Tonight's "as the crow flies" note wrap instead of clipping; the Tonight pill's toggle is a 44 pt circle and one-line summaries (What's up, sky glow) read as text, not small buttons; the share card's review route shows the rendered image, so the audit no longer needs to exempt it.
+- Owner decision: the remaining findings (Parks map text, a few contrast items on Tonight, field mode, journal entry and editor, the alarm explainer; journal and constellation text at the largest size) wait for the device pass, where VoiceOver on a phone shows more than the simulator audit; no exemptions were added to make the audit pass. Listed in `INPUT_NEEDED.md` step 9.
+- Build number 8 (version 1.1 unchanged).

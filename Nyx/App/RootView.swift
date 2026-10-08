@@ -212,7 +212,7 @@ struct RootView:View {
         case "field","field-compass": if let park=model.home { DebugField(park:park,model:model,compass:screen=="field-compass") }
         case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
         case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}
-        case "share": if let park=model.home { ShareCard(night:model.night(park)).environment(\.nyxReduceMotion,true) }
+        case "share": if let park=model.home { ShareCardReview(night:model.night(park)) }
         case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "accessibility": SoundAndTouchView()
         // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on).

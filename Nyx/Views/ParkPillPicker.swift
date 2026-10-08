@@ -37,8 +37,9 @@ struct ParkPillPicker: View {
                 if !others.isEmpty {
                     Button { open.toggle() } label:{
                         Image(systemName:"chevron.down").font(.subheadline.weight(.semibold))
-                            .rotationEffect(.degrees(open ? 180 : 0))
-                            .frame(width:44,height:44)
+                            .rotationEffect(.degrees(open ? 180 : 0)).accessibilityHidden(true)
+                            // The whole 44 pt circle is the target, for the finger and for accessibility, not the glyph.
+                            .frame(width:44,height:44).contentShape(Circle())
                             .modifier(PillGlass(solid:solid,shape:Circle(),id:"toggle",namespace:glass))
                     }
                     .buttonStyle(.plain)
