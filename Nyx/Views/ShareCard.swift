@@ -46,8 +46,8 @@ struct ShareCard:View {
     }
     /// What travels beside the image: the summary, then where it came from.
     var message:String { summary+" "+String(localized:"Planned with Nyx.")+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
-    /// The App Store page, once the app has one; nil until then, so no link is guessed.
-    static let storeURL:URL?=nil
+    /// The App Store page (`SupportLink.storePage`), nil if the app ID is ever unset, so no link is guessed.
+    static var storeURL:URL? { SupportLink.storePage }
     private var basis:String {
         switch night.basis {
         case .forecast: String(localized:"Forecast included · conditions may change")
