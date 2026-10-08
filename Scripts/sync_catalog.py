@@ -5,8 +5,9 @@ catalog=json.loads(path.read_text())
 strings=catalog['strings']
 build=sys.argv[1] if len(sys.argv)>1 else '/tmp/NyxBuild'
 extracted=set()
-# iPhone and watch simulator builds both: the watch app shares this catalog.
-for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*simulator/*/Objects-normal/arm64/*.stringsdata'):
+# iPhone and watch simulator builds both: the watch app shares this catalog. The visionOS app
+# (Debug-xrsimulator) keeps its own (sync_vision_catalog.py), so its strings never enter this one.
+for filename in [f for f in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-*simulator/*/Objects-normal/arm64/*.stringsdata') if '/Debug-xrsimulator/' not in f]:
  if 'Tests.build/' in filename: continue  # test literals are not app copy
  try: data=json.load(open(filename))
  except (ValueError,OSError): continue
