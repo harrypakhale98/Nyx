@@ -26,6 +26,8 @@ import WidgetKit
         guard let current=parkIDs else { return }
         guard !running else { again=true; return }
         running=true
+        // "Tonight" as of now, even in a background launch whose model last looked at the clock hours ago.
+        model.tick()
         defer {
             running=false
             if again { again=false; Task { await update(model) } }
@@ -38,10 +40,10 @@ import WidgetKit
         // so a quick visit still leaves both up to date.
         await model.refreshForecasts(watching:parks)
         if !again, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
-        let closures=self.closures(model,parks)
+        let closures=Self.closures(model)
         await model.refreshParkUpdates(parks)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
-        if !again, self.closures(model,parks) != closures { writeSnapshot(model,parks) }
+        if !again, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model) }
         Self.scheduleRefresh()
     }
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
@@ -49,6 +51,7 @@ import WidgetKit
     /// the same requests as in the app; nothing about the person is sent.
     func backgroundRefresh(_ model:PlanModel) async {
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
+        model.tick()
         await update(model)
         // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
         await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
@@ -61,25 +64,44 @@ import WidgetKit
         // Unavailable in the simulator and when Background App Refresh is off; the app then refreshes on open.
         try? BGTaskScheduler.shared.submit(request)
     }
-    private func closures(_ model:PlanModel,_ parks:[Park])->[String:String] {
-        Dictionary(parks.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    /// Every park's closure from the last park update, not only the saved parks': a widget or the
+    /// control can be set to any park, and following a night works for any park.
+    private static func closures(_ model:PlanModel)->[String:String] {
+        Dictionary(model.parks.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
-    @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park])->SavedSkySnapshot {
+    /// Writes the snapshot and, only when it says something new (or new Moon pictures were drawn),
+    /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
+    @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
         let ids=Set(parks.map(\.id))
-        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) },details:model.details.filter { ids.contains($0.key) },closures:closures(model,parks))
-        SharedSettings.write(snapshot)
-        WidgetCenter.shared.reloadAllTimelines()
+        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) },details:model.details.filter { ids.contains($0.key) },closures:Self.closures(model))
+        if SharedSettings.write(snapshot) || moonsDrawn {
+            WidgetCenter.shared.reloadAllTimelines()
+            ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
+            // The Smart Stack's dusk hints come from the same snapshot; a timeline reload alone may not refresh them.
+            WidgetCenter.shared.invalidateRelevance(ofKind:WidgetSelection.kind)
+        }
         return snapshot
     }
+    /// Publishes what is cached again, with no request: after a change that alters scores without
+    /// new data (switching "Smoke and haze" off).
+    func republish(_ model:PlanModel) async {
+        guard DebugScenario.screen == nil, let ids=parkIDs else { return }
+        await publish(model,ids.compactMap { model.park($0) })
+    }
+    /// Hands Apple Watch the saved parks (or, with the journal unavailable, the last snapshot's),
+    /// the starting park, clouds, smoke and summit layers, and closures. A no-op without a watch,
+    /// and when nothing changed since the last hand-over.
+    func pushWatch(_ model:PlanModel) {
+        guard let ids=parkIDs else { return }
+        WatchBridge.shared.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
+                                aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)))
+    }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
-        let snapshot=writeSnapshot(model,parks)
+        let moonsDrawn=renderWidgetMoons(model,parks)
+        let snapshot=writeSnapshot(model,parks,moonsDrawn:moonsDrawn)
         // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
         NyxShortcuts.updateAppShortcutParameters()
-        WatchBridge.shared.push(savedParkIDs:parks.map(\.id),homeParkID:model.homeID,forecasts:model.forecasts)
-        renderWidgetMoons(model,parks)
-        WidgetCenter.shared.reloadAllTimelines()
-        // The Smart Stack's dusk hints come from the same snapshot; a timeline reload alone may not refresh them.
-        WidgetCenter.shared.invalidateRelevance(ofKind:WidgetSelection.kind)
+        pushWatch(model)
         let defaults=UserDefaults.standard
         guard defaults.bool(forKey:"notificationsEnabled") else { return }
         let today=model.today, showers=defaults.object(forKey:"showerReminders") as? Bool ?? true
@@ -90,8 +112,10 @@ import WidgetKit
     /// The next week's Moons for each saved park, drawn once each for the widgets, so a widget left
     /// for days without Nyx being opened still shows the real Moon (`MoonImages.nearest`).
     static let moonNights=7
-    private func renderWidgetMoons(_ model:PlanModel,_ parks:[Park]) {
+    /// True when a picture was drawn that the widgets have not seen.
+    @discardableResult private func renderWidgetMoons(_ model:PlanModel,_ parks:[Park])->Bool {
         let engine=AstronomyEngine()
+        var drawn=false
         // Drawn in starlight: the widget turns its own pictures red in night vision, so a picture
         // drawn red would stay red once night vision is off.
         let neutral=NyxPalette(nightVision:false,highContrast:palette.highContrast)
@@ -104,7 +128,7 @@ import WidgetKit
                 if FileManager.default.fileExists(atPath:url.path) { continue }
                 let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,neutral))
                 renderer.scale=3
-                try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)
+                if (try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)) != nil { drawn=true }
             }
         }
         // Forget pictures of nights that have passed or parks no longer saved.
@@ -112,5 +136,6 @@ import WidgetKit
            let files=try? FileManager.default.contentsOfDirectory(atPath:folder.path) {
             for file in files where file.hasPrefix("moon-") && !keep.contains(file) { try? FileManager.default.removeItem(at:folder.appendingPathComponent(file)) }
         }
+        return drawn
     }
 }

@@ -48,15 +48,17 @@ nonisolated enum WatchSky {
         return context.flatMap { byID[$0.homeParkID] }.map { [$0] } ?? []
     }
     /// One night at one park, scored on the watch from the bundled park, the astronomy engine and,
-    /// when the iPhone sent one, the cached cloud forecast, by the iPhone's own rule
-    /// (`NightPlanner.night`): without a forecast, the park's usual clouds for the month.
-    static func night(_ park: Park, evening: Date, forecast: Forecast?, now: Date, sky cached: SkyConditions? = nil) -> Night {
-        NightPlanner.night(park: park, sky: cached ?? AstronomyEngine().conditions(for: park, on: evening), forecast: forecast, detail: nil, now: now)
+    /// when the iPhone sent them, the cached cloud forecast and the smoke and summit layers, by the
+    /// iPhone's own rule (`NightPlanner.night`): without a forecast, the park's usual clouds for the month.
+    static func night(_ park: Park, evening: Date, forecast: Forecast?, detail: ForecastDetail?, now: Date, sky cached: SkyConditions? = nil) -> Night {
+        NightPlanner.night(park: park, sky: cached ?? AstronomyEngine().conditions(for: park, on: evening), forecast: forecast, detail: detail, now: now)
     }
-    /// Write what the complications read: the candidate parks and their forecasts.
+    /// Write what the complications read: the candidate parks, their forecasts, smoke and layers.
     static func publish(parks: [Park], context: WatchContext?) {
         let ids = Set(parks.map(\.id))
-        SharedSettings.write(SavedSkySnapshot(parks: parks, forecasts: (context?.cloudForecasts ?? [:]).filter { ids.contains($0.key) }))
+        SharedSettings.write(SavedSkySnapshot(parks: parks, forecasts: (context?.cloudForecasts ?? [:]).filter { ids.contains($0.key) },
+                                              details: (context?.forecastDetails ?? [:]).filter { ids.contains($0.key) },
+                                              closures: (context?.closures ?? [:]).filter { ids.contains($0.key) }))
     }
     /// Red or not, for the park Tonight follows at that moment (Automatic reads its Sun).
     static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {

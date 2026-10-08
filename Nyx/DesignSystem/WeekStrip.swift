@@ -7,8 +7,8 @@ struct WeekStrip: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
     let nights: [Night]
-    /// The earliest of the highest-scoring nights.
-    private var best: Night? { nights.reduce(nil) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night } }
+    /// The best night, ties broken as everywhere (`NightPlanner.best`).
+    private var best: Night? { NightPlanner.best(nights) }
     var body: some View {
         if let best, let first=nights.first {
             HStack(spacing:10) {

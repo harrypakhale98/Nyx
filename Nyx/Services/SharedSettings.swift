@@ -4,9 +4,14 @@ nonisolated enum SharedSettings {
     static let group="group.com.harrypakhale.nyx"
     static var defaults:UserDefaults { UserDefaults(suiteName:group) ?? .standard }
     static var snapshotURL:URL? { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:group)?.appendingPathComponent("saved-sky.json") }
-    static func write(_ snapshot:SavedSkySnapshot) {
-        guard let url=snapshotURL,let data=try? JSONEncoder().encode(snapshot) else { return }
-        try? data.write(to:url,options:.atomic)
+    /// Writes the snapshot when it differs from the one on disk; true when it did. Keys are sorted,
+    /// so the same contents always encode to the same bytes and an unchanged snapshot costs no reload.
+    @discardableResult static func write(_ snapshot:SavedSkySnapshot)->Bool {
+        let encoder=JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        guard let url=snapshotURL,let data=try? encoder.encode(snapshot) else { return false }
+        if let current=try? Data(contentsOf:url), current == data { return false }
+        return (try? data.write(to:url,options:.atomic)) != nil
     }
     /// Pre-rendered Moon images for the widget, one per park and night: widgets can't run the
     /// Moon's Metal shader, so the app draws it and leaves the picture here.

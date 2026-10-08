@@ -14,6 +14,9 @@ nonisolated protocol DetailProviding: Sendable {
     func seed(_ cached: [String: ForecastDetail], parks: [Park]) async
     /// True when the last detail request was held back by Low Data Mode.
     func pausedForLowData() async -> Bool
+    /// "Smoke and haze" was switched off: drop every cached aerosol series, in memory and on disk,
+    /// so nothing (the app, Siri, the widgets) counts the air-quality host's data any more.
+    func forgetAir() async
 }
 /// The forecast's context, beside the score's own clouds: three models' clouds, cloud layers,
 /// cold, dew, wind and visibility (seven days), and the aerosol forecast that warns of smoke.
@@ -35,6 +38,8 @@ actor ForecastDetailService: DetailProviding {
     private var memory: [String: ForecastDetail] = [:]
     private var loaded=Set<String>()
     private var lowData=false
+    /// The files on disk hold no aerosol series (`forgetAir` swept them this launch).
+    private var airCleared=false
     /// A refresh already under way; later callers wait for it instead of asking again.
     private var running: Task<Void, Never>?
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
@@ -49,6 +54,22 @@ actor ForecastDetailService: DetailProviding {
         for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     func pausedForLowData() -> Bool { lowData }
+    func forgetAir() {
+        for (id, detail) in memory where detail.air != nil {
+            var kept=detail; kept.air=nil
+            memory[id]=kept
+            if persist { CacheDirectory.write(kept, name: "detail-\(id)") }
+        }
+        // Parks not read yet this launch: their files on disk, once until smoke is fetched again.
+        guard persist, !airCleared else { return }
+        airCleared=true
+        let all=(try? ParkData.load().map(\.id)) ?? []
+        for id in all where memory[id] == nil {
+            guard var cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)"), cached.air != nil else { continue }
+            cached.air=nil
+            CacheDirectory.write(cached, name: "detail-\(id)")
+        }
+    }
     private func load(_ id: String) {
         guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)") else { return }
         memory[id]=cached
@@ -92,7 +113,7 @@ actor ForecastDetailService: DetailProviding {
         for (kind, fetched) in results {
             for (id, series) in fetched ?? [] {
                 var detail=memory[id] ?? ForecastDetail()
-                switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series }
+                switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series; airCleared=false }
                 memory[id]=detail; changed.insert(id)
             }
         }

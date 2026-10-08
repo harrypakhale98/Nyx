@@ -55,6 +55,8 @@ struct StargazingFocusFilter: SetFocusFilterIntent {
         StargazingFocus.apply(nightVision:nightVision,offerField:offerField)
         WidgetCenter.shared.reloadAllTimelines()
         ControlCenter.shared.reloadAllControls()
+        // A followed night's Live Activity takes the new colours too, even with Nyx in the background.
+        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
         return .result()
     }
 }

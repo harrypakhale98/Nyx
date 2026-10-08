@@ -133,15 +133,18 @@ struct RootView:View {
             while !Task.isCancelled { try? await Task.sleep(for:.seconds(300)); model.tick() }
         }
         .onChange(of:palette.nightVision) { _,_ in model.savedSync.palette=palette }
-        .onChange(of:nightVision) { _,_ in
-            // Keep the Control Center toggle and widgets in step with the in-app switch.
+        .onChange(of:nightVision) { _,on in
+            // Keep the Control Center toggle and widgets in step with the switch, wherever it was flipped
+            // (in Nyx, Control Center, a Focus or field mode).
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
             // The watch hears the parks the widget has, never the empty list of a store that could not open.
-            if let ids=model.journalUnavailable ? model.savedSync.parkIDs : saved.map(\.parkID) {
-                WatchBridge.shared.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts)
-            }
+            model.savedSync.pushWatch(model)
+            // A followed night on the Lock Screen changes colour with the app.
+            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
         }
+        // The watch falls back to the starting park when nothing is saved: tell it when that changes.
+        .onChange(of:model.homeID) { _,_ in model.savedSync.pushWatch(model) }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
         .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
@@ -269,10 +272,11 @@ struct RootView:View {
         guard let park=model.park(route.parkID) else { return }
         open(route.parkID,night:route.day.map { ($0.evening(in:park),route.whatsUp) })
     }
-    /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`).
+    /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`),
+    /// or the Tonight tab when the Tonight control was tapped before any park was saved.
     private func openRequestedPark() {
-        guard DebugScenario.screen == nil else { return }
-        open(ParkOpenRequest.take())
+        guard DebugScenario.screen == nil, let request=ParkOpenRequest.take() else { return }
+        if let id=request.parkID { open(id) } else { commands.tab=0 }
     }
     private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)

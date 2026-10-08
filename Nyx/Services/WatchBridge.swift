@@ -13,11 +13,14 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     private var lastSent: Data?
     private override init() { super.init() }
 
-    /// Called wherever the widget snapshot is written. Cheap when there is no watch.
-    func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast]) {
+    /// Called wherever the widget snapshot is written, and when night vision or the starting park
+    /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch.
+    func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast], details: [String: ForecastDetail],
+              closures: [String: String], aboveInversion: Set<String>) {
         guard WCSession.isSupported() else { return }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
-        let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts)
+        let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts,
+                                        details: details, closures: closures, aboveInversion: aboveInversion)
         let session = WCSession.default
         lock.withLock { latest = context }
         if session.activationState == .activated { send(session) }
@@ -27,8 +30,10 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         guard session.isPaired, session.isWatchAppInstalled else { return }
         let context: WatchContext? = lock.withLock { latest }
         guard let context, let data = context.data else { return }
-        // The same parks, forecasts and switch as last time: nothing to say.
-        let comparable = try? JSONEncoder().encode(WatchContext(sent: .distantPast, savedParkIDs: context.savedParkIDs, homeParkID: context.homeParkID, nightVision: context.nightVision, forecasts: context.forecasts))
+        // The same parks, forecasts, smoke, closures and switch as last time: nothing to say.
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let comparable = try? encoder.encode(context.sent(at: .distantPast))
         guard comparable == nil || lock.withLock({ comparable != lastSent }) else { return }
         // Remembered only once delivered to WatchConnectivity, so a failed update is retried next time.
         do { try session.updateApplicationContext([WatchContext.key: data]) } catch { return }

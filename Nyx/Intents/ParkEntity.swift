@@ -65,20 +65,24 @@ struct OpenParkIntent:OpenIntent {
     }
 }
 /// A park to open, handed from an intent to the app's root view. Stored as well as posted, because
-/// a cold launch may run the intent before any view is listening.
+/// a cold launch may run the intent before any view is listening; stored in the App Group's
+/// defaults, as `FieldModeRequest` is, so it reaches the app from whichever process ran the intent.
 nonisolated enum ParkOpenRequest {
     static let key="parkOpenRequest"
     static let notification=Notification.Name("NyxParkOpenRequest")
-    static func post(parkID:String,now:Date = .now,defaults:UserDefaults = .standard) {
-        defaults.set(["park":parkID,"at":now.timeIntervalSince1970],forKey:key)
+    /// `parkID` nil asks for the Tonight tab.
+    static func post(parkID:String?,now:Date = .now,defaults:UserDefaults = SharedSettings.defaults) {
+        defaults.set(["park":parkID ?? "","at":now.timeIntervalSince1970],forKey:key)
         NotificationCenter.default.post(name:notification,object:nil)
     }
-    /// The pending park, once, if it was asked for within the last minute.
-    static func take(now:Date = .now,defaults:UserDefaults = .standard)->String? {
+    /// The pending request, once, if it was made within the last minute. `parkID` is nil for Tonight.
+    struct Pending:Equatable { let parkID:String? }
+    static func take(now:Date = .now,defaults:UserDefaults = SharedSettings.defaults)->Pending? {
         guard let request=defaults.dictionary(forKey:key) else { return nil }
         defaults.removeObject(forKey:key)
-        guard let at=request["at"] as? Double,abs(now.timeIntervalSince1970-at)<60,let park=request["park"] as? String,!park.isEmpty else { return nil }
-        return park
+        guard let at=request["at"] as? Double,abs(now.timeIntervalSince1970-at)<60 else { return nil }
+        let park=request["park"] as? String
+        return Pending(parkID:park?.isEmpty == false ? park : nil)
     }
 }
 
@@ -118,7 +122,7 @@ struct OpenTonightParkIntent:AppIntent {
     init() {}
     init(parkID:String?) { self.parkID=parkID }
     func perform() async throws -> some IntentResult {
-        if let parkID, !parkID.isEmpty { ParkOpenRequest.post(parkID:parkID) }
+        ParkOpenRequest.post(parkID:parkID?.isEmpty == false ? parkID : nil)
         return .result()
     }
 }

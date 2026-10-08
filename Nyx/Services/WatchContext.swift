@@ -1,13 +1,16 @@
 import Foundation
 
 /// What the iPhone tells Apple Watch, and nothing more: the saved parks, the starting park, the
-/// night-vision switch and the last cloud forecasts. The watch never touches the network; it
-/// computes the Sun, the Moon and the score itself from these and the bundled parks.
+/// night-vision switch, the last cloud forecasts, the smoke and summit cloud-layer forecasts the
+/// score uses, and the parks' closures. The watch never touches the network; it computes the Sun,
+/// the Moon and the score itself from these and the bundled parks.
 /// Sent as one property-list value (JSON data) through WatchConnectivity, device to device.
 nonisolated struct WatchContext: Codable, Sendable, Equatable {
     static let key = "nyx.watch.context"
     /// Bumped when the shape changes. Watch apps update on their own schedule, so a watch reads any
     /// context from `minimumVersion` on: fields added later are optional and unknown ones ignored.
+    /// (Details and closures were added that way: a 1.2 watch reads a context without them, and an
+    /// older watch ignores them.)
     static let currentVersion = 1
     static let minimumVersion = 1
     /// WatchConnectivity rejects large contexts; forecasts that would pass this are left out
@@ -19,27 +22,52 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let homeParkID: String
     let nightVision: Bool
     let forecasts: [String: CompactForecast]
+    /// The parts of the forecast detail that change a score: the aerosol forecast (smoke caps) and,
+    /// for a summit above the inversion, mid and high cloud. Empty when none was sent.
+    let details: [String: CompactDetail]
+    /// Each park's closure as Nyx words it beside the score, from the last park update.
+    let closures: [String: String]
 
-    init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast]) {
+    init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast],
+         details: [String: CompactDetail] = [:], closures: [String: String] = [:]) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
-        self.nightVision = nightVision; self.forecasts = forecasts
+        self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures
     }
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
-    /// through a week ahead) and to the byte budget, saved parks first in their order.
-    static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: Forecast], now: Date = .now) -> WatchContext {
-        var compact: [String: CompactForecast] = [:]
+    /// through a week ahead) and to the byte budget, saved parks first in their order. Each park's
+    /// clouds go first, then its smoke and summit layers; closures, which are short, come last
+    /// (the followed parks' first).
+    static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: Forecast],
+                     details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
+                     now: Date = .now) -> WatchContext {
+        var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
+        let from = now.addingTimeInterval(-24*3600), to = now.addingTimeInterval(9*86400)
         // Park IDs and the envelope are small; each forecast is measured on its own.
         var used = 2_000 + ids.reduce(0) { $0 + $1.utf8.count + 4 }
-        for id in ids {
-            guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: now.addingTimeInterval(-24*3600), to: now.addingTimeInterval(9*86400)),
-                  let size = (try? JSONEncoder().encode(trimmed))?.count else { continue }
-            guard used + size + id.utf8.count + 4 <= byteBudget else { break }
+        func fits(_ value: some Encodable, _ id: String) -> Bool {
+            guard let size = (try? JSONEncoder().encode(value))?.count, used + size + id.utf8.count + 4 <= byteBudget else { return false }
             used += size + id.utf8.count + 4
-            compact[id] = trimmed
+            return true
         }
-        return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: compact)
+        for id in ids {
+            guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
+            guard fits(trimmed, id) else { break }
+            compact[id] = trimmed
+            // Its smoke and summit layers right behind its clouds, so the wrist scores it as the
+            // iPhone does; they are left out only once the budget is spent.
+            if let detail = details[id], let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: to), fits(small, id) {
+                compactDetails[id] = small
+            }
+        }
+        let followed = Set(ids)
+        for (id, closure) in closures.sorted(by: { (followed.contains($0.key) ? 0 : 1, $0.key) < (followed.contains($1.key) ? 0 : 1, $1.key) }) {
+            guard fits(closure, id) else { break }
+            sentClosures[id] = closure
+        }
+        return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: compact,
+                            details: compactDetails, closures: sentClosures)
     }
     var data: Data? { try? JSONEncoder().encode(self) }
     var dictionary: [String: Any] { data.map { [Self.key: $0] } ?? [:] }
@@ -51,8 +79,14 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version >= Self.minimumVersion else { return nil }
         self = decoded
     }
+    /// The same context stamped at another moment, for comparing what it says rather than when.
+    func sent(at date: Date) -> WatchContext {
+        WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details, closures: closures)
+    }
     /// The forecasts in the shape the score engine and the widgets already read.
     var cloudForecasts: [String: Forecast] { forecasts.compactMapValues(\.forecast) }
+    /// The smoke and summit layers in the shape `NightPlanner.night` reads.
+    var forecastDetails: [String: ForecastDetail] { details.compactMapValues(\.detail) }
 }
 
 nonisolated extension WatchContext {
@@ -66,6 +100,8 @@ nonisolated extension WatchContext {
         savedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .savedParkIDs)) ?? []
         nightVision = (try? container.decodeIfPresent(Bool.self, forKey: .nightVision)) ?? false
         forecasts = ((try? container.decodeIfPresent([String: Lenient<CompactForecast>].self, forKey: .forecasts)) ?? [:]).compactMapValues(\.value)
+        details = ((try? container.decodeIfPresent([String: Lenient<CompactDetail>].self, forKey: .details)) ?? [:]).compactMapValues(\.value)
+        closures = (try? container.decodeIfPresent([String: String].self, forKey: .closures)) ?? [:]
     }
 }
 
@@ -77,18 +113,66 @@ nonisolated struct CompactForecast: Codable, Sendable, Equatable {
     let start: Double
     let clouds: [Double?]
     init?(_ forecast: Forecast, from: Date, to: Date) {
-        let times = forecast.times
-        guard !times.isEmpty, times.count == forecast.clouds.count, times.allSatisfy(\.isFinite),
-              zip(times, times.dropFirst()).allSatisfy({ abs($1-$0-3600) < 0.1 }) else { return nil }
-        let keep = times.indices.filter { times[$0]+3600 > from.timeIntervalSince1970 && times[$0] < to.timeIntervalSince1970 }
-        guard let first = keep.first, let last = keep.last else { return nil }
+        guard let kept = CompactSeries.trim(times: forecast.times, from: from, to: to), forecast.times.count == forecast.clouds.count else { return nil }
         updated = forecast.updated
-        start = times[first]
-        clouds = Array(forecast.clouds[first...last])
+        start = forecast.times[kept.lowerBound]
+        clouds = Array(forecast.clouds[kept])
     }
     var forecast: Forecast? {
         guard !clouds.isEmpty, start.isFinite else { return nil }
         return Forecast(updated: updated, times: clouds.indices.map { start + Double($0)*3600 }, clouds: clouds)
+    }
+}
+
+/// One `HourlySeries` compacted the same way (start hour and values), keeping only the named
+/// variables.
+nonisolated struct CompactSeries: Codable, Sendable, Equatable {
+    let updated: Date
+    let start: Double
+    let values: [String: [Double?]]
+    init?(_ series: HourlySeries, keys: [String], from: Date, to: Date) {
+        guard let kept = Self.trim(times: series.times, from: from, to: to) else { return nil }
+        var values: [String: [Double?]] = [:]
+        for key in keys {
+            guard let all = series.values[key], all.count == series.times.count else { return nil }
+            values[key] = Array(all[kept])
+        }
+        updated = series.updated
+        start = series.times[kept.lowerBound]
+        self.values = values
+    }
+    var series: HourlySeries? {
+        guard let count = values.values.first?.count, count > 0, start.isFinite, values.values.allSatisfy({ $0.count == count }) else { return nil }
+        return HourlySeries(updated: updated, times: (0..<count).map { start + Double($0)*3600 }, values: values)
+    }
+    /// The indices of a clean hourly series that touch `from`…`to`; nil for a series with gaps.
+    static func trim(times: [Double], from: Date, to: Date) -> ClosedRange<Int>? {
+        guard !times.isEmpty, times.allSatisfy(\.isFinite), zip(times, times.dropFirst()).allSatisfy({ abs($1-$0-3600) < 0.1 }) else { return nil }
+        let keep = times.indices.filter { times[$0]+3600 > from.timeIntervalSince1970 && times[$0] < to.timeIntervalSince1970 }
+        guard let first = keep.first, let last = keep.last else { return nil }
+        return first...last
+    }
+}
+
+/// What of a park's forecast detail the score uses, for the watch: the aerosol forecast and, at a
+/// summit above the inversion, mid and high cloud. Model spread, cold, dew and wind stay on the iPhone.
+nonisolated struct CompactDetail: Codable, Sendable, Equatable {
+    var air: CompactSeries?
+    var layers: CompactSeries?
+    init?(_ detail: ForecastDetail, upper: Bool, from: Date, to: Date) {
+        air = detail.air.flatMap { CompactSeries($0, keys: ["aerosol_optical_depth"], from: from, to: to) }
+        layers = upper ? detail.layers.flatMap { CompactSeries($0, keys: ["cloud_cover_mid", "cloud_cover_high"], from: from, to: to) } : nil
+        if air == nil && layers == nil { return nil }
+    }
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        air = try? container.decodeIfPresent(CompactSeries.self, forKey: .air)
+        layers = try? container.decodeIfPresent(CompactSeries.self, forKey: .layers)
+    }
+    var detail: ForecastDetail? {
+        let air = air?.series, layers = layers?.series
+        guard air != nil || layers != nil else { return nil }
+        return ForecastDetail(layers: layers, air: air)
     }
 }
 

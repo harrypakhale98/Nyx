@@ -55,9 +55,10 @@ import WidgetKit
         AdaptationReminders.cancel()
     }
     var savedParks: [Park] { (context?.savedParkIDs ?? []).compactMap(park) }
-    /// The park on Tonight: the one kept on the watch, else the darkest saved park tonight, else the iPhone's starting park.
+    /// The park on Tonight: the one kept on the watch, else the darkest saved park tonight (ties
+    /// broken as everywhere, `NightPlanner.best`), else the iPhone's starting park.
     func featured(at now: Date) -> Park? {
-        WatchSky.candidates(in: parks, context: context, pinned: pinned).max { tonight($0, at: now).score.value < tonight($1, at: now).score.value }
+        NightPlanner.best(WatchSky.candidates(in: parks, context: context, pinned: pinned).map { tonight($0, at: now) })?.park
     }
     func pin(_ park: Park?) {
         pinned = park?.id
@@ -71,7 +72,7 @@ import WidgetKit
         let sky = skies[key] ?? AstronomyEngine().conditions(for: park, on: evening)
         if skies.count > 120 { skies.removeAll() }
         skies[key] = sky
-        return WatchSky.night(park, evening: evening, forecast: context?.cloudForecasts[park.id], now: now, sky: sky)
+        return WatchSky.night(park, evening: evening, forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now, sky: sky)
     }
     func week(_ park: Park, at now: Date) -> [Night] { (0..<7).map { night(park, offset: $0, at: now) } }
     /// Hand the complications what Tonight shows, then ask them and the Smart Stack to look again.

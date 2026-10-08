@@ -99,12 +99,12 @@ private struct GaugeArc: View, Animatable {
 
 #Preview("Pristine • red") {
     if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
-        WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, now: .now))
+        WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now))
             .environment(\.nyx, NyxPalette(nightVision: true, highContrast: false)).modifier(NightVisionFilter(enabled: true))
     }
 }
 #Preview("Starlight • AX") {
     if let park = try? ParkData.load().first(where: { $0.id == "dena" }) {
-        WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, now: .now)).dynamicTypeSize(.accessibility3)
+        WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now)).dynamicTypeSize(.accessibility3)
     }
 }
