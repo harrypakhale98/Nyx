@@ -811,3 +811,4 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - **Pointer.** `pointerStyle(.link)` is not available on iOS or iPadOS (SwiftUI `PointerStyle`: `@available(iOS, unavailable)`, iOS 27 SDK), so it is not used. Custom tappable cells keep `hoverEffect(.highlight)` with a rounded hover shape: calendar nights (existing), the new week cells, map rows (existing); the map highlights the park under the pointer (existing).
 - **Plan "My free nights"** was already two columns on wide windows (inputs left, results right; checked in the capture).
 - XL widget's layout left to the platform lane, as briefed.
+- 2026-10-07 · Nyx 1.1 is on the App Store (ID 6818817800, worldwide). The website's two "Coming to the App Store" pills become "Download on the App Store" links to the US listing, every page carries the Smart App Banner tag, and the press fact sheet gives the release date and store link.
