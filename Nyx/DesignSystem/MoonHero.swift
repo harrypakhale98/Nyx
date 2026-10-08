@@ -12,14 +12,17 @@ struct MoonHero: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let night: Night
-    /// Moves the selected night by a number of nights; nil where the Moon only shows one night.
-    var step: ((Int)->Void)?=nil
+    /// Moves the selected night by a number of nights and says whether it moved (false at the
+    /// river's ends); nil where the Moon only shows one night.
+    var step: ((Int)->Bool)?=nil
     /// The drawn angles, kept unwrapped so a new night turns the short way round.
     @State private var phase: Double?
     @State private var limb: Double?
     @State private var north: Double?
     @State private var dragged=0
     @State private var detents=0
+    /// Whether the current drag is a sideways scrub, decided once per drag; reset by the system even when a drag is cancelled.
+    @GestureState private var scrubbing: Bool?=nil
     private var target: (geometry:MoonGeometry,moment:Date) { AstronomyEngine().moon(for:night) }
     var body: some View {
         let target=target
@@ -30,7 +33,8 @@ struct MoonHero: View {
                 .frame(maxWidth:280).aspectRatio(1,contentMode:.fit)
                 .padding(.horizontal,8)
                 .contentShape(Circle())
-                .gesture(scrub)
+                // Simultaneous, and only for drags that start sideways, so the page still scrolls through the Moon.
+                .simultaneousGesture(scrub)
                 .accessibilityHidden(true)
             VStack(spacing:6) {
                 Text(night.sky.moon.name).font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).contentTransition(.opacity)
@@ -44,17 +48,21 @@ struct MoonHero: View {
         }
         .frame(maxWidth:.infinity)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(Self.spoken(night:night,geometry:target.geometry))
+        // A fixed name and the night as its value, so adjusting it says which night it now shows.
+        .accessibilityLabel("Moon")
+        .accessibilityValue(night.park.dayLabel(night.id)+". "+Self.spoken(night:night,geometry:target.geometry))
         .accessibilityAdjustableAction { direction in
             guard let step else { return }
             switch direction {
-            case .increment: step(1)
-            case .decrement: step(-1)
+            case .increment: _=step(1)
+            case .decrement: _=step(-1)
             @unknown default: break
             }
         }
         .accessibilityHint(step == nil ? "" : String(localized:"Swipe up or down to move one night at a time."))
         .sensoryFeedback(.selection,trigger:detents)
+        // The page holds still during a sideways scrub, as it does for the river's.
+        .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
         .onChange(of:target.geometry,initial:true) { _,geometry in follow(geometry) }
     }
     @ViewBuilder private var times: some View {
@@ -66,11 +74,18 @@ struct MoonHero: View {
         }
     }
     /// Drag sideways across the Moon: one night per 36 pt, later to the right as on the river.
+    /// The axis is chosen once per drag, as on the river; the detent is felt only when the night
+    /// actually moves, never at the ends of the thirty nights.
     private var scrub: some Gesture {
-        DragGesture(minimumDistance:8).onChanged { drag in
-            guard let step, abs(drag.translation.width)>abs(drag.translation.height) else { return }
+        DragGesture(minimumDistance:8).updating($scrubbing) { drag,state,_ in
+            if state==nil { state=abs(drag.translation.width)>abs(drag.translation.height) }
+        }.onChanged { drag in
+            guard let step, scrubbing ?? (abs(drag.translation.width)>abs(drag.translation.height)) else { return }
             let nights=Int((drag.translation.width/36).rounded(.towardZero))
-            if nights != dragged { step(nights-dragged); dragged=nights; detents+=1 }
+            if nights != dragged {
+                if step(nights-dragged) { detents+=1 }
+                dragged=nights
+            }
         }.onEnded { _ in dragged=0 }
     }
     private func follow(_ geometry:MoonGeometry) {

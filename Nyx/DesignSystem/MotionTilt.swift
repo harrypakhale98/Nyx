@@ -1,5 +1,6 @@
 import CoreMotion
 import Foundation
+import SwiftUI
 
 /// How the phone is tilted, for highlights that catch the light as you move it.
 /// Gravity only: no activity, no location, no permission prompt; nothing leaves the phone.
@@ -8,6 +9,7 @@ import Foundation
 @MainActor final class MotionTilt {
     static let shared=MotionTilt()
     private let manager=CMMotionManager()
+    /// Views on screen that want tilt now (`motionTilt(_:)`); a view under Reduce Motion never counts.
     private var clients=0
     /// Sideways tilt, about -1 (left edge down) … 1 (right edge down). Smoothed.
     private(set) var x=0.0
@@ -16,21 +18,19 @@ import Foundation
 
     /// Field mode's compass needs Core Motion's attitude to itself; the tilt pauses meanwhile.
     private var suspended=false
-    private var wanted=false
     func suspend(_ on:Bool) {
         suspended=on
-        if on { manager.stopDeviceMotionUpdates(); x=0; y=0 } else if wanted && clients>0 { begin() }
+        if on { manager.stopDeviceMotionUpdates(); x=0; y=0 } else if clients>0 { begin() }
     }
-    func start(reduceMotion:Bool) {
+    /// One more view wants tilt. Called by `motionTilt(_:)`, which balances it with `stop()`.
+    func start() {
         clients+=1
-        guard clients==1 else { return }
-        wanted = !reduceMotion
-        if wanted { begin() }
+        if clients==1 { begin() }
     }
     /// Low Power Mode switched on or off while a view wants tilt.
     func powerChanged() {
         if PowerState.shared.lowPower { manager.stopDeviceMotionUpdates(); x=0; y=0 }
-        else if wanted && clients>0 { begin() }
+        else if clients>0 { begin() }
     }
     private func begin() {
         guard !suspended,!manager.isDeviceMotionActive,!PowerState.shared.lowPower,manager.isDeviceMotionAvailable else { return }
@@ -45,11 +45,34 @@ import Foundation
         }
     }
     func stop() {
-        clients=max(0,clients-1)
+        guard clients>0 else { return }
+        clients-=1
         guard clients==0 else { return }
-        wanted=false
         manager.stopDeviceMotionUpdates()
         x=0; y=0
+    }
+}
+extension View {
+    /// Holds a claim on the tilt while this view is on screen and `wanted` is true, and lets it go
+    /// when the view leaves or stops wanting it (Reduce Motion turned on, scrolled away), so every
+    /// view counts on its own and a change of setting takes effect without leaving the screen.
+    func motionTilt(_ wanted:Bool)->some View { modifier(MotionTiltClient(wanted:wanted)) }
+}
+private struct MotionTiltClient: ViewModifier {
+    let wanted: Bool
+    @State private var onScreen=false
+    @State private var claimed=false
+    func body(content:Content)->some View {
+        content
+            .onAppear { onScreen=true; sync(onScreen:true,wanted:wanted) }
+            .onDisappear { onScreen=false; sync(onScreen:false,wanted:wanted) }
+            .onChange(of:wanted) { _,now in sync(onScreen:onScreen,wanted:now) }
+    }
+    private func sync(onScreen:Bool,wanted:Bool) {
+        let want=onScreen && wanted
+        guard want != claimed else { return }
+        claimed=want
+        if want { MotionTilt.shared.start() } else { MotionTilt.shared.stop() }
     }
 }
 

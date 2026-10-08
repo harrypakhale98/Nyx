@@ -234,7 +234,8 @@ struct CalendarView: View {
             Text(park.monthLabel(data.date)).font(.system(.title2,design:.serif)).multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityHint("An audio graph of this month's nights is available.")
-                .nightChart { [nights=data.nights,events=monthEvents(data.nights,park:park),title=String(localized:"Darkness score by night, \(park.monthLabel(data.date))")] in NightChart.nights(nights,title:title,events:events) }
+                // From tonight on, as the grid scores them: a night already past is never named the best.
+                .nightChart { [nights=data.nights.filter { $0.id>=data.tonight },events=monthEvents(data.nights,park:park),title=String(localized:"Darkness score by night, \(park.monthLabel(data.date))")] in NightChart.nights(nights,title:title,events:events) }
             Spacer(minLength:0)
             Button { move(1) } label:{ Image(systemName:"chevron.forward").frame(width:44,height:44) }.accessibilityLabel("Next month").accessibilityInputLabels([Text("Next month"),Text("Next")])
                 .hoverEffect(.highlight)

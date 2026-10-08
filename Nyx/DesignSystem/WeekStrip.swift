@@ -34,11 +34,13 @@ struct WeekStrip: View {
     private func weekday(_ night:Night)->String {
         night.id.formatted(Date.FormatStyle(timeZone:night.park.timeZone).weekday(.abbreviated))
     }
-    /// For a row's VoiceOver label.
+    /// For a row's VoiceOver label, with the best night's forecast caveat ("Early look", "No cloud
+    /// forecast yet") when it has one, as the dots show it.
     static func summary(_ nights:[Night])->String? {
         guard let first=nights.first, let best=WeekStrip(nights:nights).best else { return nil }
-        if best.id==first.id { return String(localized:"Tonight is the best night this week.") }
-        return String(localized:"Best night this week: \(best.park.dayLabel(best.id)), \(best.score.value).")
+        let line=best.id==first.id ? String(localized:"Tonight is the best night this week.")
+            : String(localized:"Best night this week: \(best.park.dayLabel(best.id)), \(best.score.value).")
+        return best.basisLabel.map { line+" "+$0+"." } ?? line
     }
 }
 #Preview("Week strip") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).preferredColorScheme(.dark) } }

@@ -385,10 +385,12 @@ struct ParkDetailView: View {
         let now=ParkChapter.current(tops:tracker.tops,line:showsIndex ? 140 : 100)
         if now != chapter { chapter=now }
     }
-    private func step(_ delta:Int) {
+    /// Moves the chosen night within the river's thirty; false when that would leave them.
+    @discardableResult private func step(_ delta:Int)->Bool {
         let next=park.date(night.id,addingDays:delta)
-        guard next>=riverStart, next<park.date(riverStart,addingDays:30) else { return }
+        guard next>=riverStart, next<park.date(riverStart,addingDays:30) else { return false }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=next }
+        return true
     }
     private func index(_ proxy:ScrollViewProxy)->some View {
         Picker("Chapter",selection:Binding(get:{ chapter },set:{ target in
@@ -433,13 +435,17 @@ struct ParkDetailView: View {
             }
             AccessNoteLabel(park:park,alignment:.center).frame(maxWidth:420).padding(.horizontal,12)
             // The dial opens at the bottom; let the lines below tuck into that space.
-            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast)
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(unavailable:!model.beyondForecast(night)))
                 .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
                 .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
                 .modifier(DepthParallax(depth:0.1))
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
-            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
+            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) {
+                // The gauge speaks the first sentence; VoiceOver hears only the month's usual clouds here.
+                Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                    .accessibilityLabel(night.typicalClouds ?? caption).accessibilityHidden(night.typicalClouds == nil)
+            }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
             if let window=model.clearWindow(night) {
                 // At accessibility sizes the glyph would take a column of its own: the words alone.

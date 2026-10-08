@@ -107,7 +107,7 @@ nonisolated struct NotificationScheduler {
     }
     private func scorePlans(nights:[Night],now:Date,delivered:Set<String>,details:[String:ForecastDetail])->[NightReminder] {
         let candidates:[(night:Night,fire:Date)]=nights.compactMap { night in
-            guard night.score.value>=90, night.score.hasForecast, night.sky.darkHours>0, let updated=night.forecastUpdated,
+            guard Self.worthAReminder(night), let updated=night.forecastUpdated,
                   night.id.timeIntervalSince(now)<=Self.horizon else { return nil }
             let park=night.park
             let previous=park.date(night.id,addingDays:-1)
@@ -148,6 +148,9 @@ nonisolated struct NotificationScheduler {
     /// True when all three models agree on a clear night (at most 15% cloud in the cloudiest).
     static func modelsClear(_ models:ModelAgreement?)->Bool { models.map { $0.band == .agree && $0.high<=15 } ?? false }
     /// "Pristine night at Joshua Tree, Friday": the news first, in the title.
+    /// A night a score reminder can announce: Pristine, with a full cloud forecast and some true
+    /// darkness. Tonight's double tap uses the same rule.
+    static func worthAReminder(_ night:Night)->Bool { night.score.value>=90 && night.score.hasForecast && night.sky.darkHours>0 }
     static func title(_ night:Night)->String {
         var weekday=Date.FormatStyle.dateTime.weekday(.wide)
         weekday.timeZone=night.park.timeZone

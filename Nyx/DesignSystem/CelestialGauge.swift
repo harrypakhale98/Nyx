@@ -21,6 +21,13 @@ struct CelestialGauge: View {
     @ScaledMetric(relativeTo:.title3) private var bandMetric=20.0
     let score: Int
     var hasForecast: Bool=true
+    /// What the night's clouds rest on, spoken after the band as the caption under the dial says it
+    /// (`Night.basisCaption`): a full forecast, an early look, the usual clouds, or the Moon and
+    /// darkness only. Nil keeps the general note.
+    var spokenBasis: String?=nil
+    /// A still drawing for exported images (share cards): the score at once, no ambient motion,
+    /// and no claim on the tilt sensor.
+    var export=false
     /// Where the arc has reached, 0…100.
     @State private var arc=0.0
     /// The numeral shown.
@@ -30,6 +37,8 @@ struct CelestialGauge: View {
     @State private var revealed=false
     /// Where an iPad's pointer rests over the dial: the glint on the glass follows it, like light on a real instrument.
     @State private var pointer: CGPoint?
+    /// Whether any of the dial shows in its scroll view; the ambient stars rest while it is scrolled away.
+    @State private var onScreen=true
     /// The dial's side, measured.
     @State private var side: CGFloat=300
     /// The width offered at accessibility sizes, where the dial grows with the text up to it.
@@ -67,13 +76,14 @@ struct CelestialGauge: View {
             }
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count."))")
+        .accessibilityLabel("Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(spokenBasis ?? (hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count.")))")
         .accessibilityInputLabels([Text("Score"),Text("Darkness score")])
         .task(id:score) { await reveal() }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone)
         .sensoryFeedback(.impact(weight:.light),trigger:landed)
-        .onAppear { MotionTilt.shared.start(reduceMotion:reduceMotion || access.reducedResources) }
-        .onDisappear { MotionTilt.shared.stop() }
+        .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
+        // Tilt only while the glint can be drawn and the dial is in view.
+        .motionTilt(onScreen && !export && !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources)
     }
     // MARK: The count-up
 
@@ -88,7 +98,7 @@ struct CelestialGauge: View {
     /// How long the count-up runs for a score: until the numeral rounds to it.
     nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2.2*Double(score))+numeralLag }
     private func reveal() async {
-        if reduceMotion { arc=Double(score); shown=score; revealed=true; return }
+        if reduceMotion || export { arc=Double(score); shown=score; revealed=true; return }
         if revealed { withAnimation(NyxMotion.spring) { arc=Double(score); shown=score }; return }
         revealed=true
         arc=0; shown=0
@@ -110,7 +120,7 @@ struct CelestialGauge: View {
     // MARK: Parts
 
     private func numeral(size:CGFloat)->some View {
-        Text(reduceMotion ? score : shown,format:.number)
+        Text(reduceMotion || export ? score : shown,format:.number)
             .font(.system(size:max(24,size),weight:.light,design:.serif)).tracking(-size*0.046)
             .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(shown)))
             .lineLimit(1).fixedSize()
@@ -135,23 +145,24 @@ struct CelestialGauge: View {
         }
     }
     private var drawing:some View {
-        let displayed=reduceMotion ? Double(score) : arc
+        let displayed=reduceMotion || export ? Double(score) : arc
         return ZStack {
             DialFace(value:displayed,hasForecast:hasForecast,palette:palette,glow:access.glow)
             ambient(displayed)
         }.accessibilityHidden(true)
     }
     /// The glint, the leading star's pulse and the orbiting stars: decoration, at 30 Hz at most,
-    /// still under Reduce Motion, reduced resources and Low Power Mode.
+    /// still under Reduce Motion, reduced resources, Low Power Mode and in exported images, and
+    /// resting while the dial is scrolled out of view.
     private func ambient(_ displayed:Double)->some View {
-        let still=reduceMotion || access.reducedResources || ProcessInfo.processInfo.isLowPowerModeEnabled
-        return TimelineView(.animation(minimumInterval:1/30,paused:still)) { timeline in
+        let still=reduceMotion || export || access.reducedResources || PowerState.shared.lowPower
+        return TimelineView(.animation(minimumInterval:1/30,paused:still || !onScreen)) { timeline in
             Canvas { context,size in
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=min(size.width,size.height)/2-18
                 let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
                 let tip=Angle.degrees(140+260*displayed/100)
                 // Specular glint on the glass rim. It slides with the phone's tilt, as light on a real dial would.
-                if !reduceMotion && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
+                if !reduceMotion && !export && !palette.nightVision && !access.reduceHighlighting && !access.reducedResources {
                     let tilt=MotionTilt.shared
                     let mid=pointer.map { atan2($0.y-center.y,$0.x-center.x) } ?? (-90+tilt.x*55-tilt.y*12)*Double.pi/180, half=22*Double.pi/180
                     var glint=Path(); glint.addArc(center:center,radius:radius+11,startAngle:.radians(mid-half),endAngle:.radians(mid+half),clockwise:false)

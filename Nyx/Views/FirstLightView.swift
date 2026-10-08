@@ -18,6 +18,8 @@ struct FirstLightView: View {
     @State private var started: Date?
     @State private var visible=false
     @State private var leaving=false
+    /// The stars have all arrived: the sky is drawn once more, whole, and the timeline rests.
+    @State private var done=false
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// Seconds for the stars to arrive; the name follows as the last of them do.
     private let reveal=7.0
@@ -25,9 +27,9 @@ struct FirstLightView: View {
         let sky=SkyProjection.shared.sky(for:park,night:night,at:moment)
         ZStack {
             Color.black
-            TimelineView(.animation(minimumInterval:1/30,paused:reduceMotion || started == nil || leaving)) { timeline in
+            TimelineView(.animation(minimumInterval:1/30,paused:reduceMotion || done || started == nil || leaving)) { timeline in
                 let elapsed=started.map { timeline.date.timeIntervalSince($0) } ?? 0
-                let progress=reduceMotion ? 1 : min(1,elapsed/reveal)
+                let progress=reduceMotion || done ? 1 : min(1,elapsed/reveal)
                 Canvas { context,size in draw(sky,progress:progress,in:&context,size:size) }
             }
             .opacity(reduceMotion ? (visible ? 1 : 0) : 1)
@@ -55,6 +57,10 @@ struct FirstLightView: View {
                 withAnimation(.spring(response:1.6,dampingFraction:1)) { visible=true }
             }
             AccessibilityNotification.Announcement(String(localized:"First light at \(park.shortName). The stars above you now.")).post()
+            guard !reduceMotion else { return }
+            // The last stars land at `reveal`; after that nothing moves, so nothing is redrawn.
+            try? await Task.sleep(for:.seconds(reveal*0.3+0.2))
+            if !Task.isCancelled { done=true }
         }
     }
     private func dismiss() {
