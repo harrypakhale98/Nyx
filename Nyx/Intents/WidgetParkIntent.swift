@@ -21,6 +21,8 @@ struct CycleWidgetParkIntent: AppIntent {
 /// showing a choice from yesterday.
 nonisolated enum WidgetSelection {
     static let kind="TonightWidget"
+    /// The Tonight control's kind (`TonightControl`), reloaded whenever the snapshot changes.
+    static let controlKind="TonightScoreControl"
     static let key="widgetPark"
     /// The order the button walks: tonight's best first, as `NightPlanner` ranks nights.
     static func ordered(_ nights:[Night])->[Night] { NightPlanner.ranked(nights) }

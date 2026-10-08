@@ -35,14 +35,10 @@ extension VisionModel {
     }
     /// The newest forecast on this headset, for Your privacy.
     var lastForecast: Date? { forecasts.values.map(\.updated).max() }
-    /// True when a night without clouds simply lies past the forecast's last hour (or about two
-    /// weeks out when no forecast has arrived), rather than having a forecast that could not be
-    /// read or was switched off. The iPhone's rule (`PlanModel.beyondForecast`).
-    func beyondForecast(_ night: Night) -> Bool {
-        guard night.basis == .usual else { return false }
-        if let last = forecasts[night.park.id]?.times.last { return night.sky.cloudWindow.end.timeIntervalSince1970 > last+3600 }
-        return night.id.timeIntervalSince(night.park.currentNight(at: now)) > 14*86400
-    }
+    /// True when a night without clouds simply lies beyond the forecast's reach (past its last
+    /// hour, or ten days or more ahead), rather than having a forecast that could not be read or
+    /// was switched off. The iPhone's rule (`NightPlanner.beyondForecast`).
+    func beyondForecast(_ night: Night) -> Bool { NightPlanner.beyondForecast(night, forecast: forecasts[night.park.id], now: now) }
     /// The words under the score for a night's clouds, as the iPhone says them: nothing extra with
     /// a forecast but its average; "Early look: …" days ahead; "No cloud forecast yet. …" beyond.
     func cloudCaption(_ night: Night) -> String {

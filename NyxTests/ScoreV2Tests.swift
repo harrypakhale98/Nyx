@@ -240,9 +240,14 @@ import Testing
         same(try #require(snapshot.nights(from: now, count: 4, forecastAsOf: now).first { $0.id == night }), "Widget snapshot")
         same(TripPlanner.nights(parks: [jotr], days: [TripDay(year: 2026, month: 12, day: 3)], forecasts: ["jotr": f], details: ["jotr": d], now: now)[0][0], "Trip planner")
         #expect(reference.score.limit == .smoke(74) || reference.score.value <= 74)
-        // The watch has no smoke detail and Vision Pro no forecast: each matches the phone given the same inputs.
-        let wrist = NightPlanner.night(park: jotr, sky: s, forecast: f, detail: nil, now: now)
-        #expect(wrist.score.value == NightPlanner(forecasts: ["jotr": f]).night(jotr, on: night, now: now).score.value)
+        // The watch: what the iPhone hands over (clouds and smoke), decoded on the wrist and scored by
+        // `WatchSky.night`'s one call, is the phone's night, smoke cap included.
+        let sent = WatchContext.make(savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: false, forecasts: ["jotr": f], details: ["jotr": d], now: now)
+        let received = try #require(WatchContext(dictionary: sent.dictionary))
+        let wrist = NightPlanner.night(park: jotr, sky: s, forecast: received.cloudForecasts["jotr"], detail: received.forecastDetails["jotr"], now: now)
+        same(wrist, "Watch")
+        #expect(wrist.aerosol != nil && wrist.aerosol == reference.aerosol && wrist.score.value <= 74)
+        // Vision Pro has no forecast: it matches the phone given the same inputs.
         let vision = NightPlanner.night(park: jotr, sky: s, forecast: nil, detail: nil, now: night)
         #expect(vision.basis == .usual && vision.score.value == NightPlanner(forecasts: [:]).night(jotr, on: night, now: now).score.value)
     }
@@ -265,15 +270,142 @@ import Testing
         var split = a; split.modelSpread = 40
         #expect(NightPlanner.better(agreed, split) && !NightPlanner.better(split, agreed))
     }
-    /// Parks sorted by "Darkest tonight" never fall back to alphabetical order on a tie.
+    /// Parks sorted by "Darkest tonight" follow `NightPlanner.better` exactly, never alphabetical order on a tie.
     @Test func parksListBreaksTiesByGlow() throws {
         let model = PlanModel()
         model.forecasts = [:]; model.details = [:]
         let ranked = model.ranked(model.parks)
         let nights = ranked.map { model.night($0) }
-        for (x, y) in zip(nights, nights.dropFirst()) where x.score.value == y.score.value {
-            #expect(NightPlanner.glowRank(x.park.id) <= NightPlanner.glowRank(y.park.id) || abs(x.sky.darkHours-y.sky.darkHours) >= 1.0/60, "\(x.park.id) \(y.park.id)")
+        for (x, y) in zip(nights, nights.dropFirst()) {
+            #expect(!NightPlanner.better(y, x), "\(x.park.id) \(y.park.id)")
         }
+    }
+    /// Every "best night" helper (the widget's week ring and spoken best, the week strip, the
+    /// chart summary, the Tonight control, and the watch's Tonight, week and complications, which
+    /// call `NightPlanner.best`) breaks a tie the same way: here the longer true darkness, not the first night.
+    @Test func bestNightHelpersBreakTiesAlike() throws {
+        let grba = try park("grba")
+        let score = DarknessScore(value: 97, moonPoints: 40, cloudPoints: 25, bortlePoints: 17.5, lengthPoints: 15)
+        let short = Night(park: grba, sky: engine.conditions(for: grba, on: try evening(grba, "2026-10-09")), score: score, cloudCover: 0, forecastUpdated: nil)
+        let long = Night(park: grba, sky: engine.conditions(for: grba, on: try evening(grba, "2026-12-09")), score: score, cloudCover: 0, forecastUpdated: nil)
+        #expect(long.sky.darkHours > short.sky.darkHours + 1)
+        let week = [short, long]
+        #expect(NightPlanner.best(week)?.id == long.id && NightPlanner.ranked(week).first?.id == long.id)
+        #expect(NightChart.summary(week).contains(grba.dayLabel(long.id)))
+        // The control: the darkest saved park tonight by the same rule, whatever "next" chose for a widget.
+        let parks = try ["jotr", "deva", "grba", "bibe", "grca", "arch", "cany", "brca"].map(park)
+        let now = try evening(grba, "2026-12-09")
+        let snapshot = SavedSkySnapshot(parks: parks, forecasts: [:])
+        let tonight = parks.map { snapshot.planner.night($0, on: $0.currentNight(at: now), now: now) }
+        #expect(TonightControlValue(snapshot: snapshot, pinned: nil, now: now).parkID == NightPlanner.best(tonight)?.park.id)
+    }
+
+    // MARK: Haleakalā's layers (J)
+
+    /// A layer forecast much older than the total-cloud forecast never replaces it.
+    @Test func staleSummitLayersGiveWayToTheFresherForecast() throws {
+        let hale = try park("hale")
+        let night = try evening(hale, "2026-12-09")
+        let s = engine.conditions(for: hale, on: night)
+        let now = night.addingTimeInterval(-3600)
+        let total = forecast(updated: now, cover: 90)
+        func scored(layersAge: TimeInterval) -> Night {
+            let detail = ForecastDetail(layers: series(now.addingTimeInterval(-layersAge), s.cloudWindow, ["cloud_cover_low": 90, "cloud_cover_mid": 10, "cloud_cover_high": 10]))
+            return NightPlanner.night(park: hale, sky: s, forecast: total, detail: detail, now: now)
+        }
+        let recent = scored(layersAge: 6*3600)
+        #expect(recent.upperCloudOnly && abs((recent.cloudCover ?? 0)-19) < 0.01)
+        let stale = scored(layersAge: 2*86400)
+        #expect(!stale.upperCloudOnly && stale.cloudCover == 90 && stale.score.value <= recent.score.value)
+    }
+
+    /// The watch scores Haleakalā's summit from the same mid and high cloud as the iPhone, and every
+    /// park saved with clouds and smoke still fits WatchConnectivity's budget.
+    @Test func watchReceivesSummitLayersAndSmokeWithinBudget() throws {
+        let hale = try park("hale")
+        let night = try evening(hale, "2026-12-09")
+        let s = engine.conditions(for: hale, on: night)
+        let now = night.addingTimeInterval(-3600)
+        let total = forecast(updated: now, cover: 90)
+        let detail = ForecastDetail(layers: series(now, s.cloudWindow, ["cloud_cover_low": 90, "cloud_cover_mid": 10, "cloud_cover_high": 10]),
+                                    air: series(now, s.cloudWindow, ["aerosol_optical_depth": 0.3]))
+        let phone = NightPlanner.night(park: hale, sky: s, forecast: total, detail: detail, now: now)
+        let sent = WatchContext.make(savedParkIDs: ["hale"], homeParkID: "hale", nightVision: false, forecasts: ["hale": total], details: ["hale": detail],
+                                     closures: ["hale": "Summit District closed"], aboveInversion: ["hale"], now: now)
+        let data = try #require(sent.data)
+        let received = try #require(WatchContext(data: data))
+        let wrist = NightPlanner.night(park: hale, sky: s, forecast: received.cloudForecasts["hale"], detail: received.forecastDetails["hale"], now: now)
+        #expect(phone.upperCloudOnly && wrist.upperCloudOnly && wrist.score.value == phone.score.value && wrist.cloudCover == phone.cloudCover)
+        #expect(wrist.score.limit == phone.score.limit && received.closures["hale"] == "Summit District closed")
+        // Only the summit's layers travel, and only the variables the score reads.
+        #expect(received.details["hale"]?.layers?.values.keys.sorted() == ["cloud_cover_high", "cloud_cover_mid"])
+        let all = parks.map(\.id)
+        let budget = WatchContext.make(savedParkIDs: all, homeParkID: "jotr", nightVision: false,
+                                       forecasts: Dictionary(uniqueKeysWithValues: all.map { ($0, total) }),
+                                       details: Dictionary(uniqueKeysWithValues: all.map { ($0, detail) }), now: now)
+        #expect((budget.data?.count ?? .max) <= WatchContext.byteBudget)
+        #expect(budget.forecasts[all[0]] != nil && budget.details[all[0]]?.air != nil && budget.details[all[0]]?.layers == nil)
+    }
+
+    // MARK: Beyond the forecast (K)
+
+    @Test func nightsPastTenDaysAreBeyondTheForecastNotUnavailable() throws {
+        let jotr = try park("jotr")
+        let now = try evening(jotr, "2026-12-01")
+        let fresh = forecast(updated: now, cover: 20)
+        let planner = NightPlanner(forecasts: ["jotr": fresh])
+        for days in 10...13 {
+            let night = planner.night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: days), now: now)
+            #expect(night.basis == .usual, "\(days)")
+            #expect(NightPlanner.beyondForecast(night, forecast: fresh, now: now), "\(days)")
+        }
+        // A forecast eleven days old that still covers tomorrow: that night is "unavailable", not "not yet".
+        let stale = forecast(updated: now.addingTimeInterval(-11*86400), cover: 20)
+        let tomorrow = NightPlanner(forecasts: ["jotr": stale]).night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 1), now: now)
+        #expect(tomorrow.basis == .usual && !NightPlanner.beyondForecast(tomorrow, forecast: stale, now: now))
+        // No forecast at all: a week out should have had one; twelve nights out could not.
+        let none = NightPlanner(forecasts: [:])
+        #expect(!NightPlanner.beyondForecast(none.night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 5), now: now), forecast: nil, now: now))
+        #expect(NightPlanner.beyondForecast(none.night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 12), now: now), forecast: nil, now: now))
+    }
+
+    // MARK: Smoke: one value for the score and its words (L)
+
+    @Test func smokeCaveatDescribesTheSmokeTheScoreUsed() throws {
+        let model = PlanModel(weather: WeatherService(persist: false), parkStore: ParkStore(persist: false),
+                              detail: ForecastDetailService(persist: false))
+        defer { model.smokeEnabled = true }
+        model.smokeEnabled = true
+        let deva = try park("deva")
+        let tonight = model.night(deva)
+        // An aerosol forecast three days old (past the 36 hours the other context lines keep) still covers tonight.
+        let air = series(model.today.addingTimeInterval(-3*86400), tonight.sky.cloudWindow, ["aerosol_optical_depth": 0.6])
+        model.forecasts = [:]; model.details = ["deva": ForecastDetail(air: air)]
+        let smoky = model.night(deva)
+        #expect(smoky.score.value <= 59 && smoky.aerosol == 0.6)
+        #expect(model.outlook(smoky)?.clarity == .heavy && model.smokeCaveat(smoky) != nil)
+        // "Smoke and haze" off: the cached smoke stops counting everywhere, at once.
+        model.smokeEnabled = false
+        #expect(model.details["deva"]?.air == nil)
+        let clean = model.night(deva)
+        #expect(clean.aerosol == nil && clean.score.value >= smoky.score.value && model.smokeCaveat(clean) == nil)
+        // And it stays out while the switch is off, whatever arrives.
+        model.details = ["deva": ForecastDetail(air: air)]
+        #expect(model.details["deva"] == nil)
+    }
+
+    // MARK: Background refresh (M)
+
+    /// A model that last looked at the clock hours ago moves to the current night when asked, as
+    /// the saved-park refresh does before it publishes.
+    @Test func tickMovesTonightAcrossTheTurnover() throws {
+        let model = PlanModel(weather: WeatherService(persist: false), parkStore: ParkStore(persist: false),
+                              detail: ForecastDetailService(persist: false))
+        let jotr = try park("jotr")
+        let before = model.tonight(jotr)
+        let later = model.today.addingTimeInterval(2*86400)
+        model.tick(later)
+        #expect(model.today == later && model.tonight(jotr) == jotr.date(before, addingDays: 2))
     }
 
     // MARK: Time zones without daylight saving

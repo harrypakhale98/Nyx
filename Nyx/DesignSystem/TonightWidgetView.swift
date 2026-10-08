@@ -77,10 +77,15 @@ struct TonightControlValue:Sendable {
     let score:Int?
     let symbol:String
     init(parkID:String?,name:String?,score:Int?,symbol:String) { self.parkID=parkID; self.name=name; self.score=score; self.symbol=symbol }
-    /// The set park's night, else the darkest saved park's; no score before any park is saved.
+    /// The set park's night, else the darkest saved park's (`NightPlanner.best`, as everywhere);
+    /// no score before any park is saved. Never the park the widget's "next" button moved to: the
+    /// control answers "where is darkest tonight", whatever a widget is showing.
     init(snapshot:SavedSkySnapshot?,pinned:Park?,now:Date) {
-        var timeline=TonightTimeline(snapshot:snapshot,large:false,pinned:pinned)
-        guard let night=timeline.entry(at:now).night else { self.init(parkID:nil,name:nil,score:nil,symbol:"moon.stars"); return }
+        let planner=snapshot?.planner ?? NightPlanner(forecasts:[:])
+        let parks=pinned.map { [$0] } ?? snapshot?.parks ?? []
+        guard let night=NightPlanner.best(parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }) else {
+            self.init(parkID:nil,name:nil,score:nil,symbol:"moon.stars"); return
+        }
         self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,symbol:night.sky.moon.symbolName)
     }
 }
@@ -257,7 +262,7 @@ struct TonightWidgetView:View {
     /// Seven nights as small skies: the dot grows with the score, the best night gets a ring,
     /// nights without a cloud forecast are hollow.
     private func weekStrip(_ week:[Night])->some View {
-        let best=week.max { $0.score.value<$1.score.value }?.id
+        let best=NightPlanner.best(week)?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
                 Text("NEXT SEVEN NIGHTS").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
@@ -448,7 +453,7 @@ struct TonightWidgetView:View {
             return ([tonight,String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."),
                      String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map { $0+"." }).joined(separator:" ")
         }
-        guard family == .systemMedium,let top=entry.week.max(by:{ $0.score.value<$1.score.value }) else { return tonight }
+        guard family == .systemMedium,let top=NightPlanner.best(entry.week) else { return tonight }
         return tonight+" "+String(localized:"Best of the next seven nights: \(top.park.dayLabel(top.id)), \(top.score.value).")
     }
 }

@@ -13,7 +13,14 @@ import CoreLocation
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
     var forecasts: [String:Forecast] = [:] { didSet { outlookCache=[:] } }
     /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
-    var details: [String:ForecastDetail] = [:] { didSet { outlookCache=[:] } }
+    /// With "Smoke and haze" off in Your privacy, the air-quality host's data is not used at all:
+    /// no aerosol series is kept here, so no score, caveat or snapshot counts cached smoke.
+    var details: [String:ForecastDetail] = [:] {
+        didSet {
+            if !smokeEnabled, details.values.contains(where:{ $0.air != nil }) { details=Self.withoutAir(details) }
+            outlookCache=[:]
+        }
+    }
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
     /// What's up each night. Astronomy only, so never invalidated by a forecast.
@@ -58,7 +65,26 @@ import CoreLocation
     var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
-    var smokeEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") } } }
+    var smokeEnabled: Bool {
+        didSet {
+            if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") }
+            guard !smokeEnabled, oldValue else { return }
+            // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
+            details=Self.withoutAir(details)
+            let service=detailService
+            Task { [weak self] in
+                await service.forgetAir()
+                // The widgets, the watch and reminders stop counting it too.
+                if let self { await savedSync.republish(self) }
+            }
+        }
+    }
+    nonisolated static func withoutAir(_ details:[String:ForecastDetail])->[String:ForecastDetail] {
+        details.compactMapValues { detail in
+            var kept=detail; kept.air=nil
+            return kept == ForecastDetail() ? nil : kept
+        }
+    }
     var today: Date {
         #if DEBUG
         if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
@@ -95,7 +121,7 @@ import CoreLocation
             if let preload {
                 // Read in the background since launch began; taken now, before the first frame.
                 let cached=preload.wait()
-                forecasts=cached.forecasts; details=cached.details
+                forecasts=cached.forecasts; details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
                 apply(AlertsUpdate(cache:cached.alerts,busy:false))
                 LaunchSignposts.note("Caches ready")
                 let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
@@ -139,10 +165,12 @@ import CoreLocation
     private func deriveOutlook(_ night:Night)->NightOutlook? {
         guard let detail=details[night.park.id] else { return nil }
         let window=night.sky.cloudWindow
-        var outlook=detail.outlook(from:window.start,to:window.end)
+        var outlook=detail.outlook(from:window.start,to:window.end,now:today)
+        // The smoke words describe the smoke the score counted, whatever the aerosol forecast's age.
+        outlook.aerosol=night.aerosol
         if night.score.hasForecast, !night.upperCloudOnly, let agreement=outlook.agreement {
             // The same caps as the score itself, smoke included.
-            let aerosol=outlook.aerosol
+            let aerosol=night.aerosol
             let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.low,basis:.forecast,aerosol:aerosol).value
             let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.high,basis:.forecast,aerosol:aerosol).value
             outlook.scoreRange=min(clearest,cloudiest)...max(clearest,cloudiest)
@@ -198,21 +226,17 @@ import CoreLocation
     }
     /// Aurora season, satellites, zodiacal light, the faintest stars and the core's light dome.
     func skyNotes(_ night:Night)->[SkyNote] {
-        let aerosol=details[night.park.id]?.air?.mean("aerosol_optical_depth",from:night.sky.cloudWindow.start,to:night.sky.cloudWindow.end,valid:0...10)
-        return SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:aerosol)
+        SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:night.aerosol)
     }
     /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
     func smokeCaveat(_ night:Night)->String? {
         guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
         return clarity.sentence
     }
-    /// True when a night without clouds simply lies past the forecast's last hour (or about two
-    /// weeks out when no forecast has arrived), rather than having a forecast that failed.
-    func beyondForecast(_ night:Night)->Bool {
-        guard night.basis == .usual else { return false }
-        if let last=forecasts[night.park.id]?.times.last { return night.sky.cloudWindow.end.timeIntervalSince1970>last+3600 }
-        return night.id.timeIntervalSince(today)>14*86400
-    }
+    /// True when a night without clouds simply lies beyond the forecast's reach (past its last
+    /// hour, or ten days or more ahead, where a forecast counts for nothing), rather than having a
+    /// forecast that failed (`NightPlanner.beyondForecast`).
+    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:today) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?,radiusMiles:Double?=nil)->[Park] {
         guard let origin else { return [] }
@@ -289,6 +313,8 @@ import CoreLocation
         let network=weatherEnabled && live
         let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
+        if !smokeEnabled { await detailService.forgetAir() }
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         let paused=await detailService.pausedForLowData()

@@ -47,8 +47,9 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     static func snapshot(for configuration: TonightParkIntent) -> SavedSkySnapshot? {
         guard let id = configuration.park?.id, id != WristParkEntity.darkestID,
               let park = WristParkQuery.allParks().first(where: { $0.id == id }) else { return SharedSettings.read() }
-        let forecast = WatchSky.readContext()?.cloudForecasts[id]
-        return SavedSkySnapshot(parks: [park], forecasts: forecast.map { [id: $0] } ?? [:])
+        let context = WatchSky.readContext()
+        let forecast = context?.cloudForecasts[id], detail = context?.forecastDetails[id]
+        return SavedSkySnapshot(parks: [park], forecasts: forecast.map { [id: $0] } ?? [:], details: detail.map { [id: $0] } ?? [:])
     }
 }
 
@@ -166,8 +167,8 @@ struct DuskProvider: RelevanceEntriesProvider {
         for park in snapshot.parks {
             for offset in 0..<7 {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
-                let night = WatchSky.night(park, evening: evening, forecast: snapshot.forecasts[park.id], now: now)
-                guard night.score.value >= 60, let window = WatchTimeline.duskWindow(sky: night.sky), window.end > now else { continue }
+                let night = WatchSky.night(park, evening: evening, forecast: snapshot.forecasts[park.id], detail: snapshot.details?[park.id], now: now)
+                guard NightPlanner.worthSurfacing(night), let window = WatchTimeline.duskWindow(sky: night.sky), window.end > now else { continue }
                 attributes.append(WidgetRelevanceAttribute(configuration: DuskNight(park: park.id, evening: evening), context: .date(interval: window, kind: .informational)))
             }
             // At the park, the card is the point of the trip, whatever the score. The system matches
@@ -188,7 +189,7 @@ struct DuskProvider: RelevanceEntriesProvider {
             return DuskEntry(entry: WatchSkyEntry(date: now, night: nil, next: nil, nightVision: look.nightVision(park: nil, at: now)))
         }
         let evening = configuration.evening ?? park.currentNight(at: now)
-        let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: now)
+        let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: now)
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now)))
     }
     func placeholder(context: Context) -> DuskEntry {

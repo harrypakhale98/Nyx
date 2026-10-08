@@ -159,5 +159,8 @@ nonisolated struct Night: Identifiable, Sendable {
     /// How far apart three forecast models' cloud averages are, in percentage points, within
     /// their seven-day horizon. Breaks ties between equal scores; never changes one.
     var modelSpread: Double? = nil
+    /// The aerosol optical depth the score counted (the smoke forecast's average over the cloud
+    /// window), so the smoke caveat and the score never describe different air.
+    var aerosol: Double? = nil
     var basis: CloudBasis { score.basis }
 }

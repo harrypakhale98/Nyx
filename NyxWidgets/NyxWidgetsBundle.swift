@@ -140,7 +140,7 @@ struct NightVisionProvider:ControlValueProvider {
 /// from the widgets' snapshot. A tap opens that park. Read only: it changes nothing.
 struct TonightControl:ControlWidget {
     var body:some ControlWidgetConfiguration {
-        AppIntentControlConfiguration(kind:"TonightScoreControl",provider:TonightControlProvider()) { value in
+        AppIntentControlConfiguration(kind:WidgetSelection.controlKind,provider:TonightControlProvider()) { value in
             ControlWidgetButton(action:OpenTonightParkIntent(parkID:value.parkID)) {
                 Label {
                     Text(value.score.map { String(localized:"Tonight \($0)") } ?? String(localized:"Tonight"))

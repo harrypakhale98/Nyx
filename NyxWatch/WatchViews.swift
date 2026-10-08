@@ -136,6 +136,8 @@ struct TonightFace: View {
     @State private var engaged = WatchDebug.initialNight > 0
     @FocusState private var scrubbing: Bool
     private var shown: Night { week.indices.contains(offset) ? week[offset] : night }
+    /// The park's closure from the iPhone's last park update, worded as on the iPhone.
+    private var closure: String? { context?.closures[night.park.id] }
     private var looking: Bool { engaged || offset != 0 }
     var body: some View {
         if typeSize.isAccessibilitySize {
@@ -144,6 +146,7 @@ struct TonightFace: View {
                     gauge.frame(width: 112, height: 112)
                     Text(shown.score.band.label).font(.system(.headline, design: .serif))
                     if looking { NightGlance(night: shown, isTonight: offset == 0) } else { NextMoment(night: night, now: now) }
+                    if let closure { ClosureLine(text: closure) }
                     ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                         Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                     }
@@ -162,6 +165,8 @@ struct TonightFace: View {
                         Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1).nonEssential()
                     }
                 }
+                // A closure stands beside the score on every surface; here it costs the gauge one line.
+                if let closure { ClosureLine(text: closure, lines: 1).layoutPriority(1) }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -192,6 +197,22 @@ struct TonightFace: View {
                 }
             }
             .onAppear { if engaged { Task { scrubbing = true } } }
+    }
+}
+
+/// A park's closure, in the accent with a warning mark, as the iPhone shows it beside the score.
+struct ClosureLine: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let text: String
+    var lines: Int? = nil
+    var body: some View {
+        Label { Text(text) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+            .font(.caption2).foregroundStyle(palette.accent)
+            .lineLimit(typeSize.isAccessibilitySize ? nil : lines).minimumScaleFactor(0.8)
+            .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(String(localized: "Closure alert: \(text)"))
     }
 }
 
@@ -348,8 +369,8 @@ struct WeekPage: View {
     let now: Date
     let isHome: Bool
     var body: some View {
-        let best = nights.max { $0.score.value < $1.score.value }
-        // Nights that tie the best are all ringed; the first is named, the rest counted.
+        let best = NightPlanner.best(nights)
+        // Nights that tie the best are all ringed; the best by the iPhone's tie-breaks is named, the rest counted.
         let tied = nights.filter { $0.score.value == best?.score.value }
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {

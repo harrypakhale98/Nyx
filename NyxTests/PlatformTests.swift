@@ -206,10 +206,13 @@ import Testing
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         ParkOpenRequest.post(parkID: "grca", now: now, defaults: defaults)
-        #expect(ParkOpenRequest.take(now: now.addingTimeInterval(5), defaults: defaults) == "grca")
+        #expect(ParkOpenRequest.take(now: now.addingTimeInterval(5), defaults: defaults) == ParkOpenRequest.Pending(parkID: "grca"))
         #expect(ParkOpenRequest.take(now: now.addingTimeInterval(6), defaults: defaults) == nil)
         ParkOpenRequest.post(parkID: "grca", now: now, defaults: defaults)
         #expect(ParkOpenRequest.take(now: now.addingTimeInterval(120), defaults: defaults) == nil)
+        // The Tonight control before any park is saved: no park, which opens the Tonight tab.
+        ParkOpenRequest.post(parkID: nil, now: now, defaults: defaults)
+        #expect(ParkOpenRequest.take(now: now.addingTimeInterval(1), defaults: defaults) == ParkOpenRequest.Pending(parkID: nil))
     }
 
     // MARK: Ask Nyx's tools

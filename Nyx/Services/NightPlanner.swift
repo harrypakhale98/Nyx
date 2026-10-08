@@ -27,16 +27,19 @@ nonisolated struct NightPlanner: Sendable {
     /// month and w = `CloudBasis.forecastWeight` of the lead from the forecast's issue to the
     /// middle of the night's cloud window. No forecast covering the window: the usual clouds
     /// alone. A park flagged `aboveInversion` (Haleakalā's summit) counts mid and high cloud only
-    /// when the layer forecast covers the night: low cloud there lies below the observer.
+    /// when the layer forecast covers the night and is no more than `layerLag` older than the
+    /// total-cloud forecast (`layersCurrent`): low cloud there lies below the observer, but a stale
+    /// layer forecast never stands in for a fresher total.
     /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
-    /// only lower a score, so its age never hides it). **Ties.** The three models' cloud spread.
-    /// `now` decides only whether the model spread is recent enough to describe (36 hours).
+    /// only lower a score, so its age never hides it); kept on the night (`aerosol`) so the
+    /// outlook's smoke words always describe the smoke the score used. **Ties.** The three models'
+    /// cloud spread. `now` decides only whether the model spread is recent enough to describe (36 hours).
     static func night(park: Park, sky: SkyConditions, forecast: Forecast?, detail: ForecastDetail?, now: Date,
                       climate: CloudClimate = .shared, scoring: any ScoreProviding = ScoreEngine()) -> Night {
         let window = sky.cloudWindow
         let usual = climate.typical(park, on: sky.evening)?.cloud
         var predicted = forecast?.mean(from: window.start, to: window.end), issued = forecast?.updated, upper = false
-        if park.aboveInversion == true, let layers = detail?.layers,
+        if park.aboveInversion == true, let layers = detail?.layers, layersCurrent(layers, forecast: forecast),
            let mid = layers.mean("cloud_cover_mid", from: window.start, to: window.end, valid: 0...100),
            let high = layers.mean("cloud_cover_high", from: window.start, to: window.end, valid: 0...100) {
             // Random overlap of the two layers above the summit.
@@ -59,7 +62,30 @@ nonisolated struct NightPlanner: Sendable {
         let used = weight > 0
         let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
         return Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
-                     usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread)
+                     usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
+    }
+    /// How much older than the total-cloud forecast a summit's layer forecast may be and still be used.
+    static let layerLag: TimeInterval = 12*3600
+    /// The layer forecast is used for a summit only when it is not much older than the total-cloud
+    /// forecast (or there is none): a two-day-old layer forecast never replaces this morning's clouds.
+    static func layersCurrent(_ layers: HourlySeries, forecast: Forecast?) -> Bool {
+        guard let forecast else { return true }
+        return layers.updated >= forecast.updated.addingTimeInterval(-layerLag)
+    }
+    /// True when a night scored on the usual clouds simply lies beyond what a cloud forecast
+    /// reaches: past the forecast's last hour, or so far ahead of a recent forecast (or, with none
+    /// recent, of `now`) that it counts for nothing (`CloudBasis.forecastWeight` is 0, ten days
+    /// out). False when a forecast should have reached the night but could not be read or is too
+    /// old, which the captions call "Cloud forecast unavailable". One rule for iPhone, iPad and Vision Pro.
+    static func beyondForecast(_ night: Night, forecast: Forecast?, now: Date) -> Bool {
+        guard night.basis == .usual else { return false }
+        let window = night.sky.cloudWindow
+        let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
+        // A recent forecast is measured from its issue, as the score measures it; a stale one from now.
+        let reference = forecast.map { now.timeIntervalSince($0.updated) < 36*3600 ? $0.updated : now } ?? now
+        if CloudBasis.forecastWeight(leadDays: middle.timeIntervalSince(reference)/86400) == 0 { return true }
+        if let last = forecast?.times.last { return window.end.timeIntervalSince1970 > last+3600 }
+        return false
     }
     /// `count` nights from the park-local night that contains `start` (clamped to 1...60).
     func nights(_ park: Park, from start: Date, count: Int, now: Date) -> [Night] {
@@ -124,11 +150,15 @@ nonisolated struct NightPlanner: Sendable {
     /// true darkness (or sunrise when there is none). Good or better only; a night without a full
     /// cloud forecast must reach Excellent, because the real clouds may still take it away.
     static func duskWindow(_ night: Night) -> DateInterval? {
-        guard night.score.value >= (night.score.hasForecast ? 60 : 75), night.sky.darkHours > 0,
-              let sunset = night.sky.sunset else { return nil }
+        guard worthSurfacing(night), let sunset = night.sky.sunset else { return nil }
         let start = sunset.addingTimeInterval(-90*60)
         let end = night.sky.darkStart.map { $0.addingTimeInterval(3600) } ?? night.sky.sunrise ?? sunset.addingTimeInterval(3*3600)
         return end > start ? DateInterval(start: start, end: end) : nil
+    }
+    /// Whether a night is worth surfacing in a Smart Stack at all, on iPhone and on the watch alike:
+    /// some true darkness, and Good or better with a full cloud forecast, Excellent without one.
+    static func worthSurfacing(_ night: Night) -> Bool {
+        night.sky.darkHours > 0 && night.score.value >= (night.score.hasForecast ? 60 : 75)
     }
     /// How strongly the widget should rise at `date`: 0 outside every dusk window, else the
     /// night's score (0.6...1.0) and the time left in its window. WidgetKit compares scores only

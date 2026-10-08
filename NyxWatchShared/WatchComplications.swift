@@ -49,14 +49,16 @@ nonisolated enum WatchTimeline {
         cache[key] = sky
         return sky
     }
-    /// The park Tonight would show at `date`: the darkest of the snapshot's parks.
+    /// The park Tonight would show at `date`: the darkest of the snapshot's parks, ties broken as
+    /// on the iPhone (`NightPlanner.best`).
     static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Night? {
         var nights: [Night] = []
         for park in snapshot?.parks ?? [] {
             let evening = park.currentNight(at: date)
-            nights.append(WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], now: date, sky: sky(park, evening: evening, cache: &cache)))
+            nights.append(WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: date,
+                                         sky: sky(park, evening: evening, cache: &cache)))
         }
-        return nights.max { $0.score.value < $1.score.value }
+        return NightPlanner.best(nights)
     }
     static func entry(at date: Date, snapshot: SavedSkySnapshot?, look: WristLook, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
         let best = best(at: date, snapshot: snapshot, cache: &cache)
@@ -98,9 +100,10 @@ nonisolated enum WatchTimeline {
         let end = sky.darkEnd ?? sky.sunrise ?? begin.addingTimeInterval(3*3600)
         return end > start ? DateInterval(start: start, end: end) : nil
     }
-    /// Smart Stack ranking: relevant around dusk on Good nights or better, more so the darker the night.
+    /// Smart Stack ranking: relevant around dusk on a night the iPhone would surface too
+    /// (`NightPlanner.worthSurfacing`: Good with a forecast, Excellent without), more so the darker the night.
     static func rank(for night: Night, at date: Date) -> (score: Float, duration: TimeInterval) {
-        guard night.score.value >= 60, let window = duskWindow(sky: night.sky), window.contains(date) else { return (0, 0) }
+        guard NightPlanner.worthSurfacing(night), let window = duskWindow(sky: night.sky), window.contains(date) else { return (0, 0) }
         return (Float(night.score.value)/100, window.end.timeIntervalSince(date))
     }
 }
