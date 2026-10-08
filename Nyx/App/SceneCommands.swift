@@ -6,8 +6,8 @@ import SwiftUI
 @MainActor @Observable final class SceneCommands {
     /// The tabs in order, for ⌘1–⌘4.
     static let tabs:[LocalizedStringKey]=["Tonight","Parks","Plan","Journal"]
-    /// A screenshot route's tab: `calendar` and `plan` are both Plan. Nil for routes that are not tabs.
-    nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"parks":1,"calendar":2,"plan":2,"journal":3][route] }
+    /// A screenshot route's tab: `calendar` and `plan` are both Plan; `parks-map` is Parks showing its map. Nil for routes that are not tabs.
+    nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"parks":1,"parks-map":1,"calendar":2,"plan":2,"journal":3][route] }
     var tab=0
     /// A park's own window (`ParkWindow`): one page, no tabs, so the tab keys and Find a Park rest.
     let parkWindow:Bool
