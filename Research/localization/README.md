@@ -6,14 +6,24 @@ Prepared on 2026-10-05 as a translation memory and brought up to date on 2026-10
 
 | File | What it is |
 |---|---|
-| `es-strings.json` | `{ "<English source key>": "<Spanish>" }` for all **1,088** keys in `Nyx/Resources/Localizable.xcstrings` as of commit a7825ec: 687 from the first pass plus **401 added on 2026-10-06** (400 UI strings and `essay.access`). It includes the six `essay.*` keys. No entry has plural or device variations, so every value is a plain string. Every format specifier (`%@`, `%lld`, `%%`) and `${park}` placeholder was checked by script against the English: same count, same type, same order. No positional reordering was needed. The English values of the `essay.*` keys did not change since the first pass. |
-| `es-vision-strings.json` | All **183** keys in `NyxVision/Resources/Localizable.xcstrings`. 138 reuse the iPhone translation word for word; 45 are Vision-only. |
+| `es-strings.json` | `{ "<English source key>": "<Spanish>" }` for the plain-string keys of `Nyx/Resources/Localizable.xcstrings` (1,643 keys on 2026-10-07, of which 27 are plurals kept in `es-plurals.json` and the data-backed `shower.*`, `access.*` keys come from their own files). It includes the `essay.*` values; the Learn essays themselves live in `learn-es/`, which wins. Every format specifier (`%@`, `%lld`, `%%`, positional `%1$@`) is checked by `apply_translations.py` against the English: same count and types, positions free. Keys that no longer exist in the app are harmless and stay as translation memory. |
+| `es-plurals.json`, `en-plurals.json` | Counted strings as real String Catalog plural variations, `one` and `other` (Spanish `many` falls back to `other`). A string with one counted number is `{"one": "...", "other": "..."}`. A string with several is `{"format": "%#@nights@ under the stars at %#@parks@", "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"}, ...}` (Xcode's substitutions: `arg` is the argument number, `%arg` the formatted number; a form may omit it, as in *El parque*). The English file defines which keys are plural; `--check` reports a key with no Spanish form or a missing `one`/`other`. The Swift code keeps writing plain interpolation (`String(localized: "\(n) nights")`): the plural form is chosen by the catalog, so no `n == 1` branch is needed. `PluralTests` checks the compiled tables in both languages. |
+| `es-vision-strings.json` | The keys of `NyxVision/Resources/Localizable.xcstrings` (352 on 2026-10-07), including the 40 `constellation.<abbr>` names the Vision Pro sky looks up (English from `NyxVision/Resources/constellations.json`). Strings the iPhone app shares reuse its Spanish word for word. |
 | `es-shower-names.json` | Meteor shower code (`sky-events.json` `meteorShowers[].code`) → Spanish name, for all 13 showers. The integrator will localize shower names by code. |
 | `es-access-notes.json` | Park id → Spanish access note (catalog keys `access.<id>`; English from `parks.json`), added 2026-10-06 for the 17 parks in `Research/park-access.md`. |
-| `es-infoplist.json` | The two keys in `Nyx/Resources/InfoPlist.xcstrings`: `NSLocationWhenInUseUsageDescription` and `NSAlarmKitUsageDescription`. |
+| `es-infoplist.json` | The keys of `Nyx/Resources/InfoPlist.xcstrings`: the three usage descriptions (`NSLocationWhenInUseUsageDescription`, `NSAlarmKitUsageDescription`, `NSMotionUsageDescription`) and the document and type names *Nyx Journal* and *Nyx Park* (the Info.plist localizes those by their English text). `sync_catalog.py` rebuilds the English from `project.yml`, so the catalog cannot drift from the plist. |
 | `glossary-es.md` | Register (tú), term decisions, proper names, meteor shower and compass names. Read this first. |
-| `learn-es/*.md` | The six Learn essays in Spanish (`access.md`, *Un cielo para todos*, added 2026-10-06). They match the `essay.*` values in `es-strings.json` (the first line is the title, then paragraphs separated by blank lines, the same structure `EssayView` expects). |
+| `learn-es/*.md` | The ten Learn essays in Spanish, one file per `Nyx/Resources/learn/<name>.md` (and `access.md`, whose English lives only in the catalog). The first line is the title, then paragraphs separated by blank lines, the same structure `EssayView` expects. `apply_translations.py` writes them as the `essay.<name>` Spanish and takes the English `essay.<name>` from `Nyx/Resources/learn/<name>.md`, so each essay has one source per language. |
 | `appstore-es.md` | Spanish (Mexico) App Store metadata: name, subtitle, promotional text, description, keywords, What's New and screenshot captions, with character counts. |
+
+## Workflow (after any copy change)
+
+1. Build Debug for the iOS simulator (the `Nyx` scheme also builds the embedded watch app and the widgets) and for `NyxVision`; the compiler writes `.stringsdata` for every `Text("…")`, `String(localized:)` and `LocalizedStringResource`.
+2. `python3 Scripts/sync_catalog.py <iOS DerivedData>` and `python3 Scripts/sync_vision_catalog.py <Vision DerivedData>`. New keys appear in the catalogs with the English as the value; keys no longer extracted are pruned **only** when their value is still the auto-added text, so hand-written entries (`essay.*`, `shower.*`, `access.*`, App Intent summaries with `${…}`) are never removed. Both scripts finish by running `apply_translations.py`.
+3. `python3 Scripts/apply_translations.py --check` lists every key without Spanish, every counted string without both plural forms and every Spanish text whose format specifiers differ from the English. Fix those in the JSON files here; never in the catalogs.
+4. `python3 Scripts/apply_translations.py` writes the catalogs. It is idempotent and byte-stable (same JSON layout as Xcode).
+
+A counted string ("3 nights") is added to `en-plurals.json` and `es-plurals.json` instead of `es-strings.json`. Strings with several counts use the `format` layout; keep the argument positions explicit (`%2$lld`) in every form.
 
 ## Integration (for whoever wires it in)
 
@@ -60,3 +70,15 @@ A native Mexican or US-Hispanic Spanish speaker, ideally someone who stargazes o
   - *una población al %@* (a town to the %@) and *población* for "town" in the Black Marble text, because the light can come from a city.
   - *Índice de oscuridad (0–100)* as the chart axis title for *Darkness score, out of 100*.
 - **AI tool strings** (*%@, %@; a %lld millas en línea recta de %@; esta noche %lld/100 %@*, *%@ horas de oscuridad total*) are read by the on-device model. Test them in Spanish with Foundation Models, as for the first-pass prompts.
+
+### Added 2026-10-07: strings flagged for native review
+
+- **Times without "a las".** Bare times after *desde* and *hasta*, a colon after a verb (*Sale: %@*, *Se pone: %@*, *La Luna se pone: %@*), parentheses for a time inside a sentence (*Sale por el este (%@)*), and *aprox. %@* for "around". Check that *Oscuro desde %@*, *Con Luna hasta %@* and *Luna oculta desde %@* read well on the wrist.
+- **Gender of the band words.** The five words stay feminine and agree with *noche* (*Noche Prístina*, *noches Buenas*). Where "Darkness score N" came first the sentence now says *índice de oscuridad 94, noche Prístina*, which fixes the clash with masculine *índice*. *Mala* and *Prístina* are still the glossary's open questions; the audit suggests *Excepcional / Excelente / Buena / Regular / Baja*.
+- **Plans and streaks.** *Planear* for the Plan tab, *Mejor racha* and *Racha de luna más oscura* for the best stretch of nights, *Mis noches libres*.
+- **Following a night.** *Seguir esta noche*, *Siguiendo esta noche*, *Dejar de seguir*; *Abrir el cielo* for the alarm action "Open sky" (it could read as "open heaven": *Abrir el cielo de esta noche* is the alternative).
+- **Parks and sources.** *National Park Service* stays in English everywhere (the first draft had *Servicio de Parques Nacionales* in the credits); *International Dark Sky Park* stays in English; *Certificación Dark Sky*; *Cielo del centro de la ciudad* for Bortle 9.
+- **Visibles / Ocultos** as the state of the "Other parks within reach" list (VoiceOver).
+- **Copernicus and CAMS credits** (*Servicio de Cambio Climático de Copernicus*, *Servicio de Vigilancia Atmosférica de Copernicus*) and the long *About the data* blocks, which were translated from the English rewrite of 2026-10-07; read them once for tone.
+- **Counted strings.** *Cerca de %lld horas de oscuridad total*, *Al segundo %lld* / *A los %lld segundos*, and the one-night forms *La mejor de la próxima noche*, *El parque con las noches más oscuras…* (the singular drops the number).
+- **Not localized yet:** the Siri phrases of the App Shortcuts (there is no `AppShortcuts` catalog, so Siri answers in English only), park names, viewing-spot names, and the text NPS sends (alerts, programs, campgrounds).
