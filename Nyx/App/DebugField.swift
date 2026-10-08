@@ -70,8 +70,8 @@ struct FieldActivityReview: View {
                 HStack(spacing: 10) {
                     small { FieldActivitySmallView(attributes: attributes, state: state, isStale: false) }
                     small { FieldActivitySmallView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
-                    small { FieldActivitySmallView(attributes: attributes, state: stale, isStale: true) }
                 }
+                small { FieldActivitySmallView(attributes: attributes, state: stale, isStale: true) }
                 Eyebrow(text: "Dynamic Island")
                 HStack(spacing: 10) {
                     island { HStack { FieldActivitySymbol(attributes: attributes, state: state, isStale: false); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
