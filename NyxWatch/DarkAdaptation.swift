@@ -9,7 +9,7 @@ struct DarkAdaptationView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     let park: Park
-    @State private var showsInfo = false
+    @State private var showsInfo = WatchDebug.showsInfo
     @State private var permission: UNAuthorizationStatus?
     /// Always red; under Increase Contrast the brighter red, as everywhere in Nyx (`NyxPalette.red`).
     private var palette: NyxPalette { NyxPalette(nightVision: true, highContrast: contrast == .increased) }
@@ -32,13 +32,14 @@ struct DarkAdaptationView: View {
                         Spacer()
                     }
                 }
-                .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette) }
+                .sheet(isPresented: $showsInfo) { AdaptationInfo().environment(\.nyx, palette).modifier(WatchDebug.TypeSize()) }
         }
         .foregroundStyle(palette.ink)
         .tint(palette.accent)
         .environment(\.nyx, palette)
         .modifier(NightVisionFilter(enabled: true, red: palette.red))
         .background(Color.black)
+        .modifier(WatchDebug.TypeSize())
         .task { permission = await AdaptationReminders.status() }
         .onAppear { store.reloadSettings() }
     }
@@ -68,6 +69,8 @@ struct DarkAdaptationView: View {
                 // At large text sizes the page scrolls; this keeps its end clear of the button.
                 .padding(.bottom, 30)
             }
+            // The scroll indicator is system chrome outside the red filter: a white bar at night.
+            .scrollIndicators(.never)
             // Without permission for reminders, the taps come from the screen while it is up.
             .sensoryFeedback(.success, trigger: clock?.isAdapted(at: now) ?? false) { old, new in !old && new && !AdaptationReminders.allowed(permission) }
             .modifier(MilestoneTap(park: park, next: next, active: true))
@@ -208,6 +211,8 @@ private struct AdaptationInfo: View {
                 .font(.footnote).fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .scrollIndicators(.never)
+            .modifier(WatchDebug.ScrollEnd())
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button { dismiss() } label: { Label("Done", systemImage: "xmark") }.tint(palette.toolbarTint)

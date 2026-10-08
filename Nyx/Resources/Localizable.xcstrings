@@ -16191,6 +16191,23 @@
         }
       }
     },
+    "Open Nyx to choose a park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Nyx to choose a park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Nyx para elegir un parque."
+          }
+        }
+      }
+    },
     "Open Nyx to refresh.": {
       "extractionState": "manual",
       "localizations": {

@@ -48,7 +48,7 @@ struct NightDetail: View {
     }
     private func scoreBlock(_ plan: NightPlan) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            VisionEyebrow(text: "\(plan.park.state) · \(model.nightOffset == 0 ? String(localized: "Tonight") : plan.park.dayLabel(plan.sky.evening))")
+            VisionEyebrow(text: "\(plan.park.state.replacingOccurrences(of: ",", with: ", ")) · \(model.nightOffset == 0 ? String(localized: "Tonight") : plan.park.dayLabel(plan.sky.evening))")
             Text(plan.score.value, format: .number)
                 .font(.system(size: numeral, weight: .light, design: .serif)).kerning(3).monospacedDigit()
                 .foregroundStyle(palette.accent)

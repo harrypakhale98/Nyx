@@ -220,7 +220,7 @@ struct WatchComplicationView: View {
             default:
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Nyx", systemImage: "moon.stars").font(.headline)
-                    Text("Choose a park in Nyx on Apple Watch.").font(.caption2).foregroundStyle(muted)
+                    Text("Open Nyx to choose a park.").font(.caption2).foregroundStyle(muted)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
         }.foregroundStyle(ink)
