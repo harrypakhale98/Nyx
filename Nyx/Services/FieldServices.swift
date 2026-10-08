@@ -13,7 +13,7 @@ extension FieldActivityAttributes {
     /// The milestones worth a mark on the Lock Screen, most important first when there are too many.
     nonisolated static let priority: [FieldNight.Kind]=[.darkness, .dawn, .moonset, .coreRises, .shower, .moonrise, .coreHighest, .coreSets, .planetRises, .planetSets, .sunset, .sunrise]
     nonisolated static let maximumMilestones=8
-    nonisolated init(night: FieldNight, score: Int, band: String) {
+    nonisolated init(night: FieldNight, score: Int, band: String, closure: String?=nil) {
         let window=SkyAlmanac.nightWindow(night.sky)
         let ranked=night.milestones.filter { $0.kind != .sunset && $0.kind != .sunrise }
             .sorted { (Self.priority.firstIndex(of: $0.kind) ?? 99, $0.date)<(Self.priority.firstIndex(of: $1.kind) ?? 99, $1.date) }
@@ -21,43 +21,158 @@ extension FieldActivityAttributes {
         self.init(parkID: night.park.id, parkName: night.park.shortName, score: score, band: band,
                   dusk: night.sky.sunset ?? window.start, dawn: night.sky.sunrise ?? window.end,
                   darkStart: night.sky.darkStart, darkEnd: night.sky.darkEnd,
-                  milestones: kept.map { Milestone(title: $0.title, date: $0.date, symbol: $0.symbol) }, timeZoneID: night.park.timeZoneID)
+                  milestones: kept.map { Milestone(title: $0.title, date: $0.date, symbol: $0.symbol) }, timeZoneID: night.park.timeZoneID,
+                  nightID: night.sky.evening, closure: closure)
     }
-    /// The state at `now`: the next marked milestone, or finished once the night is over.
-    nonisolated func state(at now: Date, nightVision: Bool) -> ContentState {
-        let finished=now>=dawn
-        return ContentState(next: finished ? nil : milestones.first { $0.date>now }, nightVision: nightVision, finished: finished)
+    /// About eight hours: how long iOS keeps a Live Activity running before it ends it (Apple's
+    /// documentation; the SDK says only "the maximum duration for Live Activities"). It then stays
+    /// on the Lock Screen, ended, for up to four hours more (the SDK's "four-hour window").
+    nonisolated static let activeLimit: TimeInterval=8*3600
+    /// When a followed night begins on the Lock Screen by itself: half an hour before sunset, so
+    /// the drive and the last light are covered, but never so early that the system's limit ends
+    /// it before an hour past the middle of true darkness (long winter nights start a little later).
+    nonisolated static func followStart(_ sky: SkyConditions) -> Date {
+        let window=sky.cloudWindow
+        let middle=window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
+        let dusk=sky.sunset ?? SkyAlmanac.nightWindow(sky).start
+        return max(dusk.addingTimeInterval(-1800), middle.addingTimeInterval(3600-activeLimit))
     }
-    /// Stale when the countdown reaches its milestone (the view then shows times, not a timer);
-    /// at dawn when nothing is left.
-    nonisolated func content(at now: Date, nightVision: Bool) -> ActivityContent<ContentState> {
-        let state=state(at: now, nightVision: nightVision)
-        return ActivityContent(state: state, staleDate: state.finished ? nil : state.next?.date ?? dawn, relevanceScore: state.finished ? 0 : 50)
+    /// The alert that announces a followed night when it begins: "Tonight at Joshua Tree",
+    /// "True darkness at 7:42 PM". Park time, as everywhere in Nyx.
+    nonisolated static func followAlert(park: Park, sky: SkyConditions) -> (title: String, body: String) {
+        let title=String(localized: "Tonight at \(park.shortName)")
+        if let dark=sky.darkStart { return (title, String(localized: "True darkness at \(park.time(dark))")) }
+        if let sunset=sky.sunset { return (title, String(localized: "No true darkness tonight. Sunset at \(park.time(sunset)).")) }
+        return (title, SkyConditions.noDarknessMessage(tonight: true))
     }
 }
 
-/// Starts, refreshes and ends the night's Live Activity. One at a time; it ends itself at dawn the
-/// next time Nyx is opened, and the system retires it after its own limit regardless.
+/// Starts, refreshes and ends the night's Live Activities. Field mode runs one for tonight; a
+/// night followed ahead ("Follow this night") is scheduled to start by itself before sunset, with
+/// no app launch and no push server. One activity per park and night. Each ends itself at dawn
+/// the next time Nyx runs (or is refreshed in the background), and iOS retires it regardless.
 @MainActor enum FieldActivities {
-    static var enabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
-    static var current: Activity<FieldActivityAttributes>? { Activity<FieldActivityAttributes>.activities.first { $0.activityState == .active || $0.activityState == .stale } }
-    static func isFollowing(_ park: Park) -> Bool { current?.attributes.parkID == park.id }
-    static func start(night: FieldNight, score: DarknessScore, nightVision: Bool, now: Date = .now) async {
+    typealias Item=Activity<FieldActivityAttributes>
+    nonisolated static var enabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
+    /// The night in progress: started and not yet ended.
+    nonisolated static var current: Item? { Item.activities.first { $0.activityState == .active || $0.activityState == .stale } }
+    /// Pending (scheduled), running or stale: everything that still means "followed".
+    nonisolated private static var live: [Item] { Item.activities.filter { [.pending, .active, .stale].contains($0.activityState) } }
+    nonisolated static func isFollowing(_ park: Park) -> Bool { current?.attributes.parkID == park.id }
+    nonisolated static func isFollowing(park: Park, night: Date) -> Bool { live.contains { $0.attributes.covers(parkID: park.id, night: night) } }
+    /// Field mode for tonight. A night already followed at this park becomes the field face (no
+    /// longer "heading out"); other running activities end, while nights followed for later stay.
+    static func start(night: FieldNight, score: DarknessScore, nightVision: Bool, closure: String?=nil, now: Date = .now) async {
         guard enabled, !night.isOver(at: now) else { return }
-        let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.band.label)
-        for activity in Activity<FieldActivityAttributes>.activities { await activity.end(nil, dismissalPolicy: .immediate) }
-        _=try? Activity.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision))
-    }
-    /// Brings every running activity up to date; ends one whose night is over.
-    static func refresh(nightVision: Bool, now: Date = .now) async {
-        for activity in Activity<FieldActivityAttributes>.activities where activity.activityState == .active || activity.activityState == .stale {
-            let content=activity.attributes.content(at: now, nightVision: nightVision)
-            if content.state.finished { await activity.end(content, dismissalPolicy: .immediate) }
-            else if content.state != activity.content.state || activity.activityState == .stale { await activity.update(content) }
+        let evening=night.sky.evening
+        for activity in live {
+            let same=activity.attributes.covers(parkID: night.park.id, night: evening)
+            if same, activity.activityState != .pending {
+                await activity.update(activity.attributes.content(at: now, nightVision: nightVision, heading: false))
+                NightFollowing.shared.reload()
+                return
+            }
+            if same || activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
         }
+        let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.band.label, closure: closure)
+        _=try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision))
+        NightFollowing.shared.reload()
     }
+    enum FollowResult: Equatable { case scheduled(Date), started, alreadyFollowing, unavailable, over }
+    /// "Follow this night": the night's activity, scheduled for `followStart` (iOS 26), or at once
+    /// when that moment has passed. Opens heading out: sunset, true darkness, the closure line.
+    @discardableResult static func follow(night: Night, closure: String?, nightVision: Bool, now: Date = .now) async -> FollowResult {
+        let park=night.park
+        guard enabled else { return .unavailable }
+        guard !FieldNight.isOver(night.sky, at: now) else { return .over }
+        guard !isFollowing(park: park, night: night.id) else { return .alreadyFollowing }
+        let field=FieldNight(park: park, sky: night.sky)
+        let attributes=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label, closure: closure)
+        let start=FieldActivityAttributes.followStart(night.sky)
+        defer { NightFollowing.shared.reload() }
+        if start<=now.addingTimeInterval(60) {
+            return (try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, heading: true))) == nil ? .unavailable : .started
+        }
+        let words=FieldActivityAttributes.followAlert(park: park, sky: night.sky)
+        let alert=AlertConfiguration(title: LocalizedStringResource(stringLiteral: words.title), body: LocalizedStringResource(stringLiteral: words.body), sound: .default)
+        // Worked out for the moment it starts; `updated` says when it was planned.
+        let content=attributes.content(at: start, nightVision: nightVision, heading: true, updated: now)
+        do {
+            _=try Item.request(attributes: attributes, content: content, pushType: nil, style: .standard, alertConfiguration: alert, start: start)
+            return .scheduled(start)
+        } catch { return .unavailable }
+    }
+    /// "Stop following": ends that night's activity, scheduled or running.
+    static func unfollow(park: Park, night: Date) async {
+        for activity in live where activity.attributes.covers(parkID: park.id, night: night) { await activity.end(nil, dismissalPolicy: .immediate) }
+        NightFollowing.shared.reload()
+    }
+    /// Brings every running activity up to date and ends one whose night is over. A scheduled one
+    /// is left as planned, unless its night has passed without it starting.
+    static func refresh(nightVision: Bool, now: Date = .now) async {
+        for activity in Item.activities {
+            switch activity.activityState {
+            case .pending:
+                if now>=activity.attributes.dawn { await activity.end(nil, dismissalPolicy: .immediate) }
+            case .active, .stale:
+                let previous=activity.content.state
+                let content=activity.attributes.content(at: now, nightVision: nightVision, heading: previous.heading ?? false)
+                if content.state.finished { await activity.end(content, dismissalPolicy: .immediate) }
+                else if Self.changed(previous, content.state) || activity.activityState == .stale { await activity.update(content) }
+            default: break
+            }
+        }
+        NightFollowing.shared.reload()
+    }
+    /// A change worth an update: anything but the moment it was worked out.
+    nonisolated static func changed(_ a: FieldActivityAttributes.ContentState, _ b: FieldActivityAttributes.ContentState) -> Bool {
+        var a=a, b=b
+        a.updated=nil; b.updated=nil
+        return a != b
+    }
+    /// Leaves field mode's night: ends what is running; nights followed for later stay scheduled.
     static func stop() async {
-        for activity in Activity<FieldActivityAttributes>.activities { await activity.end(nil, dismissalPolicy: .immediate) }
+        for activity in Item.activities where activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
+        NightFollowing.shared.reload()
+    }
+}
+
+/// What the app shows of followed nights (the park page's and calendar's "Follow this night", the
+/// tab bar's night in progress). Read from ActivityKit, which is the only record: nothing else is
+/// stored. Reloaded after every change Nyx makes and whenever Nyx becomes active, since a
+/// scheduled activity starts, and iOS ends one, while Nyx is closed.
+@MainActor @Observable final class NightFollowing {
+    static let shared=NightFollowing()
+    nonisolated struct Followed: Equatable, Identifiable, Sendable {
+        var id: String { "\(attributes.parkID)-\(Int((attributes.nightID ?? attributes.dusk).timeIntervalSince1970))" }
+        let attributes: FieldActivityAttributes
+        let started: Bool
+        static func == (a: Followed, b: Followed) -> Bool { a.id == b.id && a.started == b.started }
+    }
+    private(set) var nights: [Followed]=[]
+    @ObservationIgnored private var watching=false
+    func reload() {
+        #if DEBUG
+        if let fixture=DebugFollowing.fixture { nights=[fixture]; return }
+        #endif
+        let items=FieldActivities.Item.activities.filter { [.pending, .active, .stale].contains($0.activityState) }
+        let next=items.map { Followed(attributes: $0.attributes, started: $0.activityState != .pending) }.sorted { $0.attributes.dusk<$1.attributes.dusk }
+        if next != nights { nights=next }
+        watch()
+    }
+    func isFollowing(park: Park, night: Date) -> Bool { nights.contains { $0.attributes.covers(parkID: park.id, night: night) } }
+    /// The night for the tab bar: started, or about to (from three hours before sunset), until dawn.
+    func inProgress(at now: Date) -> Followed? { Self.inProgress(nights, at: now) }
+    nonisolated static func inProgress(_ nights: [Followed], at now: Date) -> Followed? {
+        nights.first { now<$0.attributes.dawn && ($0.started || now>=$0.attributes.dusk.addingTimeInterval(-3*3600)) }
+    }
+    /// A scheduled activity starting, or one ending, refreshes the list while Nyx is open.
+    private func watch() {
+        guard !watching else { return }
+        watching=true
+        Task { [weak self] in
+            for await _ in FieldActivities.Item.activityUpdates { self?.reload() }
+        }
     }
 }
 
@@ -92,6 +207,8 @@ enum FieldAlarmError: Error { case unsupported }
         guard let id=ledger[key(park: park, option: option)].flatMap(UUID.init(uuidString:)) else { return false }
         return ((try? AlarmManager.shared.alarms) ?? []).contains { $0.id == id }
     }
+    /// "Open sky" for the Milky Way's core rising; Snooze for the others.
+    nonisolated static func opensSky(_ kind: FieldNight.AlarmOption.Kind) -> Bool { kind == .core }
     static func toggle(park: Park, option: FieldNight.AlarmOption) async throws {
         let key=key(park: park, option: option)
         if let id=ledger[key].flatMap(UUID.init(uuidString:)), isSet(park: park, option: option) {
@@ -102,18 +219,22 @@ enum FieldAlarmError: Error { case unsupported }
         // The rows are hidden below iOS 26.1 (`supported`); if one is reached anyway, say so rather than do nothing.
         guard #available(iOS 26.1, *) else { throw FieldAlarmError.unsupported }
         let id=UUID()
-        let snooze=AlarmButton(text: "Snooze", textColor: tint, systemImageName: "zzz")
-        let alert=AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: option.alarmTitle), secondaryButton: snooze, secondaryButtonBehavior: .countdown)
+        // One secondary button. "Wake me" alarms snooze; the core rising opens the sky in red, so the
+        // eyes go from a dark room to a dark screen rather than the bright Lock Screen.
+        let opensSky=Self.opensSky(option.kind)
+        let secondary=opensSky ? AlarmButton(text: "Open sky", textColor: tint, systemImageName: "scope") : AlarmButton(text: "Snooze", textColor: tint, systemImageName: "zzz")
+        let alert=AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: option.alarmTitle), secondaryButton: secondary, secondaryButtonBehavior: opensSky ? .custom : .countdown)
         let attributes=AlarmAttributes(presentation: AlarmPresentation(alert: alert, countdown: AlarmPresentation.Countdown(title: "Snoozing")),
                                        metadata: FieldAlarmMetadata(parkName: park.shortName, kind: option.kind.rawValue), tintColor: tint)
-        let snoozeFor=Alarm.CountdownDuration(preAlert: nil, postAlert: 9*60)
+        let snoozeFor=opensSky ? nil : Alarm.CountdownDuration(preAlert: nil, postAlert: 9*60)
+        let openSky=opensSky ? OpenSkyIntent(parkID: park.id) : nil
         let configuration: AlarmManager.AlarmConfiguration<FieldAlarmMetadata>
         if #available(iOS 27.0, *) {
             // Siri and the system can then name the park the alarm belongs to.
             configuration=AlarmManager.AlarmConfiguration(countdownDuration: snoozeFor, schedule: .fixed(option.fire), attributes: attributes,
-                                                          appEntityIdentifier: EntityIdentifier(for: ParkEntity.self, identifier: park.id))
+                                                          appEntityIdentifier: EntityIdentifier(for: ParkEntity.self, identifier: park.id), secondaryIntent: openSky)
         } else {
-            configuration=AlarmManager.AlarmConfiguration(countdownDuration: snoozeFor, schedule: .fixed(option.fire), attributes: attributes)
+            configuration=AlarmManager.AlarmConfiguration(countdownDuration: snoozeFor, schedule: .fixed(option.fire), attributes: attributes, secondaryIntent: openSky)
         }
         _=try await AlarmManager.shared.schedule(id: id, configuration: configuration)
         var entries=ledger

@@ -18,6 +18,23 @@ struct StartFieldModeIntent: AppIntent {
     }
 }
 
+/// The "Open sky" button on a "core is up" alarm: night vision on, then field mode for that park,
+/// so the eyes go from the dark room to a red screen and never to a bright Lock Screen.
+struct OpenSkyIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource="Open the sky"
+    static let description=IntentDescription("Opens Nyx's red field screen for tonight, with night vision on.")
+    static let isDiscoverable=false
+    static let supportedModes: IntentModes = .foreground
+    @Parameter(title:"Park") var parkID: String
+    init() {}
+    init(parkID: String) { self.parkID=parkID }
+    func perform() async throws -> some IntentResult {
+        SharedSettings.defaults.set(true,forKey:"nightVision")
+        FieldModeRequest.post(parkID:parkID)
+        return .result()
+    }
+}
+
 /// A "Stargazing" Focus: while it is on, Nyx turns night vision on and offers field mode on
 /// Tonight. When the Focus ends, night vision returns to what it was, unless the person changed
 /// it in the meantime.

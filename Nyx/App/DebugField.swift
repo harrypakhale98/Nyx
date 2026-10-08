@@ -46,21 +46,40 @@ struct FieldActivityReview: View {
         let field=FieldNight(park: night.park, sky: night.sky)
         // Shown 50 minutes after sunset, moved to the real clock so the countdown and the line run.
         let moment=(night.sky.sunset ?? night.sky.evening).addingTimeInterval(50*60)
-        let attributes=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label).shifted(by: Date.now.timeIntervalSince(moment))
+        // An illustrative closure line (sample text, DEBUG only), as a followed night carries one.
+        let base=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label, closure: "Keys View Road closed at night")
+        let attributes=base.shifted(by: Date.now.timeIntervalSince(moment))
         let now=Date.now
         let state=attributes.state(at: now, nightVision: false)
+        // Followed ahead: 40 minutes before sunset, planned the day before.
+        let early=base.shifted(by: now.timeIntervalSince(base.dusk.addingTimeInterval(-40*60)))
+        let heading=Self.planned(early.state(at: now, nightVision: false, heading: true), at: now.addingTimeInterval(-26*3600))
+        // Stale three hours after the moment it was counting down to.
+        let stale=attributes.state(at: now.addingTimeInterval(-3*3600), nightVision: false)
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Eyebrow(text: "Lock Screen")
                 face { FieldActivityLockView(attributes: attributes, state: state, isStale: false) }
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
-                Eyebrow(text: "After its milestone, before Nyx updates it")
-                face { FieldActivityLockView(attributes: attributes, state: state, isStale: true) }
+                Eyebrow(text: "Heading out: a night followed ahead")
+                face { FieldActivityLockView(attributes: early, state: heading, isStale: false) }
+                Eyebrow(text: "Three hours after its moment, before Nyx updates it")
+                face { FieldActivityLockView(attributes: attributes, state: stale, isStale: true) }
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dawn, nightVision: false), isStale: false) }
+                Eyebrow(text: "Apple Watch Smart Stack and CarPlay (small)")
+                HStack(spacing: 10) {
+                    small { FieldActivitySmallView(attributes: attributes, state: state, isStale: false) }
+                    small { FieldActivitySmallView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
+                    small { FieldActivitySmallView(attributes: attributes, state: stale, isStale: true) }
+                }
                 Eyebrow(text: "Dynamic Island")
                 HStack(spacing: 10) {
                     island { HStack { FieldActivitySymbol(attributes: attributes, state: state, isStale: false); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: state, isStale: false) }.padding(.horizontal, 14) }
                     island { FieldActivitySymbol(attributes: attributes, state: state, isStale: false) }.frame(width: 44)
+                }
+                HStack(spacing: 10) {
+                    island { HStack { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true); Spacer(minLength: 40); FieldActivityCountdown(attributes: attributes, state: stale, isStale: true) }.padding(.horizontal, 14) }
+                    island { FieldActivitySymbol(attributes: attributes, state: stale, isStale: true) }.frame(width: 44)
                 }
                 island {
                     VStack(alignment: .leading, spacing: 8) {
@@ -73,6 +92,15 @@ struct FieldActivityReview: View {
     }
     private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content().background(Color.black.opacity(0.88), in: RoundedRectangle(cornerRadius: 22))
+    }
+    private static func planned(_ state: FieldActivityAttributes.ContentState, at date: Date) -> FieldActivityAttributes.ContentState {
+        var state=state
+        state.updated=date
+        return state
+    }
+    /// About the size of a Smart Stack card's Live Activity slot on a 46 mm watch.
+    private func small<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content().frame(width: 170, height: 84).background(Color.black, in: RoundedRectangle(cornerRadius: 16))
     }
     private func island<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content().frame(maxWidth: .infinity, minHeight: 36).background(Color.black, in: Capsule()).overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.5))

@@ -5,11 +5,11 @@ import SwiftUI
 import WidgetKit
 
 /// The night in the field, on the Lock Screen, in the Dynamic Island and in StandBy (whose night
-/// mode already turns it red).
+/// mode already turns it red), and in its small family on Apple Watch's Smart Stack and CarPlay.
 struct FieldLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for:FieldActivityAttributes.self) { context in
-            FieldActivityLockView(attributes:context.attributes,state:context.state,isStale:context.isStale)
+            FieldActivityFace(attributes:context.attributes,state:context.state,isStale:context.isStale)
                 .activityBackgroundTint(Color.black.opacity(0.88))
                 .activitySystemActionForegroundColor(FieldActivityColors(nightVision:context.state.nightVision).ink)
                 .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
@@ -26,12 +26,16 @@ struct FieldLiveActivity: Widget {
                         .dynamicIsland(verticalPlacement:.belowIfTooWide)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale,font:.system(.title3,design:.serif),maxWidth:90)
+                    FieldActivityCountdown(attributes:context.attributes,state:context.state,isStale:context.isStale,font:.system(.title3,design:.serif),maxWidth:110,compact:false)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment:.leading,spacing:6) {
                         FieldNightLine(attributes:context.attributes,colors:colors).frame(height:14)
-                        Text("\(context.attributes.parkName) · \(context.attributes.score) \(context.attributes.band)").font(.caption2).foregroundStyle(colors.muted)
+                        if context.isStale && !context.state.finished {
+                            FieldActivityUpdated(attributes:context.attributes,state:context.state).font(.caption2).foregroundStyle(colors.muted)
+                        } else {
+                            Text("\(context.attributes.parkName) · \(context.attributes.score) \(context.attributes.band)").font(.caption2).foregroundStyle(colors.muted)
+                        }
                     }.environment(\.timeZone,zone)
                 }
             } compactLeading: {
@@ -43,6 +47,21 @@ struct FieldLiveActivity: Widget {
             }
             .keylineTint(colors.accent)
             .widgetURL(URL(string:"nyx://field/\(context.attributes.parkID)"))
+        }
+        // Apple Watch's Smart Stack and CarPlay draw the small family; without it they compose one from the island.
+        .supplementalActivityFamilies([.small])
+    }
+}
+/// The Lock Screen face, or the small one where the system asks for it.
+struct FieldActivityFace: View {
+    @Environment(\.activityFamily) private var family
+    let attributes: FieldActivityAttributes
+    let state: FieldActivityAttributes.ContentState
+    let isStale: Bool
+    var body: some View {
+        switch family {
+        case .small: FieldActivitySmallView(attributes:attributes,state:state,isStale:isStale)
+        default: FieldActivityLockView(attributes:attributes,state:state,isStale:isStale)
         }
     }
 }
