@@ -97,7 +97,7 @@ nonisolated enum SpotGlow {
             let mean=others.reduce(0,+)/Double(others.count)
             if glow>mean*1.25 { return others.count==1 ? String(localized:"Brighter than this park's other spot") : String(localized:"Brighter than this park's other spots") }
             if glow<mean/1.25 { return others.count==1 ? String(localized:"Darker than this park's other spot") : String(localized:"Darker than this park's other spots") }
-            return String(localized:"About as dark as this park's other spots")
+            return nil
         }
         return parkCentre.flatMap { SkyGlow.comparison(spot:glow,park:$0) }
     }
@@ -160,11 +160,11 @@ struct ViewingSpotRow: View {
             copied=true
             Task { try? await Task.sleep(for:.seconds(3)); copied=false }
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
-            .buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.accent)
+            .buttonStyle(.borderless).foregroundStyle(palette.accent)
             .accessibilityHint(String(localized:"Copies \(coordinates), approximate."))
         if let url=SpotGlow.directions(spot) {
             Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
-                .buttonStyle(.bordered).buttonBorderShape(.capsule).tint(palette.accent)
+                .buttonStyle(.borderless).foregroundStyle(palette.accent)
                 .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
         }
     }

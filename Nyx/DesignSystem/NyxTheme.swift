@@ -50,7 +50,8 @@ struct Panel<Content: View>: View {
     @ViewBuilder var content: Content
     var body: some View {
         let shape=RoundedRectangle(cornerRadius:24)
-        content.padding(20).frame(maxWidth:.infinity,alignment:.leading)
+        // One card however many views the content holds.
+        VStack(alignment:.leading,spacing:0) { content }.padding(20).frame(maxWidth:.infinity,alignment:.leading)
             .background(shape.fill(palette.panel))
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
     }

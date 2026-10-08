@@ -38,7 +38,7 @@ struct TonightSkyView: View {
     var body: some View {
         let sky=HorizonSkies.shared.sky(park:park,night:night.id,at:moment)
         PanoramaCanvas(sky:sky,options:options)
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges:.top)
             .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
             .gesture(turn)
             .accessibilityElement()
@@ -204,7 +204,7 @@ struct BortleFigure: View {
                 let window=SkyAlmanac.nightWindow(night)
                 let middle=night.darkStart.flatMap { start in night.darkEnd.map { start.addingTimeInterval($0.timeIntervalSince(start)/2) } } ?? window.start.addingTimeInterval(window.duration/2)
                 let sky=HorizonSkies.shared.sky(park:park,night:park.evening(Self.summer),at:middle)
-                PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:park),centreAltitude:30,span:1.9,labels:false,bortle:level,showsMoon:false))
+                PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:park),centreAltitude:40,span:1.9,labels:false,bortle:level,showsMoon:false))
                     .frame(height:260)
                     .clipShape(RoundedRectangle(cornerRadius:20))
                     .overlay(RoundedRectangle(cornerRadius:20).stroke(palette.line,lineWidth:0.5))

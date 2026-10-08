@@ -272,15 +272,17 @@ struct PanoramaCanvas: View {
             }
         }
         // Faint stars, as far as the sky's limiting magnitude reaches; dimmer as they near it.
+        // A brighter sky also lowers every star's contrast against it.
+        let contrast=1-0.07*((bortle ?? 3)-1)
         for star in sky.dust where star.magnitude<limit {
             guard let p=frame.point(star.altitude,star.azimuth), frame.visible(p) else { continue }
-            let fade=min(1,(limit-star.magnitude)/0.9)
+            let fade=min(1,(limit-star.magnitude)/0.9)*contrast
             let d=0.8+0.6*(1-(star.magnitude-4.5)/3.3)
             context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(ink.opacity(0.5*fade)))
         }
-        for star in sky.stars where star.magnitude<limit+0.5 {
+        for star in sky.stars where star.magnitude<limit {
             guard let p=frame.point(star.altitude,star.azimuth), frame.visible(p) else { continue }
-            let fade=min(1,max(0,(limit-star.magnitude+0.5)/1.2))
+            let fade=min(1,max(0,limit-star.magnitude))*contrast
             let d=max(1.1,3.9-0.6*star.magnitude)
             let brightness=max(0.4,min(1,1.25-0.15*star.magnitude))*fade
             if star.magnitude<1.2 {
