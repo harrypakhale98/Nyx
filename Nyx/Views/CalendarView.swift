@@ -16,6 +16,8 @@ struct NightCell: View {
     var scale=1.0
     /// The night shown beside the month on a wide iPad.
     var selected=false
+    /// The score line's height, held open on a past night so its date lines up with the rest of the week.
+    @ScaledMetric(relativeTo:.caption2) private var scoreLine=13.33
     var body:some View {
         VStack(spacing:5) {
             Text("\(night.park.calendar.component(.day,from:night.id))").font((scale>1 ? Font.callout : Font.caption).monospacedDigit().weight(isTonight ? .bold : .regular))
@@ -48,9 +50,11 @@ struct NightCell: View {
                 let fade=isPast ? 0.35 : 1.0
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200)
             }.frame(height:28*scale).accessibilityHidden(true)
-            if isPast { Text(verbatim:"00").font(.caption2.monospacedDigit()).hidden() }
+            // Space, not hidden text: a hidden placeholder stretched the date's text frame over the whole cell.
+            if isPast { Color.clear.frame(height:scoreLine) }
             else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
-            else { Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(palette.muted) }
+            // Medium weight: at 11 pt the thin diagonals of a regular "7" fade into the sky.
+            else { Text("\(night.score.value)").font(.caption2.monospacedDigit().weight(.medium)).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78*scale)
             .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8)) } }
             .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
