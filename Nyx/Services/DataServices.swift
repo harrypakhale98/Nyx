@@ -321,7 +321,8 @@ actor ParkStore: ParkProviding {
         return true
     }
     private func fetchPrograms(_ park: Park, key: String) async {
-        struct Event: Decodable { let id: String; let title: String; let datestart: String; let description: String; let tags: [String]?; let dates: [String]? }
+        struct Time: Decodable { let timestart: String?; let timeend: String? }
+        struct Event: Decodable { let id: String; let title: String; let datestart: String; let description: String; let tags: [String]?; let dates: [String]?; let times: [Time]?; let location: String? }
         struct Page: Decodable { let data: [Event]; let total: String? }
         let today=park.isoDay(clock())
         func page(_ number: Int) async -> Page? {
@@ -338,7 +339,8 @@ actor ParkStore: ParkProviding {
             }
         }
         let programs=events.filter { Self.isNightSky(title: $0.title, tags: $0.tags ?? []) }.flatMap { event in
-            (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description)) }
+            (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description),
+                time: event.times?.first.flatMap { RangerProgram.timeRange(start: $0.timestart, end: $0.timeend) }, location: RangerProgram.place(event.location)) }
         }.sorted { $0.date<$1.date }
         let fresh=ProgramsCache(updated: clock(), programs: programs)
         programCache[park.id]=fresh

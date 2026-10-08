@@ -28,10 +28,10 @@ struct ScoreReadout: View {
     private var parts: [Part] {
         let scale=score.cloudPoints == nil ? 1/0.75 : 1
         return [
-            Part(id:"moon",title:String(localized:"Moon"),spoken:String(localized:"Moonlight"),points:score.moonPoints,maximum:40*scale),
-            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Cloud cover"),points:score.cloudPoints,maximum:25,note:cloudNote),
-            Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Light pollution"),points:score.bortlePoints,maximum:20*scale),
-            Part(id:"hours",title:String(localized:"Dark hours"),spoken:String(localized:"Length of darkness"),points:score.lengthPoints,maximum:15*scale)
+            Part(id:"moon",title:String(localized:"Moonlight"),spoken:String(localized:"Moonlight"),points:score.moonPoints,maximum:40*scale),
+            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Clouds"),points:score.cloudPoints,maximum:25,note:cloudNote),
+            Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Sky glow"),points:score.bortlePoints,maximum:20*scale),
+            Part(id:"hours",title:String(localized:"True darkness"),spoken:String(localized:"True darkness"),points:score.lengthPoints,maximum:15*scale)
         ]
     }
     private var cloudNote: String? {

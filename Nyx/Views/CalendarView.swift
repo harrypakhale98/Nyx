@@ -120,6 +120,8 @@ struct CalendarView: View {
     @State private var monthOffset=0
     @State private var chosen:Night?
     @State private var peeking=false
+    /// A night being added to Calendar from its context menu (no calendar permission: the system editor).
+    @State private var calendarNight:Night?
     @State private var forward=true
     /// The night shown beside the month on a wide iPad; tonight (or the month's first night) until one is chosen.
     @State private var focusedID:Date?
@@ -173,6 +175,7 @@ struct CalendarView: View {
             .measuringWidth($width)
             .task(id:park?.id) { if let park { await model.refresh([park]) } }
             .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
+            .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
@@ -239,6 +242,7 @@ struct CalendarView: View {
                 .contextMenu {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                     Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                    if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night } }
                 }
                 .accessibilityInputLabels(Self.spokenNames(night))
         } }
@@ -260,6 +264,7 @@ struct CalendarView: View {
                     .contextMenu {
                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                        if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night } }
                     } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision)) }
             }
         }
@@ -297,6 +302,7 @@ struct CalendarView: View {
         Panel { VStack(alignment:.leading,spacing:18) {
             ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park),inline:true)
             Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.buttonStyle(.bordered)
+            if night.id>=model.tonight(night.park) { AddNightToCalendar(night:night) }
         } }
         .frame(maxWidth:560)
         .id(night.id)

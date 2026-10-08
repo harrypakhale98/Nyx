@@ -55,9 +55,9 @@ Texas SB 2420 (in force since 2026-06-04, per Apple) and later Utah and Louisian
 - Under Apple's definition of "collect", nothing leaves the device, so the label stays Data Not Collected. Apple's framework, not vendor code, handles the exchange with the system. No required-reason API is involved.
 - Not used: PermissionKit significant-change consent (nothing to consent to) and App Store Server Notifications (no server). Counsel review is still recommended (owner).
 
-## Maps hand-off and translation (planned; integrator to confirm for build 8)
+## Maps hand-off and translation
 
-- **Open in Maps** from a viewing spot, if shipped: a user-initiated `maps://` link carrying the spot's public coordinates from `parks.json`, opened by the system in Apple Maps. Nyx makes no request and uses no MapKit; what Maps does is governed by Apple's policy. The product brief's "nothing else, including Apple routing services" refers to requests Nyx makes; this is a hand-off the person chooses. Add `maps` to the documented hand-offs and to `verify_release.py` if it uses a URL literal.
+- **Directions in Maps** from a viewing spot (build 8): a user-initiated `maps://` link carrying the spot's public coordinates from `parks.json`, opened by the system in Apple Maps. Nyx makes no request and uses no MapKit; what Maps does is governed by Apple's policy. The product brief's "nothing else, including Apple routing services" refers to requests Nyx makes; this is a hand-off the person chooses. Add `maps` to the documented hand-offs and to `verify_release.py` if it uses a URL literal.
 - **On-device translation** of NPS descriptions and alerts, if shipped: SwiftUI's `translationPresentation` shows Apple's Translation sheet when the person asks. Translation runs through Apple's framework (on device once languages are downloaded); Nyx sends nothing. No change to the label.
 
 ## Build 8 at a glance

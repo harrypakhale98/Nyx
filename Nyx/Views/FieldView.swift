@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// Field mode: the night itself, at the park. Black everywhere, red through the night-vision
 /// filter whatever the app's setting, large serif type, one fact at a time. The milestones scroll
@@ -59,6 +60,9 @@ struct FieldView: View {
         .modifier(NightVisionFilter(enabled:true))
         .preferredColorScheme(.dark)
         .statusBarHidden(true).persistentSystemOverlays(.hidden)
+        // Remembered so the park's page can offer "Keep this night" the morning after.
+        .onAppear { if session.changesPhone { KeepThisNight.record(park:session.park,night:session.night.sky.evening) } }
+        .modifier(FieldJournalStore())
         .sensoryFeedback(.selection,trigger:focused)
         .sensoryFeedback(.impact(weight:.light),trigger:session.milestonesPassed)
         .sensoryFeedback(.success,trigger:session.darknessBegan)
@@ -80,7 +84,8 @@ struct FieldView: View {
                 .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
             VStack(alignment:.leading,spacing:2) {
                 Text(session.park.shortName).font(.system(.headline,design:.serif)).lineLimit(typeSize.isAccessibilitySize ? 3 : 2).minimumScaleFactor(0.85)
-                Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit()
+                // Wraps at accessibility sizes rather than cutting the band short.
+                Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit().fixedSize(horizontal:false,vertical:true)
             }
             // One spoken line; the visible caption keeps its own short text.
             .accessibilityElement(children:.ignore)
@@ -184,16 +189,18 @@ struct FieldNightPager: View {
         return dims(VStack(alignment:.leading,spacing:10) {
             Eyebrow(text:"Now")
             Text(status.lead).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true)
-            if let target=status.target {
-                Text(timerInterval:Date.now...max(Date.now,session.real(target)),countsDown:true,showsHours:true)
-                    .font(.system(size:numeral,weight:.light,design:.serif)).monospacedDigit().tracking(-1)
-                    .lineLimit(1).minimumScaleFactor(0.5)
-            }
+            if let target=status.target { FieldCountdown(target:session.real(target),numeral:numeral) }
             if !status.trailing.isEmpty { Text(status.trailing).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true) }
+            // Dawn: the night can go straight into the journal, with the park, the date and the score.
+            if status.phase == .over, KeepThisNight.container != nil || DebugScenario.screen != nil {
+                KeepThisNightButton(prefill:JournalPrefill(parkID:session.park.id,date:session.night.sky.evening,observedBortle:session.park.bortleEstimate,
+                    notes:String(localized:"Nyx scored this night \(session.score.value), \(session.score.band.label). \(session.night.sky.moon.name), \(Int((session.night.sky.moon.illumination*100).rounded()))% lit.")),prominent:false)
+                    .padding(.top,10)
+            }
             Text(moonLine(now)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,6)
         }
         .frame(maxWidth:.infinity,alignment:.leading)
-        .accessibilityElement(children:.ignore)
+        .accessibilityElement(children:status.phase == .over ? .contain : .ignore)
         .accessibilityLabel(status.spoken+" "+moonLine(now)))
     }
     private func card(_ milestone:FieldNight.Milestone,now:Date)->some View {
@@ -261,6 +268,7 @@ struct EyeClock: View {
                         }.frame(width:34,height:34)
                         VStack(alignment:.leading,spacing:2) {
                             Text(title(adaptation.stage(at:now))).font(.subheadline.weight(.medium)).fixedSize(horizontal:false,vertical:true)
+                            if adaptation.stage(at:now) == .rods { Text("Your faint-light vision is waking up.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                             Text(adaptation.stage(at:now) == .adapted ? String(localized:"About 30 minutes in red light. An estimate.") : String(localized:"\(minutes) of about 30 minutes. An estimate."))
                                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                         }
@@ -270,7 +278,7 @@ struct EyeClock: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityElement(children:.ignore)
-                .accessibilityLabel("Dark adaptation: \(title(adaptation.stage(at:now)))")
+                .accessibilityLabel(adaptation.stage(at:now) == .rods ? String(localized:"Dark adaptation: rods taking over. Your faint-light vision is waking up.") : String(localized:"Dark adaptation: \(title(adaptation.stage(at:now)))"))
                 .accessibilityValue(String(localized:"\(minutes) of about 30 minutes. An estimate."))
                 .accessibilityHint(expanded ? "Hides how this works" : "Explains how this works")
                 if expanded {
@@ -362,6 +370,7 @@ struct FieldEntry: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @Environment(\.modelContext) private var context
     let park: Park
     let night: Night
     @State private var following=false
@@ -389,6 +398,8 @@ struct FieldEntry: View {
             }
         }
         .task { following=FieldActivities.isFollowing(park) }
+        // Field mode is presented over the app; its dawn "Keep this night" needs the journal's store.
+        .onAppear { KeepThisNight.container=context.container }
     }
 }
 /// Liquid Glass normally; a plain bordered capsule in night vision and under Reduce Transparency.
@@ -399,4 +410,77 @@ private struct FieldButtonStyle:ViewModifier {
         if palette.nightVision || reduceTransparency || palette.highContrast { content.buttonStyle(.bordered).buttonBorderShape(.capsule) }
         else { content.buttonStyle(.glass).buttonBorderShape(.capsule) }
     }
+}
+
+/// The journal's store for field mode, which is presented over the app without its environment.
+private struct FieldJournalStore: ViewModifier {
+    @ViewBuilder func body(content:Content)->some View {
+        if let container=KeepThisNight.container { content.modelContainer(container) } else { content }
+    }
+}
+/// The time to a moment, in words a dark-adapted eye cannot mistake for a clock: "23 min",
+/// "1 h 31 min", serif numerals with smaller units, ticking each minute. Only the last two
+/// minutes count down as m:ss. The surrounding card speaks it as a sentence.
+struct FieldCountdown: View {
+    let target: Date
+    var numeral: Double=68
+    var body: some View {
+        TimelineView(FieldCountdownSchedule(target:target)) { context in
+            let remaining=target.timeIntervalSince(context.date)
+            Group {
+                if remaining<=120 {
+                    Text(timerInterval:context.date...max(context.date,target),countsDown:true,showsHours:false)
+                        .font(.system(size:numeral,weight:.light,design:.serif)).monospacedDigit().tracking(-1)
+                } else {
+                    let parts=Self.parts(remaining)
+                    ViewThatFits(in:.horizontal) {
+                        HStack(alignment:.firstTextBaseline,spacing:6) { units(parts) }
+                        VStack(alignment:.leading,spacing:0) { units(parts) }
+                    }
+                }
+            }
+            .lineLimit(1)
+            .accessibilityHidden(true)
+        }
+    }
+    @ViewBuilder private func units(_ parts:(hours:Int,minutes:Int))->some View {
+        if parts.hours>0 {
+            HStack(alignment:.firstTextBaseline,spacing:4) { figure(parts.hours); unit(String(localized:"h")) }
+        }
+        if parts.minutes>0 || parts.hours==0 {
+            HStack(alignment:.firstTextBaseline,spacing:4) { figure(parts.minutes); unit(String(localized:"min")) }
+        }
+    }
+    private func figure(_ value:Int)->some View { Text(value,format:.number).font(.system(size:numeral,weight:.light,design:.serif)).monospacedDigit().tracking(-1) }
+    private func unit(_ text:String)->some View { Text(text).font(.system(size:numeral*0.36,weight:.regular,design:.serif)) }
+    /// Whole hours and minutes, rounded up to the next minute, as a countdown should be.
+    nonisolated static func parts(_ seconds:TimeInterval)->(hours:Int,minutes:Int) {
+        let minutes=Int((max(0,seconds)/60).rounded(.up))
+        return (minutes/60,minutes%60)
+    }
+}
+/// Ticks on each minute boundary counted back from the target, then every second for the last two minutes.
+struct FieldCountdownSchedule: TimelineSchedule {
+    let target: Date
+    func entries(from startDate:Date,mode:TimelineScheduleMode)->AnyIterator<Date> {
+        var next=startDate
+        return AnyIterator {
+            let current=next
+            let remaining=target.timeIntervalSince(current)
+            if remaining<=120 { next=current.addingTimeInterval(1) }
+            else {
+                // The next moment the rounded-up minute changes.
+                let step=remaining.truncatingRemainder(dividingBy:60)
+                next=current.addingTimeInterval(step>0.001 ? step : 60)
+            }
+            return current
+        }
+    }
+}
+#Preview("Countdown • 23 min • 1 h 31 min • 1:40") {
+    VStack(alignment:.leading,spacing:24) {
+        FieldCountdown(target:.now.addingTimeInterval(22*60+39))
+        FieldCountdown(target:.now.addingTimeInterval(90*60+10))
+        FieldCountdown(target:.now.addingTimeInterval(100))
+    }.padding().foregroundStyle(.white).background(.black)
 }

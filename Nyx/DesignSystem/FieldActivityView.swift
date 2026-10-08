@@ -37,7 +37,7 @@ struct FieldActivityLockView: View {
                     // Stale: the countdown's moment passed with no update, so the next one is a clock time.
                     Group {
                         if isStale { Text(mark.date,style:.time) }
-                        else { Text(timerInterval:Date.now...max(Date.now,mark.date),countsDown:true) }
+                        else { FieldActivityTimer(target:mark.date) }
                     }.font(.system(.title2,design:.serif)).monospacedDigit()
                         .foregroundStyle(colors.accent).multilineTextAlignment(.trailing).frame(maxWidth:110,alignment:.trailing)
                 }
@@ -125,7 +125,7 @@ struct FieldActivityCountdown: View {
         Group {
             if let mark=attributes.shown(state,isStale:isStale) {
                 if isStale { Text(mark.date,style:.time) }
-                else { Text(timerInterval:Date.now...max(Date.now,mark.date),countsDown:true) }
+                else { FieldActivityTimer(target:mark.date) }
             } else if !state.finished {
                 Text(attributes.dawn,style:.time)
             } else { Text("Dawn") }
@@ -136,6 +136,16 @@ struct FieldActivityCountdown: View {
     }
 }
 
+/// The countdown on the Lock Screen and in the Dynamic Island: hours and minutes, rounded up
+/// ("23 min", "1 hr, 31 min"), updated by the system from a time source, so it keeps counting
+/// between the app's updates and never reads as a clock time.
+struct FieldActivityTimer: View {
+    let target: Date
+    var body: some View {
+        // From now to the target, counted in whole minutes; the 59 s rounds a part minute up ("22:39" reads "23 min").
+        Text(.dateRange(endingAt:target.addingTimeInterval(59)),format:.components(style:.abbreviated,fields:[.hour,.minute]))
+    }
+}
 #if DEBUG
 extension FieldActivityAttributes {
     /// The same night moved in time, so a review screen's system timers count against a real clock.

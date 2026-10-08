@@ -232,6 +232,14 @@ struct JournalEditorView:View {
     @State private var picker:[PhotosPickerItem]=[]
     var existing:JournalEntry?
     init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
+    /// A new entry for a night being kept (field mode at dawn, a park's page the morning after):
+    /// the park, the night it began on, the observed-Bortle default and a first line, all editable.
+    init(prefill:JournalPrefill) {
+        existing=nil
+        let editor=JournalEditorModel(entry:nil)
+        editor.parkID=prefill.parkID; editor.date=prefill.date; editor.observedBortle=prefill.observedBortle; editor.notes=prefill.notes
+        _editor=State(initialValue:editor)
+    }
     var body:some View {
         @Bindable var editor=editor
         Form {

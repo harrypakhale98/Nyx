@@ -174,6 +174,23 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
     let title: String
     let date: String
     let description: String
+    /// NPS's own wording of the time ("7:00 PM – 8:30 PM"), park-local; nil in older caches.
+    var time: String?=nil
+    /// Where it meets, as NPS lists it.
+    var location: String?=nil
+    /// "7:00 PM – 8:30 PM", or the start alone; nil when NPS gives neither.
+    static func timeRange(start: String?, end: String?) -> String? {
+        let start=start?.trimmingCharacters(in: .whitespacesAndNewlines), end=end?.trimmingCharacters(in: .whitespacesAndNewlines)
+        switch (start?.isEmpty == false ? start : nil, end?.isEmpty == false ? end : nil) {
+        case (let a?, let b?): return a==b ? a : "\(a) – \(b)"
+        case (let a?, nil): return a
+        default: return nil
+        }
+    }
+    static func place(_ text: String?) -> String? {
+        guard let text=text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
+        return text
+    }
 }
 nonisolated enum ParkData {
     static func load(bundle: Bundle = .main) throws -> [Park] {
