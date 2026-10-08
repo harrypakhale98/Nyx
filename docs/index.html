@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nyx — Where, and which night, for the darkest sky</title>
 <meta name="description" content="Nyx compares the 63 US national parks night by night and tells you where and when the sky will be darkest. One score from 0 to 100, with its reasons. Free, offline-first, and it collects no data.">
+<meta name="apple-itunes-app" content="app-id=6818817800">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" href="images/favicon-64.png">
@@ -24,12 +25,9 @@
 <!--
   Landing page. No scripts, no cookies, no web fonts, no external requests; every image is in docs/images.
   Night vision is a checkbox (#nv) that restyles the page through CSS :has(); nothing is stored.
-  LAUNCH DAY: replace both <span class="pill status"> lines ("Coming to the App Store") with
-    <a class="pill status" href="https://apps.apple.com/app/id<APP_ID>">Download on the App Store</a>
-  using the App Store ID from App Store Connect (App Information → Apple ID), and add
-    <meta name="apple-itunes-app" content="app-id=<APP_ID>">
-  to this head for Safari's Smart App Banner. For Apple's badge artwork, download the SVG from Apple
-  Marketing Tools into docs/images and use it inside that link; do not hotlink it.
+  On the App Store since October 7, 2026 (ID 6818817800). Both download buttons and the Smart App Banner tag
+  use that ID; for Apple's badge artwork, download the SVG from Apple Marketing Tools into docs/images and
+  use it inside the links; do not hotlink it.
   Screens: build 1.1 (7), captured 2026-10-06 with live forecasts (Store/Screenshots/README.md).
 -->
 </head>
@@ -60,7 +58,7 @@
         <h1 id="hero-title">Where, and which night, for the <em>darkest</em> sky.</h1>
         <p class="lead">Nyx weighs the Moon, the clouds, the sky glow and the hours of true darkness for every park and every night, and turns them into one score from 0 to 100. It shows its reasons, puts park closures beside the number, and says what it cannot know.</p>
         <div class="cta-row">
-          <span class="pill status">Coming to the App Store</span>
+          <a class="pill primary" href="https://apps.apple.com/us/app/nyx-dark-sky-planner/id6818817800">Download on the App Store</a>
           <a class="pill ghost" href="#score">How the score works</a>
         </div>
         <ul class="trust" aria-label="At a glance">
@@ -310,10 +308,10 @@
       <h2 id="closing-title">Plan a darker night.</h2>
       <p class="lead">Free, with no subscriptions or in-app purchases. For iPhone and iPad with iOS 26 or later, Apple Watch, and Apple Vision Pro.</p>
       <div class="cta-row">
-        <span class="pill status">Coming to the App Store</span>
+        <a class="pill primary" href="https://apps.apple.com/us/app/nyx-dark-sky-planner/id6818817800">Download on the App Store</a>
         <a class="pill ghost" href="case-study">Read the case study</a>
       </div>
-      <p class="note" style="margin-top:28px">Screens from the pre-release build 1.1. Every number in them comes from the app's own engine and real forecasts on the night of capture; the journal uses sample entries.</p>
+      <p class="note" style="margin-top:28px">Screens from Nyx 1.1, the version on the App Store. Every number in them comes from the app's own engine and real forecasts on the night of capture; the journal uses sample entries.</p>
     </div>
   </section>
 
