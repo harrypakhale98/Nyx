@@ -123,12 +123,22 @@ struct CalendarView: View {
     /// A night being added to Calendar from its context menu (no calendar permission: the system editor).
     @State private var calendarNight:Night?
     @State private var forward=true
-    /// The night shown beside the month on a wide iPad; tonight (or the month's first night) until one is chosen.
-    @State private var focusedID:Date?
+    /// The night in the inspector on a wide iPad; tonight (or the month's first night) until one is
+    /// chosen. Kept for the window, like its park.
+    @SceneStorage("planNight") private var focusedID:Date?
+    /// Whether the breakdown stands beside the month where there is room; closing it is remembered.
+    @SceneStorage("planInspector") private var inspectorWanted=true
+    /// The breakdown in a trailing inspector, right now.
+    @State private var inspector=false
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    /// The month's own width (an open inspector is not part of it).
     @State private var width=0.0
     private var park:Park? { model.park(parkID) ?? model.home }
-    /// A wide iPad shows the chosen night's breakdown beside a larger month, instead of in a sheet.
-    private var wide:Bool { !typeSize.isAccessibilitySize && WideLayout.columns(width:width,largeText:false)==2 }
+    /// A wide iPad window shows the chosen night's breakdown in a trailing inspector beside a larger
+    /// month, and a tap chooses the night; otherwise a tap opens the breakdown in a sheet.
+    private var wide:Bool { inspector }
+    /// Room for the inspector (`WideLayout.inspector`), whether or not it is open.
+    private var inspectorRoom:Bool { WideLayout.inspector(width:width,open:inspector,regular:sizeClass == .regular,largeText:typeSize.isAccessibilitySize) }
     /// Everything one month's page draws, worked out once per render.
     private struct Month {
         let date:Date
@@ -157,22 +167,31 @@ struct CalendarView: View {
         ScrollView {
             if let park {
                 let data=month(park)
-                if wide {
-                    HStack(alignment:.top,spacing:28) {
-                        VStack(alignment:.leading,spacing:24) { heading(park); monthBar(park,data); grid(park,data,scale:1.3); windowPanel(park,data); legend }
-                            .frame(maxWidth:640)
-                        if let night=focused(data) { aside(night) }
-                    }.padding(24).clipped()
-                } else {
-                    VStack(alignment:.leading,spacing:24) {
-                        heading(park); monthBar(park,data)
-                        if typeSize.isAccessibilitySize { list(park,data) } else { grid(park,data,scale:1) }
-                        windowPanel(park,data); legend
-                    }.padding(24).clipped().readableColumn()
-                }
+                VStack(alignment:.leading,spacing:24) {
+                    heading(park); monthBar(park,data)
+                    if typeSize.isAccessibilitySize { list(park,data) } else { grid(park,data,scale:wide && width>=640 ? 1.3 : 1) }
+                    windowPanel(park,data); legend
+                }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .measuringWidth($width)
+            .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {
+                if let park, let night=focused(month(park)) { aside(night) }
+            }
+            .toolbar {
+                if inspectorRoom {
+                    ToolbarItem(placement:.topBarTrailing) {
+                        Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { inspectorWanted.toggle() } } label:{
+                            Label(inspector ? "Hide the breakdown" : "Show the breakdown",systemImage:"sidebar.trailing")
+                        }.help(inspector ? "Hide the breakdown" : "Show the breakdown")
+                        .accessibilityInputLabels([Text("Breakdown"),Text("Score breakdown")])
+                    }
+                }
+            }
+            .onChange(of:width,initial:true) { _,_ in syncInspector() }
+            .onChange(of:sizeClass) { _,_ in syncInspector() }
+            .onChange(of:typeSize) { _,_ in syncInspector() }
+            .onChange(of:inspectorWanted) { _,_ in syncInspector() }
             .task(id:park?.id) { if let park { await model.refresh([park]) } }
             .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
@@ -297,20 +316,28 @@ struct CalendarView: View {
         Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
         if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
     }
-    /// The chosen night beside the month: its breakdown, and the way into the park on that night.
+    /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
+    /// page here or in a window of its own, and Calendar for nights still ahead).
     private func aside(_ night:Night)->some View {
-        Panel { VStack(alignment:.leading,spacing:18) {
-            ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park),inline:true)
-            Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.buttonStyle(.bordered)
-            if night.id>=model.tonight(night.park) { AddNightToCalendar(night:night) }
-        } }
-        .frame(maxWidth:560)
-        .id(night.id)
-        .transition(.opacity)
+        NightInspector(night:night,isTonight:night.id==model.tonight(night.park),close:nil) {
+            VStack(alignment:.leading,spacing:12) {
+                Button { chosen=night;peeking=true } label:{ Label("Open this night",systemImage:"arrow.up.right") }.buttonStyle(.bordered)
+                OpenParkWindowButton(park:night.park,night:night.id).buttonStyle(.bordered)
+                if night.id>=model.tonight(night.park) { AddNightToCalendar(night:night) }
+            }
+        }
     }
-    /// A tap: beside the month on a wide iPad, in a sheet otherwise.
+    /// Opens or closes the inspector as the window's room and the person's choice allow.
+    private func syncInspector() {
+        let show=inspectorWanted && inspectorRoom
+        if show != inspector { inspector=show }
+    }
+    /// A tap: in the inspector on a wide iPad (opening it again if it was closed), in a sheet otherwise.
     private func choose(_ night:Night) {
-        if wide { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=night.id }; ReviewPrompt.noteNightViewed(score:night.score.value) } else { chosen=night }
+        if inspectorRoom {
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=night.id; inspectorWanted=true }
+            ReviewPrompt.noteNightViewed(score:night.score.value)
+        } else { chosen=night }
     }
     private func step(_ delta:Int) {
         guard let park else { return }

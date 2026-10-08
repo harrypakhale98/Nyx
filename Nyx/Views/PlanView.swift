@@ -27,6 +27,10 @@ struct PlanView: View {
                 }
             }
         }
+        // A park dragged here (from Parks, Tonight or the map, or another window) opens its month.
+        .acceptsPark("Plan this park",systemImage:"calendar") { park in
+            model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil)
+        }
         // A `nyx://calendar` link always lands on the month it names.
         .onChange(of:model.calendarRequest,initial:true) { _,request in if request != nil { mode = .month } }
         .task { if DebugScenario.isEnabled("plan-trip") { mode = .free } }

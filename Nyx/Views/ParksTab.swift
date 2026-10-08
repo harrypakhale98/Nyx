@@ -8,7 +8,8 @@ struct ParksTab: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(SceneCommands.self) private var commands: SceneCommands?
-    @State private var selection: String?
+    /// The park beside the list, kept for the window (and restored with it).
+    @SceneStorage("parksPark") private var selection: String?
     @State private var path: [Park]=[]
     /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` opens the map.
     @SceneStorage("parksShowsMap") private var showsMap=DebugScenario.isEnabled("parks-map")

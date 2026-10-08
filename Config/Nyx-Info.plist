@@ -87,6 +87,16 @@
 				</array>
 			</dict>
 		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Nyx Park</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.harrypakhale.nyx.park</string>
+		</dict>
 	</array>
 </dict>
 </plist>

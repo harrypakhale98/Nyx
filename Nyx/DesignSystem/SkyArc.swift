@@ -12,6 +12,13 @@ struct SkyArc: View {
     var isTonight=true
     /// The Milky Way core's line from What's up, so VoiceOver hears the same times the panel shows.
     var core:WhatsUp.Item?=nil
+    /// The chart's width, so a wide column draws a taller night instead of a flatter one.
+    @State private var chartWidth=0.0
+    /// About 2.4:1 wherever the column allows (168 pt tall on iPhone, as before; up to 300 pt on a wide iPad).
+    private var chartHeight:Double { SkyArc.height(width:chartWidth) }
+    nonisolated static func height(width:Double)->Double { min(300,max(168,(width/2.4).rounded())) }
+    /// The Moon grows with the chart: 20 pt at the phone's height.
+    private var moonSize:Double { (20*chartHeight/168).rounded() }
     /// Sunset minus an hour to sunrise plus an hour; 18:00–06:00 local when the Sun never crosses.
     private var window:(start:Date,end:Date) {
         if let sunset=night.sky.sunset,let sunrise=night.sky.sunrise,sunrise>sunset {
@@ -30,9 +37,10 @@ struct SkyArc: View {
         VStack(alignment:.leading,spacing:14) {
             Canvas { context,size in draw(in:&context,size:size) } symbols: {
                 MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
-                    .frame(width:20,height:20).tag("moon")
+                    .frame(width:moonSize,height:moonSize).tag("moon")
             }
-            .frame(height:168)
+            .frame(height:chartHeight)
+            .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
             .clipShape(RoundedRectangle(cornerRadius:14))
             // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
             .accessibilityIgnoresInvertColors()
@@ -83,6 +91,8 @@ struct SkyArc: View {
         let (start,end)=window
         let duration=end.timeIntervalSince(start)
         let labelBand=22.0, horizon=(size.height-labelBand)*0.74
+        // Taller on a wide iPad: the Milky Way's band and the Moon grow with the chart (1 on iPhone).
+        let grow=size.height/168
         func x(_ date:Date)->Double { date.timeIntervalSince(start)/duration*size.width }
         func date(_ x:Double)->Date { start.addingTimeInterval(x/size.width*duration) }
         func y(_ altitude:Double)->Double { horizon-altitude/90*(horizon-10) }
@@ -177,7 +187,7 @@ struct SkyArc: View {
         if !corePaths.isEmpty {
             context.drawLayer { band in
                 band.addFilter(.blur(radius:4))
-                for path in corePaths { band.stroke(path,with:.color(palette.ink.opacity(0.16*access.glow)),style:StrokeStyle(lineWidth:10,lineCap:.round,lineJoin:.round)) }
+                for path in corePaths { band.stroke(path,with:.color(palette.ink.opacity(0.16*access.glow)),style:StrokeStyle(lineWidth:10*grow,lineCap:.round,lineJoin:.round)) }
             }
             for path in corePaths { context.stroke(path,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:1.3,lineCap:.round,dash:[0.1,3.6])) }
             if let peak=corePeak, peak.altitude>=8 {
@@ -197,7 +207,8 @@ struct SkyArc: View {
         }
         // The Moon itself, at its highest point in view.
         if let peak=moonPoints.max(by:{ $0.1<$1.1 }),peak.1>0,let symbol=context.resolveSymbol(id:"moon") {
-            let px=min(max(x(peak.0),12),size.width-12), py=max(y(peak.1),12)
+            let edge=12*grow
+            let px=min(max(x(peak.0),edge),size.width-edge), py=max(y(peak.1),edge)
             context.draw(symbol,at:CGPoint(x:px,y:py))
         }
 
