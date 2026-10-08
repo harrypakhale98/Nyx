@@ -67,6 +67,8 @@
 		<key>UIImageName</key>
 		<string>LaunchStars</string>
 	</dict>
+	<key>UISupportsAssistiveAccess</key>
+	<true/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
