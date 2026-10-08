@@ -850,7 +850,9 @@ struct SystemSearch: ViewModifier {
     let prompt: LocalizedStringKey
     let enabled: Bool
     func body(content:Content)->some View {
-        if enabled { content.searchable(text:$text,prompt:prompt).searchFocused(focused) } else { content }
+        // Always shown: a field that tucks away under the bar moved the whole list 52 pt while the accessibility
+        // tree kept the old positions, so the system audit measured every row against the wrong pixels.
+        if enabled { content.searchable(text:$text,placement:.navigationBarDrawer(displayMode:.always),prompt:prompt).searchFocused(focused) } else { content }
     }
 }
 /// A search field in the page itself, for accessibility text sizes: it grows and wraps with the text.

@@ -33,14 +33,20 @@ struct FieldView: View {
     @State private var size=CGSize.zero
     /// A wide landscape window: "The night" and "Where to look" side by side, with no switch between them.
     private var sideBySide: Bool { WideLayout.sideBySide(width:size.width,height:size.height,largeText:typeSize.isAccessibilitySize) }
+    /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
+    private var basisNote: String? {
+        guard !session.score.hasForecast else { return nil }
+        return session.score.basis.isEarlyLook ? String(localized:"Early look: the forecast is eased toward usual clouds.") : String(localized:"No cloud forecast yet. This score uses the park's usual clouds.")
+    }
     var body: some View {
         let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"))
         VStack(spacing:0) {
             header
             // Without a full cloud forecast (offline with nothing cached, or a stale one) the score says
             // what its clouds rest on, under it, aligned with the park's name.
-            if !session.score.hasForecast {
-                Text(session.score.basis.isEarlyLook ? String(localized:"Early look: the forecast is eased toward usual clouds.") : String(localized:"No cloud forecast yet. This score uses the park's usual clouds.")).font(.caption)
+            // At accessibility sizes it scrolls with the page instead, so the page keeps its room.
+            if let basisNote, !inline {
+                Text(basisNote).font(.caption)
                     .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.leading,68).padding(.trailing,20)
             }
             // In the flow, not over it: the countdown under it stays readable.
@@ -49,14 +55,14 @@ struct FieldView: View {
                 if sideBySide {
                     // The night on the left, the sky on the right; the eye's clock stays with the night.
                     HStack(spacing:0) {
-                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil).frame(maxWidth:.infinity)
+                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil).frame(maxWidth:.infinity)
                         Rectangle().fill(palette.line).frame(width:0.5).padding(.vertical,24).accessibilityHidden(true)
                         FieldCompassView(session:session,fixedPose:fixedPose).frame(maxWidth:.infinity)
                     }
                 } else {
                     switch current {
-                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil)
-                    case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil)
+                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil)
+                    case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil)
                     }
                 }
             }.frame(maxHeight:.infinity)
@@ -174,6 +180,8 @@ struct FieldNightPager: View {
     @Binding var focused: String?
     /// At accessibility sizes, the eye's clock scrolls here, under "Now".
     var eyeClock: Binding<Bool>?=nil
+    /// At accessibility sizes, what the score's clouds rest on scrolls here, above "Now", instead of under the header.
+    var note: String?=nil
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -184,7 +192,10 @@ struct FieldNightPager: View {
             let ahead=session.night.upcoming(after:now), passed=session.night.milestones.filter { $0.date<=now }
             ScrollView(.vertical) {
                 LazyVStack(alignment:.leading,spacing:44) {
-                    nowCard(now).id("now")
+                    VStack(alignment:.leading,spacing:20) {
+                        if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading) }
+                        nowCard(now)
+                    }.id("now")
                     if let eyeClock { EyeClock(session:session,expanded:eyeClock) }
                     ForEach(ahead) { milestone in card(milestone,now:now).id(milestone.id) }
                     if !passed.isEmpty { earlier(passed).id("earlier") }

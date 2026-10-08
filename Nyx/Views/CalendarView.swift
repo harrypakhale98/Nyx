@@ -33,7 +33,9 @@ struct NightCell: View {
                 // A past night is one quiet mark, whatever its forecast was: it can no longer be chosen.
                 if isPast {
                     let dot=1.6*scale
-                    context.fill(Path(ellipseIn:CGRect(x:center.x-dot,y:center.y-dot,width:2*dot,height:2*dot)),with:.color(palette.muted.opacity(0.45)))
+                    // In the date's own grey, not fainter: the cell is one accessibility element whose text spans
+                    // it, so a fainter dot was measured as the date's colour (the audit failed every past date).
+                    context.fill(Path(ellipseIn:CGRect(x:center.x-dot,y:center.y-dot,width:2*dot,height:2*dot)),with:.color(palette.muted))
                     return
                 }
                 if highlighted {

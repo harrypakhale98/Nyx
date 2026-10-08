@@ -161,6 +161,8 @@ struct TonightMapView: View {
     private func insetNames(size:CGSize)->some View {
         ForEach(SkyMap.insets.dropFirst(),id:\.region) { inset in
             Text(inset.name).font(.system(size:insetType,weight:.medium)).foregroundStyle(palette.muted)
+                // On the map's own colour, so a neighbouring mark's glow never runs behind the small words.
+                .background(RoundedRectangle(cornerRadius:3,style:.continuous).fill(palette.panel).padding(.horizontal,-2).padding(.vertical,-1))
                 .accessibilityHidden(true)
                 .layoutValue(key:TonightMapLabels.Key.self,value:.inset(region:inset.region,frame:frame(inset,size:size)))
         }
