@@ -64,7 +64,7 @@ struct FeelMoonButton: View {
                 Label("Feel the Moon",systemImage:"hand.tap").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle())
             }
             .buttonStyle(.plain).foregroundStyle(palette.accent)
-            .accessibilityHint("Plays the Moon's phase as a texture: sharp, sparse taps for a new Moon, a broad swell for a full one.")
+            .accessibilityHint("Plays the Moon's phase as a texture: sharp, sparse taps for a new moon, a broad swell for a full moon.")
             .accessibilityInputLabels([Text("Feel the Moon"),Text("Feel")])
         }
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 /// True while a horizontal scrub is under way, so the page can hold still instead of drifting.
 struct RiverScrubbingKey:PreferenceKey {
@@ -7,10 +8,12 @@ struct RiverScrubbingKey:PreferenceKey {
 }
 /// Thirty nights as one flowing line. Drag across it (or swipe up/down with VoiceOver)
 /// to scrub; the moon above the selected night morphs as you go. Nights without a full cloud
-/// forecast are dashed (hollow beyond the forecast, half-filled for an early look), and the best
-/// nights glow amber. Within the seven-day model
-/// horizon a pale bar through each night spans the scores the clearest and cloudiest of three
-/// forecast models would give, so uncertainty is something you can see, not a footnote.
+/// forecast are dashed (hollow beyond the forecast, half-filled for an early look), a small tick
+/// marks where the forecast ends, and the best nights glow amber. Within the seven-day model
+/// horizon a soft vertical glow behind each night spans the scores the clearest and cloudiest of
+/// three forecast models would give, so uncertainty is something you can see, not a footnote.
+/// The selected night's caption carries the meaning (date, score, what its clouds rest on); a
+/// one-time tip explains the marks instead of a standing legend.
 struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
@@ -45,10 +48,12 @@ struct TimeRiver: View {
         return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0
+    private let tip=RiverTip()
 
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
-            Eyebrow(text:"Follow the darker nights")
+            Eyebrow(text:startsTonight ? "The next 30 nights" : "30 nights from \(nights.first.map { $0.park.dayLabel($0.id) } ?? "")")
+            if showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent) }
             if nights.isEmpty {
                 Text("No nights available").font(.subheadline).foregroundStyle(palette.muted)
             } else if typeSize.isAccessibilitySize {
@@ -56,12 +61,9 @@ struct TimeRiver: View {
             } else {
                 river
                 summary
-                if let current, let marker=markers[current.id] {
-                    Label { Text(marker.name) } icon:{ SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.accent).frame(width:14,height:14) }
-                        .font(.caption).foregroundStyle(palette.ink).accessibilityHidden(true)
-                }
             }
-            Text(legend).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            // Shapes stand in for colour under Differentiate Without Color; they need their key.
+            if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
         .sensoryFeedback(.selection,trigger:detents)
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
@@ -117,21 +119,32 @@ struct TimeRiver: View {
         }
     }
 
+    /// The selected night in words: its date and score, then what the score rests on.
     private var summary: some View {
-        HStack(alignment:.firstTextBaseline) {
+        VStack(alignment:.leading,spacing:4) {
             if let current {
-                Text(current.park.dayLabel(current.id)).font(.subheadline)
-                Spacer(minLength:8)
-                Text("\(current.score.value)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
-                Text(current.compactBandLabel).font(.caption).foregroundStyle(palette.muted)
-                // Where the models part, the range the score could fall in, beside the score itself.
-                if let outlook=outlooks[current.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
-                    Text("· \(range.lowerBound)–\(range.upperBound)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
+                HStack(alignment:.firstTextBaseline) {
+                    Text(current.park.dayLabel(current.id)).font(.subheadline)
+                    Spacer(minLength:8)
+                    Text("\(current.score.value)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(current.score.value)))
+                    Text(current.score.band.label).font(.caption).foregroundStyle(palette.muted)
+                }
+                HStack(alignment:.firstTextBaseline,spacing:6) {
+                    if let marker=markers[current.id] { SkyGlyph(SkyGlyph.Kind(marker.glyph),color:palette.accent).frame(width:12,height:12) }
+                    Text(caption(current)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
             }
         }.accessibilityHidden(true)
     }
-
+    /// "No cloud forecast yet", "Early look", "Cloud forecast · models range 62–88", then a shower or an eclipse.
+    func caption(_ night:Night)->String {
+        var parts=[night.basisLabel ?? String(localized:"Cloud forecast")]
+        if let outlook=outlooks[night.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
+            parts.append(String(localized:"models range \(range.lowerBound)–\(range.upperBound)"))
+        }
+        if let marker=markers[night.id] { parts.append(marker.name) }
+        return parts.joined(separator:" · ")
+    }
     /// At accessibility text sizes the drawn river gives way to a plain, large stepper.
     private var stepper: some View {
         Stepper(value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1)) {
@@ -153,14 +166,7 @@ struct TimeRiver: View {
         return agreement.band == .roughly ? String(localized:"Forecast models roughly agree; the score could be \(range.lowerBound) to \(range.upperBound).")
             : String(localized:"Forecast models disagree; the score could be \(range.lowerBound) to \(range.upperBound).")
     }
-    private var hasRanges:Bool { nights.contains { outlooks[$0.id]?.scoreRange != nil } }
-    private var legend: String {
-        if typeSize.isAccessibilitySize { return String(localized:"Hollow nights have no cloud forecast yet and use the usual clouds; half-filled nights are an early look.") }
-        var base=hasRanges ? String(localized:"Drag along the river. Pale bars span three forecast models. Hollow nights have no cloud forecast yet; half-filled nights are an early look.")
-            : String(localized:"Drag along the river. Hollow nights have no cloud forecast yet; half-filled nights are an early look.")
-        if access.differentiate { base+=" "+NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.") }
-        return markers.isEmpty ? base : base+" "+String(localized:"Small marks above a night are a meteor shower's peak or a lunar eclipse.")
-    }
+    private var showsTip:Bool { DebugScenario.screen == nil || DebugScenario.isEnabled("river-tip") }
     /// The glowing nights, best first.
     private var peakOrder:[Int] {
         let ranks=nights.map(\.rankScore)
@@ -181,6 +187,7 @@ struct TimeRiver: View {
         // The detent sharpens with the night's score where Core Haptics can say so.
         if MoonHaptics.enabled { MoonHaptics.shared.detent(score:nights[value].score.value) } else { detents+=1 }
         felt+=1
+        tip.invalidate(reason:.actionPerformed)
     }
 
     private func draw(in context:inout GraphicsContext,size:CGSize) {
@@ -219,17 +226,29 @@ struct TimeRiver: View {
             context.stroke(river(max(0,dashedStart-1)...(nights.count-1)),with:.color(palette.accent.opacity(0.55)),style:StrokeStyle(lineWidth:1.1,lineCap:.round,dash:[3,4]))
         }
 
-        // Model spread: a soft starlight bar from the cloudiest model's score to the clearest's.
-        for i in nights.indices {
-            guard let range=outlooks[nights[i].id]?.scoreRange, range.upperBound>range.lowerBound else { continue }
-            let cx=x(i,width:size.width)
-            let upper=bottom-span*Double(range.upperBound)/100, lower=bottom-span*Double(range.lowerBound)/100
-            let bar=Path(roundedRect:CGRect(x:cx-3.5,y:upper-3,width:7,height:lower-upper+6),cornerRadius:3.5)
-            context.fill(bar,with:.color(palette.ink.opacity(palette.highContrast ? 0.3 : 0.16)))
-            // A whisker with small caps, so the range still reads where the dot sits inside it.
-            var line=Path(); line.move(to:CGPoint(x:cx,y:upper)); line.addLine(to:CGPoint(x:cx,y:lower))
-            for y in [upper,lower] { line.move(to:CGPoint(x:cx-2.5,y:y)); line.addLine(to:CGPoint(x:cx+2.5,y:y)) }
-            context.stroke(line,with:.color(palette.ink.opacity(palette.highContrast ? 0.8 : 0.55)),style:StrokeStyle(lineWidth:0.9,lineCap:.round))
+        // Model spread: a soft vertical glow from the cloudiest model's score to the clearest's,
+        // brightest in the middle and fading at both ends, so it reads as a range, not a glyph.
+        context.drawLayer { glow in
+            glow.addFilter(.blur(radius:1.5))
+            for i in nights.indices {
+                guard let range=outlooks[nights[i].id]?.scoreRange, range.upperBound>range.lowerBound else { continue }
+                let cx=x(i,width:size.width)
+                let upper=bottom-span*Double(range.upperBound)/100-4, lower=bottom-span*Double(range.lowerBound)/100+4
+                let strength=palette.highContrast ? 0.45 : 0.26
+                glow.fill(Path(roundedRect:CGRect(x:cx-4,y:upper,width:8,height:lower-upper),cornerRadius:4),
+                          with:.linearGradient(Gradient(stops:[.init(color:palette.ink.opacity(0),location:0),.init(color:palette.ink.opacity(strength),location:0.3),.init(color:palette.ink.opacity(strength),location:0.7),.init(color:palette.ink.opacity(0),location:1)]),
+                                               startPoint:CGPoint(x:cx,y:upper),endPoint:CGPoint(x:cx,y:lower)))
+            }
+        }
+        // Where the cloud forecast ends: a quiet tick between the last forecast night and the first without.
+        if let lastForecast, lastForecast<nights.count-1 {
+            let fx=(x(lastForecast,width:size.width)+x(lastForecast+1,width:size.width))/2
+            var tick=Path(); tick.move(to:CGPoint(x:fx,y:top+4)); tick.addLine(to:CGPoint(x:fx,y:bottom))
+            context.stroke(tick,with:.color(palette.ink.opacity(palette.highContrast ? 0.6 : 0.3)),style:StrokeStyle(lineWidth:0.7,dash:[1,3]))
+            let label=context.resolve(Text("forecast ends").font(.caption2).foregroundStyle(palette.muted))
+            let measured=label.measure(in:size)
+            let lx=min(max(fx+4+measured.width/2,measured.width/2),size.width-measured.width/2)
+            context.draw(label,at:CGPoint(x:lx,y:bottom-measured.height/2-2))
         }
 
         for i in nights.indices {
@@ -304,3 +323,9 @@ private struct RiverAccessibility: ViewModifier {
 #Preview("River") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().background(.black) } }
 #Preview("River • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().dynamicTypeSize(.accessibility5).background(.black) } }
 #Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }
+/// The river explains itself once, then gets out of the way: it closes after the first scrub.
+struct RiverTip: Tip {
+    var title: Text { Text("Drag along the nights") }
+    var message: Text? { Text("Hollow nights have no cloud forecast yet; half-filled ones are an early look. A soft glow spans what three forecast models expect.") }
+    var image: Image? { Image(systemName:"hand.draw") }
+}

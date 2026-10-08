@@ -123,7 +123,13 @@ struct FieldCompassView: View {
         }
         // Cardinal points on the horizon.
         for (azimuth,name) in [(0.0,String(localized:"N")),(90,String(localized:"E")),(180,String(localized:"S")),(270,String(localized:"W"))] {
-            if let p=at(0,azimuth).point { context.draw(Text(name).font(.system(.callout,design:.serif).weight(.semibold)).foregroundStyle(ink),at:CGPoint(x:p.x,y:p.y+14)) }
+            // Under the horizon, but never below the window's foot, where the control tray would cut it.
+            if let p=at(0,azimuth).point {
+                let text=context.resolve(Text(name).font(.system(.callout,design:.serif).weight(.semibold)).foregroundStyle(ink))
+                let half=text.measure(in:size).height/2
+                let y=p.y+14+half>h-4 ? p.y-14 : p.y+14
+                context.draw(text,at:CGPoint(x:p.x,y:min(h-half-4,y)))
+            }
         }
         for star in stars {
             guard let p=at(star.altitude,star.azimuth).point else { continue }
@@ -174,9 +180,13 @@ struct FieldCompassView: View {
             label(Text(target.name).font(.system(.subheadline,design:.serif)).foregroundStyle(ink),near:c,gap:target.kind == .core ? 30 : 22)
         }
         for arrow in arrows { edgeArrow(&context,size:size,angle:arrow.angle,name:arrow.name,ink:ink,taken:&taken) }
-        // The middle of the window: where the back of the phone points.
-        var reticle=Path(); reticle.addEllipse(in:CGRect(x:w/2-14,y:h/2-14,width:28,height:28))
-        context.stroke(reticle,with:.color(ink.opacity(0.5)),lineWidth:0.8)
+        // The middle of the window, where the back of the phone points: a crosshair with an open
+        // centre, so it never reads as one of the round target marks.
+        var reticle=Path()
+        for (dx,dy) in [(1.0,0.0),(-1,0),(0,1),(0,-1)] {
+            reticle.move(to:CGPoint(x:w/2+dx*6,y:h/2+dy*6)); reticle.addLine(to:CGPoint(x:w/2+dx*16,y:h/2+dy*16))
+        }
+        context.stroke(reticle,with:.color(ink.opacity(0.6)),style:StrokeStyle(lineWidth:1,lineCap:.round))
     }
     /// The Milky Way: soft discs along the galactic plane, added together, each as wide as the band is
     /// there and as bright as RealSky's model, dimmed toward the horizon (more air to look through),

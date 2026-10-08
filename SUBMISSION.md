@@ -42,7 +42,7 @@ Reminders are local notifications, opt-in, for saved parks only: nights scoring 
 
 Add these sentences only if the feature is in build 8 (integrator to confirm):
 
-- **Maps hand-off:** `Viewing spots can open in Apple Maps when the person taps "Open in Maps": the app hands the spot's public coordinates to Maps through a maps:// link. Nyx makes no request itself and uses no MapKit.`
+- **Maps hand-off:** `Viewing spots can open in Apple Maps when the person taps "Directions in Maps": the app hands the spot's public coordinates to Maps through a maps:// link. Nyx makes no request itself and uses no MapKit.`
 - **Translation of park text:** `Park descriptions and alerts from the National Park Service can be translated on the device with Apple's Translation framework (translationPresentation), only when the person asks. Nyx sends nothing for this.`
 
 ## Age assurance (Texas SB 2420)

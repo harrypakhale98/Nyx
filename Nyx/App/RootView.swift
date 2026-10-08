@@ -72,6 +72,9 @@ struct RootView:View {
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
         .onAppear { LaunchSignposts.firstFrame() }
+        // Field mode can open from Tonight or Control Center before any park page has appeared; its dawn
+        // "Keep this night" needs the journal's store.
+        .onAppear { KeepThisNight.container=context.container }
         .task {
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
