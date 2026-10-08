@@ -40,10 +40,13 @@ Links: park pages on nps.gov, Globe at Night, Open-Meteo and the Creative Common
 Reminders are local notifications, opt-in, for saved parks only: nights scoring 90 or more, up to five days ahead, with a recent full cloud forecast, at most one a week per park. Photos come only through PhotosPicker. The journal lives in SwiftData on the device (no CloudKit) and can be exported as a file the person saves. Siri, Shortcuts, widgets and Spotlight answer from data already on the device. Apple Intelligence features appear only where Apple's on-device model is available. The build includes the publisher's National Park Service API key. Developer screenshot launch arguments are compiled out of Release.
 ```
 
-Add these sentences only if the feature is in build 8 (integrator to confirm):
+Add this sentence (shipped in build 8):
+
+- **Translation of park text:** `When Nyx runs in a language other than English, park alerts and ranger programs from the National Park Service have a Translate button. It opens Apple's translation sheet (Translation framework, translationPresentation), only when the person taps it. iOS may download an Apple language pack on first use; Nyx itself sends nothing for this.`
+
+Add this sentence only if the feature is in build 8 (integrator to confirm):
 
 - **Maps hand-off:** `Viewing spots can open in Apple Maps when the person taps "Directions in Maps": the app hands the spot's public coordinates to Maps through a maps:// link. Nyx makes no request itself and uses no MapKit.`
-- **Translation of park text:** `Park descriptions and alerts from the National Park Service can be translated on the device with Apple's Translation framework (translationPresentation), only when the person asks. Nyx sends nothing for this.`
 
 ## Age assurance (Texas SB 2420)
 

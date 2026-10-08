@@ -73,6 +73,8 @@ targets:
             LSItemContentTypes: [com.harrypakhale.nyx.journal]
         # Opened journals are copied in and merged; the original file is never edited in place.
         LSSupportsOpeningDocumentsInPlace: false
+        # Handoff: a park and night from park detail to Nyx on the person's other devices (`ParkHandoff`).
+        NSUserActivityTypes: [com.harrypakhale.nyx.park]
     configFiles:
       Debug: Config/Nyx.xcconfig
       Release: Config/Nyx.xcconfig
@@ -136,6 +138,12 @@ targets:
       - path: Nyx/Intents/NightVisionIntent.swift
       - path: Nyx/Intents/FieldModeIntent.swift
       - path: Nyx/Intents/WidgetParkIntent.swift
+      # The park choice for the Tonight and Moon widgets and the Tonight control.
+      - path: Nyx/Intents/ParkEntity.swift
+      - path: Nyx/DesignSystem/MoonWidgetView.swift
+      # `MoonNow` (the Moon widget's phase, rise and set), shared with the watch's Moon complication.
+      - path: Nyx/Services/WristSky.swift
+      - path: Nyx/Services/WatchContext.swift
       - path: Nyx/Services/NightPlanner.swift
       - path: Nyx/Models/CloudClimate.swift
       - path: Nyx/Resources/cloud-climate.json
@@ -300,6 +308,8 @@ targets:
       - path: Nyx/Resources/Assets.xcassets
       # The widget's faces, compiled into the app too for its DEBUG renders of them.
       - path: NyxVisionWidgets/MoonWidgetFace.swift
+      # Handoff from park detail on iPhone or iPad: that park and night in the window.
+      - path: Nyx/Models/ParkHandoff.swift
     # Linked so the App Intents metadata step finds its framework instead of warning on every build
     # ("Metadata extraction skipped"). The window has no intents of its own yet; linking costs nothing.
     dependencies:
@@ -310,6 +320,7 @@ targets:
       properties:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSUserActivityTypes: [com.harrypakhale.nyx.park]
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "7"

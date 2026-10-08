@@ -98,12 +98,14 @@ nonisolated struct NotificationScheduler {
     /// (tonight, or tomorrow opened late), they fire in a minute instead, as long as true
     /// darkness has not begun; a reminder already issued is never repeated.
     /// Meteor shower peaks join the same plan, budget, ledger and switch (with their own sub-switch).
-    func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[],showers:Bool=false,table:SkyEvents = .shared)->[NightReminder] {
-        let scored=scorePlans(nights:nights,now:now,delivered:delivered)
+    /// `details` are the saved parks' forecast details (the widget snapshot's), so a reminder can say
+    /// when all three forecast models agree the night is clear.
+    func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[],showers:Bool=false,details:[String:ForecastDetail]=[:],table:SkyEvents = .shared)->[NightReminder] {
+        let scored=scorePlans(nights:nights,now:now,delivered:delivered,details:details)
         let meteors=showers ? showerPlans(nights:nights,now:now,delivered:delivered,table:table) : []
         return (scored+meteors).sorted { ($0.fireDate,$0.id)<($1.fireDate,$1.id) }.prefix(max(0,min(60,limit))).map{$0}
     }
-    private func scorePlans(nights:[Night],now:Date,delivered:Set<String>)->[NightReminder] {
+    private func scorePlans(nights:[Night],now:Date,delivered:Set<String>,details:[String:ForecastDetail])->[NightReminder] {
         let candidates:[(night:Night,fire:Date)]=nights.compactMap { night in
             guard night.score.value>=90, night.score.hasForecast, night.sky.darkHours>0, let updated=night.forecastUpdated,
                   night.id.timeIntervalSince(now)<=Self.horizon else { return nil }
@@ -131,10 +133,20 @@ nonisolated struct NotificationScheduler {
             let identifier=Self.identifier(park:park,night:night.id)
             guard !delivered.contains(identifier), !(taken[park.id] ?? []).contains(where:{ abs($0.timeIntervalSince(night.id))<window }) else { continue }
             taken[park.id,default:[]].append(night.id)
-            plans.append(NightReminder(id:identifier,parkID:park.id,title:Self.title(night),body:Self.body(night),fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id)))
+            let models=Self.agreement(night,detail:details[park.id],now:now)
+            plans.append(NightReminder(id:identifier,parkID:park.id,title:Self.title(night),body:Self.body(night,models:models),fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id)))
         }
         return plans
     }
+    /// How the three forecast models compare over the night's dark window, as the park page shows
+    /// it: only beside a score that includes clouds, and not when only high cloud was forecast.
+    static func agreement(_ night:Night,detail:ForecastDetail?,now:Date)->ModelAgreement? {
+        guard let detail, night.score.hasForecast, !night.upperCloudOnly else { return nil }
+        let window=night.sky.cloudWindow
+        return detail.outlook(from:window.start,to:window.end,now:now).agreement
+    }
+    /// True when all three models agree on a clear night (at most 15% cloud in the cloudiest).
+    static func modelsClear(_ models:ModelAgreement?)->Bool { models.map { $0.band == .agree && $0.high<=15 } ?? false }
     /// "Pristine night at Joshua Tree, Friday": the news first, in the title.
     static func title(_ night:Night)->String {
         var weekday=Date.FormatStyle.dateTime.weekday(.wide)
@@ -143,19 +155,32 @@ nonisolated struct NotificationScheduler {
     }
     /// "94 out of 100. Moon down all night. Check park alerts before you go." Never "94/100",
     /// which VoiceOver reads as "slash".
-    static func body(_ night:Night)->String {
-        String(localized:"\(night.score.value) out of 100. \(reason(night)). Check park alerts before you go.")
+    static func body(_ night:Night,models:ModelAgreement?=nil)->String {
+        String(localized:"\(night.score.value) out of 100. \(reason(night,models:models)). Check park alerts before you go.")
     }
-    /// One thing that is true of this night and makes it dark, the most telling first.
-    static func reason(_ night:Night)->String {
+    /// One thing that is true of this night and makes it dark, the most telling first; with it,
+    /// when true, that all three forecast models are clear ("Moon down all night; all three
+    /// forecast models clear").
+    static func reason(_ night:Night,models:ModelAgreement?=nil)->String {
+        let moon=moonReason(night)
+        guard modelsClear(models) else { return moon ?? cloudReason(night) }
+        guard let moon else { return String(localized:"All three forecast models clear") }
+        return String(localized:"\(moon); all three forecast models clear")
+    }
+    /// The Moon's part, when it is the reason; nil when it is not.
+    private static func moonReason(_ night:Night)->String? {
         let sky=night.sky
         if sky.moonBelowFraction>=0.99 { return String(localized:"Moon down all night") }
         if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight") }
         if let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end, sky.moonrise.map({ $0<start || $0>end }) ?? true {
             return String(localized:"Moon sets at \(night.park.time(set))")
         }
+        return nil
+    }
+    /// Without a Moon reason: a clear forecast, else the hours of true darkness.
+    private static func cloudReason(_ night:Night)->String {
         if let clouds=night.cloudCover, clouds<=10 { return String(localized:"Forecast \(Int(clouds.rounded()))% cloud") }
-        return String(localized:"About \(Int(sky.darkHours.rounded())) hours of true darkness")
+        return String(localized:"About \(Int(night.sky.darkHours.rounded())) hours of true darkness")
     }
     /// A major shower's peak night at a saved park, when at least 20 an hour are expected at its
     /// best moment with the Moon down (`WhatsUp.Events.reminderShower`), whatever the score. One per
@@ -190,7 +215,7 @@ nonisolated struct NotificationScheduler {
     /// Without permission nothing is added, but reminders that no longer qualify are still
     /// cancelled: iOS keeps pending ones while notifications are off and delivers them if they
     /// are turned back on.
-    @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false) async {
+    @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,details:[String:ForecastDetail]=[:]) async {
         let allowed=await center.authorized()
         let pending=await center.pendingIDs()
         let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
@@ -198,7 +223,7 @@ nonisolated struct NotificationScheduler {
         // Issued before and no longer pending: it was delivered, tapped or cleared.
         let finished=issued.subtracting(ours).union(await center.deliveredIDs())
         let available=max(0,64-pending.filter{!$0.hasPrefix("nyx-night-")}.count)
-        let planned=plans(nights:nights,now:now,limit:available,delivered:finished,showers:showers)
+        let planned=plans(nights:nights,now:now,limit:available,delivered:finished,showers:showers,details:details)
         let plannedIDs=Set(planned.map(\.id))
         let cancelled=ours.subtracting(plannedIDs)
         await center.remove(cancelled.sorted())

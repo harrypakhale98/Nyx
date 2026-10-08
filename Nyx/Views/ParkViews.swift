@@ -336,6 +336,8 @@ struct ParkDetailView: View {
             if let chosen=selected, chosen<start || chosen>=park.date(start,addingDays:30) { selected=nil }
         }
         .onAppear { KeepThisNight.container=context.container }
+        // Handoff to another device, and the park Siri sees on screen.
+        .parkHandoff(park,night:night.id)
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }.modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
@@ -430,6 +432,8 @@ struct ParkDetailView: View {
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
             AddNightToCalendar(night:night)
+            // Tonight is followed from the hero, beside "I'm here tonight".
+            if !isTonight { FollowNightButton(night:night) }
         }.id("river")
     }
     private var alerts: some View {
@@ -441,6 +445,8 @@ struct ParkDetailView: View {
                 DisclosureGroup {
                     ForEach(AlertRanking.ranked(data.alerts)) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.displayTitle(park:park)).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
                 } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
+                // The Park Service writes in English: every alert, translated by iOS on this device.
+                TranslateButton(text:AlertRanking.ranked(data.alerts).map { "\($0.title)\n\($0.description)" }.joined(separator:"\n\n"))
             }
             if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) }
         } }.id("alerts")
@@ -598,6 +604,7 @@ private struct ProgramCard: View {
             Label([park.programDate(program.date),program.time].compactMap { $0 }.joined(separator:" · "),systemImage:"calendar").font(.footnote).foregroundStyle(palette.ink)
             if let location=program.location { Label(location,systemImage:"mappin.and.ellipse").font(.footnote).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             ClampedText(text:program.description,lines:3)
+            TranslateButton(text:[program.title,program.description].joined(separator:"\n\n"))
         }
     }
 }

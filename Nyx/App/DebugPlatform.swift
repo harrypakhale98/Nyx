@@ -25,8 +25,12 @@ struct DebugSnippetView: View {
         ScrollView { VStack(alignment:.leading,spacing:16) {
             Text("Snippet review").font(.system(size:20,design:.serif))
             if let park=model.home, let answer=BestNightSearch.answer(parks:[park],planner:NightPlanner(forecasts:model.forecasts,details:model.details),from:model.today,nights:30,now:model.today) {
+                // "What's the darkness score at Joshua Tree tonight?": the card and the words.
+                let tonight=DarknessAnswer(park:park,forecast:model.forecasts[park.id],detail:model.details[park.id],now:model.today)
+                Text(tonight.dialog).font(.callout)
+                DarknessSnippetView(night:tonight.night)
                 Text(BestNightSearch.dialog(answer,voiceOnly:false)).font(.callout)
-                BestNightSnippetView(night:answer.best,rank:0,total:answer.ranked.count,nights:answer.count)
+                BestNightSnippetView(night:answer.best,rank:0,total:answer.ranked.count,nights:answer.count,following:false)
                 Text("Voice only (iOS 27):").font(.caption)
                 Text(BestNightSearch.dialog(answer,voiceOnly:true)).font(.callout)
                 if answer.ranked.count>1 { BestNightSnippetView(night:answer.ranked[1],rank:1,total:answer.ranked.count,nights:answer.count) }
