@@ -18,6 +18,11 @@ struct GuideView:View {
     /// The question as it was asked, shown above its answer.
     @State private var asked=""
     @State private var requestID=0
+    /// The last request answered in full, so coming back from a record's page never asks again.
+    @State private var answeredID=0
+    /// The records as the model saw them for the question on screen, so the citations keep
+    /// pointing at the rows they cite while forecasts and the starting point move on.
+    @State private var sent:[String]?
     /// The record a citation chip pointed to, briefly lit.
     @State private var lit:Int?
     @FocusState private var typing:Bool
@@ -46,7 +51,7 @@ struct GuideView:View {
         switch mode { case .planning:String(localized:"Which of these parks and nights looks most promising, and what is still uncertain?");case .learn:String(localized:"Explain the main idea in plain language for someone new to stargazing.") }
     }
     var body:some View {
-        let shown=records
+        let shown=sent ?? records
         ScrollViewReader { proxy in
             ScrollView { VStack(alignment:.leading,spacing:22) {
                 Text("Written on this iPhone from the records below. Check them before making plans.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -82,19 +87,20 @@ struct GuideView:View {
         .safeAreaBar(edge:.bottom) { inputBar }
         .background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
         .task(id:requestID) {
-            guard requestID>0 else { return }
+            guard requestID>0, requestID != answeredID else { return }
             // Planning gets tools that call the engine; explainers reason over their records only.
             var tools:NightLookup?
             if case .planning = mode { tools=lookup }
-            await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:records,lookup:tools)
+            await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:sent ?? records,lookup:tools)
             guard !Task.isCancelled else { return }
+            answeredID=requestID
             AccessibilityNotification.Announcement(guide.error ?? String(localized:"Answer ready")).post()
         }
     }
     private func ask(_ text:String) {
         let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
         guard !trimmed.isEmpty, !guide.loading else { return }
-        asked=trimmed; question=""; typing=false; lit=nil; requestID+=1
+        asked=trimmed; question=""; typing=false; lit=nil; sent=records; requestID+=1
     }
     /// A glass bar floating over the night, pinned to the bottom; solid where glass would cost contrast.
     private var inputBar:some View {

@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import UIKit
 import Testing
 @testable import Nyx
 
@@ -346,6 +347,28 @@ struct DataLaneTests {
         #expect(imported.orderedPhotos.first?.altText == "The Milky Way over Joshua trees.")
         #expect(try reread.merge(into: ipad, parks: parks).added == 0)
         #expect(try ipad.fetch(FetchDescriptor<JournalEntry>()).count == 2)
+    }
+    /// The journal's export is gathered on a background context and an import's thumbnails are
+    /// drawn before the inserts, as the Journal tab does off the main thread: same archive, same cards.
+    @MainActor @Test func journalArchiveWorkHappensOffTheMainThread() async throws {
+        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
+        let photo=try #require(UIGraphicsImageRenderer(size: CGSize(width: 40, height: 30)).image { context in
+            UIColor.orange.setFill(); context.fill(CGRect(x: 0, y: 0, width: 40, height: 30))
+        }.jpegData(compressionQuality: 0.8))
+        let entry=JournalEntry(date: Date(timeIntervalSince1970: 1790899200), parkID: "jotr", notes: "Orange glow.")
+        container.mainContext.insert(entry); try container.mainContext.save()
+        entry.photos=[photo]; try container.mainContext.save()
+        let archive=await Task.detached { () -> JournalArchive? in
+            (try? ModelContext(container).fetch(FetchDescriptor<JournalEntry>())).map { JournalArchive.make(from: $0) }
+        }.value
+        let made=try #require(archive)
+        #expect(made.manifest.entries.map(\.id) == [entry.id] && made.photos.values.first == photo)
+        let thumbnails=await Task.detached { made.thumbnails() }.value
+        let thumbnail=try #require(thumbnails[entry.id])
+        let other=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
+        #expect(try made.merge(into: other, parks: parks, thumbnails: thumbnails).added == 1)
+        #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.thumbnail == thumbnail)
     }
 
     // MARK: Forecasts

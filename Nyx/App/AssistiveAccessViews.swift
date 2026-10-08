@@ -13,7 +13,29 @@ struct AssistiveAccessRoot: View {
             // High contrast throughout: amber and starlight at full strength.
             .environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
             .preferredColorScheme(.dark)
+            .background(AssistiveSavedSync())
     }
+}
+/// The main window's saved-park upkeep, for this scene: the full app's `RootView` does not run in
+/// Assistive Access, so "Remind me" would otherwise save a park and switch reminders on without
+/// anything being scheduled. The widget's snapshot, the watch and reminders follow the saved parks
+/// through the same `SavedSkySync`.
+private struct AssistiveSavedSync: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.scenePhase) private var scenePhase
+    @Query private var saved: [SavedPark]
+    @AppStorage("notificationsEnabled") private var reminders=false
+    var body: some View {
+        Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
+            .task { await update() }
+            .onChange(of: saved.map(\.parkID)) { _, _ in Task { await update() } }
+            .onChange(of: reminders) { _, enabled in Task { if enabled { await update() } else { await NotificationScheduler().remove() } } }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { model.tick(); Task { await update() } }
+                if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
+            }
+    }
+    private func update() async { await model.savedSync.update(model, parkIDs: saved.map(\.parkID)) }
 }
 /// The two choices.
 struct AssistiveHome: View {

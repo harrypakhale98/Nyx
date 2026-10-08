@@ -3637,6 +3637,23 @@
         }
       }
     },
+    "Add to journal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to journal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar al diario"
+          }
+        }
+      }
+    },
     "Adding a night to Calendar opens Calendar's own editor, where you choose and save it. Nyx never reads your calendars.": {
       "extractionState": "manual",
       "localizations": {
@@ -3667,6 +3684,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Agregando foto"
+          }
+        }
+      }
+    },
+    "Adds a note about tonight to your Nyx journal, at tonight's park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds a note about tonight to your Nyx journal, at tonight's park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agrega una nota sobre esta noche a tu diario de Nyx, en el parque de esta noche."
           }
         }
       }
@@ -8385,19 +8419,19 @@
         }
       }
     },
-    "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, light pollution 20, and the length of darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.": {
+    "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, light pollution 20, and the length of darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good."
+            "value": "Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de ejemplo 94 de 100. Parte del índice: luz de luna 40 por ciento, nubes 25, contaminación lumínica 20 y duración de la oscuridad 15. 90 o más es Prístina, 75 Excelente, 60 Buena."
+            "value": "Índice de ejemplo 94 de 100. Parte del índice: luz de luna 40 por ciento, nubes 25, resplandor 20 y oscuridad total 15. 90 o más es Prístina, 75 Excelente, 60 Buena."
           }
         }
       }
@@ -10402,6 +10436,23 @@
         }
       }
     },
+    "Importing your journal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importing your journal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importando tu diario"
+          }
+        }
+      }
+    },
     "In %@ you spent %@ under the stars in %@, %lld of them new to you.": {
       "extractionState": "manual",
       "localizations": {
@@ -11310,23 +11361,6 @@
         }
       }
     },
-    "Length of darkness": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Length of darkness"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duración de la oscuridad"
-          }
-        }
-      }
-    },
     "Less": {
       "extractionState": "manual",
       "localizations": {
@@ -11391,23 +11425,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bruma ligera."
-          }
-        }
-      }
-    },
-    "Light pollution": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light pollution"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contaminación lumínica"
           }
         }
       }
@@ -15180,6 +15197,23 @@
         }
       }
     },
+    "Note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nota"
+          }
+        }
+      }
+    },
     "Nothing Nyx can point to is above the horizon now.": {
       "extractionState": "manual",
       "localizations": {
@@ -17915,6 +17949,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Preparando tu constelación para compartir"
+          }
+        }
+      }
+    },
+    "Preparing your journal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing your journal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando tu diario"
           }
         }
       }
@@ -24469,6 +24520,23 @@
         }
       }
     },
+    "Title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Título"
+          }
+        }
+      }
+    },
     "Tone": {
       "extractionState": "manual",
       "localizations": {
@@ -26291,6 +26359,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lo que un pronóstico no puede decirte"
+          }
+        }
+      }
+    },
+    "What would you like to remember about tonight?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What would you like to remember about tonight?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué te gustaría recordar de esta noche?"
           }
         }
       }

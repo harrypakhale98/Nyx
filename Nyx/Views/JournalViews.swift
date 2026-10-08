@@ -19,6 +19,8 @@ struct JournalView: View {
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
+    /// An export being gathered or an import being read, off the main thread (photos can be many megabytes).
+    @State private var working:LocalizedStringKey?
     /// A park dropped onto the journal: a new entry for it, tonight's date.
     @State private var dropped:JournalPrefill?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
@@ -50,9 +52,9 @@ struct JournalView: View {
             .tabRootToolbar()
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Menu {
-                    Button("Export journal",systemImage:"square.and.arrow.up") { exporting=JournalDocument(archive:JournalArchive.make(from:entries)) }
-                        .disabled(entries.isEmpty || model.journalUnavailable)
-                    Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable)
+                    Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
+                        .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
+                    Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
                 } label:{ Image(systemName:"ellipsis") }.accessibilityLabel("Journal options") }
                 // Nothing is recorded into a journal that could not be opened: it would be lost.
                 ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night").disabled(model.journalUnavailable) }
@@ -73,20 +75,44 @@ struct JournalView: View {
                 if case .failure=result { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
             }
             .fileImporter(isPresented:$importing,allowedContentTypes:[.nyxJournal]) { result in
-                if case .success(let url)=result { importJournal(url) }
+                if case .success(let url)=result { Task { await importJournal(url) } }
             }
+            .overlay { if let working { WorkingNote(title:working) } }
             .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
             .task(id:model.journalFile) {
                 // A journal opened from Files or another app.
                 guard let url=model.journalFile, !model.journalUnavailable else { return }
                 model.journalFile=nil
-                importJournal(url)
+                await importJournal(url)
             }
     }
-    /// Adds the nights the journal does not have yet; nothing already here is changed.
-    private func importJournal(_ url:URL) {
+    /// Gathers every entry and its photos from the store on a background context, so the photos'
+    /// files are read off the main thread; the exporter opens once the archive is ready.
+    private func exportJournal() {
+        let container=context.container
+        working="Preparing your journal"
+        Task {
+            let archive=await Task.detached(priority:.userInitiated) { () -> JournalArchive? in
+                let background=ModelContext(container)
+                return (try? background.fetch(FetchDescriptor<JournalEntry>())).map { JournalArchive.make(from:$0) }
+            }.value
+            working=nil
+            if let archive { exporting=JournalDocument(archive:archive) }
+            else { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
+        }
+    }
+    /// Adds the nights the journal does not have yet; nothing already here is changed. The package
+    /// is read and its thumbnails drawn off the main thread; only the inserts happen here.
+    private func importJournal(_ url:URL) async {
+        working="Importing your journal"
+        defer { working=nil }
+        let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data])? in
+            guard let archive=try? JournalArchive(url:url) else { return nil }
+            return (archive,archive.thumbnails())
+        }.value
         do {
-            let result=try JournalArchive(url:url).merge(into:context,parks:model.parks)
+            guard let read else { throw JournalArchive.ArchiveError.unreadable }
+            let result=try read.archive.merge(into:context,parks:model.parks,thumbnails:read.thumbnails)
             importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
         } catch {
             context.rollback()
@@ -121,6 +147,20 @@ struct JournalView: View {
         }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
     }
 }
+/// A stock spinner on a solid panel while the journal is exported or imported; solid, not glass,
+/// so it reads over the sky in night vision and with Reduce Transparency alike.
+private struct WorkingNote: View {
+    @Environment(\.nyx) private var palette
+    let title:LocalizedStringKey
+    var body: some View {
+        ProgressView { Text(title) }.tint(palette.accent).foregroundStyle(palette.ink)
+            .padding(.vertical,18).padding(.horizontal,24)
+            .background(palette.nightVision ? Color.black : palette.panel,in:RoundedRectangle(cornerRadius:18))
+            .overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
+            .accessibilityElement(children:.combine)
+    }
+}
+#Preview("Working note") { ZStack { Color.black; WorkingNote(title:"Preparing your journal") }.preferredColorScheme(.dark) }
 /// A remembered night, with the Moon as it actually was over that park.
 struct JournalCard:View {
     @Environment(PlanModel.self) private var model

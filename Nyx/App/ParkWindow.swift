@@ -18,14 +18,16 @@ struct ParkWindowRoot: View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     /// The night last chosen in this window, as seconds since 1970 (0: none yet).
     @SceneStorage("windowNight") private var chosenNight=0.0
     @State private var commands=SceneCommands(parkWindow:true)
     var body: some View {
-        let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased)
+        // The same palette as the main window, brighter red included (`RootView`).
+        let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed)
         NavigationStack {
             if let value, let park=model.park(value.parkID) {
-                ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
+                ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
                     .id(park.id)
             } else {
                 CalmState(symbol:"mountain.2",title:"This park is not in Nyx",message:"Close this window and choose a park from the list.")
@@ -37,15 +39,16 @@ struct ParkWindowRoot: View {
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
-        .modifier(NightVisionFilter(enabled:palette.nightVision))
+        .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .animation(reduceMotion ? nil : NyxMotion.spring,value:palette.nightVision)
         .nyxAccessibility()
     }
     /// The night a window opens on: the one last chosen in it, else the one it was opened with.
-    /// A night that has already passed (a window restored days later) gives way to tonight.
-    nonisolated static func night(stored:Double,opened:Date?,now:Date = .now)->Date? {
+    /// A night before the park's current one (a window left open past sunrise, or restored days
+    /// later) gives way to tonight. `tonight` is the park's current night (`Park.currentNight(at:)`).
+    nonisolated static func night(stored:Double,opened:Date?,tonight:Date)->Date? {
         let candidate=stored>0 ? Date(timeIntervalSince1970:stored) : opened
-        guard let candidate, candidate>=now.addingTimeInterval(-36*3600) else { return nil }
+        guard let candidate, candidate>=tonight else { return nil }
         return candidate
     }
 }

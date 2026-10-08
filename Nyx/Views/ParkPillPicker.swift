@@ -28,12 +28,12 @@ struct ParkPillPicker: View {
     private var stack: some View {
         VStack(spacing:10) {
             HStack(spacing:6) {
-                NavigationLink(value:park) {
+                NavigationLink(value:ZoomRoute.pill(park)) {
                     HStack { Text(park.shortName).font(.system(.title2,design:.serif)); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
                         .padding(.vertical,14).padding(.horizontal,22)
                         .modifier(PillGlass(solid:solid,shape:Capsule(),id:"pill",namespace:glass))
                 }
-                .buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.lift)
+                .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pill(park).source,in:zoom).hoverEffect(.lift)
                 if !others.isEmpty {
                     Button { open.toggle() } label:{
                         Image(systemName:"chevron.down").font(.subheadline.weight(.semibold))
@@ -53,7 +53,7 @@ struct ParkPillPicker: View {
                 VStack(spacing:0) {
                     ForEach(Array(others.enumerated()),id:\.element.id) { index,other in
                         if index>0 { Divider().overlay(palette.line) }
-                        NavigationLink(value:other) {
+                        NavigationLink(value:ZoomRoute.pillList(other)) {
                             HStack(spacing:10) {
                                 Text(other.shortName).font(.system(.body,design:.serif)).multilineTextAlignment(.leading)
                                 Spacer(minLength:8)
@@ -62,7 +62,7 @@ struct ParkPillPicker: View {
                             }
                             .padding(.horizontal,18).frame(minHeight:44).contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain).matchedTransitionSource(id:other.id,in:zoom)
+                        .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pillList(other).source,in:zoom)
                         .accessibilityLabel(String(localized:"\(other.shortName), \(score(other)) tonight"))
                     }
                 }

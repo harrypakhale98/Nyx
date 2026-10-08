@@ -18,6 +18,9 @@ import SwiftUI
     var visiblePark:String? { visibleParks[parkWindow ? 0 : tab] }
     func show(park id:String,tab:Int?) { if let tab { visibleParks[tab]=id } }
     func hide(park id:String,tab:Int?) { if let tab, visibleParks[tab]==id { visibleParks[tab]=nil } }
+    /// A park's month asked of this window's Plan tab (a `nyx://calendar` link, "Show in Calendar",
+    /// a park dropped on Plan). Per window, so a request in one iPad window never moves another's Plan.
+    var calendarRequest:CalendarRequest?
     /// Bumped to close this window's Settings sheet, so a link from Learn shows where it leads.
     var closeSettings=0
     /// This window's scene, so a park or field mode opened from a link, a reminder or a menu is

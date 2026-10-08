@@ -399,7 +399,8 @@ struct ScoreAnatomy:View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let active:Bool
     @State private var filled=0
-    private let parts:[(LocalizedStringKey,Int)]=[("Moonlight",40),("Clouds",25),("Light pollution",20),("Length of darkness",15)]
+    /// The breakdown's own words (`ScoreReadout`), so the recipe and every night's score name the same four parts.
+    private let parts:[(LocalizedStringKey,Int)]=[("Moonlight",40),("Clouds",25),("Sky glow",20),("True darkness",15)]
     /// Each share a step dimmer, so the four read apart without colour; gaps divide them too.
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
@@ -427,7 +428,7 @@ struct ScoreAnatomy:View {
             Text("Example night").font(.caption).foregroundStyle(palette.muted)
         }
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel("Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, light pollution 20, and the length of darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
+        .accessibilityLabel("Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
         .task(id:active) {
             guard active else { filled=0; return }
             if systemReduceMotion || forcedReduceMotion { filled=parts.count; return }

@@ -6,6 +6,8 @@ import SwiftUI
 struct PlanView: View {
     enum Mode: String, CaseIterable { case month, free }
     @Environment(PlanModel.self) private var model
+    /// This window's commands, which carry its calendar requests.
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.dynamicTypeSize) private var typeSize
     @SceneStorage("planMode") private var mode:Mode = .month
     var body: some View {
@@ -30,10 +32,10 @@ struct PlanView: View {
         }
         // A park dragged here (from Parks, Tonight or the map, or another window) opens its month.
         .acceptsPark("Plan this park",systemImage:"calendar") { park in
-            model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil)
+            commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil)
         }
         // A `nyx://calendar` link always lands on the month it names.
-        .onChange(of:model.calendarRequest,initial:true) { _,request in if request != nil { mode = .month } }
+        .onChange(of:commands?.calendarRequest,initial:true) { _,request in if request != nil { mode = .month } }
         .task { if DebugScenario.isEnabled("plan-trip") { mode = .free } }
     }
     /// Segmented where it fits; at accessibility sizes a menu, which grows with the text instead of truncating.

@@ -24,9 +24,9 @@ struct RootView:View {
     /// Cold launch: the launch screen's starfield paints first, then the app settles in.
     /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
     @State private var revealed=DebugScenario.screen != nil
-    @State private var launchParkID:String?
-    /// A link's night at the park, and whether to open it at What's up.
-    @State private var launchNight:(date:Date,whatsUp:Bool)?
+    /// The park a link, reminder or Spotlight opened, with its night: one value, so a later link
+    /// presented above it never changes the night on this sheet.
+    @State private var launch:LaunchPark?
     /// First light's park, while the sky reveals itself over the app.
     @State private var firstLight:Park?
     /// The Tonight tab icon is today's real moon phase, drawn just after the first frame (the tab
@@ -74,7 +74,7 @@ struct RootView:View {
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? ""),red:palette.red))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
-        .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
+        .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
         .onAppear { if DebugScenario.screen == nil, (0..<SceneCommands.tabs.count).contains(savedTab) { commands.tab=savedTab } }
@@ -156,7 +156,7 @@ struct RootView:View {
     /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.
     private func handle(_ link:DeepLink?) {
         switch link {
-        case .park(let id): launchNight=nil; open(id)
+        case .park(let id): open(id)
         case .tonight: commands.tab=0
         case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) }
         case .whatsUp(let id,let day):
@@ -164,7 +164,7 @@ struct RootView:View {
             open(id,night:(day.evening(in:park),true))
         case .calendar(let id,let year,let month):
             guard model.park(id) != nil else { return }
-            commands.tab=2; model.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
+            commands.tab=2; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
         case nil: break
         }
     }
@@ -242,9 +242,8 @@ struct RootView:View {
     /// the person was doing is lost.
     private func open(_ parkID:String?,night:(date:Date,whatsUp:Bool)?=nil) {
         guard let parkID,let park=model.park(parkID) else { return }
-        launchNight=night
         // This window's own stack: a link or reminder never opens over another iPad window.
-        guard let top=commands.topController, top.presentingViewController != nil else { launchParkID=parkID; return }
+        guard let top=commands.topController, top.presentingViewController != nil else { launch=LaunchPark(park:park,night:night?.date,whatsUp:night?.whatsUp ?? false); return }
         let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
@@ -277,6 +276,14 @@ struct RootView:View {
     private func updateSaved() async {
         await model.savedSync.update(model,parkIDs:saved.map(\.parkID))
     }
+}
+/// What a link, reminder or Spotlight asked the main window to open: the park, the night, and
+/// whether to scroll to What's up. Its identity is all three, so a different night is a new sheet.
+struct LaunchPark: Identifiable, Equatable {
+    let park:Park
+    var night:Date?=nil
+    var whatsUp=false
+    var id:String { "\(park.id)|\(night?.timeIntervalSince1970 ?? 0)|\(whatsUp)" }
 }
 /// A park opened from a reminder, Spotlight or a widget. It reads night vision and Increase
 /// Contrast itself, so it matches the app (and follows a Control Center switch) wherever it is
