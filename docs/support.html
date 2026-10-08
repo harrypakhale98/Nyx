@@ -2,56 +2,174 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nyx — Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Support — Nyx</title>
 <meta name="description" content="Help with Nyx, the dark-sky planner for US national parks, on iPhone, iPad, Apple Watch and Apple Vision Pro.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/nyx-icon-256.png">
+<link rel="canonical" href="https://get-nyx.com/support">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nyx">
+<meta property="og:title" content="Nyx support">
+<meta property="og:description" content="Help with Nyx, the dark-sky planner for US national parks, on iPhone, iPad, Apple Watch and Apple Vision Pro.">
+<meta property="og:url" content="https://get-nyx.com/support">
+<meta property="og:image" content="https://get-nyx.com/images/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-  <p class="eyebrow">Nyx · Support</p>
-  <h1>Help under a dark sky.</h1>
-  <p class="lead">Scores are planning estimates. Always confirm park access before you travel; a high score never means a road is open.</p>
+<a class="skip" href="#main">Skip to content</a>
+<input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
+<div class="sky" aria-hidden="true"><div class="band"></div></div>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="privacy">Privacy</a>
+      <a href="support" aria-current="page">Support</a>
+      <a class="opt" href="press/">Press</a>
+      <a class="opt" href="case-study">Case study</a>
+    </nav>
+    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red</span><span class="track" aria-hidden="true"></span></label>
+  </div>
+</header>
+<main id="main">
+  <header class="page-head prose">
+    <p class="eyebrow amber">Support</p>
+    <h1>Help under a dark sky.</h1>
+    <p class="lead">Scores are planning estimates. Always confirm park access before you travel; a high score never means a road is open.</p>
+    <ul class="toc" aria-label="On this page"><li><a href="#questions">Common questions</a></li><li><a href="#watch">Apple Watch</a></li><li><a href="#vision">Apple Vision Pro</a></li><li><a href="#data">About the data</a></li></ul>
+  </header>
+  <div class="prose doc">
 
   <div class="panel">
     <p><strong>Contact.</strong> Email <a href="mailto:harry.pakhale98@gmail.com?subject=Nyx%20support">harry.pakhale98@gmail.com</a> or open an issue on <a href="https://github.com/harrypakhale98/Nyx/issues">GitHub</a>. Include your device (iPhone, iPad, Apple Watch or Apple Vision Pro), its software version, the park and screen, and what happened. Please don't send private journal entries or photos.</p>
   </div>
 
-  <h2>Common questions</h2>
-  <ul>
-    <li><strong>Hollow nights, "No cloud forecast yet" and "Early look".</strong> A full cloud forecast counts for about three days ahead. Further out, a half-filled night is an early look: the forecast is eased toward the park's usual clouds for that month. A hollow night has no forecast yet and uses the usual clouds alone, so its score can change when a forecast arrives. Pull down to refresh when you have a connection, and check that Cloud forecasts is on under Settings → Your privacy.</li>
-    <li><strong>"Clouds limit tonight to 64", or a score lower than its parts.</strong> The four parts add up, then the weakest one can cap the total: heavy cloud, a bright sky glow, smoke or short hours of true darkness. The line under the score names the cap that applies.</li>
-    <li><strong>"Access not checked" or "Park alerts are busy".</strong> Nyx could not get current park alerts. Use the link to the park's current conditions on nps.gov, or contact the park before traveling.</li>
-    <li><strong>No nearby parks.</strong> Widen the radius or choose a different starting park. The radius is a straight line, not driving distance.</li>
-    <li><strong>Location is off.</strong> Tap the starting-park name and choose a park. Location is optional.</li>
-    <li><strong>No reminders.</strong> Save a park and turn on reminders in Settings. Only nights scoring 90 or more, up to five days ahead and with a recent, full cloud forecast, qualify, and at most one a week for each park. Reminders are recalculated whenever Nyx opens and, when iOS allows, about every six hours in the background.</li>
-    <li><strong>"No true darkness tonight."</strong> In Alaska's summer the Sun never sinks 18° below the horizon, so astronomical darkness never arrives. Nyx caps those nights below 40.</li>
-    <li><strong>Night vision.</strong> Turn it on in Settings or from Control Center. Lower your screen brightness too; Nyx does not change it for you.</li>
-    <li><strong>Your journal.</strong> Entries and photos stay on your iPhone or iPad. Back up your device with Apple's settings; Nyx has no cloud sync or account recovery. To move a journal to another device, use Export in the Journal tab and open the file on the other device.</li>
-    <li><strong>An age range request.</strong> In a few US states, the law asks apps to check the age range of new accounts. Where iOS says this applies to your account, it may show its own age range sheet once. Nyx keeps nothing from it and nothing in Nyx depends on the answer.</li>
-    <li><strong>Search at the largest text sizes.</strong> With the largest accessibility text sizes, Parks shows its search field in the page, under its title, instead of in the navigation bar.</li>
-  </ul>
+  <h2 id="questions">Common questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Hollow nights, "No cloud forecast yet" and "Early look"</summary>
+      <p>A full cloud forecast counts for about three days ahead. Further out, a half-filled night is an early look: the forecast is eased toward the park's usual clouds for that month. A hollow night has no forecast yet and uses the usual clouds alone, so its score can change when a forecast arrives. Pull down to refresh when you have a connection, and check that Cloud forecasts is on under Settings → Your privacy.</p>
+    </details>
+    <details>
+      <summary>"Clouds limit tonight to 64", or a score lower than its parts</summary>
+      <p>The four parts add up, then the weakest one can cap the total: heavy cloud, a bright sky glow, smoke or short hours of true darkness. The line under the score names the cap that applies.</p>
+    </details>
+    <details>
+      <summary>"Access not checked" or "Park alerts are busy"</summary>
+      <p>Nyx could not get current park alerts. Use the link to the park's current conditions on nps.gov, or contact the park before traveling.</p>
+    </details>
+    <details>
+      <summary>No nearby parks</summary>
+      <p>Widen the radius or choose a different starting park. The radius is a straight line, not driving distance.</p>
+    </details>
+    <details>
+      <summary>Location is off</summary>
+      <p>Tap the starting-park name and choose a park. Location is optional.</p>
+    </details>
+    <details>
+      <summary>No reminders</summary>
+      <p>Save a park and turn on reminders in Settings. Only nights scoring 90 or more, up to five days ahead and with a recent, full cloud forecast, qualify, and at most one a week for each park. Reminders are recalculated whenever Nyx opens and, when iOS allows, about every six hours in the background.</p>
+    </details>
+    <details>
+      <summary>"No true darkness tonight"</summary>
+      <p>In Alaska's summer the Sun never sinks 18° below the horizon, so astronomical darkness never arrives. Nyx caps those nights below 40.</p>
+    </details>
+    <details>
+      <summary>Night vision</summary>
+      <p>Turn it on in Settings or from Control Center. Lower your screen brightness too; Nyx does not change it for you.</p>
+    </details>
+    <details>
+      <summary>Your journal</summary>
+      <p>Entries and photos stay on your iPhone or iPad. Back up your device with Apple's settings; Nyx has no cloud sync or account recovery. To move a journal to another device, use Export in the Journal tab and open the file on the other device.</p>
+    </details>
+    <details>
+      <summary>An age range request</summary>
+      <p>In a few US states, the law asks apps to check the age range of new accounts. Where iOS says this applies to your account, it may show its own age range sheet once. Nyx keeps nothing from it and nothing in Nyx depends on the answer.</p>
+    </details>
+    <details>
+      <summary>Search at the largest text sizes</summary>
+      <p>With the largest accessibility text sizes, Parks shows its search field in the page, under its title, instead of in the navigation bar.</p>
+    </details>
+  </div>
 
-  <h2>Apple Watch</h2>
-  <ul>
-    <li><strong>"No recent forecast" on the watch.</strong> The watch makes no network requests. Its cloud forecasts come from Nyx on your paired iPhone: open Nyx on the iPhone with a connection, and the watch updates. Until then, the watch scores each night with the park's usual clouds and says so.</li>
-    <li><strong>Red at dusk.</strong> With the Automatic palette, the watch turns red from dusk to dawn at the park on Tonight. Choose another palette in Nyx on the watch, or use the Red light control.</li>
-    <li><strong>Saved parks.</strong> The watch shows the parks you saved on your iPhone.</li>
-  </ul>
+  <h2 id="watch">Apple Watch</h2>
+  <div class="faq">
+    <details>
+      <summary>"No recent forecast" on the watch</summary>
+      <p>The watch makes no network requests. Its cloud forecasts come from Nyx on your paired iPhone: open Nyx on the iPhone with a connection, and the watch updates. Until then, the watch scores each night with the park's usual clouds and says so.</p>
+    </details>
+    <details>
+      <summary>Red at dusk</summary>
+      <p>With the Automatic palette, the watch turns red from dusk to dawn at the park on Tonight. Choose another palette in Nyx on the watch, or use the Red light control.</p>
+    </details>
+    <details>
+      <summary>Saved parks</summary>
+      <p>The watch shows the parks you saved on your iPhone.</p>
+    </details>
+  </div>
 
-  <h2>Apple Vision Pro</h2>
-  <ul>
-    <li><strong>Opening the sky.</strong> Choose a park in the window, then "Stand under this sky". "Leave the sky" closes it. The clock at the bottom of the window steps nights and moves through the hours, and the sky follows.</li>
-    <li><strong>"Usual clouds."</strong> Nyx on Vision Pro uses the cloud forecast when it has one and each park's usual clouds for the month otherwise (or when you switch forecasts off in Your privacy). For park alerts and field mode, use Nyx on iPhone or iPad.</li>
-    <li><strong>Which way is south?</strong> The sky is computed for the park and night you choose, with south ahead of you, where the Milky Way, Moon and planets cross. It is not turned to your room's real directions, and clouds are not shown. A plaque at your feet says so.</li>
-    <li><strong>Names in the sky.</strong> Tap a planet, a bright star, the Moon or the Milky Way core to see its name, its height and its direction. Constellations in the window toolbar shows or hides the figures. Drag across the sky to turn the night by hand.</li>
-    <li><strong>The Moon on your table.</strong> Open it from the window toolbar. It is lit at that night's phase; drag to turn it, and it turns back to the face we always see.</li>
-  </ul>
+  <h2 id="vision">Apple Vision Pro</h2>
+  <div class="faq">
+    <details>
+      <summary>Opening the sky</summary>
+      <p>Choose a park in the window, then "Stand under this sky". "Leave the sky" closes it. The clock at the bottom of the window steps nights and moves through the hours, and the sky follows.</p>
+    </details>
+    <details>
+      <summary>"Usual clouds"</summary>
+      <p>Nyx on Vision Pro uses the cloud forecast when it has one and each park's usual clouds for the month otherwise (or when you switch forecasts off in Your privacy). For park alerts and field mode, use Nyx on iPhone or iPad.</p>
+    </details>
+    <details>
+      <summary>Which way is south?</summary>
+      <p>The sky is computed for the park and night you choose, with south ahead of you, where the Milky Way, Moon and planets cross. It is not turned to your room's real directions, and clouds are not shown. A plaque at your feet says so.</p>
+    </details>
+    <details>
+      <summary>Names in the sky</summary>
+      <p>Tap a planet, a bright star, the Moon or the Milky Way core to see its name, its height and its direction. Constellations in the window toolbar shows or hides the figures. Drag across the sky to turn the night by hand.</p>
+    </details>
+    <details>
+      <summary>The Moon on your table</summary>
+      <p>Open it from the window toolbar. It is lit at that night's phase; drag to turn it, and it turns back to the face we always see.</p>
+    </details>
+  </div>
 
-  <h2>About the data</h2>
+  <h2 id="data">About the data</h2>
   <p>Sun and Moon positions are calculated on your device; moonrise and moonset agree with the U.S. Naval Observatory to within a few minutes, and terrain can shift what you see. Light-pollution classes are conservative estimates, not measurements. Heavy smoke or haze from the Copernicus (CAMS) forecast can cap the score; telescope seeing is not forecast. The Milky Way core, planets (to about a degree) and meteor showers are also calculated on your device; shower rates are a rough guide from the International Meteor Organization calendar, and lunar eclipse times are Eclipse Predictions by Fred Espenak, NASA's GSFC. None of these sky events change the score. <a href="https://open-meteo.com/">Weather data by Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), averaged over each night's true darkness by Nyx. Air-quality data: Copernicus Atmosphere Monitoring Service (CAMS) via Open-Meteo, CC BY 4.0. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International. The app's About the data screen has the full sources.</p>
-
-  <nav aria-label="Pages"><a href="index.html">Nyx</a><a href="privacy.html">Privacy policy</a><a href="case-study.html">Case study</a><a href="press/">Press kit</a></nav>
+  </div>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div class="about">
+        <a class="brand" href="./"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+        <p style="margin-top:10px">A dark-sky planner for the 63 US national parks, made by one independent developer.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="case-study">Case study</a></li>
+          <li><a href="press/">Press kit</a></li>
+          <li><a href="privacy">Privacy policy</a></li>
+          <li><a href="support">Support</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:harry.pakhale98@gmail.com?subject=Nyx">harry.pakhale98@gmail.com</a></li>
+          <li><a href="https://github.com/harrypakhale98/Nyx/issues">Report an issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="credits">Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Smoke and haze: Copernicus Atmosphere Monitoring Service, via Open-Meteo. Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Night lights and Moon imagery: NASA. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International. © 2026 Hardik Pakhale.</p>
+  </div>
+</footer>
 </body>
 </html>

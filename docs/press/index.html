@@ -2,21 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nyx press kit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Press kit — Nyx</title>
 <meta name="description" content="Press kit for Nyx: Dark Sky Planner, a free app for iPhone, iPad, Apple Watch and Apple Vision Pro that compares the 63 US national parks night by night to find the darkest sky.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" href="../images/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/nyx-icon-256.png">
+<link rel="canonical" href="https://get-nyx.com/press/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Nyx">
 <meta property="og:title" content="Nyx press kit">
-<meta property="og:description" content="Fact sheet, boilerplate, images and contact for Nyx: Dark Sky Planner.">
+<meta property="og:description" content="Press kit for Nyx: Dark Sky Planner, a free app for iPhone, iPad, Apple Watch and Apple Vision Pro that compares the 63 US national parks night by night to find the darkest sky.">
 <meta property="og:url" content="https://get-nyx.com/press/">
 <meta property="og:image" content="https://get-nyx.com/images/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../style.css">
 <!--
-  Press kit for the first public release, Nyx 1.1. Publish with the rest of docs/ (GitHub Pages serves docs/).
+  Press kit for the first public release, Nyx 1.1. Publish with the rest of docs/ (served at get-nyx.com; GitHub Pages serves the same folder).
   Images are web copies of Store/Framed (see Scripts in the compliance notes); after the build 8 recapture,
   regenerate them and drop the "pre-release" note under Images.
   LAUNCH DAY: set the launch date in the fact sheet and add the App Store link beside "Website".
@@ -25,11 +30,28 @@
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<main id="main" class="wide">
-  <img class="icon" src="../images/nyx-icon-256.png" width="88" height="88" alt="">
-  <p class="eyebrow">Nyx · Press kit</p>
-  <h1>Plan a darker night.</h1>
-  <p class="lead">Nyx is a free app that tells you where and when the sky will be darkest across the 63 US national parks.</p>
+<input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
+<div class="sky" aria-hidden="true"><div class="band"></div></div>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="../" aria-label="Nyx, home"><img src="../images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="../privacy">Privacy</a>
+      <a href="../support">Support</a>
+      <a class="opt" href="../press/" aria-current="page">Press</a>
+      <a class="opt" href="../case-study">Case study</a>
+    </nav>
+    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red</span><span class="track" aria-hidden="true"></span></label>
+  </div>
+</header>
+<main id="main">
+  <header class="page-head prose">
+    <p class="eyebrow amber">Press kit</p>
+    <h1>Plan a darker night.</h1>
+    <p class="lead">Nyx is a free app that tells you where and when the sky will be darkest across the 63 US national parks.</p>
+  </header>
+  <div class="prose doc">
 
   <h2>The story</h2>
   <p>National parks recorded more than 323 million recreation visits in 2025<sup><a href="#s1" id="r1">1</a></sup>, and night is part of why people come: in a survey at Acadia, nearly 90 percent of visitors agreed that viewing the night sky was important to them<sup><a href="#s2" id="r2">2</a></sup>. Yet a trip to see the Milky Way still fails for reasons no single app joined together: a bright Moon, a cloud deck, the glow of a distant city, or a closed road. Nyx asks one question, where should I go and on which night, and answers it with a Darkness Score for each park and night, explained in four plain parts. It runs its astronomy on the device, says what it does not know, and collects nothing.</p>
@@ -46,9 +68,9 @@
       <dt>Category</dt><dd>Travel; Weather</dd>
       <dt>Privacy</dt><dd>App Store privacy label: Data Not Collected. No account, analytics or tracking. Location, journal and photos stay on the device.</dd>
       <dt>Coverage</dt><dd>The 63 US national parks, with 85 named viewing spots and park-local times</dd>
-      <dt>Website</dt><dd><a href="../">get-nyx.com</a> · <a href="../case-study.html">Case study</a></dd>
-      <dt>Privacy policy</dt><dd><a href="../privacy.html">privacy.html</a></dd>
-      <dt>Support</dt><dd><a href="../support.html">support.html</a></dd>
+      <dt>Website</dt><dd><a href="../">get-nyx.com</a> · <a href="../case-study">Case study</a></dd>
+      <dt>Privacy policy</dt><dd><a href="../privacy">get-nyx.com/privacy</a></dd>
+      <dt>Support</dt><dd><a href="../support">get-nyx.com/support</a></dd>
       <dt>Press contact</dt><dd><a href="mailto:harry.pakhale98@gmail.com?subject=Nyx%20press">harry.pakhale98@gmail.com</a></dd>
     </dl>
   </div>
@@ -165,13 +187,35 @@ The astronomy runs on the device. There is no account, advertising or tracking, 
 
   <h2>Contact</h2>
   <p>Hardik Pakhale · <a href="mailto:harry.pakhale98@gmail.com?subject=Nyx%20press">harry.pakhale98@gmail.com</a>. Interviews, TestFlight access and further images on request.</p>
-
-  <nav aria-label="Pages">
-    <a href="../">Nyx</a>
-    <a href="../case-study.html">Case study</a>
-    <a href="../privacy.html">Privacy policy</a>
-    <a href="../support.html">Support</a>
-  </nav>
+  </div>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div class="about">
+        <a class="brand" href="../"><img src="../images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+        <p style="margin-top:10px">A dark-sky planner for the 63 US national parks, made by one independent developer.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../case-study">Case study</a></li>
+          <li><a href="../press/">Press kit</a></li>
+          <li><a href="../privacy">Privacy policy</a></li>
+          <li><a href="../support">Support</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:harry.pakhale98@gmail.com?subject=Nyx">harry.pakhale98@gmail.com</a></li>
+          <li><a href="https://github.com/harrypakhale98/Nyx/issues">Report an issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="credits">Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Smoke and haze: Copernicus Atmosphere Monitoring Service, via Open-Meteo. Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Night lights and Moon imagery: NASA. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International. © 2026 Hardik Pakhale.</p>
+  </div>
+</footer>
 </body>
 </html>
