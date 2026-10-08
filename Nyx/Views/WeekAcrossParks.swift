@@ -62,15 +62,17 @@ struct WeekAcrossParksPanel: View {
                 Text(week.total>week.rows.count ? String(localized:"The \(week.rows.count) parks with the darkest nights this week, of \(week.total) \(reach).") : String(localized:"Every park \(reach), darkest week first."))
                     .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
-            Grid(alignment:.leading,horizontalSpacing:2,verticalSpacing:2) {
-                GridRow {
-                    Color.clear.gridCellUnsizedAxes([.horizontal,.vertical]).accessibilityHidden(true)
+            // Rows of stacks, not a Grid: every night column shares what is left after the park's name,
+            // and the panel never asks for more width than its window has.
+            VStack(spacing:2) {
+                HStack(spacing:2) {
+                    Color.clear.frame(width:150,height:1).accessibilityHidden(true)
                     if let first=week.rows.first {
                         ForEach(Array(first.nights.enumerated()),id:\.offset) { index,night in header(night,tonight:index==0) }
                     }
                 }
                 ForEach(Array(week.rows.enumerated()),id:\.element.id) { r,row in
-                    GridRow {
+                    HStack(spacing:2) {
                         Text(row.park.shortName).font(.system(.subheadline,design:.serif)).foregroundStyle(palette.ink)
                             .lineLimit(2).fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
                             .accessibilityAddTraits(.isHeader)
@@ -116,7 +118,7 @@ struct WeekAcrossParksPanel: View {
     }
     private func cell(_ night:Night,at position:WeekAcrossParks.Cell)->some View {
         let isBest=week.best == position
-        return         NavigationLink { ParkDetailView(park:night.park,initialDate:night.id) } label:{
+        return NavigationLink { ParkDetailView(park:night.park,initialDate:night.id) } label:{
             VStack(spacing:4) {
                 Canvas { context,size in
                     let center=CGPoint(x:size.width/2,y:size.height/2), radius=1.5+8*pow(Double(night.score.value)/100,1.5)
@@ -125,7 +127,7 @@ struct WeekAcrossParksPanel: View {
                         context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.8)
                     }
                     NightMark.mark(night,differentiate:access.differentiate).draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200)
-                }.frame(height:28).accessibilityHidden(true)
+                }.frame(width:28,height:28).accessibilityHidden(true)
                 if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
                 else { Text("\(night.score.value)").font(.caption.monospacedDigit()).foregroundStyle(isBest ? palette.accent : palette.ink) }
             }

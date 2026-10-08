@@ -11,11 +11,12 @@ struct PlanView: View {
     var body: some View {
         Group {
             switch mode {
-            case .month: CalendarView()
+            // The picker lives inside the month, so the inspector's column stays clear of it.
+            case .month: CalendarView(bar:AnyView(picker))
             case .free: TripPlannerView(embedded:true)
             }
         }
-        .safeAreaBar(edge:.top,spacing:0) { picker }
+        .safeAreaBar(edge:.top,spacing:0) { if mode == .free { picker } }
         .navigationTitle("Plan").navigationBarTitleDisplayMode(.inline)
         .tabRootToolbar()
         .toolbar {

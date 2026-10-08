@@ -108,6 +108,8 @@ struct NightPeek: View {
     }
 }
 struct CalendarView: View {
+    /// Plan's switch between one park and My free nights, pinned under the bar. It sits inside the month so the inspector's column never runs beneath it.
+    var bar:AnyView?=nil
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
@@ -174,6 +176,7 @@ struct CalendarView: View {
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
+            .safeAreaBar(edge:.top,spacing:0) { if let bar { bar } }
             .measuringWidth($width)
             .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {
                 if let park, let night=focused(month(park)) { aside(night) }
