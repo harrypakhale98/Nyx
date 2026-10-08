@@ -82,9 +82,9 @@ struct PlannerWindow: View {
             guard scenePhase == .active else { return }
             await model.keepClock()
         }
-        // The Moon volume offers a way back here only while this window is closed.
-        .onAppear { model.plannerOpen = true }
-        .onDisappear { model.plannerOpen = false }
+        // The Moon volume offers a way back here only while every planner window is closed.
+        .onAppear { model.plannerWindows += 1 }
+        .onDisappear { model.plannerWindows = max(0, model.plannerWindows-1) }
         // While the window is in use: the parks' cloud forecast, asked for again only when six hours old.
         .task(id: scenePhase == .active) {
             guard scenePhase == .active else { return }

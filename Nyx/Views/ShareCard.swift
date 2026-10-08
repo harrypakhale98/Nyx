@@ -81,7 +81,12 @@ nonisolated struct ShareArtwork: Transferable {
     }
     private enum Failure: Error { case notDrawn }
     @MainActor private static var drawn: [String:Data]=[:]
-    @MainActor private var key: String { [night.park.id,night.id.description,String(night.score.value),String(describing:shape),String(palette.nightVision),why ?? "",String(Double(scale))].joined(separator:"|") }
+    /// Everything the drawing depends on: the night's score and its forecast basis (the caption and
+    /// the gauge's hollow ring), the shape, the words, and the palette's red and contrast.
+    @MainActor private var key: String {
+        [night.park.id,night.id.description,String(night.score.value),String(describing:night.basis),String(night.score.hasForecast),String(describing:shape),
+         String(palette.nightVision),String(palette.highContrast),String(palette.brighterRed),why ?? "",String(Double(scale))].joined(separator:"|")
+    }
     @MainActor func png() throws -> Data {
         if let data=Self.drawn[key] { return data }
         guard let data=image()?.pngData() else { throw Failure.notDrawn }

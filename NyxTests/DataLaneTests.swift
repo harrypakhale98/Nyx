@@ -426,11 +426,11 @@ struct DataLaneTests {
         JournalInbox.remove(picked, folder: inbox)
         JournalInbox.remove(opened, folder: inbox)
         #expect(manager.fileExists(atPath: picked.path) && !manager.fileExists(atPath: opened.path))
-        let waiting=try journal(inbox, "Waiting"), left=try journal(inbox, "Left")
-        JournalInbox.sweep(folder: inbox, keeping: waiting)
-        #expect(manager.fileExists(atPath: waiting.path) && !manager.fileExists(atPath: left.path))
+        let waiting=try journal(inbox, "Waiting"), importing=try journal(inbox, "Importing"), left=try journal(inbox, "Left")
+        JournalInbox.sweep(folder: inbox, keeping: [waiting, importing])
+        #expect(manager.fileExists(atPath: waiting.path) && manager.fileExists(atPath: importing.path) && !manager.fileExists(atPath: left.path))
         JournalInbox.sweep(folder: inbox)
-        #expect(!manager.fileExists(atPath: waiting.path))
+        #expect(!manager.fileExists(atPath: waiting.path) && !manager.fileExists(atPath: importing.path))
     }
     /// When the store on disk could not open, Siri and Shortcuts refuse plainly: nothing is written
     /// to the stand-in in memory, which would be gone on the next launch.

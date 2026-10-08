@@ -40,6 +40,9 @@ actor ForecastDetailService: DetailProviding {
     private var lowData=false
     /// The files on disk hold no aerosol series (`forgetAir` swept them this launch).
     private var airCleared=false
+    /// Counts `forgetAir` calls. A refresh notes it when it begins; smoke that arrives after the
+    /// switch went off (the request was already in flight) is dropped instead of stored.
+    private var airGeneration=0
     /// A refresh already under way; later callers wait for it instead of asking again.
     private var running: Task<Void, Never>?
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
@@ -55,6 +58,7 @@ actor ForecastDetailService: DetailProviding {
     }
     func pausedForLowData() -> Bool { lowData }
     func forgetAir() {
+        airGeneration+=1
         for (id, detail) in memory where detail.air != nil {
             var kept=detail; kept.air=nil
             memory[id]=kept
@@ -88,6 +92,7 @@ actor ForecastDetailService: DetailProviding {
                 for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
             }
             if !jobs.isEmpty {
+                let generation=airGeneration
                 let task=Task {
                     let results=await withTaskGroup(of: (Kind, [(String, HourlySeries)]?).self) { group in
                         for (kind, chunk) in jobs { group.addTask { (kind, await self.fetch(kind, chunk)) } }
@@ -95,7 +100,7 @@ actor ForecastDetailService: DetailProviding {
                         for await result in group { all.append(result) }
                         return all
                     }
-                    self.store(results)
+                    self.store(results, airGeneration: generation)
                     self.running=nil
                 }
                 running=task
@@ -106,11 +111,13 @@ actor ForecastDetailService: DetailProviding {
         for park in parks { if let detail=memory[park.id] { result[park.id]=detail } }
         return result
     }
-    /// A nil part was held back by Low Data Mode.
-    private func store(_ results: [(Kind, [(String, HourlySeries)]?)]) {
+    /// A nil part was held back by Low Data Mode. Smoke asked for before the latest `forgetAir`
+    /// is not stored: the switch went off while it was on its way.
+    private func store(_ results: [(Kind, [(String, HourlySeries)]?)], airGeneration generation: Int) {
         var changed=Set<String>()
         lowData=results.contains { $0.1 == nil }
         for (kind, fetched) in results {
+            if kind == .air && generation != airGeneration { continue }
             for (id, series) in fetched ?? [] {
                 var detail=memory[id] ?? ForecastDetail()
                 switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series; airCleared=false }
