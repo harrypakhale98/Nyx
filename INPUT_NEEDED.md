@@ -1,6 +1,6 @@
 # Input needed: the steps left for Nyx 1.1, in order
 
-Build 1.1 (8) is the first public release. It carries the award audit's work (`Research/award-audit.md`): the score's caps, honest forecasts with usual clouds, bulk park alerts, background refresh, the four-tab app with Plan, the park in three chapters, Assistive Access, Feel tonight, the Watch's dark-adaptation clock and complications, Vision Pro's named sky and clouds, iPad windows, widgets with choices and Spanish drafts for every string. Every step below needs your Apple ID, your accounts, your money, a lawyer, or your own eyes on real hardware. Steps 1–6 can start today, in parallel with nothing else; the device pass (7–9) needs build 8 on your devices.
+Build 1.1 (8) is the first public release. It carries the award audit's work (`Research/award-audit.md`): the score's caps, honest forecasts with usual clouds, bulk park alerts, background refresh, the four-tab app with Plan, the park in three chapters, Assistive Access, Feel tonight, the Watch's dark-adaptation clock and complications, Vision Pro's named sky and clouds, iPad windows, widgets with choices and Spanish drafts for every string. Every step below needs your Apple ID, your accounts, your money, a lawyer, or your own eyes on real hardware. Steps 1–6 can start today. The device pass (9–10) runs straight from Xcode: plug in the iPhone, choose it as the run destination and press Run (the Watch app installs with it; Vision Pro uses the NyxVision scheme). No archive is needed for it; the build you upload is archived after the device pass and its fixes.
 
 ## Start now (deadlines first)
 
@@ -28,7 +28,7 @@ Build 1.1 (8) is the first public release. It carries the award audit's work (`R
 
 8. **Xcode Cloud (optional, recommended).** *Why only you:* it runs on your account. In Xcode → Integrate → Create Workflow: a test workflow on `main` (iOS 26.5 and 27 simulators, `Nyx.xctestplan`, Default configuration) and an archive workflow named "Release" with the secret environment variable `NPS_API_KEY` (from `Config/Secrets.xcconfig`). `ci_scripts/` is already in the repo.
 
-## The device pass (needs build 8 on your devices; at night where it says so)
+## The device pass (run from Xcode on your devices; at night where it says so)
 
 9. **iPhone, ideally at night at a dark place.** *Why only you:* the simulator has no Taptic Engine, compass, brightness, alarms, Lock Screen, widget host, AirPods or real sky. Record pass or fail with the build number in `AUDIT.md`; this pass also decides which Accessibility Nutrition Labels you may declare (`Store/1.1/accessibility-nutrition-labels.md`).
    - **Core:** first run asks "Where do you start from?"; Chicago (or your city) as the start; Near me allowed and denied; a park's three chapters; the closure beside the score; Plan in both modes; Add to Calendar and Follow this night from a night's menu; airplane mode (scores fall back to usual clouds, never rise).
@@ -51,7 +51,7 @@ Build 1.1 (8) is the first public release. It carries the award audit's work (`R
 
 ## Upload, store page and submission
 
-12. **Archive and upload build 1.1 (8) and the visionOS build.** *Why only you:* distribution signing uses your account. The archives are in Xcode → Window → Organizer → Archives (`Nyx 1.1 (8)` and `NyxVision 1.1 (8)`). Distribute App → App Store Connect → Upload, automatic signing. Export compliance: standard HTTPS only. Install from TestFlight and repeat the quick checks from step 9 on the distributed build. Turn on the **public TestFlight link** for the featuring nomination.
+12. **Archive and upload the release build and the visionOS build** (after the device pass and its fixes; ask me to bump the build number and archive, or do it in Xcode: Product → Archive with the **Nyx** scheme and Any iOS Device, then the **NyxVision** scheme and Any visionOS Device). *Why only you:* distribution signing uses your account. The archives appear in Xcode → Window → Organizer → Archives. Distribute App → App Store Connect → Upload, automatic signing. Export compliance: standard HTTPS only. Install from TestFlight and repeat the quick checks from step 9 on the distributed build. Turn on the **public TestFlight link** for the featuring nomination.
 
 13. **Set up the 1.1 version in App Store Connect.**
     - If 1.0 (5) was never submitted, rename the pending version to 1.1; otherwise + Version → 1.1. It is the first release, so there is no What's New.
