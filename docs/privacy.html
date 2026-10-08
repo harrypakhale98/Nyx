@@ -19,6 +19,7 @@
 <meta property="og:image" content="https://get-nyx.com/images/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nyx on iPhone: Death Valley tonight scores 97 out of 100, Pristine.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -55,7 +56,7 @@
   <h2>What stays on your device</h2>
   <ul>
     <li><strong>Journal and photos.</strong> Entries and the photos you choose are stored in the app on your iPhone or iPad. Nyx does not sync them to iCloud. Your device backup settings may include app data. Deleting an entry removes it; deleting the app removes its data, subject to Apple's backups.</li>
-    <li><strong>Location.</strong> Only if you choose "Near me", and only while you use the app. Nyx compares straight-line distances to parks on your device, and works out the sky "From home tonight" there too, with no request at all. Your coordinates are never sent anywhere. Cloud forecasts, park alerts and campgrounds are requested for all 63 parks at once, so none of them reveals which parks are near you; ranger programs are requested only for a park whose page you open. Each can be switched off in Your privacy. You can always choose a starting park instead.</li>
+    <li><strong>Location.</strong> Only if you choose "Near me", and only while you use the app. Nyx compares straight-line distances to parks on your device, and works out the sky "From home tonight" there too, with no request at all. Once you have allowed it, the same rough position (accurate to about 3 km) also starts a trip plan from where you are, lets Nyx notice in the evening or at night that you have reached a park, and lets field mode point the sky to true north instead of magnetic north. None of these asks for it again, and Nyx never reads your position in the background. Your coordinates are never sent anywhere. Cloud forecasts, park alerts and campgrounds are requested for all 63 parks at once, so none of them reveals which parks are near you; ranger programs are requested only for a park whose page you open. Each can be switched off in Your privacy. You can always choose a starting park instead.</li>
     <li><strong>Photos.</strong> Chosen through Apple's photo picker. Nyx can see only the photos you select.</li>
     <li><strong>Reminders.</strong> Local notifications scheduled on your device. About every six hours, iOS may let Nyx refresh your saved parks' forecasts in the background, with the same requests as in the app, so a reminder never rests on an old forecast. Turn reminders off in Nyx, or Background App Refresh in the Settings app.</li>
     <li><strong>Journal export.</strong> Export makes a file you save or share yourself, to move your journal to another device. Nyx never sends it anywhere.</li>
@@ -69,7 +70,7 @@
     <li><strong>Followed nights (1.2).</strong> Follow this night schedules the night's Live Activity on your device, with no server and no push token. It shows the park, the night's times, its score and any closure.</li>
     <li><strong>Handoff (1.2).</strong> A park's page can be picked up on another of your devices signed in to the same Apple Account. Only the park and the night's date are handed over, by Apple's system; Nyx has no server.</li>
     <li><strong>Journal by voice (1.2).</strong> Entries you add with Siri go into the same journal on your device, with the park's own public name and coordinates.</li>
-    <li><strong>Where to look by sound (1.2).</strong> If you turn on Sound in field mode and wear headphones that report head movement, Nyx reads that movement to place the tone. It is used on your device while the view is open, and never recorded or sent.</li>
+    <li><strong>Where to look by sound (1.2).</strong> If you turn on Sound in field mode and wear headphones that report head movement, Nyx reads that movement to place the tone. iOS asks once for permission first (Motion &amp; Fitness in the Settings app), after a short explanation in Nyx; without it the tone follows your iPhone instead. The movement is used on your device while the view is open, and never recorded or sent.</li>
     <li><strong>Translation (1.2).</strong> When Nyx runs in a language other than English, a Translate button under park alerts and ranger programs opens Apple's translation, which runs on your device. iOS may download a language pack the first time; Nyx sends nothing and stores nothing.</li>
   </ul>
 
@@ -78,7 +79,7 @@
   <ul>
     <li><strong>Open-Meteo</strong> (api.open-meteo.com) for cloud forecasts, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. Requests contain the public coordinates of all 63 national parks (each park's main viewing spot), never yours.</li>
     <li><strong>Open-Meteo air quality</strong> (air-quality-api.open-meteo.com) for the smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Requests contain the same public park coordinates, never yours.</li>
-    <li><strong>National Park Service</strong> (developer.nps.gov) for park alerts, ranger programs and campgrounds. Alert requests contain the codes of all 63 parks; a program request contains the code of the park you opened. The campground request, at most once a week, contains the codes of all 63 parks and nothing about you. If you enter your own NPS key, it is kept in your device's Keychain and sent only to this service.</li>
+    <li><strong>National Park Service</strong> (developer.nps.gov) for park alerts, ranger programs and campgrounds. Alert requests contain the codes of all 63 parks; a program request contains the code of the park you opened. The campground request, at most once a week, contains the codes of all 63 parks and nothing about you. Requests carry an NPS key that ships inside the app, the same one in every copy of Nyx, so it identifies the app and not you. If you enter your own NPS key, it is kept in your device's Keychain, used instead, and sent only to this service.</li>
   </ul>
   <p>Like any website, these services see your IP address and ordinary request information. Open-Meteo states that its logs are not linked to identities and are deleted after 90 days. Their own policies govern their servers: <a href="https://open-meteo.com/en/terms">Open-Meteo</a>, <a href="https://www.nps.gov/aboutus/privacy.htm">National Park Service</a>. You can switch each service off in Nyx under Settings → Your privacy; information already saved stays available, and moon, twilight, calendar and journal keep working offline.</p>
 

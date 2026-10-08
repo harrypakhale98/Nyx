@@ -6,7 +6,7 @@ Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served 
 
 ## Version
 
-**1.1 (7)**, archived 2026-10-06. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` live in `project.yml` and every target inherits them. 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.0 (5) was the last build on the store before it.
+**1.2 (8)**, uploaded 2026-10-08 and in review preparation; **1.1 (7)** has been live on the App Store since 2026-10-07 (ID 6818817800). `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` live in `project.yml` and every target inherits them. 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.2 is the update to it (see `Store/1.1/metadata.md` for what it adds); 1.0 (5) was only uploaded and never public.
 
 Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md). Archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json` and never prints the NPS key).
 
@@ -23,7 +23,7 @@ Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED
 | `Scripts/` | Data builders, catalog sync, translation merge, screenshot capture, store frames, release verification, the promo video |
 | `Research/` | Sources and evidence behind the bundled data: accuracy against USNO, sky glow, cloud climate, contrast, performance, localization memory, review screenshots |
 | `Store/` | App Store metadata, screenshots (raw and captioned), In-App Event media, social posts |
-| `docs/` | The public support, privacy and press pages (GitHub Pages) |
+| `docs/` | The public website: landing, support, privacy, case study and press pages (get-nyx.com, served by a Cloudflare Worker) |
 | `project.yml` | XcodeGen spec for every target; `Nyx.xcodeproj` is generated from it |
 
 Project documents: [DECISIONS.md](DECISIONS.md) (every decision with its reason), [PHASE_STATUS.md](PHASE_STATUS.md) (latest handoff), [AUDIT.md](AUDIT.md) (design, accessibility and device-gate evidence), [PRIVACY.md](PRIVACY.md) (privacy review), [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md) (release checklist and the owner's tasks).
@@ -42,7 +42,7 @@ Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/
 
 ### iPad
 
-The same app target runs on iPad (iPadOS 26+, every orientation, resizable windows). Wide windows (≥ 900 pt) get two-column pages: Parks as a list beside the park, park detail with the gauge and river beside the sky's detail, Tonight with the answer beside the choices, Calendar with the chosen night's breakdown beside a larger month, Journal with the constellation beside the entries. Narrow windows and Slide Over use the iPhone layout. Keyboard: ⌘1–⌘5 tabs, ⌘F find a park, ⌘← ⌘→ previous and next night. An extra-large Tonight's sky widget is iPad only. See DECISIONS.md "iPad".
+The same app target runs on iPad (iPadOS 26+, every orientation, resizable windows). Wide windows (≥ 900 pt) get two-column pages: Parks as a list beside the park, park detail with the gauge and river beside the sky's detail, Tonight with the answer beside the choices, Calendar with the chosen night's breakdown beside a larger month, Journal with the constellation beside the entries. Narrow windows and Slide Over use the iPhone layout. Keyboard: ⌘1–⌘4 for the tabs (Tonight, Parks, Plan, Journal; Learn is in Settings › About the sky), ⌘F find a park, ⌘← ⌘→ previous and next night. An extra-large Tonight's sky widget is iPad only. See DECISIONS.md "iPad".
 
 ### Apple Watch
 

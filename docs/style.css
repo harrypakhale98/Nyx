@@ -16,9 +16,10 @@
   color-scheme: dark;
 }
 
-/* Night vision: the same page in deep red, as the app does at the park. Red text on black is 6.2:1. */
+/* Night vision: the same page in deep red, as the app does at the park. Every red text colour is at least 5:1
+   on the lightest background it sits on (#1F0807): ink 5.6:1, muted 5.4:1, soft 5.1:1; on black, 6.2, 5.9 and 5.6:1. */
 html:has(#nv:checked) {
-  --ink: #FF453A; --muted: #E0473D; --soft: #D8443A;
+  --ink: #FF453A; --muted: #F54A40; --soft: #EC4A40;
   --line: rgba(255, 69, 58, .22); --line-strong: rgba(255, 69, 58, .4);
   --amber: #FF453A; --amber-soft: rgba(255, 69, 58, .14); --on-amber: #000000;
   --panel: rgba(31, 8, 7, .8); --glass: rgba(14, 3, 3, .7);
@@ -28,7 +29,8 @@ html:has(#nv:checked) {
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { background: var(--void); -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 76px; }
+html { background: var(--void); -webkit-text-size-adjust: 100%; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
   margin: 0; min-height: 100vh; color: var(--ink);
   font: 17px/1.6 var(--sans); overflow-x: clip; overflow-wrap: break-word;
@@ -75,8 +77,8 @@ html:has(#nv:checked) .sky::after { background-image: url("images/stars-bright-r
 
 /* Night-vision switch (a real checkbox, styled) */
 .nv-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; color: var(--muted); font-size: 15px; min-height: 44px; padding: 0 4px 0 10px; user-select: none; -webkit-user-select: none; }
-.nv-switch .track { width: 42px; height: 26px; border-radius: 13px; background: rgba(245, 241, 230, .16); position: relative; flex: none; transition: background .25s; box-shadow: inset 0 0 0 1px var(--line); }
-.nv-switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); transition: transform .3s cubic-bezier(.3, 1.4, .5, 1); }
+.nv-switch .track { width: 42px; height: 26px; border-radius: 13px; background: rgba(245, 241, 230, .16); position: relative; flex: none; box-shadow: inset 0 0 0 1px var(--line); }
+.nv-switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); }
 #nv:checked ~ * .nv-switch .track { background: #FF453A; }
 #nv:checked ~ * .nv-switch .track::after { transform: translateX(16px); background: #000; }
 #nv:focus-visible ~ * .nv-switch .track { outline: 2px solid var(--amber); outline-offset: 3px; }
@@ -193,11 +195,11 @@ html:has(#nv:checked) .scale li { border-color: var(--amber); }
 /* Field mode: always red, whatever the switch says */
 .field { background: radial-gradient(90% 70% at 50% 30%, #1F0807 0%, #0A0202 55%, #000 100%); border-top: 1px solid rgba(255, 69, 58, .2); border-bottom: 1px solid rgba(255, 69, 58, .2); }
 .field, .field .copy, .field h2 { color: #FF453A; }
-.field .eyebrow { color: #D8443A; }
-.field .lead, .field .ticks li { color: #E0473D; }
+.field .eyebrow { color: #EC4A40; }
+.field .lead, .field .ticks li { color: #F54A40; }
 .field .ticks li::before { border-color: #FF453A; }
 .field .pill.ghost { color: #FF453A; border-color: rgba(255, 69, 58, .45); background: rgba(31, 8, 7, .8); cursor: pointer; }
-.field .shot figcaption { color: #D8443A; }
+.field .shot figcaption { color: #EC4A40; }
 
 /* Platforms */
 .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
@@ -264,7 +266,7 @@ html:has(#nv:checked) .scale li { border-color: var(--amber); }
 .faq details:last-of-type { border-bottom: 1px solid var(--line); }
 .faq summary { cursor: pointer; list-style: none; padding: 18px 36px 18px 0; position: relative; color: var(--ink); font-weight: 600; min-height: 44px; }
 .faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: ""; position: absolute; right: 8px; top: 26px; width: 9px; height: 9px; border-right: 1.5px solid var(--amber); border-bottom: 1.5px solid var(--amber); transform: rotate(45deg); transition: transform .25s; }
+.faq summary::after { content: ""; position: absolute; right: 8px; top: 26px; width: 9px; height: 9px; border-right: 1.5px solid var(--amber); border-bottom: 1.5px solid var(--amber); transform: rotate(45deg); }
 .faq details[open] summary::after { transform: rotate(-135deg); top: 30px; }
 .faq details p { margin: 0 0 18px; color: var(--muted); }
 dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 12px 26px; margin: 0; }
@@ -302,6 +304,9 @@ blockquote { margin: 18px 0; padding: 4px 0 4px 18px; border-left: 2px solid var
     @keyframes rise { from { opacity: 0; transform: translateY(36px); } }
   }
   .pill, .site-nav a, .toc a, .card, .tile { transition: border-color .2s, background-color .2s, color .2s; }
+  .nv-switch .track { transition: background .25s; }
+  .nv-switch .track::after { transition: transform .3s cubic-bezier(.3, 1.4, .5, 1); }
+  .faq summary::after { transition: transform .25s; }
 }
 
 /* Larger text and narrow windows */
@@ -338,6 +343,29 @@ blockquote { margin: 18px 0; padding: 4px 0 4px 18px; border-left: 2px solid var
 @media (prefers-reduced-transparency: reduce) {
   .site-header { background: #05060d; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+/* Print: dark ink on white, no sky, no header, no night-vision switch, nothing animated.
+   The selector list matches the night-vision rule's weight, so a page printed in red still prints dark on white. */
 @media print {
-  .sky, .site-header, .nv-switch,   body { background: #fff; color: #000; }
+  :root, html:has(#nv:checked) {
+    --void: #fff; --indigo: #fff; --violet: #fff;
+    --ink: #000; --muted: #222; --soft: #444;
+    --line: rgba(0, 0, 0, .25); --line-strong: rgba(0, 0, 0, .45);
+    --amber: #7A4300; --amber-soft: rgba(0, 0, 0, .06); --on-amber: #fff;
+    --panel: #fff; --glass: #fff; --glow: transparent; --band: transparent;
+    --shot-filter: none;
+    color-scheme: light;
+  }
+  html, body { background: #fff; color: #000; }
+  body { font-size: 11pt; line-height: 1.5; min-height: 0; }
+  .sky, .site-header, .nv-switch, .skip, .defs, #nv { display: none !important; }
+  .reveal, .dial .value, .dial .knob { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .dial .track, .part .meter { background: rgba(0, 0, 0, .12); stroke: rgba(0, 0, 0, .15); }
+  .field { background: #fff; border-color: var(--line); }
+  .field, .field .copy, .field h2, .field .eyebrow, .field .lead, .field .ticks li, .field .shot figcaption { color: #000; }
+  .tile.vision .over { background: #fff; }
+  .device { box-shadow: none; }
+  .site-footer { background: none; margin-top: 24pt; }
+  h1, h2, h3 { break-after: avoid; }
+  .panel, .card, .part, .tile, .figures li, figure, tr { break-inside: avoid; }
+  a { color: #000; }
 }
