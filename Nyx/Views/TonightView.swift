@@ -86,6 +86,8 @@ struct TonightView: View {
                     withAnimation(.spring(response:0.9,dampingFraction:1)) { shooting=1 } completion:{ shooting=0 }
                 }
                 await model.refresh(candidates,force:true);refreshed+=1
+                // The haptic is felt; this is heard, politely, after anything VoiceOver is already saying.
+                NightListener.announce(String(localized:"Updated"),priority:.low)
             }
     }
     /// First run, until a starting point is chosen: the question, asked in place, with no permission

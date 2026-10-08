@@ -101,7 +101,7 @@ import Testing
         let draft=try #require(CalendarDraft(stay:stays[0]))
         #expect(draft.title.contains("Death Valley"))
         #expect(draft.start==CalendarDraft(stop:stops[0]).start && draft.end==CalendarDraft(stop:stops[2]).end)
-        #expect(draft.notes.components(separatedBy:"\n").filter { $0.contains("/100") }.count==3)
+        #expect(draft.notes.components(separatedBy:"\n").filter { $0.contains(" out of 100 ") }.count==3)
         #expect(CalendarDraft(stay:[]) == nil)
         #expect(CalendarDraft(stay:[stops[3]])==CalendarDraft(stop:stops[3]))
         #expect(TripStay(stays[0])?.best?.isBest == true)

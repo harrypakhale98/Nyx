@@ -299,7 +299,7 @@ struct TripStayRow: View {
                 .accessibilityLabel(spoken)
                 .accessibilityHint(several ? "Opens the best of these nights at the park." : "Opens that night at the park.")
                 Button(action:addToCalendar) { Label(several ? String(localized:"Add \(stay.stops.count) nights to Calendar") : String(localized:"Add to Calendar"),systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
-                    .buttonStyle(.plain).foregroundStyle(palette.accent)
+                    .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
                     .accessibilityLabel(several ? String(localized:"Add \(stay.stops.count) nights at \(park.shortName) to Calendar") : String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))
                     .accessibilityInputLabels([Text("Add to Calendar"),Text("Add \(park.shortName) to Calendar")])
             }.padding(.vertical,14)
