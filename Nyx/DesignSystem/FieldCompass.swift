@@ -17,6 +17,8 @@ struct FieldCompassView: View {
     @State private var targets: [FieldSkyTarget]=[]
     @State private var stars: [CompassStar]=[]
     @State private var band=CompassBand.none
+    @State private var explainsBeacon=false
+    private var beacon: SkyBeacon { .shared }
     private var motion: FieldMotion { .shared }
     private var sensing: Bool { fixedPose != nil || motion.available }
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -39,7 +41,16 @@ struct FieldCompassView: View {
             }
         }
         .onAppear { if fixedPose == nil { motion.start() } }
-        .onDisappear { motion.stop() }
+        .onDisappear { motion.stop(); beacon.stop() }
+        .sheet(isPresented:$explainsBeacon) {
+            PermissionExplainer(symbol:"headphones",title:"Where to look by sound",message:"With headphones, a soft tone sits where the Milky Way's core, a planet or the Moon is, and quickens as you turn toward it, so you can find it with the screen dark. With AirPods that track your head, iOS asks once to use their motion; it stays on this iPhone. Nothing is recorded.",action:"Play the tone") {
+                SkyBeacon.explained=true; explainsBeacon=false; switchBeacon(true)
+            }.nyxPresentation()
+        }
+    }
+    private func switchBeacon(_ on:Bool) {
+        if on && !SkyBeacon.explained { explainsBeacon=true; return }
+        beacon.set(on,park:session.park,sky:session.night.sky) { [session] in session.now }
     }
     private var sky: some View {
         TimelineView(.animation(minimumInterval:1/30,paused:frozen != nil || fixedPose != nil || PowerState.shared.thermalSerious)) { _ in
@@ -80,6 +91,7 @@ struct FieldCompassView: View {
                 HStack(spacing:12) { buttons }
                 VStack(alignment:.leading,spacing:8) { buttons }
             }.font(.subheadline)
+            if beacon.isOn { beaconStatus }
             if sensing && fixedPose == nil {
                 Text(motion.trueNorth ? String(localized:"Directions use true north.") : String(localized:"Directions use magnetic north, which can differ from true north by several degrees."))
                     .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -95,6 +107,30 @@ struct FieldCompassView: View {
         }
         if sensing {
             Button { listed = !showsList } label:{ Label(showsList ? "Sky" : "List",systemImage:showsList ? "scope" : "list.bullet") }.buttonStyle(.bordered)
+        }
+        if sensing && fixedPose == nil && SkyBeacon.supported {
+            Toggle(isOn:Binding(get:{ beacon.isOn },set:{ switchBeacon($0) })) { Label("Sound",systemImage:"headphones") }
+                .toggleStyle(.button).buttonStyle(.bordered)
+                .accessibilityLabel("Where to look by sound")
+                .accessibilityHint("Plays a tone in your headphones from the direction of a target in the sky.")
+                .accessibilityInputLabels([Text("Sound"),Text("Tone"),Text("Where to look by sound")])
+        }
+    }
+    /// What the tone points to, and a way to point it at something else.
+    private var beaconStatus: some View {
+        VStack(alignment:.leading,spacing:6) {
+            if let target=beacon.target {
+                Text("The tone points to \(target.spoken).").font(.caption).fixedSize(horizontal:false,vertical:true)
+            } else {
+                Text("Nothing Nyx can point to is above the horizon now.").font(.caption).fixedSize(horizontal:false,vertical:true)
+            }
+            if beacon.choices.count>1 {
+                Picker("Toward",selection:Binding(get:{ beacon.chosenID ?? "" },set:{ beacon.choose($0.isEmpty ? nil : $0) })) {
+                    Text("Automatic").tag("")
+                    ForEach(beacon.choices) { Text($0.name).tag($0.id) }
+                }.pickerStyle(.menu).font(.caption)
+            }
+            Text(beacon.headTracking ? String(localized:"Following your head.") : String(localized:"Following your iPhone. Headphones carry the direction; the speaker only the quickening pulse.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
     }
     /// "Facing south, 30° up. In view: Jupiter, Milky Way core."
