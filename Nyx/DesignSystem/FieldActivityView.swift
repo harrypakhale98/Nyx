@@ -142,7 +142,8 @@ struct FieldActivityCountdown: View {
 struct FieldActivityTimer: View {
     let target: Date
     var body: some View {
-        Text(.durationOffset(to:target),format:.units(allowed:[.hours,.minutes],width:.abbreviated,fractionalPart:.hide(rounded:.up)))
+        // From now to the target, counted in whole minutes; the 59 s rounds a part minute up ("22:39" reads "23 min").
+        Text(.dateRange(endingAt:target.addingTimeInterval(59)),format:.components(style:.abbreviated,fields:[.hour,.minute]))
     }
 }
 #if DEBUG

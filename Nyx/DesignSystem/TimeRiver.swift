@@ -248,8 +248,7 @@ struct TimeRiver: View {
             let label=context.resolve(Text("forecast ends").font(.caption2).foregroundStyle(palette.muted))
             let measured=label.measure(in:size)
             let lx=min(max(fx+4+measured.width/2,measured.width/2),size.width-measured.width/2)
-            let clearOfMoon=index.map { abs(x($0,width:size.width)-lx)>measured.width/2+moonSize/2+4 } ?? true
-            if clearOfMoon { context.draw(label,at:CGPoint(x:lx,y:top+measured.height/2)) }
+            context.draw(label,at:CGPoint(x:lx,y:bottom-measured.height/2-2))
         }
 
         for i in nights.indices {

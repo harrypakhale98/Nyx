@@ -156,7 +156,7 @@ import SwiftUI
     @Test func spotGlowComparesWithinThePark() {
         #expect(SpotGlow.comparison(10,others:[4,5],parkCentre:nil)=="Brighter than this park's other spots")
         #expect(SpotGlow.comparison(2,others:[5],parkCentre:nil)=="Darker than this park's other spot")
-        #expect(SpotGlow.comparison(5,others:[5,5.2],parkCentre:nil)=="About as dark as this park's other spots")
+        #expect(SpotGlow.comparison(5,others:[5,5.2],parkCentre:nil)==nil)
         #expect(SpotGlow.comparison(5,others:[],parkCentre:nil)==nil)
         #expect(SpotGlow.comparison(10,others:[],parkCentre:5)=="Brighter than the park's center")
     }
