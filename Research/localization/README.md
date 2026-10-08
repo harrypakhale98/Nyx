@@ -70,3 +70,15 @@ A native Mexican or US-Hispanic Spanish speaker, ideally someone who stargazes o
   - *una población al %@* (a town to the %@) and *población* for "town" in the Black Marble text, because the light can come from a city.
   - *Índice de oscuridad (0–100)* as the chart axis title for *Darkness score, out of 100*.
 - **AI tool strings** (*%@, %@; a %lld millas en línea recta de %@; esta noche %lld/100 %@*, *%@ horas de oscuridad total*) are read by the on-device model. Test them in Spanish with Foundation Models, as for the first-pass prompts.
+
+### Added 2026-10-07: strings flagged for native review
+
+- **Times without "a las".** Bare times after *desde* and *hasta*, a colon after a verb (*Sale: %@*, *Se pone: %@*, *La Luna se pone: %@*), parentheses for a time inside a sentence (*Sale por el este (%@)*), and *aprox. %@* for "around". Check that *Oscuro desde %@*, *Con Luna hasta %@* and *Luna oculta desde %@* read well on the wrist.
+- **Gender of the band words.** The five words stay feminine and agree with *noche* (*Noche Prístina*, *noches Buenas*). Where "Darkness score N" came first the sentence now says *índice de oscuridad 94, noche Prístina*, which fixes the clash with masculine *índice*. *Mala* and *Prístina* are still the glossary's open questions; the audit suggests *Excepcional / Excelente / Buena / Regular / Baja*.
+- **Plans and streaks.** *Planear* for the Plan tab, *Mejor racha* and *Racha de luna más oscura* for the best stretch of nights, *Mis noches libres*.
+- **Following a night.** *Seguir esta noche*, *Siguiendo esta noche*, *Dejar de seguir*; *Abrir el cielo* for the alarm action "Open sky" (it could read as "open heaven": *Abrir el cielo de esta noche* is the alternative).
+- **Parks and sources.** *National Park Service* stays in English everywhere (the first draft had *Servicio de Parques Nacionales* in the credits); *International Dark Sky Park* stays in English; *Certificación Dark Sky*; *Cielo del centro de la ciudad* for Bortle 9.
+- **Visibles / Ocultos** as the state of the "Other parks within reach" list (VoiceOver).
+- **Copernicus and CAMS credits** (*Servicio de Cambio Climático de Copernicus*, *Servicio de Vigilancia Atmosférica de Copernicus*) and the long *About the data* blocks, which were translated from the English rewrite of 2026-10-07; read them once for tone.
+- **Counted strings.** *Cerca de %lld horas de oscuridad total*, *Al segundo %lld* / *A los %lld segundos*, and the one-night forms *La mejor de la próxima noche*, *El parque con las noches más oscuras…* (the singular drops the number).
+- **Not localized yet:** the Siri phrases of the App Shortcuts (there is no `AppShortcuts` catalog, so Siri answers in English only), park names, viewing-spot names, and the text NPS sends (alerts, programs, campgrounds).

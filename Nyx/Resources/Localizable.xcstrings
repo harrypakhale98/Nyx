@@ -819,7 +819,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@, índice de oscuridad %lld de 100. %@."
+            "value": "%@, %@, índice de oscuridad %lld de 100. Noche %@."
           }
         }
       }
@@ -1292,7 +1292,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@. Índice de oscuridad %lld, %@"
+            "value": "%@. Índice de oscuridad %lld, noche %@"
           }
         }
       }
@@ -1309,7 +1309,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@. Índice de oscuridad %2$lld, %3$@."
+            "value": "%1$@. Índice de oscuridad %2$lld, noche %3$@."
           }
         }
       }
@@ -1496,7 +1496,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@: índice de oscuridad %2$lld de 100 (%3$@). %4$@."
+            "value": "%1$@: índice de oscuridad %2$lld de 100 (noche %3$@). %4$@."
           }
         }
       }
@@ -7397,7 +7397,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de oscuridad %1$lld de 100 (%2$@), con el pronóstico de nubes como Nyx lo vio por última vez."
+            "value": "Índice de oscuridad %1$lld de 100 (noche %2$@), con el pronóstico de nubes como Nyx lo vio por última vez."
           }
         }
       }
@@ -7414,7 +7414,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de oscuridad %1$lld de 100 (%2$@)."
+            "value": "Índice de oscuridad %1$lld de 100 (noche %2$@)."
           }
         }
       }
@@ -7431,7 +7431,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de oscuridad: %lld de 100. %@. %@"
+            "value": "Índice de oscuridad: %lld de 100. Noche %@. %@"
           }
         }
       }
@@ -7686,7 +7686,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Probable rocío en las lentes"
+            "value": "Puede formarse rocío en los lentes"
           }
         }
       }
