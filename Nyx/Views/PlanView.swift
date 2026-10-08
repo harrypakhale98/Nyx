@@ -11,11 +11,12 @@ struct PlanView: View {
     var body: some View {
         Group {
             switch mode {
-            case .month: CalendarView()
+            // The picker lives inside the month, so the inspector's column stays clear of it.
+            case .month: CalendarView(bar:AnyView(picker))
             case .free: TripPlannerView(embedded:true)
             }
         }
-        .safeAreaBar(edge:.top,spacing:0) { picker }
+        .safeAreaBar(edge:.top,spacing:0) { if mode == .free { picker } }
         .navigationTitle("Plan").navigationBarTitleDisplayMode(.inline)
         .tabRootToolbar()
         .toolbar {
@@ -26,6 +27,10 @@ struct PlanView: View {
                         .accessibilityLabel("Ask Nyx").accessibilityInputLabels([Text("Ask Nyx"),Text("Ask")])
                 }
             }
+        }
+        // A park dragged here (from Parks, Tonight or the map, or another window) opens its month.
+        .acceptsPark("Plan this park",systemImage:"calendar") { park in
+            model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil)
         }
         // A `nyx://calendar` link always lands on the month it names.
         .onChange(of:model.calendarRequest,initial:true) { _,request in if request != nil { mode = .month } }

@@ -9,6 +9,15 @@ import SwiftUI
     /// A screenshot route's tab: `calendar` and `plan` are both Plan. Nil for routes that are not tabs.
     nonisolated static func tabIndex(_ route:String)->Int? { ["tonight":0,"parks":1,"calendar":2,"plan":2,"journal":3][route] }
     var tab=0
+    /// A park's own window (`ParkWindow`): one page, no tabs, so the tab keys and Find a Park rest.
+    let parkWindow:Bool
+    init(parkWindow:Bool=false) { self.parkWindow=parkWindow }
+    /// The park whose page is on screen in each tab, for ⌘⇧N (`ReportsVisiblePark`).
+    private(set) var visibleParks:[Int:String]=[:]
+    /// The park on screen in this window's current tab, if any.
+    var visiblePark:String? { visibleParks[parkWindow ? 0 : tab] }
+    func show(park id:String,tab:Int?) { if let tab { visibleParks[tab]=id } }
+    func hide(park id:String,tab:Int?) { if let tab, visibleParks[tab]==id { visibleParks[tab]=nil } }
     /// Bumped to close this window's Settings sheet, so a link from Learn shows where it leads.
     var closeSettings=0
     /// This window's scene, so a park or field mode opened from a link, a reminder or a menu is
@@ -58,18 +67,28 @@ extension EnvironmentValues {
 /// The menu bar and the ⌘-hold overlay on iPad: the four tabs, Find a Park, and the night keys.
 struct NyxCommands: Commands {
     @FocusedValue(SceneCommands.self) private var scene
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.supportsMultipleWindows) private var multipleWindows
+    /// The tab keys and Find a Park need a window with tabs.
+    private var tabless:Bool { scene == nil || scene?.parkWindow == true }
     var body: some Commands {
+        // The park on screen, beside the one you are reading: ⌘⇧N, as "Open in New Window" on its row.
+        CommandGroup(after:.newItem) {
+            Button("Open Park in New Window") { if let id=scene?.visiblePark { openWindow(value:ParkWindow(parkID:id)) } }
+                .keyboardShortcut("n",modifiers:[.command,.shift])
+                .disabled(!multipleWindows || tabless || scene?.visiblePark == nil)
+        }
         CommandGroup(before:.sidebar) {
             ForEach(Array(SceneCommands.tabs.enumerated()),id:\.offset) { index,title in
                 Button(title) { scene?.tab=index }
                     .keyboardShortcut(KeyEquivalent(Character(String(index+1))),modifiers:.command)
-                    .disabled(scene == nil)
+                    .disabled(tabless)
             }
             Divider()
         }
         // ⌘← and ⌘→, as Calendar steps its days: plain arrows belong to scroll views and keyboard focus.
         CommandMenu("Nights") {
-            Button("Find a Park") { scene?.findPark() }.keyboardShortcut("f",modifiers:.command).disabled(scene == nil)
+            Button("Find a Park") { scene?.findPark() }.keyboardShortcut("f",modifiers:.command).disabled(tabless)
             Divider()
             Button("Previous Night") { scene?.stepNight(-1) }.keyboardShortcut(.leftArrow,modifiers:.command).disabled(scene == nil)
             Button("Next Night") { scene?.stepNight(1) }.keyboardShortcut(.rightArrow,modifiers:.command).disabled(scene == nil)

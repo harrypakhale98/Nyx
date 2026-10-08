@@ -37,6 +37,8 @@ struct TonightView: View {
                         VStack(spacing:26) { hero(park); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { startingPoint; more; footnote; fromHome; extras }.frame(maxWidth:500)
                     }
+                    // Where, then when: the week at every park in reach fills the window's lower half.
+                    weekAcross
                 }.padding(24)
             } else {
                 VStack(alignment:.leading,spacing:22) {
@@ -155,6 +157,12 @@ struct TonightView: View {
             }
         } }
     }
+    /// The next seven nights across the parks in reach (`WeekAcrossParks`), wide windows only.
+    private var weekAcross: some View {
+        let radius=Self.distance(model.radiusMiles)
+        let reach=location.latitude != nil ? String(localized:"within \(radius) of you") : String(localized:"within \(radius) of \(model.originName)")
+        return WeekAcrossParksPanel(week:.make(model.ranked(candidates).map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) }),reach:reach)
+    }
     private func stepRiver(_ delta:Int) {
         guard let park=best.first else { return }
         let tonight=model.tonight(park), current=riverNight ?? tonight
@@ -190,7 +198,7 @@ struct TonightView: View {
     @ViewBuilder private var more: some View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
-            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight);Divider().overlay(palette.line) }
+            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:park) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight).draggable(park);Divider().overlay(palette.line) }
         }
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's
