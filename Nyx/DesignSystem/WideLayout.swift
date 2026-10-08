@@ -58,10 +58,12 @@ extension View {
 private struct ReadableForm: ViewModifier {
     let measure:Double
     @State private var width=0.0
-    @ViewBuilder func body(content:Content)->some View {
+    func body(content:Content)->some View {
         let margin=WideLayout.margin(width:width,measure:measure)
         // Only where the window is wider than the measure: below it the list keeps its own inset.
-        if margin>20 { content.contentMargins(.horizontal,margin,for:.scrollContent).measuringWidth($width) }
-        else { content.measuringWidth($width) }
+        // One branch, so a window resized across the threshold keeps the form (its scroll position
+        // and focus): the narrow case sets a zero margin on the indicators, which is their default.
+        let wide=margin>20
+        return content.contentMargins(.horizontal,wide ? margin : 0,for:wide ? ContentMarginPlacement.scrollContent : .scrollIndicators).measuringWidth($width)
     }
 }

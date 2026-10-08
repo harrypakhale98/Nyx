@@ -61,14 +61,57 @@ import UniformTypeIdentifiers
         #expect(bare.parkID=="deva" && bare.night==nil)
         #expect(ParkWindow(parkID:"jotr") != value)
     }
-    @Test func aWindowReopensOnTheNightLastChosenUnlessItHasPassed() {
-        let now=Date(timeIntervalSince1970:1_791_400_000)
-        let opened=now.addingTimeInterval(86_400), chosen=now.addingTimeInterval(3*86_400)
-        #expect(ParkWindowRoot.night(stored:chosen.timeIntervalSince1970,opened:opened,now:now)==chosen)
-        #expect(ParkWindowRoot.night(stored:0,opened:opened,now:now)==opened)
-        #expect(ParkWindowRoot.night(stored:0,opened:nil,now:now)==nil)
+    @Test func aWindowReopensOnTheNightLastChosenUnlessItHasPassed() throws {
+        let jotr=try #require(park("jotr"))
+        let tonight=jotr.evening(Date(timeIntervalSince1970:1_791_400_000))
+        let opened=jotr.date(tonight,addingDays:1), chosen=jotr.date(tonight,addingDays:3)
+        #expect(ParkWindowRoot.night(stored:chosen.timeIntervalSince1970,opened:opened,tonight:tonight)==chosen)
+        #expect(ParkWindowRoot.night(stored:0,opened:opened,tonight:tonight)==opened)
+        #expect(ParkWindowRoot.night(stored:0,opened:nil,tonight:tonight)==nil)
+        // Tonight itself stays.
+        #expect(ParkWindowRoot.night(stored:tonight.timeIntervalSince1970,opened:nil,tonight:tonight)==tonight)
         // Restored a week later: tonight, not a night gone by.
-        #expect(ParkWindowRoot.night(stored:chosen.timeIntervalSince1970,opened:opened,now:now.addingTimeInterval(9*86_400))==nil)
+        #expect(ParkWindowRoot.night(stored:chosen.timeIntervalSince1970,opened:opened,tonight:jotr.date(tonight,addingDays:9))==nil)
+    }
+    @Test func lastNightGivesWayAtSunriseNotADayAndAHalfLater() throws {
+        let jotr=try #require(park("jotr"))
+        let evening=jotr.evening(Date(timeIntervalSince1970:1_791_400_000))
+        // At 1 AM it is still that night; by mid-morning the park has moved on to the next one.
+        let small=evening.addingTimeInterval(13*3600), morning=evening.addingTimeInterval(22*3600)
+        #expect(ParkWindowRoot.night(stored:evening.timeIntervalSince1970,opened:nil,tonight:jotr.currentNight(at:small))==evening)
+        #expect(ParkWindowRoot.night(stored:evening.timeIntervalSince1970,opened:nil,tonight:jotr.currentNight(at:morning))==nil)
+    }
+    @Test func theCalendarCountsMonthsFromTonightsMonth() throws {
+        let jotr=try #require(park("jotr"))
+        // 1 AM on November 1 at the park: tonight is still October 31, so October is month zero.
+        let small=try #require(jotr.calendar.date(from:DateComponents(year:2026,month:11,day:1,hour:1)))
+        let tonight=jotr.currentNight(at:small)
+        #expect(jotr.calendar.component(.month,from:tonight)==10)
+        #expect(jotr.calendar.component(.month,from:CalendarView.baseMonth(jotr,tonight:tonight))==10)
+        #expect(CalendarView.monthOffset(jotr,tonight:tonight,to:tonight)==0)
+        #expect(CalendarView.monthOffset(jotr,tonight:tonight,to:jotr.evening(small))==1)
+        // A link's month counts from the same base as the arrows.
+        #expect(CalendarView.monthOffset(jotr,tonight:tonight,year:2026,month:10)==0)
+        #expect(CalendarView.monthOffset(jotr,tonight:tonight,year:2027,month:1)==3)
+        #expect(CalendarView.monthOffset(jotr,tonight:tonight,year:nil,month:nil)==0)
+    }
+    @MainActor @Test func aCalendarRequestBelongsToOneWindow() {
+        let one=SceneCommands(), two=SceneCommands()
+        one.calendarRequest=CalendarRequest(parkID:"jotr",year:nil,month:nil)
+        #expect(one.calendarRequest?.parkID=="jotr" && two.calendarRequest==nil)
+    }
+    @MainActor @Test func aLaunchedParkIsOneValueWithItsNight() throws {
+        let jotr=try #require(park("jotr"))
+        let night=jotr.evening(Date(timeIntervalSince1970:1_791_400_000))
+        let plain=LaunchPark(park:jotr), dated=LaunchPark(park:jotr,night:night), whatsUp=LaunchPark(park:jotr,night:night,whatsUp:true)
+        // Another night or What's up is another sheet; the same request twice is the same one.
+        #expect(Set([plain.id,dated.id,whatsUp.id]).count==3)
+        #expect(LaunchPark(park:jotr,night:night).id==dated.id)
+    }
+    @Test func eachZoomSourceOnTonightIsUnique() throws {
+        let jotr=try #require(park("jotr"))
+        let sources=[ZoomRoute.pill(jotr),.pillList(jotr),.row(jotr)].map(\.source)
+        #expect(Set(sources).count==3 && [ZoomRoute.pill(jotr),.pillList(jotr),.row(jotr)].allSatisfy { $0.park==jotr })
     }
     @MainActor @Test func eachTabReportsItsOwnPark() {
         let commands=SceneCommands()

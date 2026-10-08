@@ -33,7 +33,8 @@ nonisolated struct JournalArchive: Sendable, Equatable {
     /// Photo data by file name.
     var photos: [String: Data]
 
-    @MainActor static func make(from entries: [JournalEntry], now: Date = .now) -> JournalArchive {
+    /// Reads every photo's data, so the journal view calls it from a background `ModelContext`.
+    static func make(from entries: [JournalEntry], now: Date = .now) -> JournalArchive {
         var photos: [String: Data]=[:]
         // Whole seconds, as the ISO 8601 dates in entries.json keep them.
         func second(_ date: Date) -> Date { Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded(.down)) }
@@ -74,9 +75,18 @@ nonisolated struct JournalArchive: Sendable, Equatable {
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         try self.init(wrapper: FileWrapper(url: url, options: .immediate))
     }
+    /// Each entry's card thumbnail, from its first photo. JPEG scaling is slow, so the journal view
+    /// draws these off the main thread before `merge`.
+    func thumbnails() -> [UUID: Data] {
+        var thumbnails: [UUID: Data]=[:]
+        for item in manifest.entries {
+            if let first=item.photos.lazy.compactMap({ photos[$0.file] }).first, let thumbnail=PhotoScaling.jpeg(first, maxPixels: 900) { thumbnails[item.id]=thumbnail }
+        }
+        return thumbnails
+    }
     /// Adds the entries the journal does not have yet and returns how many were added and how many
-    /// were already there. Nothing existing is changed.
-    @MainActor func merge(into context: ModelContext, parks: [Park]) throws -> (added: Int, skipped: Int) {
+    /// were already there. Nothing existing is changed. Thumbnails not supplied are drawn here.
+    @MainActor func merge(into context: ModelContext, parks: [Park], thumbnails: [UUID: Data]?=nil) throws -> (added: Int, skipped: Int) {
         let existing=try context.fetch(FetchDescriptor<JournalEntry>())
         func night(_ parkID: String, _ date: Date) -> String {
             let park=parks.first { $0.id == parkID }
@@ -96,7 +106,7 @@ nonisolated struct JournalArchive: Sendable, Equatable {
                 context.insert(record)
                 record.entry=entry
             }
-            entry.thumbnail=kept.first.flatMap { PhotoScaling.jpeg($0.1, maxPixels: 900) }
+            entry.thumbnail=thumbnails.map { $0[item.id] } ?? kept.first.flatMap { PhotoScaling.jpeg($0.1, maxPixels: 900) }
             ids.insert(item.id); nights.insert(key); added+=1
         }
         try context.save()

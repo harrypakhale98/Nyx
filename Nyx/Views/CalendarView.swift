@@ -115,6 +115,8 @@ struct CalendarView: View {
     /// Plan's switch between one park and My free nights, pinned under the bar. It sits inside the month so the inspector's column never runs beneath it.
     var bar:AnyView?=nil
     @Environment(PlanModel.self) private var model
+    /// This window's commands, which carry its calendar requests.
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -155,8 +157,7 @@ struct CalendarView: View {
         let inWindow:Set<Date>
     }
     private func month(_ park:Park)->Month {
-        // Tonight's month, not the clock's: at 1 AM on the 1st, tonight is still last month's last night.
-        let base=park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:model.tonight(park))) ?? model.today
+        let base=Self.baseMonth(park,tonight:model.tonight(park))
         let month=park.calendar.date(byAdding:.month,value:monthOffset,to:base) ?? base
         let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
         let nights=model.nights(park,from:month,count:count)
@@ -200,7 +201,7 @@ struct CalendarView: View {
             .onChange(of:typeSize) { _,_ in syncInspector() }
             .onChange(of:inspectorWanted) { _,_ in syncInspector() }
             .task(id:park?.id) { if let park { await model.refresh([park]) } }
-            .onChange(of:model.calendarRequest,initial:true) { _,request in if let request { show(request) } }
+            .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
@@ -351,10 +352,7 @@ struct CalendarView: View {
         let data=month(park)
         guard let current=focused(data) else { return }
         let next=park.date(current.id,addingDays:delta)
-        let calendar=park.calendar
-        let base=calendar.date(from:calendar.dateComponents([.year,.month],from:model.today)) ?? model.today
-        let target=calendar.date(from:calendar.dateComponents([.year,.month],from:next)) ?? next
-        let offset=calendar.dateComponents([.month],from:base,to:target).month ?? monthOffset
+        let offset=Self.monthOffset(park,tonight:model.tonight(park),to:next)
         if offset != monthOffset { move(offset-monthOffset) }
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=next }
     }
@@ -381,12 +379,28 @@ struct CalendarView: View {
     }
     /// A `nyx://calendar` link: that park, and that month (this month when the link names none).
     private func show(_ request:CalendarRequest) {
-        model.calendarRequest=nil
+        commands?.calendarRequest=nil
         guard let target=model.park(request.parkID) else { return }
         parkID=target.id
-        let calendar=target.calendar, now=calendar.dateComponents([.year,.month],from:model.today)
-        let months=request.year.flatMap { y in request.month.map { m in (y-(now.year ?? y))*12+(m-(now.month ?? m)) } } ?? 0
+        let months=Self.monthOffset(target,tonight:model.tonight(target),year:request.year,month:request.month)
         forward=months>=monthOffset; monthOffset=months
+    }
+    /// The first of tonight's month at the park, which every month offset counts from. Tonight's
+    /// month, not the clock's: at 1 AM on the 1st, tonight is still last month's last night.
+    nonisolated static func baseMonth(_ park:Park,tonight:Date)->Date {
+        park.calendar.date(from:park.calendar.dateComponents([.year,.month],from:tonight)) ?? tonight
+    }
+    /// Months from tonight's month to the one holding `date`.
+    nonisolated static func monthOffset(_ park:Park,tonight:Date,to date:Date)->Int {
+        let calendar=park.calendar
+        let target=calendar.date(from:calendar.dateComponents([.year,.month],from:date)) ?? date
+        return calendar.dateComponents([.month],from:baseMonth(park,tonight:tonight),to:target).month ?? 0
+    }
+    /// Months from tonight's month to the one a link names (tonight's month when it names none).
+    nonisolated static func monthOffset(_ park:Park,tonight:Date,year:Int?,month:Int?)->Int {
+        guard let year, let month else { return 0 }
+        let base=park.calendar.dateComponents([.year,.month],from:tonight)
+        return (year-(base.year ?? year))*12+(month-(base.month ?? month))
     }
     private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
     /// The five nights the ring marks.

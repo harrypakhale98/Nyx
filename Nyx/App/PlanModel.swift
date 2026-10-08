@@ -23,8 +23,6 @@ import CoreLocation
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
     let location=LocationService()
-    /// A link asked the Calendar tab for one park's month (`nyx://calendar/<park>?month=…`).
-    var calendarRequest: CalendarRequest?
     var enrichments: [String:ParkEnrichment] = [:]
     /// Campgrounds for every park, once "Where to stay" has asked (`refreshCampgrounds`).
     var campgrounds: CampgroundsCache?

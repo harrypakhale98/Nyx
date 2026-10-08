@@ -188,7 +188,7 @@ struct ParksView: View {
             if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
             do { try context.save() } catch { context.rollback();saveFailed=true }
         }
-        Button("Show in Calendar",systemImage:"calendar") { model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
+        Button("Show in Calendar",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
         OpenParkWindowButton(park:park)
     }
     private func focusSearchIfAsked() {
@@ -248,6 +248,8 @@ struct ParkDetailView: View {
     @State private var titleGone=false
     @State private var showsSky=DebugScenario.isEnabled("sky-view")
     @State private var description=false
+    /// What's up has been scrolled to for a link that asked for it (`focusWhatsUp`).
+    @State private var focusedWhatsUp=false
     private var night:Night { model.night(park,on:selected ?? initialDate ?? model.tonight(park)) }
     private var isTonight:Bool { night.id==model.tonight(park) }
     private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
@@ -332,9 +334,12 @@ struct ParkDetailView: View {
                     return
                 }
                 #endif
-                guard focusWhatsUp else { return }
+                // Once per page: coming back from a pushed page keeps the reader where they were.
+                guard focusWhatsUp, !focusedWhatsUp else { return }
                 // After the zoom or sheet settles, so the scroll reads as arriving rather than jumping.
                 try? await Task.sleep(for:.milliseconds(500))
+                guard !Task.isCancelled else { return }
+                focusedWhatsUp=true
                 withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("whatsup",anchor:.top) }
             }
         }
@@ -356,7 +361,9 @@ struct ParkDetailView: View {
             .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight) { inspector=false } }
             .onChange(of:width) { _,_ in if inspector, !inspectorRoom { inspector=false } }
             .onChange(of:sizeClass) { _,_ in if inspector, !inspectorRoom { inspector=false } }
-            .onChange(of:night.id,initial:true) { _,id in nightChanged?(id) }
+            // Only a night chosen here is kept: storing the one the page opened on would hold a
+            // restored window on that date after it has passed.
+            .onChange(of:night.id) { _,id in nightChanged?(id) }
             // DEBUG captures (`-nyx-inspector`): the breakdown open beside the page where it has room.
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
             .modifier(ReportsVisiblePark(parkID:park.id))
@@ -452,7 +459,7 @@ struct ParkDetailView: View {
     private var river: some View {
         Panel {
             let river=model.nights(park,from:riverStart,count:30)
-            TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in breakdown=true })
+            TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() })
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
             AddNightToCalendar(night:night)

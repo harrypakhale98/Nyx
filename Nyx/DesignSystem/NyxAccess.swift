@@ -72,6 +72,16 @@ private struct NyxAccessReader27: ViewModifier {
 /// A park opens with the zoom from its row, or a cross-fade when the person prefers one
 /// (the system's own `.crossFade` on iOS 27; a plain push before it, which the system already
 /// softens under Reduce Motion).
+/// A park pushed from a page that shows it in more than one place (Tonight's pill, the pill's list
+/// and the rows below it): each place is its own zoom source, so the page grows out of the one tapped.
+nonisolated struct ZoomRoute: Hashable, Sendable {
+    let park: Park
+    /// The transition source's id, unique on the page.
+    let source: String
+    static func pill(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "pill.\(park.id)") }
+    static func pillList(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "pill-list.\(park.id)") }
+    static func row(_ park: Park) -> ZoomRoute { ZoomRoute(park: park, source: "row.\(park.id)") }
+}
 struct ParkTransition: ViewModifier {
     @Environment(\.nyxAccess) private var access
     let sourceID: String

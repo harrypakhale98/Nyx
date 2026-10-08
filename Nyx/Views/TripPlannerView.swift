@@ -32,6 +32,8 @@ struct TripPlannerView: View {
     @State private var planning=false
     @State private var calendarStay:TripStay?
     @State private var planned=0
+    /// The inputs last announced, so returning to the page refreshes the plan without saying it again.
+    @State private var announced:String?
     @State private var prepared=false
     @State private var width=0.0
     /// The best night's numeral: the hero, scaling with Dynamic Type but never past the screen.
@@ -121,9 +123,13 @@ struct TripPlannerView: View {
             let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
             withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { plan=result }
+            planning=false
+            // Only a change of plan is spoken and felt; a return to the page is not.
+            let key=inputs
+            guard key != announced else { return }
+            announced=key
             // The plan changes above and below the controls; say what it now leads with.
             AccessibilityNotification.Announcement(result.best.map { String(localized:"Best night: \($0.night.park.shortName), \($0.night.score.value)") } ?? String(localized:"No nights to plan")).post()
-            planning=false
             if result.best != nil { planned+=1 }
         }
     }
