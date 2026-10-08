@@ -97,7 +97,8 @@ struct FeelTonightView: View {
                 let touch=touch
                 VStack(alignment:.leading,spacing:8) {
                     Text(touch.opening).font(.subheadline).fixedSize(horizontal:false,vertical:true)
-                    ForEach(touch.lines,id:\.offset) { line in
+                    // By position: two moments can share a second (true darkness and the core already up).
+                    ForEach(Array(touch.lines.enumerated()),id:\.offset) { _,line in
                         Text(verbatim:"\(Int(line.offset.rounded())) s · \(line.text)").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                             .accessibilityLabel(String(localized:"At \(Int(line.offset.rounded())) seconds: \(line.text)"))
                     }
