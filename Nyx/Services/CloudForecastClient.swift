@@ -108,11 +108,16 @@ nonisolated struct SafeHTTP: HTTPTransport {
         session=URLSession(configuration: configuration, delegate: HostGuard(), delegateQueue: nil)
     }
     func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
+    /// Why a request may not be made, decided before any connection: `.unsupportedURL` for anything
+    /// but HTTPS to the listed hosts, `.cancelled` when that host's switch is off; nil when allowed.
+    static func refusal(_ url: URL, defaults: UserDefaults) -> URLError.Code? {
+        guard url.scheme == "https", let host=url.host, let preference=preferences[host] else { return .unsupportedURL }
+        return defaults.object(forKey: preference) as? Bool == false ? .cancelled : nil
+    }
     func get(_ url: URL, headers: [String: String], constrained: Bool) async throws -> Data {
-        guard url.scheme == "https", let host=url.host, let preference=Self.preferences[host] else { throw URLError(.unsupportedURL) }
         let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
         // Checked before any connection is made: a switch turned off means no request at all.
-        guard defaults.object(forKey: preference) as? Bool != false else { throw URLError(.cancelled) }
+        if let refusal=Self.refusal(url, defaults: defaults) { throw URLError(refusal) }
         var request=URLRequest(url: url)
         for (field, value) in headers { request.setValue(value, forHTTPHeaderField: field) }
         request.allowsConstrainedNetworkAccess=constrained

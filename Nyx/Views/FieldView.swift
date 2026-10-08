@@ -216,8 +216,9 @@ struct FieldNightPager: View {
             Text(status.lead).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true)
             if let target=status.target { FieldCountdown(target:session.real(target),numeral:numeral) }
             if !status.trailing.isEmpty { Text(status.trailing).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true) }
-            // Dawn: the night can go straight into the journal, with the park, the date and the score.
-            if status.phase == .over, KeepThisNight.container != nil || DebugScenario.screen != nil {
+            // Dawn: the night can go straight into the journal, with the park, the date and the score
+            // (not when the journal could not open, since the entry would not last).
+            if status.phase == .over, !JournalAccess.unavailable, KeepThisNight.container != nil || DebugScenario.screen != nil {
                 KeepThisNightButton(prefill:JournalPrefill(parkID:session.park.id,date:session.night.sky.evening,observedBortle:session.park.bortleEstimate,
                     notes:String(localized:"Nyx scored this night \(session.score.value), \(session.score.band.label). \(session.night.sky.moon.name), \(Int((session.night.sky.moon.illumination*100).rounded()))% lit.")),prominent:false)
                     .padding(.top,10)

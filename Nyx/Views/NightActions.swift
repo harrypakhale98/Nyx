@@ -118,7 +118,8 @@ struct KeepThisNightOffer: View {
             nightIsOver:FieldNight.isOver(candidate.sky,at:now),journaled:journaled,calendar:park.calendar) ? candidate : nil
     }
     var body: some View {
-        if let night {
+        // Never offered when the journal could not open: the entry would be gone on the next launch.
+        if !model.journalUnavailable, let night {
             VStack(spacing:6) {
                 Text("You were here last night.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                 KeepThisNightButton(prefill:JournalPrefill(night:night))

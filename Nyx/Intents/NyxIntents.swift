@@ -24,7 +24,7 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
         case .parkNotFound: "That park could not be found in the bundled library."
         case .noParks: "Choose a park, or save parks in Nyx to compare them."
         case .noNights: "Nyx could not find those nights."
-        case .journalUnavailable: "Your journal could not be opened. Open Nyx and try again."
+        case .journalUnavailable: "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more."
         }
     }
 }

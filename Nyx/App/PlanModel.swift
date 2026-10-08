@@ -27,7 +27,10 @@ import CoreLocation
     /// Campgrounds for every park, once "Where to stay" has asked (`refreshCampgrounds`).
     var campgrounds: CampgroundsCache?
     /// The journal's store could not be opened; Nyx runs with an empty one in memory and says so on the Journal tab.
+    /// Nothing is written to that stand-in (journal entries, saved parks), since it is gone on the next launch.
     var journalUnavailable=false
+    /// The store could not be opened and the device is nearly full: the Journal tab asks for space.
+    var journalNeedsSpace=false
     /// A `.nyxjournal` opened from Files or another app, waiting for the Journal tab to import it.
     var journalFile:URL?
     /// NPS is refusing requests right now (the shared key's quota, or a struggling service).

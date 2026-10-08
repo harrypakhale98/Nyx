@@ -143,7 +143,7 @@ struct ParksView: View {
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize))
-            .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
+            .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             // ⌘F from anywhere in the window.
             .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
             .onAppear { focusSearchIfAsked() }
@@ -185,6 +185,8 @@ struct ParksView: View {
     @ViewBuilder private func rowMenu(_ park:Park)->some View {
         let isSaved=saved.contains { $0.parkID==park.id }
         Button(isSaved ? "Unsave park" : "Save park",systemImage:isSaved ? "bookmark.slash" : "bookmark") {
+            // Saved parks share the journal's store; a save into its stand-in would not last.
+            guard !model.journalUnavailable else { saveFailed=true; return }
             if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
             do { try context.save() } catch { context.rollback();saveFailed=true }
         }
@@ -368,7 +370,7 @@ struct ParkDetailView: View {
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
             .modifier(ReportsVisiblePark(parkID:park.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation() }
-            .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
+            .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             .task { await model.refresh([park],programs:true) }
             .refreshable { await model.refresh([park],force:true,programs:true) }
@@ -583,7 +585,7 @@ struct ParkDetailView: View {
         }
     }
     private var saveButton:some View {
-        Button { if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
+        Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
             .accessibilityLabel(isSaved ? "Unsave park" : "Save park")
             .accessibilityInputLabels(isSaved ? [Text("Unsave"),Text("Unsave park")] : [Text("Save"),Text("Save park")])
     }

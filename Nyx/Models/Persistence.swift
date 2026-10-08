@@ -94,18 +94,54 @@ nonisolated enum NyxMigrationPlan: SchemaMigrationPlan {
     }
 }
 nonisolated enum JournalMigration {
+    enum MigrationError: Error { case notEnoughSpace }
+    /// Free space the move leaves untouched beyond the photo copies, so it never fills the device.
+    static let headroom: Int64=100_000_000
     static var folder: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("JournalMigration", isDirectory: true)
     }
-    /// Copies every V0 entry's photos to `folder/<entry id>/<index>`.
+    /// Copies every V0 entry's photos to `folder/<entry id>/<index>`. The copies take as much space
+    /// as the photos, so the move does not start without that room: SwiftData changes the store only
+    /// after `willMigrate` returns, so throwing here leaves the file exactly as build 7 wrote it. The
+    /// journal then opens as unavailable for this launch, and the move is tried again on the next.
     static func stash(_ context: ModelContext) throws {
         guard let folder else { return }
         let manager=FileManager.default
-        for entry in try context.fetch(FetchDescriptor<NyxSchemaV0.JournalEntry>()) where !entry.photos.isEmpty {
-            let place=folder.appendingPathComponent(entry.id.uuidString, isDirectory: true)
-            try manager.createDirectory(at: place, withIntermediateDirectories: true)
-            for (index, data) in entry.photos.enumerated() { try data.write(to: place.appendingPathComponent(String(index)), options: .atomic) }
+        // The store is still V0 here, so anything already in the folder is from a move that never finished its first half.
+        try? manager.removeItem(at: folder)
+        if let store=context.container.configurations.first?.url, !hasRoom(forStoreAt: store) { throw MigrationError.notEnoughSpace }
+        do {
+            for entry in try context.fetch(FetchDescriptor<NyxSchemaV0.JournalEntry>()) where !entry.photos.isEmpty {
+                let place=folder.appendingPathComponent(entry.id.uuidString, isDirectory: true)
+                try manager.createDirectory(at: place, withIntermediateDirectories: true)
+                for (index, data) in entry.photos.enumerated() { try data.write(to: place.appendingPathComponent(String(index)), options: .atomic) }
+            }
+        } catch {
+            // A half-written stash only takes space; the photos are still in the unchanged store.
+            try? manager.removeItem(at: folder)
+            throw error
         }
+    }
+    /// True when the store's volume has room for a copy of everything the store holds, plus
+    /// `headroom`. An unreadable capacity counts as room, as before the check existed.
+    static func hasRoom(forStoreAt url: URL) -> Bool {
+        guard let available=try? url.deletingLastPathComponent().resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage else { return true }
+        return available >= footprint(ofStoreAt: url)+headroom
+    }
+    /// The bytes the store takes: the database, its write-ahead files, and the folder of records
+    /// kept outside it (`.<name>_SUPPORT`, where external-storage photos live). An upper bound on the photos.
+    static func footprint(ofStoreAt url: URL) -> Int64 {
+        let manager=FileManager.default, folder=url.deletingLastPathComponent(), name=url.lastPathComponent
+        let support="."+url.deletingPathExtension().lastPathComponent+"_SUPPORT"
+        func size(_ file: URL) -> Int64 {
+            guard let values=try? file.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]), values.isRegularFile == true else { return 0 }
+            return Int64(values.fileSize ?? 0)
+        }
+        var total=[name, name+"-wal", name+"-shm"].reduce(Int64(0)) { $0+size(folder.appendingPathComponent($1)) }
+        if let files=manager.enumerator(at: folder.appendingPathComponent(support, isDirectory: true), includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey]) {
+            for case let file as URL in files { total+=size(file) }
+        }
+        return total
     }
     /// Attaches stashed photos to their V1 entries, saves, then removes the stash.
     static func restore(_ context: ModelContext) throws {
@@ -134,17 +170,22 @@ nonisolated enum JournalMigration {
 }
 /// Opens the journal's store. When it cannot be opened, Nyx runs with an empty store in memory and
 /// says so on the Journal tab only: Tonight, Parks and Calendar never depend on it, and the file
-/// on disk is left exactly as it is for a later version to open.
+/// on disk is left exactly as it is for a later version to open. Nothing may be written to that
+/// stand-in: a journal entry or saved park kept there would be gone on the next launch, so every
+/// writer checks `failed` (`PlanModel.journalUnavailable`, `JournalAccess.unavailable`), and the saved
+/// parks it reads as empty never reach the widget, the watch or reminders (`SavedSkySync`).
+/// `shortOfSpace` says the device is too full for the store (or its one-time move) to be trusted to open.
 @MainActor enum JournalStore {
-    static func open(inMemory: Bool, url: URL? = nil) -> (container: ModelContainer?, failed: Bool) {
+    static func open(inMemory: Bool, url: URL? = nil) -> (container: ModelContainer?, failed: Bool, shortOfSpace: Bool) {
         let schema=Schema(versionedSchema: NyxSchemaV1.self)
         let configuration=url.map { ModelConfiguration(schema: schema, url: $0) } ?? ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             let container=try ModelContainer(for: schema, migrationPlan: NyxMigrationPlan.self, configurations: configuration)
             if !inMemory { JournalMigration.recover(container) }
-            return (container, false)
+            return (container, false, false)
         } catch {
-            return (try? ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)), true)
+            let memory=try? ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
+            return (memory, true, !inMemory && !JournalMigration.hasRoom(forStoreAt: configuration.url))
         }
     }
 }

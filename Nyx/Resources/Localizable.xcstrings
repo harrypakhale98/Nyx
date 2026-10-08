@@ -19453,6 +19453,23 @@
         }
       }
     },
+    "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los parques guardados se conservan junto con tu diario, que no se pudo abrir. No se cambió nada."
+          }
+        }
+      }
+    },
     "Saved parks only": {
       "extractionState": "manual",
       "localizations": {
@@ -24047,6 +24064,23 @@
         }
       }
     },
+    "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficiente espacio libre para abrir tu diario. Libera espacio y vuelve a abrir Nyx. Todo lo demás funciona, y Nyx no tocó tu diario."
+          }
+        }
+      }
+    },
     "These nights have passed. Look ahead to the next new moon.": {
       "extractionState": "manual",
       "localizations": {
@@ -27610,19 +27644,36 @@
         }
       }
     },
-    "Your journal could not be opened. Open Nyx and try again.": {
+    "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your journal could not be opened. Open Nyx and try again."
+            "value": "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo abrir tu diario. Abre Nyx e inténtalo de nuevo."
+            "value": "No se pudo abrir tu diario, así que no se leyó ni se guardó nada. La pestaña Diario de Nyx tiene más información."
+          }
+        }
+      }
+    },
+    "Your journal couldn't be opened, so this file was not imported. Nothing was changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your journal couldn't be opened, so this file was not imported. Nothing was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo abrir tu diario, así que este archivo no se importó. No se cambió nada."
           }
         }
       }

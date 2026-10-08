@@ -19,7 +19,7 @@ struct AssistiveAccessRoot: View {
 /// The main window's saved-park upkeep, for this scene: the full app's `RootView` does not run in
 /// Assistive Access, so "Remind me" would otherwise save a park and switch reminders on without
 /// anything being scheduled. The widget's snapshot, the watch and reminders follow the saved parks
-/// through the same `SavedSkySync`.
+/// through the same `SavedSkySync`, which keeps the last snapshot's parks when the store could not open.
 private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
@@ -113,12 +113,15 @@ struct AssistiveParkCard: View {
                 Label { Text("Closed: \(closure)").fixedSize(horizontal: false, vertical: true) } icon:{ Image(systemName: "exclamationmark.triangle.fill") }
                     .font(.title3.weight(.semibold)).foregroundStyle(palette.accent)
             }
-            if reminder && !(isSaved && reminders) {
-                Button { remind() } label:{ Label("Remind me", systemImage: "bell").frame(maxWidth: .infinity, minHeight: 56) }
-                    .buttonStyle(.borderedProminent).foregroundStyle(Color.black)
-                    .accessibilityHint("Nyx will tell you when a night here looks very dark.")
-            } else if reminder {
-                Label("Nyx will remind you about dark nights here.", systemImage: "bell.fill").font(.title3).fixedSize(horizontal: false, vertical: true)
+            // Not offered when saved parks could not be opened: the park would not stay saved.
+            if reminder && !model.journalUnavailable {
+                if !(isSaved && reminders) {
+                    Button { remind() } label:{ Label("Remind me", systemImage: "bell").frame(maxWidth: .infinity, minHeight: 56) }
+                        .buttonStyle(.borderedProminent).foregroundStyle(Color.black)
+                        .accessibilityHint("Nyx will tell you when a night here looks very dark.")
+                } else {
+                    Label("Nyx will remind you about dark nights here.", systemImage: "bell.fill").font(.title3).fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
