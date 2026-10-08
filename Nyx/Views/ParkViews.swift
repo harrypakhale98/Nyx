@@ -690,7 +690,7 @@ struct ScoreBreakdownView: View {
             }
             HStack(alignment:.firstTextBaseline,spacing:12) {
                 Text("\(night.score.value)").font(.system(size:numeralSize,weight:.light,design:.serif)).tracking(-3).foregroundStyle(palette.accent)
-                VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
+                VStack(alignment:.leading,spacing:2) { Text(night.score.band.label).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true); Text("out of 100").font(.caption).foregroundStyle(palette.muted) }
             }
             .accessibilityElement(children:.combine)
             // The weakest link, said beside the number it sets, before the parts that add up to more.
