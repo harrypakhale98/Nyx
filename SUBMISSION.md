@@ -123,7 +123,7 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 5. Pricing and Availability: US, Canada, Mexico; Mac availability off.
 6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only passed features), age rating (expected 4+; social media capabilities: No), review notes (above).
 7. Manual release → Submit for Review. File the App Launch nomination (by Oct 16) and attach the events once approved.
-8. After approval: install from the App Store, run an offline sanity check, then release; flip the website's one line to the App Store link (`docs/index.html` comment).
+8. After approval: install from the App Store, run an offline sanity check, then release; flip the website's two "Coming to the App Store" pills to the App Store link and add the Smart App Banner tag (steps in the `docs/index.html` head comment).
 
 ## Owner sign-off
 

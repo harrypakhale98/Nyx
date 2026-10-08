@@ -2,30 +2,52 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Designing for night-adapted eyes — Nyx</title>
 <meta name="description" content="How Nyx, a dark-sky planner for the US national parks, was designed: one honest score, uncertainty drawn rather than hidden, a red palette with measured contrast, a shader Moon, and accessibility built in.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/nyx-icon-256.png">
 <link rel="canonical" href="https://get-nyx.com/case-study">
 <meta property="og:type" content="article">
+<meta property="og:site_name" content="Nyx">
 <meta property="og:title" content="Designing for night-adapted eyes">
 <meta property="og:description" content="A case study in honest scores, red light and a Moon you could print.">
 <meta property="og:url" content="https://get-nyx.com/case-study">
 <meta property="og:image" content="https://get-nyx.com/images/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
 <!-- Case study. About a three-minute read. No scripts, no trackers, no external requests.
-     Figures: test count from the unit suite on main (2026-10-07); accuracy from Research/accuracy.md and
+     Figures: test count from the unit suite on main (2026-10-07, 268 tests); accuracy from Research/accuracy.md and
      the polar and tropical USNO fixtures; contrast from Research/contrast.json. -->
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<main id="main" class="wide">
-  <p class="eyebrow">Nyx · Case study · A three-minute read</p>
-  <h1>Designing for night-adapted eyes</h1>
-  <p class="lead">Nyx answers one question for the 63 US national parks: where should I go, and on which night, for the darkest sky? Everything in its design follows from who asks it, and where they are standing when they do.</p>
+<input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
+<div class="sky" aria-hidden="true"><div class="band"></div></div>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="./" aria-label="Nyx, home"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="privacy">Privacy</a>
+      <a href="support">Support</a>
+      <a class="opt" href="press/">Press</a>
+      <a class="opt" href="case-study" aria-current="page">Case study</a>
+    </nav>
+    <label class="nv-switch" for="nv"><span class="label-long">Night vision</span><span class="label-short">Red</span><span class="track" aria-hidden="true"></span></label>
+  </div>
+</header>
+<main id="main">
+  <header class="page-head prose">
+    <p class="eyebrow amber">Case study · A three-minute read</p>
+    <h1>Designing for night-adapted eyes</h1>
+    <p class="lead">Nyx answers one question for the 63 US national parks: where should I go, and on which night, for the darkest sky? Everything in its design follows from who asks it, and where they are standing when they do.</p>
+  </header>
+  <div class="prose doc">
 
   <h2>The problem, at one park</h2>
   <p>Joshua Tree sits two to three hours from Los Angeles. On a clear night with no Moon, its darkest corners are dark enough to show the Milky Way's structure. On the same date a month later, a gibbous Moon can wash most of that out, and the drive is the same. A weather app tells you about clouds. An almanac tells you about the Moon. A light-pollution map tells you about Palm Springs on the horizon. Nobody joined them for a park and a night, and nobody put a closed road beside the answer.</p>
@@ -93,18 +115,39 @@
   <ul class="figures">
     <li><span class="num">63</span>national parks, 85 named viewing spots</li>
     <li><span class="num">0</span>data collected; three public services, each with its own switch</li>
-    <li><span class="num" id="tests">232</span>unit tests, run on iOS 26 and iOS 27</li>
+    <li><span class="num" id="tests">268</span>unit tests in 25 suites</li>
     <li><span class="num">3.7 min</span>largest Moon rise or set difference from the U.S. Naval Observatory at mid-latitude parks; under a minute for the Sun</li>
   </ul>
   <p class="note">Moon times were also checked at parks in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, where they agree to within a minute. Terrain and the atmosphere can shift what you actually see by a few minutes more.</p>
-
-  <nav aria-label="Pages">
-    <a href="./">Nyx</a>
-    <a href="press/">Press kit</a>
-    <a href="privacy.html">Privacy policy</a>
-    <a href="support.html">Support</a>
-  </nav>
-  <footer>Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Moon: NASA's Scientific Visualization Studio; LRO LROC and LOLA teams. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.</footer>
+  </div>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div class="about">
+        <a class="brand" href="./"><img src="images/nyx-icon-256.png" width="30" height="30" alt="">Nyx</a>
+        <p style="margin-top:10px">A dark-sky planner for the 63 US national parks, made by one independent developer.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="case-study">Case study</a></li>
+          <li><a href="press/">Press kit</a></li>
+          <li><a href="privacy">Privacy policy</a></li>
+          <li><a href="support">Support</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:harry.pakhale98@gmail.com?subject=Nyx">harry.pakhale98@gmail.com</a></li>
+          <li><a href="https://github.com/harrypakhale98/Nyx/issues">Report an issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="credits">Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>). Smoke and haze: Copernicus Atmosphere Monitoring Service, via Open-Meteo. Usual clouds: generated using Copernicus Climate Change Service information [2015–2024]. Night lights and Moon imagery: NASA. Park data: National Park Service. Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International. © 2026 Hardik Pakhale.</p>
+  </div>
+</footer>
 </body>
 </html>
