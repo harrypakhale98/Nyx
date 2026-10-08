@@ -135,8 +135,8 @@ struct TonightView: View {
     private func answerLine(_ park:Park)->Text {
         let day=park.dayLabel(model.night(park).id), radius=Self.distance(model.radiusMiles)
         if !model.startChosen { return Text("\(day) · Example: from \(model.originName)") }
-        if location.latitude != nil { return Text("\(day) · Darkest within \(radius) of you") }
-        return Text("\(day) · Darkest within \(radius) of \(model.originName)")
+        // The card below names where from ("From Joshua Tree", "Near me") and how it is measured.
+        return Text("\(day) · Darkest within \(radius)")
     }
     private static func distance(_ miles:Double)->String { Measurement(value:miles,unit:UnitLength.miles).formatted(.measurement(width:.abbreviated,usage:.road)) }
     /// A thin answer (fewer than three parks in reach, or a bright sky at the best of them) points to
@@ -196,8 +196,9 @@ struct TonightView: View {
             let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
+            // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
             // The gauge speaks this line, so VoiceOver does not hear it twice.
-            Text(basis ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(basis != nil)
+            if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             // A forecast more than six hours old says when it is from.
             if night.score.hasForecast, let updated=night.forecastUpdated, Date.now.timeIntervalSince(updated)>6*3600 {
                 Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)

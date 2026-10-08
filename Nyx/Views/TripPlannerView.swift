@@ -218,7 +218,7 @@ struct TripPlannerView: View {
                 Text(park.dayLabel(best.night.id)).font(.subheadline).foregroundStyle(palette.muted)
                 Text("\(best.night.score.value)").font(.system(size:min(heroSize,150),weight:.light,design:.serif)).kerning(3).foregroundStyle(palette.accent)
                     .contentTransition(.numericText(value:Double(best.night.score.value)))
-                Text(best.night.bandWithBasis).font(.subheadline).foregroundStyle(palette.ink)
+                Text(best.night.bandWithBasis).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center)
                 Text(best.reason).font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                 if let closure=best.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
                 AccessNoteLabel(park:park,alignment:.center)

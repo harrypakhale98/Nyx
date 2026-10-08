@@ -70,6 +70,8 @@ struct MoonDisc: View, Animatable {
                 // The unlit disc is a faint ghost (template icons keep alpha), so a new moon is still
                 // a moon, and a crescent reads as a crescent rather than as the letter O.
                 context.fill(circle,with:.color(palette.ink.opacity(0.22)))
+                // And a faint limb, so a dark phase still has an edge against the bar's glass (and in night-vision red).
+                context.stroke(Path(ellipseIn:disc.insetBy(dx:0.75,dy:0.75)),with:.color(palette.ink.opacity(0.6)),lineWidth:1.5)
                 context.fill(litPath,with:.color(palette.ink))
                 return
             }

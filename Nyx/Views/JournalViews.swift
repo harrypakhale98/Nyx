@@ -55,9 +55,10 @@ struct JournalView: View {
                     Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
                         .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
                     Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
-                } label:{ Image(systemName:"ellipsis") }.accessibilityLabel("Journal options") }
-                // Nothing is recorded into a journal that could not be opened: it would be lost.
-                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus") }.accessibilityLabel("Record a night").disabled(model.journalUnavailable) }
+                } label:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
+                // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since
+                // the app's ink foreground style (`RootView`) holds bar symbols at full strength when disabled.
+                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus").opacity(model.journalUnavailable ? 0.35 : 1) }.accessibilityLabel("Record a night").disabled(model.journalUnavailable) }
             }
             .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
             .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }

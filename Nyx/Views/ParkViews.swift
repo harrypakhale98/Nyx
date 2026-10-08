@@ -363,7 +363,8 @@ struct ParkDetailView: View {
             .toolbar { toolbar }.modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
             // Wide iPad: the breakdown stays beside the page and follows the river's night.
-            .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight) { inspector=false } }
+            // The close button only while it is open: iOS 27 lends a closed inspector's toolbar to the page's bar.
+            .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight,close:inspector ? { inspector=false } : nil) }
             .onChange(of:width) { _,_ in if inspector, !inspectorRoom { inspector=false } }
             .onChange(of:sizeClass) { _,_ in if inspector, !inspectorRoom { inspector=false } }
             // Only a night chosen here is kept: storing the one the page opened on would hold a
@@ -417,15 +418,17 @@ struct ParkDetailView: View {
         let state=park.state.replacingOccurrences(of:",",with:" · ")
         return park.darkSkyDesignated ? String(localized:"\(state) · International Dark Sky Park") : state
     }
+    /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.
     private func hero(_ proxy:ScrollViewProxy)->some View {
-        VStack(spacing:12) {
+        let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
+        return VStack(alignment:large ? .leading : .center,spacing:12) {
             Eyebrow(text:"\(eyebrow)")
-            Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).accessibilityAddTraits(.isHeader)
+            Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
                 .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
             Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
             // The closure is the one line that must never be lost in the sky: on a dark scrim, beside the score.
             if let closure=model.closure(park) {
-                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align)
                     .fixedSize(horizontal:false,vertical:true)
                     .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
                     .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
@@ -436,24 +439,25 @@ struct ParkDetailView: View {
                 }.buttonStyle(.plain).foregroundStyle(palette.ink)
                 .accessibilityHint("Shows the park's other alerts.")
             }
-            AccessNoteLabel(park:park,alignment:.center).frame(maxWidth:420).padding(.horizontal,12)
+            AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
             // The dial opens at the bottom; let the lines below tuck into that space.
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(unavailable:!model.beyondForecast(night)))
+                .frame(maxWidth:.infinity)
                 .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
                 .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
                 .modifier(DepthParallax(depth:0.1))
-            if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(.center) }
-            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(.center) }
+            if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(align) }
+            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(align) }
             if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) {
                 // The gauge speaks the first sentence; VoiceOver hears only the month's usual clouds here.
-                Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+                Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(align)
                     .accessibilityLabel(night.typicalClouds ?? caption).accessibilityHidden(night.typicalClouds == nil)
             }
-            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true).padding(.horizontal,12) }
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true).padding(.horizontal,large ? 0 : 12) }
             if let window=model.clearWindow(night) {
                 // At accessibility sizes the glyph would take a column of its own: the words alone.
                 Label { Text(window.line(park:park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
-                    .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
+                    .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(align).padding(.horizontal,large ? 0 : 12)
                     .accessibilityElement(children:.combine)
             }
             ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
@@ -692,6 +696,8 @@ struct ScoreBreakdownView: View {
     /// Beside the month on a wide iPad: the breakdown without its own page, background or Done.
     var inline=false
     @ScaledMetric(relativeTo:.largeTitle) private var numeralSize=72.0
+    /// The context lines' symbol column, as wide as the widest symbol at the reader's text size.
+    @ScaledMetric(relativeTo:.callout) private var contextIcon=24.0
     var body: some View {
         if inline { content }
         else {
@@ -775,8 +781,12 @@ struct ScoreBreakdownView: View {
     private var cloudContext:[(symbol:String,text:String)] {
         guard let outlook=model.outlook(night) else { return [] }
         let lines:[(String,String?)]=[("rectangle.split.3x1",outlook.agreement?.sentence(tonight:isTonight)),("cloud",outlook.layers?.note),
-                                      ("smoke",outlook.clarity?.sentence),("sun.haze",outlook.clarity == nil ? outlook.hazeText : nil)]
+                                      (outlook.clarity.map(Self.airSymbol) ?? "aqi.low",outlook.clarity?.sentence),("sun.haze",outlook.clarity == nil ? outlook.hazeText : nil)]
         return lines.compactMap { symbol,text in text.map { (symbol,$0) } }
+    }
+    /// The air's symbol: clean air is not drawn as smoke.
+    private static func airSymbol(_ clarity:AirClarity)->String {
+        switch clarity { case .clear: "aqi.low"; case .lightHaze: "aqi.medium"; case .haze,.heavy: "smoke" }
     }
     /// NASA's night lights, as context beside the estimate the score uses.
     private var lightContext:[(symbol:String,text:String)] {
@@ -805,7 +815,8 @@ struct ScoreBreakdownView: View {
             if !context.isEmpty {
                 VStack(alignment:.leading,spacing:6) {
                     ForEach(context,id:\.text) { line in
-                        Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.muted).accessibilityHidden(true) }
+                        // One icon column, so lines with narrower or wider symbols start their words together.
+                        Label { Text(line.text).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:line.symbol).foregroundStyle(palette.muted).frame(width:contextIcon).accessibilityHidden(true) }
                     }
                 }.font(.system(.callout,design:.serif)).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.88)).padding(.top,2)
             }

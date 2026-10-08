@@ -22,8 +22,10 @@ struct TonightMapCanvas: View {
             // Room for bigger marks on a wide iPad, never smaller than a phone's.
             let size1=max(1,min(1.8,size.width/360))
             // The insets' quiet frames (their names are text over the map: `TonightMapLabels`).
+            var boxes:[SkyMap.Region:CGRect]=[:]
             for inset in SkyMap.insets.dropFirst() {
                 let rect=CGRect(origin:screen(inset.frame.origin),size:CGSize(width:inset.frame.width*scale,height:inset.frame.height*scale)).insetBy(dx:-3,dy:-3)
+                boxes[inset.region]=rect
                 context.stroke(Path(roundedRect:rect,cornerRadius:4),with:.color(palette.line.opacity(0.8)),style:StrokeStyle(lineWidth:0.5,dash:[2,3]))
             }
             // The country, faint: coasts and borders so the marks read as places.
@@ -51,9 +53,14 @@ struct TonightMapCanvas: View {
                 // A soft glow for Excellent and Pristine nights: a dark sky glows a little.
                 if mark.score>=75 && !palette.nightVision {
                     let halo=radius*3
-                    layer.drawLayer { glow in
-                        glow.addFilter(.blur(radius:halo/2.6))
-                        glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35*access.glow)))
+                    layer.drawLayer { kept in
+                        // An inset's glow stays inside its dashed frame, fading out just before the line, so it
+                        // never runs behind the inset names beneath (the lower 48's glows end well above them).
+                        if let box=boxes[mark.region] { kept.clipToLayer { mask in Self.softBox(&mask,box) } }
+                        kept.drawLayer { glow in
+                            glow.addFilter(.blur(radius:halo/2.6))
+                            glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35*access.glow)))
+                        }
                     }
                 }
                 let shape=NightMark.mark(score:mark.score,hasForecast:mark.fill == .full,differentiate:access.differentiate)
@@ -66,6 +73,11 @@ struct TonightMapCanvas: View {
             }
         }
         .accessibilityIgnoresInvertColors()
+    }
+    /// A mask for an inset's glows: its dashed frame, softened inward so a glow fades rather than stops at the line.
+    static func softBox(_ mask:inout GraphicsContext,_ box:CGRect) {
+        mask.addFilter(.blur(radius:1.5))
+        mask.fill(Path(roundedRect:box.insetBy(dx:2,dy:2),cornerRadius:3),with:.color(.black))
     }
     /// The closure mark: a small hollow warning triangle, the shape of the alert symbol beside every score.
     static func triangle(at center:CGPoint,size:Double)->Path {
@@ -160,9 +172,8 @@ struct TonightMapView: View {
     /// Each inset's name under its dashed frame. Its region's element speaks it in full.
     private func insetNames(size:CGSize)->some View {
         ForEach(SkyMap.insets.dropFirst(),id:\.region) { inset in
+            // On the map's own colour: each inset keeps its glows inside its frame (`TonightMapCanvas`), so none runs behind the small words.
             Text(inset.name).font(.system(size:insetType,weight:.medium)).foregroundStyle(palette.muted)
-                // On the map's own colour, so a neighbouring mark's glow never runs behind the small words.
-                .background(RoundedRectangle(cornerRadius:3,style:.continuous).fill(palette.panel).padding(.horizontal,-2).padding(.vertical,-1))
                 .accessibilityHidden(true)
                 .layoutValue(key:TonightMapLabels.Key.self,value:.inset(region:inset.region,frame:frame(inset,size:size)))
         }
@@ -353,7 +364,7 @@ struct ParksMapView: View {
         let score=Text("\(mark.score)").font(.system(.title2,design:.serif).monospacedDigit()).foregroundStyle(palette.accent)
         let chevron=Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
         let words=VStack(alignment:.leading,spacing:3) {
-            Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
+            Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
             Text("\(park.state.replacingOccurrences(of:",",with:", ")) · \(model.night(park).bandWithBasis)").font(.subheadline).foregroundStyle(palette.muted)
             if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent) }
         }.multilineTextAlignment(.leading).frame(maxWidth:.infinity,alignment:.leading)
