@@ -2,7 +2,8 @@ import XCTest
 import AppIntents
 
 /// Apple's automated accessibility audit (contrast, hit regions, labels, Dynamic Type,
-/// clipping, traits) on every screen, in the standard palette and in night vision.
+/// clipping, traits) on every screen, in the standard palette and in night vision, and on the key
+/// screens at the largest accessibility text size with Increase Contrast and Bold Text.
 /// It complements, and never replaces, a VoiceOver pass on a real iPhone.
 ///
 /// Run one screen: `TEST_RUNNER_NYX_AUDIT_SCREENS=river xcodebuild test -only-testing:NyxUITests/AccessibilityAuditTests ...`
@@ -17,14 +18,28 @@ final class AccessibilityAuditTests:XCTestCase {
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }
 
-    func testEveryScreenPassesTheAudit() throws { try audit(state:"offline") }
-    func testNightVisionPassesTheAudit() throws { try audit(state:"night-vision") }
+    /// The screens people live in, for the heavier passes.
+    private var keyScreens:[String] {
+        if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
+        return ["tonight","parks","detail","plan","journal","settings","field"]
+    }
 
-    private func audit(state:String) throws {
+    func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }
+    func testNightVisionPassesTheAudit() throws { try audit(state:"night-vision",screens:screens) }
+    /// AX5 (the system's own content size, so system controls grow too), Increase Contrast and Bold
+    /// Text together: the states the Larger Text and Sufficient Contrast labels claim.
+    func testLargestTextPassesTheAudit() throws {
+        try audit(state:"offline",screens:keyScreens,extra:["-UIPreferredContentSizeCategoryName","UICTContentSizeCategoryAccessibilityXXXL","-nyx-contrast","-nyx-bold"],pass:"ax5")
+    }
+    func testLargestTextInNightVisionPassesTheAudit() throws {
+        try audit(state:"night-vision",screens:keyScreens,extra:["-UIPreferredContentSizeCategoryName","UICTContentSizeCategoryAccessibilityXXXL","-nyx-contrast","-nyx-bold"],pass:"ax5")
+    }
+
+    private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
         for screen in screens {
             let app=XCUIApplication()
-            app.launchArguments=["-nyx-screen",screen,"-nyx-state",state,"-nyx-reduce-motion"]
+            app.launchArguments=["-nyx-screen",screen,"-nyx-state",state,"-nyx-reduce-motion"]+extra
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
@@ -37,7 +52,7 @@ final class AccessibilityAuditTests:XCTestCase {
             try app.performAccessibilityAudit { issue in
                 let frame=issue.element?.frame ?? .null
                 let label=issue.element?.label ?? ""
-                let line="AUDIT|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
+                let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
                 print(line)
                 if Self.isKnownFalsePositive(issue,screen:screen,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
                 if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
@@ -49,6 +64,9 @@ final class AccessibilityAuditTests:XCTestCase {
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
     }
 
+    /// Elements the audit calls "partially" Dynamic Type, each checked by hand at AX5 (screen, label
+    /// prefix). Replaces a blanket exemption, so a new element that stops scaling fails the audit.
+    private static let partialDynamicType:[(screen:String,label:String)]=[]
     /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
     private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
@@ -61,9 +79,11 @@ final class AccessibilityAuditTests:XCTestCase {
         let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
         switch issue.auditType {
         case .dynamicType:
-            // The share card is fixed-size exported artwork with a full spoken summary. Elsewhere the
-            // audit reports "partially unsupported" for text that does scale; verified with system AX5 captures.
-            return screen=="share" || issue.compactDescription.contains("partially")
+            // The share card is fixed-size exported artwork with a full spoken summary. Elsewhere only
+            // the elements below, each checked in a system AX5 capture, may report "partially
+            // unsupported": text that does scale but that the audit measures through a container.
+            let label=issue.element?.label ?? ""
+            return screen=="share" || (issue.compactDescription.contains("partially") && partialDynamicType.contains { $0.screen==screen && label.hasPrefix($0.label) })
         case .contrast:
             // Text measured against the translucent tab bar, or glass with no element, not against its own background.
             // "Nearly passed" is not a failure; it is measured where a star sits beside small text.

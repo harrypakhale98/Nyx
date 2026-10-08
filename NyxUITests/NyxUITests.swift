@@ -59,6 +59,27 @@ final class NyxUITests:XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:gone,object:nil)],timeout:5),.completed,"Search did not narrow the list")
         XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH 'Zion'")).firstMatch.exists,"Zion is not in the results")
     }
+    /// AX-03: activating the river the way VoiceOver, Voice Control ("Tap River") and Switch Control
+    /// do (`accessibilityActivate`, through a DEBUG button, since XCTest's `tap()` is a real touch)
+    /// keeps the chosen night. A real touch at the far end still moves it, so the check can fail.
+    func testRiverActivationKeepsTheNight() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","river","-nyx-state","offline","-nyx-reduce-motion","-nyx-activate-river"]
+        app.launch()
+        let river=app.descendants(matching:.any)["Thirty-night darkness timeline"].firstMatch
+        XCTAssertTrue(river.waitForExistence(timeout:20),"No river")
+        let before=river.value as? String
+        XCTAssertNotNil(before)
+        let activate=app.buttons["Activate the river"].firstMatch
+        XCTAssertTrue(activate.waitForExistence(timeout:5))
+        activate.tap()
+        sleep(1)
+        XCTAssertEqual(river.value as? String,before,"Activating the river changed the night")
+        river.coordinate(withNormalizedOffset:CGVector(dx:0.97,dy:0.5)).tap()
+        let moved=NSPredicate { _,_ in (river.value as? String) != before }
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:moved,object:nil)],timeout:5),.completed,"A touch did not move the river")
+    }
     func testOfflineLaunchResponsiveness() {
         let app=offlineApp()
         let options=XCTMeasureOptions()
