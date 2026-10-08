@@ -189,18 +189,25 @@ struct JournalThumbnail:View {
     var parkID="jotr"
     var observedBortle=3
     var notes=""
-    var photos:[Data]=[]
+    var photos:[Data]=[] { didSet { descriptions=Self.aligned(descriptions,to:photos.count) } }
+    /// Each photo's description for VoiceOver, in the same order; "" for none.
+    var descriptions:[String]=[]
+    /// A description the on-device model suggested, per photo, until the person uses or dismisses it.
+    var suggestions:[Int:String]=[:]
+    var suggesting:Set<Int>=[]
     var loadingPhotos=false
     var error:String?
     var saved=false
     init(entry:JournalEntry?=nil) {
         defer { settled=true }
-        if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos }
+        if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos;descriptions=entry.orderedPhotos.map { $0.altText ?? "" } }
         else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
         #if DEBUG
         if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
         if DebugScenario.state=="photo",let image=UIImage(named:"LaunchStars")?.pngData() { photos=[image] }
         #endif
+        // Observers do not run inside init: one description per photo from the start.
+        descriptions=Self.aligned(descriptions,to:photos.count)
     }
     func load(_ items:[PhotosPickerItem]) async {
         loadingPhotos=true;error=nil;defer { loadingPhotos=false }
@@ -214,10 +221,34 @@ struct JournalThumbnail:View {
             } catch { self.error=String(localized:"The photo could not be loaded. Try choosing it again.") }
         }
     }
+    /// `values` padded with "" or cut to `count`.
+    nonisolated static func aligned(_ values:[String],to count:Int)->[String] { Array((values+Array(repeating:"",count:max(0,count-values.count))).prefix(count)) }
+    func removePhoto(at index:Int) {
+        guard photos.indices.contains(index) else { return }
+        descriptions.remove(at:index)
+        photos.remove(at:index)
+        suggestions=Dictionary(uniqueKeysWithValues:suggestions.compactMap { $0.key<index ? ($0.key,$0.value) : $0.key>index ? ($0.key-1,$0.value) : nil })
+    }
+    /// Asks the on-device model for a draft; it waits beside the field until used or dismissed.
+    func suggest(_ index:Int) async {
+        guard photos.indices.contains(index), !suggesting.contains(index) else { return }
+        suggesting.insert(index); defer { suggesting.remove(index) }
+        let data=photos[index]
+        if let line=await PhotoDescriber.suggest(data), photos.indices.contains(index), photos[index]==data { suggestions[index]=line }
+    }
+    func useSuggestion(_ index:Int) {
+        guard let line=suggestions[index], descriptions.indices.contains(index) else { return }
+        descriptions[index]=line; suggestions[index]=nil
+    }
     func save(context:ModelContext,existing:JournalEntry?) -> Bool {
         error=nil
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
         entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
+        // Only what the person wrote or chose to use is kept; a suggestion never saves itself.
+        for (photo,text) in zip(entry.orderedPhotos,Self.aligned(descriptions,to:photos.count)) {
+            let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
+            photo.altText=trimmed.isEmpty ? nil : trimmed
+        }
         entry.thumbnail=photos.first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) }
         if existing==nil { context.insert(entry) }
         do { try context.save();saved=true;return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
@@ -254,17 +285,11 @@ struct JournalEditorView:View {
             Section("What you noticed") { TextEditor(text:$editor.notes).frame(minHeight:160).accessibilityLabel("Observation notes") }
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
-                    HStack {
-                        PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10)).accessibilityLabel("Journal photo \(index+1)")
-                        Spacer()
-                        // Borderless, so only the button removes the photo, not a tap anywhere in the row.
-                        Button(role:.destructive) { editor.photos.remove(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle()) }
-                            .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
-                    }
+                    PhotoDescriptionRow(editor:editor,index:index,data:data)
                 }
                 if editor.loadingPhotos { ProgressView("Adding photo") }
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,4-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=4 || editor.loadingPhotos)
-            } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone.").foregroundStyle(palette.muted) }
+            } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
             if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
         }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -274,6 +299,67 @@ struct JournalEditorView:View {
             .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { dismiss() } }.disabled(editor.loadingPhotos) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
+    }
+}
+/// One photo in the editor: the picture, "Describe this photo" (read by VoiceOver as the photo's
+/// label), an optional suggestion from the on-device model, and Remove.
+struct PhotoDescriptionRow:View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Bindable var editor:JournalEditorModel
+    let index:Int
+    let data:Data
+    private var description:Binding<String> {
+        Binding(get:{ editor.descriptions.indices.contains(index) ? editor.descriptions[index] : "" },set:{ if editor.descriptions.indices.contains(index) { editor.descriptions[index]=$0 } })
+    }
+    var body:some View {
+        VStack(alignment:.leading,spacing:10) {
+            let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:10)) : AnyLayout(HStackLayout(alignment:.top,spacing:12))
+            layout {
+                PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10))
+                    .accessibilityLabel(JournalPhotoLabel.text(description.wrappedValue,index:index))
+                TextField("Describe this photo",text:description,axis:.vertical).lineLimit(1...4)
+                    .accessibilityLabel("Description of photo \(index+1)")
+                    .accessibilityHint("VoiceOver reads this when the photo is shown.")
+            }
+            if let suggestion=editor.suggestions[index] {
+                VStack(alignment:.leading,spacing:8) {
+                    Text("Suggested on this iPhone").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                    Text(suggestion).font(.subheadline).fixedSize(horizontal:false,vertical:true)
+                    HStack(spacing:16) {
+                        Button("Use this") { editor.useSuggestion(index) }.buttonStyle(.borderless).foregroundStyle(palette.accent)
+                        Button("Dismiss") { editor.suggestions[index]=nil }.buttonStyle(.borderless).foregroundStyle(palette.muted)
+                    }.frame(minHeight:44)
+                }
+                .padding(12).frame(maxWidth:.infinity,alignment:.leading)
+                .background(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
+                .accessibilityElement(children:.contain)
+            }
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:16) { actions }
+                VStack(alignment:.leading,spacing:4) { actions }
+            }
+        }.padding(.vertical,4)
+    }
+    @ViewBuilder private var actions:some View {
+        if PhotoDescriber.available {
+            if editor.suggesting.contains(index) { ProgressView().frame(minHeight:44).accessibilityLabel("Suggesting a description") }
+            else {
+                // Borderless, so only the button acts, not a tap anywhere in the row.
+                Button { Task { await editor.suggest(index) } } label:{ Label("Suggest a description",systemImage:"text.below.photo").frame(minHeight:44) }
+                    .buttonStyle(.borderless).foregroundStyle(palette.accent)
+                    .accessibilityHint("Drafts one line on this iPhone for you to read and edit. Nothing is saved until you use it.")
+            }
+        }
+        Button(role:.destructive) { editor.removePhoto(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle()) }
+            .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
+    }
+}
+/// What VoiceOver says for a journal photo: the person's description, else its place in the entry.
+enum JournalPhotoLabel {
+    nonisolated static func text(_ description:String?,index:Int)->String {
+        let trimmed=description?.trimmingCharacters(in:.whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? String(localized:"Journal photo \(index+1)") : String(localized:"Photo: \(trimmed)")
     }
 }
 struct JournalDetailView:View {
@@ -308,7 +394,7 @@ struct JournalDetailView:View {
         } else { Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted) }
     }
     var body:some View {
-        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.photos.enumerated()),id:\.offset) { i,data in PhotoView(data:data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel("Journal photo \(i+1)") };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.orderedPhotos.enumerated()),id:\.offset) { i,photo in PhotoView(data:photo.data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel(JournalPhotoLabel.text(photo.altText,index:i)) };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
                 ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }
