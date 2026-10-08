@@ -88,14 +88,15 @@ final class AccessibilityAuditTests:XCTestCase {
         let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
         switch issue.auditType {
         case .dynamicType:
-            // The share card is fixed-size exported artwork with a full spoken summary. "Fully
-            // unsupported" always fails. At the default size the audit calls dozens of scaling texts
-            // "partially unsupported", system controls included (Done, Cancel, Form headers): noise.
-            // At AX5, where it matters, only the elements below (each checked in a system AX5 capture) may.
+            // "Fully unsupported" always fails (the share card's route shows the rendered image, as people
+            // receive it, with its spoken summary, so its fixed artwork is no longer live text). At the default
+            // size the audit calls dozens of scaling texts "partially unsupported", system controls included
+            // (Done, Cancel, Form headers): noise. At AX5, where it matters, only the elements below (each
+            // checked in a system AX5 capture) may.
             let label=issue.element?.label ?? ""
-            guard issue.compactDescription.contains("partially") else { return screen=="share" }
+            guard issue.compactDescription.contains("partially") else { return false }
             if pass != "ax5" { return true }
-            return screen=="share" || partialDynamicType.contains { $0.screen==screen && ($0.label.isEmpty ? label.isEmpty : label.hasPrefix($0.label)) }
+            return partialDynamicType.contains { $0.screen==screen && ($0.label.isEmpty ? label.isEmpty : label.hasPrefix($0.label)) }
         case .contrast:
             // Text measured against the translucent tab bar, or glass with no element, not against its own background.
             // "Nearly passed" is not a failure; it is measured where a star sits beside small text.
