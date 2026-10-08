@@ -1,6 +1,6 @@
 # Nyx 1.2 submission package (update)
 
-**Nyx 1.1 is live** (build 1.1 (7), released October 7, 2026, App Store ID 6818817800). **Version 1.2, build 8** is the update: App Store Connect needs a new version (+ Version → 1.2), a What's New text (`Store/1.1/metadata.md`), and the featuring nomination is **App Enhancements** (`Store/1.1/featuring-nominations.md`). Use **phased release** (seven days, pausable) after approval. Existing users' journals migrate to the new store on first launch (tested; confirm on your own phone with a TestFlight upgrade from 1.1 (7)).
+**Nyx 1.1 is live** (build 1.1 (7), released October 7, 2026, App Store ID 6818817800). **Version 1.2, build 9** is the update (build 8 was uploaded on October 8 before the team review's fixes; upload and select 9): App Store Connect needs a new version (+ Version → 1.2), a What's New text (`Store/1.1/metadata.md`), and the featuring nomination is **App Enhancements** (`Store/1.1/featuring-nominations.md`). Use **phased release** (seven days, pausable) after approval. Existing users' journals migrate to the new store on first launch (tested; confirm on your own phone with a TestFlight upgrade from 1.1 (7)).
 
 Archive both builds from the integrated `main` after the integrator sets version 1.2 and `CURRENT_PROJECT_VERSION` to 8 (done 2026-10-08): the iOS archive (iPhone and iPad app with the widgets and the Apple Watch app inside) and the visionOS archive (`NyxVision`, same bundle ID). Before uploading, run `python3 Scripts/verify_release.py --require-key <ios archive> <vision archive>`; it must pass, including the new checks for the age-range entitlement and the Safari link hosts. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store.
 
@@ -100,7 +100,7 @@ Order (hero order, DX-19 and ST-2): (1) Tonight answering where *and* when, with
 
 - **iPad:** in the iOS build. Mac availability off (above).
 - **Apple Watch:** in the iOS build (`Nyx.app/Watch/NyxWatch.app`, complications and the Red light control). Bundle IDs `com.harrypakhale.nyx.watchkitapp` and `.watchkitapp.widgets` carry the App Group. `WKRunsIndependentlyOfCompanionApp = NO`: the watch app needs the iPhone app.
-- **Apple Vision Pro:** App Store Connect → + Add Platform → visionOS, upload `NyxVision` 1.2 (8) with its widget (`NyxVisionWidgets`, ID `com.harrypakhale.nyx.widgets`), add the screenshots and the visionOS page, and submit.
+- **Apple Vision Pro:** App Store Connect → + Add Platform → visionOS, upload `NyxVision` 1.2 (9) with its widget (`NyxVisionWidgets`, ID `com.harrypakhale.nyx.widgets`), add the screenshots and the visionOS page, and submit.
 
 ## Privacy
 
@@ -119,7 +119,7 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 
 ## App Store Connect checklist
 
-1. + Version → **1.2** (iOS and visionOS); select build 8 (iOS, with the watch inside) and the visionOS build 8.
+1. + Version → **1.2** (iOS and visionOS); select build 9 (iOS, with the watch inside) and the visionOS build 9.
 2. Export compliance: No (above).
 3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass; enable the public TestFlight link for the nomination.
 4. Version page: promotional text, description, keywords, subtitle, screenshots (`Store/1.1 v8/`), optional App Preview, **What's New** (`Store/1.1/metadata.md`).

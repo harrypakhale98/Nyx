@@ -6,7 +6,7 @@ Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served 
 
 ## Version
 
-**1.2 (8)**, uploaded 2026-10-08 and in review preparation; **1.1 (7)** has been live on the App Store since 2026-10-07 (ID 6818817800). `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` live in `project.yml` and every target inherits them. 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.2 is the update to it (see `Store/1.1/metadata.md` for what it adds); 1.0 (5) was only uploaded and never public.
+**1.2 (9)** in `project.yml` (build 8 was uploaded on 2026-10-08, before the team review's fixes; build 9 is the one to submit); **1.1 (7)** has been live on the App Store since 2026-10-07 (ID 6818817800). `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` live in `project.yml` and every target inherits them. 1.1 adds What's up tonight, an honest forecast (three models, cloud layers, dew, smoke and haze from a third optional host), field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow and step-free spots, audio graphs and Listen to tonight, Spanish, the trip planner and your constellation. 1.2 is the update to it (see `Store/1.1/metadata.md` for what it adds); 1.0 (5) was only uploaded and never public.
 
 Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md). Archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json` and never prints the NPS key).
 
