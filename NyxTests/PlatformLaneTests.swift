@@ -1,6 +1,7 @@
 import AppIntents
 import CoreLocation
 import Foundation
+import GeoToolbox
 import SwiftUI
 import Testing
 @testable import Nyx
@@ -30,11 +31,11 @@ import Testing
     /// Half an hour before sunset on an ordinary night; later on a long winter night, so the
     /// system's eight-hour limit still covers an hour past the middle of true darkness.
     @Test func followStartIsBeforeSunsetUnlessTheNightIsTooLong() throws {
-        let jotr=try park("jotr"), october=try sky(jotr, "2026-10-09")
+        let jotr=try park("jotr"), october=try self.sky(jotr, "2026-10-09")
         let sunset=try #require(october.sunset)
         #expect(FieldActivityAttributes.followStart(october) == sunset.addingTimeInterval(-1800))
         // Denali in December: about 18 hours from sunset to sunrise.
-        let dena=try park("dena"), december=try sky(dena, "2026-12-20")
+        let dena=try park("dena"), december=try self.sky(dena, "2026-12-20")
         let start=FieldActivityAttributes.followStart(december)
         let window=december.cloudWindow
         let middle=window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
@@ -43,20 +44,21 @@ import Testing
         // Always before true darkness begins on that winter night, so the alert still comes first.
         #expect(start<(december.darkStart ?? .distantFuture))
         // No true darkness (Denali in June): still a moment inside the evening.
-        let june=try sky(dena, "2026-06-21")
+        let june=try self.sky(dena, "2026-06-21")
         #expect(FieldActivityAttributes.followStart(june)>june.evening)
     }
     @Test func followAlertNamesTheParkAndTrueDarknessInParkTime() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-10-09")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-10-09")
         let alert=FieldActivityAttributes.followAlert(park: jotr, sky: sky)
         #expect(alert.title == "Tonight at Joshua Tree")
-        #expect(alert.body == "True darkness at \(jotr.time(try #require(sky.darkStart)))")
-        let dena=try park("dena"), june=try sky(dena, "2026-06-21")
+        let dark=try #require(sky.darkStart)
+        #expect(alert.body == "True darkness at \(jotr.time(dark))")
+        let dena=try park("dena"), june=try self.sky(dena, "2026-06-21")
         #expect(!FieldActivityAttributes.followAlert(park: dena, sky: june).body.hasPrefix("True darkness at"))
     }
     /// Heading out until true darkness begins; the night is recorded so it is followed once.
     @Test func headingOutLastsUntilTrueDarkness() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-12-13")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine", closure: "Keys View Road closed")
         let start=try #require(sky.darkStart)
         #expect(attributes.nightID == sky.evening && attributes.closure == "Keys View Road closed")
@@ -85,7 +87,7 @@ import Testing
     /// MP-02: three hours after the moment the activity was counting down to, with no update, the
     /// face names no moment next: it lists the night's remaining times and when it was updated.
     @Test func staleFaceListsTimesThreeHoursLater() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-12-13")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine")
         let start=try #require(sky.darkStart)
         let state=attributes.state(at: start.addingTimeInterval(-300), nightVision: false)
@@ -112,7 +114,7 @@ import Testing
         #expect(small.uiImage != nil)
     }
     @Test func tabStripShowsAFollowedNightFromThreeHoursBeforeSunsetUntilDawn() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-12-13")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine")
         let pending=NightFollowing.Followed(attributes: attributes, started: false)
         #expect(NightFollowing.inProgress([pending], at: attributes.dusk.addingTimeInterval(-4*3600)) == nil)
@@ -199,13 +201,13 @@ import Testing
     // MARK: Handoff
 
     @Test func handoffCarriesTheParkAndItsNight() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-12-13")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let handoff=ParkHandoff(park: jotr, night: sky.evening)
         #expect(handoff.userInfo == ["park": "jotr", "night": "2026-12-13"])
         let back=try #require(ParkHandoff(userInfo: handoff.userInfo))
         #expect(back == handoff && back.evening(in: jotr) == sky.evening)
         // American Samoa's night is its own calendar day, not the phone's.
-        let npsa=try park("npsa"), samoa=try sky(npsa, "2026-12-13")
+        let npsa=try park("npsa"), samoa=try self.sky(npsa, "2026-12-13")
         #expect(ParkHandoff(userInfo: ParkHandoff(park: npsa, night: samoa.evening).userInfo)?.evening(in: npsa) == samoa.evening)
         #expect(ParkHandoff(userInfo: ["park": "../x"]) == nil && ParkHandoff(userInfo: [:]) == nil && ParkHandoff(userInfo: nil) == nil)
         #expect(ParkHandoff(userInfo: ["park": "jotr", "night": "2026-13-40"])?.night == nil)
@@ -231,7 +233,7 @@ import Testing
     }
     /// NA-1: a reminder says all three forecast models are clear only when they are.
     @Test func reminderCitesTheModelsOnlyWhenAllThreeAreClear() throws {
-        let jotr=try park("jotr"), sky=try sky(jotr, "2026-12-13")
+        let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let night=Night(park: jotr, sky: sky, score: DarknessScore(value: 94, moonPoints: 40, cloudPoints: 25, bortlePoints: 17, lengthPoints: 12), cloudCover: 5, forecastUpdated: now)
         let plain=NotificationScheduler.reason(night)
         #expect(NotificationScheduler.reason(night, models: ModelAgreement(low: 2, high: 9)) == "\(plain); all three forecast models clear")
