@@ -11,8 +11,11 @@ struct ParksTab: View {
     /// The park beside the list, kept for the window (and restored with it).
     @SceneStorage("parksPark") private var selection: String?
     @State private var path: [Park]=[]
-    /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` opens the map.
-    @SceneStorage("parksShowsMap") private var showsMap=DebugScenario.isEnabled("parks-map")
+    /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` (or the `parks-map` route) opens the map.
+    @SceneStorage(ParksTab.mapKey) private var showsMap=DebugScenario.parksMap
+    /// A screen route (DEBUG captures and the accessibility audit) keeps its own restored state, so a run of
+    /// `parks-map` never leaves the next `parks` launch opening on the map and switching to the list mid-audit.
+    private static var mapKey: String { DebugScenario.screen == nil ? "parksShowsMap" : DebugScenario.parksMap ? "parksShowsMap-route-map" : "parksShowsMap-route-list" }
     var body: some View {
         Group {
             if sizeClass == .regular && !showsMap {
@@ -41,7 +44,7 @@ struct ParksTab: View {
             if selection == nil { selection=path.last?.id ?? model.home?.id }
             // A screen route (DEBUG captures and the accessibility audit) opens what it names, not the map or
             // list a previous run left in the window's restored state.
-            if DebugScenario.screen != nil { showsMap=DebugScenario.isEnabled("parks-map") }
+            if DebugScenario.screen != nil { showsMap=DebugScenario.parksMap }
         }
         .onChange(of:sizeClass) { old,new in
             guard !showsMap else { return }

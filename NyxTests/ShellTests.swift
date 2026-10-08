@@ -49,6 +49,8 @@ import Testing
     @Test func fourTabsAndTheirRoutes() {
         #expect(SceneCommands.tabs.count==4)
         #expect(SceneCommands.tabIndex("tonight")==0 && SceneCommands.tabIndex("parks")==1 && SceneCommands.tabIndex("journal")==3)
+        // The map is a mode of Parks; the accessibility audit opens it by this route.
+        #expect(SceneCommands.tabIndex("parks-map")==1)
         // Screenshot scripts still say "calendar"; it is Plan's month.
         #expect(SceneCommands.tabIndex("calendar")==2 && SceneCommands.tabIndex("plan")==2)
         // Learn is no longer a tab: its route opens the index on its own.
