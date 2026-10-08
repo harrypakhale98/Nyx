@@ -66,6 +66,10 @@ targets:
             UTTypeConformsTo: [com.apple.package, public.composite-content]
             UTTypeTagSpecification:
               public.filename-extension: [nyxjournal]
+          # A park dragged between Nyx's screens and windows (iPad): only the park id travels.
+          - UTTypeIdentifier: com.harrypakhale.nyx.park
+            UTTypeDescription: Nyx Park
+            UTTypeConformsTo: [public.data]
         CFBundleDocumentTypes:
           - CFBundleTypeName: Nyx Journal
             CFBundleTypeRole: Editor

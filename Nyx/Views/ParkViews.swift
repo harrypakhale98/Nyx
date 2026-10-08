@@ -174,8 +174,11 @@ struct ParksView: View {
             }.buttonStyle(.plain).hoverEffect(.highlight)
                 .accessibilityAddTraits(chosen ? .isSelected : [])
                 .contextMenu { rowMenu(park) }
+                // iPad: drag a park onto Plan (its month) or Journal (a new entry), or out as its name.
+                .draggable(park)
         } else {
             NavigationLink(value:park) { row }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom).hoverEffect(.highlight).contextMenu { rowMenu(park) }
+                .draggable(park)
         }
     }
     /// Long press, or a secondary click with a pointer.
@@ -186,6 +189,7 @@ struct ParksView: View {
             do { try context.save() } catch { context.rollback();saveFailed=true }
         }
         Button("Show in Calendar",systemImage:"calendar") { model.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
+        OpenParkWindowButton(park:park)
     }
     private func focusSearchIfAsked() {
         guard commands?.takeSearch() == true else { return }
@@ -226,8 +230,15 @@ struct ParkDetailView: View {
     var initialDate:Date?=nil
     /// Opened from a link to that night's What's up (`nyx://whatsup`): scroll there once.
     var focusWhatsUp=false
+    /// Told whenever the night on show changes, so a park's own window can keep it (`ParkWindowRoot`).
+    var nightChanged:((Date)->Void)?=nil
     @State private var selected:Date?
     @State private var breakdown=false
+    /// The breakdown beside the page in a wide window (`WideLayout.inspector`); a sheet otherwise.
+    @State private var inspector=false
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.supportsMultipleWindows) private var multipleWindows
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     @State private var persistenceError=false
     @State private var scrubbing=false
     @State private var width=0.0
@@ -341,11 +352,24 @@ struct ParkDetailView: View {
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }.modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
+            // Wide iPad: the breakdown stays beside the page and follows the river's night.
+            .inspector(isPresented:$inspector) { NightInspector(night:night,isTonight:isTonight) { inspector=false } }
+            .onChange(of:width) { _,_ in if inspector, !inspectorRoom { inspector=false } }
+            .onChange(of:sizeClass) { _,_ in if inspector, !inspectorRoom { inspector=false } }
+            .onChange(of:night.id,initial:true) { _,id in nightChanged?(id) }
+            // DEBUG captures (`-nyx-inspector`): the breakdown open beside the page where it has room.
+            .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
+            .modifier(ReportsVisiblePark(parkID:park.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation() }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text("Your changes could not be stored. Try again when space is available.") }
             .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             .task { await model.refresh([park],programs:true) }
             .refreshable { await model.refresh([park],force:true,programs:true) }
+    }
+    /// Room for the breakdown beside the page (`WideLayout.inspector`).
+    private var inspectorRoom:Bool { WideLayout.inspector(width:width,open:inspector,regular:sizeClass == .regular,largeText:typeSize.isAccessibilitySize) }
+    private func showBreakdown() {
+        if inspectorRoom { withAnimation(reduceMotion ? nil : NyxMotion.spring) { inspector=true } } else { breakdown=true }
     }
     private func report(_ which:ParkChapter,_ top:CGFloat) {
         tracker.tops[which]=top
@@ -414,7 +438,7 @@ struct ParkDetailView: View {
                     .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(.center).padding(.horizontal,12)
                     .accessibilityElement(children:.combine)
             }
-            ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { breakdown=true }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+            ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
             if isTonight { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
             KeepThisNightOffer(park:park).padding(.top,4)
@@ -546,6 +570,10 @@ struct ParkDetailView: View {
             ToolbarItem(placement:.topBarPinnedTrailing) { saveButton }
         } else { ToolbarItem(placement:.topBarTrailing) { saveButton } }
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night) }
+        // iPad: this park in a window of its own, beside another (not in a park's own window).
+        if multipleWindows, commands?.parkWindow != true {
+            ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
+        }
     }
     private var saveButton:some View {
         Button { if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }

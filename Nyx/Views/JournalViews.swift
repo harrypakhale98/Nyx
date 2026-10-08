@@ -19,6 +19,8 @@ struct JournalView: View {
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
+    /// A park dropped onto the journal: a new entry for it, tonight's date.
+    @State private var dropped:JournalPrefill?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     var body:some View {
@@ -58,6 +60,12 @@ struct JournalView: View {
             .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
             .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
+            .sheet(item:$dropped) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
+            // iPad: drop a park here to start an entry for it (never into a journal that could not open).
+            .acceptsPark("New entry for this park",systemImage:"book.closed") { park in
+                guard !model.journalUnavailable else { return }
+                dropped=JournalPrefill.dropped(park:park,tonight:model.tonight(park))
+            }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
             .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentType:.nyxJournal,
