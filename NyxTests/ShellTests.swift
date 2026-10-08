@@ -150,7 +150,8 @@ import Testing
         defaults.removePersistentDomain(forName:"nyx-shell-tests")
     }
     @Test func supportLinksStayOnTheirHosts() {
-        #expect(SupportLink.privacyPolicy?.host()=="harrypakhale98.github.io" && SupportLink.privacyPolicy?.path()=="/Nyx/privacy.html")
+        #expect(SupportLink.privacyPolicy?.host()=="get-nyx.com" && SupportLink.privacyPolicy?.path()=="/privacy")
+        #expect(SupportLink.support?.host()=="get-nyx.com" && SupportLink.support?.path()=="/support")
         #expect(SupportLink.email?.scheme=="mailto")
         // No App Store ID yet: no Rate row.
         #expect(AppStoreLink.appID == nil && SupportLink.review == nil)
