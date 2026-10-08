@@ -19,6 +19,12 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
         var nightVision: Bool
         /// Set once the night is over.
         var finished: Bool=false
+        /// "Heading out": a night followed ahead, before true darkness and before field mode. The
+        /// face then leads with sunset, true darkness and the park's closure line. Optional, like
+        /// every field added after 1.1 (7), so a state written by an earlier build still decodes.
+        var heading: Bool?=nil
+        /// When Nyx worked this state out; the stale face says so ("Updated 7:44 PM").
+        var updated: Date?=nil
     }
     let parkID: String
     let parkName: String
@@ -35,14 +41,33 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     /// phone's clock is set. Optional so an activity started by an earlier build still decodes.
     var timeZoneID: String? = nil
     var timeZone: TimeZone { timeZoneID.flatMap(TimeZone.init(identifier:)) ?? .current }
-    /// The one milestone every face names, so title, symbol and countdown never disagree: the
-    /// state's next milestone, or once that moment has passed with no update (stale), the one after
-    /// it. Nil when the night is over or only sunrise is left.
+    /// The night as the park's calendar names it (`Night.id`), so each night is followed once.
+    var nightID: Date?=nil
+    /// The park's closure, as Nyx words it beside the score, when the night was followed.
+    var closure: String?=nil
+    /// True when this activity is for that park on that night. An activity from an earlier build
+    /// (no night recorded) matches the night whose sunset it starts from.
+    func covers(parkID id: String, night evening: Date) -> Bool {
+        guard id == parkID else { return false }
+        if let nightID { return nightID == evening }
+        let since=dusk.timeIntervalSince(evening)
+        return since>=0 && since<24*3600
+    }
+    /// The one milestone every face counts down to, so title, symbol and countdown never disagree:
+    /// the state's next milestone. Nil when the night is over, when only sunrise is left, and once
+    /// that moment has passed with no update (stale): Nyx cannot know which moment is next while
+    /// the phone sleeps, so the faces then list the night's times and name none of them next.
     func shown(_ state: ContentState, isStale: Bool) -> Milestone? {
-        guard !state.finished, let next=state.next else { return nil }
-        return isStale ? after(next).first : next
+        guard !state.finished, !isStale else { return nil }
+        return state.next
     }
 
+    /// The stale face's schedule: every milestone after the one the state was counting down to, as
+    /// clock times. They stay true however long the phone sleeps; none of them is called next.
+    func schedule(_ state: ContentState) -> [Milestone] {
+        guard !state.finished, let next=state.next else { return [] }
+        return after(next)
+    }
     /// The milestones after the one the state points at, for when the state has gone stale.
     func after(_ milestone: Milestone?) -> [Milestone] {
         guard let milestone else { return milestones }
@@ -52,6 +77,21 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     func fraction(_ date: Date) -> Double {
         let span=dawn.timeIntervalSince(dusk)
         return span>0 ? min(1, max(0, date.timeIntervalSince(dusk)/span)) : 0
+    }
+    /// The state at `now`: the next marked milestone, or finished once the night is over. A night
+    /// followed ahead stays "heading out" until true darkness begins (or sunset, without any).
+    func state(at now: Date, nightVision: Bool, heading: Bool=false) -> ContentState {
+        let finished=now>=dawn
+        let ahead=heading && !finished && now<(darkStart ?? dusk)
+        return ContentState(next: finished ? nil : milestones.first { $0.date>now }, nightVision: nightVision, finished: finished,
+                            heading: ahead ? true : nil, updated: now)
+    }
+    /// Stale when the countdown reaches its milestone (the view then shows the night's remaining
+    /// times, not a timer); at dawn when nothing is left.
+    func content(at now: Date, nightVision: Bool, heading: Bool=false, updated: Date?=nil) -> ActivityContent<ContentState> {
+        var state=state(at: now, nightVision: nightVision, heading: heading)
+        if let updated { state.updated=updated }
+        return ActivityContent(state: state, staleDate: state.finished ? nil : state.next?.date ?? dawn, relevanceScore: state.finished ? 0 : 50)
     }
 }
 

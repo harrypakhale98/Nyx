@@ -15,6 +15,8 @@ import UserNotifications
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
         container=opened.container
+        // Journal entries from Siri (`AddJournalEntryIntent`) go to the same store as the windows.
+        JournalAccess.container=opened.container
         LaunchSignposts.end(store)
         let planner=LaunchSignposts.begin("PlanModel init")
         let model=PlanModel(preload:preload)

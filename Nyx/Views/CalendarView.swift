@@ -242,7 +242,7 @@ struct CalendarView: View {
                 .contextMenu {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                     Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                    if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night } }
+                    if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
                 }
                 .accessibilityInputLabels(Self.spokenNames(night))
         } }
@@ -264,7 +264,7 @@ struct CalendarView: View {
                     .contextMenu {
                         Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                         Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                        if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night } }
+                        if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
                     } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
             }
         }

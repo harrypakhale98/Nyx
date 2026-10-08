@@ -168,8 +168,8 @@ struct TonightView: View {
             // The first line is the answer's own context: the night, and from where.
             answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize ? nil : .uppercase)
                 .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-            NavigationLink(value:park) { HStack { Text(park.shortName).font(.system(.title2,design:.serif));Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }.padding(.vertical,14).padding(.horizontal,22).modifier(ParkPill()) }.buttonStyle(.plain).matchedTransitionSource(id:park.id,in:zoom)
-                .hoverEffect(.lift)
+            // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
+            ParkPillPicker(park:park,others:Array(best.dropFirst()),score:{ model.night($0).score.value },zoom:zoom)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             Text(night.basisCaption(unavailable:!model.beyondForecast(night)) ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
@@ -315,18 +315,6 @@ struct TonightView: View {
         return Picker("Radius",selection:$model.radiusMiles) {
             ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).fixedSize().tag(miles) }
         }.pickerStyle(.menu).fixedSize(horizontal:true,vertical:false)
-    }
-}
-/// Liquid Glass normally; a solid dark capsule in night vision, where the red filter
-/// flattens glass toward the text colour and costs contrast.
-private struct ParkPill:ViewModifier {
-    @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @ViewBuilder func body(content:Content)->some View {
-        if palette.nightVision || reduceTransparency {
-            content.background(Color.black,in:Capsule()).overlay(Capsule().stroke(palette.line,lineWidth:0.8))
-        // Tinted like the panels, so the name keeps its contrast over a bright stretch of the Milky Way.
-        } else { content.glassEffect(.regular.tint(palette.panel.opacity(0.5))) }
     }
 }
 struct PermissionExplainer: View {

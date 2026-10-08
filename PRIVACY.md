@@ -22,6 +22,10 @@ Nyx has no accounts, tracking, analytics/crash SDKs, advertising identifier, ATT
 - **Widgets, Spotlight, Siri and Shortcuts** compute from the bundled parks and the cached forecasts already on the phone. The medium widget's "next park" button stores the chosen park ID and night in the App Group defaults. Spotlight items for the 63 parks are public facts (name, state, Dark Sky designation), indexed into the device's own index.
 - **Ask Nyx's tools** run the engine on the phone over the bundled parks and cached forecasts; the on-device model (Foundation Models' `SystemLanguageModel`) never uses Private Cloud Compute or any network service.
 - **Reminders on iOS 27** carry the park's App Intents entity identifier (`appEntityIdentifiers`), so Siri can open the park from the notification. It is the park's public ID, local to the phone.
+- **Followed nights (build 8).** "Follow this night" schedules the night's Live Activity on the phone with ActivityKit's iOS 26 scheduled start (no push type, no push token, no server). Its content is computed when it is followed: the park, its night's times, its score and its closure line. ActivityKit is the only record of which nights are followed. The tab bar's "night in progress" strip reads the same activities.
+- **Handoff (build 8).** Park detail offers an `NSUserActivity` ("com.harrypakhale.nyx.park") carrying the park's public ID and the night's date, eligible for Handoff only (not for Spotlight or Siri predictions). The system carries it between the person's own devices on the same Apple Account; Nyx has no server. Its `appEntityIdentifier` lets Siri know which park is on screen.
+- **Widget and control relevance (build 8).** The Tonight widget tells the Smart Stack the saved parks' dusk windows and a 25 km region around each saved park's first viewing spot (public coordinates from `parks.json`). The system matches the place on the device; Nyx asks for no location permission for this and is told nothing. The Tonight control and the Moon widget read the same App Group snapshot as the widget.
+- **Journal by voice (build 8).** The journal schema intents (`.journal.createEntry`, `.journal.entry`) write to and read from the same on-device SwiftData store as the Journal tab. An entry's place is the park's own coordinates and name from the bundled library (a `PlaceDescriptor` built on the phone, no geocoding).
 
 ## Manifests
 
@@ -58,7 +62,7 @@ Texas SB 2420 (in force since 2026-06-04, per Apple) and later Utah and Louisian
 ## Maps hand-off and translation
 
 - **Directions in Maps** from a viewing spot (build 8): a user-initiated `maps://` link carrying the spot's public coordinates from `parks.json`, opened by the system in Apple Maps. Nyx makes no request and uses no MapKit; what Maps does is governed by Apple's policy. The product brief's "nothing else, including Apple routing services" refers to requests Nyx makes; this is a hand-off the person chooses. Add `maps` to the documented hand-offs and to `verify_release.py` if it uses a URL literal.
-- **On-device translation** of NPS descriptions and alerts, if shipped: SwiftUI's `translationPresentation` shows Apple's Translation sheet when the person asks. Translation runs through Apple's framework (on device once languages are downloaded); Nyx sends nothing. No change to the label.
+- **On-device translation** of NPS alerts and ranger programs (build 8): when Nyx runs in a language other than English, a "Translate" button under "All park alerts" and under each ranger program opens Apple's Translation sheet (SwiftUI's `translationPresentation`), only when the person taps it. Translation runs through Apple's framework, on the device. On first use iOS may download Apple's language pack for that pair of languages; that is Apple's own system download, as for dictation, and Nyx neither makes it nor learns of it. Nyx sends nothing and stores nothing. No change to the label.
 
 ## Build 8 at a glance
 
