@@ -88,7 +88,7 @@ struct FieldActivityReview: View {
                     }.padding(16)
                 }.frame(height: 110)
             }.padding(24)
-        }.background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
     }
     private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content().background(Color.black.opacity(0.88), in: RoundedRectangle(cornerRadius: 22))
