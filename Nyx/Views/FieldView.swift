@@ -28,6 +28,10 @@ struct FieldView: View {
     /// At accessibility sizes the eye's clock scrolls with the page instead of standing in the
     /// footer, so the countdown keeps the room it needs.
     private var inline: Bool { typeSize.isAccessibilitySize }
+    /// The window's size, for the side-by-side layout.
+    @State private var size=CGSize.zero
+    /// A wide landscape window: "The night" and "Where to look" side by side, with no switch between them.
+    private var sideBySide: Bool { WideLayout.sideBySide(width:size.width,height:size.height,largeText:typeSize.isAccessibilitySize) }
     var body: some View {
         let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased)
         VStack(spacing:0) {
@@ -41,14 +45,24 @@ struct FieldView: View {
             // In the flow, not over it: the countdown under it stays readable.
             if let reset=session.reset { resetNotice(reset).padding(.horizontal,16).padding(.top,8).transition(.opacity.combined(with:.move(edge:.top))) }
             Group {
-                switch current {
-                case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil)
-                case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil)
+                if sideBySide {
+                    // The night on the left, the sky on the right; the eye's clock stays with the night.
+                    HStack(spacing:0) {
+                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil).frame(maxWidth:.infinity)
+                        Rectangle().fill(palette.line).frame(width:0.5).padding(.vertical,24).accessibilityHidden(true)
+                        FieldCompassView(session:session,fixedPose:fixedPose).frame(maxWidth:.infinity)
+                    }
+                } else {
+                    switch current {
+                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil)
+                    case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil)
+                    }
                 }
             }.frame(maxHeight:.infinity)
             footer
         }
         .background(Color.black.ignoresSafeArea())
+        .onGeometryChange(for:CGSize.self) { CGSize(width:$0.size.width.rounded(),height:$0.size.height.rounded()) } action:{ size=$0 }
         // VoiceOver's two-finger scrub leaves field mode, as it would leave any modal screen. On a
         // container, so the action is not copied onto every caption inside (which would make them
         // read as small buttons).
@@ -109,15 +123,19 @@ struct FieldView: View {
     private var footer: some View {
         VStack(spacing:14) {
             if !inline { EyeClock(session:session,expanded:$aboutEyes) }
-            let picker=Picker("View",selection:Binding(get:{ current },set:{ page=$0 })) {
-                Text("The night").tag(Page.night)
-                Text("Where to look").tag(Page.look)
-            }
-            // At accessibility sizes a menu, which never clips its labels; segments do not grow.
-            if inline { picker.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) } else { picker.pickerStyle(.segmented) }
+            if !sideBySide { pagePicker }
         }
         .padding(.horizontal,20).padding(.bottom,12).padding(.top,8)
         .readableColumn(WideLayout.proseWidth)
+    }
+    /// The night or where to look, one at a time (both show side by side on a wide landscape window).
+    @ViewBuilder private var pagePicker: some View {
+        let picker=Picker("View",selection:Binding(get:{ current },set:{ page=$0 })) {
+            Text("The night").tag(Page.night)
+            Text("Where to look").tag(Page.look)
+        }
+        // At accessibility sizes a menu, which never clips its labels; segments do not grow.
+        if inline { picker.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) } else { picker.pickerStyle(.segmented) }
     }
     private func resetNotice(_ reset:DarkAdaptation.Reset)->some View {
         VStack(alignment:.leading,spacing:12) {

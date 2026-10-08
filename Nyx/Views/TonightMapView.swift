@@ -218,7 +218,7 @@ struct ParksMapView: View {
                 VStack(spacing:0) {
                     ForEach(Array(map.darkest.prefix(5))) { mark in
                         if let park=model.park(mark.id) {
-                            Button { open(park) } label:{ row(mark,park:park) }.buttonStyle(.plain).hoverEffect(.highlight)
+                            Button { open(park) } label:{ row(mark,park:park) }.buttonStyle(.plain).hoverEffect(.highlight).draggable(park)
                             Divider().overlay(palette.line)
                         }
                     }

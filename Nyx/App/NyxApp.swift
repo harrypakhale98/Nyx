@@ -36,10 +36,16 @@ import UserNotifications
             if let container { RootView().environment(model).modelContainer(container).modifier(AgeAssuranceCheck()) }
             else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
-        // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night.
+        // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night, a park in a new window.
         .commands { NyxCommands() }
         // About every six hours, when iOS allows: saved parks' clouds (and alerts when due), the
         // widget, the watch and reminders, so a reminder never rests on a stale forecast.
         .backgroundTask(.appRefresh(SavedSkySync.refreshTask)) { [model] in await model.savedSync.backgroundRefresh(model) }
+        // iPad: a park in a window of its own ("Open in New Window", ⌘⇧N). Links and Spotlight keep
+        // landing in the main window, never in a new park window.
+        WindowGroup("Park",id:"park",for:ParkWindow.self) { $value in
+            if let container { ParkWindowRoot(value:$value).environment(model).modelContainer(container) }
+        }
+        .handlesExternalEvents(matching:[])
     }
 }

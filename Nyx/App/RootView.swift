@@ -17,6 +17,8 @@ struct RootView:View {
     @AppStorage("showerReminders") private var showerReminders=true
     /// This window's tab and keyboard commands (each iPad window has its own).
     @State private var commands=SceneCommands()
+    /// This window's tab, restored with the window (each iPad window keeps its own).
+    @SceneStorage("tab") private var savedTab=0
     @State private var intro=false
     /// Cold launch: the launch screen's starfield paints first, then the app settles in.
     /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
@@ -64,7 +66,7 @@ struct RootView:View {
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(DebugTypeSize())
-        .modifier(DebugWindow())
+        .modifier(DebugWindow()).modifier(DebugOpenParkWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? "")))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
@@ -72,6 +74,8 @@ struct RootView:View {
         .sheet(item:Binding(get:{launchParkID.flatMap{model.park($0)}},set:{launchParkID=$0?.id})) { park in ParkSheet(park:park,initialDate:launchNight?.date,whatsUp:launchNight?.whatsUp ?? false) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision)) } }
         .onAppear { LaunchSignposts.firstFrame() }
+        .onAppear { if DebugScenario.screen == nil, (0..<SceneCommands.tabs.count).contains(savedTab) { commands.tab=savedTab } }
+        .onChange(of:commands.tab) { _,tab in savedTab=tab }
         // Field mode can open from Tonight or Control Center before any park page has appeared; its dawn
         // "Keep this night" needs the journal's store.
         .onAppear { KeepThisNight.container=context.container }
