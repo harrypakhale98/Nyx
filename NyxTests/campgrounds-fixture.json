@@ -1,0 +1,551 @@
+{
+ "total": "7",
+ "limit": "500",
+ "start": "0",
+ "data": [
+  {
+   "id": "9B5A7B2B-E147-429F-B52F-EDBF1B48EBB0",
+   "url": "https://www.nps.gov/jotr/planyourvisit/cottonwood-campground.htm",
+   "name": "Cottonwood Campground",
+   "parkCode": "jotr",
+   "description": "The Cottonwood Campground is reservation only and has 62 sites, potable water and flush toilets. The Campground is near the Cottonwood Visitor Center in the southeast part of the park. The closest metropolitan area is Indio about 30 miles away. Cottonwood Campground fees will increase to $35 per site starting January 1, 2025. Cottonwood Group Campground fees will increase to $55 per site starting January 1, 2025.",
+   "latitude": "33.7448801293481",
+   "longitude": "-115.8128298739847",
+   "reservationInfo": "Reservations are required year-round and can be made up to six months in advance. Book a site at www.recreation.gov or by calling 877-444-6777.",
+   "reservationUrl": "https://www.recreation.gov/camping/campgrounds/272299",
+   "numberOfSitesReservable": "62",
+   "numberOfSitesFirstComeFirstServe": "0",
+   "campsites": {
+    "totalSites": "62",
+    "group": "3",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "0",
+    "rvOnly": "0",
+    "walkBoatTo": "0",
+    "other": "0"
+   },
+   "accessibility": {
+    "wheelchairAccess": "Most campsites have uneven terrain. Many roads are unpaved. The paved roads are crumbling and uneven. The Cottonwood Visitor Center has ADA access and the parking lot is well paved and flat. There is a wheelchair accessible restroom.",
+    "internetInfo": "",
+    "cellPhoneInfo": "",
+    "fireStovePolicy": "Because of the park's very dry climate, fire danger in Joshua Tree is almost always very high. Be cautious. Campfires are allowed only in designated fire rings or grills that are found in park campgrounds or picnic areas. Keep fires small. Bring your own firewood. You may not gather park vegetation, whether living or dead, to fuel your campfire. If you plan to have a campfire, bring extra water to douse it thoroughly.",
+    "rvAllowed": "1",
+    "rvInfo": "There are no hookups for RVs at any campground in Joshua Tree. Cottonwood Campground has RV-accessible potable water and dump stations. Generator use is permitted only from 7-9 am, noon-2 pm, and 5-7 pm. RVs and trailers are allowed in sites if space permits. RVs and trailers are not allowed at the group campsites at Cottonwood Campground.",
+    "rvMaxLength": "35",
+    "additionalInfo": "",
+    "trailerMaxLength": "35",
+    "adaInfo": "The Cottonwood Amphitheater is ADA accessible from Loop A. There are no ADA accessible campsites in the campground. Campgrounds with ADA accessible campsites include Indian Cove (site 1), Jumbo Rocks (site 122), and Black Rock (site 61).",
+    "trailerAllowed": "1",
+    "accessRoads": [
+     "Paved Roads - All vehicles OK"
+    ],
+    "classifications": [
+     "Developed Campground"
+    ]
+   },
+   "amenities": {
+    "trashRecyclingCollection": "Yes - year round",
+    "toilets": [
+     "Flush Toilets - year round"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "None"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "No",
+    "amphitheater": "Yes - year round",
+    "dumpStation": "Yes - year round",
+    "campStore": "No",
+    "staffOrVolunteerHostOnsite": "No",
+    "potableWater": [
+     "Yes - year round"
+    ],
+    "iceAvailableForSale": "No",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "No"
+   },
+   "fees": [
+    {
+     "cost": "35.00",
+     "description": "Individual Campsite Fee. A maximum of six people, three tents, and two cars may occupy an individual campsite, only if there is space available. Some sites only have enough parking for one vehicle.",
+     "title": "Campsite Fee"
+    },
+    {
+     "cost": "55.00",
+     "description": "There are three group campsites. Tents only. RVs and habitable trailers prohibited.",
+     "title": "Group Campsite Fee"
+    },
+    {
+     "cost": "17.50",
+     "description": "Nightly camping fee for one site for a camper with a Senior or Access pass. A maximum of six people, three tents, and two cars may occupy an individual campsite, only if there is space available. Some sites only have enough parking for one vehicle.",
+     "title": "Senior/Access Pass Campsite Fee"
+    },
+    {
+     "cost": "27.50",
+     "description": "Nightly camping fee for one site for a camper with a Senior or Access pass. There are three group campsites. Tents only. RVs and habitable trailers prohibited.",
+     "title": "Senior/Access Pass Group Campsite Fee"
+    }
+   ]
+  },
+  {
+   "id": "F825CA55-5923-48FE-B11D-CD55B5F53B88",
+   "url": "https://www.nps.gov/jotr/planyourvisit/white-tank-campground.htm",
+   "name": "White Tank Campground",
+   "parkCode": "jotr",
+   "description": "This is small campground with 15 sites. There are pit toilets, picnic tables, and fire pits. There is no water available. RVs and vehicles with trailers may not exceed 25 feet. To secure a site, 1. Locate an empty campsite. 2. Occupy the site (set up a tent or leave personal items to show occupancy). 3. Proceed immediately to an entrance station to complete registration and pay. You must pay for the site within one hour of set up. If entrance stations are closed, payment may be delayed until morning.",
+   "latitude": "33.985738",
+   "longitude": "-116.0166743",
+   "reservationInfo": "White Tank Campground is first-come, first-served throughout the year.",
+   "reservationUrl": "",
+   "numberOfSitesReservable": "0",
+   "numberOfSitesFirstComeFirstServe": "15",
+   "campsites": {
+    "totalSites": "15",
+    "group": "0",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "0",
+    "rvOnly": "0",
+    "walkBoatTo": "0",
+    "other": "0"
+   },
+   "accessibility": {
+    "wheelchairAccess": "Roads are not paved, nor are campgrounds. Though most campsites are relatively flat, the terrain can be uneven.",
+    "internetInfo": "",
+    "cellPhoneInfo": "",
+    "fireStovePolicy": "Because of the park's very dry climate, fire danger in Joshua Tree is almost always very high. Be cautious. Campfires are allowed only in designated fire rings or grills that are found in park campgrounds or picnic areas. Keep fires small. Bring your own firewood. You may not gather park vegetation, whether living or dead, to fuel your campfire. If you plan to have a campfire, bring extra water to douse it thoroughly.",
+    "rvAllowed": "1",
+    "rvInfo": "RVs may not exceed a combined maximum length of 25 feet. There is no water and no hookups. There are no hookups for RVs at any campground in Joshua Tree.",
+    "rvMaxLength": "24",
+    "additionalInfo": "",
+    "trailerMaxLength": "24",
+    "adaInfo": "There are no ADA accessible campsites in White Tank Campground. Campgrounds with ADA accessible campsites include Indian Cove (site 1), Jumbo Rocks (site 122), and Black Rock (site 61).",
+    "trailerAllowed": "1",
+    "accessRoads": [
+     "Unpaved Roads - All vehicles OK in good weather"
+    ],
+    "classifications": [
+     "Limited Development Campground"
+    ]
+   },
+   "amenities": {
+    "trashRecyclingCollection": "Yes - year round",
+    "toilets": [
+     "Vault Toilets - year round"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "None"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "No",
+    "amphitheater": "No",
+    "dumpStation": "No",
+    "campStore": "No",
+    "staffOrVolunteerHostOnsite": "No",
+    "potableWater": [
+     "No water"
+    ],
+    "iceAvailableForSale": "No",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "No"
+   },
+   "fees": [
+    {
+     "cost": "25.00",
+     "description": "Camping fees must be paid at an entrance station. A maximum of six people, three tents, and two cars may occupy an individual campsite, only if there is space available. Some sites only have enough parking for one vehicle.",
+     "title": "Individual Campsite at White Tank"
+    },
+    {
+     "cost": "12.50",
+     "description": "Nightly camping fee for one site for a camper with a Senior or Access pass. Camping fees must be paid at an entrance station. A maximum of six people, three tents, and two cars may occupy an individual campsite, only if there is space available. Some sites only have enough parking for one vehicle.",
+     "title": "Senior/Access Pass Individual Campsite at White Tank"
+    }
+   ]
+  },
+  {
+   "id": "DF0F45FB-FEE4-47A9-ACD4-63E3DC9BF9DA",
+   "url": "https://www.visitgrandcanyon.com/trailer-village-rv-park",
+   "name": "Trailer Village RV Park - South Rim",
+   "parkCode": "grca",
+   "description": "CLOSED as of August 31, 2026 due to Stage 4 water restrictions.",
+   "latitude": "36.052812",
+   "longitude": "-112.115001",
+   "reservationInfo": "Reservations can be made up to 13 months in advance. If visiting during the busy season (May through October) making reservations 1 year in advance is recommended.",
+   "reservationUrl": "https://gc.synxis.com/rez.aspx?chain=398&template=respgc&shell=gccls&dest=gcnp&hotel=63275&_ga=2.214229012.246257283.1612044367-731013058.1606790486",
+   "numberOfSitesReservable": "123",
+   "numberOfSitesFirstComeFirstServe": "0",
+   "campsites": {
+    "totalSites": "123",
+    "group": "0",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "80",
+    "rvOnly": "123",
+    "walkBoatTo": "0",
+    "other": "43"
+   },
+   "accessibility": {
+    "wheelchairAccess": "Paved sites are wheelchair accessible. There are 3 accessible restrooms in the RV park.",
+    "internetInfo": "DirecTV services are available for paved RV sites only on the back of the electric box. WiFi is not available. However, there is free limited WiFi available down the road at the Canyon Village General Store and Deli (a half-mile away), as well as the Yavapai Lodge lobby. The park has a slow connection and limited bandwidth, so it's not ideal for much more than checking email or some (very) light browsing. In other words, it's there if you need it, but our internet is not strong enough to attend Zoom meetings, stream Netflix, or Skype with your friends back home.",
+    "cellPhoneInfo": "Cellular coverage varies throughout Grand Canyon Village because of the terrain. You may or may not be able to receive a signal in Trailer Village. Usually connectivity is better in the village historic district, 1.3 miles (2 km) west of the campground.",
+    "fireStovePolicy": "Charcoal fires only. No wood fires allowed. Paved sites include a charcoal grill, gravel sites do not provide a grill. Propane camp stoves may be used on provided picnic tables.",
+    "rvAllowed": "1",
+    "rvInfo": "Total maximum vehicle length of 50 feet.",
+    "rvMaxLength": "50",
+    "additionalInfo": "Pets: Must be kept on a leash and under physical control at all times. For the safety of your pet, do not leave them unattended. Pets are not permitted below the canyon rim, on shuttle buses, or in buildings. Satellite users: The Grand Canyon's zip code is 86023",
+    "trailerMaxLength": "50",
+    "adaInfo": "Paved RV sites are mostly flat, as well as loop roads.",
+    "trailerAllowed": "1",
+    "accessRoads": [
+     "Paved Roads - All vehicles OK"
+    ],
+    "classifications": [
+     "Developed Campground"
+    ]
+   },
+   "amenities": {
+    "trashRecyclingCollection": "Yes - year round",
+    "toilets": [
+     "Flush Toilets - year round"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "Hot - Year Round"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "Yes - year round",
+    "amphitheater": "No",
+    "dumpStation": "Yes - year round",
+    "campStore": "Yes - year round",
+    "staffOrVolunteerHostOnsite": "Yes - year round",
+    "potableWater": [
+     "Yes - year round"
+    ],
+    "iceAvailableForSale": "Yes - year round",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "No"
+   },
+   "fees": [
+    {
+     "cost": "85.00",
+     "description": "Includes paved site, 30 and 50 amp hookups, water, sewer, cable TV, charcoal grill and picnic table. Price per night excluding taxes and fees.",
+     "title": "Paved RV Site up to 28 feet/8.5 meters total vehicle length"
+    },
+    {
+     "cost": "85.00",
+     "description": "Includes paved site, 30 and 50 amp hookups, water, sewer, cable TV, charcoal grill and picnic table. Price per night excluding taxes and fees.",
+     "title": "Paved RV Site 29 feet/8.5 meters to 50 feet/15 meters total vehicle length"
+    },
+    {
+     "cost": "80.00",
+     "description": "Includes gravel site, 50 amp hookup, water, sewer and picnic table. Price per night excluding taxes and fees.",
+     "title": "Classic RV Site up to 28 feet/8.5 meters total vehicle length"
+    },
+    {
+     "cost": "80.00",
+     "description": "Includes gravel site, 50 amp hookup, water, sewer and picnic table. Price per night excluding taxes and fees.",
+     "title": "Classic RV Site 29 feet/8.5 meters to 50 feet/15 meters total vehicle length"
+    }
+   ]
+  },
+  {
+   "id": "AC12C7C9-38CD-4F10-828D-8C903F1C7926",
+   "url": "",
+   "name": "Douglas Spring",
+   "parkCode": "sagu",
+   "description": "- 4,800 feet elevation - 3 campsites (6 people max per site) *This campground is hike in only! The hike up offers beautiful views down toward Tanque Verde Falls and of multiple drainages including Tina Larga tank. There is a drainage about 50 feet east of the campsite, but water is seasonal, so it is smart to check water reports before heading out. Fires are not allowed here due to the lack of firewood and the extremely fire-prone grasslands that occupy the area. Cell service is not guaranteed.",
+   "latitude": "32.227981",
+   "longitude": "-110.606875",
+   "reservationInfo": "",
+   "reservationUrl": "",
+   "numberOfSitesReservable": "0",
+   "numberOfSitesFirstComeFirstServe": "0",
+   "campsites": {
+    "totalSites": "0",
+    "group": "0",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "0",
+    "rvOnly": "0",
+    "walkBoatTo": "0",
+    "other": "0"
+   },
+   "accessibility": {
+    "wheelchairAccess": "",
+    "internetInfo": "",
+    "cellPhoneInfo": "",
+    "fireStovePolicy": "",
+    "rvAllowed": "0",
+    "rvInfo": "",
+    "rvMaxLength": "0",
+    "additionalInfo": "",
+    "trailerMaxLength": "0",
+    "adaInfo": "",
+    "trailerAllowed": "0",
+    "accessRoads": [],
+    "classifications": []
+   },
+   "amenities": {
+    "trashRecyclingCollection": "",
+    "toilets": [],
+    "internetConnectivity": "",
+    "showers": [],
+    "cellPhoneReception": "",
+    "laundry": "",
+    "amphitheater": "",
+    "dumpStation": "",
+    "campStore": "",
+    "staffOrVolunteerHostOnsite": "",
+    "potableWater": [],
+    "iceAvailableForSale": "",
+    "firewoodForSale": "",
+    "foodStorageLockers": ""
+   },
+   "fees": [
+    {
+     "cost": "8.00",
+     "description": "All campsites have the same fee, $8 per campsite with a 50% discount to those with a senior or access pass ($4). Each campsite has a maximum capacity of 6 people per group, for groups larger than 6 an additional campsite must be reserved and paid for.",
+     "title": "General Camping Fee"
+    },
+    {
+     "cost": "4.00",
+     "description": "All campsites have the same fee, $8 per campsite with a 50% discount to those with a senior or access pass ($4). Each campsite has a maximum capacity of 6 people per group, for groups larger than 6 an additional campsite must be reserved and paid for.",
+     "title": "Senior Pass Holder Camping Fee"
+    },
+    {
+     "cost": "4.00",
+     "description": "All campsites have the same fee, $8 per campsite with a 50% discount to those with a senior or access pass ($4). Each campsite has a maximum capacity of 6 people per group, for groups larger than 6 an additional campsite must be reserved and paid for.",
+     "title": "Access Pass Holder Camping Fee"
+    }
+   ]
+  },
+  {
+   "id": "C46D4DBB-5B16-4F5A-BBFA-34C350639B98",
+   "url": "https://www.nps.gov/gumo/planyourvisit/dog_canyon_campground.htm",
+   "name": "Dog Canyon Campground",
+   "parkCode": "gumo",
+   "description": "Dog Canyon is a two-hour drive from the Pine Springs area. The Dog Canyon Campground sits at 6,300 feet in elevation and has 9 tent and 4 RV sites. There is one group site at Dog Canyon that can be reserved for a group of 10-20 individuals. Campground amenities include drinking water and flush toilets (there are NO hookups, dump stations or showers). Only cooking stoves are permitted; charcoal, wood fires, and propane firepits are not permitted.",
+   "latitude": "31.9948983481",
+   "longitude": "-104.832847248",
+   "reservationInfo": "All campsites in the Dog Canyon Campground are reservable through recreation.gov. Individual campsite cost will be $20 per night, per site; $10.00 for Senior and Access passholders; there is no discount for Annual, Annual Military, Annual 4th grade, Volunteer or Guadalupe Mountains National Park passholders. There is one group site that can accommodate groups with 10-20 individuals, reservable up to six months in advance.",
+   "reservationUrl": "https://www.recreation.gov/camping/campgrounds/258852",
+   "numberOfSitesReservable": "15",
+   "numberOfSitesFirstComeFirstServe": "0",
+   "campsites": {
+    "totalSites": "15",
+    "group": "1",
+    "horse": "4",
+    "tentOnly": "9",
+    "electricalHookups": "0",
+    "rvOnly": "4",
+    "walkBoatTo": "10",
+    "other": "0"
+   },
+   "accessibility": {
+    "wheelchairAccess": "",
+    "internetInfo": "Free WiFi is available for visitors at the Dog Canyon Ranger Station. The WiFi is available 24 hrs a day and does not require a password.",
+    "cellPhoneInfo": "There is no cell phone reception in the Dog Canyon area.",
+    "fireStovePolicy": "Wood and charcoal fires are not allowed year round. All cooking must be done with contained fuel stoves.",
+    "rvAllowed": "0",
+    "rvInfo": "",
+    "rvMaxLength": "0",
+    "additionalInfo": "",
+    "trailerMaxLength": "0",
+    "adaInfo": "",
+    "trailerAllowed": "0",
+    "accessRoads": [],
+    "classifications": []
+   },
+   "amenities": {
+    "trashRecyclingCollection": "Yes - year round",
+    "toilets": [
+     "Flush Toilets - year round"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "None"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "No",
+    "amphitheater": "No",
+    "dumpStation": "No",
+    "campStore": "No",
+    "staffOrVolunteerHostOnsite": "Yes - seasonal",
+    "potableWater": [
+     "Yes - year round"
+    ],
+    "iceAvailableForSale": "No",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "No"
+   },
+   "fees": [
+    {
+     "cost": "20.00",
+     "description": "Individual sites can accomodate 8 people with 2 tents. Sites include a single tent pad measuring 10' x 10' and a picnic table.",
+     "title": "Individual Tent Sites"
+    },
+    {
+     "cost": "20.00",
+     "description": "Each RV site will have a parking spot that can accommodate a 23 foot RV. Each site will have a picnic table in the spot.",
+     "title": "RV Sites"
+    },
+    {
+     "cost": "60.00",
+     "description": "Groups must stay in designated group sites at the Pine Springs and Dog Canyon Campgrounds. Group site occupancy is limited to a minimum of 10 persons and a maximum of 20 persons per site. Vehicles parked here cannot block traffic.",
+     "title": "Group Campsites"
+    },
+    {
+     "cost": "15.00",
+     "description": "Horse corral fees are $15.00 per night. This fee is in addition to the required entrance fee and campsite fee and is needed only if the corral facility will be used.",
+     "title": "Horse Corral Fee"
+    }
+   ]
+  },
+  {
+   "id": "02A81AB4-ECCC-4FA1-9A62-1769B1D3850C",
+   "url": "",
+   "name": "Rising Sun Campground",
+   "parkCode": "glac",
+   "description": "Rising Sun Campground is located just west of St. Mary and halfway along St. Mary Lake. Campers at Rising Sun will enjoy beautiful sunrises in the morning with Red Eagle Mountain as a backdrop, and the campground serves as a convenient base camp to many day hikes located east of Logan Pass. Some sites are open, allowing for cool breezes throughout the day, while others are located among trees, accommodating those seeking some shade and privacy.",
+   "latitude": "48.6945321241",
+   "longitude": "-113.522684384",
+   "reservationInfo": "Rising Sun Campground requires a reservation to book a site. Reservations have a 0-day booking window, meaning they need to be reserved the day of your desired stay. Reservations can only be made on Recreation.gov. Cell service is limited within the park boundary. It is recommended to make a Rising Sun Campground reservation before coming to the park or at St. Mary and Apgar Visitor Centers, where public wifi is available.",
+   "reservationUrl": "https://www.recreation.gov/camping/campgrounds/10363618",
+   "numberOfSitesReservable": "83",
+   "numberOfSitesFirstComeFirstServe": "1",
+   "campsites": {
+    "totalSites": "84",
+    "group": "0",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "0",
+    "rvOnly": "0",
+    "walkBoatTo": "0",
+    "other": "0"
+   },
+   "accessibility": {
+    "wheelchairAccess": "1 campsite (#7)",
+    "internetInfo": "",
+    "cellPhoneInfo": "",
+    "fireStovePolicy": "Picnic tables and fire rings provided.",
+    "rvAllowed": "1",
+    "rvInfo": "Sites can accommodate vehicle lengths up to 21 feet (includes total length of vehicle and trailer).",
+    "rvMaxLength": "21",
+    "additionalInfo": "Adjacent to the campground is a camp store, a casual restaurant, and token operated showers. Boat tours on St. Mary Lake are located near Rising Sun, and Otokomi Lake Trailhead is located next to the campground. Attend an evening ranger program.",
+    "trailerMaxLength": "21",
+    "adaInfo": "Restroom facilities are accessible.",
+    "trailerAllowed": "1",
+    "accessRoads": [
+     "Paved Roads - All vehicles OK"
+    ],
+    "classifications": [
+     "Developed Campground"
+    ]
+   },
+   "amenities": {
+    "trashRecyclingCollection": "Yes - seasonal",
+    "toilets": [
+     "Flush Toilets - seasonal"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "Coin-Operated - Seasonal"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "No",
+    "amphitheater": "Yes - seasonal",
+    "dumpStation": "Yes - seasonal",
+    "campStore": "Yes - seasonal",
+    "staffOrVolunteerHostOnsite": "Yes - seasonal",
+    "potableWater": [
+     "Yes - seasonal"
+    ],
+    "iceAvailableForSale": "No",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "Yes - seasonal"
+   },
+   "fees": [
+    {
+     "cost": "30.00",
+     "description": "Rising Sun Campground is reservation only. Campsite capacity is limited to eight people and two vehicles, where space is available. A maximum of two tents per site is permitted.",
+     "title": "Rising Sun summer fee"
+    }
+   ]
+  },
+  {
+   "id": "D3397636-7BAA-419B-A634-9C53D6AD7E55",
+   "url": "https://www.nps.gov/isro/planyourvisit/boating-guide.htm",
+   "name": "Beaver Island Campground",
+   "parkCode": "isro",
+   "description": "Located in the center of Washington Harbor, near Windigo. All shelters are water facing. Boats can stay at the dock overnight. Stay Limit: 3 nights effective from 6/1 - Labor Day annually. Shelters: 3 Depth at dock (normal conditions): 2'-5' Access: Canoe/kayak/private boat",
+   "latitude": "47.90406144441624",
+   "longitude": "-89.1743364694965",
+   "reservationInfo": "First come, first serve.",
+   "reservationUrl": "",
+   "numberOfSitesReservable": "0",
+   "numberOfSitesFirstComeFirstServe": "3",
+   "campsites": {
+    "totalSites": "3",
+    "group": "0",
+    "horse": "0",
+    "tentOnly": "0",
+    "electricalHookups": "0",
+    "rvOnly": "0",
+    "walkBoatTo": "3",
+    "other": "3"
+   },
+   "accessibility": {
+    "wheelchairAccess": "Not wheelchair accessible.",
+    "internetInfo": "",
+    "cellPhoneInfo": "",
+    "fireStovePolicy": "Self-contained stoves only.",
+    "rvAllowed": "0",
+    "rvInfo": "No RV/Trailer access.",
+    "rvMaxLength": "0",
+    "additionalInfo": "",
+    "trailerMaxLength": "0",
+    "adaInfo": "Mostly flat, uneven earth terrain. Facilities are not accessible.",
+    "trailerAllowed": "0",
+    "accessRoads": [
+     "No Roads"
+    ],
+    "classifications": [
+     "Limited Development Campground"
+    ]
+   },
+   "amenities": {
+    "trashRecyclingCollection": "No",
+    "toilets": [
+     "Composting Toilets - seasonal"
+    ],
+    "internetConnectivity": "No",
+    "showers": [
+     "None"
+    ],
+    "cellPhoneReception": "No",
+    "laundry": "No",
+    "amphitheater": "No",
+    "dumpStation": "No",
+    "campStore": "No",
+    "staffOrVolunteerHostOnsite": "No",
+    "potableWater": [
+     "Water",
+     " but not potable"
+    ],
+    "iceAvailableForSale": "No",
+    "firewoodForSale": "No",
+    "foodStorageLockers": "Yes - year round"
+   },
+   "fees": [
+    {
+     "cost": "0.00",
+     "description": "No fee for small-party camping. A free overnight permit is required.",
+     "title": "Small-party Camping (6 people or less)"
+    }
+   ]
+  }
+ ]
+}
