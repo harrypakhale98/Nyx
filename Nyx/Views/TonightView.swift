@@ -9,6 +9,8 @@ struct TonightView: View {
     @Environment(\.nyxAccess) private var access
     @State private var shooting=0.0
     @State private var refreshed=0
+    /// The subtle double tap: Tonight's answer is a night a reminder would announce.
+    @State private var found=0
     @Environment(\.openURL) private var openURL
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.scenePhase) private var scenePhase
@@ -83,15 +85,25 @@ struct TonightView: View {
             }
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
+            .sensoryFeedback(.impact(weight:.light,intensity:0.8),trigger:found)
+            .task(id:worthyNight) { await feelFound(worthyNight) }
             .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
                 if !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting && shooting==0 {
                     withAnimation(.spring(response:0.9,dampingFraction:1)) { shooting=1 } completion:{ shooting=0 }
                 }
-                await model.refresh(candidates,force:true);refreshed+=1
+                let before=model.forecasts.mapValues(\.updated)
+                await model.refresh(candidates,force:true)
+                // Said as it is: new forecasts (or ones minutes old), or saved data and why.
+                let fetched=model.forecasts.contains { id,forecast in before[id] != forecast.updated }
+                let current=model.forecasts.values.contains { Date.now.timeIntervalSince($0.updated)<600 }
+                let line: String
+                if model.weatherEnabled && (fetched || current) { refreshed+=1; line=String(localized:"Updated") }
+                else if !model.weatherEnabled { line=String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.") }
+                else { line=String(localized:"Could not reach the forecast. Showing saved data.") }
                 // The haptic is felt; this is heard, politely, after anything VoiceOver is already saying.
-                NightListener.announce(String(localized:"Updated"),priority:.low)
+                NightListener.announce(line,priority:.low)
             }
     }
     /// First run, until a starting point is chosen: the question, asked in place, with no permission
@@ -178,9 +190,11 @@ struct TonightView: View {
                 .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:Array(best.dropFirst()),score:{ model.night($0).score.value },zoom:zoom)
-            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
+            let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
-            Text(night.basisCaption(unavailable:!model.beyondForecast(night)) ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            // The gauge speaks this line, so VoiceOver does not hear it twice.
+            Text(basis ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(basis != nil)
             // A forecast more than six hours old says when it is from.
             if night.score.hasForecast, let updated=night.forecastUpdated, Date.now.timeIntervalSince(updated)>6*3600 {
                 Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
@@ -194,6 +208,23 @@ struct TonightView: View {
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
         }.frame(maxWidth:.infinity)
+    }
+    /// Tonight's answer when a reminder would announce it (`NotificationScheduler.worthAReminder`),
+    /// as "park-day"; nil otherwise, and until a starting point is chosen.
+    private var worthyNight: String? {
+        guard model.startChosen, !loading, !empty, let park=best.first else { return nil }
+        let night=model.night(park)
+        return NotificationScheduler.worthAReminder(night) ? park.id+"-"+park.isoDay(night.id) : nil
+    }
+    /// The haptic vocabulary's subtle double tap, once per park and night, after the gauge has landed.
+    private func feelFound(_ key:String?) async {
+        guard let key, DebugScenario.screen == nil, !FoundNights.felt(key) else { return }
+        try? await Task.sleep(for:.seconds(systemReduceMotion || forcedReduceMotion ? 0.6 : 1.9))
+        guard !Task.isCancelled else { return }
+        FoundNights.note(key)
+        found+=1
+        try? await Task.sleep(for:.milliseconds(120))
+        found+=1
     }
     @ViewBuilder private var more: some View {
         if best.count>1 {
@@ -338,3 +369,13 @@ struct PermissionExplainer: View {
     }
 }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }
+/// The nights Tonight has already marked with the double tap, so each is felt once.
+enum FoundNights {
+    private static let key="foundNights"
+    static func felt(_ night:String,defaults:UserDefaults = .standard)->Bool { (defaults.stringArray(forKey:key) ?? []).contains(night) }
+    /// Keeps the last 20, which covers every park in reach for weeks of nights.
+    static func note(_ night:String,defaults:UserDefaults = .standard) {
+        let list=(defaults.stringArray(forKey:key) ?? []).filter { $0 != night }+[night]
+        defaults.set(Array(list.suffix(20)),forKey:key)
+    }
+}

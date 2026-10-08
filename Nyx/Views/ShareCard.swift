@@ -1,4 +1,6 @@
+import CoreTransferable
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The night as artwork to share: the gauge over the park's real sky, the park and the date, one
 /// line on why the night is good (Moon-free hours or the Milky Way's core), and what the clouds rest
@@ -22,7 +24,7 @@ struct ShareCard:View {
                 if shape == .story { Spacer(minLength:0) }
                 Text("NYX").font(.caption).tracking(7).foregroundStyle(palette.muted)
                 // ImageRenderer proposes no size; an unsized gauge collapses and truncates the score.
-                CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast).frame(width:300,height:300)
+                CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,export:true).frame(width:300,height:300)
                 Text(night.park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
                 HStack(spacing:10) {
                     MoonView(geometry:AstronomyEngine().moon(for:night).geometry).frame(width:26,height:26)
@@ -65,49 +67,56 @@ struct ShareCard:View {
         return free>=25 ? String(localized:"Moon-free for \(free)% of true darkness") : nil
     }
 }
-/// Renders the night's card and story once the night settles, for sharing.
-@MainActor @Observable final class ShareRender {
-    var images:[ShareCard.Format:Image]=[:]
-    var key=""
-    func render(night:Night,why:String?,palette:NyxPalette,scale:CGFloat,key:String) {
-        var fresh:[ShareCard.Format:Image]=[:]
-        for shape in ShareCard.Format.allCases {
-            let card=ShareCard(night:night,shape:shape,why:why).environment(\.nyx,palette).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark)
-            let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision))); renderer.scale=max(2,scale)
-            if let image=renderer.uiImage { fresh[shape]=Image(uiImage:image) }
-        }
-        images=fresh; self.key=key
+/// The card or story as something to share, drawn only when the share sheet asks for it (its
+/// preview, then the image itself), never while nights are being scrubbed. The last few drawings
+/// are kept, so the preview and the image are drawn once.
+nonisolated struct ShareArtwork: Transferable {
+    let night: Night
+    let shape: ShareCard.Format
+    let why: String?
+    let palette: NyxPalette
+    let scale: CGFloat
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType:.png) { artwork in try await artwork.png() }
+    }
+    private enum Failure: Error { case notDrawn }
+    @MainActor private static var drawn: [String:Data]=[:]
+    @MainActor private var key: String { [night.park.id,night.id.description,String(night.score.value),String(describing:shape),String(palette.nightVision),why ?? "",String(Double(scale))].joined(separator:"|") }
+    @MainActor func png() throws -> Data {
+        if let data=Self.drawn[key] { return data }
+        guard let data=image()?.pngData() else { throw Failure.notDrawn }
+        if Self.drawn.count>=4 { Self.drawn.removeAll() }
+        Self.drawn[key]=data
+        return data
+    }
+    /// The card exactly as exported: still, dark, and red in night vision.
+    @MainActor func image() -> UIImage? {
+        let card=ShareCard(night:night,shape:shape,why:why).environment(\.nyx,palette).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark)
+        let renderer=ImageRenderer(content:card.modifier(NightVisionFilter(enabled:palette.nightVision))); renderer.scale=max(2,scale)
+        return renderer.uiImage
     }
 }
 /// The share button in the park's toolbar: a menu of the card and the 9:16 story, each sent with
-/// its words. Disabled while a scrubbed night settles, so the previous night is never offered.
+/// its words. The image is drawn for the night shown when a share is chosen, so it always matches.
 struct ShareNightMenu:View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @Environment(\.displayScale) private var displayScale
     let night:Night
-    @State private var render=ShareRender()
-    private var key:String { night.id.description+String(night.score.value)+String(palette.nightVision) }
     private var why:String? { ShareCard.why(night:night,core:model.whatsUp(night).core) }
     var body:some View {
-        let card=ShareCard(night:night,why:why)
+        let why=why, card=ShareCard(night:night,why:why)
         Menu {
             ForEach(ShareCard.Format.allCases) { shape in
-                if let image=render.images[shape], render.key == key {
-                    ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:image)) {
-                        Label(shape == .card ? String(localized:"Share as a card") : String(localized:"Share as a story (9:16)"),systemImage:shape == .card ? "rectangle.portrait" : "rectangle.portrait.fill")
-                    }
+                let artwork=ShareArtwork(night:night,shape:shape,why:why,palette:palette,scale:displayScale)
+                ShareLink(item:artwork,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:artwork)) {
+                    Label(shape == .card ? String(localized:"Share as a card") : String(localized:"Share as a story (9:16)"),systemImage:shape == .card ? "rectangle.portrait" : "rectangle.portrait.fill")
                 }
             }
         } label:{ Image(systemName:"square.and.arrow.up") }
-        .disabled(render.key != key)
         .accessibilityLabel("Share this night")
         .accessibilityValue(card.summary)
         .accessibilityInputLabels([Text("Share"),Text("Share this night")])
-        .task(id:key) {
-            // Settle first: scrubbing the river changes the night many times a second.
-            try? await Task.sleep(for:.milliseconds(450)); if !Task.isCancelled { render.render(night:night,why:why,palette:palette,scale:displayScale,key:key) }
-        }
     }
 }
 /// The bordered share button, for sheets (the score breakdown) where there is no toolbar menu.
@@ -116,18 +125,12 @@ struct ShareCardButton:View {
     @Environment(PlanModel.self) private var model
     let night:Night
     @Environment(\.displayScale) private var displayScale
-    @State private var render=ShareRender()
-    private var key:String { night.id.description+String(night.score.value)+String(palette.nightVision) }
     private var why:String? { ShareCard.why(night:night,core:model.whatsUp(night).core) }
     var body:some View {
-        let card=ShareCard(night:night,why:why)
-        Group {
-            if let image=render.images[.card] {
-                ShareLink(item:image,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:image)) { Label("Share this night",systemImage:"square.and.arrow.up") }.disabled(render.key != key)
-            } else { Button("Prepare share card") { render.render(night:night,why:why,palette:palette,scale:displayScale,key:key) } }
-        }.buttonStyle(.bordered).accessibilityValue(card.summary).task(id:key) {
-            try? await Task.sleep(for:.milliseconds(450)); if !Task.isCancelled { render.render(night:night,why:why,palette:palette,scale:displayScale,key:key) }
-        }
+        let why=why, card=ShareCard(night:night,why:why)
+        let artwork=ShareArtwork(night:night,shape:.card,why:why,palette:palette,scale:displayScale)
+        ShareLink(item:artwork,message:Text(card.message),preview:SharePreview(String(localized:"\(night.score.value) out of 100 at \(night.park.shortName)"),image:artwork)) { Label("Share this night",systemImage:"square.and.arrow.up") }
+            .buttonStyle(.bordered).accessibilityValue(card.summary)
     }
 }
 #Preview("Share card") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p),why:"Moon-free through all of true darkness").environment(\.nyxReduceMotion,true) } }
@@ -139,17 +142,17 @@ struct ShareCardButton:View {
 struct ShareCardReview:View {
     @Environment(\.displayScale) private var displayScale
     let night:Night
-    @State private var render=ShareRender()
+    @State private var image:UIImage?
     var body:some View {
         Group {
-            if let image=render.images[.card] {
-                image.resizable().scaledToFit().frame(maxWidth:ShareCard.Format.card.size.width)
+            if let image {
+                Image(uiImage:image).resizable().scaledToFit().frame(maxWidth:ShareCard.Format.card.size.width)
                     .clipShape(RoundedRectangle(cornerRadius:24)).padding(16)
                     .accessibilityLabel(ShareCard(night:night).summary).accessibilityIgnoresInvertColors()
             } else { Color.black }
         }
         .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color.black)
-        .task { render.render(night:night,why:nil,palette:NyxPalette(nightVision:false,highContrast:false),scale:displayScale,key:"review") }
+        .task { image=ShareArtwork(night:night,shape:.card,why:nil,palette:NyxPalette(nightVision:false,highContrast:false),scale:displayScale).image() }
     }
 }
 #endif

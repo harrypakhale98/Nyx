@@ -18,6 +18,11 @@ struct FieldCompassView: View {
     @State private var stars: [CompassStar]=[]
     @State private var band=CompassBand.none
     @State private var explainsBeacon=false
+    /// The sky view's measured size, so the spoken "In view" list matches what is drawn.
+    @State private var canvasSize=CGSize(width:390,height:600)
+    /// VoiceOver's value for the sky view, refreshed once a second rather than every frame.
+    @State private var spokenSky=""
+    @Environment(\.nyxAccess) private var access
     private var beacon: SkyBeacon { .shared }
     private var motion: FieldMotion { .shared }
     private var sensing: Bool { fixedPose != nil || motion.available }
@@ -52,16 +57,27 @@ struct FieldCompassView: View {
         if on && !SkyBeacon.explained { explainsBeacon=true; return }
         beacon.set(on,park:session.park,sky:session.night.sky) { [session] in session.now }
     }
+    /// The pose drawn now: held, pinned for a capture, or the phone's.
+    private var pose: SkyCompass.Pose { frozen ?? fixedPose ?? motion.pose ?? SkyCompass.Pose(azimuth:180,altitude:30) }
     private var sky: some View {
-        TimelineView(.animation(minimumInterval:1/30,paused:frozen != nil || fixedPose != nil || PowerState.shared.thermalSerious)) { _ in
-            let pose=frozen ?? fixedPose ?? motion.pose ?? SkyCompass.Pose(azimuth:180,altitude:30)
-            let targets=targets, stars=stars, band=band
+        // Half the rate in Low Power Mode or when the system asks for less: still following the
+        // phone, at less cost. Resting while the device is hot.
+        TimelineView(.animation(minimumInterval:PowerState.shared.lowPower || access.reducedResources ? 1/15 : 1/30,paused:frozen != nil || fixedPose != nil || PowerState.shared.thermalSerious)) { _ in
+            let pose=pose, targets=targets, stars=stars, band=band
             Canvas { context,size in draw(&context,size:size,pose:pose,targets:targets,stars:stars,band:band) }
-                .accessibilityElement(children:.ignore)
-                .accessibilityLabel("Sky view")
-                .accessibilityValue(summary(pose))
-                .accessibilityHint("Hold your iPhone up toward the sky. A list is also available.")
-                .accessibilityAction(named:"Show as a list") { listed=true }
+        }
+        .onGeometryChange(for:CGSize.self) { $0.size } action:{ canvasSize=$0 }
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel("Sky view")
+        .accessibilityValue(spokenSky)
+        .accessibilityHint("Hold your iPhone up toward the sky. A list is also available.")
+        .accessibilityAction(named:"Show as a list") { listed=true }
+        .task(id:SpokenSkyKey(size:canvasSize,frozen:frozen != nil,targets:targets.count)) {
+            while !Task.isCancelled {
+                let line=summary(pose,size:canvasSize)
+                if line != spokenSky { spokenSky=line }
+                try? await Task.sleep(for:.seconds(1))
+            }
         }
         // Labels drawn in the sky stop growing at the first accessibility size, where they would
         // cover each other; the list carries every size.
@@ -134,12 +150,16 @@ struct FieldCompassView: View {
             Text(beacon.headTracking ? String(localized:"Following your head.") : String(localized:"Following your iPhone. Headphones carry the direction; the speaker only the quickening pulse.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
     }
-    /// "Facing south, 30° up. In view: Jupiter, Milky Way core."
-    private func summary(_ pose:SkyCompass.Pose)->String {
+    /// "Facing south, 30° up. In view: Jupiter, Milky Way core." Placed on the drawn sky's own size
+    /// and field of view, so it names what the screen shows.
+    private func summary(_ pose:SkyCompass.Pose,size:CGSize)->String {
         let facing=String(localized:"Facing \(Compass.fine(pose.azimuth)), \(Int(pose.altitude.rounded()))° up.")
-        let inView=targets.filter { $0.altitude > -0.5 && SkyCompass.place(altitude:$0.altitude,azimuth:$0.azimuth,pose:pose,width:390,height:600).point != nil }.map(\.name)
+        let w=Double(size.width), h=Double(size.height), fov=SkyCompass.horizontalFieldOfView(width:w,height:h)
+        let inView=targets.filter { $0.altitude > -0.5 && SkyCompass.place(altitude:$0.altitude,azimuth:$0.azimuth,pose:pose,width:w,height:h,fieldOfView:fov).point != nil }.map(\.name)
         return inView.isEmpty ? facing : facing+" "+String(localized:"In view: \(inView.formatted(.list(type:.and))).")
     }
+    /// What restarts the spoken value's refresh at once: a new size, a hold, new targets.
+    private struct SpokenSkyKey: Equatable { let size:CGSize; let frozen:Bool; let targets:Int }
     // MARK: Drawing
 
     private func draw(_ context:inout GraphicsContext,size:CGSize,pose:SkyCompass.Pose,targets:[FieldSkyTarget],stars:[CompassStar],band:CompassBand) {

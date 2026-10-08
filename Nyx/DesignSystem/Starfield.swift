@@ -21,7 +21,7 @@ struct Starfield: View {
     var body: some View {
         // When the system asks for less, half the stars, holding still.
         let still=reduceMotion || access.reducedResources
-        TimelineView(.animation(minimumInterval:1/30,paused:still || ProcessInfo.processInfo.isLowPowerModeEnabled)) { timeline in
+        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
             Canvas { context,size in
                 let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
                 let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
