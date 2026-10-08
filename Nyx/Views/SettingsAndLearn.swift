@@ -4,6 +4,7 @@ struct SettingsView:View {
     @Environment(\.nyx) private var palette
     @Environment(PlanModel.self) private var model
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
+    @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @AppStorage("notificationsEnabled") private var notifications=false
     @AppStorage("showerReminders") private var showerReminders=true
     @State private var explainNotifications=false
@@ -15,6 +16,12 @@ struct SettingsView:View {
             Section("In the dark") {
                 Toggle("Night vision",isOn:$nightVision).tint(palette.controlTint)
                 Text("A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
+                Toggle(isOn:$brighterRed) {
+                    VStack(alignment:.leading,spacing:4) {
+                        Text("Brighter red")
+                        Text("A slightly lighter red that keeps text clear for red-blind and green-blind eyes. Increase Contrast turns it on too.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    }
+                }.tint(palette.controlTint)
             }.listRowBackground(palette.panel)
             Section("Reminders") {
                 Toggle("Promising-night reminders",isOn:Binding(get:{notifications},set:{ value in if value { explainNotifications=true } else { notifications=false;Task { await NotificationScheduler().remove() } } })).tint(palette.controlTint)
@@ -111,6 +118,8 @@ struct SoundAndTouchView:View {
                         ForEach([(String(localized:"Feel a new Moon"),0.0),(String(localized:"Feel a half Moon"),0.5),(String(localized:"Feel a full Moon"),1.0)],id:\.0) { title,lit in
                             Button(title) { MoonHaptics.shared.play(.moon(illumination:lit,waxing:true)) }.foregroundStyle(palette.accent)
                         }
+                        // The whole night in the hand, at the starting park.
+                        if let park=model.home { FeelTonightView(night:model.night(park)) }
                     }
                 } else {
                     Text("This device has no Taptic Engine, so Nyx keeps its simple ticks. The Moon's phase is always written beside it.").foregroundStyle(palette.muted)

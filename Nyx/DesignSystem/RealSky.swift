@@ -43,6 +43,8 @@ struct RealSky: View {
         .onAppear { MotionTilt.shared.start(reduceMotion:still) }
         .onDisappear { MotionTilt.shared.stop() }
         .allowsHitTesting(false).accessibilityHidden(true)
+        // A night sky, not an interface: Smart Invert leaves it dark.
+        .accessibilityIgnoresInvertColors()
     }
 }
 
