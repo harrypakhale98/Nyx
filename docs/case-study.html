@@ -22,13 +22,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
 <!-- Case study. About a three-minute read. No scripts, no trackers, no external requests.
-     Figures: test count from the unit suite on main (2026-10-07, 268 tests); accuracy from Research/accuracy.md and
+     Figures: test count from PHASE_STATUS.md (build 8, 2026-10-07: 330 tests in 31 suites on iOS 27); accuracy from Research/accuracy.md and
      the polar and tropical USNO fixtures; contrast from Research/contrast.json. -->
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
 <div class="sky" aria-hidden="true"><div class="band"></div></div>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="nv-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.0574 0.1931 0.0195 0 0 0.0483 0.1624 0.0164 0 0 0 0 0 1 0"/></filter></svg>
 
 <header class="site-header">
   <div class="inner">
@@ -54,16 +55,16 @@
   <p>Joshua Tree sits two to three hours from Los Angeles. On a clear night with no Moon, its darkest corners are dark enough to show the Milky Way's structure. On the same date a month later, a gibbous Moon can wash most of that out, and the drive is the same. A weather app tells you about clouds. An almanac tells you about the Moon. A light-pollution map tells you about Palm Springs on the horizon. Nobody joined them for a park and a night, and nobody put a closed road beside the answer.</p>
 
   <h2>One score, and the weakest link</h2>
-  <p>Each night gets a Darkness Score from 0 to 100. Four parts add up: the Moon up to 40 points (by its phase and how high it stands through true darkness), clouds up to 25, sky glow up to 20 (from the park's estimated Bortle class) and the hours of true darkness up to 15. Then the weakest part may cap the sum. An early version only added, and an overcast desert night with no Moon still read as good. People do not experience a night as a sum; one problem spoils it.</p>
+  <p>Each night gets a Darkness Score from 0 to 100. Four parts add up: moonlight up to 40 points (by the Moon's phase and how high it stands through true darkness), clouds up to 25, sky glow up to 20 (from the park's estimated Bortle class) and the hours of true darkness up to 15. Then the weakest part may cap the sum. An early version only added, and an overcast desert night with no Moon still read as good. People do not experience a night as a sum; one problem spoils it.</p>
   <div class="panel">
     <p><strong>A worked example, using the published rules.</strong> A clear, moonless November night at Joshua Tree (Bortle 3, about eleven hours of true darkness):</p>
     <div class="table-wrap"><table>
       <thead><tr><th scope="col">Part</th><th scope="col">Clear</th><th scope="col">40% cloud</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Moon</th><td>40 of 40</td><td>40 of 40</td></tr>
+        <tr><th scope="row">Moonlight</th><td>40 of 40</td><td>40 of 40</td></tr>
         <tr><th scope="row">Clouds</th><td>25 of 25</td><td>15 of 25</td></tr>
         <tr><th scope="row">Sky glow</th><td>15 of 20</td><td>15 of 20</td></tr>
-        <tr><th scope="row">Dark hours</th><td>15 of 15</td><td>15 of 15</td></tr>
+        <tr><th scope="row">True darkness</th><td>15 of 15</td><td>15 of 15</td></tr>
         <tr><th scope="row">Sum</th><td>95</td><td>85</td></tr>
         <tr><th scope="row">Cap that applies</th><td>Sky glow: Bortle 3 holds any night to 89</td><td>Clouds: 100 − 0.9 × 40 = 64</td></tr>
         <tr><th scope="row">Score</th><td><strong>89, Excellent</strong></td><td><strong>64, Good</strong></td></tr>
@@ -101,7 +102,7 @@
     <li><strong>Read it.</strong> Every custom control speaks a summary of its data. Layouts reflow at the largest text sizes instead of shrinking; the river becomes a native stepper.</li>
     <li><strong>Get there.</strong> 60 of the 85 viewing spots carry step-free or partly step-free notes, each quoting the park's own accessibility page.</li>
   </ul>
-  <p class="note">Apple's automated accessibility audit passes on every screen, in both palettes, in the simulator. Testing with people who use VoiceOver and Voice Control, on real devices, is the next step.</p>
+  <p class="note">Apple's automated accessibility audit passes on every screen, in both palettes, in the iOS 27 simulator, and on the key screens in iOS 26.5. Testing with people who use VoiceOver and Voice Control, on real devices, is the next step.</p>
 
   <h2>What was left out, and why</h2>
   <ul>
@@ -116,7 +117,7 @@
   <ul class="figures">
     <li><span class="num">63</span>national parks, 85 named viewing spots</li>
     <li><span class="num">0</span>data collected; three public services, each with its own switch</li>
-    <li><span class="num" id="tests">268</span>unit tests in 25 suites</li>
+    <li><span class="num" id="tests">330</span>unit tests in 31 suites</li>
     <li><span class="num">3.7 min</span>largest Moon rise or set difference from the U.S. Naval Observatory at mid-latitude parks; under a minute for the Sun</li>
   </ul>
   <p class="note">Moon times were also checked at parks in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, where they agree to within a minute. Terrain and the atmosphere can shift what you actually see by a few minutes more.</p>

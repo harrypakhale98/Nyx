@@ -26,6 +26,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
 <div class="sky" aria-hidden="true"><div class="band"></div></div>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="nv-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.0574 0.1931 0.0195 0 0 0.0483 0.1624 0.0164 0 0 0 0 0 1 0"/></filter></svg>
 
 <header class="site-header">
   <div class="inner">
@@ -44,6 +45,7 @@
     <p class="eyebrow amber">Support</p>
     <h1>Help under a dark sky.</h1>
     <p class="lead">Scores are planning estimates. Always confirm park access before you travel; a high score never means a road is open.</p>
+    <p class="note">These answers describe Nyx 1.2, the next update; the App Store has 1.1 today.</p>
     <ul class="toc" aria-label="On this page"><li><a href="#questions">Common questions</a></li><li><a href="#watch">Apple Watch</a></li><li><a href="#vision">Apple Vision Pro</a></li><li><a href="#data">About the data</a></li></ul>
   </header>
   <div class="prose doc">
@@ -54,6 +56,10 @@
 
   <h2 id="questions">Common questions</h2>
   <div class="faq">
+    <details>
+      <summary>Where did Calendar and Learn go?</summary>
+      <p>Nyx 1.2 has four tabs: Tonight, Parks, Plan and Journal. The month for one park and the trip planner are in Plan. The essays are in Settings, under About the sky.</p>
+    </details>
     <details>
       <summary>Hollow nights, "No cloud forecast yet" and "Early look"</summary>
       <p>A full cloud forecast counts for about three days ahead. Further out, a half-filled night is an early look: the forecast is eased toward the park's usual clouds for that month. A hollow night has no forecast yet and uses the usual clouds alone, so its score can change when a forecast arrives. Pull down to refresh when you have a connection, and check that Cloud forecasts is on under Settings → Your privacy.</p>
@@ -68,11 +74,23 @@
     </details>
     <details>
       <summary>No nearby parks</summary>
-      <p>Widen the radius or choose a different starting park. The radius is a straight line, not driving distance.</p>
+      <p>Widen the radius or choose a different starting point. The radius is a straight line, not driving distance.</p>
     </details>
     <details>
-      <summary>Location is off</summary>
-      <p>Tap the starting-park name and choose a park. Location is optional.</p>
+      <summary>Where do you start from?</summary>
+      <p>Tonight asks where you start from. Choose Near me to use your location while you use Nyx, or choose a starting point: a US city or a park. Location is optional, and your choice stays on your device. In Nyx 1.1, tap the starting park's name and choose a park.</p>
+    </details>
+    <details>
+      <summary>Where to stay</summary>
+      <p>On a park's page, The place lists the park's campgrounds from the National Park Service. Reservation links open only Recreation.gov or nps.gov. The list is asked for all 63 parks at once, at most once a week, and not in Low Data Mode.</p>
+    </details>
+    <details>
+      <summary>From your starting point tonight</summary>
+      <p>At the foot of Tonight, Nyx works out the Moon, true darkness, planets, meteor showers and eclipses for your starting point, on your device, with no request. It has no light map for homes, so it does not score the sky there.</p>
+    </details>
+    <details>
+      <summary>Follow this night</summary>
+      <p>On a park's night, Follow this night puts the night on your Lock Screen as a Live Activity. It starts on its own about 30 minutes before sunset, and no server is involved.</p>
     </details>
     <details>
       <summary>No reminders</summary>
@@ -84,11 +102,19 @@
     </details>
     <details>
       <summary>Night vision</summary>
-      <p>Turn it on in Settings or from Control Center. Lower your screen brightness too; Nyx does not change it for you.</p>
+      <p>Turn it on with the button at the top left of every tab, in Settings, or from Control Center. Lower your screen brightness too; outside field mode, Nyx does not change it for you.</p>
     </details>
     <details>
       <summary>Your journal</summary>
       <p>Entries and photos stay on your iPhone or iPad. Back up your device with Apple's settings; Nyx has no cloud sync or account recovery. To move a journal to another device, use Export in the Journal tab and open the file on the other device.</p>
+    </details>
+    <details>
+      <summary>Translate</summary>
+      <p>When Nyx runs in a language other than English, a Translate button under park alerts and ranger programs opens Apple's translation, which runs on your device.</p>
+    </details>
+    <details>
+      <summary>Assistive Access</summary>
+      <p>When your iPhone or iPad uses Assistive Access, Nyx shows one answer in large type: tonight's darkest park within reach, and your saved parks, each with one word for the night, the Moon, when true darkness begins and any closure.</p>
     </details>
     <details>
       <summary>An age range request</summary>
@@ -128,7 +154,7 @@
     </details>
     <details>
       <summary>Which way is south?</summary>
-      <p>The sky is computed for the park and night you choose, with south ahead of you, where the Milky Way, Moon and planets cross. It is not turned to your room's real directions, and clouds are not shown. A plaque at your feet says so.</p>
+      <p>The sky is computed for the park and night you choose, with south ahead of you, where the Milky Way, Moon and planets cross. It is not turned to your room's real directions; a plaque at your feet says so. When Nyx has a forecast for that night, clouds follow it, and their shapes are illustrative.</p>
     </details>
     <details>
       <summary>Names in the sky</summary>

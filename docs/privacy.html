@@ -26,6 +26,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <input type="checkbox" id="nv" role="switch" aria-label="Night vision: show this page in red">
 <div class="sky" aria-hidden="true"><div class="band"></div></div>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="nv-red" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.0574 0.1931 0.0195 0 0 0.0483 0.1624 0.0164 0 0 0 0 0 1 0"/></filter></svg>
 
 <header class="site-header">
   <div class="inner">
@@ -46,7 +47,7 @@
     <p class="lead">Nyx has no account, no ads, no tracking. Your journal never leaves your device.</p>
   </header>
   <div class="prose doc">
-  <p class="note">Updated October 7, 2026. This policy covers Nyx for iPhone, iPad, Apple Watch and Apple Vision Pro, and this website.</p>
+  <p class="note">Updated October 8, 2026, for Nyx 1.2. This policy covers Nyx for iPhone, iPad, Apple Watch and Apple Vision Pro, and this website.</p>
 
   <h2>What the developer receives</h2>
   <p>Nothing. Nyx has no server, account system, analytics, crash-reporting SDK or advertising. The developer never receives your journal, photos, saved parks, location or usage. iOS gives Nyx a daily on-device performance summary (MetricKit); Nyx keeps only the last average screen brightness, to show you, and never sends it anywhere.</p>
@@ -64,11 +65,16 @@
     <li><strong>Apple Vision Pro.</strong> The Vision Pro app asks for no permissions: no location, no photos, no notifications. It computes the sky for the park and night you choose on the device itself. Its one network request is the cloud forecast from Open-Meteo (api.open-meteo.com) for the public coordinates of the 63 parks, never anything about you; a switch in Your privacy turns it off, and the forecast is kept on the headset. Apart from that switch's setting it stores nothing. It does not use your surroundings or your room's real direction; the sky it shows is computed, not seen.</li>
     <li><strong>Age range.</strong> Some US states require apps to check the age range of new accounts. Only where iOS reports that this applies to your account, Nyx asks iOS for an age range once each time it starts. iOS shows its own sheet, and may already know the answer. Nyx stores nothing from the answer, sends it nowhere and changes nothing because of it; Nyx has no age-restricted content.</li>
     <li><strong>Links and Maps.</strong> Some links open in Safari or Maps when you tap them: park pages on nps.gov, campground reservations on Recreation.gov, Globe at Night, Open-Meteo and the Creative Commons licence, or a viewing spot's public coordinates in Maps. Nyx itself makes no request for them; what those apps and sites receive is governed by Apple's and their own policies.</li>
-    <li><strong>On-device AI.</strong> On iPhones and iPads that support Apple's on-device model, optional explanations use only the records shown on screen. Nothing is sent to a remote AI service.</li>
+    <li><strong>On-device AI.</strong> On iPhones and iPads that support Apple's on-device model, optional explanations use only the records shown on screen. If you ask Nyx to suggest a description for a journal photo (iOS 27 with Apple Intelligence), the photo goes to that on-device model only. Nothing is sent to a remote AI service.</li>
+    <li><strong>Followed nights (1.2).</strong> Follow this night schedules the night's Live Activity on your device, with no server and no push token. It shows the park, the night's times, its score and any closure.</li>
+    <li><strong>Handoff (1.2).</strong> A park's page can be picked up on another of your devices signed in to the same Apple Account. Only the park and the night's date are handed over, by Apple's system; Nyx has no server.</li>
+    <li><strong>Journal by voice (1.2).</strong> Entries you add with Siri go into the same journal on your device, with the park's own public name and coordinates.</li>
+    <li><strong>Where to look by sound (1.2).</strong> If you turn on Sound in field mode and wear headphones that report head movement, Nyx reads that movement to place the tone. It is used on your device while the view is open, and never recorded or sent.</li>
+    <li><strong>Translation (1.2).</strong> When Nyx runs in a language other than English, a Translate button under park alerts and ranger programs opens Apple's translation, which runs on your device. iOS may download a language pack the first time; Nyx sends nothing and stores nothing.</li>
   </ul>
 
   <h2>The three network services</h2>
-  <p>Nyx on iPhone and iPad contacts exactly three services, and only to update public information. Nyx on Apple Watch and Apple Vision Pro contacts none.</p>
+  <p>Nyx on iPhone and iPad contacts exactly three services, and only to update public information. Nyx on Apple Watch contacts none. Nyx on Apple Vision Pro contacts only Open-Meteo, for cloud forecasts, as described above.</p>
   <ul>
     <li><strong>Open-Meteo</strong> (api.open-meteo.com) for cloud forecasts, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. Requests contain the public coordinates of all 63 national parks (each park's main viewing spot), never yours.</li>
     <li><strong>Open-Meteo air quality</strong> (air-quality-api.open-meteo.com) for the smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Requests contain the same public park coordinates, never yours.</li>

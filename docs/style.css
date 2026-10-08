@@ -24,7 +24,7 @@ html:has(#nv:checked) {
   --panel: rgba(31, 8, 7, .8); --glass: rgba(14, 3, 3, .7);
   --glow: rgba(255, 69, 58, .16); --band: rgba(255, 69, 58, .05);
   --violet: #1F0807; --indigo: #120403;
-  --shot-filter: grayscale(1) sepia(1) hue-rotate(-40deg) saturate(7) brightness(.78) contrast(1.05);
+  --shot-filter: url(#nv-red) brightness(.9);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -60,6 +60,7 @@ html:has(#nv:checked) .sky::after { background-image: url("images/stars-bright-r
 .skip { position: absolute; left: -999px; top: 10px; z-index: 50; background: var(--indigo); color: var(--ink); padding: 10px 14px; border-radius: 10px; }
 .skip:focus { left: 12px; }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 #nv { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 
 /* Header */
@@ -111,7 +112,7 @@ section { position: relative; }
 .hero-device::before { content: ""; position: absolute; inset: 12% -30% 0; background: radial-gradient(closest-side, var(--glow), transparent); z-index: -1; }
 
 /* Device frames (CSS only) */
-.device { position: relative; aspect-ratio: 1320 / 2868; padding: 3.2%; border-radius: 15% / 7%;
+.device { position: relative; aspect-ratio: 1206 / 2622; padding: 3.2%; border-radius: 15% / 7%;
   background: linear-gradient(150deg, #2b2d36 0%, #0d0e14 40%, #1d1f27 100%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 50px 90px -30px rgba(0, 0, 0, .9), 0 0 0 1px rgba(0, 0, 0, .8); }
 .device img { width: 100%; height: 100%; object-fit: cover; border-radius: 12.4% / 5.8%; filter: var(--shot-filter); background: #000; }
@@ -144,6 +145,11 @@ section { position: relative; }
 @media (prefers-reduced-motion: no-preference) {
   .dial .value { animation: draw 2.2s cubic-bezier(.2, .9, .25, 1) .3s both; }
   .dial .knob { animation: knob .6s ease .2s both; }
+  /* Where the browser can, the dial fills as it scrolls into view, like scrubbing the time river. */
+  @supports (animation-timeline: view()) {
+    .dial .value { animation-duration: auto; animation-delay: 0s; animation-timing-function: cubic-bezier(.3, .7, .4, 1); animation-timeline: --dial; animation-range: entry 20% cover 45%; }
+    .dial { view-timeline-name: --dial; }
+  }
   @keyframes draw { from { stroke-dasharray: 0 100; } }
   @keyframes knob { from { opacity: 0; } }
 }
