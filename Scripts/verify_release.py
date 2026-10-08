@@ -24,8 +24,8 @@ assert 'NSPhotoLibraryUsageDescription' not in info
 assert info.get('UIBackgroundModes')==['fetch'],info.get('UIBackgroundModes')
 assert info.get('BGTaskSchedulerPermittedIdentifiers')==['com.harrypakhale.nyx.refresh'],info.get('BGTaskSchedulerPermittedIdentifiers')
 assert info.get('CADisableMinimumFrameDurationOnPhone') is True
-# The journal export type, declared and opened by Nyx (copied in, never edited in place).
-assert [t.get('UTTypeIdentifier') for t in info.get('UTExportedTypeDeclarations',[])]==['com.harrypakhale.nyx.journal']
+# The journal export type (opened by Nyx, copied in, never edited in place) and the park type for drag and drop (iPad).
+assert sorted(t.get('UTTypeIdentifier') for t in info.get('UTExportedTypeDeclarations',[]))==['com.harrypakhale.nyx.journal','com.harrypakhale.nyx.park'],info.get('UTExportedTypeDeclarations')
 assert info.get('LSSupportsOpeningDocumentsInPlace') is False
 watchApp=root/'Watch/NyxWatch.app'
 watchInfo=plistlib.loads((watchApp/'Info.plist').read_bytes())

@@ -5,12 +5,15 @@ import GeoToolbox
 import SwiftData
 import UniformTypeIdentifiers
 
-/// The journal for Siri, Shortcuts and Apple Intelligence (the iOS 18 journal schema): "Add to my
-/// Nyx journal: Milky Way overhead from the dunes" keeps the screen dark. Entries stay in Nyx's own
-/// store on this iPhone; nothing is sent anywhere. A place is the park's own coordinates and name,
-/// from the bundled library: no geocoding, no network.
-@AppEntity(schema: .journal.entry)
-struct JournalEntryEntity {
+/// The journal for Siri and Shortcuts: "Add to my Nyx journal" asks what to remember and saves
+/// it without lighting the screen, so eyes stay dark-adapted. Entries stay in Nyx's own store on
+/// this device; nothing is sent anywhere. Each entry belongs to tonight's park (field mode or a
+/// followed night, else the starting park).
+///
+/// Not the system journal schema (`.journal.entry` / `.journal.createEntry`): it requires a
+/// `PlaceDescriptor` location, and that type fails App Shortcuts' Siri phrase training in Release
+/// archives with Xcode 27, which stops the archive. Plain App Intents keep the voice path.
+struct JournalEntryEntity: AppEntity {
     struct Query: EntityStringQuery {
         func entities(for identifiers: [UUID]) async throws -> [JournalEntryEntity] {
             try await JournalAccess.entries { entry in identifiers.contains(entry.id) }
@@ -24,12 +27,12 @@ struct JournalEntryEntity {
         func suggestedEntities() async throws -> [JournalEntryEntity] { try await JournalAccess.entries(limit: 5) { _ in true } }
     }
     static let defaultQuery=Query()
+    static let typeDisplayRepresentation=TypeDisplayRepresentation(name: "Journal entry")
     let id: UUID
     var title: String?
     var message: AttributedString?
     var mediaItems: [IntentFile]
     var entryDate: Date?
-    var location: PlaceDescriptor?
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: "\(title ?? String(localized: "Journal entry"))",
                               subtitle: entryDate.map { "\($0.formatted(date: .abbreviated, time: .omitted))" })
@@ -43,23 +46,26 @@ extension JournalEntryEntity {
         message=entry.notes.isEmpty ? nil : AttributedString(entry.notes)
         mediaItems=entry.orderedPhotos.enumerated().map { IntentFile(data: $1.data, filename: "night-\($0+1).jpg", type: .jpeg) }
         entryDate=entry.date
-        location=park.map(JournalAccess.place)
     }
 }
 
 /// "Add to my Nyx journal": a new entry at the park of tonight's followed night or field mode,
 /// else the starting park, with the park's estimated Bortle class as the observed default (the
 /// editor's default too). Photos are kept as the editor keeps them: up to four, as JPEG.
-@AppIntent(schema: .journal.createEntry)
-struct AddJournalEntryIntent {
-    var message: AttributedString
+struct AddJournalEntryIntent: AppIntent {
+    static let title: LocalizedStringResource="Add to journal"
+    static let description=IntentDescription("Adds a note about tonight to your Nyx journal, at tonight's park.")
+    @Parameter(title: "Note", requestValueDialog: "What would you like to remember about tonight?")
+    var message: String
+    @Parameter(title: "Title")
     var title: String?
+    @Parameter(title: "Date")
     var entryDate: Date?
-    var location: PlaceDescriptor?
-    var mediaItems: [IntentFile]
+    @Parameter(title: "Photos")
+    var mediaItems: [IntentFile]?
     func perform() async throws -> some ReturnsValue<JournalEntryEntity> {
-        let entry=try await JournalAccess.add(title: title, message: String(message.characters), date: entryDate ?? .now,
-                                              location: location, photos: mediaItems.prefix(4).map(\.data))
+        let entry=try await JournalAccess.add(title: title, message: message, date: entryDate ?? .now,
+                                              location: nil, photos: (mediaItems ?? []).prefix(4).map(\.data))
         return .result(value: entry)
     }
 }

@@ -247,6 +247,7 @@ struct ParkDataUnavailable: View {
     return NavigationStack { NightDetail() }.environment(model).environment(\.visionPalette, VisionPalette(nightVision: true, solid: true))
 }
 
+#if DEBUG
 #Preview("Night detail, forecast 60% cloud") {
     let model = VisionModel(now: .now)
     model.forecasts = VisionModel.fixture(parks: model.parks, cover: 60, issued: .now)
@@ -263,3 +264,4 @@ struct ParkDataUnavailable: View {
 #Preview("Park data unavailable") {
     NavigationStack { NightDetail() }.environment(VisionModel(now: .now, parks: []))
 }
+#endif
