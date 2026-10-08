@@ -75,6 +75,11 @@ final class AccessibilityAuditTests:XCTestCase {
         // Plan's park menu steps from largeTitle down to title2 at accessibility sizes, by design, so long names wrap
         // in two lines rather than six; title2 still grows to about 42 pt at AX5 (checked in a system AX5 capture).
         ("plan","Joshua Tree"),
+        // The same menu under the screen's older route name (`-nyx-screen calendar`).
+        ("calendar","Joshua Tree"),
+        // My free nights' hero score stops at 150 pt (about three times AX5 body text) so "100" still fits the
+        // width; "#" matches a label of digits only. Checked in a system AX5 capture (2026-10-08).
+        ("trip","#"),
         // An unlabelled element of the system search bar (no frame; reported at AX5 only).
         ("parks",""),
     ]
@@ -98,7 +103,17 @@ final class AccessibilityAuditTests:XCTestCase {
             let label=issue.element?.label ?? ""
             guard issue.compactDescription.contains("partially") else { return false }
             if pass != "ax5" { return true }
-            return partialDynamicType.contains { $0.screen==screen && ($0.label.isEmpty ? label.isEmpty : label.hasPrefix($0.label)) }
+            // A system toolbar button in the navigation bar (Done, Cancel): the bar caps its own type, and
+            // its buttons are reachable with the Large Content Viewer.
+            if issue.element?.elementType == .button, !navigationBar.isNull, frame.intersects(navigationBar) { return true }
+            return partialDynamicType.contains { entry in
+                guard entry.screen==screen else { return false }
+                switch entry.label {
+                case "": return label.isEmpty
+                case "#": return !label.isEmpty && label.allSatisfy(\.isNumber)
+                default: return label.hasPrefix(entry.label)
+                }
+            }
         case .contrast:
             // Text measured against the translucent tab bar, or glass with no element, not against its own background.
             // "Nearly passed" is not a failure; it is measured where a star sits beside small text.
@@ -119,7 +134,11 @@ final class AccessibilityAuditTests:XCTestCase {
             // iPad Learn grid (2026-10-06): the right-hand cards' "2-minute read" captions, starlight at 86% on the indigo
             // panel (about 12:1); the audit samples the glass over the Milky Way behind them. Checked in a zoomed capture.
             let learnCaption=screen=="learn" && (issue.element?.label ?? "").hasSuffix("-minute read")
-            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption
+            // Plan's score under each night (2026-10-08): "77" at 11 pt, starlight at 72% (#B1AEA6) on black is 9.5:1 and
+            // night vision's red 5.7:1, measured in the audit's own captures; the audit fails the doubled thin diagonals
+            // of "77" only (semibold fails the same way). Checked by eye, zoomed, in both palettes on iOS 27.
+            let nightScore=(screen=="calendar" || screen=="plan") && numeral && frame.height<20
+            return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption || nightScore
         case .textClipped:
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).

@@ -10,6 +10,8 @@ struct FieldCompassView: View {
     var fixedPose: SkyCompass.Pose?=nil
     /// At accessibility sizes the eye's clock ends the list (the sky view leaves it to the night page).
     var eyeClock: Binding<Bool>?=nil
+    /// At accessibility sizes, what the score's clouds rest on opens the list (the header leaves it to the page).
+    var note: String?=nil
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var frozen: SkyCompass.Pose?
@@ -30,10 +32,13 @@ struct FieldCompassView: View {
     /// The list first under VoiceOver, without attitude sensing, and at accessibility sizes, where
     /// the drawn sky would be a sliver between large controls; the sky stays one tap away.
     private var showsList: Bool { listed ?? (voiceOver || !sensing || typeSize.isAccessibilitySize) }
+    private var controlsInList: Bool { showsList && typeSize.isAccessibilitySize }
     var body: some View {
         VStack(spacing:12) {
             if showsList { list } else { sky }
-            controls.padding(.horizontal,20).readableColumn(WideLayout.proseWidth)
+            // At accessibility sizes the list's controls scroll with it: pinned under it, they left the
+            // list a sliver between the header and the page switch.
+            if !controlsInList { controls.padding(.horizontal,20).readableColumn(WideLayout.proseWidth) }
         }
         .task(id:session.park.id) {
             // Stars move a quarter of a degree a minute: positions are refreshed twice a minute.
@@ -87,6 +92,8 @@ struct FieldCompassView: View {
     private var list: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:16) {
+                if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true) }
+                if controlsInList { controls.padding(.bottom,8) }
                 let sorted=targets.sorted { ($0.altitude > -0.5 ? 0 : 1,-$0.altitude)<($1.altitude > -0.5 ? 0 : 1,-$1.altitude) }
                 ForEach(sorted) { target in
                     VStack(alignment:.leading,spacing:4) {
