@@ -58,11 +58,11 @@ What is made by hand: a Moon drawn by a Metal shader from NASA's lunar map, lit 
 
 **Supplemental materials (5 URLs):**
 
-1. `https://harrypakhale98.github.io/Nyx/` (landing page; says "Coming to the App Store" until launch)
-2. `https://harrypakhale98.github.io/Nyx/press/` (press kit)
-3. `https://harrypakhale98.github.io/Nyx/case-study.html` (case study: designing for night-adapted eyes)
+1. `https://get-nyx.com/` (landing page; says "Coming to the App Store" until launch)
+2. `https://get-nyx.com/press/` (press kit)
+3. `https://get-nyx.com/case-study` (case study: designing for night-adapted eyes)
 4. TestFlight public link: `[add after external testing is enabled]` (editors who cannot see the store page yet can try the build)
-5. `https://harrypakhale98.github.io/Nyx/privacy.html` (privacy policy; Data Not Collected reasoning)
+5. `https://get-nyx.com/privacy` (privacy policy; Data Not Collected reasoning)
 
 **Helpful details:**
 

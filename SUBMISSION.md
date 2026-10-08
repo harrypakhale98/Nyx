@@ -13,7 +13,7 @@ Archive both builds from the integrated `main` after the integrator bumps `CURRE
 - **Categories:** Travel (primary), Weather (secondary). **Price:** Free; no subscriptions, ads or in-app purchases. Keep it that way: Open-Meteo's free tier is for non-commercial apps without subscriptions or advertising.
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build, companion), Apple Vision Pro (own build, same bundle ID `com.harrypakhale.nyx`, universal purchase). iOS/iPadOS 26.0+, watchOS 26.0+, visionOS 26.0+. Vision Pro may be submitted a week after iOS if it threatens the date.
 - **Languages:** English (U.S.). Spanish (Mexico) store metadata only after native review (`Store/1.1/metadata-es.md`); the in-app Spanish is the owner's AM-12 decision.
-- **Copyright:** `2026 Hardik Pakhale`. **URLs:** privacy https://harrypakhale98.github.io/Nyx/privacy.html · support https://harrypakhale98.github.io/Nyx/support.html · marketing https://harrypakhale98.github.io/Nyx/ (GitHub Pages from `docs/`; not app endpoints). Contact harry.pakhale98@gmail.com.
+- **Copyright:** `2026 Hardik Pakhale`. **URLs:** privacy https://get-nyx.com/privacy · support https://get-nyx.com/support · marketing https://get-nyx.com/ (Cloudflare Worker serving `docs/` from `main`; not app endpoints). Contact harry.pakhale98@gmail.com.
 
 ## Metadata (paste from the files, not from memory)
 

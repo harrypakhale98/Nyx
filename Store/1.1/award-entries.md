@@ -31,7 +31,7 @@ Recommended spend this cycle: Webby Accessibility & Inclusion ($645 or $715) and
 
 **After launch,** add only measured facts: App Store ratings, accessibility testers' feedback, parks or dark-sky groups that link to Nyx.
 
-**Supporting links:** landing page `https://harrypakhale98.github.io/Nyx/`, case study `https://harrypakhale98.github.io/Nyx/case-study.html`, press kit `https://harrypakhale98.github.io/Nyx/press/`, App Store page (when live), the App Preview (`app-preview-script.md`).
+**Supporting links:** landing page `https://get-nyx.com/`, case study `https://get-nyx.com/case-study`, press kit `https://get-nyx.com/press/`, App Store page (when live), the App Preview (`app-preview-script.md`).
 
 ---
 

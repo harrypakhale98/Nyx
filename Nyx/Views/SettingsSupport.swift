@@ -4,8 +4,8 @@ import SwiftUI
 /// requests them itself, so they are not network hosts of Nyx's (`Scripts/verify_release.py`
 /// checks this list together with `BrowserLink`).
 enum SupportLink {
-    static let privacyPolicy=page(host:"harrypakhale98.github.io",path:"/Nyx/privacy.html")
-    static let support=page(host:"harrypakhale98.github.io",path:"/Nyx/support.html")
+    static let privacyPolicy=page(host:"get-nyx.com",path:"/privacy")
+    static let support=page(host:"get-nyx.com",path:"/support")
     /// The attribution Open-Meteo's CC BY 4.0 licence asks for links here (one constant, shared with About the data).
     static let openMeteo=BrowserLink.openMeteo
     static let email:URL?={ var components=URLComponents(); components.scheme="mailto"; components.path="harry.pakhale98@gmail.com"; components.queryItems=[URLQueryItem(name:"subject",value:"Nyx")]; return components.url }()
