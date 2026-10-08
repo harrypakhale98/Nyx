@@ -821,3 +821,8 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 ### Parks map accessibility — 2026-10-08
 - The map's park names and inset names (Alaska, Hawaiʻi, American Samoa, Virgin Islands) are real `Text` laid over the drawing by a small Layout that reuses the Canvas placement, each tag inside its park's VoiceOver element and each inset name its own static text (read before its parks), on a solid plate for contrast; at accessibility sizes the map shows dots only and the list below names them. "Darkest tonight" rows are real buttons around wrapping text. The legend sits under the map (after the list at accessibility sizes), clear of the tab bar's fade. The map joined the accessibility audit (`parks-map` route); no exemptions.
 - Two audit flags left for the device pass, judged simulator artifacts: the Parks list measured ~67 pt off where it draws when the audit runs right after the map; iOS 26.5 Plan past dates (muted ink, ~9:1) flagged for contrast.
+
+## Version 1.2 — 2026-10-08
+- **Nyx 1.1 is live** (build 1.1 (7), released October 7, 2026, App Store ID 6818817800; checked on the public App Store lookup). A released version takes no new builds, so the audit work ships as **1.2** (owner's choice over 1.1.1: it is a large update), build 8.
+- The App Store ID turns on "Rate Nyx" (write-review page) and the product page on share cards (`SupportLink.storePage`, built by the same host-checked helper as the other Safari links).
+- Release documents now describe an update: What's New drafted (full and short), the featuring nomination is App Enhancements for 1.2, phased release recommended, and the TestFlight upgrade from 1.1 (7) with a journal entry is part of the device pass (the journal store migrates on first launch).

@@ -155,7 +155,9 @@ import Testing
         #expect(SupportLink.privacyPolicy?.host()=="get-nyx.com" && SupportLink.privacyPolicy?.path()=="/privacy")
         #expect(SupportLink.support?.host()=="get-nyx.com" && SupportLink.support?.path()=="/support")
         #expect(SupportLink.email?.scheme=="mailto")
-        // No App Store ID yet: no Rate row.
-        #expect(AppStoreLink.appID == nil && SupportLink.review == nil)
+        // Live on the App Store: Rate opens the write-review page; share cards carry the product page.
+        #expect(AppStoreLink.appID == "6818817800")
+        #expect(SupportLink.review?.absoluteString == "https://apps.apple.com/app/id6818817800?action=write-review")
+        #expect(SupportLink.storePage?.absoluteString == "https://apps.apple.com/app/id6818817800")
     }
 }

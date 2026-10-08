@@ -1,8 +1,8 @@
-# Nyx 1.1 submission package (first public release)
+# Nyx 1.2 submission package (update)
 
-**Build 1.1 (8)** is Nyx's **first public release**: 1.0 was never released, and 1.1 (7) was uploaded but never submitted. App Store Connect therefore shows no What's New field, and the featuring nomination is an **App Launch** (`Store/1.1/featuring-nominations.md`). Release is **manual** after approval.
+**Nyx 1.1 is live** (build 1.1 (7), released October 7, 2026, App Store ID 6818817800). **Version 1.2, build 8** is the update: App Store Connect needs a new version (+ Version → 1.2), a What's New text (`Store/1.1/metadata.md`), and the featuring nomination is **App Enhancements** (`Store/1.1/featuring-nominations.md`). Use **phased release** (seven days, pausable) after approval. Existing users' journals migrate to the new store on first launch (tested; confirm on your own phone with a TestFlight upgrade from 1.1 (7)).
 
-Archive both builds from the integrated `main` after the integrator bumps `CURRENT_PROJECT_VERSION` to 8: the iOS archive (iPhone and iPad app with the widgets and the Apple Watch app inside) and the visionOS archive (`NyxVision`, same bundle ID). Before uploading, run `python3 Scripts/verify_release.py --require-key <ios archive> <vision archive>`; it must pass, including the new checks for the age-range entitlement and the Safari link hosts. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store.
+Archive both builds from the integrated `main` after the integrator sets version 1.2 and `CURRENT_PROJECT_VERSION` to 8 (done 2026-10-08): the iOS archive (iPhone and iPad app with the widgets and the Apple Watch app inside) and the visionOS archive (`NyxVision`, same bundle ID). Before uploading, run `python3 Scripts/verify_release.py --require-key <ios archive> <vision archive>`; it must pass, including the new checks for the age-range entitlement and the Safari link hosts. A development-signed archive is not an App Store validation result: distribute from Xcode's Organizer, which re-signs for the App Store.
 
 **Release gates** (owner, `INPUT_NEEDED.md`): the device pass, the Spanish decision, the privacy page push, the Declared Age Range capability on the App ID, counsel on age assurance, the trademark search and the storefront decision below.
 
@@ -114,19 +114,19 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 
 ## In-App Events and featuring
 
-- **Featuring:** one **App Launch** nomination for 1.1, publish window **Nov 6–8, 2026** (the new-moon weekend), filed **by Oct 16**; then a **New Content** nomination for the Geminids event (Dec 12–15), filed **by Nov 20**. No App Enhancements nomination until 1.2. Texts in `Store/1.1/featuring-nominations.md`.
+- **Featuring:** one **App Enhancements** nomination for 1.2, publish window **Nov 6–8, 2026** (the new-moon weekend), filed **by Oct 16**; then a **New Content** nomination for the Geminids event (Dec 12–15), filed **by Nov 20**. (App Launch no longer applies: 1.1 is live.) Texts in `Store/1.1/featuring-nominations.md`.
 - **In-App Events:** `Store/1.1/in-app-events.md` (artwork in `Store/1.1/events/`). Submit each at least 7 days before its publish date, once build 8 is approved.
 
 ## App Store Connect checklist
 
-1. Rename the pending version to 1.1 if needed; select build 8 (iOS, with the watch inside) and the visionOS build 8.
+1. + Version → **1.2** (iOS and visionOS); select build 8 (iOS, with the watch inside) and the visionOS build 8.
 2. Export compliance: No (above).
 3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass; enable the public TestFlight link for the nomination.
-4. Version page: promotional text, description, keywords, subtitle, screenshots (build 8 captures), optional App Preview; no What's New.
+4. Version page: promotional text, description, keywords, subtitle, screenshots (`Store/1.1 v8/`), optional App Preview, **What's New** (`Store/1.1/metadata.md`).
 5. Pricing and Availability: US, Canada, Mexico; Mac availability off.
 6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only passed features), age rating (expected 4+; social media capabilities: No), review notes (above).
-7. Manual release → Submit for Review. File the App Launch nomination (by Oct 16) and attach the events once approved.
-8. After approval: install from the App Store, run an offline sanity check, then release; flip the website's two "Coming to the App Store" pills to the App Store link and add the Smart App Banner tag (steps in the `docs/index.html` head comment).
+7. Phased release (or manual) → Submit for Review. File the App Enhancements nomination for 1.2 (by Oct 16 for Nov 6–8) and attach the events once approved.
+8. After approval: install the update from the App Store over 1.1 with a journal entry, run an offline sanity check, then release (the website already links to the live App Store page).
 
 ## Owner sign-off
 

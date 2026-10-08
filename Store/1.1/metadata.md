@@ -1,6 +1,6 @@
-# Nyx 1.1 — App Store metadata (first public release)
+# Nyx 1.2 — App Store metadata (update)
 
-Paste-ready copy for App Store Connect. Version 1.1 is the **first public release**: 1.0 never shipped, so there is **no What's New** field to fill (App Store Connect does not show one for an app's first version). Voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives, nothing says "only", "first" or "best".
+Paste-ready copy for App Store Connect. Nyx 1.1 is live; **version 1.2** is the update, so What's New is required (below). Voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives, nothing says "only", "first" or "best".
 
 Character counts were verified with a script on 2026-10-07 (`len()` of the text between the fences; App Store Connect may count a line break as two characters, so each field keeps a margin). Apple's limits: name 30, subtitle 30, promotional text 170, description 4,000, keywords 100.
 
@@ -32,6 +32,36 @@ The description names features from main as of 2026-10-07 plus wave 2 and 3 item
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
+
+## What's New in 1.2 (≤4000)
+
+Nyx 1.1 is live (App Store ID 6818817800, released October 7, 2026), so 1.2 is an update and App Store Connect asks for What's New. Paste one of these.
+
+**Full (about 1,900 characters):**
+
+```
+Nyx 1.2 is a large update, shaped by a careful look at every part of the app.
+
+A more honest score. Clouds, smoke and city light now cap a night's score instead of only subtracting from it, so an overcast desert night no longer reads Good, and a park beside a city can no longer read Pristine. Beyond the forecast, nights use each park's usual clouds for that month, and a score never rises when you go offline. The park page says what limits tonight and shows the best clear window.
+
+Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip. Start from your city, not only from a park. Follow a night and its countdown appears on your Lock Screen at dusk by itself. Add any night to Calendar, and keep it in your journal at dawn.
+
+Park pages in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with sky glow, viewing spots, campgrounds and ranger programs.
+
+For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, photo descriptions in your journal, and better VoiceOver throughout.
+
+On every device. Widgets you can set to a park, a Moon widget, an inline Lock Screen widget, Siri answers with the gauge, and Handoff. On Apple Watch, a dark-adaptation clock, Moon and Next dark complications, and the Crown through the week. On Apple Vision Pro, named stars and constellations, turning the night by hand, the Moon on your table, and tonight's clouds. On iPad, parks in their own windows and drag and drop.
+
+Also new: a map of every park tonight, four Learn essays, and From home tonight.
+
+Still no account, no ads, no tracking.
+```
+
+**Short (about 500 characters):**
+
+```
+A more honest score: clouds, smoke and city light now cap each night, and beyond the forecast nights use each park's usual clouds. A new Plan tab, starting from your city, and Follow this night on your Lock Screen. Park pages in three parts, with the Moon at full size. Assistive Access, Feel tonight and a brighter red. Widgets set to a park, a dark-adaptation clock on Apple Watch, named stars on Apple Vision Pro, windows on iPad. Still no account, no ads, no tracking.
+```
 
 ## Promotional text (≤170)
 

@@ -1,10 +1,10 @@
 # Input needed: the steps left for Nyx 1.1, in order
 
-Build 1.1 (8) is the first public release. It carries the award audit's work (`Research/award-audit.md`): the score's caps, honest forecasts with usual clouds, bulk park alerts, background refresh, the four-tab app with Plan, the park in three chapters, Assistive Access, Feel tonight, the Watch's dark-adaptation clock and complications, Vision Pro's named sky and clouds, iPad windows, widgets with choices and Spanish drafts for every string. Every step below needs your Apple ID, your accounts, your money, a lawyer, or your own eyes on real hardware. Steps 1–6 can start today. The device pass (9–10) runs straight from Xcode: plug in the iPhone, choose it as the run destination and press Run (the Watch app installs with it; Vision Pro uses the NyxVision scheme). No archive is needed for it; the build you upload is archived after the device pass and its fixes.
+**Nyx 1.1 is live** (released October 7, 2026, App Store ID 6818817800). **Version 1.2 (build 8)** is the update. It carries the award audit's work (`Research/award-audit.md`): the score's caps, honest forecasts with usual clouds, bulk park alerts, background refresh, the four-tab app with Plan, the park in three chapters, Assistive Access, Feel tonight, the Watch's dark-adaptation clock and complications, Vision Pro's named sky and clouds, iPad windows, widgets with choices and Spanish drafts for every string. Every step below needs your Apple ID, your accounts, your money, a lawyer, or your own eyes on real hardware. Steps 1–6 can start today. The device pass (9–10) runs straight from Xcode: plug in the iPhone, choose it as the run destination and press Run (the Watch app installs with it; Vision Pro uses the NyxVision scheme). No archive is needed for it; the build you upload is archived after the device pass and its fixes.
 
 ## Start now (deadlines first)
 
-1. **File the App Launch featuring nomination by about Oct 16.** *Why only you:* App Store Connect → Featuring → Nominations needs the account holder. *How:* `Store/1.1/featuring-nominations.md` has the text: one **App Launch** nomination for 1.1 with the publish window **Nov 6–8** (the November new-moon weekend; Apple needs at least three weeks), supplemental links from get-nyx.com (landing page, press kit, case study, privacy) and the TestFlight public link once step 11 has one. Then the Geminids **New Content** nomination by **Nov 20**.
+1. **File the App Enhancements featuring nomination for 1.2 by about Oct 16.** *Why only you:* App Store Connect → Featuring → Nominations needs the account holder. *How:* `Store/1.1/featuring-nominations.md` has the text: one **App Enhancements** nomination for 1.2 (1.1 is already live; if you filed an App Launch nomination for 1.1, keep it) with the publish window **Nov 6–8** (the November new-moon weekend; Apple needs at least three weeks), supplemental links from get-nyx.com (landing page, press kit, case study, privacy) and the TestFlight public link once step 11 has one. Then the Geminids **New Content** nomination by **Nov 20**.
 
 2. **Send three short emails and keep the replies.** *Why only you:* each is about your key or your app. App Review may ask for proof of permission (Guideline 5.2.2).
    - **Open-Meteo** (info@open-meteo.com): Nyx is free, with no ads, subscriptions or in-app purchases; it requests all 63 parks' public coordinates together, a few times a day per device; ask them to confirm this counts as non-commercial use, and give an expected volume.
@@ -17,7 +17,7 @@ Build 1.1 (8) is the first public release. It carries the award audit's work (`R
 
 5. **Decide EU trader status, or launch outside the EU and UK.** *Why only you:* a trader's address and phone are published on the EU product page. Recommended for launch: United States, Canada and Mexico only (App Store Connect → Pricing and Availability), EU and UK later.
 
-6. **Send me Nyx's App Store ID** (App Store Connect → App Information → Apple ID, a number). It turns on "Rate Nyx" in Settings and the store link on share cards (`AppStoreLink.appID` in `Nyx/Views/SettingsSupport.swift`).
+6. ~~Send me Nyx's App Store ID~~ **Done 2026-10-08:** 6818817800, found on the live App Store. "Rate Nyx" in Settings and the store link on share cards use it.
 
 ## Accounts and signing
 
@@ -54,8 +54,8 @@ Build 1.1 (8) is the first public release. It carries the award audit's work (`R
 
 12. **Archive and upload the release build and the visionOS build** (after the device pass and its fixes; ask me to bump the build number and archive, or do it in Xcode: Product → Archive with the **Nyx** scheme and Any iOS Device, then the **NyxVision** scheme and Any visionOS Device). *Why only you:* distribution signing uses your account. The archives appear in Xcode → Window → Organizer → Archives. Distribute App → App Store Connect → Upload, automatic signing. Export compliance: standard HTTPS only. Install from TestFlight and repeat the quick checks from step 9 on the distributed build. Turn on the **public TestFlight link** for the featuring nomination.
 
-13. **Set up the 1.1 version in App Store Connect.**
-    - If 1.0 (5) was never submitted, rename the pending version to 1.1; otherwise + Version → 1.1. It is the first release, so there is no What's New.
+13. **Set up version 1.2 in App Store Connect.**
+    - + Version → **1.2** for iOS (and for visionOS). Paste **What's New** from `Store/1.1/metadata.md` (required for an update).
     - **Mac Availability:** Pricing and Availability → uncheck "Make this app available on Mac" (field mode, alarms and the compass are hidden on Mac, but Nyx has not been tried there).
     - **Territories:** United States, Canada, Mexico (step 5).
     - **visionOS:** + Add Platform → visionOS (same bundle ID, universal purchase).
@@ -68,7 +68,7 @@ Build 1.1 (8) is the first public release. It carries the award audit's work (`R
 
 16. **Awards you enter yourself** (`Store/1.1/award-entries.md`): **UX Design Awards** by **Nov 15** (EUR 320; accepts apps launching within a year); **Webby** (Accessibility & Inclusion) once live (early deadline Oct 30 at $645, then about $715 in December). Skip iF, D&AD and A' Design this cycle.
 
-17. **Submit for review, then release.** Select build 8 (and the visionOS build), manual release, Submit for Review once the gate table in `SUBMISSION.md` is signed. After approval: install from the App Store, try it offline, release, publish the In-App Events, and on launch day change the one status line in `docs/index.html` (its comment says which) and push.
+17. **Submit for review, then release.** Select build 8 of version 1.2 (and the visionOS build), choose **phased release** (rolls out over seven days to people with automatic updates; you can pause it), and Submit for Review once the gate table in `SUBMISSION.md` is signed. After approval: install the update over 1.1 from the App Store with a journal entry already in place (the journal moves to the new store on first launch), try it offline, release, and publish the In-App Events. The website already links to the live App Store page.
 
 ## Housekeeping
 

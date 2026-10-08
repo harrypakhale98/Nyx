@@ -1,4 +1,4 @@
-# App Store screenshots: Nyx 1.1 (8)
+# App Store screenshots: Nyx 1.2 (8)
 
 English, one size per device. File order is upload order. Every frame is flattened (no alpha) and exactly the slot's size.
 

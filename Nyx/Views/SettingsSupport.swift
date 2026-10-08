@@ -10,16 +10,17 @@ enum SupportLink {
     static let openMeteo=BrowserLink.openMeteo
     static let email:URL?={ var components=URLComponents(); components.scheme="mailto"; components.path="harry.pakhale98@gmail.com"; components.queryItems=[URLQueryItem(name:"subject",value:"Nyx")]; return components.url }()
     /// The App Store's "Write a Review" page for Nyx, once the app has an App Store ID.
+    /// The product page, shared beside a card (the recipient opens it in the App Store; Nyx requests nothing).
+    static var storePage:URL? { AppStoreLink.appID.flatMap { page(host:"apps.apple.com",path:"/app/id\($0)") } }
     static var review:URL? { AppStoreLink.appID.flatMap { page(host:"apps.apple.com",path:"/app/id\($0)",query:[URLQueryItem(name:"action",value:"write-review")]) } }
     private static func page(host:String,path:String="",query:[URLQueryItem]?=nil)->URL? {
         var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path; components.queryItems=query
         return components.url
     }
 }
-/// Nyx's App Store ID, the number App Store Connect assigns when the app record is created. It is
-/// filled in at launch; until then the "Rate Nyx" row is not shown.
+/// Nyx's App Store ID (live since October 7, 2026): the "Rate Nyx" row and share cards link to it.
 enum AppStoreLink {
-    static let appID:String?=nil
+    static let appID:String?="6818817800"
 }
 /// Settings › Support › Credits: every source Nyx draws on, in the words each asks to be credited with.
 /// About the data explains how each one is used.

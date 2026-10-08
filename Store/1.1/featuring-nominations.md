@@ -1,6 +1,6 @@
 # Nyx — App Store featuring nominations (paste-ready)
 
-Rewritten 2026-10-07 for the real situation: **1.1 is Nyx's first public release** (1.0 never shipped). So there is **one App Launch nomination** for 1.1, then **one New Content nomination** for the Geminids event. The earlier "App Enhancements" nomination is dropped: an enhancement of an app with no previous version on the store reads as a mistake, and the type cannot be changed after submission. File an App Enhancements nomination only for a real post-launch update (1.2).
+Updated 2026-10-08: **Nyx 1.1 is live** (released October 7, 2026, App Store ID 6818817800), so the nomination for the big update is **App Enhancements for 1.2**, then **one New Content nomination** for the Geminids event. (If you already filed an App Launch nomination for 1.1, keep it and add this one for 1.2.) The type cannot be changed after submission.
 
 Where: App Store Connect → Apps → Nyx → Featuring → Nominations → Create nomination. Role: Account Holder, Admin, App Manager or Marketing.
 
@@ -26,10 +26,10 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 
 ---
 
-## Nomination 1 — App Launch (Nyx 1.1)
+## Nomination 1 — App Enhancements (Nyx 1.2)
 
 - **Nomination name:** `Nyx: which park, which night`
-- **Type:** App Launch
+- **Type:** App Enhancements
 - **Publish date range:** **Fri Nov 6 – Sun Nov 8, 2026**, the November new-moon weekend (the Moon about 5, 2 and 0 percent lit; `in-app-events.md`). File **by Oct 16** to keep three weeks' lead; earlier is better.
 - **Release plan:** manual release. Release as soon as App Review approves (early ratings matter more than a quiet fortnight); the nomination's publish window is the "official" launch weekend, with the press emails going out the same weekend.
 - **Platforms:** iPhone, iPad, Apple Watch; add Apple Vision Pro only if the visionOS build is approved by then (it may be submitted a week after iOS).
