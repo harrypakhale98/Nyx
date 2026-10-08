@@ -5,62 +5,105 @@ import EventKitUI
 
 /// "I'm free Oct 10–17, within 300 miles": the best park for each night, the single best night, and
 /// a line on why. Planned on this iPhone from cached forecasts and park updates; nothing is fetched.
+/// Plan's second mode ("My free nights"); the choices are kept for the window while the month is open.
 struct TripPlannerView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    @State private var first=Date.now
-    @State private var last=Date.now.addingTimeInterval(6*86400)
-    @State private var radius=300.0
-    @State private var maxHop=300.0
-    @State private var weekendsOnly=false
+    /// Inside Plan, which names the page and holds the toolbar; alone (a DEBUG route) it names itself.
+    var embedded=false
+    /// The chosen nights as seconds since 1970; 0 until chosen, which means from tonight for a week.
+    @SceneStorage("tripFirst") private var firstStamp=0.0
+    @SceneStorage("tripLast") private var lastStamp=0.0
+    @SceneStorage("tripRadius") private var radius=300.0
+    @SceneStorage("tripHop") private var maxHop=300.0
+    @SceneStorage("tripWeekends") private var weekendsOnly=false
     /// On by default: a plan that ends at a ferry dock at midnight is not a plan.
-    @State private var drivableOnly=true
+    @SceneStorage("tripDrivable") private var drivableOnly=true
     @State private var originID=""
+    /// A city or town to start from instead of a park.
+    @State private var originPlace:StartingPlace?
     @State private var useDevice=false
     @State private var device:CLLocationCoordinate2D?
-    @State private var choosingPark=false
+    @State private var choosingStart=false
     @State private var plan:TripPlan?
     @State private var planning=false
-    @State private var calendarStop:TripStop?
+    @State private var calendarStay:TripStay?
     @State private var planned=0
     @State private var prepared=false
+    @State private var width=0.0
     /// The best night's numeral: the hero, scaling with Dynamic Type but never past the screen.
     @ScaledMetric(relativeTo:.largeTitle) private var heroSize=96.0
     private var origin:Park? { model.park(originID) ?? model.home }
+    /// The planning inputs on the left and the plan on the right, on a wide iPad.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    /// Never earlier than last night: a window kept from another day starts again from tonight.
+    private var first:Date { firstStamp>0 && firstStamp>=Date.now.timeIntervalSince1970-86400 ? Date(timeIntervalSince1970:firstStamp) : Date.now }
+    private var last:Date { lastStamp>0 && lastStamp>=first.timeIntervalSince1970 ? Date(timeIntervalSince1970:lastStamp) : first.addingTimeInterval(6*86400) }
+    private var firstBinding:Binding<Date> { Binding(get:{ first },set:{ firstStamp=$0.timeIntervalSince1970; if last<$0 { lastStamp=$0.timeIntervalSince1970 } }) }
+    private var lastBinding:Binding<Date> { Binding(get:{ last },set:{ lastStamp=$0.timeIntervalSince1970 }) }
     private var days:[TripDay] { TripPlanner.days(first:TripDay(first),last:TripDay(last),weekendsOnly:weekendsOnly) }
-    private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
+    private var point:CLLocationCoordinate2D? {
+        if useDevice { return device }
+        if let originPlace { return CLLocationCoordinate2D(latitude:originPlace.latitude,longitude:originPlace.longitude) }
+        return origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
+    }
+    private var originLabel:String { originPlace?.label ?? origin?.shortName ?? "" }
+    private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(originPlace?.id ?? "")-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
     var body: some View {
-        ScrollViewReader { proxy in ScrollView { VStack(alignment:.leading,spacing:24) {
-            Eyebrow(text:"Reasons to go")
-            Text("Plan a trip").font(.system(.largeTitle,design:.serif))
-            Text("The darkest park in reach for each night you are free.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-            // The answer first; the questions that shape it just below.
-            if let best=plan?.best { hero(best) }
-            Panel { controls }
-            results
-        }.padding(24).readableColumn() }
+        ScrollViewReader { proxy in ScrollView {
+            if wide {
+                HStack(alignment:.top,spacing:32) {
+                    VStack(alignment:.leading,spacing:22) { intro; Panel { controls } }.frame(maxWidth:420)
+                    VStack(alignment:.leading,spacing:24) {
+                        if let best=plan?.best { hero(best) }
+                        results
+                    }.frame(maxWidth:.infinity)
+                }.padding(24)
+            } else {
+                VStack(alignment:.leading,spacing:24) {
+                    intro
+                    // The answer first; the questions that shape it just below.
+                    if let best=plan?.best { hero(best) }
+                    Panel { controls }
+                    results
+                }.padding(24).readableColumn()
+            }
+        }
         // DEBUG store capture (`-nyx-trip-route`): the route card at the top, once the plan is in.
         .onChange(of:plan?.best?.id) { _,_ in if DebugScenario.isEnabled("trip-route") { Task { try? await Task.sleep(for:.milliseconds(400)); proxy.scrollTo("route",anchor:.top) } } }
         }
+        .measuringWidth($width)
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
-        .navigationTitle("Plan a trip").navigationBarTitleDisplayMode(.inline)
+        .modifier(StandaloneTitle(embedded:embedded))
         .toolbar { if let plan, !plan.stops.isEmpty { ToolbarItem(placement:.topBarTrailing) {
             ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Image(systemName:"square.and.arrow.up") }.accessibilityLabel("Share plan")
         } } }
-        .sheet(isPresented:$choosingPark) { NavigationStack { ParkPickerView(selection:Binding(get:{ origin?.id ?? "" },set:{ originID=$0; useDevice=false })) }.nyxPresentation() }
-        .sheet(item:$calendarStop) { stop in CalendarEditor(draft:CalendarDraft(stop:stop)) { calendarStop=nil }.ignoresSafeArea() }
+        .sheet(isPresented:$choosingStart) {
+            NavigationStack { StartingPointPicker(nearMe:nil,selectedParkID:originPlace == nil ? origin?.id : nil,selectedPlace:originPlace) { choice in
+                switch choice {
+                case .park(let id): originID=id; originPlace=nil
+                case .place(let place): originPlace=place
+                }
+                useDevice=false
+            } }.nyxPresentation()
+        }
+        .sheet(item:$calendarStay) { stay in
+            if let draft=CalendarDraft(stay:stay.stops) { CalendarEditor(draft:draft) { calendarStay=nil }.ignoresSafeArea() }
+        }
         .sensoryFeedback(.selection,trigger:planned)
         .task {
             guard !prepared else { return }
             prepared=true
-            originID=model.homeID
+            originID=model.homeID; originPlace=model.homePlace
             #if DEBUG
-            if let date=DebugScenario.date { first=date; last=date.addingTimeInterval(6*86400) }
-            if DebugScenario.state=="weekends" { weekendsOnly=true; last=first.addingTimeInterval(27*86400) }
+            if let date=DebugScenario.date { firstStamp=date.timeIntervalSince1970; lastStamp=date.addingTimeInterval(6*86400).timeIntervalSince1970 }
+            else if DebugScenario.screen != nil { firstStamp=0; lastStamp=0 }
+            if DebugScenario.screen != nil { radius=300; maxHop=300; weekendsOnly=false; drivableOnly=true }
+            if DebugScenario.state=="weekends" { weekendsOnly=true; lastStamp=first.addingTimeInterval(27*86400).timeIntervalSince1970 }
             // Boat and plane parks included, close in: `-nyx-park chis` shows the access notes in the plan.
             if DebugScenario.state=="boats" { drivableOnly=false; radius=100 }
             #endif
@@ -71,11 +114,9 @@ struct TripPlannerView: View {
         }
         .task(id:inputs) {
             guard prepared else { return }
-            if last<first { last=first }
             try? await Task.sleep(for:.milliseconds(200))
             guard !Task.isCancelled else { return }
             planning=true
-            let point=useDevice ? device : origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
             guard let point else { planning=false; return }
             let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
@@ -87,27 +128,31 @@ struct TripPlannerView: View {
         }
     }
     private static func miles(_ meters:Double)->String { Measurement(value:meters,unit:UnitLength.meters).formatted(.measurement(width:.abbreviated,usage:.road)) }
+    /// One plain line on what this mode answers; Plan's bar already names the page.
+    private var intro:some View {
+        Text("The darkest park in reach for each night you are free.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+    }
     @ViewBuilder private var controls:some View {
         VStack(alignment:.leading,spacing:16) {
             VStack(alignment:.leading,spacing:8) {
                 Text("From").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 if device != nil {
-                    Picker("Starting point",selection:$useDevice) { Text("Your location").tag(true); Text(origin?.shortName ?? "").tag(false) }.pickerStyle(.segmented)
+                    Picker("Starting point",selection:$useDevice) { Text("Your location").tag(true); Text(originLabel).tag(false) }.pickerStyle(.segmented)
                 }
                 if !useDevice {
-                    Button { choosingPark=true } label:{
+                    Button { choosingStart=true } label:{
                         // Starlight text with an amber mark, on its own solid indigo: iOS 26's lighter glass under the panel
                         // otherwise sets the contrast of this control's text (amber text there fell short of 4.5:1).
-                        HStack { Label { Text(origin?.shortName ?? "").foregroundStyle(palette.ink) } icon:{ Image(systemName:"mappin.and.ellipse").foregroundStyle(palette.accent) }.fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                        HStack { Label { Text(originLabel).foregroundStyle(palette.ink) } icon:{ Image(systemName:originPlace == nil ? "mappin.and.ellipse" : "building.2").foregroundStyle(palette.accent) }.fixedSize(horizontal:false,vertical:true); Spacer(minLength:8); Image(systemName:"chevron.up.chevron.down").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true) }
                             .frame(minHeight:44).contentShape(Rectangle()).background(palette.panel)
-                    }.buttonStyle(.plain).accessibilityLabel("Starting park").accessibilityValue(origin?.shortName ?? "").accessibilityInputLabels([Text("Starting park"),Text(origin?.shortName ?? "")]).accessibilityHint("Choose a starting park")
+                    }.buttonStyle(.plain).accessibilityLabel("Starting point").accessibilityValue(originLabel).accessibilityInputLabels([Text("Starting point"),Text(originLabel)]).accessibilityHint("Choose a city, town or park")
                 }
             }
             Divider().overlay(palette.line)
-            DatePicker("First night",selection:$first,in:Date.now.addingTimeInterval(-86400)...Date.now.addingTimeInterval(365*86400),displayedComponents:.date)
-            DatePicker("Last night",selection:$last,in:first...first.addingTimeInterval(Double(weekendsOnly ? 69 : 13)*86400),displayedComponents:.date)
+            DatePicker("First night",selection:firstBinding,in:Date.now.addingTimeInterval(-86400)...Date.now.addingTimeInterval(365*86400),displayedComponents:.date)
+            DatePicker("Last night",selection:lastBinding,in:first...first.addingTimeInterval(Double(weekendsOnly ? 69 : 13)*86400),displayedComponents:.date)
             Toggle(isOn:$weekendsOnly) { VStack(alignment:.leading,spacing:2) { Text("Weekends only"); Text("Friday and Saturday nights").font(.caption).foregroundStyle(palette.muted) } }.tint(palette.controlTint)
-            Text(days.count==1 ? String(localized:"One night") : String(localized:"\(days.count) nights, at most \(TripPlanner.maxNights)")).font(.caption).foregroundStyle(palette.muted)
+            Text("\(days.count) nights, at most \(TripPlanner.maxNights)").font(.caption).foregroundStyle(palette.muted)
             Divider().overlay(palette.line)
             distancePicker(title:"Within",selection:$radius,values:[100,200,300,500,1000],note:"as the crow flies")
             distancePicker(title:"Longest drive between nights",selection:$maxHop,values:[100,200,300,500],note:"straight line, back-to-back nights")
@@ -136,11 +181,13 @@ struct TripPlannerView: View {
                     Text("Your nights as stars among the national parks, joined night to night. The ring marks the best night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 } }.id("route")
                 VStack(spacing:0) {
-                    // The access note once per park, on its first night, rather than on every row.
-                    let firsts=Set(plan.stops.reduce(into:[String:String]()) { seen,stop in if seen[stop.night.park.id]==nil { seen[stop.night.park.id]=stop.id } }.values)
-                    ForEach(plan.stops) { stop in
-                        TripStopRow(stop:stop,addToCalendar:{ calendarStop=stop },distance:Self.miles,showsAccess:firsts.contains(stop.id))
-                        if stop.id != plan.stops.last?.id { Divider().overlay(palette.line) }
+                    // Back-to-back nights at one park are one stay: one row, one calendar event.
+                    // The access note once per park, on its first stay, rather than on every row.
+                    let stays=TripPlanner.stays(plan.stops).compactMap(TripStay.init)
+                    let firsts=Set(stays.reduce(into:[String:String]()) { seen,stay in if seen[stay.park.id]==nil { seen[stay.park.id]=stay.id } }.values)
+                    ForEach(stays) { stay in
+                        TripStayRow(stay:stay,addToCalendar:{ calendarStay=stay },distance:Self.miles,showsAccess:firsts.contains(stay.id))
+                        if stay.id != stays.last?.id { Divider().overlay(palette.line) }
                     }
                 }
                 VStack(alignment:.leading,spacing:6) {
@@ -153,14 +200,12 @@ struct TripPlannerView: View {
     }
     /// An empty plan only because the drive-to filter left out the boat-and-plane parks in reach.
     private var onlyByBoatOrPlane:Bool {
-        guard drivableOnly else { return false }
-        let point=useDevice ? device : origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
-        guard let point else { return false }
+        guard drivableOnly, let point else { return false }
         return !TripPlanner.candidates(model.parks,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius).isEmpty
     }
     private func hero(_ best:TripStop)->some View {
         let park=best.night.park
-        return NavigationLink { ParkDetailView(park:park,initialDate:best.night.id) } label:{
+        return NavigationLink { ParkDetailView(park:park,initialDate:best.night.id).onAppear { ReviewPrompt.noteNightViewed(score:best.night.score.value) } } label:{
             VStack(spacing:10) {
                 Eyebrow(text:"The best night")
                 Text(park.shortName).font(.system(.title,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
@@ -197,55 +242,92 @@ struct TripPlannerView: View {
         return String(localized:"Route map: \(parks.joined(separator:", ")).")
     }
 }
-/// One night of the plan: the date, the park, the score, why, and what to check.
-struct TripStopRow: View {
+/// Alone, the planner names its own page; inside Plan, Plan does.
+private struct StandaloneTitle: ViewModifier {
+    let embedded:Bool
+    @ViewBuilder func body(content:Content)->some View {
+        if embedded { content } else { content.navigationTitle("My free nights").navigationBarTitleDisplayMode(.inline) }
+    }
+}
+/// Back-to-back nights at one park: one row, one calendar event.
+nonisolated struct TripStay: Identifiable, Sendable {
+    let stops:[TripStop]
+    let park:Park
+    /// Nil for no nights (`TripPlanner.stays` makes none).
+    init?(_ stops:[TripStop]) { guard let park=stops.first?.night.park else { return nil }; self.stops=stops; self.park=park }
+    var id:String { stops.first?.id ?? "" }
+    var isBest:Bool { stops.contains(where:\.isBest) }
+    /// The stay's darkest night, whose score leads the row.
+    var best:TripStop? { stops.first(where:\.isBest) ?? stops.max { NightPlanner.better($1.night,$0.night) } }
+}
+/// One stay of the plan: the dates, the park, the score, why, and what to check. A stay of several
+/// nights reads "3 nights at Death Valley" with each night's score beneath it.
+struct TripStayRow: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo:.title) private var scoreSize=40.0
-    let stop: TripStop
+    let stay: TripStay
     let addToCalendar: ()->Void
     let distance: (Double)->String
     var showsAccess=true
     var body: some View {
-        let night=stop.night, park=night.park
-        VStack(alignment:.leading,spacing:10) {
-            NavigationLink { ParkDetailView(park:park,initialDate:night.id) } label:{
-                HStack(alignment:.top,spacing:14) {
-                    VStack(alignment:.leading,spacing:4) {
-                        HStack(spacing:8) {
-                            Text(park.dayLabel(night.id)).font(.caption.weight(.medium)).foregroundStyle(palette.muted)
-                            if stop.isBest { Text("Best night").font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,3).foregroundStyle(palette.nightVision ? palette.ink : Color.black).background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0.35 : 1))) }
+        if let first=stay.stops.first, let last=stay.stops.last, let lead=stay.best {
+            let park=stay.park, night=lead.night, several=stay.stops.count>1
+            VStack(alignment:.leading,spacing:10) {
+                NavigationLink { ParkDetailView(park:park,initialDate:night.id) } label:{
+                    HStack(alignment:.top,spacing:14) {
+                        VStack(alignment:.leading,spacing:4) {
+                            HStack(spacing:8) {
+                                Text(several ? "\(park.dayLabel(first.night.id)) – \(park.dayLabel(last.night.id))" : LocalizedStringKey(park.dayLabel(night.id))).font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                                if stay.isBest { Text("Best night").font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,3).foregroundStyle(palette.nightVision ? palette.ink : Color.black).background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0.35 : 1))) }
+                            }
+                            Text(several ? String(localized:"\(stay.stops.count) nights at \(park.shortName)") : park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                            if several { Text(nightly).font(.caption.monospacedDigit()).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
+                            Text(lead.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                            if let hop=first.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
+                            if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
+                            if let closure=stay.stops.compactMap(\.closure).first { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
+                            if showsAccess { AccessNoteLabel(park:park) }
                         }
-                        Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-                        Text(stop.reason).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                        if let hop=stop.hopMeters, hop>1000 { Label(String(localized:"\(distance(hop)) from the night before"),systemImage:"arrow.triangle.turn.up.right.diamond").font(.caption).foregroundStyle(palette.muted) }
-                        if let label=night.basisLabel { Text(label).font(.caption).foregroundStyle(palette.muted) }
-                        if let closure=stop.closure { Label(String(localized:"Closure alert: \(closure)"),systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
-                        if showsAccess { AccessNoteLabel(park:park) }
-                    }
-                    Spacer(minLength:8)
-                    VStack(alignment:.trailing,spacing:0) {
-                        Text("\(night.score.value)").font(.system(size:min(scoreSize,64),weight:.light,design:.serif)).foregroundStyle(palette.accent)
-                        Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
-                    }
-                }.contentShape(Rectangle())
-            }.buttonStyle(.plain)
-            .accessibilityElement(children:.ignore)
-            .accessibilityLabel(spoken)
-            .accessibilityHint("Opens that night at the park.")
-            Button(action:addToCalendar) { Label("Add to Calendar",systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
-                .buttonStyle(.plain).foregroundStyle(palette.accent)
-                .accessibilityLabel(String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))
-                .accessibilityInputLabels([Text("Add to Calendar"),Text("Add \(park.shortName) to Calendar")])
-        }.padding(.vertical,14)
-        .background { if stop.isBest { RoundedRectangle(cornerRadius:18).fill(palette.accent.opacity(palette.nightVision ? 0.08 : 0.07)).padding(.horizontal,-12) } }
+                        Spacer(minLength:8)
+                        VStack(alignment:.trailing,spacing:0) {
+                            Text("\(night.score.value)").font(.system(size:min(scoreSize,64),weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                            Text(night.compactBandLabel).font(.caption2).foregroundStyle(palette.muted)
+                        }
+                    }.contentShape(Rectangle())
+                }.buttonStyle(.plain)
+                .accessibilityElement(children:.ignore)
+                .accessibilityLabel(spoken)
+                .accessibilityHint(several ? "Opens the best of these nights at the park." : "Opens that night at the park.")
+                Button(action:addToCalendar) { Label(several ? String(localized:"Add \(stay.stops.count) nights to Calendar") : String(localized:"Add to Calendar"),systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
+                    .buttonStyle(.plain).foregroundStyle(palette.accent)
+                    .accessibilityLabel(several ? String(localized:"Add \(stay.stops.count) nights at \(park.shortName) to Calendar") : String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))
+                    .accessibilityInputLabels([Text("Add to Calendar"),Text("Add \(park.shortName) to Calendar")])
+            }.padding(.vertical,14)
+            .background { if stay.isBest { RoundedRectangle(cornerRadius:18).fill(palette.accent.opacity(palette.nightVision ? 0.08 : 0.07)).padding(.horizontal,-12) } }
+        }
+    }
+    /// "Tue 94 · Wed 97 · Thu 95", in the park's own days.
+    private var nightly:String {
+        var format=Date.FormatStyle.dateTime.weekday(.abbreviated)
+        format.timeZone=stay.park.timeZone
+        return stay.stops.map { "\($0.night.id.formatted(format)) \($0.night.score.value)" }.joined(separator:" · ")
     }
     private var spoken:String {
-        let night=stop.night, park=night.park
-        var parts=[stop.isBest ? String(localized:"Best night. \(park.dayLabel(night.id))") : park.dayLabel(night.id),park.shortName,
-                   String(localized:"\(night.score.value) out of 100, \(night.bandWithBasis)"),stop.reason]
-        if let hop=stop.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
-        if let closure=stop.closure { parts.append(String(localized:"Closure alert: \(closure)")) }
+        let park=stay.park
+        guard let lead=stay.best, let first=stay.stops.first, let last=stay.stops.last else { return park.shortName }
+        let night=lead.night
+        var parts:[String]
+        if stay.stops.count>1 {
+            parts=[String(localized:"\(stay.stops.count) nights at \(park.shortName), \(park.dayLabel(first.night.id)) to \(park.dayLabel(last.night.id))")]
+            if stay.isBest { parts.append(String(localized:"Includes the best night")) }
+            parts+=stay.stops.map { String(localized:"\(park.dayLabel($0.night.id)), \($0.night.score.value) out of 100, \($0.night.bandWithBasis)") }
+        } else {
+            parts=[stay.isBest ? String(localized:"Best night. \(park.dayLabel(night.id))") : park.dayLabel(night.id),park.shortName,
+                   String(localized:"\(night.score.value) out of 100, \(night.bandWithBasis)")]
+        }
+        parts.append(lead.reason)
+        if let hop=first.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
+        if let closure=stay.stops.compactMap(\.closure).first { parts.append(String(localized:"Closure alert: \(closure)")) }
         if let access=park.accessNote { parts.append(String(localized:"Getting there: \(access)")) }
         return parts.joined(separator:". ")
     }

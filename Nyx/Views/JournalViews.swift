@@ -25,29 +25,29 @@ struct JournalView: View {
         let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
-                Eyebrow(text:"Keep a little of the night")
-                Text("Under the same sky").font(.system(.largeTitle,design:.serif))
                 if model.journalUnavailable { JournalUnavailableBanner() }
                 // A journal lives on the device it was written on; say so where a second device is likely.
                 if UIDevice.current.userInterfaceIdiom == .pad || sizeClass == .regular {
                     Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
-                if recapSeason(nights) { recapCard }
+                // One way into the year: at the top in recap season (December, early January), else under the constellation.
+                let season=recapSeason(nights)
+                if season { recapCard }
                 if wide {
                     HStack(alignment:.top,spacing:28) {
                         YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:24) { entryList }.frame(width:min(440,(width*0.4).rounded()))
+                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(width:min(440,(width*0.4).rounded()))
                     }
                 } else {
                     YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }
+                    if !season && !nights.isEmpty { recapCard }
                     entryList
                 }
             }.padding(24).readableColumn(wide ? .infinity : WideLayout.readableWidth)
         }.measuringWidth($width).background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+            .tabRootToolbar()
             .toolbar {
                 ToolbarItem(placement:.topBarTrailing) { Menu {
-                    Button("Year under the stars",systemImage:"sparkles") { recap=true }.disabled(entries.isEmpty)
-                    Divider()
                     Button("Export journal",systemImage:"square.and.arrow.up") { exporting=JournalDocument(archive:JournalArchive.make(from:entries)) }
                         .disabled(entries.isEmpty || model.journalUnavailable)
                     Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable)
@@ -89,7 +89,6 @@ struct JournalView: View {
         if entries.isEmpty { if !model.journalUnavailable { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) } }
         else {
             LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
-            if OnDeviceGuide.available { NavigationLink("Reflect on this season") { GuideView(mode:.recap) }.buttonStyle(.bordered) }
         }
     }
     /// December (and the first days of January): the year's recap waits at the top of the journal.
@@ -104,10 +103,12 @@ struct JournalView: View {
             Panel { HStack(spacing:14) {
                 Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
-                    Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-                    Text("Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    // Written on this iPhone when the system model is available; Nyx's own words otherwise.
+                    Text(OnDeviceGuide.available ? "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Spacer(minLength:0)
+                Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
             } }
         }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
     }

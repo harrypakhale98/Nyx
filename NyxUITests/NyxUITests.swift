@@ -15,7 +15,7 @@ final class NyxUITests:XCTestCase {
         let app=offlineApp()
         app.launch()
         XCTAssertTrue(app.navigationBars["Tonight"].waitForExistence(timeout:15))
-        for title in ["Parks","Calendar","Journal","Learn","Tonight"] {
+        for title in ["Parks","Plan","Journal","Tonight"] {
             // iPhone: the tab bar. iPad: the same tabs at the top of the window (or in its sidebar).
             let inBar=app.tabBars.buttons[title]
             let button=inBar.exists ? inBar : app.buttons.matching(identifier:title).firstMatch

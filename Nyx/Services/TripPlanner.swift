@@ -163,6 +163,16 @@ nonisolated enum TripPlanner {
         }) { stops[best].isBest=true }
         return TripPlan(stops:stops,candidates:n)
     }
+    /// Back-to-back nights at one park, kept together as one stay ("3 nights at Death Valley ·
+    /// Oct 7–9"), in plan order. A gap (weekends only) or a change of park starts a new stay.
+    static func stays(_ stops: [TripStop]) -> [[TripStop]] {
+        var stays:[[TripStop]]=[]
+        for stop in stops {
+            if let last=stays.last?.last, last.night.park.id==stop.night.park.id, last.day.adding(1)==stop.day { stays[stays.count-1].append(stop) }
+            else { stays.append([stop]) }
+        }
+        return stays
+    }
     /// One line on why a night was chosen: "New moon, 0% cloud forecast, Bortle 2".
     static func reason(_ night: Night) -> String {
         let lit=Int((night.sky.moon.illumination*100).rounded())
@@ -205,6 +215,21 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
     let notes: String
     let url: URL?
     init(stop: TripStop) { self.init(night:stop.night,closure:stop.closure) }
+    /// A stay of several nights at one park as one event: from the first night's darkness to the
+    /// last night's dawn, each night's score in the notes. A single night is `init(stop:)`; nil for none.
+    init?(stay: [TripStop]) {
+        guard let first=stay.first, let last=stay.last else { return nil }
+        guard stay.count>1 else { self.init(stop:first); return }
+        let park=first.night.park
+        let opening=CalendarDraft(night:first.night,closure:first.closure), closing=CalendarDraft(night:last.night,closure:last.closure)
+        var lines=stay.map { stop in String(localized:"\(park.dayLabel(stop.night.id)): darkness score \(stop.night.score.value)/100 (\(stop.night.bandWithBasis)). \(stop.reason).") }
+        if let closure=stay.compactMap(\.closure).first { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
+        lines.append(String(localized:"Scores are estimates. Check closures and the forecast before you go."))
+        self.init(title:opening.title,start:opening.start,end:max(opening.start.addingTimeInterval(3600),closing.end),timeZone:park.timeZone,location:park.name,notes:lines.joined(separator:"\n"),url:opening.url)
+    }
+    private init(title:String,start:Date,end:Date,timeZone:TimeZone,location:String,notes:String,url:URL?) {
+        self.title=title; self.start=start; self.end=end; self.timeZone=timeZone; self.location=location; self.notes=notes; self.url=url
+    }
     init(night: Night, closure: String?) {
         let park=night.park, sky=night.sky
         title=String(localized:"Stargazing at \(park.shortName)")
