@@ -18,5 +18,9 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.harrypakhale.nyx.park</string>
+	</array>
 </dict>
 </plist>

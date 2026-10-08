@@ -51,6 +51,8 @@ struct RootView:View {
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
+                // A followed night under way: a strip above the tabs that opens field mode (iOS 26.1).
+                .modifier(NightInProgressAccessory { id in if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) } })
                 .tint(commands.sidebar ? palette.controlTint : palette.accent)
                 .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
@@ -81,6 +83,7 @@ struct RootView:View {
             NotificationRouter.shared.connect { route in openReminder(route) }
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
+            DebugFollowing.install(model)
             if DebugScenario.state=="populated" {
                 // Illustrative sessions so store captures show a lived-in journal, written in the capture's language
                 // (sample text only; DEBUG never adds catalog keys).
@@ -130,6 +133,12 @@ struct RootView:View {
         .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
+        }
+        // A park and night handed off from park detail on another iPhone or iPad.
+        .onContinueUserActivity(ParkHandoff.type) { activity in
+            guard let handoff=ParkHandoff(userInfo:activity.userInfo), let park=model.park(handoff.parkID) else { return }
+            // A night that has passed since it was handed off opens tonight instead.
+            open(park.id,night:handoff.evening(in:park).flatMap { $0>=model.tonight(park) ? ($0,false) : nil })
         }
         .onOpenURL { url in
             // A journal export opened from Files: the Journal tab offers to import it.
@@ -181,6 +190,9 @@ struct RootView:View {
         // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
         case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
         case "widgets-xl": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),extraLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        // 1.1 platform lane: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
+        case "widgets-new": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),newer:true,moon:MoonEntry(date:.now,park:model.home,nightVision:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        case "widgets-xl-portrait": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),portrait:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park)),notes:model.skyNotes(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }

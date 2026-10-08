@@ -81,6 +81,10 @@ struct PlannerWindow: View {
             guard scenePhase == .active else { return }
             await model.keepForecastsFresh()
         }
+        // A park and night handed off from Nyx on iPhone or iPad: that park, that night, in this window.
+        .onContinueUserActivity(ParkHandoff.type) { activity in
+            if let handoff = ParkHandoff(userInfo: activity.userInfo) { model.open(handoff) }
+        }
         .onChange(of: scenePhase) { _, phase in
             // The window holds every control for the sky. Closed, it would leave someone standing
             // in a sky they cannot change or leave except by the Digital Crown, so the sky closes
