@@ -311,8 +311,8 @@ struct TonightView: View {
                 else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
             }
             ViewThatFits(in:.horizontal) {
-                HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
-                VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted) }
+                HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
             if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted) }
             if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
