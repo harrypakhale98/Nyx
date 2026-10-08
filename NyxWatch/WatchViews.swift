@@ -525,7 +525,7 @@ struct ParkChooser: View {
                     Text("Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.").font(.caption2).foregroundStyle(palette.muted)
                 }.listRowBackground(Color.clear)
             }
-            Section("Dark-sky parks") { ForEach(store.parks.filter(\.darkSkyDesignated)) { row($0) } }
+            Section("Dark Sky parks") { ForEach(store.parks.filter(\.darkSkyDesignated)) { row($0) } }
             Section("Other parks") { ForEach(store.parks.filter { !$0.darkSkyDesignated }) { row($0) } }
         }
         .nyxTitle("Nyx")

@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "\"%@\"": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\""
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\""
+          }
+        }
+      }
+    },
     "%@": {
       "extractionState": "manual",
       "localizations": {
@@ -1627,23 +1644,6 @@
         }
       }
     },
-    "%lld minute read": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld minute read"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld min de lectura"
-          }
-        }
-      }
-    },
     "%lld national parks": {
       "extractionState": "manual",
       "localizations": {
@@ -2017,23 +2017,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld de %lld cielos de parques nacionales"
-          }
-        }
-      }
-    },
-    "%lld of %lld nights have no cloud forecast yet.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld of %lld nights have no cloud forecast yet."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld de %lld noches aún no tienen pronóstico de nubes."
           }
         }
       }
@@ -2613,6 +2596,23 @@
         }
       }
     },
+    "%lld-minute read": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld-minute read"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min de lectura"
+          }
+        }
+      }
+    },
     "%lld° below the horizon": {
       "extractionState": "manual",
       "localizations": {
@@ -3004,13 +3004,13 @@
         }
       }
     },
-    "A new Moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full Moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises.": {
+    "A new moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A new Moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full Moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises."
+            "value": "A new moon is a few sharp, sparse taps. As it fills, the taps soften over a broad hum, until a full moon is one wide swell. A waxing Moon swells across the pattern; a waning one fades. Each night's tick on the river is firmer and crisper as its score rises."
           }
         },
         "es": {
@@ -3313,6 +3313,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Unas %lld de cada 10 noches de %@ aquí están mayormente despejadas."
+          }
+        }
+      }
+    },
+    "About 30 minutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About 30 minutes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unos 30 minutos"
           }
         }
       }
@@ -3633,23 +3650,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Agregar a Calendario"
-          }
-        }
-      }
-    },
-    "Add to journal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add to journal"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agregar al diario"
           }
         }
       }
@@ -4644,47 +4644,6 @@
         }
       }
     },
-    "BEST OF THE NEXT %lld NIGHTS": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "BEST OF THE NEXT %lld NIGHT"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "BEST OF THE NEXT %lld NIGHTS"
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "LA MEJOR DE LA PRÓXIMA NOCHE"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "LA MEJOR DE LAS PRÓXIMAS %lld NOCHES"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Before you go": {
       "extractionState": "manual",
       "localizations": {
@@ -4872,19 +4831,19 @@
         }
       }
     },
-    "Best night: %@ at %@.": {
+    "Best night: %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Best night: %@ at %@."
+            "value": "Best night: %@, %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejor noche: %@ en %@."
+            "value": "Mejor noche: %@, %@."
           }
         }
       }
@@ -4953,6 +4912,47 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mejores noches de esta semana"
+          }
+        }
+      }
+    },
+    "Best of the next %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best of the next %lld night"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best of the next %lld nights"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La mejor de la próxima noche"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "La mejor de las próximas %lld noches"
+                }
+              }
+            }
           }
         }
       }
@@ -5103,19 +5103,19 @@
         }
       }
     },
-    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5 reanalysis, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (“No cloud forecast yet”), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5 reanalysis, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (“No cloud forecast yet”), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) del reanálisis ERA5, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) de ERA5, un registro del clima pasado reconstruido a partir de observaciones, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
           }
         }
       }
@@ -5694,47 +5694,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elegir fotos"
-          }
-        }
-      }
-    },
-    "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Elige hasta cuatro fotos. Nyx solo ve las fotos que seleccionas. Se quedan en este iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Elige hasta cuatro fotos. Nyx solo ve las fotos que seleccionas. Se quedan en este iPhone."
-                }
-              }
-            }
           }
         }
       }
@@ -6841,23 +6800,6 @@
         }
       }
     },
-    "DARKNESS / 100": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DARKNESS / 100"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OSCURIDAD / 100"
-          }
-        }
-      }
-    },
     "Dark": {
       "extractionState": "manual",
       "localizations": {
@@ -6939,6 +6881,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Certificación Dark Sky"
+          }
+        }
+      }
+    },
+    "Dark Sky parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark Sky parks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques Dark Sky"
           }
         }
       }
@@ -7109,23 +7068,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vista adaptada"
-          }
-        }
-      }
-    },
-    "Dark-sky parks": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark-sky parks"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parques Dark Sky"
           }
         }
       }
@@ -7398,6 +7340,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Más oscuras: %@ y %lld más"
+          }
+        }
+      }
+    },
+    "Darkness / 100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness / 100"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad / 100"
           }
         }
       }
@@ -8096,13 +8055,13 @@
         }
       }
     },
-    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them. On Apple Vision Pro, star names come from the IAU Working Group on Star Names (IAU WGSN).": {
+    "Each park has an IANA time zone. A night runs from local noon to the following local noon, and \"tonight\" moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them. On Apple Vision Pro, star names come from the IAU Working Group on Star Names (IAU WGSN).": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and “tonight” moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them. On Apple Vision Pro, star names come from the IAU Working Group on Star Names (IAU WGSN)."
+            "value": "Each park has an IANA time zone. A night runs from local noon to the following local noon, and \"tonight\" moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them. On Apple Vision Pro, star names come from the IAU Working Group on Star Names (IAU WGSN)."
           }
         },
         "es": {
@@ -8623,23 +8582,6 @@
         }
       }
     },
-    "Eyes adapted": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eyes adapted"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ojos adaptados"
-          }
-        }
-      }
-    },
     "Eyes adjusting": {
       "extractionState": "manual",
       "localizations": {
@@ -8691,13 +8633,13 @@
         }
       }
     },
-    "Facing %@ at %@.": {
+    "Facing %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Facing %@ at %@."
+            "value": "Facing %@, %@."
           }
         },
         "es": {
@@ -8759,6 +8701,23 @@
         }
       }
     },
+    "Farthest between nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farthest between nights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distancia máxima entre noches"
+          }
+        }
+      }
+    },
     "Feel": {
       "extractionState": "manual",
       "localizations": {
@@ -8776,13 +8735,13 @@
         }
       }
     },
-    "Feel a full Moon": {
+    "Feel a full moon": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feel a full Moon"
+            "value": "Feel a full moon"
           }
         },
         "es": {
@@ -8793,13 +8752,13 @@
         }
       }
     },
-    "Feel a half Moon": {
+    "Feel a half moon": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feel a half Moon"
+            "value": "Feel a half moon"
           }
         },
         "es": {
@@ -8810,13 +8769,13 @@
         }
       }
     },
-    "Feel a new Moon": {
+    "Feel a new moon": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feel a new Moon"
+            "value": "Feel a new moon"
           }
         },
         "es": {
@@ -9868,13 +9827,13 @@
         }
       }
     },
-    "Full colour": {
+    "Full color": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Full colour"
+            "value": "Full color"
           }
         },
         "es": {
@@ -10004,23 +9963,6 @@
         }
       }
     },
-    "Hang": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hang"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bloqueo"
-          }
-        }
-      }
-    },
     "Hawaiʻi": {
       "extractionState": "manual",
       "localizations": {
@@ -10089,13 +10031,13 @@
         }
       }
     },
-    "Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings.": {
+    "Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hear a night as sound, feel the Moon's phase, and how Nyx adapts to VoiceOver, Voice Control and your display settings."
+            "value": "Hear a night as sound, feel the Moon's phase, and see how Nyx adapts to VoiceOver, Voice Control and your display settings."
           }
         },
         "es": {
@@ -11480,13 +11422,13 @@
         }
       }
     },
-    "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light colour, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.": {
+    "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light colour, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution."
+            "value": "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution."
           }
         },
         "es": {
@@ -11684,19 +11626,19 @@
         }
       }
     },
-    "Location is unavailable. Choose a starting park instead.": {
+    "Location is unavailable. Choose a starting point instead.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Location is unavailable. Choose a starting park instead."
+            "value": "Location is unavailable. Choose a starting point instead."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La ubicación no está disponible. Elige un parque de partida."
+            "value": "La ubicación no está disponible. Elige un punto de partida."
           }
         }
       }
@@ -11742,47 +11684,6 @@
         }
       }
     },
-    "Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Location is used only while you use Nyx, to compare park distances on this iPad. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPad to point the sky where you hold it; nothing is recorded."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Location is used only while you use Nyx, to compare park distances on this iPhone. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx, para comparar distancias a los parques en este iPad. Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPad para orientar el cielo hacia donde lo sostienes; no se registra nada."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx, para comparar distancias a los parques en este iPhone. Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPhone para orientar el cielo hacia donde lo sostienes; no se registra nada."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Lock Screen": {
       "extractionState": "manual",
       "localizations": {
@@ -11813,40 +11714,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pantalla bloqueada: en línea, Esta noche y la Luna"
-          }
-        }
-      }
-    },
-    "Log a night": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log a night"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrar una noche"
-          }
-        }
-      }
-    },
-    "Longest drive between nights": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Longest drive between nights"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trayecto máximo entre noches"
           }
         }
       }
@@ -12922,36 +12789,36 @@
         }
       }
     },
-    "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.": {
+    "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonlight contributes 40%, clouds 25%, estimated light pollution 20%, and the length of true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness."
+            "value": "Moonlight contributes 40%, clouds 25%, sky glow (estimated) 20%, and true darkness 15%. Moonlight follows the Moon's phase and its height through true darkness (Krisciunas and Schaefer, 1991), so a low crescent costs less than a high gibbous Moon. The four parts are added, then the weakest link caps the sum: clouds hold a night to 100 minus 0.9 points for each percent of cloud (overcast at most 10, half cloud 55); sky glow holds a Bortle 3 park to 89, Bortle 4 to 84, Bortle 5 to 74, Bortle 6 to 59 and brighter skies to 39, so only Bortle 2 or darker can read Pristine; heavy smoke or haze (aerosol optical depth 0.5 or more) holds a night to 59, and lighter smoke (0.25 to 0.5) to 74. No true darkness caps a night below 40, and that cap lifts gradually over the first three hours of true darkness. The breakdown names the cap that applies. When scores tie, parks with darker skies in NASA's satellite night lights come first, then longer true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La luz de la Luna aporta el 40%, las nubes el 25%, la contaminación lumínica estimada el 20% y la duración de la oscuridad total el 15%. La luz de la Luna sigue su fase y su altura durante la oscuridad total (Krisciunas y Schaefer, 1991), así que una Luna delgada y baja pesa menos que una Luna gibosa alta. Las cuatro partes se suman y después el eslabón más débil limita el total: las nubes limitan una noche a 100 menos 0.9 puntos por cada por ciento de nubes (cielo cubierto, como máximo 10; medio cubierto, 55); el resplandor del cielo limita un parque de Bortle 3 a 89, Bortle 4 a 84, Bortle 5 a 74, Bortle 6 a 59 y los cielos más brillantes a 39, así que solo un Bortle 2 o más oscuro puede llegar a Prístina; el humo o la bruma densos (profundidad óptica de aerosoles de 0.5 o más) limitan una noche a 59, y el humo más ligero (0.25 a 0.5), a 74. Sin oscuridad total, una noche queda por debajo de 40, y ese límite se levanta poco a poco durante las primeras tres horas de oscuridad total. El desglose indica el límite que aplica. Cuando los índices empatan, van primero los parques con cielos más oscuros en las luces nocturnas satelitales de la NASA y después los de oscuridad total más larga."
+            "value": "La luz de la Luna aporta el 40%, las nubes el 25%, el resplandor del cielo (estimado) el 20% y la oscuridad total el 15%. La luz de la Luna sigue su fase y su altura durante la oscuridad total (Krisciunas y Schaefer, 1991), así que una Luna delgada y baja pesa menos que una Luna gibosa alta. Las cuatro partes se suman y después el eslabón más débil limita el total: las nubes limitan una noche a 100 menos 0.9 puntos por cada por ciento de nubes (cielo cubierto, como máximo 10; medio cubierto, 55); el resplandor del cielo limita un parque de Bortle 3 a 89, Bortle 4 a 84, Bortle 5 a 74, Bortle 6 a 59 y los cielos más brillantes a 39, así que solo un Bortle 2 o más oscuro puede llegar a Prístina; el humo o la bruma densos (profundidad óptica de aerosoles de 0.5 o más) limitan una noche a 59, y el humo más ligero (0.25 a 0.5), a 74. Sin oscuridad total, una noche queda por debajo de 40, y ese límite se levanta poco a poco durante las primeras tres horas de oscuridad total. El desglose indica el límite que aplica. Cuando los índices empatan, van primero los parques con cielos más oscuros en las luces nocturnas satelitales de la NASA y después los de oscuridad total más larga."
           }
         }
       }
     },
-    "Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown.": {
+    "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonlight, clouds, artificial light and the length of darkness become one score. Every estimate tells you what is still unknown."
+            "value": "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La luz de la Luna, las nubes, la luz artificial y la duración de la oscuridad se convierten en un solo índice. Cada estimación te dice qué sigue sin saberse."
+            "value": "La luz de la Luna, las nubes, el resplandor del cielo y la oscuridad total se convierten en un solo índice. Cada estimación te dice qué sigue sin saberse."
           }
         }
       }
@@ -13058,13 +12925,13 @@
         }
       }
     },
-    "Moonrise at %@ at %@.": {
+    "Moonrise at %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonrise at %@ at %@."
+            "value": "Moonrise at %@, %@."
           }
         },
         "es": {
@@ -13126,13 +12993,13 @@
         }
       }
     },
-    "Moonset at %@ at %@.": {
+    "Moonset at %@, %@.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moonset at %@ at %@."
+            "value": "Moonset at %@, %@."
           }
         },
         "es": {
@@ -13269,23 +13136,6 @@
         }
       }
     },
-    "Moves Nyx's Tonight's sky widget to your next saved park, in order of tonight's score. The next day it returns to the darkest one.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moves Nyx's Tonight's sky widget to your next saved park, in order of tonight's score. The next day it returns to the darkest one."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pasa el widget Cielo de esta noche de Nyx a tu siguiente parque guardado, según el índice de esta noche. Al día siguiente vuelve al más oscuro."
-          }
-        }
-      }
-    },
     "Moves one night at a time.": {
       "extractionState": "manual",
       "localizations": {
@@ -13316,6 +13166,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Avanza una noche a la vez. Hay un gráfico de audio disponible."
+          }
+        }
+      }
+    },
+    "Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasa el widget Cielo de esta noche a tu siguiente parque guardado, según el índice de esta noche. Mañana vuelve a tu parque más oscuro."
           }
         }
       }
@@ -13456,84 +13323,6 @@
         }
       }
     },
-    "NEXT SEVEN NIGHTS": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NEXT SEVEN NIGHTS"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "PRÓXIMAS SIETE NOCHES"
-          }
-        }
-      }
-    },
-    "NUMBER %lld OF THE NEXT %lld NIGHTS": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NUMBER %1$lld OF THE NEXT %#@nights@"
-          },
-          "substitutions": {
-            "nights": {
-              "argNum": 2,
-              "formatSpecifier": "lld",
-              "variations": {
-                "plural": {
-                  "one": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "%arg NIGHT"
-                    }
-                  },
-                  "other": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "%arg NIGHTS"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NÚMERO %1$lld DE %#@nights@"
-          },
-          "substitutions": {
-            "nights": {
-              "argNum": 2,
-              "formatSpecifier": "lld",
-              "variations": {
-                "plural": {
-                  "one": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "LA PRÓXIMA NOCHE"
-                    }
-                  },
-                  "other": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "LAS PRÓXIMAS %arg NOCHES"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "NW": {
       "extractionState": "manual",
       "localizations": {
@@ -13564,23 +13353,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "NYX"
-          }
-        }
-      }
-    },
-    "NYX · YEAR UNDER THE STARS": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NYX · YEAR UNDER THE STARS"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NYX · UN AÑO BAJO LAS ESTRELLAS"
           }
         }
       }
@@ -13700,23 +13472,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Casi oscuro"
-          }
-        }
-      }
-    },
-    "New entry for this park": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New entry for this park"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nueva entrada para este parque"
           }
         }
       }
@@ -13976,6 +13731,23 @@
         }
       }
     },
+    "Next seven nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next seven nights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximas siete noches"
+          }
+        }
+      }
+    },
     "Night": {
       "extractionState": "manual",
       "localizations": {
@@ -14163,23 +13935,6 @@
         }
       }
     },
-    "Nights logged: %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nights logged: %lld"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noches registradas: %lld"
-          }
-        }
-      }
-    },
     "Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part.": {
       "extractionState": "manual",
       "localizations": {
@@ -14268,6 +14023,40 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Nights recorded: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights recorded: %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noches registradas: %lld"
+          }
+        }
+      }
+    },
+    "Nights without a cloud forecast yet: %lld of %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights without a cloud forecast yet: %lld of %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noches aún sin pronóstico de nubes: %lld de %lld."
           }
         }
       }
@@ -14738,13 +14527,13 @@
         }
       }
     },
-    "No nights logged in %@ yet. Your first night will be your first star.": {
+    "No nights recorded in %@ yet. Your first night will be your first star.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No nights logged in %@ yet. Your first night will be your first star."
+            "value": "No nights recorded in %@ yet. Your first night will be your first star."
           }
         },
         "es": {
@@ -15340,6 +15129,67 @@
         }
       }
     },
+    "Number %lld of the next %lld nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number %1$lld of the next %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg night"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nights"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Número %1$lld de %#@nights@"
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "la próxima noche"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "las próximas %arg noches"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Nyx": {
       "extractionState": "manual",
       "localizations": {
@@ -15548,77 +15398,36 @@
         }
       }
     },
-    "Nyx could not ground an answer in these records. The original data is still available below.": {
+    "Nyx could not match an answer to these records. The original data is below.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx could not ground an answer in these records. The original data is still available below."
+            "value": "Nyx could not match an answer to these records. The original data is below."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx no pudo basar una respuesta en estos registros. Los datos originales siguen disponibles abajo."
+            "value": "Nyx no pudo relacionar una respuesta con estos registros. Los datos originales están abajo."
           }
         }
       }
     },
-    "Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.": {
+    "Nyx could not open its storage": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced."
+            "value": "Nyx could not open its storage"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx no pudo abrir el almacenamiento local. Reinicia Nyx después de liberar espacio. Los datos existentes no se reemplazaron."
-          }
-        }
-      }
-    },
-    "Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx could not open local storage. Restart the app after making space on this iPad. Existing data has not been replaced."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx could not open local storage. Restart the app after making space on this iPhone. Existing data has not been replaced."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx no pudo abrir el almacenamiento local. Reinicia la app después de liberar espacio en este iPad. Los datos existentes no se reemplazaron."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx no pudo abrir el almacenamiento local. Reinicia la app después de liberar espacio en este iPhone. Los datos existentes no se reemplazaron."
-                }
-              }
-            }
+            "value": "Nyx no pudo abrir su almacenamiento"
           }
         }
       }
@@ -15711,23 +15520,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyx se basa en ciencia pública. Cada fuente se reconoce aquí con las palabras que pide."
-          }
-        }
-      }
-    },
-    "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nyx no está afiliado ni respaldado por el NPS, la NASA ni DarkSky International."
           }
         }
       }
@@ -15882,47 +15674,6 @@
         }
       }
     },
-    "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPad. You can also choose a starting park."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a starting park."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx usa tu ubicación una vez para encontrar parques dentro de un radio en línea recta. Se queda en este iPad. También puedes elegir un parque de partida."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Nyx usa tu ubicación una vez para encontrar parques dentro de un radio en línea recta. Se queda en este iPhone. También puedes elegir un parque de partida."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Nyx will ask to tap your wrist at 25 and 30 minutes.": {
       "extractionState": "manual",
       "localizations": {
@@ -15970,6 +15721,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyx te avisará cuando una noche aquí se vea muy oscura."
+          }
+        }
+      }
+    },
+    "Nyx · Year under the stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx · Year under the stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx · Un año bajo las estrellas"
           }
         }
       }
@@ -17290,13 +17058,13 @@
         }
       }
     },
-    "Parks and skyglow": {
+    "Parks and sky glow": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Parks and skyglow"
+            "value": "Parks and sky glow"
           }
         },
         "es": {
@@ -18327,6 +18095,23 @@
         }
       }
     },
+    "Read \"%@\"": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read \"%@\""
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer \"%@\""
+          }
+        }
+      }
+    },
     "Read the estimate": {
       "extractionState": "manual",
       "localizations": {
@@ -18344,19 +18129,19 @@
         }
       }
     },
-    "Read “%@”": {
+    "Reading artificial sky brightness": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Read “%@”"
+            "value": "Reading artificial sky brightness"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leer “%@”"
+            "value": "Cómo leer el brillo artificial del cielo"
           }
         }
       }
@@ -18378,13 +18163,13 @@
         }
       }
     },
-    "Reading the Darkness Score": {
+    "Reading the darkness score": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reading the Darkness Score"
+            "value": "Reading the darkness score"
           }
         },
         "es": {
@@ -18446,43 +18231,19 @@
         }
       }
     },
-    "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone.": {
+    "Record a night at this park": {
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Record what you saw, how the sky felt, and the place you found it. Every entry stays on this iPhone."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record a night at this park"
           }
         },
         "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Anota lo que viste, cómo se sentía el cielo y el lugar donde lo encontraste. Cada entrada se queda en este iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Anota lo que viste, cómo se sentía el cielo y el lugar donde lo encontraste. Cada entrada se queda en este iPhone."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar una noche en este parque"
           }
         }
       }
@@ -18538,19 +18299,19 @@
         }
       }
     },
-    "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still.": {
+    "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the month slide in Plan. When iOS asks apps to use less, the sky holds still.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the calendar's slide. When iOS asks apps to use less, the sky holds still."
+            "value": "Reduce Highlighting Effects dims the glows, halos and the Milky Way and keeps the shooting star away. Prefer Cross-Fade Transitions replaces the zoom and the month slide in Plan. When iOS asks apps to use less, the sky holds still."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reducir efectos de resaltado atenúa los brillos, los halos y la Vía Láctea, y quita la estrella fugaz. Preferir transiciones de fundido reemplaza el zoom y el deslizamiento del calendario. Cuando iOS pide a las apps que consuman menos, el cielo se queda quieto."
+            "value": "Reducir efectos de resaltado atenúa los brillos, los halos y la Vía Láctea, y quita la estrella fugaz. Preferir transiciones de fundido reemplaza el zoom y el deslizamiento del mes en Planear. Cuando iOS pide a las apps que consuman menos, el cielo se queda quieto."
           }
         }
       }
@@ -18626,6 +18387,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Remove from saved parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from saved parks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de los parques guardados"
           }
         }
       }
@@ -18847,6 +18625,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reinicia el reloj y cancela los recordatorios."
+          }
+        }
+      }
+    },
+    "Restart Nyx after making some space. Existing data has not been replaced.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart Nyx after making some space. Existing data has not been replaced."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reinicia Nyx después de liberar espacio. Los datos existentes no se reemplazaron."
           }
         }
       }
@@ -19085,23 +18880,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Entran los bastones"
-          }
-        }
-      }
-    },
-    "Rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los rotores van directo a lo importante: Mejores noches y la mejor racha en Planear, Cierres y Noches prístinas en Parques, Hitos en el modo de campo. En el río del tiempo, las acciones llevan a la mejor noche y permiten sentir la Luna."
           }
         }
       }
@@ -19470,13 +19248,13 @@
         }
       }
     },
-    "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed.": {
+    "Saved parks are kept with your journal, which could not be opened. Nothing was changed.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saved parks are kept with your journal, which couldn't be opened. Nothing was changed."
+            "value": "Saved parks are kept with your journal, which could not be opened. Nothing was changed."
           }
         },
         "es": {
@@ -20147,13 +19925,13 @@
         }
       }
     },
-    "Short essays on the Darkness Score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night.": {
+    "Short essays on the darkness score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Short essays on the Darkness Score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night."
+            "value": "Short essays on the darkness score, the Milky Way and its photos, meteors, forecasts, staying safe and sharing the night."
           }
         },
         "es": {
@@ -20256,19 +20034,19 @@
         }
       }
     },
-    "Show in Calendar": {
+    "Show in Plan": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show in Calendar"
+            "value": "Show in Plan"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mostrar en Calendario"
+            "value": "Mostrar en Planear"
           }
         }
       }
@@ -20868,13 +20646,13 @@
         }
       }
     },
-    "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position. Checked against the U.S. Naval Observatory, they agree to within a few minutes: a minute or less at the parks checked in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, and under 4 minutes at mid-latitude parks. Sunrise, sunset and twilight agree to within a minute. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map, lit from the Sun's real direction and tilted as it appears from the park at its highest point that night. Moon imagery: NASA's Scientific Visualization Studio (CGI Moon Kit); LRO LROC and LOLA teams.": {
+    "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position. Checked against the U.S. Naval Observatory, they agree to within a few minutes: a minute or less at the parks checked in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, and under 4 minutes at mid-latitude parks. Sunrise, sunset and twilight agree to within a minute. Moon illumination corrects the mean 29.53-day cycle with the Moon's calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar color map, lit from the Sun's real direction and tilted as it appears from the park at its highest point that night. Moon imagery: NASA's Scientific Visualization Studio (CGI Moon Kit); LRO LROC and LOLA teams.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position. Checked against the U.S. Naval Observatory, they agree to within a few minutes: a minute or less at the parks checked in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, and under 4 minutes at mid-latitude parks. Sunrise, sunset and twilight agree to within a minute. Moon illumination corrects the mean 29.53-day cycle with the Moon’s calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar colour map, lit from the Sun's real direction and tilted as it appears from the park at its highest point that night. Moon imagery: NASA's Scientific Visualization Studio (CGI Moon Kit); LRO LROC and LOLA teams."
+            "value": "Solar timing uses NOAA approximations. Moonrise and moonset use a low-precision Meeus-style position. Checked against the U.S. Naval Observatory, they agree to within a few minutes: a minute or less at the parks checked in Alaska, Hawaiʻi, American Samoa and the Virgin Islands, and under 4 minutes at mid-latitude parks. Sunrise, sunset and twilight agree to within a minute. Moon illumination corrects the mean 29.53-day cycle with the Moon's calculated position and is approximate. Terrain and atmospheric conditions can shift visible rise and set times. The Moon is drawn from NASA's lunar color map, lit from the Sun's real direction and tilted as it appears from the park at its highest point that night. Moon imagery: NASA's Scientific Visualization Studio (CGI Moon Kit); LRO LROC and LOLA teams."
           }
         },
         "es": {
@@ -21378,40 +21156,6 @@
         }
       }
     },
-    "Starting places": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starting places"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lugares de partida"
-          }
-        }
-      }
-    },
-    "Starting places and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starting places and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lugares de partida y el mapa de Estados Unidos: archivos Gazetteer, estimaciones de población y límites cartográficos de la Oficina del Censo de EE. UU., dominio público."
-          }
-        }
-      }
-    },
     "Starting point": {
       "extractionState": "manual",
       "localizations": {
@@ -21459,6 +21203,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Punto de partida: la ubicación del dispositivo. Las distancias son estimaciones en línea recta."
+          }
+        }
+      }
+    },
+    "Starting points": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting points"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntos de partida"
+          }
+        }
+      }
+    },
+    "Starting points and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting points and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntos de partida y el mapa de Estados Unidos: archivos Gazetteer, estimaciones de población y límites cartográficos de la Oficina del Censo de EE. UU., dominio público."
           }
         }
       }
@@ -21680,6 +21458,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dejar de escuchar"
+          }
+        }
+      }
+    },
+    "Stopped responding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped responding"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejó de responder"
           }
         }
       }
@@ -22133,70 +21928,19 @@
         }
       }
     },
-    "THE MOON": {
+    "That does not look like a National Park Service key. Keys are about 40 letters and numbers.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "THE MOON"
+            "value": "That does not look like a National Park Service key. Keys are about 40 letters and numbers."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "LA LUNA"
-          }
-        }
-      }
-    },
-    "TONIGHT": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TONIGHT"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ESTA NOCHE"
-          }
-        }
-      }
-    },
-    "TONIGHT'S SKY": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TONIGHT'S SKY"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CIELO DE ESTA NOCHE"
-          }
-        }
-      }
-    },
-    "That doesn't look like an NPS key. Keys are about 40 letters and numbers.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "That doesn't look like an NPS key. Keys are about 40 letters and numbers."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eso no parece una clave del NPS. Las claves tienen unas 40 letras y números."
+            "value": "Eso no parece una clave del National Park Service. Las claves tienen unas 40 letras y números."
           }
         }
       }
@@ -22364,19 +22108,19 @@
         }
       }
     },
-    "The Milky Way's bright center is Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score.": {
+    "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The Milky Way's bright center is Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score."
+            "value": "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante de la Vía Láctea es Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. La temporada de auroras en Alaska es una nota de calendario; Nyx no pronostica auroras. Nada de esto cambia el índice."
+            "value": "El centro brillante de la Vía Láctea se toma como la dirección de Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. La temporada de auroras en Alaska es una nota de calendario; Nyx no pronostica auroras. Nada de esto cambia el índice."
           }
         }
       }
@@ -22602,23 +22346,6 @@
         }
       }
     },
-    "The Moon sets at %@ in 30 minutes": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Moon sets at %@ in 30 minutes"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La Luna se pone en 30 minutos (%@)"
-          }
-        }
-      }
-    },
     "The Moon sets before it ends.": {
       "extractionState": "manual",
       "localizations": {
@@ -22632,6 +22359,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "La Luna se pone antes de que termine."
+          }
+        }
+      }
+    },
+    "The Moon sets in 30 minutes at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon sets in 30 minutes at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna se pone en 30 minutos en %@"
           }
         }
       }
@@ -23088,13 +22832,13 @@
         }
       }
     },
-    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service.": {
+    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark-Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service."
+            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service."
           }
         },
         "es": {
@@ -23258,13 +23002,13 @@
         }
       }
     },
-    "The faint outline of the United States beneath your stars is simplified from the US Census Bureau's cartographic boundary file of the nation (cb_2023_us_nation_20m), which is in the public domain. It is decoration, drawn at a scale where small islands disappear.": {
+    "The faint outline of the United States beneath your stars is simplified from the U.S. Census Bureau's cartographic boundary file of the nation (cb_2023_us_nation_20m), which is in the public domain. It is decoration, drawn at a scale where small islands disappear.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The faint outline of the United States beneath your stars is simplified from the US Census Bureau's cartographic boundary file of the nation (cb_2023_us_nation_20m), which is in the public domain. It is decoration, drawn at a scale where small islands disappear."
+            "value": "The faint outline of the United States beneath your stars is simplified from the U.S. Census Bureau's cartographic boundary file of the nation (cb_2023_us_nation_20m), which is in the public domain. It is decoration, drawn at a scale where small islands disappear."
           }
         },
         "es": {
@@ -23326,19 +23070,19 @@
         }
       }
     },
-    "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; heavy smoke can cap the score.": {
+    "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; heavy smoke can cap the score."
+            "value": "The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El pronóstico por hora, promediado durante la oscuridad total y ajustado hacia la nubosidad habitual del parque después de unos tres días. La coincidencia entre modelos y las capas de nubes son contexto; el humo denso puede limitar el índice."
+            "value": "El pronóstico por hora, promediado durante la oscuridad total y ajustado hacia la nubosidad habitual del parque después de unos tres días. La coincidencia entre modelos y las capas de nubes son contexto; el humo o la bruma pueden limitar el índice."
           }
         }
       }
@@ -24081,13 +23825,13 @@
         }
       }
     },
-    "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched.": {
+    "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched."
+            "value": "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched."
           }
         },
         "es": {
@@ -24271,47 +24015,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "El cielo de esa noche"
-          }
-        }
-      }
-    },
-    "This optional explanation stays on your iPhone. Check the source records before making plans.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "This optional explanation stays on your iPad. Check the source records before making plans."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "This optional explanation stays on your iPhone. Check the source records before making plans."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Esta explicación opcional se queda en tu iPad. Revisa los registros originales antes de hacer planes."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Esta explicación opcional se queda en tu iPhone. Revisa los registros originales antes de hacer planes."
-                }
-              }
-            }
           }
         }
       }
@@ -25377,19 +25080,19 @@
         }
       }
     },
-    "Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline.": {
+    "Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, calendar, saved parks and the journal work offline."
+            "value": "Turning updates off prevents new requests. Previously cached data remains available. Moon, twilight, Plan, saved parks and the journal work offline."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desactivar las actualizaciones evita nuevas solicitudes. Los datos guardados antes siguen disponibles. La Luna, el crepúsculo, el calendario, los parques guardados y el diario funcionan sin conexión."
+            "value": "Desactivar las actualizaciones evita nuevas solicitudes. Los datos guardados antes siguen disponibles. La Luna, el crepúsculo, Planear, los parques guardados y el diario funcionan sin conexión."
           }
         }
       }
@@ -25594,23 +25297,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Debajo de la forma de la noche, en la página de un parque, Nyx puede reproducir esa noche en doce segundos de sonido, de la puesta a la salida del sol."
-          }
-        }
-      }
-    },
-    "Understand artificial sky brightness": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Understand artificial sky brightness"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Entiende el brillo artificial del cielo"
           }
         }
       }
@@ -25887,19 +25573,19 @@
         }
       }
     },
-    "Use your own NPS key": {
+    "Use your own park service key": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use your own NPS key"
+            "value": "Use your own park service key"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usar tu propia clave del NPS"
+            "value": "Usar tu propia clave del servicio de parques"
           }
         }
       }
@@ -26121,6 +25807,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "VoiceOver lo lee cuando se muestra la foto."
+          }
+        }
+      }
+    },
+    "VoiceOver rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VoiceOver rotors jump straight to what matters: Best nights and the best stretch in Plan, Closures and Pristine nights in Parks, Milestones in field mode. On the time river, actions go to the best night and feel the Moon."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los rotores de VoiceOver van directo a lo importante: Mejores noches y la mejor racha en Planear, Cierres y Noches prístinas en Parques, Hitos en el modo de campo. En el río del tiempo, las acciones llevan a la mejor noche y permiten sentir la Luna."
           }
         }
       }
@@ -27258,19 +26961,19 @@
         }
       }
     },
-    "Your NPS API key": {
+    "Your National Park Service key": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your NPS API key"
+            "value": "Your National Park Service key"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu clave de la API del NPS"
+            "value": "Tu clave del National Park Service"
           }
         }
       }
@@ -27535,19 +27238,19 @@
         }
       }
     },
-    "Your eyes have adapted. Keep the screen red.": {
+    "Your eyes should be adapted. Keep the screen red.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your eyes have adapted. Keep the screen red."
+            "value": "Your eyes should be adapted. Keep the screen red."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus ojos ya se adaptaron. Mantén la pantalla en rojo."
+            "value": "Tus ojos ya deberían estar adaptados. Mantén la pantalla en rojo."
           }
         }
       }
@@ -27637,47 +27340,6 @@
         }
       }
     },
-    "Your iPhone": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Your iPad"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Your iPhone"
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Tu iPad"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Tu iPhone"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more.": {
       "extractionState": "manual",
       "localizations": {
@@ -27695,13 +27357,13 @@
         }
       }
     },
-    "Your journal couldn't be opened, so this file was not imported. Nothing was changed.": {
+    "Your journal could not be opened, so this file was not imported. Nothing was changed.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your journal couldn't be opened, so this file was not imported. Nothing was changed."
+            "value": "Your journal could not be opened, so this file was not imported. Nothing was changed."
           }
         },
         "es": {
@@ -27712,36 +27374,19 @@
         }
       }
     },
-    "Your journal couldn't be opened. Everything else works. Nyx left your journal untouched.": {
+    "Your journal could not be opened. Everything else works. Nyx left your journal untouched.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your journal couldn't be opened. Everything else works. Nyx left your journal untouched."
+            "value": "Your journal could not be opened. Everything else works. Nyx left your journal untouched."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "No se pudo abrir tu diario. Todo lo demás funciona. Nyx no tocó tu diario."
-          }
-        }
-      }
-    },
-    "Your journal is safe to leave closed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your journal is safe to leave closed"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puedes cerrar tu diario sin riesgo"
           }
         }
       }
@@ -28619,7 +28264,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stargazing for everyone\n\nThe night sky asks very little of us. You do not need perfect eyesight, a long hike or a telescope to share in it. Many national parks hold their astronomy programs at paved parking areas and visitor centers, and some offer accessible viewing areas, tactile star maps or assistive listening at ranger talks. Ask the park before you go about step-free paths, accessible parking and restrooms near the place you plan to watch.\n\nDarkness can be a barrier of its own. Ground that is easy by day becomes uncertain at night. Arrive before dusk, learn the path while you can see it, and park close to where you will sit. A folding chair and a blanket make a long wait under the stars comfortable at any age. Bring someone along if you can; the sky is better shared.\n\nRed light protects night vision, yours and everyone's around you. Use the dimmest red light that still lets you move safely, and point it at the ground. Nyx's night-vision mode turns the screen red, and field mode lowers the brightness for you and puts it back when you leave.\n\nThe sky can be heard. Astronomers increasingly turn data into sound, and blind and low-vision astronomers have shown how much it can carry. In Nyx, Listen to tonight plays a whole night in twelve seconds: the tone falls as the sky darkens and rises toward dawn, it quiets while the Moon is up, a soft pulse marks moonrise and moonset, and a chime marks the Milky Way's core rising. A transcript says the same night in words. With VoiceOver, the time river, each calendar month and the shape of the night also have an audio graph you can play.\n\nThe Moon can be felt. On an iPhone with a Taptic Engine, Feel the Moon turns its phase into a texture: a few sharp, sparse taps for a new Moon, a broad swell for a full one. As you move along the time river, each night ticks firmer as its score rises.\n\nNyx follows the settings you already use: larger and bold text, VoiceOver and Voice Control, reduced motion, reduced transparency and highlighting, and shapes as well as colour when you ask for them. If something in Nyx does not work for you, that is a flaw to fix, not a limit of the sky."
+            "value": "Stargazing for everyone\n\nThe night sky asks very little of us. You do not need perfect eyesight, a long hike or a telescope to share in it. Many national parks hold their astronomy programs at paved parking areas and visitor centers, and some offer accessible viewing areas, tactile star maps or assistive listening at ranger talks. Ask the park before you go about step-free paths, accessible parking and restrooms near the place you plan to watch.\n\nDarkness can be a barrier of its own. Ground that is easy by day becomes uncertain at night. Arrive before dusk, learn the path while you can see it, and park close to where you will sit. A folding chair and a blanket make a long wait under the stars comfortable at any age. Bring someone along if you can; the sky is better shared.\n\nRed light protects night vision, yours and everyone's around you. Use the dimmest red light that still lets you move safely, and point it at the ground. Nyx's night-vision mode turns the screen red, and field mode lowers the brightness for you and puts it back when you leave.\n\nThe sky can be heard. Astronomers increasingly turn data into sound, and blind and low-vision astronomers have shown how much it can carry. In Nyx, Listen to tonight plays a whole night in twelve seconds: the tone falls as the sky darkens and rises toward dawn, it quiets while the Moon is up, a soft pulse marks moonrise and moonset, and a chime marks the Milky Way's core rising. A transcript says the same night in words. With VoiceOver, the time river, each calendar month and the shape of the night also have an audio graph you can play.\n\nThe Moon can be felt. On an iPhone with a Taptic Engine, Feel the Moon turns its phase into a texture: a few sharp, sparse taps for a new moon, a broad swell for a full one. As you move along the time river, each night ticks firmer as its score rises.\n\nNyx follows the settings you already use: larger and bold text, VoiceOver and Voice Control, reduced motion, reduced transparency and highlighting, and shapes as well as color when you ask for them. If something in Nyx does not work for you, that is a flaw to fix, not a limit of the sky."
           }
         },
         "es": {
@@ -28636,7 +28281,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reading the Bortle scale\n\nThe Bortle scale describes how a night sky looks to an observer. It runs from class 1, an exceptionally dark sky, to class 9, a bright inner-city sky. Lower numbers mean less artificial light. The scale is useful language for comparing places, but it is not a precise instrument reading and it cannot predict the weather.\n\nUnder a dark sky, faint stars become easier to see and the Milky Way may show structure instead of appearing as a barely visible band. Near a city, a bright background can wash out those details. You might still enjoy the Moon, planets and bright constellations. A high Bortle number does not mean there is nothing to see; it means the faintest parts of the sky have more competition.\n\nClasses 1 and 2 describe very dark skies. Class 3 is a rural sky where artificial light may be visible near the horizon. Class 4 is a transition toward suburban conditions. Classes 5 and 6 bring more skyglow, and classes 7 through 9 describe increasingly bright skies. These are broad descriptions, not a checklist that every observer will agree on perfectly.\n\nYour experience depends on more than artificial light. A full Moon can brighten an otherwise remote park. Haze and smoke scatter light. A cloud can reflect light from a town or hide the stars altogether. Trees, cliffs and mountains can block your view without changing the darkness of the open sky. Even your eyes need time to adjust after a bright screen or a car's headlights.\n\nNyx includes a conservative Bortle estimate for each park. It is a planning assumption, not a measurement made at the moment you arrive. A large park may contain very different viewing conditions. An estimate for the park cannot describe every campground, overlook or trail. This is why the app labels the class as an estimate and keeps weather, moonlight and the length of darkness separate in the score breakdown.\n\nWhen you record a journal entry, choose the class that seems closest to the sky you observed. There is no need to turn your evening into an examination. Note whether the Milky Way was visible, where a bright horizon appeared, and whether haze or the Moon changed the view. Those notes may be more useful on your next trip than the number alone.\n\nTry comparing the same place on different nights. A moonless evening after clear weather can feel very different from a humid night under a bright Moon. That difference is part of learning to read the sky. Use the scale to describe an experience, use the forecast to prepare, and give yourself time to look before deciding what you can see."
+            "value": "Reading the Bortle scale\n\nThe Bortle scale describes how a night sky looks to an observer. It runs from class 1, an exceptionally dark sky, to class 9, a bright inner-city sky. Lower numbers mean less artificial light. The scale is useful language for comparing places, but it is not a precise instrument reading and it cannot predict the weather.\n\nUnder a dark sky, faint stars become easier to see and the Milky Way may show structure instead of appearing as a barely visible band. Near a city, a bright background can wash out those details. You might still enjoy the Moon, planets and bright constellations. A high Bortle number does not mean there is nothing to see; it means the faintest parts of the sky have more competition.\n\nClasses 1 and 2 describe very dark skies. Class 3 is a rural sky where artificial light may be visible near the horizon. Class 4 is a transition toward suburban conditions. Classes 5 and 6 bring more sky glow, and classes 7 through 9 describe increasingly bright skies. These are broad descriptions, not a checklist that every observer will agree on perfectly.\n\nYour experience depends on more than artificial light. A full moon can brighten an otherwise remote park. Haze and smoke scatter light. A cloud can reflect light from a town or hide the stars altogether. Trees, cliffs and mountains can block your view without changing the darkness of the open sky. Even your eyes need time to adjust after a bright screen or a car's headlights.\n\nNyx includes a conservative Bortle estimate for each park. It is a planning assumption, not a measurement made at the moment you arrive. A large park may contain very different viewing conditions. An estimate for the park cannot describe every campground, overlook or trail. This is why the app labels the class as an estimate and keeps weather, moonlight and the length of darkness separate in the score breakdown.\n\nWhen you record a journal entry, choose the class that seems closest to the sky you observed. There is no need to turn your evening into an examination. Note whether the Milky Way was visible, where a bright horizon appeared, and whether haze or the Moon changed the view. Those notes may be more useful on your next trip than the number alone.\n\nTry comparing the same place on different nights. A moonless evening after clear weather can feel very different from a humid night under a bright Moon. That difference is part of learning to read the sky. Use the scale to describe an experience, use the forecast to prepare, and give yourself time to look before deciding what you can see."
           }
         },
         "es": {
@@ -28653,7 +28298,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A sky worth protecting\n\nA dark sky is more than a place to see stars. It is a habitat. Long before electric light, plants and animals lived with a steady pattern of bright days and dark nights. That rhythm still matters. A lamp beside a road may help a person see the ground, but its light can reach far beyond the road, into the places where other lives unfold.\n\nLight scattered in the atmosphere creates skyglow. From a city, it can hide the faint band of the Milky Way. The brightest stars remain, while the quieter parts of the sky disappear. A person who has never seen a truly dark night may not know what is missing. A national park can offer a first encounter with a sky that feels unexpectedly full.\n\nDarkness does not mean using no light. It means putting light where it helps, at the time it is needed, and at a level that suits the task. A shielded light aimed toward the ground serves a path better than one shining into the sky. A light switched off when nobody needs it gives darkness back to the surrounding landscape. Small decisions can matter when many people make them.\n\nPark staff work to protect night skies by improving outdoor lighting, studying sky brightness and helping visitors learn how to enjoy the night. International Dark Sky certification recognizes sustained work on lighting and education. It is not a promise that every night will be clear, or that every corner of a certified park will be equally dark. Clouds, the Moon, nearby towns and your own viewing location still shape the experience.\n\nNyx treats a park's Bortle class as an estimate because darkness is not a permanent property of a name on a map. A visitor center may have more light than a remote overlook. A bright horizon may affect one direction more than another. Smoke and haze can scatter light even on a night with little cloud. The score helps you choose a promising night; your eyes tell you what the night actually offers.\n\nYou can help protect that experience. Choose a modest red light for moving around. Turn off vehicle headlights when safely parked, and avoid shining a beam toward other observers. Ask a ranger where you may stay after dark. Leave paths, wildlife and cultural places as you found them.\n\nBack at home, look at your own outdoor lights. Consider shielding them, lowering their brightness or using a timer. You do not need a telescope to be a caretaker of the night. Sometimes the most useful thing you can do is let a light go out."
+            "value": "A sky worth protecting\n\nA dark sky is more than a place to see stars. It is a habitat. Long before electric light, plants and animals lived with a steady pattern of bright days and dark nights. That rhythm still matters. A lamp beside a road may help a person see the ground, but its light can reach far beyond the road, into the places where other lives unfold.\n\nLight scattered in the atmosphere creates sky glow. From a city, it can hide the faint band of the Milky Way. The brightest stars remain, while the quieter parts of the sky disappear. A person who has never seen a truly dark night may not know what is missing. A national park can offer a first encounter with a sky that feels unexpectedly full.\n\nDarkness does not mean using no light. It means putting light where it helps, at the time it is needed, and at a level that suits the task. A shielded light aimed toward the ground serves a path better than one shining into the sky. A light switched off when nobody needs it gives darkness back to the surrounding landscape. Small decisions can matter when many people make them.\n\nPark staff work to protect night skies by improving outdoor lighting, studying sky brightness and helping visitors learn how to enjoy the night. International Dark Sky certification recognizes sustained work on lighting and education. It is not a promise that every night will be clear, or that every corner of a certified park will be equally dark. Clouds, the Moon, nearby towns and your own viewing location still shape the experience.\n\nNyx treats a park's Bortle class as an estimate because darkness is not a permanent property of a name on a map. A visitor center may have more light than a remote overlook. A bright horizon may affect one direction more than another. Smoke and haze can scatter light even on a night with little cloud. The score helps you choose a promising night; your eyes tell you what the night actually offers.\n\nYou can help protect that experience. Choose a modest red light for moving around. Turn off vehicle headlights when safely parked, and avoid shining a beam toward other observers. Ask a ranger where you may stay after dark. Leave paths, wildlife and cultural places as you found them.\n\nBack at home, look at your own outdoor lights. Consider shielding them, lowering their brightness or using a timer. You do not need a telescope to be a caretaker of the night. Sometimes the most useful thing you can do is let a light go out."
           }
         },
         "es": {
@@ -28687,13 +28332,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "What a forecast can't tell you\n\nA cloud forecast is a computer model's best guess at the sky, worked out on a grid whose boxes are a few miles, or several kilometers, across. It is often right, and it is never certain. Knowing where it is weakest helps you read a score honestly.\n\nModels disagree. Nyx compares three of them, from the United States, Europe and Germany. When all three show a clear night, the forecast is on firm ground. When one shows clear skies and another shows cloud, the truth could be either, and the park's page says the models disagree and gives the range of scores they would lead to. A disagreement is not a bad forecast. It is the forecast telling you how sure it is.\n\nHigh, thin cloud is hard to judge. A veil of ice crystals miles up can dim faint stars and spread moonlight across the sky while the forecast still looks mostly clear. Or it can be counted as cloud while bright stars shine straight through it. A percentage says how much of the sky is covered, not how thick the cover is.\n\nSmoke and haze are not clouds. Wildfire smoke can travel a thousand miles (1,600 km) and dull the Milky Way on a cloudless night. Nyx reads a separate smoke and haze forecast and caps the score when it is heavy, but smoke forecasts are rougher than cloud forecasts, and dust or damp air near the ground can wash out the horizon without showing up in either.\n\nFar nights fade toward the usual clouds. A forecast for tomorrow is far better than a guess. A forecast for ten days from now is barely better than knowing what the weather here usually does in that month. So Nyx uses a cloud forecast in full for about three days, then eases it toward the park's usual clouds, and beyond ten days uses the usual clouds alone. Those nights are drawn half-filled or hollow, because their scores will change as the night comes closer. Check again a day or two before you go.\n\nLocal weather hides between the grid points. Fog can fill a valley or roll in from the coast while a ridge a few hundred feet (about 100 m) higher stays clear. On still nights, cold air pools in low places. As the air cools toward its dew point, dew forms on lenses, eyepieces and windshields; a hand warmer against the lens helps. Mountains often build their own clouds in the afternoon, and these usually fade after sunset, though not always.\n\nWhat helps most is watching the sky yourself. Look west in the late afternoon, where most weather comes from. Ask a ranger about local fog. And when the forecast is unsure, choose a park with more than one good night within reach, and let the sky decide."
+            "value": "What a forecast can't tell you\n\nA cloud forecast is a computer model's best guess at the sky, worked out on a grid whose boxes are a few miles (several kilometers) across. It is often right, and it is never certain. Knowing where it is weakest helps you read a score honestly.\n\nModels disagree. Nyx compares three of them, from the United States, Europe and Germany. When all three show a clear night, the forecast is on firm ground. When one shows clear skies and another shows cloud, the truth could be either, and the park's page says the models disagree and gives the range of scores they would lead to. A disagreement is not a bad forecast. It is the forecast telling you how sure it is.\n\nHigh, thin cloud is hard to judge. A veil of ice crystals miles up can dim faint stars and spread moonlight across the sky while the forecast still looks mostly clear. Or it can be counted as cloud while bright stars shine straight through it. A percentage says how much of the sky is covered, not how thick the cover is.\n\nSmoke and haze are not clouds. Wildfire smoke can travel a thousand miles (1,600 km) and dull the Milky Way on a cloudless night. Nyx reads a separate smoke and haze forecast and caps the score when it is moderate or heavy, but smoke forecasts are rougher than cloud forecasts, and dust or damp air near the ground can wash out the horizon without showing up in either.\n\nFar nights fade toward the usual clouds. A forecast for tomorrow is far better than a guess. A forecast for ten days from now is barely better than knowing what the weather here usually does in that month. So Nyx uses a cloud forecast in full for about three days, then eases it toward the park's usual clouds, and beyond ten days uses the usual clouds alone. Those nights are drawn half-filled or hollow, because their scores will change as the night comes closer. Check again a day or two before you go.\n\nLocal weather hides between the grid points. Fog can fill a valley or roll in from the coast while a ridge a few hundred feet (about 100 m) higher stays clear. On still nights, cold air pools in low places. As the air cools toward its dew point, dew forms on lenses, eyepieces and windshields; a hand warmer against the lens helps. Mountains often build their own clouds in the afternoon, and these usually fade after sunset, though not always.\n\nWhat helps most is watching the sky yourself. Look west in the late afternoon, where most weather comes from. Ask a ranger about local fog. And when the forecast is unsure, choose a park with more than one good night within reach, and let the sky decide."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lo que un pronóstico no puede decirte\n\nUn pronóstico de nubes es la mejor estimación de un modelo de computadora, calculada sobre una cuadrícula cuyas celdas miden varios kilómetros, o unas cuantas millas, de lado. Suele acertar, y nunca es seguro. Saber dónde es más débil te ayuda a leer un índice con honestidad.\n\nLos modelos discrepan. Nyx compara tres, de Estados Unidos, Europa y Alemania. Cuando los tres muestran una noche despejada, el pronóstico pisa terreno firme. Cuando uno muestra cielo despejado y otro muestra nubes, la verdad podría ser cualquiera de los dos, y la página del parque dice que los modelos discrepan y muestra el rango de índices al que llevaría cada uno. Una discrepancia no es un mal pronóstico. Es el pronóstico diciéndote qué tan seguro está.\n\nLas nubes altas y delgadas son difíciles de juzgar. Un velo de cristales de hielo a varios kilómetros de altura puede apagar las estrellas tenues y esparcir la luz de la Luna por el cielo mientras el pronóstico todavía se ve casi despejado. O puede contarse como nubosidad mientras las estrellas brillantes se ven a través de él. Un porcentaje dice cuánto del cielo está cubierto, no qué tan gruesa es la capa.\n\nEl humo y la bruma no son nubes. El humo de un incendio forestal puede viajar 1,600 km (mil millas) y opacar la Vía Láctea en una noche sin nubes. Nyx lee un pronóstico aparte de humo y bruma y limita el índice cuando son densos, pero esos pronósticos son más burdos que los de nubes, y el polvo o el aire húmedo cerca del suelo pueden borrar el horizonte sin aparecer en ninguno de los dos.\n\nLas noches lejanas se ajustan hacia la nubosidad habitual. Un pronóstico para mañana es mucho mejor que una suposición. Uno para dentro de diez días apenas es mejor que saber cómo suele estar el tiempo aquí en ese mes. Por eso Nyx usa el pronóstico de nubes completo durante unos tres días, luego lo ajusta hacia la nubosidad habitual del parque, y más allá de diez días usa solo la nubosidad habitual. Esas noches aparecen con medio relleno o sin relleno, porque su índice cambiará conforme se acerque la noche. Vuelve a revisar uno o dos días antes de salir.\n\nEl tiempo local se esconde entre los puntos de la cuadrícula. La niebla puede llenar un valle o llegar desde la costa mientras una cresta unos 100 m (unos cientos de pies) más arriba sigue despejada. En las noches sin viento, el aire frío se acumula en las zonas bajas. Cuando el aire se enfría hasta su punto de rocío, se forma rocío en lentes, oculares y parabrisas; un calentador de manos junto al lente ayuda. Las montañas suelen formar sus propias nubes por la tarde, que casi siempre se disipan después de la puesta del sol, aunque no siempre.\n\nLo que más ayuda es mirar el cielo por tu cuenta. Mira hacia el oeste al final de la tarde, de donde llega la mayor parte del tiempo. Pregunta a un guardaparques por la niebla local. Y cuando el pronóstico no sea seguro, elige un parque con más de una buena noche a tu alcance, y deja que el cielo decida."
+            "value": "Lo que un pronóstico no puede decirte\n\nUn pronóstico de nubes es la mejor estimación de un modelo de computadora, calculada sobre una cuadrícula cuyas celdas miden varios kilómetros, o unas cuantas millas, de lado. Suele acertar, y nunca es seguro. Saber dónde es más débil te ayuda a leer un índice con honestidad.\n\nLos modelos discrepan. Nyx compara tres, de Estados Unidos, Europa y Alemania. Cuando los tres muestran una noche despejada, el pronóstico pisa terreno firme. Cuando uno muestra cielo despejado y otro muestra nubes, la verdad podría ser cualquiera de los dos, y la página del parque dice que los modelos discrepan y muestra el rango de índices al que llevaría cada uno. Una discrepancia no es un mal pronóstico. Es el pronóstico diciéndote qué tan seguro está.\n\nLas nubes altas y delgadas son difíciles de juzgar. Un velo de cristales de hielo a varios kilómetros de altura puede apagar las estrellas tenues y esparcir la luz de la Luna por el cielo mientras el pronóstico todavía se ve casi despejado. O puede contarse como nubosidad mientras las estrellas brillantes se ven a través de él. Un porcentaje dice cuánto del cielo está cubierto, no qué tan gruesa es la capa.\n\nEl humo y la bruma no son nubes. El humo de un incendio forestal puede viajar 1,600 km (mil millas) y opacar la Vía Láctea en una noche sin nubes. Nyx lee un pronóstico aparte de humo y bruma y limita el índice cuando son moderados o densos, pero esos pronósticos son más burdos que los de nubes, y el polvo o el aire húmedo cerca del suelo pueden borrar el horizonte sin aparecer en ninguno de los dos.\n\nLas noches lejanas se ajustan hacia la nubosidad habitual. Un pronóstico para mañana es mucho mejor que una suposición. Uno para dentro de diez días apenas es mejor que saber cómo suele estar el tiempo aquí en ese mes. Por eso Nyx usa el pronóstico de nubes completo durante unos tres días, luego lo ajusta hacia la nubosidad habitual del parque, y más allá de diez días usa solo la nubosidad habitual. Esas noches aparecen con medio relleno o sin relleno, porque su índice cambiará conforme se acerque la noche. Vuelve a revisar uno o dos días antes de salir.\n\nEl tiempo local se esconde entre los puntos de la cuadrícula. La niebla puede llenar un valle o llegar desde la costa mientras una cresta unos 100 m (unos cientos de pies) más arriba sigue despejada. En las noches sin viento, el aire frío se acumula en las zonas bajas. Cuando el aire se enfría hasta su punto de rocío, se forma rocío en lentes, oculares y parabrisas; un calentador de manos junto al lente ayuda. Las montañas suelen formar sus propias nubes por la tarde, que casi siempre se disipan después de la puesta del sol, aunque no siempre.\n\nLo que más ayuda es mirar el cielo por tu cuenta. Mira hacia el oeste al final de la tarde, de donde llega la mayor parte del tiempo. Pregunta a un guardaparques por la niebla local. Y cuando el pronóstico no sea seguro, elige un parque con más de una buena noche a tu alcance, y deja que el cielo decida."
           }
         }
       }
@@ -28704,13 +28349,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Watching a meteor shower\n\nA meteor is a grain of dust, often smaller than a grain of sand, striking the air at tens of kilometers a second and burning about a hundred kilometers up. A shower happens when Earth passes through the trail of dust a comet or asteroid has left along its orbit. The same trails return on the same dates every year, which is why the Perseids come in August and the Geminids in December.\n\nEvery meteor in a shower seems to fly out of one small patch of sky, the radiant, which gives the shower its name: the Geminids from Gemini, the Perseids from Perseus. You do not need to look at the radiant. Meteors cross the whole sky, and the longest, most graceful ones appear well away from it. Face whichever part of the sky is darkest and clearest, about halfway up.\n\nThe rate you read in calendars is the zenithal hourly rate, or ZHR: the number one observer would see in an hour under a perfect sky, with the radiant straight overhead. You will almost always see fewer. A radiant low in the sky hides most of the shower below the horizon. Moonlight and light pollution drown the faint meteors, which are most of them. Nyx works out a rough rate for each park and night from the radiant's height, the Moon and that park's estimated sky brightness. Treat it as a guide, not a count. Showers vary from year to year, and a few can surprise.\n\nThe Moon matters more than anything you control. A bright Moon can cut the count in half or worse. The best hours are usually after midnight, when your side of Earth faces forward into the dust, and especially when the Moon has set.\n\nLie down. A reclining chair or a sleeping pad lets you take in the most sky with the least strain. Dress for a temperature well below what the forecast says; lying still on the ground is colder than standing. Keep your phone dim and red, or away. Your eyes need twenty to thirty minutes to adapt to the dark, and one bright screen undoes it.\n\nThen be patient. Meteors come in clusters and lulls. Ten quiet minutes can be followed by three in a row. Give it at least an hour. Most people who say they saw nothing gave up after fifteen minutes.\n\nNo telescope or binoculars are needed. Meteors are too quick and too spread out. The instrument is your own eyes, adapted to the dark, under the widest sky you can find."
+            "value": "Watching a meteor shower\n\nA meteor is a grain of dust, often smaller than a grain of sand, striking the air at tens of kilometers a second and burning about a hundred kilometers up. A shower happens when Earth passes through the trail of dust a comet or asteroid has left along its orbit. The same trails return on the same dates every year, which is why the Perseids come in August and the Geminids in December.\n\nEvery meteor in a shower seems to fly out of one small patch of sky, the radiant, which gives the shower its name: the Geminids from Gemini, the Perseids from Perseus. You do not need to look at the radiant. Meteors cross the whole sky, and the longest, most graceful ones appear well away from it. Face whichever part of the sky is darkest and clearest, about halfway up.\n\nThe rate you read in calendars is the zenithal hourly rate, or ZHR: the number one observer would see in an hour under a perfect sky, with the radiant straight overhead. You will almost always see fewer. A radiant low in the sky hides most of the shower below the horizon. Moonlight and light pollution drown the faint meteors, which are most of them. Nyx works out a rough rate for each park and night from the radiant's height, the Moon and that park's estimated sky brightness. Treat it as a guide, not a count. Showers vary from year to year, and a few can surprise.\n\nThe Moon matters more than anything you control. A bright Moon can cut the count in half or worse. The best hours are usually after midnight, when your side of Earth faces forward into the dust, and especially when the Moon has set.\n\nLie down. A reclining chair or a sleeping pad lets you take in the most sky with the least strain. Dress for a temperature well below what the forecast says; lying still on the ground is colder than standing. Keep your phone dim and red, or away. Your eyes need twenty to thirty minutes to adapt to the dark, and one bright screen undoes it.\n\nThen be patient. Meteors come in clusters and lulls. Ten quiet minutes can be followed by three in a row. Give it at least an hour. Many people who say they saw nothing gave up early.\n\nNo telescope or binoculars are needed. Meteors are too quick and too spread out. The instrument is your own eyes, adapted to the dark, under the widest sky you can find."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Observar una lluvia de meteoros\n\nUn meteoro es un grano de polvo, a menudo más pequeño que un grano de arena, que choca con el aire a decenas de kilómetros por segundo y arde a unos cien kilómetros de altura. Una lluvia ocurre cuando la Tierra atraviesa el rastro de polvo que un cometa o un asteroide ha dejado a lo largo de su órbita. Los mismos rastros vuelven en las mismas fechas cada año; por eso las Perseidas llegan en agosto y las Gemínidas en diciembre.\n\nCada meteoro de una lluvia parece salir de una pequeña zona del cielo, el radiante, que le da nombre a la lluvia: las Gemínidas, de Géminis; las Perseidas, de Perseo. No necesitas mirar al radiante. Los meteoros cruzan todo el cielo, y los más largos y elegantes aparecen lejos de él. Mira hacia la parte del cielo más oscura y despejada, más o menos a media altura.\n\nLa tasa que aparece en los calendarios es la tasa horaria cenital, o THZ (ZHR en inglés): el número que vería un observador en una hora bajo un cielo perfecto, con el radiante justo encima. Casi siempre verás menos. Un radiante bajo deja la mayor parte de la lluvia bajo el horizonte. La luz de la Luna y la contaminación lumínica ahogan los meteoros débiles, que son la mayoría. Nyx calcula una tasa aproximada para cada parque y cada noche a partir de la altura del radiante, la Luna y el brillo estimado del cielo de ese parque. Tómala como una guía, no como un conteo. Las lluvias varían de un año a otro, y algunas pueden sorprender.\n\nLa Luna importa más que cualquier cosa que puedas controlar. Una Luna brillante puede reducir el conteo a la mitad o más. Las mejores horas suelen ser después de medianoche, cuando tu lado de la Tierra avanza de frente hacia el polvo, y sobre todo cuando la Luna ya se puso.\n\nAcuéstate. Una silla reclinable o una colchoneta te dejan abarcar más cielo con menos esfuerzo. Abrígate para una temperatura bastante más baja de la que indica el pronóstico; quedarse quieto en el suelo da más frío que estar de pie. Mantén el teléfono tenue y en rojo, o guárdalo. Tus ojos necesitan de veinte a treinta minutos para adaptarse a la oscuridad, y una sola pantalla brillante deshace esa adaptación.\n\nDespués, ten paciencia. Los meteoros llegan en rachas y pausas. Diez minutos tranquilos pueden dar paso a tres meteoros seguidos. Dale al menos una hora. La mayoría de quienes dicen que no vieron nada se rindieron a los quince minutos.\n\nNo se necesitan telescopio ni binoculares. Los meteoros son demasiado rápidos y están demasiado dispersos. El instrumento son tus propios ojos, adaptados a la oscuridad, bajo el cielo más amplio que encuentres."
+            "value": "Observar una lluvia de meteoros\n\nUn meteoro es un grano de polvo, a menudo más pequeño que un grano de arena, que choca con el aire a decenas de kilómetros por segundo y arde a unos cien kilómetros de altura. Una lluvia ocurre cuando la Tierra atraviesa el rastro de polvo que un cometa o un asteroide ha dejado a lo largo de su órbita. Los mismos rastros vuelven en las mismas fechas cada año; por eso las Perseidas llegan en agosto y las Gemínidas en diciembre.\n\nCada meteoro de una lluvia parece salir de una pequeña zona del cielo, el radiante, que le da nombre a la lluvia: las Gemínidas, de Géminis; las Perseidas, de Perseo. No necesitas mirar al radiante. Los meteoros cruzan todo el cielo, y los más largos y elegantes aparecen lejos de él. Mira hacia la parte del cielo más oscura y despejada, más o menos a media altura.\n\nLa tasa que aparece en los calendarios es la tasa horaria cenital, o THZ (ZHR en inglés): el número que vería un observador en una hora bajo un cielo perfecto, con el radiante justo encima. Casi siempre verás menos. Un radiante bajo deja la mayor parte de la lluvia bajo el horizonte. La luz de la Luna y la contaminación lumínica ahogan los meteoros débiles, que son la mayoría. Nyx calcula una tasa aproximada para cada parque y cada noche a partir de la altura del radiante, la Luna y el brillo estimado del cielo de ese parque. Tómala como una guía, no como un conteo. Las lluvias varían de un año a otro, y algunas pueden sorprender.\n\nLa Luna importa más que cualquier cosa que puedas controlar. Una Luna brillante puede reducir el conteo a la mitad o más. Las mejores horas suelen ser después de medianoche, cuando tu lado de la Tierra avanza de frente hacia el polvo, y sobre todo cuando la Luna ya se puso.\n\nAcuéstate. Una silla reclinable o una colchoneta te dejan abarcar más cielo con menos esfuerzo. Abrígate para una temperatura bastante más baja de la que indica el pronóstico; quedarse quieto en el suelo da más frío que estar de pie. Mantén el teléfono tenue y en rojo, o guárdalo. Tus ojos necesitan de veinte a treinta minutos para adaptarse a la oscuridad, y una sola pantalla brillante deshace esa adaptación.\n\nDespués, ten paciencia. Los meteoros llegan en rachas y pausas. Diez minutos tranquilos pueden dar paso a tres meteoros seguidos. Dale al menos una hora. Muchas de las personas que dicen que no vieron nada se rindieron pronto.\n\nNo se necesitan telescopio ni binoculares. Los meteoros son demasiado rápidos y están demasiado dispersos. El instrumento son tus propios ojos, adaptados a la oscuridad, bajo el cielo más amplio que encuentres."
           }
         }
       }
@@ -28721,13 +28366,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finding the Milky Way\n\nThe Milky Way is our own galaxy seen from the inside: a band of light from countless distant stars, crossed by dark lanes of dust. Its brightest part, the galactic center, lies toward the constellations Sagittarius and Scorpius. Seeing it well depends on four things Nyx already weighs: a dark site, a dark Moon, clear air and enough true darkness.\n\nSeason matters most. From the United States the bright center rises before dawn in early spring, stands highest in the southern sky through June, July and August, and sinks into the southwest soon after dusk by October. From November through January it is close to the Sun and out of the night sky. In American Samoa, south of the equator, the center climbs nearly overhead in the same months. The fainter band still arches across the winter sky, through Cassiopeia and past Orion, and it rewards a dark night too.\n\nThe Moon decides which nights are worth the drive. A bright Moon washes out the faint glow, even at the darkest park. Look for nights near the new moon, or nights when the Moon sets early or rises late and leaves hours of true darkness. The calendar's ringed nights and the lighter, moonlit stretches of the sky arc show both.\n\nGive your eyes time. Full dark adaptation takes twenty to thirty minutes, and one glance at a bright screen undoes much of it. Turn on night-vision mode, lower your screen brightness, and use a dim red light on the trail.\n\nIn summer, look low and to the south, and choose a place with an open southern horizon: a desert flat, a ridgeline overlook, a lake shore. Cliffs, trees and canyon walls can hide the brightest part even under a perfect sky. Haze and wildfire smoke dim it as surely as clouds do, which is one reason no forecast can promise what you will see.\n\nPhotographs show more color and detail than the eye can. To the eye, the Milky Way is a soft, silvery river with darker gaps. That is not a disappointment. It is the real thing: light that has travelled for thousands of years to reach you."
+            "value": "Finding the Milky Way\n\nThe Milky Way is our own galaxy seen from the inside: a band of light from countless distant stars, crossed by dark lanes of dust. Its brightest part, the galactic center, lies toward the constellations Sagittarius and Scorpius. Seeing it well depends on four things Nyx already weighs: a dark site, a dark Moon, clear air and enough true darkness.\n\nSeason matters most. From the United States the bright center rises before dawn in early spring, stands highest in the southern sky through June, July and August, and sinks into the southwest soon after dusk by October. From about November to January it is close to the Sun and out of the night sky. In American Samoa, south of the equator, the center climbs high in the southern sky, about 75° up, in the same months. The fainter band still arches across the winter sky, through Cassiopeia and past Orion, and it rewards a dark night too.\n\nThe Moon decides which nights are worth the drive. A bright Moon washes out the faint glow, even at the darkest park. Look for nights near the new moon, or nights when the Moon sets early or rises late and leaves hours of true darkness. The ringed nights in Plan and the lighter, moonlit stretches of the sky arc show both.\n\nGive your eyes time. Full dark adaptation takes twenty to thirty minutes, and one glance at a bright screen undoes much of it. Turn on night-vision mode, lower your screen brightness, and use a dim red light on the trail.\n\nIn summer, look low and to the south, and choose a place with an open southern horizon: a desert flat, a ridgeline overlook, a lake shore. Cliffs, trees and canyon walls can hide the brightest part even under a perfect sky. Haze and wildfire smoke dim it as surely as clouds do, which is one reason no forecast can promise what you will see.\n\nPhotographs show more color and detail than the eye can. To the eye, the Milky Way is a soft, silvery river with darker gaps. That is not a disappointment. It is the real thing: light that has traveled for thousands of years to reach you."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encontrar la Vía Láctea\n\nLa Vía Láctea es nuestra propia galaxia vista desde dentro: una banda de luz de incontables estrellas lejanas, cruzada por franjas oscuras de polvo. Su parte más brillante, el centro galáctico, está en dirección a las constelaciones de Sagitario y Escorpio. Verla bien depende de cuatro cosas que Nyx ya pondera: un lugar oscuro, una Luna oscura, aire limpio y suficiente oscuridad total.\n\nLa temporada es lo que más importa. Desde Estados Unidos, el centro brillante sale antes del amanecer a principios de la primavera, alcanza su punto más alto en el cielo del sur en junio, julio y agosto, y hacia octubre se hunde en el suroeste poco después del anochecer. De noviembre a enero está cerca del Sol y fuera del cielo nocturno. En Samoa Americana, al sur del ecuador, el centro sube casi hasta el cenit en esos mismos meses. La banda más tenue sigue formando un arco en el cielo de invierno, a través de Casiopea y junto a Orión, y también recompensa una noche oscura.\n\nLa Luna decide qué noches valen el viaje. Una Luna brillante borra el resplandor tenue, incluso en el parque más oscuro. Busca noches cerca de la luna nueva, o noches en que la Luna se pone temprano o sale tarde y deja horas de oscuridad total. Las noches con anillo del calendario y los tramos más claros, con Luna, del arco del cielo muestran ambas cosas.\n\nDale tiempo a tus ojos. La adaptación completa a la oscuridad toma de veinte a treinta minutos, y una mirada a una pantalla brillante deshace buena parte de ella. Activa el modo de visión nocturna, baja el brillo de la pantalla y usa una luz roja tenue en el sendero.\n\nEn verano, mira hacia el sur, cerca del horizonte, y elige un lugar con el horizonte sur despejado: una planicie desértica, un mirador en una cresta, la orilla de un lago. Los acantilados, los árboles y las paredes de los cañones pueden ocultar la parte más brillante incluso bajo un cielo perfecto. La bruma y el humo de los incendios forestales la atenúan tanto como las nubes, y esa es una de las razones por las que ningún pronóstico puede prometer lo que verás.\n\nLas fotografías muestran más color y detalle de lo que ve el ojo. A simple vista, la Vía Láctea es un río suave y plateado con huecos más oscuros. Eso no es una decepción. Es lo real: luz que ha viajado durante miles de años para llegar hasta ti."
+            "value": "Encontrar la Vía Láctea\n\nLa Vía Láctea es nuestra propia galaxia vista desde dentro: una banda de luz de incontables estrellas lejanas, cruzada por franjas oscuras de polvo. Su parte más brillante, el centro galáctico, está en dirección a las constelaciones de Sagitario y Escorpio. Verla bien depende de cuatro cosas que Nyx ya pondera: un lugar oscuro, una Luna oscura, aire limpio y suficiente oscuridad total.\n\nLa temporada es lo que más importa. Desde Estados Unidos, el centro brillante sale antes del amanecer a principios de la primavera, alcanza su punto más alto en el cielo del sur en junio, julio y agosto, y hacia octubre se hunde en el suroeste poco después del anochecer. Más o menos de noviembre a enero está cerca del Sol y fuera del cielo nocturno. En Samoa Americana, al sur del ecuador, el centro sube alto en el cielo del sur, a unos 75°, en esos mismos meses. La banda más tenue sigue formando un arco en el cielo de invierno, a través de Casiopea y junto a Orión, y también recompensa una noche oscura.\n\nLa Luna decide qué noches valen el viaje. Una Luna brillante borra el resplandor tenue, incluso en el parque más oscuro. Busca noches cerca de la luna nueva, o noches en que la Luna se pone temprano o sale tarde y deja horas de oscuridad total. Las noches con anillo en Planear y los tramos más claros, con Luna, del arco del cielo muestran ambas cosas.\n\nDale tiempo a tus ojos. La adaptación completa a la oscuridad toma de veinte a treinta minutos, y una mirada a una pantalla brillante deshace buena parte de ella. Activa el modo de visión nocturna, baja el brillo de la pantalla y usa una luz roja tenue en el sendero.\n\nEn verano, mira hacia el sur, cerca del horizonte, y elige un lugar con el horizonte sur despejado: una planicie desértica, un mirador en una cresta, la orilla de un lago. Los acantilados, los árboles y las paredes de los cañones pueden ocultar la parte más brillante incluso bajo un cielo perfecto. La bruma y el humo de los incendios forestales la atenúan tanto como las nubes, y esa es una de las razones por las que ningún pronóstico puede prometer lo que verás.\n\nLas fotografías muestran más color y detalle de lo que ve el ojo. A simple vista, la Vía Láctea es un río suave y plateado con huecos más oscuros. Eso no es una decepción. Es lo real: luz que ha viajado durante miles de años para llegar hasta ti."
           }
         }
       }
@@ -28738,13 +28383,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your first Milky Way photo\n\nYou do not need expensive gear to photograph the Milky Way. You need a dark sky, a steady camera and a few settings you choose yourself, because a camera's automatic modes are made for daylight.\n\nStart with a tripod. Every setting below keeps the shutter open for many seconds, and a light breeze or the press of a button will blur the stars. Use the camera's two-second timer or a remote, so your hand is off the camera when the exposure begins.\n\nUse the widest, fastest lens you have. A focal length of about 14 to 24 mm on a full-frame camera takes in a long stretch of the band. Open the aperture all the way, or close to it: f/2.8 is a good target, and f/2 or f/1.8 is better if your lens allows it.\n\nChoose the shutter time with care. The Earth turns, so the stars drift across the frame, and a long exposure stretches points into short streaks. A rough guide called the 500 rule divides 500 by your focal length: at 20 mm, that is about 25 seconds. On cameras with smaller sensors, or for pin-sharp stars, go shorter. Somewhere between 15 and 25 seconds is a good start.\n\nSet the ISO between 1600 and 6400. Try 3200 first, look at the result and adjust. A brighter picture with some grain is easier to fix later than a dark one.\n\nFocus by hand. Autofocus cannot find faint stars. Switch to manual focus, point at the brightest star or planet in the sky, magnify the live view as far as it goes, and turn the ring until that point is as small as you can make it. Then leave the ring alone; a strip of tape helps.\n\nShoot in RAW. It keeps far more of the faint detail and lets you set the color afterward. A white balance near 4000 K is a good place to begin.\n\nTime it. The Milky Way's bright center is the part most people want, and it is up for only part of the year and part of the night. Nyx's What's up shows when the core is up during true darkness at each park, where it will stand and whether the Moon will be down. The calendar's ringed nights mark the darkest stretches.\n\nGive the picture a place. A tree, a rock formation or a ridgeline against the sky turns a picture of stars into a picture of one night somewhere. Arrive in daylight to find your spot and frame it. Light painting and stray lights can spoil other people's photos and night vision, so keep lights off when others are near, and follow the park's rules. Flying a drone is not allowed in national parks.\n\nPhones can do this too. On a tripod, a recent iPhone's Night mode can hold its shutter open for up to 30 seconds."
+            "value": "Your first Milky Way photo\n\nYou do not need expensive gear to photograph the Milky Way. You need a dark sky, a steady camera and a few settings you choose yourself, because a camera's automatic modes are made for daylight.\n\nStart with a tripod. Every setting below keeps the shutter open for many seconds, and a light breeze or the press of a button will blur the stars. Use the camera's two-second timer or a remote, so your hand is off the camera when the exposure begins.\n\nUse the widest, fastest lens you have. A focal length of about 14 to 24 mm on a full-frame camera takes in a long stretch of the band. Open the aperture all the way, or close to it: f/2.8 is a good target, and f/2 or f/1.8 is better if your lens allows it.\n\nChoose the shutter time with care. The Earth turns, so the stars drift across the frame, and a long exposure stretches points into short streaks. A rough guide called the 500 rule divides 500 by your focal length: at 20 mm, that is about 25 seconds. On cameras with smaller sensors, or for pin-sharp stars, go shorter. Somewhere between 15 and 25 seconds is a good start.\n\nSet the ISO between 1600 and 6400. Try 3200 first, look at the result and adjust. A brighter picture with some grain is easier to fix later than a dark one.\n\nFocus by hand. Autofocus cannot find faint stars. Switch to manual focus, point at the brightest star or planet in the sky, magnify the live view as far as it goes, and turn the ring until that point is as small as you can make it. Then leave the ring alone; a strip of tape helps.\n\nShoot in RAW. It keeps far more of the faint detail and lets you set the color afterward. A white balance near 4000 K is a good place to begin.\n\nTime it. The Milky Way's bright center is the part most people want, and it is up for only part of the year and part of the night. Nyx's What's up shows when the core is up during true darkness at each park, where it will stand and whether the Moon will be down. The ringed nights in Plan mark the darkest stretches.\n\nGive the picture a place. A tree, a rock formation or a ridgeline against the sky turns a picture of stars into a picture of one night somewhere. Arrive in daylight to find your spot and frame it. Light painting and stray lights can spoil other people's photos and night vision, so keep lights off when others are near, and follow the park's rules. Flying a drone is not allowed in national parks.\n\nPhones can do this too. On a tripod, a recent iPhone's Night mode can hold its shutter open for up to 30 seconds."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu primera foto de la Vía Láctea\n\nNo necesitas equipo caro para fotografiar la Vía Láctea. Necesitas un cielo oscuro, una cámara firme y algunos ajustes que elijas tú, porque los modos automáticos de una cámara están hechos para la luz del día.\n\nEmpieza con un tripié. Cada ajuste de esta guía deja el obturador abierto muchos segundos, y una brisa ligera o pulsar un botón harán que las estrellas salgan movidas. Usa el temporizador de dos segundos o un control remoto, para que tu mano no toque la cámara cuando empiece la exposición.\n\nUsa el lente más angular y luminoso que tengas. Una distancia focal de unos 14 a 24 mm en una cámara de cuadro completo abarca un buen tramo de la banda. Abre el diafragma por completo, o casi: f/2.8 es una buena meta, y f/2 o f/1.8 es aún mejor si tu lente lo permite.\n\nElige el tiempo de exposición con cuidado. La Tierra gira, así que las estrellas se desplazan por el cuadro, y una exposición larga convierte los puntos en trazos cortos. Una guía aproximada, la regla del 500, divide 500 entre tu distancia focal: a 20 mm, son unos 25 segundos. En cámaras con sensor más pequeño, o para estrellas muy nítidas, usa menos tiempo. Algo entre 15 y 25 segundos es un buen comienzo.\n\nAjusta el ISO entre 1600 y 6400. Prueba primero con 3200, revisa el resultado y corrige. Una foto más brillante con algo de grano es más fácil de arreglar después que una oscura.\n\nEnfoca a mano. El enfoque automático no encuentra estrellas tenues. Cambia a enfoque manual, apunta a la estrella o al planeta más brillante del cielo, amplía la vista en vivo al máximo y gira el anillo hasta que ese punto sea lo más pequeño posible. Después no toques el anillo; un trozo de cinta ayuda.\n\nDispara en RAW. Conserva mucho más detalle tenue y te deja ajustar el color después. Un balance de blancos cercano a 4000 K es un buen punto de partida.\n\nElige el momento. El centro brillante de la Vía Láctea es la parte que casi todos buscan, y solo está en el cielo una parte del año y una parte de la noche. La sección En el cielo esta noche de Nyx muestra cuándo está el núcleo en el cielo durante la oscuridad total en cada parque, en qué parte del cielo estará y si la Luna estará oculta. Las noches con anillo en el calendario marcan los tramos más oscuros.\n\nDale un lugar a la foto. Un árbol, una formación rocosa o una cresta contra el cielo convierten una foto de estrellas en la foto de una noche en un sitio. Llega de día para encontrar tu lugar y encuadrarlo. Pintar con luz y las luces sueltas pueden arruinar las fotos y la visión nocturna de otras personas, así que mantén las luces apagadas cuando haya gente cerca y sigue las reglas del parque. Volar drones no está permitido en los parques nacionales.\n\nLos teléfonos también pueden hacerlo. Sobre un tripié, el modo Noche de un iPhone reciente puede mantener el obturador abierto hasta 30 segundos."
+            "value": "Tu primera foto de la Vía Láctea\n\nNo necesitas equipo caro para fotografiar la Vía Láctea. Necesitas un cielo oscuro, una cámara firme y algunos ajustes que elijas tú, porque los modos automáticos de una cámara están hechos para la luz del día.\n\nEmpieza con un tripié. Cada ajuste de esta guía deja el obturador abierto muchos segundos, y una brisa ligera o pulsar un botón harán que las estrellas salgan movidas. Usa el temporizador de dos segundos o un control remoto, para que tu mano no toque la cámara cuando empiece la exposición.\n\nUsa el lente más angular y luminoso que tengas. Una distancia focal de unos 14 a 24 mm en una cámara de cuadro completo abarca un buen tramo de la banda. Abre el diafragma por completo, o casi: f/2.8 es una buena meta, y f/2 o f/1.8 es aún mejor si tu lente lo permite.\n\nElige el tiempo de exposición con cuidado. La Tierra gira, así que las estrellas se desplazan por el cuadro, y una exposición larga convierte los puntos en trazos cortos. Una guía aproximada, la regla del 500, divide 500 entre tu distancia focal: a 20 mm, son unos 25 segundos. En cámaras con sensor más pequeño, o para estrellas muy nítidas, usa menos tiempo. Algo entre 15 y 25 segundos es un buen comienzo.\n\nAjusta el ISO entre 1600 y 6400. Prueba primero con 3200, revisa el resultado y corrige. Una foto más brillante con algo de grano es más fácil de arreglar después que una oscura.\n\nEnfoca a mano. El enfoque automático no encuentra estrellas tenues. Cambia a enfoque manual, apunta a la estrella o al planeta más brillante del cielo, amplía la vista en vivo al máximo y gira el anillo hasta que ese punto sea lo más pequeño posible. Después no toques el anillo; un trozo de cinta ayuda.\n\nDispara en RAW. Conserva mucho más detalle tenue y te deja ajustar el color después. Un balance de blancos cercano a 4000 K es un buen punto de partida.\n\nElige el momento. El centro brillante de la Vía Láctea es la parte que casi todos buscan, y solo está en el cielo una parte del año y una parte de la noche. La sección En el cielo esta noche de Nyx muestra cuándo está el núcleo en el cielo durante la oscuridad total en cada parque, en qué parte del cielo estará y si la Luna estará oculta. Las noches con anillo en Planear marcan los tramos más oscuros.\n\nDale un lugar a la foto. Un árbol, una formación rocosa o una cresta contra el cielo convierten una foto de estrellas en la foto de una noche en un sitio. Llega de día para encontrar tu lugar y encuadrarlo. Pintar con luz y las luces sueltas pueden arruinar las fotos y la visión nocturna de otras personas, así que mantén las luces apagadas cuando haya gente cerca y sigue las reglas del parque. Volar drones no está permitido en los parques nacionales.\n\nLos teléfonos también pueden hacerlo. Sobre un tripié, el modo Noche de un iPhone reciente puede mantener el obturador abierto hasta 30 segundos."
           }
         }
       }
@@ -28772,13 +28417,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reading the Darkness Score\n\nThe Darkness Score answers one question: how dark and clear will the sky be at this park on this night? It runs from 0 to 100. Nyx builds it from four parts, then checks it against the weakest link.\n\nThe four parts have fixed weights. The Moon counts for 40 points: a night with no moonlight during true darkness earns all 40, and a full Moon high in the sky all night earns none. Clouds count for 25, averaged over the hours of true darkness. Sky glow counts for 20, from the park's estimated Bortle class. The length of true darkness counts for 15, and ten hours or more earns all of it. True darkness is the time when the Sun is more than 18 degrees below the horizon and twilight has left the sky.\n\nAdding alone would mislead: a moonless night under thick cloud would still add up to a respectable number. So the score never rises above its weakest link. Cloud caps it: half cover holds a night to 55, and full overcast to 10. Sky glow caps it: a Bortle 3 park can reach 89 at most, so only the darkest skies earn Pristine. Smoke or haze in the forecast caps it at 74, or at 59 when it is heavy. A night with less than three hours of true darkness is capped too, and one with none at all stays below 40.\n\nHere is one night. A Bortle 2 park, a thin crescent Moon that sets at dusk, nine hours of true darkness and a forecast of 40% cloud. The parts add up to 86: 40 for the Moon, 15 for clouds, 17.5 for sky glow and 13.5 for length. But 40% cloud caps the night at 64, so the score is 64, Good, and the breakdown says that clouds limit the night to 64.\n\nClouds are the least certain part. Up to about three days ahead, Nyx uses the cloud forecast in full. From there to ten days, it eases the forecast toward the park's usual clouds for that month and calls the night an early look, drawn half-filled in the calendar. Beyond ten days a forecast adds little, so the score rests on the usual clouds alone and the night is drawn hollow. Those scores will change as the night comes closer.\n\nThe bands are simple: 90 and above is Pristine, 75 Excellent, 60 Good, 40 Fair, and anything lower is Poor.\n\nSome things the score cannot know. It does not know whether the road to your viewing spot is open; Nyx shows the park's alerts beside the score, but they can be hours old. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the southern sky. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush."
+            "value": "Reading the darkness score\n\nThe darkness score answers one question: how dark and clear will the sky be at this park on this night? It runs from 0 to 100. Nyx builds it from four parts, then checks it against the weakest link.\n\nThe four parts have fixed weights. The Moon counts for 40 points: a night with no moonlight during true darkness earns all 40, and a full moon high in the sky all night earns none. Clouds count for 25, averaged over the hours of true darkness. Sky glow counts for 20, from the park's estimated Bortle class. The length of true darkness counts for 15, and ten hours or more earns all of it. True darkness is the time when the Sun is more than 18 degrees below the horizon and twilight has left the sky.\n\nAdding alone would mislead: a moonless night under thick cloud would still add up to a respectable number. So the score never rises above its weakest link. Cloud caps it: half cover holds a night to 55, and full overcast to 10. Sky glow caps it: a Bortle 3 park can reach 89 at most, so only the darkest skies earn Pristine. Smoke or haze in the forecast caps it at 74, or at 59 when it is heavy. A night with less than three hours of true darkness is capped too, and one with none at all stays below 40.\n\nHere is one night. A Bortle 2 park, a thin crescent Moon that sets at dusk, nine hours of true darkness and a forecast of 40% cloud. The parts add up to 86: 40 for the Moon, 15 for clouds, 17.5 for sky glow and 13.5 for length. But 40% cloud caps the night at 64, so the score is 64, Good, and the breakdown says that clouds limit the night to 64.\n\nClouds are the least certain part. Up to about three days ahead, Nyx uses the cloud forecast in full. From there to ten days, it eases the forecast toward the park's usual clouds for that month and calls the night an early look, drawn half-filled in Plan. Beyond ten days a forecast adds little, so the score rests on the usual clouds alone and the night is drawn hollow. Those scores will change as the night comes closer.\n\nThe bands are simple: 90 and above is Pristine, 75 Excellent, 60 Good, 40 Fair, and anything lower is Poor.\n\nSome things the score cannot know. It does not know whether the road to your viewing spot is open; Nyx shows the park's alerts beside the score, but they can be hours old. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the southern sky. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cómo leer el índice de oscuridad\n\nEl índice de oscuridad responde una sola pregunta: ¿qué tan oscuro y despejado estará el cielo en este parque esta noche? Va de 0 a 100. Nyx lo construye con cuatro partes y luego lo contrasta con el eslabón más débil.\n\nLas cuatro partes tienen pesos fijos. La Luna cuenta 40 puntos: una noche sin luz de luna durante la oscuridad total gana los 40, y una Luna llena alta en el cielo toda la noche no gana ninguno. Las nubes cuentan 25, promediadas sobre las horas de oscuridad total. El resplandor del cielo cuenta 20, según la clase Bortle estimada del parque. La duración de la oscuridad total cuenta 15, y diez horas o más ganan todo. La oscuridad total es el tiempo en que el Sol está a más de 18 grados bajo el horizonte y el crepúsculo ya dejó el cielo.\n\nSumar no basta: una noche sin Luna bajo nubes espesas todavía sumaría un número respetable. Por eso el índice nunca sube por encima de su eslabón más débil. La nubosidad lo limita: con la mitad del cielo cubierto, una noche llega a 55 como máximo, y con el cielo cerrado, a 10. El resplandor del cielo lo limita: un parque Bortle 3 llega a 89 como máximo, así que solo los cielos más oscuros alcanzan Prístina. El humo o la bruma en el pronóstico lo limitan a 74, o a 59 cuando son densos. Una noche con menos de tres horas de oscuridad total también tiene límite, y una sin ninguna se queda por debajo de 40.\n\nVeamos una noche. Un parque Bortle 2, una Luna creciente muy delgada que se pone al anochecer, nueve horas de oscuridad total y un pronóstico de 40% de nubosidad. Las partes suman 86: 40 por la Luna, 15 por las nubes, 17.5 por el resplandor y 13.5 por la duración. Pero 40% de nubosidad limita la noche a 64, así que el índice es 64, Buena, y el desglose dice que las nubes limitan la noche a 64.\n\nLas nubes son la parte menos segura. Hasta unos tres días antes, Nyx usa el pronóstico de nubes completo. De ahí a diez días, lo ajusta hacia la nubosidad habitual del parque en ese mes y llama a la noche una vista anticipada, con el punto de medio relleno en el calendario. Más allá de diez días, un pronóstico aporta poco, así que el índice se basa solo en la nubosidad habitual y la noche aparece sin relleno. Esos índices cambiarán conforme se acerque la noche.\n\nLas categorías son sencillas: 90 o más es Prístina, 75 Excelente, 60 Buena, 40 Regular, y cualquier valor menor es Mala.\n\nHay cosas que el índice no puede saber. No sabe si el camino a tu punto de observación está abierto; Nyx muestra las alertas del parque junto al índice, pero pueden tener horas de antigüedad. No puede ver un estacionamiento iluminado, una lámpara en un campamento ni una cresta que tape el cielo del sur. Y no conoce tus ojos: cuánto tiempo llevan adaptándose, o cuánto deshizo una pantalla brillante. Una noche Buena bien planeada puede ser mejor que una Excelente hecha con prisa."
+            "value": "Cómo leer el índice de oscuridad\n\nEl índice de oscuridad responde una sola pregunta: ¿qué tan oscuro y despejado estará el cielo en este parque esta noche? Va de 0 a 100. Nyx lo construye con cuatro partes y luego lo contrasta con el eslabón más débil.\n\nLas cuatro partes tienen pesos fijos. La Luna cuenta 40 puntos: una noche sin luz de luna durante la oscuridad total gana los 40, y una Luna llena alta en el cielo toda la noche no gana ninguno. Las nubes cuentan 25, promediadas sobre las horas de oscuridad total. El resplandor del cielo cuenta 20, según la clase Bortle estimada del parque. La duración de la oscuridad total cuenta 15, y diez horas o más ganan todo. La oscuridad total es el tiempo en que el Sol está a más de 18 grados bajo el horizonte y el crepúsculo ya dejó el cielo.\n\nSumar no basta: una noche sin Luna bajo nubes espesas todavía sumaría un número respetable. Por eso el índice nunca sube por encima de su eslabón más débil. La nubosidad lo limita: con la mitad del cielo cubierto, una noche llega a 55 como máximo, y con el cielo cerrado, a 10. El resplandor del cielo lo limita: un parque Bortle 3 llega a 89 como máximo, así que solo los cielos más oscuros alcanzan Prístina. El humo o la bruma en el pronóstico lo limitan a 74, o a 59 cuando son densos. Una noche con menos de tres horas de oscuridad total también tiene límite, y una sin ninguna se queda por debajo de 40.\n\nVeamos una noche. Un parque Bortle 2, una Luna creciente muy delgada que se pone al anochecer, nueve horas de oscuridad total y un pronóstico de 40% de nubosidad. Las partes suman 86: 40 por la Luna, 15 por las nubes, 17.5 por el resplandor y 13.5 por la duración. Pero 40% de nubosidad limita la noche a 64, así que el índice es 64, Buena, y el desglose dice que las nubes limitan la noche a 64.\n\nLas nubes son la parte menos segura. Hasta unos tres días antes, Nyx usa el pronóstico de nubes completo. De ahí a diez días, lo ajusta hacia la nubosidad habitual del parque en ese mes y llama a la noche una vista anticipada, con el punto de medio relleno en Planear. Más allá de diez días, un pronóstico aporta poco, así que el índice se basa solo en la nubosidad habitual y la noche aparece sin relleno. Esos índices cambiarán conforme se acerque la noche.\n\nLas categorías son sencillas: 90 o más es Prístina, 75 Excelente, 60 Buena, 40 Regular, y cualquier valor menor es Mala.\n\nHay cosas que el índice no puede saber. No sabe si el camino a tu punto de observación está abierto; Nyx muestra las alertas del parque junto al índice, pero pueden tener horas de antigüedad. No puede ver un estacionamiento iluminado, una lámpara en un campamento ni una cresta que tape el cielo del sur. Y no conoce tus ojos: cuánto tiempo llevan adaptándose, o cuánto deshizo una pantalla brillante. Una noche Buena bien planeada puede ser mejor que una Excelente hecha con prisa."
           }
         }
       }
@@ -30163,23 +29808,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "tu ubicación"
-          }
-        }
-      }
-    },
-    "“%@”": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "“%@”"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "“%@”"
           }
         }
       }

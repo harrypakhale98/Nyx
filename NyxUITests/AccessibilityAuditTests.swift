@@ -116,9 +116,9 @@ final class AccessibilityAuditTests:XCTestCase {
             // Moons sample as low contrast on the same anti-aliased strokes; starlight on solid indigo is about 13:1, red on
             // night-vision black 6.2:1. Checked by eye in zoomed iOS 27 captures in both palettes.
             let recapSerif=screen=="recap" && (numeral || issue.element?.label=="The Moon's phases you met")
-            // iPad Learn grid (2026-10-06): the right-hand cards' "2 minute read" captions, starlight at 86% on the indigo
+            // iPad Learn grid (2026-10-06): the right-hand cards' "2-minute read" captions, starlight at 86% on the indigo
             // panel (about 12:1); the audit samples the glass over the Milky Way behind them. Checked in a zoomed capture.
-            let learnCaption=screen=="learn" && (issue.element?.label ?? "").hasSuffix("minute read")
+            let learnCaption=screen=="learn" && (issue.element?.label ?? "").hasSuffix("-minute read")
             return !visible || issue.compactDescription.contains("nearly") || (screen=="parks" && (numeral || bandLabel)) || toolbarButton || recapSerif || learnCaption
         case .textClipped:
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;

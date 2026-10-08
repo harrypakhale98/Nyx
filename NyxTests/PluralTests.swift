@@ -66,13 +66,13 @@ struct PluralTests {
         check([
             ("The \(1) parks with the darkest nights this week, of \(1) \(reach).","The park with the darkest nights this week, of 1 within 200 mi."),
             ("The \(4) parks with the darkest nights this week, of \(9) \(reach).","The 4 parks with the darkest nights this week, of 9 within 200 mi."),
-            ("BEST OF THE NEXT \(1) NIGHTS","BEST OF THE NEXT 1 NIGHT"),
+            ("Best of the next \(1) nights","Best of the next 1 night"),
         ],"en")
         check([
             ("The \(1) parks with the darkest nights this week, of \(6) \(alcance).","El parque con las noches más oscuras de esta semana, de 6 a menos de 200 mi."),
-            ("BEST OF THE NEXT \(1) NIGHTS","LA MEJOR DE LA PRÓXIMA NOCHE"),
-            ("BEST OF THE NEXT \(14) NIGHTS","LA MEJOR DE LAS PRÓXIMAS 14 NOCHES"),
-            ("NUMBER \(2) OF THE NEXT \(1) NIGHTS","NÚMERO 2 DE LA PRÓXIMA NOCHE"),
+            ("Best of the next \(1) nights","La mejor de la próxima noche"),
+            ("Best of the next \(14) nights","La mejor de las próximas 14 noches"),
+            ("Number \(2) of the next \(1) nights","Número 2 de la próxima noche"),
         ],"es")
     }
 }

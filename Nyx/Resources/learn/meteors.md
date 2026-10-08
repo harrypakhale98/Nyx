@@ -10,6 +10,6 @@ The Moon matters more than anything you control. A bright Moon can cut the count
 
 Lie down. A reclining chair or a sleeping pad lets you take in the most sky with the least strain. Dress for a temperature well below what the forecast says; lying still on the ground is colder than standing. Keep your phone dim and red, or away. Your eyes need twenty to thirty minutes to adapt to the dark, and one bright screen undoes it.
 
-Then be patient. Meteors come in clusters and lulls. Ten quiet minutes can be followed by three in a row. Give it at least an hour. Most people who say they saw nothing gave up after fifteen minutes.
+Then be patient. Meteors come in clusters and lulls. Ten quiet minutes can be followed by three in a row. Give it at least an hour. Many people who say they saw nothing gave up early.
 
 No telescope or binoculars are needed. Meteors are too quick and too spread out. The instrument is your own eyes, adapted to the dark, under the widest sky you can find.

@@ -78,7 +78,7 @@ struct NightDetail: View {
     private func moon(_ plan: NightPlan) -> some View {
         VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: String(localized: "Moon, \(Int((plan.moon.illumination*100).rounded())) percent illuminated, as seen at \(plan.park.time(plan.moonMoment))"))
+                       label: String(localized: "Moon, \(Int((plan.moon.illumination*100).rounded())) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
                 .frame(width: moonSide, height: moonSide)
                 .background {
                     // A piece of night behind the Moon, so even a new moon reads as a disc against the sky.
@@ -184,7 +184,7 @@ struct NightDetail: View {
     private func honesty(_ plan: NightPlan) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(VisionModel.honesty(plan))
-            Text("Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
+            Text("Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
         }
         .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
     }

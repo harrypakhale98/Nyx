@@ -14,7 +14,7 @@ Enfoca a mano. El enfoque automático no encuentra estrellas tenues. Cambia a en
 
 Dispara en RAW. Conserva mucho más detalle tenue y te deja ajustar el color después. Un balance de blancos cercano a 4000 K es un buen punto de partida.
 
-Elige el momento. El centro brillante de la Vía Láctea es la parte que casi todos buscan, y solo está en el cielo una parte del año y una parte de la noche. La sección En el cielo esta noche de Nyx muestra cuándo está el núcleo en el cielo durante la oscuridad total en cada parque, en qué parte del cielo estará y si la Luna estará oculta. Las noches con anillo en el calendario marcan los tramos más oscuros.
+Elige el momento. El centro brillante de la Vía Láctea es la parte que casi todos buscan, y solo está en el cielo una parte del año y una parte de la noche. La sección En el cielo esta noche de Nyx muestra cuándo está el núcleo en el cielo durante la oscuridad total en cada parque, en qué parte del cielo estará y si la Luna estará oculta. Las noches con anillo en Planear marcan los tramos más oscuros.
 
 Dale un lugar a la foto. Un árbol, una formación rocosa o una cresta contra el cielo convierten una foto de estrellas en la foto de una noche en un sitio. Llega de día para encontrar tu lugar y encuadrarlo. Pintar con luz y las luces sueltas pueden arruinar las fotos y la visión nocturna de otras personas, así que mantén las luces apagadas cuando haya gente cerca y sigue las reglas del parque. Volar drones no está permitido en los parques nacionales.
 

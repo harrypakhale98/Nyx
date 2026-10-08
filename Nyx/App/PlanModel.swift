@@ -409,6 +409,6 @@ import CoreLocation
         manager.requestLocation()
     }
     func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
-        locating=false; message=String(localized:"Location is unavailable. Choose a starting park instead.")
+        locating=false; message=String(localized:"Location is unavailable. Choose a starting point instead.")
     }
 }

@@ -248,8 +248,8 @@ enum AdaptationReminders {
                 content.title = String(localized: "Nearly adapted")
                 content.body = String(localized: "Five more minutes for full dark adaptation. Keep the screen red.")
             } else {
-                content.title = String(localized: "Eyes adapted")
-                content.body = String(localized: "Your eyes have adapted. Keep the screen red.")
+                content.title = String(localized: "About 30 minutes")
+                content.body = String(localized: "Your eyes should be adapted. Keep the screen red.")
             }
             content.sound = .default
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, reminder.date.timeIntervalSinceNow), repeats: false)

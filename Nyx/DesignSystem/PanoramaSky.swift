@@ -360,7 +360,7 @@ struct PanoramaCanvas: View {
     }
     /// What is up and where, for VoiceOver: "Facing south at 11:40 PM. Jupiter, high in the southeast. …"
     static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?)->String {
-        var lines=[String(localized:"Facing \(Compass.name(facing)) at \(park.time(sky.moment)).")]
+        var lines=[String(localized:"Facing \(Compass.name(facing)), \(park.time(sky.moment)).")]
         if sky.sunAltitude > -6 { lines.append(String(localized:"The Sun is barely down; the sky is still bright.")) }
         else if !sky.dark { lines.append(String(localized:"The sky is still in twilight.")) }
         func place(_ mark:(altitude:Double,azimuth:Double))->String {

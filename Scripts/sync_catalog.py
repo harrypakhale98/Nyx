@@ -17,11 +17,16 @@ for filename in [f for f in glob.glob(build+'/Build/Intermediates.noindex/*.buil
   if key in strings: continue
   strings[key]={'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':key}}}}
   if item.get('comment'): strings[key]['comment']=item['comment']
-# Drop copy that no longer appears in code. Only auto-added entries (value == key) are pruned;
-# hand-written entries such as the Learn essays (essay.*) are never touched.
+# Drop copy that no longer appears in code. Only entries generated from code are pruned: auto-added
+# ones (value == key), and counted or device-specific ones (plural or iPad variations, written by
+# apply_translations.py and device_strings.py). Hand-written entries such as the Learn essays
+# (essay.*) are never touched.
 # App Intents summaries ("Darkness at ${park} tonight") never reach .stringsdata, so they are kept.
+def generated(key,entry):
+    en=entry.get('localizations',{}).get('en',{})
+    return 'variations' in en or 'substitutions' in en or en.get('stringUnit',{}).get('value')==key
 if extracted:
- for key in [k for k,v in strings.items() if k not in extracted and '${' not in k and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
+ for key in [k for k,v in strings.items() if k not in extracted and '${' not in k and not k.startswith(('essay.','shower.','access.')) and generated(k,v)]:
   del strings[key]
 # iPad wording for strings that name the device (see device_strings.py).
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))

@@ -64,7 +64,7 @@ struct JournalView: View {
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .sheet(item:$dropped) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
             // iPad: drop a park here to start an entry for it (never into a journal that could not open).
-            .acceptsPark("New entry for this park",systemImage:"book.closed") { park in
+            .acceptsPark("Record a night at this park",systemImage:"book.closed") { park in
                 guard !model.journalUnavailable else { return }
                 dropped=JournalPrefill.dropped(park:park,tonight:model.tonight(park))
             }
@@ -85,7 +85,7 @@ struct JournalView: View {
                 model.journalFile=nil
                 guard !model.journalUnavailable else {
                     Task.detached(priority:.utility) { JournalInbox.remove(url) }
-                    importResult=String(localized:"Your journal couldn't be opened, so this file was not imported. Nothing was changed.")
+                    importResult=String(localized:"Your journal could not be opened, so this file was not imported. Nothing was changed.")
                     return
                 }
                 await importJournal(url)
@@ -478,7 +478,7 @@ struct JournalUnavailableBanner:View {
     /// The device is nearly full: the one thing that may help is said first.
     var needsSpace=false
     var body:some View {
-        Label { Text(needsSpace ? "There isn't enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched." : "Your journal couldn't be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
+        Label { Text(needsSpace ? "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched." : "Your journal could not be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
             icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.ink)
             .padding(14).frame(maxWidth:.infinity,alignment:.leading)

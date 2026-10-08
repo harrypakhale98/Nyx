@@ -72,9 +72,9 @@
     "one": "Al segundo %lld: %@",
     "other": "A los %lld segundos: %@"
   },
-  "BEST OF THE NEXT %lld NIGHTS": {
-    "one": "LA MEJOR DE LA PRÓXIMA NOCHE",
-    "other": "LA MEJOR DE LAS PRÓXIMAS %lld NOCHES"
+  "Best of the next %lld nights": {
+    "one": "La mejor de la próxima noche",
+    "other": "La mejor de las próximas %lld noches"
   },
   "Best of the next %lld nights: %@, %lld.": {
     "format": "La mejor de %#@nights@: %2$@, %3$lld.",
@@ -84,9 +84,9 @@
     "format": "Mapa de %#@parks@ según el índice de esta noche. El más oscuro: %2$@, %3$lld, %4$@.",
     "parks": {"arg": 1, "one": "%arg parque nacional", "other": "%arg parques nacionales"}
   },
-  "NUMBER %lld OF THE NEXT %lld NIGHTS": {
-    "format": "NÚMERO %1$lld DE %#@nights@",
-    "nights": {"arg": 2, "one": "LA PRÓXIMA NOCHE", "other": "LAS PRÓXIMAS %arg NOCHES"}
+  "Number %lld of the next %lld nights": {
+    "format": "Número %1$lld de %#@nights@",
+    "nights": {"arg": 2, "one": "la próxima noche", "other": "las próximas %arg noches"}
   },
   "No true darkness at %@ in the next %lld nights. The best is %@, %lld out of 100.": {
     "format": "No hay oscuridad total en %1$@ en %#@nights@. La mejor es %3$@, %4$lld de 100.",

@@ -23,7 +23,7 @@ struct DiagnosticsView: View {
                         LabeledContent {
                             Text(record.received.formatted(date:.abbreviated,time:.shortened)).foregroundStyle(palette.muted)
                         } label:{
-                            Label(record.kind == .crash ? String(localized:"Crash") : String(localized:"Hang"),systemImage:record.kind == .crash ? "exclamationmark.triangle" : "hourglass")
+                            Label(record.kind == .crash ? String(localized:"Crash") : String(localized:"Stopped responding"),systemImage:record.kind == .crash ? "exclamationmark.triangle" : "hourglass")
                         }
                         .accessibilityElement(children:.combine)
                     }

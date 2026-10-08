@@ -51,7 +51,7 @@ struct MoonWidgetView: View {
         default:
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top) {
-                    Text("THE MOON").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
+                    Text("The Moon").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
                     Spacer(minLength: 4)
                 }
                 disc.frame(width: 58, height: 58).frame(maxWidth: .infinity, alignment: .center).padding(.vertical, 2)
@@ -95,7 +95,7 @@ struct MoonWidgetView: View {
         var text=String(localized: "\(entry.moon.phase.name), \(entry.moon.percent) percent lit.")
         if let up=entry.moon.isUp { text+=" "+(up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
         if let park=entry.park, let next=entry.moon.next {
-            text+=" "+(next.rises ? String(localized: "Moonrise at \(park.time(next.date)) at \(park.shortName).") : String(localized: "Moonset at \(park.time(next.date)) at \(park.shortName)."))
+            text+=" "+(next.rises ? String(localized: "Moonrise at \(park.time(next.date)), \(park.shortName).") : String(localized: "Moonset at \(park.time(next.date)), \(park.shortName)."))
         }
         return text
     }

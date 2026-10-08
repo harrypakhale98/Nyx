@@ -1123,13 +1123,13 @@
         }
       }
     },
-    "Drawn for Nyx between catalogue stars.": {
+    "Drawn for Nyx between catalog stars.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Drawn for Nyx between catalogue stars."
+            "value": "Drawn for Nyx between catalog stars."
           }
         },
         "es": {
@@ -2109,40 +2109,6 @@
         }
       }
     },
-    "Moon, %lld percent illuminated": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %lld percent illuminated"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %lld por ciento iluminada"
-          }
-        }
-      }
-    },
-    "Moon, %lld percent illuminated, as seen at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %lld percent illuminated, as seen at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %lld por ciento iluminada, vista en %@"
-          }
-        }
-      }
-    },
     "Moon, %lld percent lit": {
       "extractionState": "manual",
       "localizations": {
@@ -2156,6 +2122,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Luna, %lld por ciento iluminada"
+          }
+        }
+      }
+    },
+    "Moon, %lld percent lit, as seen at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %lld percent lit, as seen at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %lld por ciento iluminada, vista en %@"
           }
         }
       }
@@ -2721,19 +2704,19 @@
         }
       }
     },
-    "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.": {
+    "Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International."
+            "value": "Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx no está afiliado ni respaldado por el NPS, la NASA ni DarkSky International."
+            "value": "Nyx no está afiliado ni respaldado por el National Park Service, la NASA ni DarkSky International."
           }
         }
       }
@@ -3605,23 +3588,6 @@
         }
       }
     },
-    "TONIGHT'S MOON": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TONIGHT'S MOON"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LA LUNA DE ESTA NOCHE"
-          }
-        }
-      }
-    },
     "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
       "extractionState": "manual",
       "localizations": {
@@ -4064,19 +4030,19 @@
         }
       }
     },
-    "Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.": {
+    "Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Times are park time. Moonrise and moonset are good to about a quarter of an hour, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
+            "value": "Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las horas son las del parque. La salida y la puesta de la Luna tienen un margen de unos quince minutos; los planetas, de un grado. En el cielo, la Luna se dibuja más grande de lo real para que se lea su fase; su posición es la verdadera."
+            "value": "Las horas son las locales del parque. La salida y la puesta de la Luna tienen un margen de pocos minutos; los planetas, de un grado. En el cielo, la Luna se dibuja más grande de lo real para que se lea su fase; su posición es la verdadera."
           }
         }
       }
@@ -4094,6 +4060,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esta noche"
+          }
+        }
+      }
+    },
+    "Tonight's Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight's Moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna de esta noche"
           }
         }
       }

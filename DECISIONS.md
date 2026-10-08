@@ -907,3 +907,36 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - Starting the dark-adaptation clock awaits the notification permission answer (`AdaptationReminders.schedule` and `WatchStore.startAdaptation` are async and return it) instead of re-reading it after a fixed second, so a slow answer no longer gives both the screen's tap and the reminder at 30 minutes, nor brings back "Nyx will ask…" after Stop. Provisional permission counts as allowed on both paths.
 - Vision Pro's time slider follows the immersive sky's rules while the sky is open: held, it chases the thumb no faster than `comfortableTurn` (`VisionModel.turn(toward:)`), the thumb showing the hand and the time above it the sky; under Reduce Motion it moves once, without a sweep, on letting go (a VoiceOver adjustment jumps at once). In the window alone it still moves the clock directly.
 - `SkyMoment` is cached in `VisionModel.skyMoment`, recomputed when the clock or the plan changes, instead of built three times per 11 ms frame of a sweep (ornament, written sky, immersive sky).
+
+## Team review — 2026-10-08 (copy)
+
+- The score recipe in onboarding (page 2) and About the data uses the readout's words: moonlight, clouds, sky glow (estimated), true darkness. The old onboarding sentence ("artificial light and the length of darkness") is gone.
+- "Show in Calendar" in a park's menu is "Show in Plan": it opens the Plan tab, and "Calendar" already means Apple Calendar ("Add to Calendar"). The Milky Way, photo and score essays, the Reduce Highlighting note ("the month slide in Plan") and the updates-off note ("twilight, Plan, saved parks") name Plan too, in English and Spanish.
+- The storage-failure screen says what happened ("Nyx could not open its storage") instead of reassuring first; its message no longer repeats the title.
+- The trip planner's hop is "Farthest between nights": the limit is straight-line, so "drive" overstated it; the "straight line" note stays.
+- Milky Way essay: from American Samoa (14.2° S) the galactic center (dec −29°) culminates about 75° up in the southern sky, not nearly overhead; the season is "about November to January". Spanish corrected the same way.
+- Smoke wording matches `ScoreEngine.smokeCap` (moderate 0.25–0.5 caps at 74, heavy 0.5+ at 59): the Clouds row says "smoke or haze can cap the score", the forecast essay "when it is moderate or heavy" (English and Spanish).
+- Meteors essay: "Many people … gave up early" replaces an unsourced "most … after fifteen minutes" (English and Spanish).
+- The watch's 30-minute dark-adaptation reminder is titled "About 30 minutes" and says the eyes "should be adapted": the clock is an estimate, not a measurement.
+- Vision Pro's accuracy line matches the verified figure in About the data and `Research/accuracy.md` (moonrise and moonset within a few minutes of USNO, not "a quarter of an hour"), and says "park-local" as the iPhone does; "percent illuminated" is "percent lit" there too.
+- One name for adding a journal entry: "Record a night" (the App Intent's title, the App Shortcut's short title and a "Record a night in Nyx" phrase; "Add to my Nyx journal" stays as a second phrase; the park drop target says "Record a night at this park"). The year recap says "Nights recorded" and "No nights recorded".
+- "darkness score" is sentence case in labels and lowercase mid-sentence (essay title "Reading the darkness score", Learn blurb), in the app, on the website and in the 1.1 metadata.
+- About the data: the Milky Way's center "is taken as the direction of Sagittarius A*" (the code uses its position; the black hole is not the visible glow); ERA5 is glossed as "a record of past weather rebuilt from observations".
+- "sky glow" is two words everywhere (About the data heading, Bortle and darkness essays, README); the Bortle essay's subtitle is "Reading artificial sky brightness", like the score essay's "Reading…" title.
+- "%lld-minute read" is hyphenated, as the website's case study already was.
+- The widget's "next park" description says what it does today: "Moves the Tonight's sky widget to your next saved park … Tomorrow it returns to your darkest park." (the Control Center control is not affected).
+- The moonset alarm reads "The Moon sets in 30 minutes at %@". The proposed "…at %@." with a time was rejected: the argument is the park name, not a time.
+- Spoken strings with two "at"s use a comma: "Moonrise at %@, %@." and "Moonset at %@, %@." (time, park; widget and watch), "Facing %@, %@." (direction, time), "Best night: %@, %@." (day, park). "%@ at %@ tonight" (shower at park) has one "at" and stays.
+- Ask Nyx's refusal says "could not match an answer to these records"; the diagnostics list says "Stopped responding" instead of "Hang".
+- Sound and touch: "VoiceOver rotors jump…" and "…and see how Nyx adapts…".
+- The key field and its label say "National Park Service key" / "park service key" instead of "NPS API key"; the Watch and Vision Pro credits spell out the National Park Service, as the iPhone's do.
+- Eyebrows are stored in sentence case and drawn with `.textCase(.uppercase)` ("Tonight", "Tonight's sky", "Next seven nights", "The Moon", "Darkness / 100", "Nyx · Year under the stars", Siri's "Best of the next %lld nights" / "Number %lld of the next %lld nights", Vision's "Tonight's Moon"): the same pixels, but VoiceOver no longer reads capitals and Spanish is stored in sentence case.
+- Dark Sky: "International Dark Sky Park" for the certification, "Dark Sky designations" in About the data, "Dark Sky parks" on the watch; "dark-sky" stays only as a generic adjective.
+- "Unsave park" is "Remove from saved parks"; "Unsave" and "Unsave park" stay as Voice Control input labels.
+- "Starting point" everywhere the place you start from is meant (the location-unavailable message, the credits heading "Starting points").
+- American spelling in UI and essays: color (lunar color map, light color, access essay, watch debug), traveled, catalog (Vision credits); proper titles such as the Yale Bright Star Catalogue keep theirs.
+- Moon capitalization: phase names are lowercase in running text ("new moon", "full moon", "Feel a half moon"), "Moon" is the body ("a waxing Moon").
+- Contractions in the journal and saved-park failure messages are spelled out ("could not", "is not"), matching the rest of the calm copy.
+- Quotes: straight quotes are the catalog's style (131 straight apostrophes to 1 curly), so the few curly ones in About the data and the Sky glow chapter were normalized. "U.S." in prose (the map credit); the texts Ask Nyx reads from its tools keep "US".
+- The chart summary says "Nights without a cloud forecast yet: %lld of %lld." instead of "1 of 3 nights have…", which was wrong for one night.
+- `sync_catalog.py` and `sync_vision_catalog.py` now also prune generated entries with plural or iPad variations once their key leaves the code; before, renamed counted strings and device-variant strings stayed in the catalog forever (seven stale "this iPhone" keys removed).

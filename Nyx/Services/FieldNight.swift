@@ -191,7 +191,7 @@ nonisolated struct FieldNight: Sendable {
         // Thirty minutes before a Moon that sets in true darkness, for the moon-free hours before dawn.
         if sky.moon.illumination>=0.05, let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end {
             options.append(AlarmOption(kind: .moonset, fire: set.addingTimeInterval(-1800), label: String(localized: "Wake me 30 minutes before the Moon sets"),
-                alarmTitle: String(localized: "The Moon sets at \(name) in 30 minutes")))
+                alarmTitle: String(localized: "The Moon sets in 30 minutes at \(name)")))
         }
         return options.filter { $0.fire.timeIntervalSince(now)>=Self.alarmLead }.sorted { $0.fire<$1.fire }
     }

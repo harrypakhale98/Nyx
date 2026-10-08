@@ -86,7 +86,7 @@ Alternates (promotional text changes without a new build):
 ## Description (≤4000)
 
 ```
-Which park, and which night? Nyx compares the 63 US national parks night by night and gives each a Darkness Score from 0 to 100, from the Moon, the clouds, the sky glow and the hours of true darkness. It tells you what it doesn't know. Free. No account, no ads, no tracking.
+Which park, and which night? Nyx compares the 63 US national parks night by night and gives each a darkness score from 0 to 100, from the Moon, the clouds, the sky glow and the hours of true darkness. It tells you what it doesn't know. Free. No account, no ads, no tracking.
 
 ONE SCORE, WITH ITS REASONS
 Four parts add up, and the weakest can cap the total, so a cloudy night never looks good. The line under the score names the cap. Park closures from the National Park Service sit beside the number.

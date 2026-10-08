@@ -2,7 +2,7 @@ A sky worth protecting
 
 A dark sky is more than a place to see stars. It is a habitat. Long before electric light, plants and animals lived with a steady pattern of bright days and dark nights. That rhythm still matters. A lamp beside a road may help a person see the ground, but its light can reach far beyond the road, into the places where other lives unfold.
 
-Light scattered in the atmosphere creates skyglow. From a city, it can hide the faint band of the Milky Way. The brightest stars remain, while the quieter parts of the sky disappear. A person who has never seen a truly dark night may not know what is missing. A national park can offer a first encounter with a sky that feels unexpectedly full.
+Light scattered in the atmosphere creates sky glow. From a city, it can hide the faint band of the Milky Way. The brightest stars remain, while the quieter parts of the sky disappear. A person who has never seen a truly dark night may not know what is missing. A national park can offer a first encounter with a sky that feels unexpectedly full.
 
 Darkness does not mean using no light. It means putting light where it helps, at the time it is needed, and at a level that suits the task. A shielded light aimed toward the ground serves a path better than one shining into the sky. A light switched off when nobody needs it gives darkness back to the surrounding landscape. Small decisions can matter when many people make them.
 

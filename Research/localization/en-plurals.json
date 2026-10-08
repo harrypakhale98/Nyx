@@ -72,9 +72,9 @@
     "one": "At %lld second: %@",
     "other": "At %lld seconds: %@"
   },
-  "BEST OF THE NEXT %lld NIGHTS": {
-    "one": "BEST OF THE NEXT %lld NIGHT",
-    "other": "BEST OF THE NEXT %lld NIGHTS"
+  "Best of the next %lld nights": {
+    "one": "Best of the next %lld night",
+    "other": "Best of the next %lld nights"
   },
   "Best of the next %lld nights: %@, %lld.": {
     "format": "Best of the next %#@nights@: %2$@, %3$lld.",
@@ -84,9 +84,9 @@
     "format": "Map of %#@parks@ by tonight's score. Darkest: %2$@, %3$lld, %4$@.",
     "parks": {"arg": 1, "one": "%arg national park", "other": "%arg national parks"}
   },
-  "NUMBER %lld OF THE NEXT %lld NIGHTS": {
-    "format": "NUMBER %1$lld OF THE NEXT %#@nights@",
-    "nights": {"arg": 2, "one": "%arg NIGHT", "other": "%arg NIGHTS"}
+  "Number %lld of the next %lld nights": {
+    "format": "Number %1$lld of the next %#@nights@",
+    "nights": {"arg": 2, "one": "%arg night", "other": "%arg nights"}
   },
   "No true darkness at %@ in the next %lld nights. The best is %@, %lld out of 100.": {
     "format": "No true darkness at %1$@ in the next %#@nights@. The best is %3$@, %4$lld out of 100.",

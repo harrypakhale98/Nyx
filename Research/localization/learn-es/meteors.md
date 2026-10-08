@@ -10,6 +10,6 @@ La Luna importa más que cualquier cosa que puedas controlar. Una Luna brillante
 
 Acuéstate. Una silla reclinable o una colchoneta te dejan abarcar más cielo con menos esfuerzo. Abrígate para una temperatura bastante más baja de la que indica el pronóstico; quedarse quieto en el suelo da más frío que estar de pie. Mantén el teléfono tenue y en rojo, o guárdalo. Tus ojos necesitan de veinte a treinta minutos para adaptarse a la oscuridad, y una sola pantalla brillante deshace esa adaptación.
 
-Después, ten paciencia. Los meteoros llegan en rachas y pausas. Diez minutos tranquilos pueden dar paso a tres meteoros seguidos. Dale al menos una hora. La mayoría de quienes dicen que no vieron nada se rindieron a los quince minutos.
+Después, ten paciencia. Los meteoros llegan en rachas y pausas. Diez minutos tranquilos pueden dar paso a tres meteoros seguidos. Dale al menos una hora. Muchas de las personas que dicen que no vieron nada se rindieron pronto.
 
 No se necesitan telescopio ni binoculares. Los meteoros son demasiado rápidos y están demasiado dispersos. El instrumento son tus propios ojos, adaptados a la oscuridad, bajo el cielo más amplio que encuentres.

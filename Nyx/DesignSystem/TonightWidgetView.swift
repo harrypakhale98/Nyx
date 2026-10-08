@@ -229,7 +229,7 @@ struct TonightWidgetView:View {
         VStack(alignment:.leading,spacing:4) {
             if !typeSize.isAccessibilitySize {
                 HStack(alignment:.center) {
-                    Text("TONIGHT'S SKY").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
+                    Text("Tonight's sky").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
                     Spacer(minLength:4)
                     moon(night).frame(width:18,height:18)
                 }
@@ -265,7 +265,7 @@ struct TonightWidgetView:View {
         let best=NightPlanner.best(week)?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
-                Text("NEXT SEVEN NIGHTS").font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
+                Text("Next seven nights").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
                 // Room for the "2 of 3" button laid over the top corner.
                 Spacer(minLength:entry.savedCount>1 ? 62 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
@@ -303,7 +303,7 @@ struct TonightWidgetView:View {
             HStack(spacing:0) {
                 // A closure takes the eyebrow's place, so the month keeps its room.
                 if entry.closure != nil { closureLine(.caption2) }
-                else { Text("TONIGHT'S SKY").font(.caption2.weight(.medium)).tracking(1.2).foregroundStyle(muted) }
+                else { Text("Tonight's sky").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.2).foregroundStyle(muted) }
                 Spacer(minLength:entry.savedCount>1 ? 70 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(alignment:.center,spacing:12) {
@@ -339,7 +339,7 @@ struct TonightWidgetView:View {
     private func extraLargeContent(_ night:Night,month:NightPlanner.Month)->some View {
         HStack(alignment:.top,spacing:28) {
             VStack(alignment:.leading,spacing:8) {
-                Text("TONIGHT'S SKY").font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("Tonight's sky").textCase(.uppercase).font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                 Text("\(night.score.value)").font(.system(size:72,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
                 Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted)
@@ -370,7 +370,7 @@ struct TonightWidgetView:View {
     private func portraitContent(_ night:Night,month:NightPlanner.Month)->some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(spacing:0) {
-                Text("TONIGHT'S SKY").font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("Tonight's sky").textCase(.uppercase).font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
                 Spacer(minLength:entry.savedCount>1 ? 70 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(alignment:.center,spacing:16) {

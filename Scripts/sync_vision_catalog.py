@@ -20,8 +20,13 @@ for filename in glob.glob(build+'/Build/Intermediates.noindex/*.build/Debug-xrsi
   if key in strings: continue
   strings[key]={'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':key}}}}
   if item.get('comment'): strings[key]['comment']=item['comment']
+# Prune copy no longer in code: auto-added entries (value == key) and counted ones (plural
+# variations written by apply_translations.py); hand-written keys (constellation.*, shower.*) stay.
+def generated(key,entry):
+    en=entry.get('localizations',{}).get('en',{})
+    return 'variations' in en or 'substitutions' in en or en.get('stringUnit',{}).get('value')==key
 if extracted:
- for key in [k for k,v in strings.items() if k not in extracted and v.get('localizations',{}).get('en',{}).get('stringUnit',{}).get('value')==k]:
+ for key in [k for k,v in strings.items() if k not in extracted and not k.startswith(('constellation.','shower.')) and generated(k,v)]:
   del strings[key]
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')

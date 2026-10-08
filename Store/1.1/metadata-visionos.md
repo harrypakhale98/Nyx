@@ -24,7 +24,7 @@ Stand under a darker sky.
 Nyx on Apple Vision Pro shows the night sky over any of the 63 US national parks, on any night in the coming year, computed on the device from the positions of the Sun, the Moon, the planets and the stars.
 
 PLAN THE NIGHT
-Browse the parks with each night's Darkness Score, from 0 to 100. Open a park to see its night: the Moon's phase and its times, the hours of true darkness, the park's estimated sky glow, and what is up, from the Milky Way core to the planets. Step through the nights ahead, scrub from sunset to sunrise, or jump to the middle of true darkness. Times are park-local.
+Browse the parks with each night's darkness score, from 0 to 100. Open a park to see its night: the Moon's phase and its times, the hours of true darkness, the park's estimated sky glow, and what is up, from the Milky Way core to the planets. Step through the nights ahead, scrub from sunset to sunrise, or jump to the middle of true darkness. Times are park-local.
 
 STAND UNDER THIS SKY
 Open the sky and the night surrounds you, with the room still at the edges until you turn the Digital Crown. The brightest stars are placed from the Yale Bright Star Catalogue, in their true colors, and the best known carry their names. Constellation figures can be shown or hidden. The Milky Way is a model drawn from the shape of our galaxy. Planets glow, sized by their brightness; tap a star, a planet, the Moon or the Milky Way core to see its name, its height and its direction. Drag across the sky to turn the night by hand.

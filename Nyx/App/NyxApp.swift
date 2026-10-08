@@ -38,7 +38,7 @@ import UserNotifications
         WindowGroup {
             // Age assurance only where the system says the law requires it; stores and gates nothing (`AgeAssurance`).
             if let container { RootView().environment(model).modelContainer(container).modifier(AgeAssuranceCheck()) }
-            else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+            else { CalmState(symbol:"externaldrive",title:"Nyx could not open its storage",message:"Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
         // iPad's menu bar and ⌘-hold overlay: tabs, Find a Park, previous and next night, a park in a new window.
         .commands { NyxCommands() }
@@ -48,7 +48,7 @@ import UserNotifications
         // Assistive Access (Settings › Accessibility): one park, one word, the Moon and when it gets dark.
         AssistiveAccess {
             if let container { AssistiveAccessRoot().environment(model).modelContainer(container) }
-            else { CalmState(symbol:"externaldrive",title:"Your journal is safe to leave closed",message:"Nyx could not open local storage. Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
+            else { CalmState(symbol:"externaldrive",title:"Nyx could not open its storage",message:"Restart Nyx after making some space. Existing data has not been replaced.").background(Color.black).preferredColorScheme(.dark) }
         }
         // iPad: a park in a window of its own ("Open in New Window", ⌘⇧N). Links and Spotlight keep
         // landing in the main window, never in a new park window.

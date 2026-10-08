@@ -66,7 +66,7 @@ struct DarknessSnippetView:View {
         HStack(alignment:.center,spacing:18) {
             StaticScoreDial(score:night.score.value,hasForecast:night.score.hasForecast,palette:palette).frame(width:118,height:118)
             VStack(alignment:.leading,spacing:6) {
-                Text("TONIGHT").font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                Text("Tonight").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:8) {
@@ -116,6 +116,6 @@ struct NyxShortcuts:AppShortcutsProvider {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
         AppShortcut(intent:FindBestNightIntent(),phrases:["Find the best night at \(\.$park) with \(.applicationName)","When is the darkest night at \(\.$park) in \(.applicationName)","Find the best night for stars with \(.applicationName)"],shortTitle:"Best night",systemImageName:"calendar")
         AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
-        AppShortcut(intent:AddJournalEntryIntent(),phrases:["Add to my \(.applicationName) journal","Log a night in \(.applicationName)"],shortTitle:"Log a night",systemImageName:"book.closed")
+        AppShortcut(intent:AddJournalEntryIntent(),phrases:["Add to my \(.applicationName) journal","Record a night in \(.applicationName)"],shortTitle:"Record a night",systemImageName:"book.closed")
     }
 }

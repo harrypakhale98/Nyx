@@ -80,7 +80,7 @@ struct MoonWidgetFace: View {
                 HStack(spacing: 20) {
                     WidgetMoon(facts: facts).frame(width: 112, height: 112)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("TONIGHT'S MOON").font(.caption2.weight(.semibold)).kerning(1.4).foregroundStyle(Self.ink.opacity(0.7))
+                        Text("Tonight's Moon").textCase(.uppercase).font(.caption2.weight(.semibold)).kerning(1.4).foregroundStyle(Self.ink.opacity(0.7))
                         Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink)
                         Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(Self.amber)
                         Spacer(minLength: 6)

@@ -1,6 +1,6 @@
 # Nyx
 
-A calm, offline-first dark-sky planner for the 63 US national parks. Nyx weighs moonlight, clouds, estimated skyglow and the length of true darkness into one Darkness Score (0–100) per park per night, so you can choose where to go and which night to take off. No accounts, advertising, tracking, backend or third-party runtime packages.
+A calm, offline-first dark-sky planner for the 63 US national parks. Nyx weighs moonlight, clouds, estimated sky glow and the length of true darkness into one darkness score (0–100) per park per night, so you can choose where to go and which night to take off. No accounts, advertising, tracking, backend or third-party runtime packages.
 
 Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served from `docs/` by a Cloudflare Worker that deploys on every push to `main` (`wrangler.jsonc`: 404 page and clean URLs; `docs/_headers`: security headers) (GitHub Pages still serves the same folder at harrypakhale98.github.io/Nyx for links in older builds).
 
