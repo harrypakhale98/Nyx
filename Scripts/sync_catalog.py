@@ -1,5 +1,5 @@
 """Merge compiler-extracted strings after xcodebuild (Xcode's IDE does this interactively)."""
-import json,pathlib,glob,sys
+import json,pathlib,glob,re,sys
 path=pathlib.Path('Nyx/Resources/Localizable.xcstrings')
 catalog=json.loads(path.read_text())
 strings=catalog['strings']
@@ -28,10 +28,15 @@ import device_strings
 device_strings.apply(catalog)
 catalog['strings']=dict(sorted(strings.items()))
 path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
-# Usage strings, kept identical to project.yml's Info.plist values. "This device": one plist serves iPhone and iPad.
-usage={'NSAlarmKitUsageDescription':"Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only.",
-       'NSLocationWhenInUseUsageDescription':'Nyx uses your location on this device to find nearby national parks. Your coordinates are never sent to a service.'}
-info={'sourceLanguage':'en','strings':{key:{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':value}}}} for key,value in usage.items()},'version':'1.0'}
+# Info.plist strings, read from project.yml so the catalog never drifts from the plist: the usage
+# descriptions, plus the document and type names (the Info.plist localizes those by their English text).
+yml=pathlib.Path('project.yml').read_text()
+def yml_value(key):
+    match=re.search(r'^\s*(?:INFOPLIST_KEY_)?'+key+r':\s*(.+?)\s*$',yml,re.M)
+    return match.group(1).strip('"') if match else None
+usage={key:yml_value(key) for key in ('NSAlarmKitUsageDescription','NSLocationWhenInUseUsageDescription','NSMotionUsageDescription')}
+usage.update({name:name for name in re.findall(r'^\s*(?:- )?(?:UTTypeDescription|CFBundleTypeName):\s*(.+?)\s*$',yml,re.M)})
+info={'sourceLanguage':'en','strings':{key:{'extractionState':'manual','localizations':{'en':{'stringUnit':{'state':'translated','value':value}}}} for key,value in sorted(usage.items()) if value},'version':'1.0'}
 path.with_name('InfoPlist.xcstrings').write_text(json.dumps(info,indent=2)+'\n')
 print('Catalog:',len(strings),'keys')
 # Spanish (and the data-backed shower.*/access.* keys) after every sync, so new copy never drops it.
