@@ -102,14 +102,21 @@ nonisolated struct SkyMoment: Sendable {
     let parks: [Park]
     var selectedID: String? { didSet { if selectedID != oldValue { refresh(resetTime: true) } } }
     /// Nights after tonight (park-local), so stepping moves every park together.
-    var nightOffset = 0 { didSet { if nightOffset != oldValue { refresh(resetTime: true); refreshList() } } }
+    var nightOffset = 0 { didSet { if nightOffset != oldValue, !keepingNight { refresh(resetTime: true); refreshList() } } }
     /// Position in the night's span, sunset (0) to sunrise (1).
-    var fraction = 0.5
+    var fraction = 0.5 { didSet { if fraction != oldValue { updateSkyMoment() } } }
     var nightVision = false
     var immersiveOpen = false
     /// The body whose name card is showing in the sky.
     var selectedBody: String?
-    private(set) var plan: NightPlan?
+    private(set) var plan: NightPlan? { didSet { updateSkyMoment() } }
+    /// Where everything is at the clock's moment, computed once per change of the clock or the
+    /// plan (the ornament, the window's written sky and the immersive sky all read it each frame
+    /// of a sweep).
+    private(set) var skyMoment: SkyMoment?
+    /// True while the planner window is open, so the Moon volume offers a way back to it only
+    /// when there is none on screen.
+    var plannerOpen = false
     /// Every park's night for the list, scored as `plan` is.
     private(set) var listNights: [String: Night] = [:]
     /// The last cloud forecast for each park, from this headset's cache or Open-Meteo
@@ -128,10 +135,20 @@ nonisolated struct SkyMoment: Sendable {
     private var sweep: Task<Void, Never>?
     private var planTask: Task<Void, Never>?
     private var listTask: Task<Void, Never>?
-    let now: Date
+    /// The moment "tonight" is judged from. Moved on only when some park's night turns over (its
+    /// sunrise, or local noon in polar night), as on the iPhone (`PlanModel.tick`): Vision Pro
+    /// keeps an app suspended for days, and a launch-time clock would leave Tonight, Back to
+    /// tonight, the Moon volume and each night's forecast basis on a night long past.
+    private(set) var now: Date
+    /// Set while `tick` re-bases `nightOffset` on the new tonight, which keeps the same night.
+    private var keepingNight = false
 
-    init(now: Date = VisionDebug.date ?? .now, parks: [Park]? = nil, weather: (any WeatherProviding)? = nil) {
-        self.now = now
+    /// A clock fixed by the caller (previews) or by DEBUG's `-nyx-date` never moves.
+    private let pinned: Bool
+
+    init(now: Date? = nil, parks: [Park]? = nil, weather: (any WeatherProviding)? = nil) {
+        self.now = now ?? VisionDebug.date ?? .now
+        pinned = now != nil || VisionDebug.date != nil
         self.parks = (parks ?? (try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         self.weather = weather ?? WeatherService()
         nightVision = VisionDebug.isEnabled("night-vision")
@@ -145,7 +162,40 @@ nonisolated struct SkyMoment: Sendable {
     var park: Park? { parks.first { $0.id == selectedID } }
     func night(for park: Park) -> Date { park.date(park.currentNight(at: now), addingDays: nightOffset) }
     var moment: Date? { plan.map { SkyDome.moment(fraction, in: $0.span) } }
-    var skyMoment: SkyMoment? { plan.flatMap { plan in moment.map { SkyMoment(park: plan.park, at: $0) } } }
+    private func updateSkyMoment() {
+        skyMoment = plan.flatMap { plan in moment.map { SkyMoment(park: plan.park, at: $0) } }
+    }
+
+    /// Moves "tonight" on to `date` once some park's night has turned over; otherwise nothing
+    /// changes (and nothing redraws). A later night the person stepped to stays the same night,
+    /// one step nearer; tonight becomes the new tonight, opening at its middle of darkness. A
+    /// pinned clock never moves.
+    func tick(_ date: Date = .now) {
+        guard !pinned, parks.contains(where: { $0.currentNight(at: now) != $0.currentNight(at: date) }) else { return }
+        let before = now
+        now = date
+        var newNight = false
+        if let park {
+            let turned = park.calendar.dateComponents([.day], from: park.currentNight(at: before), to: park.currentNight(at: date)).day ?? 0
+            // The chosen night changes unless a later night simply came one step nearer.
+            newNight = turned < 0 || nightOffset < turned
+            if turned > 0, nightOffset > 0 {
+                keepingNight = true
+                nightOffset = max(0, nightOffset-turned)
+                keepingNight = false
+            }
+        }
+        refresh(resetTime: newNight)
+        refreshList()
+    }
+    /// While a window is in use: the clock checked at once and every minute, so a night turning
+    /// over at the chosen park's sunrise reaches the window within the minute.
+    func keepClock() async {
+        while !Task.isCancelled {
+            tick()
+            try? await Task.sleep(for: .seconds(60))
+        }
+    }
 
     /// Recomputes the chosen night off the main thread; the sky opens at the middle of true darkness.
     private func refresh(resetTime: Bool) {

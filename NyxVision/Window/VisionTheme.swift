@@ -11,8 +11,14 @@ struct VisionPalette: Equatable {
     /// white there (as on the iPhone): a red ink filtered again would turn a dim, unreadable red.
     var ink: Color { nightVision ? .white : Color(red: 0.961, green: 0.945, blue: 0.902) }
     var accent: Color { nightVision ? .white : Color(red: 1, green: 0.706, blue: 0.329) }
-    /// Words in the immersive sky, which no window filter reaches: red already in night vision.
-    var skyInk: Color { nightVision ? Color(red: 1, green: 0.30, blue: 0.24) : Color(red: 0.961, green: 0.945, blue: 0.902) }
+    /// Words in the immersive sky, which no window filter reaches: red already in night vision,
+    /// the brighter red under Increase Contrast.
+    var skyInk: Color { nightVision ? (highContrast ? red : Color(red: 1, green: 0.30, blue: 0.24)) : Color(red: 0.961, green: 0.945, blue: 0.902) }
+    /// Night vision's red multiplier, as on the iPhone (`NyxPalette.red`, `NightTint`): the deepest
+    /// red that keeps text at 6.2:1 on black, or under Increase Contrast the brighter one that
+    /// keeps it above 4.5:1 for protan and deutan eyes too. The same two values, repeated here
+    /// because the visionOS target does not compile the iPhone's design system.
+    var red: Color { highContrast ? Color(red: 1, green: 0.36, blue: 0.31) : Color(red: 1, green: 0.27, blue: 0.23) }
     /// Secondary text. On glass it is the system's vibrant secondary style, which keeps its
     /// contrast over whatever the room shows through; night vision and Increase Contrast use a
     /// near-solid ink instead.

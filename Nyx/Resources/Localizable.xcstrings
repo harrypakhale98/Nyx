@@ -6297,6 +6297,23 @@
         }
       }
     },
+    "Cloud forecasts are off in Your privacy. Showing saved data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts are off in Your privacy. Showing saved data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pronósticos de nubes están desactivados en Tu privacidad. Se muestran los datos guardados."
+          }
+        }
+      }
+    },
     "Cloudiest forecast model": {
       "extractionState": "manual",
       "localizations": {
@@ -6701,6 +6718,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Núcleo en descenso"
+          }
+        }
+      }
+    },
+    "Could not reach the forecast. Showing saved data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not reach the forecast. Showing saved data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo obtener el pronóstico. Se muestran los datos guardados."
           }
         }
       }
@@ -17919,23 +17953,6 @@
         }
       }
     },
-    "Prepare share card": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prepare share card"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preparar tarjeta"
-          }
-        }
-      }
-    },
     "Preparing your constellation to share": {
       "extractionState": "manual",
       "localizations": {
@@ -24567,6 +24584,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Título"
+          }
+        }
+      }
+    },
+    "To keep Nyx on screen between glances, open Settings › General › Return to Clock › Nyx and choose After 1 hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To keep Nyx on screen between glances, open Settings › General › Return to Clock › Nyx and choose After 1 hour."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para mantener Nyx en pantalla entre vistazos, abre Configuración › General › Volver al reloj › Nyx y elige Después de 1 hora."
           }
         }
       }

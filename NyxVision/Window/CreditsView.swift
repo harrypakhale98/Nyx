@@ -42,7 +42,7 @@ struct CreditsView: View {
         .frame(minWidth: 520, minHeight: 560)
         // A sheet is its own presentation: it takes night vision's red here, as the window does.
         .saturation(palette.nightVision ? 0 : 1)
-        .colorMultiply(palette.nightVision ? Color(red: 1, green: 0.27, blue: 0.23) : .white)
+        .colorMultiply(palette.nightVision ? palette.red : .white)
         .background { if palette.nightVision { palette.nightPanel } }
     }
 }

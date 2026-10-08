@@ -4,6 +4,7 @@ import SwiftUI
 /// night in full. The ornament below steps nights and scrubs the night's clock, for the window and
 /// for the immersive sky alike.
 struct PlannerWindow: View {
+    static let id = "planner"
     @Environment(VisionModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -74,8 +75,16 @@ struct PlannerWindow: View {
             if VisionDebug.isEnabled("vision-widget-shots") { VisionWidgetShots.render() }
             if VisionDebug.isEnabled("vision-immersive") { await toggleSky() }
             // DEBUG: `-nyx-vision-skyonly` closes the window once the sky is open, for screenshots of the sky alone.
-            if VisionDebug.isEnabled("vision-skyonly"), model.immersiveOpen { dismissWindow(id: "planner") }
+            if VisionDebug.isEnabled("vision-skyonly"), model.immersiveOpen { dismissWindow(id: Self.id) }
         }
+        // Tonight moves on at the park's sunrise, however long the headset kept Nyx suspended.
+        .task(id: scenePhase == .active) {
+            guard scenePhase == .active else { return }
+            await model.keepClock()
+        }
+        // The Moon volume offers a way back here only while this window is closed.
+        .onAppear { model.plannerOpen = true }
+        .onDisappear { model.plannerOpen = false }
         // While the window is in use: the parks' cloud forecast, asked for again only when six hours old.
         .task(id: scenePhase == .active) {
             guard scenePhase == .active else { return }
@@ -119,7 +128,7 @@ private struct NightVisionWindow: ViewModifier {
     func body(content: Content) -> some View {
         content
             .saturation(enabled ? 0 : 1)
-            .colorMultiply(enabled ? Color(red: 1, green: 0.27, blue: 0.23) : .white)
+            .colorMultiply(enabled ? palette.red : .white)
             .background { if enabled { palette.nightPanel } }
             .animation(VisionMotion.spring, value: enabled)
     }
