@@ -46,6 +46,8 @@ import WidgetKit
     func backgroundRefresh(_ model:PlanModel) async {
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         await update(model)
+        // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
+        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
         Self.scheduleRefresh()
     }
     /// Asks iOS for the next background refresh, about six hours from now (iOS decides when).
@@ -79,19 +81,24 @@ import WidgetKit
         let today=model.today, showers=defaults.object(forKey:"showerReminders") as? Bool ?? true
         let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
         // Reminders may have been switched off while the nights were computed.
-        if defaults.bool(forKey:"notificationsEnabled") { await NotificationScheduler().reschedule(nights:nights,showers:showers) }
+        if defaults.bool(forKey:"notificationsEnabled") { await NotificationScheduler().reschedule(nights:nights,showers:showers,details:snapshot.details ?? [:]) }
     }
-    /// Tonight's and tomorrow's Moon for each saved park, drawn once for the widget.
+    /// The next week's Moons for each saved park, drawn once each for the widgets, so a widget left
+    /// for days without Nyx being opened still shows the real Moon (`MoonImages.nearest`).
+    static let moonNights=7
     private func renderWidgetMoons(_ model:PlanModel,_ parks:[Park]) {
         let engine=AstronomyEngine()
+        // Drawn in starlight: the widget turns its own pictures red in night vision, so a picture
+        // drawn red would stay red once night vision is off.
+        let neutral=NyxPalette(nightVision:false,highContrast:palette.highContrast)
         var keep=Set<String>()
         for park in parks {
-            for offset in 0..<2 {
+            for offset in 0..<Self.moonNights {
                 let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
                 guard let url=SharedSettings.moonImageURL(park:park.id,night:night.id) else { continue }
                 keep.insert(url.lastPathComponent)
                 if FileManager.default.fileExists(atPath:url.path) { continue }
-                let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,palette))
+                let renderer=ImageRenderer(content:MoonView(geometry:engine.moon(for:night).geometry).frame(width:60,height:60).environment(\.nyx,neutral))
                 renderer.scale=3
                 try? renderer.uiImage?.pngData()?.write(to:url,options:.atomic)
             }
