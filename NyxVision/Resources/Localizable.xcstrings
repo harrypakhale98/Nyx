@@ -18,6 +18,40 @@
         }
       }
     },
+    "%@ nights here are nearly always clear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are nearly always clear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí casi siempre están despejadas."
+          }
+        }
+      }
+    },
+    "%@ nights here are rarely clear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are rarely clear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí rara vez están despejadas."
+          }
+        }
+      }
+    },
     "%@ peak": {
       "extractionState": "manual",
       "localizations": {
@@ -52,19 +86,19 @@
         }
       }
     },
-    "%@ · moon and darkness": {
+    "%@ · %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · moon and darkness"
+            "value": "%@ · %lld%% lit"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · Luna y oscuridad"
+            "value": "%@ · %lld%% iluminada"
           }
         }
       }
@@ -120,6 +154,40 @@
         }
       }
     },
+    "%@, early look": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, early look"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, vista anticipada"
+          }
+        }
+      }
+    },
+    "%@, in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, in %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, en %@"
+          }
+        }
+      }
+    },
     "%@, night of %@": {
       "extractionState": "manual",
       "localizations": {
@@ -133,6 +201,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, noche del %@"
+          }
+        }
+      }
+    },
+    "%@, usual clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, usual clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, nubosidad habitual"
           }
         }
       }
@@ -188,19 +273,36 @@
         }
       }
     },
-    "%lld out of 100, %@, moon and darkness only": {
+    "%lld%%": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld out of 100, %@, moon and darkness only"
+            "value": "%lld%%"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld de 100, %@, solo Luna y oscuridad"
+            "value": "%lld%%"
+          }
+        }
+      }
+    },
+    "%lld%% average cover across the dark window.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% average cover across the dark window."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de nubosidad promedio durante el periodo de oscuridad."
           }
         }
       }
@@ -256,6 +358,40 @@
         }
       }
     },
+    "%lld–%lld an hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld–%lld an hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld–%lld por hora"
+          }
+        }
+      }
+    },
+    "%lld–%lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld–%lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld–%lld%%"
+          }
+        }
+      }
+    },
     "A bright Moon hides all but the brightest meteors.": {
       "extractionState": "manual",
       "localizations": {
@@ -307,6 +443,74 @@
         }
       }
     },
+    "About %lld in 10 %@ nights here are mostly clear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld in 10 %@ nights here are mostly clear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unas %lld de cada 10 noches de %@ aquí están mayormente despejadas."
+          }
+        }
+      }
+    },
+    "About %lld%% of the sky this hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld%% of the sky this hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %lld%% del cielo en esta hora"
+          }
+        }
+      }
+    },
+    "About %lld%% of the sky, an early look eased toward usual clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld%% of the sky, an early look eased toward usual clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca del %lld%% del cielo, una vista anticipada ajustada hacia la nubosidad habitual"
+          }
+        }
+      }
+    },
+    "Ahead is %@, not your room's real north.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahead is %@, not your room's real north."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al frente está el %@, no el norte real de tu habitación."
+          }
+        }
+      }
+    },
     "All night": {
       "extractionState": "manual",
       "localizations": {
@@ -324,6 +528,23 @@
         }
       }
     },
+    "All three forecast models agree: %@ cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All three forecast models agree: %@ cloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los tres modelos de pronóstico coinciden: %@ de nubes."
+          }
+        }
+      }
+    },
     "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -337,6 +558,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Coordenadas aproximadas. Confirma con un guardaparques el acceso, los horarios y los cierres actuales. Esto no es una guía de navegación."
+          }
+        }
+      }
+    },
+    "As seen from %@ at %@, its highest that night. Drag to turn it; it turns back to the face we always see.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As seen from %@ at %@, its highest that night. Drag to turn it; it turns back to the face we always see."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista desde %1$@ (%2$@), a su mayor altura esa noche. Arrástrala para girarla; vuelve a la cara que siempre vemos."
           }
         }
       }
@@ -477,6 +715,176 @@
         }
       }
     },
+    "Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpio"
+          }
+        }
+      }
+    },
+    "Clear air.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear air."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aire limpio."
+          }
+        }
+      }
+    },
+    "Clear in all three forecast models.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear in all three forecast models."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Despejado en los tres modelos de pronóstico."
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible."
+          }
+        }
+      }
+    },
+    "Cloud forecasts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronósticos de nubes"
+          }
+        }
+      }
+    },
+    "Cloud forecasts (Open-Meteo)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts (Open-Meteo)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronósticos de nubes (Open-Meteo)"
+          }
+        }
+      }
+    },
+    "Cloud forecasts are off in Your privacy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecasts are off in Your privacy."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pronósticos de nubes están desactivados en Tu privacidad."
+          }
+        }
+      }
+    },
+    "Clouds limit this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds limit this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes limitan esa noche a %lld."
+          }
+        }
+      }
+    },
+    "Clouds limit tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds limit tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las nubes limitan esta noche a %lld."
+          }
+        }
+      }
+    },
+    "Cloudy in all three forecast models.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloudy in all three forecast models."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nublado en los tres modelos de pronóstico."
+          }
+        }
+      }
+    },
     "Compass point on the horizon": {
       "extractionState": "manual",
       "localizations": {
@@ -494,36 +902,70 @@
         }
       }
     },
-    "Computed for %@, %@. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is %@, not your room's real north.": {
+    "Computed for %@, %@. Not a live view. Clouds follow the hourly forecast; their shapes and the skyline are illustrative.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Computed for %@, %@. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is %@, not your room's real north."
+            "value": "Computed for %@, %@. Not a live view. Clouds follow the hourly forecast; their shapes and the skyline are illustrative."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calculado para %@, %@. No es una vista en vivo; no se muestran las nubes y el horizonte es ilustrativo. Al frente está el %@, no el norte real de tu habitación."
+            "value": "Calculado para %@, %@. No es una vista en vivo. Las nubes siguen el pronóstico por hora; sus formas y el horizonte son ilustrativos."
           }
         }
       }
     },
-    "Computed for %@, %@. Not a live view; clouds not shown.": {
+    "Computed for %@, %@. Not a live view. Clouds follow the hourly forecast; their shapes are illustrative.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Computed for %@, %@. Not a live view; clouds not shown."
+            "value": "Computed for %@, %@. Not a live view. Clouds follow the hourly forecast; their shapes are illustrative."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calculado para %@, %@. No es una vista en vivo; no se muestran las nubes."
+            "value": "Calculado para %@, %@. No es una vista en vivo. Las nubes siguen el pronóstico por hora; sus formas son ilustrativas."
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view. No cloud forecast reaches this night, so no clouds are shown, and the skyline is illustrative.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view. No cloud forecast reaches this night, so no clouds are shown, and the skyline is illustrative."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo. Ningún pronóstico de nubes llega a esta noche, así que no se muestran nubes, y el horizonte es ilustrativo."
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view. No cloud forecast reaches this night, so no clouds are shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view. No cloud forecast reaches this night, so no clouds are shown."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo. Ningún pronóstico de nubes llega a esta noche, así que no se muestran nubes."
           }
         }
       }
@@ -545,6 +987,74 @@
         }
       }
     },
+    "Constellation figures": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Constellation figures"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Figuras de las constelaciones"
+          }
+        }
+      }
+    },
+    "Constellations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Constellations"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Constelaciones"
+          }
+        }
+      }
+    },
+    "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (ERA5, 2015–2024)."
+          }
+        }
+      }
+    },
+    "Credits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créditos"
+          }
+        }
+      }
+    },
     "Darkness score": {
       "extractionState": "manual",
       "localizations": {
@@ -558,6 +1068,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Índice de oscuridad"
+          }
+        }
+      }
+    },
+    "Done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
@@ -596,6 +1123,23 @@
         }
       }
     },
+    "Drawn for Nyx between catalogue stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn for Nyx between catalogue stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trazadas para Nyx entre estrellas del catálogo."
+          }
+        }
+      }
+    },
     "E": {
       "extractionState": "manual",
       "localizations": {
@@ -609,6 +1153,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "E"
+          }
+        }
+      }
+    },
+    "Early look": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada"
+          }
+        }
+      }
+    },
+    "Early look: forecast %lld days out, eased toward usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look: forecast %lld days out, eased toward usual clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada: pronóstico a %lld días, ajustado hacia la nubosidad habitual."
           }
         }
       }
@@ -715,6 +1293,74 @@
         }
       }
     },
+    "Forecast as of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast as of %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de %@"
+          }
+        }
+      }
+    },
+    "Forecast clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes pronosticadas"
+          }
+        }
+      }
+    },
+    "Forecast clouds about %lld%% of the sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast clouds about %lld%% of the sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes pronosticadas en cerca del %lld%% del cielo"
+          }
+        }
+      }
+    },
+    "Forecast models roughly agree: %@ cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models roughly agree: %@ cloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos de pronóstico casi coinciden: %@ de nubes."
+          }
+        }
+      }
+    },
     "Full moon": {
       "extractionState": "manual",
       "localizations": {
@@ -749,6 +1395,91 @@
         }
       }
     },
+    "Gusts to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusts to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ráfagas de %@"
+          }
+        }
+      }
+    },
+    "Haze or smoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haze or smoke"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruma o humo"
+          }
+        }
+      }
+    },
+    "Haze or smoke: the Milky Way will look faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haze or smoke: the Milky Way will look faint."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruma o humo: la Vía Láctea se verá tenue."
+          }
+        }
+      }
+    },
+    "Heavy smoke or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy smoke or haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo o bruma densos"
+          }
+        }
+      }
+    },
+    "Heavy smoke or haze: faint stars hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy smoke or haze: faint stars hidden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo o bruma densos: estrellas débiles ocultas."
+          }
+        }
+      }
+    },
     "Highest at %@, %lld° up in the %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -761,7 +1492,24 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Punto más alto a las %@, a %lld° en el %@."
+            "value": "Punto más alto: %1$@, a %2$lld° en el %3$@."
+          }
+        }
+      }
+    },
+    "IAU Working Group on Star Names.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Working Group on Star Names."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupo de Trabajo sobre Nombres de Estrellas de la UAI."
           }
         }
       }
@@ -795,7 +1543,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "En el %@ al anochecer; se pone a las %@."
+            "value": "En el %1$@ al anochecer; se pone: %2$@"
           }
         }
       }
@@ -813,6 +1561,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Júpiter"
+          }
+        }
+      }
+    },
+    "Last forecast: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last forecast: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último pronóstico: %@."
           }
         }
       }
@@ -851,6 +1616,57 @@
         }
       }
     },
+    "Light haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruma ligera"
+          }
+        }
+      }
+    },
+    "Light haze.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light haze."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruma ligera."
+          }
+        }
+      }
+    },
+    "Light wind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light wind"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viento ligero"
+          }
+        }
+      }
+    },
     "Low in the %@ after dusk; sets at %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -863,7 +1679,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bajo en el %@ al anochecer; se pone a las %@."
+            "value": "Bajo en el %1$@ al anochecer; se pone: %2$@"
           }
         }
       }
@@ -1021,6 +1837,91 @@
         }
       }
     },
+    "Milky Way core, washed out by the Moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core, washed out by the Moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea, opacado por la Luna"
+          }
+        }
+      }
+    },
+    "Models agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models agree"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos coinciden"
+          }
+        }
+      }
+    },
+    "Models differ": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models differ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos difieren"
+          }
+        }
+      }
+    },
+    "Models disagree: %@ cloud. Check again before you leave.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models disagree: %@ cloud. Check again before you leave."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos discrepan: %@ de nubes. Vuelve a revisar antes de salir."
+          }
+        }
+      }
+    },
+    "Models disagree: %@ cloud. Check again tomorrow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models disagree: %@ cloud. Check again tomorrow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos discrepan: %@ de nubes. Vuelve a revisar mañana."
+          }
+        }
+      }
+    },
     "Moon": {
       "extractionState": "manual",
       "localizations": {
@@ -1068,23 +1969,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Luna a %lld° en el %@"
-          }
-        }
-      }
-    },
-    "Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon and darkness only. Nyx on Vision Pro fetches no cloud forecast; check one before you go."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solo Luna y oscuridad. Nyx en Vision Pro no descarga pronósticos de nubes; consulta uno antes de ir."
           }
         }
       }
@@ -1157,6 +2041,23 @@
         }
       }
     },
+    "Moon map": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon map"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa de la Luna"
+          }
+        }
+      }
+    },
     "Moon up, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -1170,6 +2071,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Luna en el cielo, %lld%% iluminada"
+          }
+        }
+      }
+    },
+    "Moon, %@, %lld percent lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %@, %lld percent lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %@, %lld por ciento iluminada"
+          }
+        }
+      }
+    },
+    "Moon, %@, %lld percent lit. Next new moon %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %@, %lld percent lit. Next new moon %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %@, %lld por ciento iluminada. Próxima luna nueva: %@."
           }
         }
       }
@@ -1254,7 +2189,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin Luna desde las %@."
+            "value": "Sin Luna desde %@"
           }
         }
       }
@@ -1271,7 +2206,41 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin Luna hasta las %@."
+            "value": "Sin Luna hasta %@"
+          }
+        }
+      }
+    },
+    "Mostly low cloud, which hides what it covers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostly low cloud, which hides what it covers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre todo nubes bajas, que ocultan lo que cubren."
+          }
+        }
+      }
+    },
+    "Mostly mid-level cloud.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostly mid-level cloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre todo nubes medias."
           }
         }
       }
@@ -1327,6 +2296,40 @@
         }
       }
     },
+    "NASA's Scientific Visualization Studio; LRO LROC and LOLA teams.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NASA's Scientific Visualization Studio; LRO LROC and LOLA teams."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scientific Visualization Studio de la NASA; equipos LROC y LOLA del LRO."
+          }
+        }
+      }
+    },
+    "National Park Service.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Service."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Service."
+          }
+        }
+      }
+    },
     "Nautical twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -1357,6 +2360,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Luna nueva"
+          }
+        }
+      }
+    },
+    "New moon %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New moon %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna nueva: %@"
+          }
+        }
+      }
+    },
+    "Next new moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next new moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próxima luna nueva"
           }
         }
       }
@@ -1429,6 +2466,40 @@
         }
       }
     },
+    "No cloud forecast yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún sin pronóstico de nubes"
+          }
+        }
+      }
+    },
+    "No cloud forecast yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún sin pronóstico de nubes."
+          }
+        }
+      }
+    },
     "No crossing": {
       "extractionState": "manual",
       "localizations": {
@@ -1442,6 +2513,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sin cruce"
+          }
+        }
+      }
+    },
+    "No forecast on this device yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No forecast on this device yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay pronóstico en este dispositivo."
           }
         }
       }
@@ -1514,6 +2602,40 @@
         }
       }
     },
+    "None drawn: no cloud forecast reaches this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None drawn: no cloud forecast reaches this night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se dibujan: ningún pronóstico de nubes llega a esta noche"
+          }
+        }
+      }
+    },
+    "None drawn: the forecast has no value for this hour": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None drawn: the forecast has no value for this hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se dibujan: el pronóstico no tiene valor para esta hora"
+          }
+        }
+      }
+    },
     "Not visible from this park: the Moon is below the horizon.": {
       "extractionState": "manual",
       "localizations": {
@@ -1527,6 +2649,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "No es visible desde este parque: la Luna está bajo el horizonte."
+          }
+        }
+      }
+    },
+    "Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada más sale de este Apple Vision Pro. Aquí nunca se piden avisos de parques, pronósticos de humo ni tu ubicación, y nada se mide ni se comparte."
           }
         }
       }
@@ -1565,6 +2704,91 @@
         }
       }
     },
+    "Nyx has no account, no ads, no tracking.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx has no account, no ads, no tracking."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no tiene cuentas, anuncios ni rastreo."
+          }
+        }
+      }
+    },
+    "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx is not affiliated with or endorsed by NPS, NASA or DarkSky International."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no está afiliado ni respaldado por el NPS, la NASA ni DarkSky International."
+          }
+        }
+      }
+    },
+    "One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una solicitud a api.open-meteo.com para todos los parques a la vez, como máximo cada seis horas mientras Nyx está abierto, solo de nubes. El servicio recibe información de red, como tu dirección IP."
+          }
+        }
+      }
+    },
+    "Opens this night's Moon as a globe you can place in the room": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens this night's Moon as a globe you can place in the room"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la Luna de esta noche como un globo que puedes colocar en la habitación"
+          }
+        }
+      }
+    },
+    "Optional data update": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional data update"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualización de datos opcional"
+          }
+        }
+      }
+    },
     "Out of the night sky": {
       "extractionState": "manual",
       "localizations": {
@@ -1578,6 +2802,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fuera del cielo nocturno"
+          }
+        }
+      }
+    },
+    "Park data": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos de los parques"
           }
         }
       }
@@ -1752,6 +2993,23 @@
         }
       }
     },
+    "Rises already in Earth's shadow; partial phase visible %@–%@. Totality is over before moonrise here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rises already in Earth's shadow; partial phase visible %@–%@. Totality is over before moonrise here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale ya dentro de la sombra de la Tierra; fase parcial visible de %@ a %@. Aquí la totalidad termina antes de la salida de la Luna."
+          }
+        }
+      }
+    },
     "Rises at %@ in the %@ and climbs high before dawn.": {
       "extractionState": "manual",
       "localizations": {
@@ -1764,7 +3022,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@ y sube alto antes del amanecer."
+            "value": "Sale por el %2$@ (%1$@) y sube alto antes del amanecer."
           }
         }
       }
@@ -1781,7 +3039,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@, alcanza su punto más alto hacia las %@ y se pone a las %@."
+            "value": "Sale por el %2$@ (%1$@); punto más alto: aprox. %3$@; se pone: %4$@"
           }
         }
       }
@@ -1798,7 +3056,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@; %@ antes del amanecer."
+            "value": "Sale por el %2$@ (%1$@); %3$@ antes del amanecer."
           }
         }
       }
@@ -1815,7 +3073,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@; más alto hacia las %@ en el %@."
+            "value": "Sale por el %2$@ (%1$@); punto más alto: aprox. %3$@, en el %4$@"
           }
         }
       }
@@ -1832,7 +3090,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@; aún bajo al amanecer."
+            "value": "Sale por el %2$@ (%1$@); aún bajo al amanecer."
           }
         }
       }
@@ -1849,7 +3107,24 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sale a las %@ por el %@; bien alto al amanecer."
+            "value": "Sale por el %2$@ (%1$@); bien alto al amanecer."
+          }
+        }
+      }
+    },
+    "Roughly agree": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roughly agree"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casi coinciden"
           }
         }
       }
@@ -1973,6 +3248,91 @@
         }
       }
     },
+    "Sets during the partial phase; visible %@–%@. Totality comes after moonset here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets during the partial phase; visible %@–%@. Totality comes after moonset here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se pone durante la fase parcial; visible de %@ a %@. Aquí la totalidad llega después de la puesta de la Luna."
+          }
+        }
+      }
+    },
+    "Short hours of true darkness limit this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Short hours of true darkness limit this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las pocas horas de oscuridad total limitan esa noche a %lld."
+          }
+        }
+      }
+    },
+    "Short hours of true darkness limit tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Short hours of true darkness limit tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las pocas horas de oscuridad total limitan esta noche a %lld."
+          }
+        }
+      }
+    },
+    "Shows each night's forecast clouds in the score and the sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows each night's forecast clouds in the score and the sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra las nubes pronosticadas de cada noche en el índice y en el cielo"
+          }
+        }
+      }
+    },
+    "Shows or hides the constellation figures in the sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows or hides the constellation figures in the sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra u oculta las figuras de las constelaciones en el cielo"
+          }
+        }
+      }
+    },
     "Sky glow": {
       "extractionState": "manual",
       "localizations": {
@@ -1990,6 +3350,40 @@
         }
       }
     },
+    "Sky glow limits this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow limits this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El resplandor del cielo limita esa noche a %lld."
+          }
+        }
+      }
+    },
+    "Sky glow limits tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky glow limits tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El resplandor del cielo limita esta noche a %lld."
+          }
+        }
+      }
+    },
     "Sky over %@ at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2002,7 +3396,41 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cielo sobre %@ a las %@"
+            "value": "Cielo sobre %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Smoke or haze limits this night to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke or haze limits this night to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El humo o la bruma limitan esa noche a %lld."
+          }
+        }
+      }
+    },
+    "Smoke or haze limits tonight to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke or haze limits tonight to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El humo o la bruma limitan esta noche a %lld."
           }
         }
       }
@@ -2037,6 +3465,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Entrar en este cielo"
+          }
+        }
+      }
+    },
+    "Star names": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star names"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombres de estrellas"
+          }
+        }
+      }
+    },
+    "Stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estrellas"
           }
         }
       }
@@ -2109,6 +3571,23 @@
         }
       }
     },
+    "TONIGHT'S MOON": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TONIGHT'S MOON"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LA LUNA DE ESTA NOCHE"
+          }
+        }
+      }
+    },
     "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
       "extractionState": "manual",
       "localizations": {
@@ -2173,6 +3652,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "La Luna está en el cielo todo ese tiempo, %lld%% iluminada."
+          }
+        }
+      }
+    },
+    "The Moon on your table": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon on your table"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna en tu mesa"
           }
         }
       }
@@ -2308,7 +3804,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante sale a las %@, después de que termina la oscuridad total a las %@."
+            "value": "El centro brillante sale (%1$@), después de que termina la oscuridad total (%2$@)."
           }
         }
       }
@@ -2325,7 +3821,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante se pone a las %@, antes de que empiece la oscuridad total a las %@."
+            "value": "El centro brillante se pone (%1$@), antes de que empiece la oscuridad total (%2$@)."
           }
         }
       }
@@ -2343,6 +3839,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "A esta latitud, el centro brillante se queda bajo en el horizonte. Lo más importante es una vista despejada hacia el sur."
+          }
+        }
+      }
+    },
+    "The darkest nights of the month come in the week around it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest nights of the month come in the week around it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches más oscuras del mes llegan en la semana alrededor de ella."
           }
         }
       }
@@ -2377,6 +3890,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aquí el máximo llega con el radiante bajo, así que pocos meteoros alcanzan este cielo."
+          }
+        }
+      }
+    },
+    "The public coordinates of the 63 national parks. Nothing about you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The public coordinates of the 63 national parks. Nothing about you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las coordenadas públicas de los 63 parques nacionales. Nada sobre ti."
           }
         }
       }
@@ -2427,7 +3957,58 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El cielo a las %@"
+            "value": "El cielo: %@"
+          }
+        }
+      }
+    },
+    "Thin high cloud; bright stars only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thin high cloud; bright stars only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes altas y finas; solo estrellas brillantes."
+          }
+        }
+      }
+    },
+    "This score counts the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This score counts the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este índice solo cuenta la Luna y la oscuridad."
+          }
+        }
+      }
+    },
+    "This score uses the usual %@ clouds at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This score uses the usual %@ clouds at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este índice usa la nubosidad habitual de %@ en %@."
           }
         }
       }
@@ -2483,23 +4064,6 @@
         }
       }
     },
-    "Tonight · moon and darkness": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tonight · moon and darkness"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta noche · Luna y oscuridad"
-          }
-        }
-      }
-    },
     "Total lunar eclipse": {
       "extractionState": "manual",
       "localizations": {
@@ -2547,6 +4111,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oscuridad total"
+          }
+        }
+      }
+    },
+    "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. The Moon, the stars and every score still work offline.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. The Moon, the stars and every score still work offline."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al desactivar los pronósticos se detienen las solicitudes nuevas. El último pronóstico se queda en este dispositivo y cuenta menos con el tiempo; después rige la nubosidad habitual del parque. La Luna, las estrellas y todos los índices siguen funcionando sin conexión."
           }
         }
       }
@@ -2614,7 +4195,24 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Visible toda la noche, más alto hacia las %@ en el %@."
+            "value": "Visible toda la noche; punto más alto: aprox. %1$@, en el %2$@."
+          }
+        }
+      }
+    },
+    "Usual clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usual clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubosidad habitual"
           }
         }
       }
@@ -2632,6 +4230,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Venus"
+          }
+        }
+      }
+    },
+    "Visibility forecast about %@; haze is possible.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visibility forecast about %@; haze is possible."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visibilidad pronosticada de unos %@; es posible que haya bruma."
           }
         }
       }
@@ -2721,6 +4336,40 @@
         }
       }
     },
+    "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos meteorológicos de Open-Meteo.com (CC BY 4.0), promediados por Nyx."
+          }
+        }
+      }
+    },
+    "What is sent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is sent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué se envía"
+          }
+        }
+      }
+    },
     "What's up this night": {
       "extractionState": "manual",
       "localizations": {
@@ -2789,6 +4438,57 @@
         }
       }
     },
+    "Yale Bright Star Catalogue (HEASARC).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yale Bright Star Catalogue (HEASARC)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yale Bright Star Catalogue (HEASARC)."
+          }
+        }
+      }
+    },
+    "Your privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your privacy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu privacidad"
+          }
+        }
+      }
+    },
+    "a bright star": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a bright star"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "una estrella brillante"
+          }
+        }
+      }
+    },
     "about %lld an hour": {
       "extractionState": "manual",
       "localizations": {
@@ -2806,6 +4506,23 @@
         }
       }
     },
+    "about %lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "alrededor de %lld%%"
+          }
+        }
+      }
+    },
     "around %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2818,7 +4535,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "hacia las %@"
+            "value": "aprox. %@"
           }
         }
       }
@@ -2874,6 +4591,686 @@
         }
       }
     },
+    "constellation.And": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andromeda"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andrómeda"
+          }
+        }
+      }
+    },
+    "constellation.Aql": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquila"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Águila"
+          }
+        }
+      }
+    },
+    "constellation.Ari": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aries"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aries"
+          }
+        }
+      }
+    },
+    "constellation.Aur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auriga"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auriga"
+          }
+        }
+      }
+    },
+    "constellation.Boo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boötes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boyero"
+          }
+        }
+      }
+    },
+    "constellation.CMa": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canis Major"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can Mayor"
+          }
+        }
+      }
+    },
+    "constellation.CMi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canis Minor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can Menor"
+          }
+        }
+      }
+    },
+    "constellation.Cap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capricornus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capricornio"
+          }
+        }
+      }
+    },
+    "constellation.Car": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carina"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carina"
+          }
+        }
+      }
+    },
+    "constellation.Cas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cassiopeia"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casiopea"
+          }
+        }
+      }
+    },
+    "constellation.Cen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centaurus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centauro"
+          }
+        }
+      }
+    },
+    "constellation.Cep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cepheus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cefeo"
+          }
+        }
+      }
+    },
+    "constellation.Cet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cetus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ballena"
+          }
+        }
+      }
+    },
+    "constellation.CrB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corona Borealis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corona Boreal"
+          }
+        }
+      }
+    },
+    "constellation.Cru": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crux"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cruz del Sur"
+          }
+        }
+      }
+    },
+    "constellation.Crv": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corvus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuervo"
+          }
+        }
+      }
+    },
+    "constellation.Cyg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cygnus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cisne"
+          }
+        }
+      }
+    },
+    "constellation.Dra": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draco"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dragón"
+          }
+        }
+      }
+    },
+    "constellation.Eri": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eridanus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erídano"
+          }
+        }
+      }
+    },
+    "constellation.Gem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Géminis"
+          }
+        }
+      }
+    },
+    "constellation.Gru": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grulla"
+          }
+        }
+      }
+    },
+    "constellation.Her": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hercules"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hércules"
+          }
+        }
+      }
+    },
+    "constellation.Hya": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hydra"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hidra"
+          }
+        }
+      }
+    },
+    "constellation.Leo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leo"
+          }
+        }
+      }
+    },
+    "constellation.Lib": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libra"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libra"
+          }
+        }
+      }
+    },
+    "constellation.Lyr": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyra"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lira"
+          }
+        }
+      }
+    },
+    "constellation.Oph": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ophiuchus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ofiuco"
+          }
+        }
+      }
+    },
+    "constellation.Ori": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orion"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orión"
+          }
+        }
+      }
+    },
+    "constellation.Pav": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pavo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pavo"
+          }
+        }
+      }
+    },
+    "constellation.Peg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegasus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegaso"
+          }
+        }
+      }
+    },
+    "constellation.Per": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perseus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perseo"
+          }
+        }
+      }
+    },
+    "constellation.PsA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piscis Austrinus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pez Austral"
+          }
+        }
+      }
+    },
+    "constellation.Sco": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scorpius"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escorpio"
+          }
+        }
+      }
+    },
+    "constellation.Sgr": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagittarius"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagitario"
+          }
+        }
+      }
+    },
+    "constellation.Tau": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taurus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tauro"
+          }
+        }
+      }
+    },
+    "constellation.TrA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triangulum Australe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triángulo Austral"
+          }
+        }
+      }
+    },
+    "constellation.UMa": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ursa Major"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osa Mayor"
+          }
+        }
+      }
+    },
+    "constellation.UMi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ursa Minor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osa Menor"
+          }
+        }
+      }
+    },
+    "constellation.Vel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vela"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vela"
+          }
+        }
+      }
+    },
+    "constellation.Vir": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virgo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virgo"
+          }
+        }
+      }
+    },
     "east": {
       "extractionState": "manual",
       "localizations": {
@@ -2887,6 +5284,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "este"
+          }
+        }
+      }
+    },
+    "easy to see": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "easy to see"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fácil de ver"
+          }
+        }
+      }
+    },
+    "easy to see from a dark site": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "easy to see from a dark site"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fácil de ver desde un sitio oscuro"
           }
         }
       }
@@ -2976,6 +5407,23 @@
         }
       }
     },
+    "nearly overhead": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nearly overhead"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "casi en el cenit"
+          }
+        }
+      }
+    },
     "north": {
       "extractionState": "manual",
       "localizations": {
@@ -3040,6 +5488,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "no visible aquí"
+          }
+        }
+      }
+    },
+    "one of the brightest stars": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "one of the brightest stars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "una de las estrellas más brillantes"
+          }
+        }
+      }
+    },
+    "partial phase here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "partial phase here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fase parcial aquí"
           }
         }
       }
@@ -3465,6 +5947,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "muy brillante"
+          }
+        }
+      }
+    },
+    "washed out by moonlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "washed out by moonlight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "opacado por la luz de luna"
           }
         }
       }

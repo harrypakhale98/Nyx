@@ -51,6 +51,40 @@
           }
         }
       }
+    },
+    "Nyx Journal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx Journal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diario de Nyx"
+          }
+        }
+      }
+    },
+    "Nyx Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx Park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parque de Nyx"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

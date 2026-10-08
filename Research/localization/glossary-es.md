@@ -10,7 +10,7 @@ Every translation in `es-strings.json`, `es-infoplist.json`, `learn-es/` and `ap
 - **Gender-neutral second person.** Avoid forms like *estacionado* or *cómodo* when they would refer to the reader (*cuando te hayas estacionado*, *estar a gusto*).
 - **Capitals: Luna and Sol** when they mean the bodies, matching the English *Moon* and *Sun* (*la Luna se pone*). Moon phases are lowercase mid-sentence (*cerca de la luna nueva*) and capitalized only at the start of a label (*Luna nueva*). *luz de luna* is lowercase.
 - **Numbers:** the decimal point stays a period (0.25, 29.53), which matches Mexico and the US. Write *40%* with no space. Format specifiers, units and `Measurement` output are untouched.
-- **Times:** *a las %@*, *hasta las %@*, *hacia las %@* (time strings come from the system formatter). **A sentence that ends with a time has no final period** (*Sin Luna hasta las %@*): US and Mexican Spanish write the time as *3:38 a.m.*, whose own period ends the sentence; a second one printed *a.m..* (fixed 2026-10-06). On a 24-hour device the sentence simply ends with the time. Known limitation: 1:xx o'clock times need *a la 1:20*. This is rare at night and acceptable for v1. The reviewer may want to rephrase as *a %@* if it reads badly on device.
+- **Times:** *desde %@*, *hasta %@*, *de %@ a %@* take the bare time (the time strings come from the system formatter). **Never "a las %@" (or "a la 1:20") in new copy:** the article has to agree with the hour (*a la 1:20*, *a las 3:38*), and the formatter cannot do that, so a 1 o'clock time came out ungrammatical (audit finding ES-1). A verb takes a colon instead: *Sale: %@*, *Se pone: %@*, *La Luna se pone: %@*, *Oscuridad total: %@*. A time inside a sentence goes in parentheses or after a colon (*Sale por el este (%@)*), and "around" is *aprox. %@*. **A sentence that ends with a time has no final period** (*Sin Luna hasta %@*): US and Mexican Spanish write the time as *3:38 a.m.*, whose own period ends the sentence; a second one printed *a.m..*. The older sentence-embedded forms were rewritten on 2026-10-07 along with the new ones.
 - Quotation marks follow the English source (“ ” or \" \").
 
 ## Core terms
@@ -25,6 +25,9 @@ Every translation in `es-strings.json`, `es-infoplist.json`, `learn-es/` and `ap
 | estimate (noun) | estimación | |
 | true darkness | **oscuridad total** | The plain-language term the app uses for astronomical darkness. *No true darkness* = *Sin oscuridad total*. |
 | astronomical darkness | oscuridad astronómica | Only where the source says "astronomical". |
+| early look (a cloud forecast eased toward the usual clouds) | vista anticipada | Never *primer vistazo*. The forecast is *ajustado hacia la nubosidad habitual*, never *acercado*. |
+| usual clouds | nubosidad habitual | *Usual clouds* as a source line: *Nubes habituales*. |
+| best stretch / darkest moon stretch | mejor racha / racha de luna más oscura | *Racha* is the everyday word for a run of good nights. |
 | dark window | periodo de oscuridad | Not *ventana*, which reads as an anglicism here. |
 | five-night moon window / new moon window | ventana de luna nueva (cinco noches) | *ventana* is kept here because it names a planning window. |
 | moon and darkness only | solo Luna y oscuridad | Score label when no cloud forecast exists. |

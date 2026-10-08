@@ -1,0 +1,113 @@
+{
+  "%@ · %lld parks tonight": {
+    "one": "%@ · %lld park tonight",
+    "other": "%@ · %lld parks tonight"
+  },
+  "%@, %@. %lld seconds of sound, from %@ to %@.": {
+    "one": "%@, %@. %lld second of sound, from %@ to %@.",
+    "other": "%@, %@. %lld seconds of sound, from %@ to %@."
+  },
+  "%@, %@. %lld seconds of touch, from %@ to %@.": {
+    "one": "%@, %@. %lld second of touch, from %@ to %@.",
+    "other": "%@, %@. %lld seconds of touch, from %@ to %@."
+  },
+  "%lld first-come sites": {
+    "one": "%lld first-come site",
+    "other": "%lld first-come sites"
+  },
+  "%lld national parks": {
+    "one": "%lld national park",
+    "other": "%lld national parks"
+  },
+  "%lld nights": {
+    "one": "%lld night",
+    "other": "%lld nights"
+  },
+  "%lld nights at %@": {
+    "one": "%lld night at %@",
+    "other": "%lld nights at %@"
+  },
+  "%lld nights at %@, %@ to %@": {
+    "one": "%lld night at %@, %@ to %@",
+    "other": "%lld nights at %@, %@ to %@"
+  },
+  "%lld nights under the stars at %lld national parks": {
+    "format": "%#@nights@ under the stars at %#@parks@",
+    "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"},
+    "parks": {"arg": 2, "one": "%arg national park", "other": "%arg national parks"}
+  },
+  "%lld nights, at most %lld": {
+    "format": "%#@nights@, at most %2$lld",
+    "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"}
+  },
+  "%lld parks have a closure.": {
+    "one": "%lld park has a closure.",
+    "other": "%lld parks have a closure."
+  },
+  "%lld reservable sites": {
+    "one": "%lld reservable site",
+    "other": "%lld reservable sites"
+  },
+  "%lld reservable sites · %lld first-come": {
+    "format": "%#@sites@ · %2$lld first-come",
+    "sites": {"arg": 1, "one": "%arg reservable site", "other": "%arg reservable sites"}
+  },
+  "%lld sites": {
+    "one": "%lld site",
+    "other": "%lld sites"
+  },
+  "About %lld hours of true darkness": {
+    "one": "About %lld hour of true darkness",
+    "other": "About %lld hours of true darkness"
+  },
+  "Add %lld nights at %@ to Calendar": {
+    "one": "Add %lld night at %@ to Calendar",
+    "other": "Add %lld nights at %@ to Calendar"
+  },
+  "Add %lld nights to Calendar": {
+    "one": "Add %lld night to Calendar",
+    "other": "Add %lld nights to Calendar"
+  },
+  "At %lld seconds: %@": {
+    "one": "At %lld second: %@",
+    "other": "At %lld seconds: %@"
+  },
+  "BEST OF THE NEXT %lld NIGHTS": {
+    "one": "BEST OF THE NEXT %lld NIGHT",
+    "other": "BEST OF THE NEXT %lld NIGHTS"
+  },
+  "Best of the next %lld nights: %@, %lld.": {
+    "format": "Best of the next %#@nights@: %2$@, %3$lld.",
+    "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"}
+  },
+  "Map of %lld national parks by tonight's score. Darkest: %@, %lld, %@.": {
+    "format": "Map of %#@parks@ by tonight's score. Darkest: %2$@, %3$lld, %4$@.",
+    "parks": {"arg": 1, "one": "%arg national park", "other": "%arg national parks"}
+  },
+  "NUMBER %lld OF THE NEXT %lld NIGHTS": {
+    "format": "NUMBER %1$lld OF THE NEXT %#@nights@",
+    "nights": {"arg": 2, "one": "%arg NIGHT", "other": "%arg NIGHTS"}
+  },
+  "No true darkness at %@ in the next %lld nights. The best is %@, %lld out of 100.": {
+    "format": "No true darkness at %1$@ in the next %#@nights@. The best is %3$@, %4$lld out of 100.",
+    "nights": {"arg": 2, "one": "%arg night", "other": "%arg nights"}
+  },
+  "Show all %lld campgrounds": {
+    "one": "Show %lld campground",
+    "other": "Show all %lld campgrounds"
+  },
+  "The %lld parks with the darkest nights this week, of %lld %@.": {
+    "format": "%#@parks@ with the darkest nights this week, of %2$lld %3$@.",
+    "parks": {"arg": 1, "one": "The park", "other": "The %arg parks"}
+  },
+  "The best of the next %lld nights: %@ at %@, %lld out of 100, %@. %@ Confirm park access before you go.": {
+    "format": "The best of the next %#@nights@: %2$@ at %3$@, %4$lld out of 100, %5$@. %6$@ Confirm park access before you go.",
+    "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"}
+  },
+  "Your constellation: %lld nights at %lld parks across %lld seasons, each a star at its park on a map of the United States.": {
+    "format": "Your constellation: %#@nights@ at %#@parks@ across %#@seasons@, each a star at its park on a map of the United States.",
+    "nights": {"arg": 1, "one": "%arg night", "other": "%arg nights"},
+    "parks": {"arg": 2, "one": "%arg park", "other": "%arg parks"},
+    "seasons": {"arg": 3, "one": "%arg season", "other": "%arg seasons"}
+  }
+}
