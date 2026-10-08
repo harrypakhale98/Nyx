@@ -98,7 +98,8 @@ struct FieldView: View {
             Button { NightListener.shared.stop(); close() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
                 .accessibilityLabel("Leave field mode").accessibilityInputLabels([Text("Leave"),Text("Close"),Text("Leave field mode")])
             VStack(alignment:.leading,spacing:2) {
-                Text(session.park.shortName).font(.system(.headline,design:.serif)).lineLimit(typeSize.isAccessibilitySize ? 3 : 2).minimumScaleFactor(0.85)
+                // Wraps to its full height, never shrunk or cut: the pages below give way instead.
+                Text(session.park.shortName).font(.system(.headline,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 // Wraps at accessibility sizes rather than cutting the band short.
                 Text("\(session.score.value) · \(session.score.band.label)").font(.caption).monospacedDigit().fixedSize(horizontal:false,vertical:true)
             }

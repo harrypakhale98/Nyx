@@ -89,6 +89,8 @@ struct WhatsUpPanel: View {
         }
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(item.spoken+(Self.gloss(whatsUp,item:item).map { " "+$0 } ?? ""))
+        // Text to read, not a control: one line tall, it would otherwise be taken for a too-small target.
+        .accessibilityAddTraits(.isStaticText)
     }
     /// Where each row goes: `first` above the planets, `after` below them, `mentions` a line each.
     struct Layout: Equatable { var first:[WhatsUp.Item]; var after:[WhatsUp.Item]; var mentions:[WhatsUp.Item] }
