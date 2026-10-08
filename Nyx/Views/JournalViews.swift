@@ -82,8 +82,10 @@ struct JournalView: View {
             .task(id:model.journalFile) {
                 // A journal opened from Files or another app.
                 guard let url=model.journalFile else { return }
+                model.importingJournal=url
                 model.journalFile=nil
                 guard !model.journalUnavailable else {
+                    model.importingJournal=nil
                     Task.detached(priority:.utility) { JournalInbox.remove(url) }
                     importResult=String(localized:"Your journal could not be opened, so this file was not imported. Nothing was changed.")
                     return
@@ -111,7 +113,12 @@ struct JournalView: View {
     /// another app left in Documents/Inbox is removed afterwards, imported or not.
     private func importJournal(_ url:URL) async {
         working="Importing your journal"
-        defer { working=nil; Task.detached(priority:.utility) { JournalInbox.remove(url) } }
+        model.importingJournal=url
+        defer {
+            working=nil
+            if model.importingJournal == url { model.importingJournal=nil }
+            Task.detached(priority:.utility) { JournalInbox.remove(url) }
+        }
         let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data])? in
             guard let archive=try? JournalArchive(url:url) else { return nil }
             return (archive,archive.thumbnails())

@@ -114,9 +114,10 @@ nonisolated struct SkyMoment: Sendable {
     /// plan (the ornament, the window's written sky and the immersive sky all read it each frame
     /// of a sweep).
     private(set) var skyMoment: SkyMoment?
-    /// True while the planner window is open, so the Moon volume offers a way back to it only
-    /// when there is none on screen.
-    var plannerOpen = false
+    /// Planner windows open right now (the planner is a window group, so there may be several);
+    /// the Moon volume offers a way back to one only when none is on screen.
+    var plannerWindows = 0
+    var plannerOpen: Bool { plannerWindows > 0 }
     /// Every park's night for the list, scored as `plan` is.
     private(set) var listNights: [String: Night] = [:]
     /// The last cloud forecast for each park, from this headset's cache or Open-Meteo

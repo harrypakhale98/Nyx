@@ -41,8 +41,9 @@ struct MoonVolume: View {
                 .environment(\.visionPalette, VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency))
                 .modifier(DebugTypeSize())
         }
-        // Keyed by the night itself, so the Moon moves on when tonight does (`VisionModel.tick`).
-        .task(id: "\(model.selectedID ?? "")-\(evening.map { Int($0.timeIntervalSince1970) } ?? 0)") {
+        // Keyed by the night itself, so the Moon moves on when tonight does (`VisionModel.tick`),
+        // and by whether it is tonight, which a stepped-to night becomes when tonight reaches it.
+        .task(id: "\(model.selectedID ?? "")-\(evening.map { Int($0.timeIntervalSince1970) } ?? 0)-\(nights == 0)") {
             guard let park = model.park, let night = evening else { return }
             let tonight = nights == 0
             let computed = await Task.detached(priority: .userInitiated) { MoonView(park: park, night: night, isTonight: tonight) }.value
@@ -50,6 +51,12 @@ struct MoonVolume: View {
             view = computed
         }
         .onAppear { if let n = VisionDebug.moonNights { nights = n } }
+        // When tonight turns over, a later night keeps its date, as the planner's does (`VisionModel.tick`).
+        .onChange(of: model.now) { before, after in
+            guard nights > 0, let park = model.park else { return }
+            let turned = park.calendar.dateComponents([.day], from: park.currentNight(at: before), to: park.currentNight(at: after)).day ?? 0
+            if turned > 0 { nights = max(0, nights-turned) }
+        }
         // Left on the table for days, the volume still shows tonight's Moon when looked at again.
         .task(id: scenePhase == .active) {
             guard scenePhase == .active else { return }

@@ -18,6 +18,22 @@ actor RoutedHTTP: HTTPTransport {
         return Data(body.utf8)
     }
 }
+/// Holds the first request until released, so a test can act while it is in flight.
+actor GatedHTTP: HTTPTransport {
+    let body: String
+    private var held: CheckedContinuation<Void, Never>?
+    private var gate=true
+    private(set) var waiting=false
+    init(body: String) { self.body=body }
+    func get(_ url: URL) async throws -> Data {
+        if gate {
+            gate=false
+            await withCheckedContinuation { held=$0; waiting=true }
+        }
+        return Data(body.utf8)
+    }
+    func release() { held?.resume(); held=nil }
+}
 /// Hours that start on the hour, as Open-Meteo returns them.
 private let t0=1_789_999_200.0
 private func hours(_ count: Int) -> [Double] { (0..<count).map { t0+Double($0)*3600 } }
@@ -208,6 +224,22 @@ struct ForecastDetailTests {
         let http3=RoutedHTTP()
         #expect(await ForecastDetailService(transport:http3,persist:false).details(for:one,weather:false,smoke:false).isEmpty)
         #expect(await http3.urls.isEmpty)
+    }
+    /// Smoke that arrives after the switch went off is dropped, not stored; a later request with
+    /// the switch back on stores it again.
+    @Test func smokeInFlightWhenSwitchedOffIsDropped() async throws {
+        let one=try parks(1)
+        let http=GatedHTTP(body:hourly(["aerosol_optical_depth":[0.6],"pm2_5":[1]],count:1))
+        let service=ForecastDetailService(transport:http,persist:false)
+        let inFlight=Task { await service.details(for:one,weather:false,smoke:true) }
+        var tries=0
+        while !(await http.waiting), tries<500 { tries+=1; try await Task.sleep(for:.milliseconds(5)) }
+        #expect(await http.waiting)
+        await service.forgetAir()
+        await http.release()
+        #expect(await inFlight.value[one[0].id]?.air == nil)
+        #expect(await service.details(for:one,weather:false,smoke:false)[one[0].id]?.air == nil)
+        #expect(await service.details(for:one,weather:false,smoke:true)[one[0].id]?.air != nil)
     }
     /// A failed refresh keeps the last good detail, and a fresh one is not asked for again.
     @Test func failureKeepsLastGoodDetail() async throws {

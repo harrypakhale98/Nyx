@@ -115,8 +115,9 @@ struct RootView:View {
             if phase == .background, DebugScenario.screen == nil {
                 SavedSkySync.scheduleRefresh()
                 // Journals opened from other apps are copied into Documents/Inbox; ones left behind
-                // by an import cut short are cleared, keeping one still waiting to be imported.
-                let waiting=model.journalFile
+                // by an import cut short are cleared, keeping one still waiting to be imported and
+                // one being imported right now.
+                let waiting=[model.journalFile,model.importingJournal].compactMap { $0 }
                 Task.detached(priority:.utility) { JournalInbox.sweep(keeping:waiting) }
             }
             if phase == .active {

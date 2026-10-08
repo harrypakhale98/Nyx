@@ -141,14 +141,15 @@ nonisolated enum JournalInbox {
         guard contains(url, folder: folder) else { return }
         try? FileManager.default.removeItem(at: url)
     }
-    /// Removes every journal in the Inbox except `keeping` (one still waiting for the Journal tab).
-    /// Runs when Nyx leaves the screen, after any opened file has been handed to the app, so it
-    /// needs no file dates (no required-reason file timestamp API).
-    static func sweep(folder: URL?=folder, keeping: URL?=nil) {
+    /// Removes every journal in the Inbox except those in `keeping` (one still waiting for the
+    /// Journal tab, one being read right now). Runs when Nyx leaves the screen, after any opened
+    /// file has been handed to the app, so it needs no file dates (no required-reason file
+    /// timestamp API).
+    static func sweep(folder: URL?=folder, keeping: [URL]=[]) {
         guard let folder, let items=try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) else { return }
-        let kept=keeping.map { $0.standardizedFileURL.resolvingSymlinksInPath().path }
+        let kept=Set(keeping.map { $0.standardizedFileURL.resolvingSymlinksInPath().path })
         for item in items where item.pathExtension.lowercased() == JournalArchive.fileExtension {
-            guard item.standardizedFileURL.resolvingSymlinksInPath().path != kept else { continue }
+            guard !kept.contains(item.standardizedFileURL.resolvingSymlinksInPath().path) else { continue }
             try? FileManager.default.removeItem(at: item)
         }
     }

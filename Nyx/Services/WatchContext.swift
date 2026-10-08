@@ -27,12 +27,25 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let details: [String: CompactDetail]
     /// Each park's closure as Nyx words it beside the score, from the last park update.
     let closures: [String: String]
+    /// The forecasts in the shape the score engine and the widgets already read, expanded once when
+    /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
+    let cloudForecasts: [String: Forecast]
+    /// The smoke and summit layers in the shape `NightPlanner.night` reads, expanded once. Not sent.
+    let forecastDetails: [String: ForecastDetail]
+    /// Only what travels; the expanded forecasts above are rebuilt on arrival.
+    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures }
+    /// What was sent; the expanded forecasts follow from it.
+    static func == (a: WatchContext, b: WatchContext) -> Bool {
+        a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
+            && a.nightVision == b.nightVision && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
+    }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:]) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures
+        cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
     /// through a week ahead) and to the byte budget, saved parks first in their order. Each park's
@@ -83,10 +96,6 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     func sent(at date: Date) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details, closures: closures)
     }
-    /// The forecasts in the shape the score engine and the widgets already read.
-    var cloudForecasts: [String: Forecast] { forecasts.compactMapValues(\.forecast) }
-    /// The smoke and summit layers in the shape `NightPlanner.night` reads.
-    var forecastDetails: [String: ForecastDetail] { details.compactMapValues(\.detail) }
 }
 
 nonisolated extension WatchContext {
@@ -102,6 +111,7 @@ nonisolated extension WatchContext {
         forecasts = ((try? container.decodeIfPresent([String: Lenient<CompactForecast>].self, forKey: .forecasts)) ?? [:]).compactMapValues(\.value)
         details = ((try? container.decodeIfPresent([String: Lenient<CompactDetail>].self, forKey: .details)) ?? [:]).compactMapValues(\.value)
         closures = (try? container.decodeIfPresent([String: String].self, forKey: .closures)) ?? [:]
+        cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
 }
 

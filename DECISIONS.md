@@ -940,3 +940,12 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - Quotes: straight quotes are the catalog's style (131 straight apostrophes to 1 curly), so the few curly ones in About the data and the Sky glow chapter were normalized. "U.S." in prose (the map credit); the texts Ask Nyx reads from its tools keep "US".
 - The chart summary says "Nights without a cloud forecast yet: %lld of %lld." instead of "1 of 3 nights have…", which was wrong for one night.
 - `sync_catalog.py` and `sync_vision_catalog.py` now also prune generated entries with plural or iPad variations once their key leaves the code; before, renamed counted strings and device-variant strings stayed in the catalog forever (seven stale "this iPhone" keys removed).
+
+## Team review — 2026-10-08 (regression pass)
+- Smoke switched off mid-refresh stays off: `ForecastDetailService` counts `forgetAir` calls and a refresh that began before the latest one drops its aerosol series instead of storing them in memory and in the `detail-<id>` cache Siri reads; tested with a request held in flight.
+- A journal being imported is kept by the Inbox sweep: `PlanModel.importingJournal` holds its URL from the hand-off until the import ends, and `JournalInbox.sweep` keeps every URL it is given.
+- Forecast age checks (model spread, the outlook's 36 hours, beyond the forecast) use `PlanModel.present`, the real clock (a screenshot scenario's fixed date in DEBUG), not `today`, which moves only when a night turns over and could pass a forecast a day too old.
+- Vision's Moon volume re-bases its own night when tonight turns over, as `VisionModel.tick` does for the planner, so a stepped-to night keeps its date; its Moon is redrawn when that night becomes tonight.
+- Vision counts open planner windows (the planner is a window group) instead of one flag, so closing a second window no longer makes the Moon volume offer a way back while one is still open.
+- Share artwork's drawing cache is keyed by everything drawn: the night's forecast basis and hollow ring, Increase Contrast and the brighter red, not only the score and night vision.
+- `WatchContext` expands its compact forecasts and detail once, when made or decoded, into stored values the watch's scores read; explicit coding keys keep what is sent unchanged, and equality compares only what is sent.

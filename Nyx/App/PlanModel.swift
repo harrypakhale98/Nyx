@@ -40,6 +40,8 @@ import CoreLocation
     var journalNeedsSpace=false
     /// A `.nyxjournal` opened from Files or another app, waiting for the Journal tab to import it.
     var journalFile:URL?
+    /// The journal being read right now; the Inbox sweep leaves it alone until the import ends.
+    var importingJournal:URL?
     /// NPS is refusing requests right now (the shared key's quota, or a struggling service).
     var alertsBusy=false
     /// The last forecast detail request was held back by Low Data Mode.
@@ -92,6 +94,15 @@ import CoreLocation
         if let fixed=DebugScenario.date { return fixed }
         #endif
         return clock
+    }
+    /// The present moment for a forecast's age (the 36 hours after which model spread, layers and
+    /// smoke stop being described): the real clock, never `today`, which moves only when a night
+    /// turns over. Screenshot scenarios with a fixed date keep that date.
+    var present: Date {
+        #if DEBUG
+        if DebugScenario.date != nil || DebugScenario.state=="polar-night" || DebugScenario.state=="polar" { return today }
+        #endif
+        return .now
     }
     /// The moment "tonight" is judged from. Advanced only when some park's night turns over
     /// (at its sunrise or local noon), so open screens move on without constant redraws.
@@ -151,7 +162,7 @@ import CoreLocation
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
         }
-        return NightPlanner.night(park:park,sky:sky,forecast:forecasts[park.id],detail:details[park.id],now:today,scoring:scoring)
+        return NightPlanner.night(park:park,sky:sky,forecast:forecasts[park.id],detail:details[park.id],now:present,scoring:scoring)
     }
     /// What the forecast says around the score for one night: model agreement (with the score the
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
@@ -165,7 +176,7 @@ import CoreLocation
     private func deriveOutlook(_ night:Night)->NightOutlook? {
         guard let detail=details[night.park.id] else { return nil }
         let window=night.sky.cloudWindow
-        var outlook=detail.outlook(from:window.start,to:window.end,now:today)
+        var outlook=detail.outlook(from:window.start,to:window.end,now:present)
         // The smoke words describe the smoke the score counted, whatever the aerosol forecast's age.
         outlook.aerosol=night.aerosol
         if night.score.hasForecast, !night.upperCloudOnly, let agreement=outlook.agreement {
@@ -236,7 +247,7 @@ import CoreLocation
     /// True when a night without clouds simply lies beyond the forecast's reach (past its last
     /// hour, or ten days or more ahead, where a forecast counts for nothing), rather than having a
     /// forecast that failed (`NightPlanner.beyondForecast`).
-    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:today) }
+    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:present) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?,radiusMiles:Double?=nil)->[Park] {
         guard let origin else { return [] }
