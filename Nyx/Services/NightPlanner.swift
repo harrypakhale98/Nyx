@@ -112,19 +112,27 @@ nonisolated struct NightPlanner: Sendable {
     }
     /// Best first, by score. Every night's score already counts clouds (forecast, early look or
     /// the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
-    /// go to the darker measured sky (Black Marble glow, `glowRank`), then the longer true
-    /// darkness, then the forecast models that agree more closely, then the surer cloud basis,
-    /// then the earlier night and the park's name. The numbers shown never change.
+    /// go to the darker measured sky (Black Marble glow, `glowRank`), then the higher sum of parts
+    /// beneath a cap (a park's usual clouds can hold a whole month at one score, and the new Moon
+    /// must still outrank a gibbous one), then the longer true darkness, then the forecast models
+    /// that agree more closely, then the surer cloud basis, then the earlier night and the park's
+    /// name. The numbers shown never change.
     static func better(_ a: Night, _ b: Night) -> Bool {
         if a.score.value != b.score.value { return a.score.value > b.score.value }
         let ga = glowRank(a.park.id), gb = glowRank(b.park.id)
         if ga != gb { return ga < gb }
+        let ra = partsSum(a.score), rb = partsSum(b.score)
+        if abs(ra-rb) >= 0.5 { return ra > rb }
         if abs(a.sky.darkHours-b.sky.darkHours) >= 1.0/60 { return a.sky.darkHours > b.sky.darkHours }
         let sa = a.modelSpread ?? .infinity, sb = b.modelSpread ?? .infinity
         if abs(sa-sb) >= 0.5 { return sa < sb }
         if certainty(a.basis) != certainty(b.basis) { return certainty(a.basis) > certainty(b.basis) }
         if a.id != b.id { return a.id < b.id }
         return a.park.name < b.park.name
+    }
+    /// The score's parts before any cap: what the night would score if nothing held it down.
+    static func partsSum(_ score: DarknessScore) -> Double {
+        score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints
     }
     private static func certainty(_ basis: CloudBasis) -> Double {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
