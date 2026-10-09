@@ -70,13 +70,16 @@ struct TimeRiver: View {
     /// The loupe is up: a horizontal scrub is under way (or a DEBUG capture holds it up).
     private var lifted:Bool { scrubbing==true || DebugScenario.isEnabled("loupe") }
     private let tip=RiverTip()
+    private var tipShown:Bool { showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize }
+    /// While the tip is above the river the loupe may not rise into its arrow.
+    private var tipHeadroom:Double? { tipShown && tip.shouldDisplay ? 0 : nil }
 
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:startsTonight ? "The next 30 nights" : "30 nights from \(nights.first.map { $0.park.dayLabel($0.id) } ?? "")")
-            // While the loupe is up the tip fades rather than closing, so nothing under the finger
-            // moves; it closes once the scrub ends.
-            if showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent).opacity(lifted ? 0 : 1).animation(reduceMotion ? nil : NyxMotion.spring,value:lifted) }
+            // The tip stays readable through the first scrub (the loupe keeps below it, `tipHeadroom`), so
+            // nothing under the finger moves; it closes once the scrub ends.
+            if tipShown { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent) }
             if nights.isEmpty {
                 Text("No nights available").font(.subheadline).foregroundStyle(palette.muted)
             } else if typeSize.isAccessibilitySize {
@@ -113,7 +116,7 @@ struct TimeRiver: View {
                 // on the same spring as the loupe and never comes loose from it.
                 if let current,let index {
                     let point=CGPoint(x:x(index,width:width),y:y(current.score.value,height:proxy.size.height))
-                    let top=lifted ? loupeCenter(point,width:width).y+loupeSize/2 : moonSize+2
+                    let top=lifted ? Self.loupeBottom(loupeCenter(point,width:width,headroom:tipHeadroom),x:point.x,radius:loupeSize/2) : moonSize+2
                     let bottom=proxy.size.height-22+4
                     Rectangle().fill(palette.line).frame(width:0.6*palette.stroke,height:max(0,bottom-top))
                         .offset(x:point.x-0.3*palette.stroke,y:top).accessibilityHidden(true)
@@ -122,7 +125,7 @@ struct TimeRiver: View {
                     .accessibilityHidden(true)
                 if let current,let index {
                     let point=CGPoint(x:x(index,width:width),y:y(current.score.value,height:proxy.size.height))
-                    let loupe=lifted ? loupeCenter(point,width:width) : point
+                    let loupe=lifted ? loupeCenter(point,width:width,headroom:tipHeadroom) : point
                     let moon=lifted ? moonBeside(loupe,point:point,width:width) : CGPoint(x:point.x,y:moonSize/2)
                     let size=lifted ? loupeSize : lensSize
                     MoonView(geometry:AstronomyEngine().moon(for:current).geometry)
@@ -203,7 +206,8 @@ struct TimeRiver: View {
         ZStack {
             if lifted {
                 VStack(spacing:4) {
-                    Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).monospacedDigit()
+                    // Light, or regular under Bold Text, as the strokes follow it.
+                    Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
                         .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
                     Capsule().fill(palette.accent).frame(width:Self.tickWidth(night.score.band),height:2)
                 }.transition(.opacity)
@@ -218,15 +222,26 @@ struct TimeRiver: View {
         switch band { case .pristine: 24; case .excellent: 20; case .good: 16; case .fair: 12; case .poor: 8 }
     }
     /// Where the loupe sits: lifted above the night's point, kept inside the river's width and at
-    /// most `loupeHeadroom` above it (a Pristine night near the top lifts less, never out of the panel).
-    func loupeCenter(_ point:CGPoint,width:Double)->CGPoint {
-        CGPoint(x:min(max(point.x,loupeSize/2),width-loupeSize/2),y:max(point.y-loupeLift,loupeSize/2-loupeHeadroom))
+    /// most `headroom` (`loupeHeadroom` by default) above it (a Pristine night near the top lifts
+    /// less, never out of the panel, and not at all into the tip's arrow while the tip shows).
+    func loupeCenter(_ point:CGPoint,width:Double,headroom:Double?=nil)->CGPoint {
+        CGPoint(x:min(max(point.x,loupeSize/2),width-loupeSize/2),y:max(point.y-loupeLift,loupeSize/2-(headroom ?? loupeHeadroom)))
     }
-    /// The Moon beside the loupe while scrubbing, on the side toward the middle of the river, so
-    /// the loupe never covers it and the phase still morphs night by night.
+    /// The hairline's top under the loupe: the circle's own lower edge above the night, which at the
+    /// first and last nights (the loupe held inside the river) is off the circle's lowest point.
+    static func loupeBottom(_ loupe:CGPoint,x:Double,radius:Double)->Double {
+        let dx=x-loupe.x
+        return loupe.y+(abs(dx)<radius ? (radius*radius-dx*dx).squareRoot() : 0)
+    }
+    /// The Moon while scrubbing keeps its own row above the river (y 0 to `moonSize`, above every
+    /// night's mark), so it never covers the nights being scrubbed. Only when the loupe rises into
+    /// that row does the Moon step beside it, toward the middle of the river, so the loupe never
+    /// covers it either and the phase still morphs night by night.
     func moonBeside(_ loupe:CGPoint,point:CGPoint,width:Double)->CGPoint {
+        let row=moonSize/2
+        guard loupe.y-loupeSize/2<moonSize+4 else { return CGPoint(x:min(max(point.x,moonSize/2),width-moonSize/2),y:row) }
         let gap=loupeSize/2+6+moonSize/2
-        return CGPoint(x:point.x<width/2 ? loupe.x+gap : loupe.x-gap,y:loupe.y)
+        return CGPoint(x:point.x<width/2 ? loupe.x+gap : loupe.x-gap,y:row)
     }
     /// Previous and next night, for anyone who prefers buttons to a long drag.
     private var stepButtons: some View {

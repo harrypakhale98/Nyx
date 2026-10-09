@@ -42,12 +42,27 @@ import SwiftUI
         #expect(high.x-28 >= 0)
         let right=river.loupeCenter(CGPoint(x:316,y:60),width:width)
         #expect(right.x+28 <= width)
-        // The Moon sits beside the loupe, never under it, and inside the river's width.
-        for point in [CGPoint(x:14,y:42),CGPoint(x:165,y:80),CGPoint(x:316,y:128)] {
-            let loupe=river.loupeCenter(point,width:width), moon=river.moonBeside(loupe,point:point,width:width)
-            #expect(abs(moon.x-loupe.x) >= 28+15)
-            #expect(moon.x-15 >= 0 && moon.x+15 <= width)
+        // The Moon keeps its row above the river's marks (which start at y 42), never under the
+        // loupe, and inside the river's width, with or without the tip's headroom.
+        for headroom in [nil,0.0] {
+            for point in [CGPoint(x:14,y:42),CGPoint(x:165,y:80),CGPoint(x:316,y:128),CGPoint(x:60,y:110)] {
+                let loupe=river.loupeCenter(point,width:width,headroom:headroom), moon=river.moonBeside(loupe,point:point,width:width)
+                #expect(hypot(moon.x-loupe.x,moon.y-loupe.y) >= 28+15)
+                #expect(moon.y+15 <= 39)
+                #expect(moon.x-15 >= 0 && moon.x+15 <= width)
+            }
         }
+        // A low night's Moon stays above its own night rather than stepping aside.
+        let lowLoupe=river.loupeCenter(CGPoint(x:165,y:128),width:width)
+        #expect(river.moonBeside(lowLoupe,point:CGPoint(x:165,y:128),width:width)==CGPoint(x:165,y:15))
+        // While the tip shows, the loupe never rises above the river into the tip's arrow.
+        #expect(river.loupeCenter(CGPoint(x:100,y:42),width:width,headroom:0).y-28 >= 0)
+    }
+    @Test func theHairlineStartsAtTheLoupesEdge() {
+        // Centred: the circle's lowest point. Held 14 pt inside at the first night: higher, on the curve.
+        #expect(TimeRiver.loupeBottom(CGPoint(x:100,y:50),x:100,radius:28)==78)
+        let edge=TimeRiver.loupeBottom(CGPoint(x:28,y:50),x:14,radius:28)
+        #expect(edge<78 && abs(edge-(50+(28.0*28-14*14).squareRoot()))<0.001)
     }
     @Test func theLoupeTickGrowsWithTheBand() {
         let widths=[ScoreBand.poor,.fair,.good,.excellent,.pristine].map(TimeRiver.tickWidth)
@@ -120,6 +135,19 @@ import SwiftUI
         // A night chosen elsewhere: the step starts from tonight in tonight's month.
         let fromTonight=try #require(MonthPager.step(jotr,tonight:tonight,offset:0,chosen:nil,delta:1))
         #expect(fromTonight.night==jotr.date(tonight,addingDays:1) && fromTonight.move==0)
+    }
+    @Test func thePagerIsAsTallAsTheTallestOfItsThreeMonths() throws {
+        let jotr=try park("jotr")
+        var components=DateComponents(); components.year=2026; components.month=10; components.day=9; components.hour=21
+        let tonight=jotr.evening(try #require(jotr.calendar.date(from:components)))
+        // October 2026 spans five weeks whether weeks start on Sunday or Monday; August 2026 six.
+        #expect(MonthPager.weeks(jotr,tonight:tonight,offset:0)==5)
+        #expect(MonthPager.weeks(jotr,tonight:tonight,offset:-2)==6)
+        for offset in -3...3 {
+            let three=(offset-1...offset+1).map { MonthPager.weeks(jotr,tonight:tonight,offset:$0) }
+            #expect(three.allSatisfy { (4...6).contains($0) })
+            #expect(MonthPager.weeks(jotr,tonight:tonight,around:offset)==three.max())
+        }
     }
     @Test func everyPageHasItsOwnKey() throws {
         let jotr=try park("jotr"), deva=try park("deva")

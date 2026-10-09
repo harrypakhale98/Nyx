@@ -283,7 +283,7 @@ struct CelestialGauge: View {
 
     private func numeral(size:CGFloat)->some View {
         Text(reduceMotion || export ? score : shown,format:.number)
-            .font(.system(size:max(24,size),weight:.light,design:.serif)).tracking(-size*0.046)
+            .font(.system(size:max(24,size),weight:.light,design:.serif)).tracking(-size*0.02)
             .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(shown)))
             .lineLimit(1).fixedSize()
             .opacity(numeralVisible ? 1 : 0)
@@ -382,8 +382,9 @@ private struct DialFace: View, Animatable {
             let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
             let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
             // A soft inner shadow: the numeral sits inside the instrument, not on top of the sky.
+            // Its rim fades to nothing, so no disc edge shows through the dial's open bottom on a twilight sky.
             let well=radius-14*k
-            context.fill(Path(ellipseIn:CGRect(x:center.x-well,y:center.y-well,width:2*well,height:2*well)),with:.radialGradient(Gradient(stops:[.init(color:.black.opacity(0.55),location:0),.init(color:.black.opacity(0.35),location:0.8),.init(color:.black.opacity(0.6),location:1)]),center:center,startRadius:0,endRadius:well))
+            context.fill(Path(ellipseIn:CGRect(x:center.x-well,y:center.y-well,width:2*well,height:2*well)),with:.radialGradient(Gradient(stops:[.init(color:.black.opacity(0.55),location:0),.init(color:.black.opacity(0.35),location:0.8),.init(color:.clear,location:1)]),center:center,startRadius:0,endRadius:well))
             let start=Angle.degrees(140), end=Angle.degrees(400)
             var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
             context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2*palette.stroke,lineCap:.round))

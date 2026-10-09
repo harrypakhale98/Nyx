@@ -207,14 +207,16 @@ struct TonightView: View {
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
             let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
+            let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
-                           revealKey:revealKey(park),
-                           range:CelestialGauge.modelRange(model.outlook(night),basis:night.basis)) { heroSettledKey=$0 }
+                           revealKey:revealKey(park),range:range) { heroSettledKey=$0 }
                 .frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
             // The gauge speaks this line, so VoiceOver does not hear it twice.
             if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
+            // The dial's range mark in words, as the share card and the river say it (the gauge speaks it).
+            if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             // A forecast more than six hours old says when it is from.
             let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
@@ -386,17 +388,25 @@ struct TonightView: View {
         .accessibilityElement(children:.contain).accessibilityIdentifier("startingPoint") }
     }
     /// Heard with the radius it qualifies ("Radius, 200 mi, as the crow flies"), so not read again here.
+    /// It keeps the starting point's icon column (the same symbol, hidden, at the same size), so its
+    /// words start under "From", not under the pin; at accessibility sizes, where the radius sits at
+    /// the leading edge under a wrapped name, it aligns with the radius instead.
     private var crowFlies: some View {
-        Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+        Label {
+            Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:originSymbol).hidden() } }
+        .font(.subheadline).accessibilityHidden(true)
     }
+    /// The starting point's symbol: a pin for a park, a building for a city or town, the arrow for the device.
+    private var originSymbol:String { location.latitude != nil ? "location.fill" : model.homePlace == nil ? "mappin.and.ellipse" : "building.2" }
     /// The separator between the starting point and its radius, drawn as a shape rather than a "·"
     /// glyph: a four-point character is mostly anti-aliasing, which the contrast audit measures as text.
     private var dot: some View { Circle().fill(palette.muted).frame(width:dotSize,height:dotSize).accessibilityHidden(true) }
     private func origin(wraps:Bool)->some View {
         Button { chooseHome=true } label:{
             Group {
-                if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:model.homePlace == nil ? "mappin.and.ellipse" : "building.2") }
-                else { Label("From your location",systemImage:"location.fill") }
+                if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:originSymbol) }
+                else { Label("From your location",systemImage:originSymbol) }
             }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
         }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
     }
