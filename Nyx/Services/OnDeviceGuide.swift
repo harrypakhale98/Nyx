@@ -31,6 +31,9 @@ import Observation
     /// A session made ahead of the question and prewarmed, so the first words come sooner. Made
     /// when Ask Nyx opens and again after each answer; one session per question.
     @ObservationIgnored private var prepared:(key:String,session:LanguageModelSession,ledger:GuideLedger)?
+    /// Which question is on screen, so a lookup that lands after its question was cancelled never
+    /// lists itself under the next one.
+    @ObservationIgnored private var asking=0
     private static func instructions(lookup:NightLookup?)->String {
         // The person's own calendar day: an ISO style alone would print GMT's, tomorrow in a US evening.
         let today=lookup.map { "Today is \(TripDay($0.now).iso). " } ?? ""
@@ -54,8 +57,10 @@ import Observation
     func answer(question:String,context:[String],lookup:NightLookup?=nil) async {
         guard Self.available else { return }
         loading=true;text="";checked=false;citations=[];error=nil;lookedUp=[];lookups=[]
+        asking+=1
+        let token=asking
         defer {
-            loading=false
+            if asking == token { loading=false }
             // The next question gets a fresh session, warmed while this answer is read.
             if !Task.isCancelled { prepare(lookup:lookup) }
         }
@@ -65,7 +70,7 @@ import Observation
         let session=ready.session, ledger=ready.ledger
         ledger.reset(firstID:context.count,lookup:lookup) { [weak self] lines in
             // Each lookup is listed as the model makes it.
-            Task { @MainActor in if let self, self.loading { self.lookups=lines } }
+            Task { @MainActor in if let self, self.asking == token, self.loading { self.lookups=lines } }
         }
         let today=lookup.map { "Today is \(TripDay($0.now).iso). " } ?? ""
         let records=await Self.fit(context,question:question)

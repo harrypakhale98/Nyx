@@ -57,17 +57,9 @@ struct GuideView:View {
                 Text("Written on this iPhone from the records below. Check them before making plans.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if !asked.isEmpty { Text(asked).font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader) }
                 if !guide.lookups.isEmpty { GuideLookups(lines:guide.lookups) }
-                if guide.loading && guide.text.isEmpty { ConstellationLoader().frame(maxWidth:.infinity) }
-                if !guide.text.isEmpty {
-                    // Muted while it streams, each part already checked against the records; starlight
-                    // once the whole answer has passed. VoiceOver reads it only then, and no live region
-                    // speaks the words as they come.
-                    Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6).foregroundStyle(guide.checked ? palette.ink : palette.muted)
-                        .fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
-                        .accessibilityHidden(!guide.checked)
-                        .animation(systemReduceMotion ? nil : NyxMotion.spring,value:guide.checked)
-                    if guide.checked { citationChips(shown,proxy:proxy) }
-                }
+                // The streaming words live in their own view, so each new part redraws only the
+                // answer, never the records below it.
+                GuideAnswerBlock(guide:guide,shown:shown,lit:$lit)
                 if let error=guide.error { Text(error).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if asked.isEmpty && !guide.loading { suggestionChips }
                 if case .learn = mode {
@@ -179,30 +171,76 @@ struct GuideView:View {
             }
         }
     }
+    private func chip(_ text:Text)->some View { GuideChip(text:text) }
+}
+private extension GuideMode { var isPlanning:Bool { if case .planning = self { true } else { false } } }
+
+/// The answer as it arrives: the constellation loader until the first checked words, the words
+/// muted while they stream, then starlight with "Checked against the records" and one chip per
+/// cited record. It reads the guide's streaming text itself, so only this view redraws with each
+/// new part, never the records.
+private struct GuideAnswerBlock: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    let guide:OnDeviceGuide
+    let shown:[String]
+    @Binding var lit:Int?
+    var body: some View {
+        if guide.loading && guide.text.isEmpty { ConstellationLoader().frame(maxWidth:.infinity) }
+        if !guide.text.isEmpty {
+            // Muted while it streams, each part already checked against the records; starlight
+            // once the whole answer has passed. VoiceOver reads it only then, and no live region
+            // speaks the words as they come.
+            Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6).foregroundStyle(guide.checked ? palette.ink : palette.muted)
+                .fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
+                .accessibilityHidden(!guide.checked)
+                .animation(systemReduceMotion ? nil : NyxMotion.spring,value:guide.checked)
+            if guide.checked || guide.loading { status }
+            if guide.checked { citationChips }
+        }
+    }
+    /// Where the answer stands, for every reader: still being checked while it streams (the one
+    /// thing VoiceOver finds then, never announced), checked once it has passed. In night vision,
+    /// where muted and starlight are the same red, this line is how the answer shows its work.
+    private var status:some View {
+        HStack(alignment:.center,spacing:6) {
+            if guide.checked { Image(systemName:"checkmark.seal").foregroundStyle(palette.accent) }
+            else { ProgressView().controlSize(.mini).tint(palette.muted) }
+            Text(guide.checked ? "Checked against the records" : "Checking the answer against the records")
+                .fixedSize(horizontal:false,vertical:true)
+        }
+        .font(.caption).foregroundStyle(palette.muted)
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel(guide.checked ? Text("Checked against the records") : Text("Checking the answer against the records"))
+    }
     /// One chip per cited record: "1 · Arches, Fri, Oct 9". A tap finds the record below.
-    private func citationChips(_ shown:[String],proxy:ScrollViewProxy)->some View {
+    private var citationChips:some View {
         let all=shown+guide.lookedUp.map(\.text)
         return VStack(alignment:.leading,spacing:8) {
             Text("Sources").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
             FlowLayout(spacing:8) {
                 ForEach(guide.citations,id:\.self) { id in
                     let record=all.indices.contains(id) ? GuideRecord(all[id],parks:model.parks,tonight:{ model.tonight($0) }) : nil
-                    Button { lit=id; Task { try? await Task.sleep(for:.seconds(2)); if lit==id { lit=nil } } } label:{ chip(Text(record?.chip(number:id+1) ?? String(localized:"Record \(id+1)"))) }
+                    Button { lit=id; Task { try? await Task.sleep(for:.seconds(2)); if lit==id { lit=nil } } } label:{ GuideChip(text:Text(record?.chip(number:id+1) ?? String(localized:"Record \(id+1)"))) }
                         .buttonStyle(.plain)
                         .accessibilityHint("Shows this record below.")
                 }
             }
         }
     }
-    private func chip(_ text:Text)->some View {
+}
+/// A suggestion or citation chip: accent words in a hairline capsule, at least 44 pt tall.
+private struct GuideChip: View {
+    @Environment(\.nyx) private var palette
+    let text:Text
+    var body: some View {
         text.font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.leading)
             .padding(.vertical,8).padding(.horizontal,14).frame(minHeight:44)
             .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
             .contentShape(Capsule())
     }
 }
-private extension GuideMode { var isPlanning:Bool { if case .planning = self { true } else { false } } }
-
 /// A record as the model saw it ("Arches; Fri, Oct 9 (2026-10-09); score 94/100 Pristine; …"),
 /// read back into Nyx's own row: the park, the night, the score, and one line for the rest.
 struct GuideRecord: Equatable {
@@ -265,6 +303,14 @@ struct GuideRecordRow: View {
         case .blended: String(localized:"\(Int((night.cloudCover ?? 0).rounded()))% cloud forecast, an early look")
         case .usual: String(localized:"No cloud forecast yet")
         }
+    }
+    /// The Moon beside its percentage. Below 5% lit the phase symbol's crescent would read as a
+    /// third of the disc beside "2% lit", so the row draws the new Moon's outline there.
+    /// Turned for the southern sky, as `MoonSymbol` is.
+    static func moonGlyph(_ night:Night)->some View {
+        let moon=night.sky.moon
+        let south=night.park.latitude<0 ? -1.0 : 1.0
+        return Image(systemName:Int((moon.illumination*100).rounded())<5 ? "moonphase.new.moon" : moon.symbolName).scaleEffect(x:south,y:south)
     }
     /// The basis said once above the records.
     static func sharedCaption(_ basis:String)->String {
@@ -336,7 +382,7 @@ struct GuideRecordRow: View {
         if let distance=record.detail { Text(distance).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         let lit=Int((night.sky.moon.illumination*100).rounded())
         let line=showsBasis ? "\(String(localized:"\(lit)% lit")) · \(Self.basis(night))" : String(localized:"\(lit)% lit")
-        Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ MoonSymbol(night:night).accessibilityHidden(true) }
+        Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ Self.moonGlyph(night).accessibilityHidden(true) }
             .font(.subheadline).foregroundStyle(palette.muted).labelStyle(GuideLineLabelStyle())
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(showsBasis ? "\(String(localized:"\(night.sky.moon.name), \(lit)% lit")). \(Self.basis(night))" : String(localized:"\(night.sky.moon.name), \(lit)% lit"))

@@ -269,9 +269,15 @@ struct FieldActivityTimer: View {
 #if DEBUG
 extension FieldActivityAttributes {
     /// The same night moved in time, so a review screen's system timers count against a real clock.
+    /// Its clock times stay the park's own: the zone is moved back by the same amount (to the
+    /// minute), so a capture taken at any hour reads "Sunset 5:47 PM", never the capture's hour.
     func shifted(by seconds:TimeInterval)->FieldActivityAttributes {
-        FieldActivityAttributes(parkID:parkID,parkName:parkName,score:score,band:band,dusk:dusk+seconds,dawn:dawn+seconds,darkStart:darkStart.map { $0+seconds },darkEnd:darkEnd.map { $0+seconds },
-            milestones:milestones.map { Milestone(title:$0.title,date:$0.date+seconds,symbol:$0.symbol) },timeZoneID:timeZoneID,nightID:nightID,closure:closure)
+        let day=86400, half=43200
+        let offset=timeZone.secondsFromGMT(for:dusk)-Int((seconds/60).rounded())*60
+        let wrapped=((offset+half)%day+day)%day-half
+        let zone=String(format:"GMT%@%02d%02d",wrapped<0 ? "-" : "+",abs(wrapped)/3600,abs(wrapped)%3600/60)
+        return FieldActivityAttributes(parkID:parkID,parkName:parkName,score:score,band:band,dusk:dusk+seconds,dawn:dawn+seconds,darkStart:darkStart.map { $0+seconds },darkEnd:darkEnd.map { $0+seconds },
+            milestones:milestones.map { Milestone(title:$0.title,date:$0.date+seconds,symbol:$0.symbol) },timeZoneID:zone,nightID:nightID,closure:closure)
     }
     /// A state carrying a later score, band and closure, for previews and the review screen.
     static func rescored(_ state:ContentState,score:Int,band:String,closure:String?,at:Date)->ContentState {

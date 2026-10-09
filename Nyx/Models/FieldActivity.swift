@@ -87,6 +87,9 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
         guard let day=scoreDay(state) else { return "\(score(state)) · \(band(state))" }
         return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(weekday(.abbreviated)))")
     }
+    /// What a state's face shows of its night, for deciding whether a refresh changes anything:
+    /// the score line (score, band and the "as of" day in park time) and the closure.
+    func shows(_ state: ContentState) -> [String?] { [scoreLine(state), closure(state)] }
     /// What VoiceOver hears for the score: "Darkness score 94, Pristine, as of Wednesday."
     func spokenScore(_ state: ContentState) -> String {
         guard let day=scoreDay(state) else { return String(localized: "Darkness score \(score(state)), \(band(state)).") }
