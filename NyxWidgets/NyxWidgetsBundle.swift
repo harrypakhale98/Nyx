@@ -117,9 +117,10 @@ struct MoonWidget:Widget {
 struct NightVisionControl:ControlWidget {
     var body:some ControlWidgetConfiguration {
         StaticControlConfiguration(kind:"NightVisionControl",provider:NightVisionProvider()) { value in
-            // The state reads in both word and symbol: "On" with a filled moon, "Off" with an outline.
+            // The state reads in both word and symbol, with the in-app switch's own lamp: "On" with a
+            // filled flashlight, "Off" with an outline. The circled glyph keeps it apart from the system Flashlight.
             ControlWidgetToggle(isOn:value,action:NightVisionIntent()) { Text("Night vision") } valueLabel:{ isOn in
-                if isOn { Label("On",systemImage:"moon.fill") } else { Label("Off",systemImage:"moon") }
+                if isOn { Label("On",systemImage:"flashlight.on.circle.fill") } else { Label("Off",systemImage:"flashlight.off.circle") }
             }
         }.displayName("Night vision").description("Use Nyx's red palette to reduce glare at night.")
     }

@@ -35,7 +35,7 @@ struct SettingsSheet: View {
 /// red comes up under the cover and is revealed (`NightVisionLamp`, run by `RootView`), with one
 /// soft tap at the turn and the new state announced. Under Reduce Motion or Prefer Cross-Fade
 /// Transitions it writes the setting at once and the palette crossfades. VoiceOver hears a toggle
-/// with its state; Voice Control answers to "Night vision" or "Red light".
+/// with its state; Voice Control answers to "Night vision", "Red light" or "Flashlight".
 struct NightVisionToggle: View {
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(SceneCommands.self) private var commands:SceneCommands?
@@ -49,10 +49,10 @@ struct NightVisionToggle: View {
         }
         .toggleStyle(.button).labelStyle(.iconOnly)
         .accessibilityLabel("Night vision")
-        .accessibilityInputLabels([Text("Night vision"),Text("Red light"),Text("Red screen")])
+        // "Flashlight" too: it is the glyph on screen.
+        .accessibilityInputLabels([Text("Night vision"),Text("Red light"),Text("Red screen"),Text("Flashlight")])
         .help("Night vision")
-        // At the turn, under the cover: the lamp writes the setting then.
-        .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
+        // The soft tap at the turn comes once, from `RootView`: every tab's toolbar has its own switch.
     }
     private func turn(_ on:Bool) {
         if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on); return }

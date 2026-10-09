@@ -1808,5 +1808,14 @@
   "within %@ of %@": "a menos de %@ de %@",
   "within %@ of you": "a menos de %@ de ti",
   "your location": "tu ubicación",
-  "· %lld–%lld": "· %lld–%lld"
+  "· %lld–%lld": "· %lld–%lld",
+  "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service.": "El inventario del NPS incluido contiene 63 parques nacionales. Las clases Bortle son estimaciones conservadoras, no mediciones con instrumentos. Las designaciones Dark Sky son certificaciones International Dark Sky Park a julio de 2026, verificadas con la lista del NPS; un parque certificado después aún no está marcado. Las coordenadas de observación son aproximadas, no indicaciones de ruta. Los dibujos del cielo (el cielo de esta noche, la figura de Bortle y la comparación con una ciudad) muestran estrellas en una noche sin luna hasta la magnitud más débil que la escala de Bortle de 2001 da a cada clase, cerca de 7.3 en la clase 2 y 4.5 en la clase 8; sus estrellas más débiles están colocadas como ilustración, no tomadas de un catálogo. Datos de parques: National Park Service.",
+  "Up through all of true darkness.": "Sobre el horizonte durante toda la oscuridad total.",
+  "A citizen-science project. Observations like yours let scientists estimate that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing.": "Un proyecto de ciencia ciudadana. Observaciones como la tuya permitieron a los científicos estimar que el cielo nocturno se volvió entre un 7 y un 10 por ciento más brillante al año de 2011 a 2022. Se abre en Safari; Nyx no envía nada.",
+  "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.": "Una paleta roja reduce el deslumbramiento. Baja también el brillo de la pantalla. El botón de la linterna arriba de cada pestaña y el control del Centro de control también la activan. El modo de campo, desde \"Estoy aquí esta noche\" de un parque, la activa y atenúa la pantalla mientras está abierto, y luego restaura ambos.",
+  "Checking the numbers against the records": "Comprobando las cifras con los registros",
+  "Numbers checked against the records": "Cifras comprobadas con los registros",
+  "Numbers checked": "Cifras comprobadas",
+  "Flashlight": "Linterna",
+  "Here (Class %lld, estimated)": "Aquí (clase %lld, estimada)"
 }
