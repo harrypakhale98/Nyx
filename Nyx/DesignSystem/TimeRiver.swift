@@ -49,6 +49,8 @@ struct TimeRiver: View {
     @State private var pacer=RiverDetents()
     /// Counts a person's choices, so the Moon's texture follows a scrub once it settles.
     @State private var felt=0
+    /// A scrub has chosen a night; the tip closes when the finger lifts, not under it.
+    @State private var tipPending=false
     /// The night under an iPad's pointer, marked faintly before it is clicked.
     @State private var hovered: Int?
     /// The selected night's position; nil when it is not on the river, which then marks no night
@@ -72,7 +74,9 @@ struct TimeRiver: View {
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:startsTonight ? "The next 30 nights" : "30 nights from \(nights.first.map { $0.park.dayLabel($0.id) } ?? "")")
-            if showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent) }
+            // While the loupe is up the tip fades rather than closing, so nothing under the finger
+            // moves; it closes once the scrub ends.
+            if showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize { TipView(tip,arrowEdge:.bottom).tipBackground(palette.panel).tint(palette.accent).opacity(lifted ? 0 : 1).animation(reduceMotion ? nil : NyxMotion.spring,value:lifted) }
             if nights.isEmpty {
                 Text("No nights available").font(.subheadline).foregroundStyle(palette.muted)
             } else if typeSize.isAccessibilitySize {
@@ -90,6 +94,7 @@ struct TimeRiver: View {
             if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
         .sensoryFeedback(.selection,trigger:detents)
+        .onChange(of:scrubbing==true) { _,now in if !now && tipPending { tipPending=false; tip.invalidate(reason:.actionPerformed) } }
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
         // Feel the Moon: once a scrub rests on a night, its Moon's phase as a short texture.
         .task(id:felt) {
@@ -103,6 +108,16 @@ struct TimeRiver: View {
         GeometryReader { proxy in
             let width=proxy.size.width
             ZStack(alignment:.topLeading) {
+                // The selected night's hairline, from the Moon (or, while scrubbing, the loupe) down to
+                // the date row: a shape rather than part of the drawing, so it travels and stretches
+                // on the same spring as the loupe and never comes loose from it.
+                if let current,let index {
+                    let point=CGPoint(x:x(index,width:width),y:y(current.score.value,height:proxy.size.height))
+                    let top=lifted ? loupeCenter(point,width:width).y+loupeSize/2 : moonSize+2
+                    let bottom=proxy.size.height-22+4
+                    Rectangle().fill(palette.line).frame(width:0.6,height:max(0,bottom-top))
+                        .offset(x:point.x-0.3,y:top).accessibilityHidden(true)
+                }
                 Canvas { context,size in draw(in:&context,size:size) }
                     .accessibilityHidden(true)
                 if let current,let index {
@@ -304,7 +319,7 @@ struct TimeRiver: View {
             pacer.play(crossed.map { nights[$0].score.value })
         } else { detents+=1 }
         felt+=1
-        tip.invalidate(reason:.actionPerformed)
+        if scrubbing==true { tipPending=true } else { tip.invalidate(reason:.actionPerformed) }
     }
 
     private func draw(in context:inout GraphicsContext,size:CGSize) {
@@ -312,14 +327,7 @@ struct TimeRiver: View {
         func point(_ i:Int)->CGPoint { CGPoint(x:x(i,width:size.width),y:bottom-span*Double(nights[i].score.value)/100) }
         let lastForecast=nights.lastIndex { $0.score.hasForecast }
 
-        // Selected-night hairline, from the moon down to the date row.
-        if let index {
-            // While scrubbing it hangs from the loupe instead, like a pin to the night's point.
-            let px=x(index,width:size.width), py=bottom-span*Double(nights[index].score.value)/100
-            let from=lifted ? loupeCenter(CGPoint(x:px,y:py),width:size.width).y+loupeSize/2 : moonSize+2
-            var hairline=Path(); hairline.move(to:CGPoint(x:px,y:from)); hairline.addLine(to:CGPoint(x:px,y:bottom+4))
-            context.stroke(hairline,with:.color(palette.line),lineWidth:0.6)
-        }
+        // The selected night's hairline is a shape beneath this drawing (see `river`).
 
         // The pointer's night, a fainter hairline and ring than the chosen one.
         if let hovered, hovered != index, nights.indices.contains(hovered) {

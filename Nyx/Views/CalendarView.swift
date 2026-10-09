@@ -186,17 +186,26 @@ struct CalendarView: View {
         return Month(date:month,nights:nights,lead:lead,tonight:tonight,stretch:found,inWindow:found.inMonth ? Set(found.nights.map(\.id)) : [])
     }
     private func focused(_ data:Month)->Night? {
-        data.nights.first { $0.id==focusedID } ?? data.nights.first { $0.id==data.tonight } ?? data.nights.first
+        MonthPager.focus(data.nights.map(\.id),chosen:focusedID,tonight:data.tonight).flatMap { id in data.nights.first { $0.id==id } }
+    }
+    /// The current month and the neighbouring pages ready to draw, each worked out once per render
+    /// and shared by the grid, the month bar and the ring's panel.
+    private func pages(_ park:Park)->(current:Month,others:[Int:Month]) {
+        let current=month(park)
+        guard paging, !typeSize.isAccessibilitySize else { return (current,[:]) }
+        var others:[Int:Month]=[:]
+        for offset in [monthOffset-1,monthOffset+1] where ready(park,offset) { others[offset]=month(park,offset:offset) }
+        return (current,others)
     }
     var body: some View {
         ScrollView {
             if let park {
-                let data=month(park)
+                let pages=pages(park), data=pages.current
                 // The month bar and the ring's panel follow the page in view as soon as it is ready.
-                let shown=visible(park).map { month(park,offset:$0) } ?? data
+                let shown=visible(park).flatMap { pages.others[$0] } ?? data
                 VStack(alignment:.leading,spacing:24) {
                     heading(park); monthBar(park,shown)
-                    if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,scale:wide && width>=640 ? 1.3 : 1) }
+                    if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
                     windowPanel(park,shown); legend
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
@@ -204,8 +213,11 @@ struct CalendarView: View {
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar } }
             .measuringWidth($width)
             .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {
-                // The page in view, so a keyboard step across a month's edge shows its night while the page slides.
-                if let park, let night=focused(visible(park).map { month(park,offset:$0) } ?? month(park)) { aside(night) }
+                // The page in view, so a keyboard step across a month's edge shows its night while the page
+                // slides. Only that one night is worked out here, not its month.
+                if let park, let id=MonthPager.focus(MonthPager.evenings(park,tonight:model.tonight(park),offset:visible(park) ?? monthOffset),chosen:focusedID,tonight:park.evening(model.tonight(park))) {
+                    aside(model.night(park,on:id))
+                }
             }
             .toolbar {
                 if inspectorRoom {
@@ -328,7 +340,7 @@ struct CalendarView: View {
     /// which follows a swipe, can be caught mid-slide and settles a page at a time. Only the current
     /// month is in the accessibility tree and carries the peek, the rotors and the keyboard steps.
     /// Reduce Motion and Prefer Cross-Fade keep one page that fades between months.
-    @ViewBuilder private func months(_ park:Park,_ data:Month,scale:Double)->some View {
+    @ViewBuilder private func months(_ park:Park,_ data:Month,others:[Int:Month],scale:Double)->some View {
         if !paging {
             grid(park,data,scale:scale,current:true)
                 .id(monthOffset)
@@ -345,7 +357,7 @@ struct CalendarView: View {
                         let offset=monthOffset+slot
                         Group {
                             if offset==monthOffset { grid(park,data,scale:scale,current:true) }
-                            else if ready(park,offset) { grid(park,month(park,offset:offset),scale:scale,current:false) }
+                            else if let page=others[offset] { grid(park,page,scale:scale,current:false) }
                             else { skeleton(park,scale:scale) }
                         }
                         .padding(.horizontal,24)
@@ -424,10 +436,13 @@ struct CalendarView: View {
         .accessibilityHidden(true)
     }
     /// A slide has settled (or an arrow's spring has finished): the page in view becomes the month.
-    private func commit() {
-        guard let slot=position, slot != 0 else { return }
+    /// Returns the month offset now current.
+    @discardableResult private func commit()->Int {
+        guard let slot=position, slot != 0 else { return monthOffset }
+        let settled=MonthPager.commit(offset:monthOffset,position:slot)
         var still=Transaction(); still.disablesAnimations=true
-        withTransaction(still) { monthOffset+=slot; position=0 }
+        withTransaction(still) { monthOffset=settled.offset; position=settled.position }
+        return settled.offset
     }
     /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon.
     private func windowPanel(_ park:Park,_ data:Month)->some View {
@@ -473,12 +488,12 @@ struct CalendarView: View {
     }
     private func step(_ delta:Int) {
         guard let park else { return }
-        let data=month(park)
-        guard let current=focused(data) else { return }
-        let next=park.date(current.id,addingDays:delta)
-        let offset=Self.monthOffset(park,tonight:model.tonight(park),to:next)
-        if offset != monthOffset { move(offset-monthOffset) }
-        withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=next }
+        // A slide still under way lands first, so a quick second ⌘→ steps from the month in view,
+        // not from the month the slide is leaving.
+        let offset=commit()
+        guard let step=MonthPager.step(park,tonight:model.tonight(park),offset:offset,chosen:focusedID,delta:delta) else { return }
+        if step.move != 0 { move(step.move) }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { focusedID=step.night }
     }
     /// One rotor stop per night: the day, its score and band.
     struct RotorNight: Identifiable { let id: Date; let label: String }
@@ -507,7 +522,10 @@ struct CalendarView: View {
         guard let target=model.park(request.parkID) else { return }
         parkID=target.id
         let months=Self.monthOffset(target,tonight:model.tonight(target),year:request.year,month:request.month)
-        monthOffset=months
+        // The pager returns to its current slot with the month, so an arrow's spring still landing
+        // cannot add its slot to the month the link asked for.
+        var still=Transaction(); still.disablesAnimations=true
+        withTransaction(still) { monthOffset=months; position=0 }
     }
     /// The first of tonight's month at the park, which every month offset counts from. Tonight's
     /// month, not the clock's: at 1 AM on the 1st, tonight is still last month's last night.
@@ -606,5 +624,29 @@ private struct MonthRotors: ViewModifier {
             HStack { ForEach(0..<5,id:\.self) { i in NightCell(night:n,highlighted:true,ringDrawn:drawn,ringDelay:Double(i)*0.06) } }
             Button { drawn.toggle() } label:{ Text(verbatim:drawn ? "Undraw" : "Draw in") }
         }.padding().background(.black).preferredColorScheme(.dark)
+    }
+}
+/// The month pager's arithmetic, apart from the view so it can be tested.
+nonisolated enum MonthPager {
+    /// A settled slide: the slot in view joins the month offset and the pager returns to slot 0,
+    /// which then draws that same month.
+    static func commit(offset:Int,position:Int?)->(offset:Int,position:Int) { (offset+(position ?? 0),0) }
+    /// The night ids (each local noon) of the month `offset` months from tonight's month.
+    static func evenings(_ park:Park,tonight:Date,offset:Int)->[Date] {
+        let base=CalendarView.baseMonth(park,tonight:tonight)
+        let month=park.calendar.date(byAdding:.month,value:offset,to:base) ?? base
+        let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
+        return (0..<count).map { park.evening(park.date(month,addingDays:$0)) }
+    }
+    /// The night a month focuses: the chosen one when it is in the month, else tonight, else the first.
+    static func focus(_ ids:[Date],chosen:Date?,tonight:Date)->Date? {
+        ids.first { $0==chosen } ?? ids.first { $0==tonight } ?? ids.first
+    }
+    /// A keyboard step from the month at `offset`: the night it lands on and how many months the
+    /// pager moves to show it (0 within the month, ±1 across its edge).
+    static func step(_ park:Park,tonight:Date,offset:Int,chosen:Date?,delta:Int)->(night:Date,move:Int)? {
+        guard let current=focus(evenings(park,tonight:tonight,offset:offset),chosen:chosen,tonight:park.evening(tonight)) else { return nil }
+        let next=park.date(current,addingDays:delta)
+        return (next,CalendarView.monthOffset(park,tonight:tonight,to:next)-offset)
     }
 }

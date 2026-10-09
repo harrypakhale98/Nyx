@@ -64,21 +64,44 @@ struct NightDirections: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.openURL) private var openURL
     let park:Park
+    /// What the row offers for a park: its access note when a car cannot reach it, directions to
+    /// the chosen spot, or nothing when the park lists no viewing spot.
+    enum Offer: Equatable {
+        case accessNote
+        case directions(spot:String,url:URL,stepFree:SpotAccess.Level?)
+        case nothing
+    }
+    static func offer(for park:Park,access:AccessData = .shared)->Offer {
+        guard park.drivable else { return .accessNote }
+        guard let choice=MapsHandOff.spot(for:park,access:access), let url=MapsHandOff.directions(choice.spot) else { return .nothing }
+        return .directions(spot:choice.spot.name,url:url,stepFree:choice.stepFree)
+    }
     var body: some View {
-        if !park.drivable {
+        switch Self.offer(for:park) {
+        case .accessNote:
             AccessNoteLabel(park:park).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
-        } else if let choice=MapsHandOff.spot(for:park), let url=MapsHandOff.directions(choice.spot) {
+        case .nothing:
+            EmptyView()
+        case .directions(let spot,let url,let stepFree):
             Button { openURL(url) } label:{
                 // The step-free glyph rides in the text, so it wraps with the words; at accessibility
                 // sizes the turn glyph would take a column of its own, so the words stand alone.
-                let words=Text("Directions to \(choice.spot.name)")
-                let line=choice.stepFree == .yes || choice.stepFree == .partial ? Text("\(words) \(Image(systemName:"figure.roll"))") : words
-                Label { line.fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"arrow.triangle.turn.up.right.diamond").accessibilityHidden(true) } }
-                    .font(.footnote.weight(.medium))
+                // A partly step-free spot says so in words, never with the step-free glyph alone,
+                // so what is seen and what VoiceOver hears agree.
+                let line=switch stepFree {
+                case .yes: Text("\(Text("Directions to \(spot)")) \(Image(systemName:"figure.roll"))")
+                case .partial: Text("Directions to \(spot) · partly step-free")
+                default: Text("Directions to \(spot)")
+                }
+                Group {
+                    if typeSize.isAccessibilitySize { line.fixedSize(horizontal:false,vertical:true) }
+                    else { Label { line.fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"arrow.triangle.turn.up.right.diamond").accessibilityHidden(true) } }
+                }
+                    .font(.footnote.weight(.medium)).multilineTextAlignment(.leading)
                     .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
             }
             .buttonStyle(.borderless).foregroundStyle(palette.accent)
-            .accessibilityLabel(MapsHandOff.spokenLabel(spot:choice.spot.name,park:park.shortName,stepFree:choice.stepFree))
+            .accessibilityLabel(MapsHandOff.spokenLabel(spot:spot,park:park.shortName,stepFree:stepFree))
             .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
             .accessibilityInputLabels([Text("Directions"),Text("Maps")])
         }
@@ -189,11 +212,17 @@ struct KeepThisNightOffer: View {
     let m=PlanModel()
     if let p=m.home { KeepThisNightButton(prefill:JournalPrefill(night:m.night(p))).padding().background(.black).environment(m).preferredColorScheme(.dark) }
 }
-#Preview("Directions · step-free, roadless, none") {
+#Preview("Directions · step-free, roadless, partly step-free, undocumented") {
     let parks=(try? ParkData.load()) ?? []
     VStack(alignment:.leading,spacing:12) {
-        ForEach(["grca","drto","jotr"],id:\.self) { id in if let p=parks.first(where:{ $0.id==id }) { NightDirections(park:p) } }
+        ForEach(["meve","drto","jotr","acad"],id:\.self) { id in if let p=parks.first(where:{ $0.id==id }) { NightDirections(park:p) } }
     }.padding().background(.black).preferredColorScheme(.dark)
+}
+#Preview("Directions · AX5") {
+    let parks=(try? ParkData.load()) ?? []
+    VStack(alignment:.leading,spacing:12) {
+        ForEach(["meve","jotr"],id:\.self) { id in if let p=parks.first(where:{ $0.id==id }) { NightDirections(park:p) } }
+    }.padding().background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark)
 }
 #Preview("Add to Calendar") {
     let m=PlanModel()

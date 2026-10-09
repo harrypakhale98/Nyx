@@ -1043,7 +1043,6 @@
   "Partly step-free: %@": "En parte sin escalones: %@",
   "Passed": "Ya pasó",
   "Past night": "Noche pasada",
-  "Past nights · %lld": "Noches pasadas · %lld",
   "Past the forecasts, the ring marks the five nights with the least moonlight. Their clouds are not known yet.": "Más allá de los pronósticos, el anillo marca las cinco noches con menos luz de luna. Aún no se conocen sus nubes.",
   "Penumbral lunar eclipse": "Eclipse penumbral de Luna",
   "Penumbral: the Moon dims slightly; easy to miss.": "Penumbral: la Luna se oscurece un poco; es fácil no notarlo.",
@@ -1792,5 +1791,6 @@
   "Directions to %@, %@, in Maps": "Cómo llegar a %1$@, %2$@, en Mapas",
   "Directions to %@, step-free, %@, in Maps": "Cómo llegar a %1$@, sin escalones, %2$@, en Mapas",
   "Directions to %@, partly step-free, %@, in Maps": "Cómo llegar a %1$@, en parte sin escalones, %2$@, en Mapas",
-  "Past nights": "Noches pasadas"
+  "Past nights": "Noches pasadas",
+  "Directions to %@ · partly step-free": "Cómo llegar a %@ · en parte sin escalones"
 }
