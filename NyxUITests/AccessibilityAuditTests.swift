@@ -21,7 +21,7 @@ final class AccessibilityAuditTests:XCTestCase {
     /// The screens people live in, for the heavier passes.
     private var keyScreens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","parks-map","detail","plan","journal","settings","field"]
+        return ["tonight","parks","parks-map","detail","plan","journal","settings","field","river"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }

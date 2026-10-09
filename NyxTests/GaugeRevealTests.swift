@@ -175,4 +175,50 @@ import Testing
         }
         #expect(corner(CelestialGauge.accessibleNumeral(band:53,side:160))<innerTick(160))
     }
+
+    // MARK: A sweep moves as one
+
+    @Test func aSweepKeepsTheOldWordUntilTheArcLands() {
+        for plan:Plan in [.sweep,.settle] {
+            #expect(CelestialGauge.bandShown(plan:plan,previous:.excellent,target:.pristine,completed:false) == .excellent)
+            #expect(CelestialGauge.bandShown(plan:plan,previous:.excellent,target:.pristine,completed:true) == .pristine)
+        }
+    }
+    @Test func withoutMotionTheNewWordShowsAtOnce() {
+        #expect(CelestialGauge.bandShown(plan:.instant,previous:.excellent,target:.pristine,completed:false) == .pristine)
+        #expect(CelestialGauge.bandShown(plan:.instant,previous:.excellent,target:.pristine,completed:true) == .pristine)
+        // The count hides its word until it lands, so it may carry the answer's word from the start.
+        #expect(CelestialGauge.bandShown(plan:.odometer,previous:.poor,target:.pristine,completed:false) == .pristine)
+        #expect(CelestialGauge.bandShown(plan:.hold,previous:.good,target:.pristine,completed:false) == .good)
+    }
+    /// Cached 81 overtaken by a computed 97: at every point of the travel the word on show (the old
+    /// one until the landing, the new one after) stands only beside a number of its own band.
+    @Test func theOvertakeNeverPairsANumberWithAnotherBandsWord() {
+        let target=97
+        for start in [51.0,81] {
+            // Every point of the travel, the spring's small overshoot past 97 included.
+            for step in 0...400 {
+                let value=start+(98.2-start)*Double(step)/400
+                let numeral=CelestialGauge.numeral(value:value,target:target)
+                let word=CelestialGauge.bandShown(plan:.sweep,previous:.excellent,target:.pristine,completed:false)
+                if CelestialGauge.wordFits(word,numeral:numeral) { #expect(ScoreBand.band(numeral) == word) }
+            }
+            let landed=CelestialGauge.bandShown(plan:.sweep,previous:.excellent,target:.pristine,completed:true)
+            #expect(CelestialGauge.wordFits(landed,numeral:CelestialGauge.numeral(value:Double(target),target:target)))
+        }
+    }
+    @Test func aSweepingNumeralNeverOvershootsTheAnswer() {
+        #expect(CelestialGauge.numeral(value:97.9,target:97)==97)
+        #expect(CelestialGauge.numeral(value:95.7,target:97)==96)
+        #expect(CelestialGauge.numeral(value:89.4,target:90)==90)
+        #expect(CelestialGauge.numeral(value:60.6,target:97)==61)
+        #expect(CelestialGauge.numeral(value:101.4,target:99)==100)
+        #expect(CelestialGauge.numeral(value:-1.4,target:30)==0)
+    }
+    @Test func theWordStandsOnlyBesideItsOwnBand() {
+        #expect(CelestialGauge.wordFits(.excellent,numeral:89))
+        #expect(!CelestialGauge.wordFits(.excellent,numeral:90))
+        #expect(CelestialGauge.wordFits(.pristine,numeral:90))
+        #expect(!CelestialGauge.wordFits(.good,numeral:75))
+    }
 }

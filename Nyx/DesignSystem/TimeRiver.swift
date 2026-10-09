@@ -15,13 +15,14 @@ struct RiverScrubbingKey:PreferenceKey {
 /// The selected night's caption carries the meaning (date, score, what its clouds rest on); a
 /// one-time tip explains the marks instead of a standing legend. The chosen night sits under a
 /// small Liquid Glass lens that bends the river beneath it. While a finger scrubs, the lens grows
-/// into a loupe lifted above the finger that shows the night's score, and the Moon steps beside
-/// it, since the page's gauge is usually scrolled away by then (solid in night vision, under
-/// Reduce Transparency and Increase Contrast; hidden from VoiceOver, which hears the river's value).
+/// into a loupe lifted above the finger that shows the night's date and score (the finger covers
+/// the date row), and the Moon steps beside it, since the page's gauge is usually scrolled away by
+/// then (solid in night vision, under Reduce Transparency and Increase Contrast; hidden from
+/// VoiceOver, which hears the river's value).
 /// Without a long drag: VoiceOver and Voice Control adjust it a night at a time (activating it
 /// says the night, never jumps to the middle one); with "prefers action slider alternative" or
 /// Switch Control, previous and next night buttons sit under it; at accessibility sizes it becomes
-/// a stepper.
+/// a stepper with the best nights a button away.
 struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
@@ -29,6 +30,7 @@ struct TimeRiver: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyxAccess) private var access
+    @Environment(\.locale) private var locale
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let nights: [Night]
     @Binding var selected: Date
@@ -188,28 +190,32 @@ struct TimeRiver: View {
             }
         }.accessibilityHidden(true)
     }
-    /// "No cloud forecast yet", "Early look", "Cloud forecast · models range 62–88", then a shower or an eclipse.
-    func caption(_ night:Night)->String {
+    /// "No cloud forecast yet", "Early look", "Cloud forecast · models range 62–88", then a shower or
+    /// an eclipse. At accessibility sizes each part takes a line of its own (`separator: "\n"`), so
+    /// a range never breaks across lines.
+    func caption(_ night:Night,separator:String=" · ")->String {
         var parts=[night.basisLabel ?? String(localized:"Cloud forecast")]
         if let outlook=outlooks[night.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
             parts.append(String(localized:"models range \(range.lowerBound)–\(range.upperBound)"))
         }
         if let marker=markers[night.id] { parts.append(marker.name) }
-        return parts.joined(separator:" · ")
+        return parts.joined(separator:separator)
     }
     /// The scrub position: a small lens of Liquid Glass over the chosen night, which bends the river
-    /// under it. While scrubbing it is a 56 pt loupe holding the night's score in light serif and a
-    /// short tick whose length follows the band, on glass tinted like the panel so the numeral keeps
-    /// its contrast over the river. Solid panel colour where glass would cost legibility or is unwanted.
+    /// under it. While scrubbing it is a 56 pt loupe naming the night under the finger (its short
+    /// date, "Fri 16") above its score in light serif, on glass tinted like the panel so both keep
+    /// their contrast over the river. Solid panel colour where glass would cost legibility or is unwanted.
     @ViewBuilder private func lens(_ night:Night,size:Double)->some View {
         let solid=palette.nightVision || palette.highContrast || reduceTransparency
         ZStack {
             if lifted {
-                VStack(spacing:4) {
+                VStack(spacing:1) {
+                    // The finger covers the date row; the loupe carries the night's date above it.
+                    Text(Self.loupeDate(night.id,locale:locale,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit()
+                        .foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8)
                     // Light, or regular under Bold Text, as the strokes follow it.
                     Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
                         .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
-                    Capsule().fill(palette.accent).frame(width:Self.tickWidth(night.score.band),height:2)
                 }.transition(.opacity)
             }
         }
@@ -217,9 +223,10 @@ struct TimeRiver: View {
         .modifier(LoupeSurface(solid:solid,lifted:lifted))
         .allowsHitTesting(false).accessibilityHidden(true)
     }
-    /// The loupe's tick: longer for a better band, so the band reads in shape as well as in the numeral.
-    static func tickWidth(_ band:ScoreBand)->Double {
-        switch band { case .pristine: 24; case .excellent: 20; case .good: 16; case .fair: 12; case .poor: 8 }
+    /// The loupe's date: the weekday and day in the reader's language, in the park's own time zone
+    /// ("Fri 16", "vie 16"). Always the date, never "Tonight", so it reads the same on every night.
+    nonisolated static func loupeDate(_ date:Date,locale:Locale,timeZone:TimeZone)->String {
+        date.formatted(Date.FormatStyle(locale:locale,timeZone:timeZone).weekday(.abbreviated).day())
     }
     /// Where the loupe sits: lifted above the night's point, kept inside the river's width and at
     /// most `headroom` (`loupeHeadroom` by default) above it (a Pristine night near the top lifts
@@ -260,9 +267,10 @@ struct TimeRiver: View {
         AccessibilityNotification.Announcement(spokenValue).post()
     }
     /// At accessibility text sizes the drawn river gives way to a plain, large stepper: the date,
-    /// the score as a large numeral with its band, the stepper on a row of its own, then what the
-    /// score rests on. VoiceOver hears the stepper alone, exactly as before; the words above it are
-    /// what a sighted reader sees.
+    /// the score as a large numeral with its band, the stepper on a row of its own, buttons to the
+    /// best night and the next of the best (the glow they replace is not drawn here), then what the
+    /// score rests on, a part to a line. VoiceOver hears the stepper as before (the best nights are
+    /// also its actions); the words above it are what a sighted reader sees.
     private var stepper: some View {
         VStack(alignment:.leading,spacing:10) {
             if let current {
@@ -276,14 +284,48 @@ struct TimeRiver: View {
             }
             Stepper("Selected night",value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1))
                 .labelsHidden().frame(maxWidth:.infinity,alignment:.leading)
-                .tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
+                // The third style fills the stepper's capsule under clear − and + glyphs (`stepperFill`).
+                .tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,stepperFill)
                 .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Moves one night at a time.")
                 .accessibilityInputLabels([Text("Night"),Text("Selected night")])
                 .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
+            // The best nights are a button away for sighted readers too (VoiceOver has them as actions).
+            if let best=peakOrder.first {
+                VStack(alignment:.leading,spacing:10) {
+                    Button { choose(best) } label:{ bestLabel("Best night") }
+                        .disabled(index==best)
+                    if peakOrder.count>1 {
+                        Button { if let next=Self.nextPeak(peaks:peakOrder,current:index) { choose(next) } } label:{ bestLabel("Next of the best nights") }
+                    }
+                }
+                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline.weight(.medium))
+            }
             if let current {
-                Text(caption(current)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+                Text(Self.lineCaption(caption(current,separator:"\n"))).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
             }
         }
+    }
+    /// The AX stepper's capsule: amber-brown on the panel (grey in night vision), as the journal's
+    /// Bortle stepper, but translucent. The stepper draws a glyph it has disabled (− on tonight, +
+    /// on the last night) in this same style over the capsule, so an opaque fill would make that
+    /// glyph vanish; at half strength it stays a dim, legible mark, and the enabled glyph in
+    /// starlight keeps at least 4.5:1 on the capsule.
+    private var stepperFill: Color { palette.nightVision ? palette.ink.opacity(0.26) : palette.accent.opacity(0.5) }
+    /// Words alone: at these sizes a glyph would take a column of its own.
+    private func bestLabel(_ title:LocalizedStringKey)->some View {
+        Text(title).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+            .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
+    }
+    /// A caption a part to a line, with each number kept to the word before it ("range 55–83"), so a
+    /// line that must wrap never leaves the figures on their own.
+    nonisolated static func lineCaption(_ text:String)->String {
+        text.replacingOccurrences(of:" (?=[0-9])",with:"\u{00A0}",options:.regularExpression)
+    }
+    /// The next of the best nights in date order after the one shown, wrapping to the first; the
+    /// first when none is chosen.
+    nonisolated static func nextPeak(peaks:[Int],current:Int?)->Int? {
+        let ordered=peaks.sorted()
+        return ordered.first(where:{ $0>(current ?? -1) }) ?? ordered.first
     }
     @ViewBuilder private func stepperScore(_ night:Night)->some View {
         Text(verbatim:"\(night.score.value)").font(.system(.largeTitle,design:.serif).weight(.light)).foregroundStyle(palette.accent)
@@ -458,8 +500,7 @@ private struct RiverAccessibility: ViewModifier {
                 if peaks.count>1 {
                     Button("Next of the best nights") {
                         // The best nights in date order, starting after the one shown.
-                        let ordered=peaks.sorted()
-                        if let next=ordered.first(where:{ $0>(current ?? -1) }) ?? ordered.first { choose(next) }
+                        if let next=TimeRiver.nextPeak(peaks:peaks,current:current) { choose(next) }
                     }
                 }
                 if MoonHaptics.enabled, let current, nights.indices.contains(current) {
@@ -469,7 +510,8 @@ private struct RiverAccessibility: ViewModifier {
     }
 }
 #Preview("River") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().background(.black) } }
-#Preview("River • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().dynamicTypeSize(.accessibility5).background(.black) } }
+#Preview("River • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();ScrollView { TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding() }.dynamicTypeSize(.accessibility5).background(.black) } }
+#Preview("River • AX5 • night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();ScrollView { TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding() }.dynamicTypeSize(.accessibility5).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
 #Preview("River • Steps") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyxAccess,NyxAccess(preferSteps:true)).background(.black) } }
 #Preview("River • Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
 #Preview("River • Loupe") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();VStack(spacing:24) { LoupePreview(night:m.night(p),solid:false);LoupePreview(night:m.night(p),solid:true) }.padding(40).background(Color(red:0.043,green:0.063,blue:0.149)) } }
@@ -536,9 +578,9 @@ private struct LoupePreview: View {
     let night:Night
     let solid:Bool
     var body: some View {
-        VStack(spacing:4) {
-            Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).foregroundStyle(palette.accent)
-            Capsule().fill(palette.accent).frame(width:TimeRiver.tickWidth(night.score.band),height:2)
+        VStack(spacing:1) {
+            Text(TimeRiver.loupeDate(night.id,locale:.current,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit().foregroundStyle(palette.muted)
+            Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
         }.frame(width:56,height:56).modifier(LoupeSurface(solid:solid,lifted:true))
     }
 }

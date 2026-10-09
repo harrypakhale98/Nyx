@@ -143,7 +143,7 @@ struct ParksView: View {
             .accessibilityRotor(Text("Pristine nights"),entries:rotor(shown) { park in
                 let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
-        }.background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
+        }.background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize))
             .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             // ⌘F from anywhere in the window.
