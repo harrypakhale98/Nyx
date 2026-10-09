@@ -5,8 +5,11 @@ import SwiftUI
 /// naked-eye planets and, on shower nights, the meteor radiant.
 /// Seen facing south (north in the southern hemisphere) at the middle of that night's darkness.
 /// It is the geometry of the sky, not a visibility forecast: clouds belong to the score.
+/// A night without true darkness shows what twilight leaves (`Visibility`): only the brightest
+/// stars over a faint lift of light low in the sky while the Sun is less than 6° down.
 struct RealSky: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
@@ -18,28 +21,67 @@ struct RealSky: View {
     /// 0…1. Higher-scoring nights twinkle harder and show a brighter Milky Way.
     var twinkle: Double=0.3
     var strength: Double=0.6
+    /// Towns' light domes on the horizon. Off where no horizon is drawn (the wallpaper behind
+    /// every screen), where a dome clipped flat at the horizon reads as a seam across the page.
+    var domes: Bool=true
+    /// How much of each depth layer a sky shows: by the Sun's height at the moment shown, and,
+    /// under Increase Contrast, without the stars fainter than about magnitude 3 (a calmer field
+    /// behind text). Pure, so the polar and tropical rules are tested.
+    nonisolated struct Visibility: Equatable, Sendable {
+        var faint: Double
+        var middle: Double
+        var bright: Double
+        /// 0…1: the twilight lift low in the sky; 0 below −18°, full at −6° and above.
+        var lift: Double
+        init(sunAltitude:Double,highContrast:Bool=false,liftAllowed:Bool=true) {
+            // Above −6° (civil twilight, a white night): only the brightest stars, at half strength.
+            // Between −6° and −12°: the bright and middle stars. Below −12°: all of them.
+            faint=sunAltitude < -12 ? 1 : 0
+            middle=sunAltitude < -6 ? 1 : 0
+            bright=sunAltitude < -6 ? 1 : 0.5
+            lift=liftAllowed ? max(0,min(1,(sunAltitude+18)/12)) : 0
+            // Increase Contrast: the faint set goes and the middle set (magnitude 2.2–3.6) dims.
+            if highContrast { faint=0; middle=min(middle,0.35) }
+        }
+    }
+    /// The lift's colour at its brightest, at the bottom of the screen: deep indigo, low enough that
+    /// muted captions keep about 8:1 over it (`Scripts/contrast.py`, "Twilight lift").
+    nonisolated static let liftColor=Color(red:0.078,green:0.106,blue:0.227)
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night)
         let strength=palette.nightVision ? strength*0.45 : strength
+        // The lift is off under Reduce Transparency and Increase Contrast: plain black behind text.
+        let seen=Visibility(sunAltitude:sky.sunAltitude,highContrast:palette.highContrast,liftAllowed:!reduceTransparency && !palette.highContrast)
+        let showDomes=domes && !sky.domes.isEmpty
         // Rests in Low Power Mode and while the device is hot, as the sensors do.
         TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
+                // Twilight's lift, under everything: void at the top to deep indigo low in the sky.
+                if seen.lift>0 {
+                    LinearGradient(colors:[.black,Self.liftColor],startPoint:.top,endPoint:.bottom).opacity(seen.lift)
+                }
                 // Light domes sit on the horizon, farthest of all.
-                if !sky.domes.isEmpty { DomeLayer(sky:sky,strength:strength).equatable().offset(x:tilt.x*1.5,y:tilt.y*1.5) }
+                if showDomes { DomeLayer(sky:sky,strength:strength).equatable().offset(x:tilt.x*1.5,y:tilt.y*1.5) }
                 // Far to near: the Milky Way and faint stars barely move, bright stars move most.
-                StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2)
-                StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4)
+                // Each set fades rather than pops when Increase Contrast changes.
+                if seen.faint>0 || palette.highContrast {
+                    StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2).opacity(seen.faint)
+                }
+                if seen.middle>0 || palette.highContrast {
+                    StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4).opacity(seen.middle)
+                }
                 MarkLayer(sky:sky,ink:palette.ink,strength:strength).equatable().offset(x:tilt.x*5,y:tilt.y*5)
                 Canvas { context,size in
                     let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
                     for star in sky.bright {
                         let shimmer=still ? 0.85 : 0.7+amplitude*sin(t*speed*(1+star.seed)+star.seed*6.28)
-                        StarLayer.draw(star,in:&context,size:size,ink:palette.ink,opacity:shimmer*strength)
+                        StarLayer.draw(star,in:&context,size:size,ink:palette.ink,opacity:shimmer*strength*seen.bright)
                     }
                 }.offset(x:tilt.x*7,y:tilt.y*7)
             }
+            .animation(.easeInOut(duration:0.6),value:seen)
         }
         .motionTilt(!still)
         .allowsHitTesting(false).accessibilityHidden(true)
@@ -192,6 +234,8 @@ private struct DomeLayer: View, Equatable {
         let galaxy: [[GalaxyPoint]]
         /// True when the Sun is at least 12° down at the moment shown: the Milky Way is drawn only then.
         let dark: Bool
+        /// The Sun's altitude in degrees at the moment shown (below −18° on a night with true darkness).
+        var sunAltitude: Double = -90
         var planets: [Mark]=[]
         var radiant: Mark?=nil
         var domes: [Dome]=[]
@@ -234,10 +278,15 @@ private struct DomeLayer: View, Equatable {
         if let cached=cache[key] { return cached }
         let engine=AstronomyEngine()
         let sky=engine.conditions(for:park,on:night)
-        // The middle of true darkness; otherwise local midnight.
+        // The middle of true darkness; otherwise the night's darkest moment, when the Sun is lowest
+        // (in Alaska's summer about two hours after local midnight), found to the nearest ten minutes.
         let moment:Date
         if let instant { moment=Date(timeIntervalSince1970:(instant.timeIntervalSince1970/300).rounded(.down)*300) }
-        else if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) } else { moment=sky.evening.addingTimeInterval(12*3600) }
+        else if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) }
+        else {
+            let candidates=stride(from:6*3600.0,through:18*3600.0,by:600).map { sky.evening.addingTimeInterval($0) }
+            moment=candidates.min { engine.solarAltitude(at:$0,park:park) < engine.solarAltitude(at:$1,park:park) } ?? sky.evening.addingTimeInterval(12*3600)
+        }
         let facing=park.latitude<0 ? 0.0 : 180.0, centreAltitude=45.0*Double.pi/180
         func project(altitude:Double,azimuth:Double)->SIMD2<Double> {
             let alt=altitude*Double.pi/180, dAz=(azimuth-facing)*Double.pi/180
@@ -270,7 +319,8 @@ private struct DomeLayer: View, Equatable {
             else if !current.isEmpty { segments.append(current); current=[] }
         }
         if !current.isEmpty { segments.append(current) }
-        let dark=engine.solarAltitude(at:moment,park:park) < -12
+        let sunAltitude=engine.solarAltitude(at:moment,park:park)
+        let dark=sunAltitude < -12
         // Planets and a radiant only when the sky shown is dark: a label in daylight would be a fiction.
         var planets:[Mark]=[], radiant:Mark?
         if dark {
@@ -298,10 +348,22 @@ private struct DomeLayer: View, Equatable {
                 domes.append(Dome(base:project(altitude:0,azimuth:dome.bearing),top:project(altitude:14,azimuth:dome.bearing),horizon:horizon,intensity:min(1,(amount/4).squareRoot())))
             }
         }
-        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,planets:planets,radiant:radiant,domes:domes)
+        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,sunAltitude:sunAltitude,planets:planets,radiant:radiant,domes:domes)
         cache[key]=result
         recent.append(key)
         if recent.count>capacity { cache[recent.removeFirst()]=nil }
         return result
     }
+}
+
+#Preview("Dark night") {
+    if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) { RealSky(park:park,night:.now).background(.black) }
+}
+#Preview("White night • Denali in June") {
+    if let park=try? ParkData.load().first(where:{ $0.id=="dena" }), let june=park.calendar.date(from:DateComponents(year:2026,month:6,day:21,hour:12)) {
+        RealSky(park:park,night:june).background(.black)
+    }
+}
+#Preview("Increase Contrast") {
+    if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) { RealSky(park:park,night:.now).environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)).background(.black) }
 }

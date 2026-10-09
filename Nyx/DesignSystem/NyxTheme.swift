@@ -76,6 +76,7 @@ struct Eyebrow: View {
 }
 struct NightBackground: View {
     @Environment(\.skyHome) private var home
+    @Environment(\.nyx) private var palette
     var seed: String="nyx"
     /// The night's score, when the screen is about one night; stars twinkle harder as it rises.
     var score: Int?=nil
@@ -86,13 +87,20 @@ struct NightBackground: View {
     var veil: Double=0
     var body: some View {
         let twinkle=score.map { pow(Double($0)/100,2) } ?? 0.3
+        // Increase Contrast: a calmer sky behind text, veiled by half and no more, so it is still a sky.
+        let veil=palette.highContrast ? max(veil,0.5) : veil
         ZStack {
             Color.black
-            if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle) }
+            // No light domes on the wallpaper: with no horizon drawn, a dome's clipped foot reads as a seam.
+            if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle,domes:false) }
             else { Starfield(seed:seed,twinkle:twinkle) }
-            if veil>0 { Color.black.opacity(veil) }
-        }.ignoresSafeArea().accessibilityHidden(true)
-        // A night sky inverted under Smart Invert would read as a white page with black stars.
+            Color.black.opacity(veil)
+        }.animation(.easeInOut(duration:0.6),value:palette.highContrast)
+        .ignoresSafeArea().accessibilityHidden(true)
+        // Nyx is dark by design and Smart Invert leaves it as it is: the system does not invert an
+        // app that draws in the dark appearance (checked on iOS 27 with Smart Invert on: Tonight, a
+        // park, Plan and a sheet). The opt-out stays on the sky itself, so a night sky can never turn
+        // into a white page with black stars; Classic Invert remains for anyone who wants a light screen.
         .accessibilityIgnoresInvertColors()
     }
 }

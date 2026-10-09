@@ -83,7 +83,7 @@ struct KeepThisNightButton: View {
         .accessibilityHint("Opens a journal entry for this night, with the park, the date and the score filled in.")
         .accessibilityInputLabels([Text("Keep this night"),Text("Journal")])
         .sheet(item:$editing) { prefill in
-            NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation()
+            NavigationStack { JournalEditorView(prefill:prefill) { ReviewPrompt.noteFieldNightKept() } }.nyxPresentation()
         }
     }
 }

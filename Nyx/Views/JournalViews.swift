@@ -332,11 +332,13 @@ struct JournalEditorView:View {
     @State private var editor:JournalEditorModel
     @State private var picker:[PhotosPickerItem]=[]
     var existing:JournalEntry?
+    /// Called once the entry is saved (a kept night tells the rating request).
+    var saved:(()->Void)?=nil
     init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
     /// A new entry for a night being kept (field mode at dawn, a park's page the morning after):
     /// the park, the night it began on, the observed-Bortle default and a first line, all editable.
-    init(prefill:JournalPrefill) {
-        existing=nil
+    init(prefill:JournalPrefill,saved:(()->Void)?=nil) {
+        existing=nil; self.saved=saved
         let editor=JournalEditorModel(entry:nil)
         editor.parkID=prefill.parkID; editor.date=prefill.date; editor.observedBortle=prefill.observedBortle; editor.notes=prefill.notes
         _editor=State(initialValue:editor)
@@ -366,7 +368,7 @@ struct JournalEditorView:View {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)) }
         }
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { dismiss() } }.disabled(editor.loadingPhotos) } }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { saved?(); dismiss() } }.disabled(editor.loadingPhotos) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
     }

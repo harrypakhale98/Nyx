@@ -239,9 +239,9 @@ struct RootView:View {
         case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "accessibility": SoundAndTouchView()
         // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on).
-        case "assistive": AssistiveHome().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
-        case "assistive-tonight": AssistiveTonight().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
-        case "assistive-saved": AssistiveSaved().environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
+        case "assistive": AssistiveHome().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
+        case "assistive-tonight": AssistiveTonight().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
+        case "assistive-saved": AssistiveSaved().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
         // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
         case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
         // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.

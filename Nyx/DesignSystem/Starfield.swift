@@ -21,24 +21,36 @@ struct Starfield: View {
     var body: some View {
         // When the system asks for less, half the stars, holding still.
         let still=reduceMotion || access.reducedResources
+        let field=access.reducedResources ? Array(stars.prefix(44)) : stars
         TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
-            Canvas { context,size in
-                let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
-                let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
-                // Night vision keeps stars faint: kinder to dark-adapted eyes and to the text above them.
-                let strength=palette.nightVision ? strength*0.45 : strength
-                for star in access.reducedResources ? Array(stars.prefix(44)) : stars {
-                    let shimmer=0.55+amplitude*sin(t*speed+star.phase)
-                    let point=CGRect(x:star.x*size.width,y:star.y*size.height,width:star.radius*2,height:star.radius*2)
-                    context.fill(Path(ellipseIn:point),with:.color(palette.ink.opacity(shimmer*strength)))
-                }
-            }
+            let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            ZStack {
+                // The smaller, fainter stars in their own layer: under Increase Contrast they fade out
+                // (rather than pop), leaving a calmer field behind text.
+                layer(field.filter { $0.radius<Self.faintRadius },t:t).opacity(palette.highContrast ? 0 : 1)
+                layer(field.filter { $0.radius>=Self.faintRadius },t:t)
+            }.animation(.easeInOut(duration:0.6),value:palette.highContrast)
         }.allowsHitTesting(false).accessibilityHidden(true).accessibilityIgnoresInvertColors()
+    }
+    /// Stars smaller than this (about half of them) stand for those fainter than about magnitude 3.
+    private static let faintRadius=0.9
+    private func layer(_ stars:[Star],t:Double)->some View {
+        Canvas { context,size in
+            let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
+            // Night vision keeps stars faint: kinder to dark-adapted eyes and to the text above them.
+            let strength=palette.nightVision ? strength*0.45 : strength
+            for star in stars {
+                let shimmer=0.55+amplitude*sin(t*speed+star.phase)
+                let point=CGRect(x:star.x*size.width,y:star.y*size.height,width:star.radius*2,height:star.radius*2)
+                context.fill(Path(ellipseIn:point),with:.color(palette.ink.opacity(shimmer*strength)))
+            }
+        }
     }
 }
 #Preview("Living") { Starfield(seed:"jotr").background(.black) }
 #Preview("Pristine night") { Starfield(seed:"jotr",twinkle:1).background(.black) }
 #Preview("Still") { Starfield(seed:"jotr").environment(\.nyxReduceMotion,true).background(.black) }
+#Preview("Increase Contrast") { Starfield(seed:"jotr").environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)).background(.black) }
 
 /// Same seed, same sky: a small deterministic generator for decorative stars.
 struct SeededGenerator: RandomNumberGenerator {
