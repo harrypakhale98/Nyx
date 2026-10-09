@@ -436,4 +436,32 @@ import Testing
             }
         }
     }
+
+    // MARK: A breakdown that adds up
+
+    /// The parts a breakdown prints are whole points that add up to the sum it names, whatever the
+    /// fractions: rounding each part alone printed 40 + 25 + 15 + 15 beside "add up to 94".
+    @Test func displayedPartsAlwaysAddUpToTheSum() {
+        let joshua = DarknessScore(value: 89, moonPoints: 39.6, cloudPoints: 24.6, bortlePoints: 15, lengthPoints: 14.55, limit: .skyGlow(89))
+        #expect(joshua.partsSum == 94)
+        let shown = joshua.displayedParts
+        #expect(shown.moon + (shown.cloud ?? 0) + shown.glow + shown.length == 94)
+        #expect(shown.moon == 40 && shown.cloud == 25 && shown.glow == 15 && shown.length == 14)
+        // Every engine score, over a grid of skies: the shown parts make the sum, none leaves its range.
+        for moonlight in stride(from: 0.0, through: 1, by: 0.07) {
+            for dark in [0.0, 0.4, 2.3, 6.7, 9.71, 12] {
+                for cloud in [nil, 0.0, 13.3, 47.5, 88.8] as [Double?] {
+                    for bortle in 1...9 {
+                        let score = scoring.score(sky: sky(moonlight: moonlight, dark: dark), bortle: bortle, cloudCover: cloud)
+                        let parts = score.displayedParts
+                        #expect(parts.moon + (parts.cloud ?? 0) + parts.glow + parts.length == score.partsSum)
+                        #expect((parts.cloud == nil) == (score.cloudPoints == nil))
+                        let scale = score.cloudPoints == nil ? 1/0.75 : 1
+                        #expect(Double(parts.moon) <= (40*scale).rounded() && Double(parts.glow) <= (20*scale).rounded() && Double(parts.length) <= (15*scale).rounded() && (parts.cloud ?? 0) <= 25)
+                        #expect(score.value <= score.partsSum)
+                    }
+                }
+            }
+        }
+    }
 }

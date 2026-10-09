@@ -136,6 +136,24 @@ nonisolated struct DarknessScore: Sendable {
         self.basis=basis ?? (cloudPoints == nil ? .usual : .forecast); self.cloudUsed=cloudUsed; self.limit=limit
     }
     var band: ScoreBand { .band(value) }
+    /// The four parts added, rounded once: the score before any cap.
+    var partsSum: Int { Int((moonPoints+(cloudPoints ?? 0)+bortlePoints+lengthPoints).rounded()) }
+    /// The parts as whole points that always add up to `partsSum` (largest remainder), so the numbers
+    /// a reader adds on a breakdown make the total beside them; rounding each part alone could show
+    /// 40 + 25 + 15 + 15 beside a sum of 94.
+    var displayedParts: (moon: Int, cloud: Int?, glow: Int, length: Int) {
+        let raw = [moonPoints, cloudPoints ?? 0, bortlePoints, lengthPoints].map { max(0, $0) }
+        var whole = raw.map { Int($0.rounded(.down)) }
+        let short = max(0, min(raw.count, partsSum-whole.reduce(0, +)))
+        // The largest fractions take the missing points; on a tie, the earlier part (the brief's order).
+        let fraction = raw.map { $0-$0.rounded(.down) }
+        let order = raw.indices.sorted { fraction[$0] != fraction[$1] ? fraction[$0] > fraction[$1] : $0 < $1 }
+        // A part never shows more than its own maximum ("53 of 53" with no cloud figure, never 54).
+        let scale = cloudPoints == nil ? 1/0.75 : 1
+        let maximum = [40*scale, cloudPoints == nil ? 0 : 25, 20*scale, 15*scale].map { Int($0.rounded()) }
+        for index in order.filter({ whole[$0] < maximum[$0] }).prefix(short) { whole[index] += 1 }
+        return (whole[0], cloudPoints == nil ? nil : whole[1], whole[2], whole[3])
+    }
     /// True when a cloud forecast counts in full. An early look or the usual clouds is not a forecast.
     var hasForecast: Bool { basis == .forecast }
 }

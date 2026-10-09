@@ -1239,3 +1239,7 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - Store frames, social cards and the App Preview are recaptured once, after the device pass, with the deferred re-sequencing (sky frame first, no repeated 97 gauge): recapturing before it would publish art the pass may still change.
 - The owner's Social Impact evidence (a DarkSky chapter or ranger program linking to Nyx, three to five disabled testers in their own words, whether the repository may be cited) joins the awards step, since no entry should claim impact the owner has not gathered.
 - README documents `-nyx-following` and `Scripts/build_moon_atlas.swift`, and the Moon's credit names LOLA elevation alongside the LROC colour map.
+
+## Award panel — 2026-10-09 (a breakdown that adds up)
+
+- The breakdown's parts are whole points that always add up to the sum it names (`DarknessScore.displayedParts`, largest remainder, ties to the brief's order, never above a part's own maximum). Rounding each part alone printed 40 + 25 + 15 + 15 beside "the four parts add up to 94" on an iPad capture of Joshua Tree; a reader who adds the rows must get the number on the screen. One `partsSum` now serves the park breakdown, the readout under the dial and the Vision Pro night. The score and its caps are unchanged; test `displayedPartsAlwaysAddUpToTheSum` covers a grid of skies, glow classes and cloud figures, including no cloud figure at all.

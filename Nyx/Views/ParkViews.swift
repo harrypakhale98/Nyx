@@ -740,13 +740,13 @@ struct ScoreBreakdownView: View {
                     Text(limit.sentence(tonight:isTonight)+" "+String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
                 }
             }
-            row("Moonlight",points:night.score.moonPoints,of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
-            row("Clouds",points:night.score.cloudPoints,of:25,fact:cloudFact,
+            row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
+            row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:cloudFact,
                 context:cloudContext,
                 detail:cloudContext.isEmpty ? String(localized:"The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
                     : String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."))
-            row("Sky glow",points:night.score.bortlePoints,of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
-            row("True darkness",points:night.score.lengthPoints,of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
+            row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
+            row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
             if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(caption+" "+String(localized:"The score will change as a forecast arrives.")).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
             else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
@@ -769,7 +769,9 @@ struct ScoreBreakdownView: View {
         }
     }
     /// The four parts' sum before any cap, as the readout shows them.
-    private var partsSum:Int { Int((night.score.moonPoints+(night.score.cloudPoints ?? 0)+night.score.bortlePoints+night.score.lengthPoints).rounded()) }
+    private var partsSum:Int { night.score.partsSum }
+    /// Whole points that add up to `partsSum`, so the rows make the sum the caption names.
+    private var shown:(moon:Int,cloud:Int?,glow:Int,length:Int) { night.score.displayedParts }
     private var cloudFact:String {
         switch night.basis {
         case .forecast: return night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover through true darkness.") } ?? String(localized:"No forecast covers this night yet.")

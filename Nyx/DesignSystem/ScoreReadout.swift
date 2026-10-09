@@ -26,12 +26,12 @@ struct ScoreReadout: View {
         var note: String?=nil
     }
     private var parts: [Part] {
-        let scale=score.cloudPoints == nil ? 1/0.75 : 1
+        let scale=score.cloudPoints == nil ? 1/0.75 : 1, shown=score.displayedParts
         return [
-            Part(id:"moon",title:String(localized:"Moonlight"),spoken:String(localized:"Moonlight"),points:score.moonPoints,maximum:40*scale),
-            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Clouds"),points:score.cloudPoints,maximum:25,note:cloudNote),
-            Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Sky glow"),points:score.bortlePoints,maximum:20*scale),
-            Part(id:"hours",title:String(localized:"True darkness"),spoken:String(localized:"True darkness"),points:score.lengthPoints,maximum:15*scale)
+            Part(id:"moon",title:String(localized:"Moonlight"),spoken:String(localized:"Moonlight"),points:Double(shown.moon),maximum:40*scale),
+            Part(id:"clouds",title:String(localized:"Clouds"),spoken:String(localized:"Clouds"),points:shown.cloud.map(Double.init),maximum:25,note:cloudNote),
+            Part(id:"glow",title:String(localized:"Sky glow"),spoken:String(localized:"Sky glow"),points:Double(shown.glow),maximum:20*scale),
+            Part(id:"hours",title:String(localized:"True darkness"),spoken:String(localized:"True darkness"),points:Double(shown.length),maximum:15*scale)
         ]
     }
     private var cloudNote: String? {
@@ -44,8 +44,7 @@ struct ScoreReadout: View {
     /// The binding cap, when the parts add up to more than the score.
     private var limitLine: String? {
         guard let limit=score.limit else { return nil }
-        let sum=Int((score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints).rounded())
-        return limit.cap<sum ? limit.sentence(tonight:isTonight) : nil
+        return limit.cap<score.partsSum ? limit.sentence(tonight:isTonight) : nil
     }
     var body: some View {
         Button(action:action) {
