@@ -2970,23 +2970,6 @@
         }
       }
     },
-    "A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un proyecto de ciencia ciudadana que mapea la contaminación lumínica a partir de lo que ve la gente. Se abre en Safari; Nyx no envía nada, así que registras tu noche allí por tu cuenta."
-          }
-        }
-      }
-    },
     "A countdown to truly dark sky: the Sun far below the horizon and the Moon down.": {
       "extractionState": "manual",
       "localizations": {
@@ -4365,6 +4348,23 @@
         }
       }
     },
+    "An illustration: the same sky drawn at this park's estimated class and at a city's.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An illustration: the same sky drawn at this park's estimated class and at a city's."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una ilustración: el mismo cielo dibujado con la clase estimada de este parque y con la de una ciudad."
+          }
+        }
+      }
+    },
     "Another way to see it": {
       "extractionState": "manual",
       "localizations": {
@@ -4497,6 +4497,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "La luz artificial en el cielo, como una estimación conservadora en la escala de Bortle. No es una medición."
+          }
+        }
+      }
+    },
+    "As your eyes adapt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As your eyes adapt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mientras tus ojos se adaptan"
           }
         }
       }
@@ -6946,6 +6963,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cantidad"
+          }
+        }
+      }
+    },
+    "Counts like yours showed scientists that the night sky is brightening by 7 to 10 percent a year. It opens in Safari; Nyx sends nothing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts like yours showed scientists that the night sky is brightening by 7 to 10 percent a year. It opens in Safari; Nyx sends nothing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conteos como el tuyo mostraron a los científicos que el cielo nocturno se aclara entre un 7 y un 10 por ciento al año. Se abre en Safari; Nyx no envía nada."
           }
         }
       }
@@ -10225,6 +10259,23 @@
         }
       }
     },
+    "From a city (Class 8)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From a city (Class 8)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desde una ciudad (clase 8)"
+          }
+        }
+      }
+    },
     "From the National Park Service": {
       "extractionState": "manual",
       "localizations": {
@@ -10589,6 +10640,40 @@
         }
       }
     },
+    "Here (Class %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Here (Class %lld)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí (clase %lld)"
+          }
+        }
+      }
+    },
+    "Here (Class %lld, estimated)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Here (Class %lld, estimated)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí (clase %lld, estimada)"
+          }
+        }
+      }
+    },
     "Hidden": {
       "extractionState": "manual",
       "localizations": {
@@ -10881,6 +10966,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Estoy aquí esta noche"
+          }
+        }
+      }
+    },
+    "Illustration. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustración. Desde una ciudad, la Vía Láctea y la mayoría de las estrellas tenues desaparecen; solo quedan las más brillantes."
           }
         }
       }
@@ -21051,6 +21153,23 @@
         }
       }
     },
+    "Sky drawn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky drawn"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo dibujado"
+          }
+        }
+      }
+    },
     "Sky glow": {
       "extractionState": "manual",
       "localizations": {
@@ -29043,13 +29162,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A sky worth protecting\n\nA dark sky is more than a place to see stars. It is a habitat. Long before electric light, plants and animals lived with a steady pattern of bright days and dark nights. That rhythm still matters. A lamp beside a road may help a person see the ground, but its light can reach far beyond the road, into the places where other lives unfold.\n\nLight scattered in the atmosphere creates sky glow. From a city, it can hide the faint band of the Milky Way. The brightest stars remain, while the quieter parts of the sky disappear. A person who has never seen a truly dark night may not know what is missing. A national park can offer a first encounter with a sky that feels unexpectedly full.\n\nDarkness does not mean using no light. It means putting light where it helps, at the time it is needed, and at a level that suits the task. A shielded light aimed toward the ground serves a path better than one shining into the sky. A light switched off when nobody needs it gives darkness back to the surrounding landscape. Small decisions can matter when many people make them.\n\nPark staff work to protect night skies by improving outdoor lighting, studying sky brightness and helping visitors learn how to enjoy the night. International Dark Sky certification recognizes sustained work on lighting and education. It is not a promise that every night will be clear, or that every corner of a certified park will be equally dark. Clouds, the Moon, nearby towns and your own viewing location still shape the experience.\n\nNyx treats a park's Bortle class as an estimate because darkness is not a permanent property of a name on a map. A visitor center may have more light than a remote overlook. A bright horizon may affect one direction more than another. Smoke and haze can scatter light even on a night with little cloud. The score helps you choose a promising night; your eyes tell you what the night actually offers.\n\nYou can help protect that experience. Choose a modest red light for moving around. Turn off vehicle headlights when safely parked, and avoid shining a beam toward other observers. Ask a ranger where you may stay after dark. Leave paths, wildlife and cultural places as you found them.\n\nBack at home, look at your own outdoor lights. Consider shielding them, lowering their brightness or using a timer. You do not need a telescope to be a caretaker of the night. Sometimes the most useful thing you can do is let a light go out."
+            "value": "A sky worth protecting\n\nA dark sky is more than a place to see stars. It is a habitat. Long before electric light, plants and animals lived with a steady rhythm of bright days and dark nights, and they still do.\n\nLight scattered in the atmosphere creates sky glow. The faint band of the Milky Way is the first thing it hides; the brightest stars remain. A world atlas of night sky brightness, published in 2016, put the scale plainly: “The Milky Way is hidden from more than one-third of humanity, including 60% of Europeans and nearly 80% of North Americans.” A national park can be the first place someone sees what is missing.\n\nThe change is also fast. From 2011 to 2022, people around the world counted the stars they could see and reported them to Globe at Night, a citizen-science project. A study of 51,351 of those counts, published in 2023, found that “The number of visible stars decreased by an amount that can be explained by an increase in sky brightness of 7 to 10% per year in the human visible band.” That is faster than satellites show, partly because the color of outdoor light has changed.\n\nEach park's page in Nyx names the towns whose light rises on its horizon, from NASA's satellite night lights. From Death Valley, the brightest glow lies east, toward Las Vegas. The same page draws the park's sky twice, at its estimated class and at a city's, so the difference can be seen rather than imagined.\n\nDarkness does not mean using no light. It means light where it helps, when it is needed, no brighter than the task. A shielded light aimed at the ground serves a path better than one shining into the sky.\n\nPark staff protect night skies by improving outdoor lighting and measuring sky brightness, and International Dark Sky certification recognizes that work. It is not a promise that every corner is equally dark. That is why Nyx calls each park's Bortle class an estimate: a visitor center has more light than a remote overlook.\n\nAt the park, a modest red light is enough for moving around. Headlights can go off once you are safely parked, and a beam kept low stays out of other observers' eyes. A ranger can tell you where you may stay after dark.\n\nIf you would like to add to the record, count the stars you can see on a clear night and report them to Globe at Night. It takes a few minutes, from a park or from your own street, and each count shows a little more of how the night is changing.\n\nSources: F. Falchi and others, “The new world atlas of artificial night sky brightness,” Science Advances 2, e1600377 (2016). C. C. M. Kyba and others, “Citizen scientists report global rapid reductions in the visibility of stars from 2011 to 2022,” Science 379, 265–268 (2023). Light domes: NASA Black Marble night lights (VNP46A4), 2025."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un cielo que vale la pena proteger\n\nUn cielo oscuro es más que un lugar para ver estrellas. Es un hábitat. Mucho antes de la luz eléctrica, plantas y animales vivían con un patrón constante de días luminosos y noches oscuras. Ese ritmo todavía importa. Una lámpara junto a un camino puede ayudar a una persona a ver el suelo, pero su luz puede llegar mucho más allá del camino, hasta los lugares donde transcurren otras vidas.\n\nLa luz que se dispersa en la atmósfera crea el resplandor del cielo. Desde una ciudad, puede ocultar la banda tenue de la Vía Láctea. Las estrellas más brillantes permanecen, mientras que las partes más discretas del cielo desaparecen. Quien nunca ha visto una noche verdaderamente oscura quizá no sepa lo que falta. Un parque nacional puede ofrecer un primer encuentro con un cielo que se siente inesperadamente lleno.\n\nOscuridad no significa no usar luz. Significa poner la luz donde ayuda, en el momento en que se necesita y con un nivel adecuado para la tarea. Una luz apantallada y dirigida hacia el suelo sirve mejor a un sendero que una que brilla hacia el cielo. Una luz que se apaga cuando nadie la necesita le devuelve la oscuridad al paisaje. Las decisiones pequeñas importan cuando muchas personas las toman.\n\nEl personal de los parques trabaja para proteger el cielo nocturno: mejora la iluminación exterior, estudia el brillo del cielo y ayuda a los visitantes a aprender a disfrutar de la noche. La certificación International Dark Sky reconoce un trabajo sostenido en iluminación y educación. No es una promesa de que todas las noches estarán despejadas, ni de que cada rincón de un parque certificado será igual de oscuro. Las nubes, la Luna, los pueblos cercanos y tu propio lugar de observación siguen dando forma a la experiencia.\n\nNyx trata la clase Bortle de un parque como una estimación porque la oscuridad no es una propiedad permanente de un nombre en un mapa. Un centro de visitantes puede tener más luz que un mirador remoto. Un horizonte brillante puede afectar más a una dirección que a otra. El humo y la bruma pueden dispersar la luz incluso en una noche con pocas nubes. El índice te ayuda a elegir una noche prometedora; tus ojos te dicen lo que la noche realmente ofrece.\n\nPuedes ayudar a proteger esa experiencia. Elige una luz roja discreta para moverte. Apaga los faros del vehículo cuando estés estacionado en un lugar seguro y evita apuntar un haz de luz hacia otros observadores. Pregunta a un guardaparques dónde puedes quedarte después del anochecer. Deja los senderos, la fauna y los sitios culturales como los encontraste.\n\nDe vuelta en casa, observa tus propias luces exteriores. Considera apantallarlas, bajar su brillo o usar un temporizador. No necesitas un telescopio para cuidar de la noche. A veces lo más útil que puedes hacer es dejar que una luz se apague."
+            "value": "Un cielo que vale la pena proteger\n\nUn cielo oscuro es más que un lugar para ver estrellas. Es un hábitat. Mucho antes de la luz eléctrica, plantas y animales vivían con un ritmo constante de días luminosos y noches oscuras, y todavía viven con él.\n\nLa luz que se dispersa en la atmósfera crea el resplandor del cielo. Lo primero que oculta es la banda tenue de la Vía Láctea; las estrellas más brillantes permanecen. Un atlas mundial del brillo del cielo nocturno, publicado en 2016, lo dijo con claridad: “La Vía Láctea está oculta para más de un tercio de la humanidad, incluido el 60% de los europeos y casi el 80% de los norteamericanos”. Un parque nacional puede ser el primer lugar donde alguien ve lo que falta.\n\nEl cambio también es rápido. De 2011 a 2022, personas de todo el mundo contaron las estrellas que podían ver y lo reportaron a Globe at Night, un proyecto de ciencia ciudadana. Un estudio de 51,351 de esos conteos, publicado en 2023, encontró que “el número de estrellas visibles disminuyó en una cantidad que puede explicarse por un aumento del brillo del cielo de entre 7 y 10% por año en la banda visible para el ojo humano”. Es más rápido de lo que muestran los satélites, en parte porque el color de la luz exterior ha cambiado.\n\nLa página de cada parque en Nyx nombra los pueblos y ciudades cuya luz se eleva en su horizonte, a partir de las luces nocturnas que mide la NASA desde satélites. Desde Death Valley, el resplandor más brillante está al este, hacia Las Vegas. La misma página dibuja el cielo del parque dos veces, con su clase estimada y con la de una ciudad, para que la diferencia se vea en lugar de imaginarse.\n\nOscuridad no significa no usar luz. Significa luz donde ayuda, cuando se necesita y no más brillante de lo que pide la tarea. Una luz apantallada y dirigida hacia el suelo sirve mejor a un sendero que una que brilla hacia el cielo.\n\nEl personal de los parques protege el cielo nocturno mejorando la iluminación exterior y midiendo el brillo del cielo, y la certificación International Dark Sky reconoce ese trabajo. No es una promesa de que cada rincón sea igual de oscuro. Por eso Nyx llama estimación a la clase Bortle de cada parque: un centro de visitantes tiene más luz que un mirador remoto.\n\nEn el parque, una luz roja discreta basta para moverte. Los faros pueden apagarse cuando estés estacionado en un lugar seguro, y un haz de luz dirigido hacia abajo se mantiene lejos de los ojos de otros observadores. Un guardaparques puede decirte dónde puedes quedarte después del anochecer.\n\nSi quieres sumar al registro, cuenta las estrellas que ves en una noche despejada y repórtalas a Globe at Night. Toma unos minutos, desde un parque o desde tu propia calle, y cada conteo muestra un poco más de cómo está cambiando la noche.\n\nFuentes: F. Falchi y otros, “The new world atlas of artificial night sky brightness”, Science Advances 2, e1600377 (2016). C. C. M. Kyba y otros, “Citizen scientists report global rapid reductions in the visibility of stars from 2011 to 2022”, Science 379, 265–268 (2023). Domos de luz: luces nocturnas Black Marble de la NASA (VNP46A4), 2025."
           }
         }
       }

@@ -6,23 +6,40 @@ import SwiftUI
 /// radiant and NASA's light domes on the horizon, drawn for the park's estimated Bortle class.
 /// It is geometry, not a forecast: clouds belong to the score. Red under night vision, still under
 /// Reduce Motion (it never moves by itself), and VoiceOver hears what is up and where.
+///
+/// The first time it opens for a park and night after Nyx launches, the sky arrives as eyes adapt: the
+/// brightest stars first, the fainter ones after, the Milky Way last, over about four seconds,
+/// with "As your eyes adapt" under the title. Any touch (a drag, the slider, a direction) completes
+/// it at once. Reduce Motion and Reduce Highlighting Effects draw the sky whole, with no caption.
 struct TonightSkyView: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.nyxAccess) private var access
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let night: Night
     var isTonight=true
     @State private var facing: Double
     @State private var minutes: Double
     @State private var dragFrom: Double?
     @State private var size: CGSize = .zero
+    /// The adaptation reveal is running (from `revealStart`); false once it lands or a touch ends it.
+    @State private var revealing: Bool
+    @State private var revealStart: Date?
+    @State private var captionShown: Bool
     private var window: DateInterval { SkyAlmanac.nightWindow(night.sky) }
     init(night:Night,isTonight:Bool=true) {
         self.night=night; self.isTonight=isTonight
         _facing=State(initialValue:SkyDome.facing(for:night.park))
         _minutes=State(initialValue:Self.defaultMinutes(night.sky))
+        let first = !SkyAdaptation.seen.contains(SkyAdaptation.key(parkID:night.park.id,night:night.id))
+        _revealing=State(initialValue:first)
+        _captionShown=State(initialValue:first)
     }
+    /// The reveal is a highlight and a motion: neither plays under Reduce Motion or Reduce Highlighting Effects.
+    private var revealAllowed: Bool { !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting }
     /// Minutes after the night's start that the view opens at: the middle of true darkness, else
     /// the middle of the night.
     nonisolated static func defaultMinutes(_ sky:SkyConditions)->Double {
@@ -35,9 +52,14 @@ struct TonightSkyView: View {
     private var moment: Date { window.start.addingTimeInterval(minutes*60) }
     private var park: Park { night.park }
     private var options: PanoramaOptions { PanoramaOptions(facing:facing,bortle:Double(park.bortleEstimate),nightVision:palette.nightVision) }
+    private func adapted(_ adaptation:Double)->PanoramaOptions { var adapted=options; adapted.adaptation=adaptation; return adapted }
     var body: some View {
         let sky=HorizonSkies.shared.sky(park:park,night:night.id,at:moment)
-        PanoramaCanvas(sky:sky,options:options)
+        let adapting=revealing && revealAllowed
+        // At most 30 frames a second while the stars arrive; paused (nothing redrawn) once they have.
+        TimelineView(.animation(minimumInterval:1/30,paused:!adapting || SkyAdaptation.frozen != nil)) { timeline in
+            PanoramaCanvas(sky:sky,options:adapted(adapting ? SkyAdaptation.progress(since:revealStart,now:timeline.date) : 1))
+        }
             .ignoresSafeArea(edges:.top)
             .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
             .gesture(turn)
@@ -57,6 +79,25 @@ struct TonightSkyView: View {
             .background(Color.black)
             .statusBarHidden(palette.nightVision)
             .sensoryFeedback(.selection,trigger:Int(minutes/30))
+            .onChange(of:minutes) { completeReveal() }
+            .task { await reveal() }
+    }
+    /// Starts the reveal on first appearance for this park and night, and lands it after `duration`.
+    private func reveal() async {
+        SkyAdaptation.seen.insert(SkyAdaptation.key(parkID:park.id,night:night.id))
+        guard revealing, revealAllowed else { revealing=false; captionShown=false; return }
+        if SkyAdaptation.frozen != nil { return }
+        revealStart = .now
+        try? await Task.sleep(for:.seconds(SkyAdaptation.duration))
+        guard !Task.isCancelled, revealing else { return }
+        revealing=false
+        withAnimation(.easeOut(duration:0.8)) { captionShown=false }
+    }
+    /// A touch completes the reveal at once: the whole sky, and the caption fades.
+    private func completeReveal() {
+        guard revealing || captionShown else { return }
+        revealing=false
+        withAnimation(.easeOut(duration:0.3)) { captionShown=false }
     }
     private var title: String {
         isTonight ? String(localized:"Tonight's sky over \(park.shortName)") : String(localized:"The sky over \(park.shortName), \(park.dayLabel(night.id))")
@@ -68,6 +109,11 @@ struct TonightSkyView: View {
                     .accessibilityAddTraits(.isHeader)
                 Text("\(park.dayLabel(night.id)) · \(park.time(moment)) · facing \(Compass.name(facing))").font(.caption).foregroundStyle(palette.muted)
                     .fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+                // Visual only: VoiceOver hears the sky's summary, unchanged.
+                if captionShown && revealAllowed {
+                    Text("As your eyes adapt").font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.muted)
+                        .padding(.top,6).transition(.opacity).accessibilityHidden(true)
+                }
             }
             Spacer(minLength:8)
             Button { dismiss() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(width:44,height:44) }
@@ -106,7 +152,7 @@ struct TonightSkyView: View {
         let names=[String(localized:"North"),String(localized:"East"),String(localized:"South"),String(localized:"West")]
         ForEach(0..<4,id:\.self) { index in
             let azimuth=Double(index)*90, name=names[index]
-            Button(name) { face(azimuth) }
+            Button(name) { completeReveal(); face(azimuth) }
                 .buttonStyle(.bordered).buttonBorderShape(.capsule).font(.footnote.weight(.medium))
                 .tint(Compass.name(facing)==Compass.name(azimuth) ? palette.accent : palette.muted)
                 .accessibilityLabel(String(localized:"Face \(name.lowercased())"))
@@ -123,12 +169,30 @@ struct TonightSkyView: View {
     /// Drag sideways to turn: the sky follows the finger, so dragging right turns to the left.
     private var turn: some Gesture {
         DragGesture(minimumDistance:4).onChanged { drag in
+            completeReveal()
             let start=dragFrom ?? facing
             if dragFrom == nil { dragFrom=facing }
             let frame=SkyFrame(options:options,size:size == .zero ? CGSize(width:390,height:800) : size)
             face(start-drag.translation.width*frame.degreesPerPoint)
         }.onEnded { _ in dragFrom=nil }
     }
+}
+/// The sky view's adaptation reveal: once per park and night each time Nyx launches, in memory only.
+@MainActor enum SkyAdaptation {
+    static var seen: Set<String>=[]
+    nonisolated static func key(parkID:String,night:Date)->String { "\(parkID)|\(Int(night.timeIntervalSince1970))" }
+    /// Seconds for the stars to arrive. Real dark adaptation takes 20 to 30 minutes; this is the
+    /// order they arrive in, not the time it takes, and the caption claims nothing more.
+    nonisolated static let duration=4.0
+    /// DEBUG: `-nyx-sky-adapt 0.5` holds the reveal at that point, for captures.
+    static var frozen: Double? { DebugScenario.number("-nyx-sky-adapt").map { max(0,min(1,$0)) } }
+    /// Adaptation 0…1 at `now`, eased in and out; 0 before the reveal starts.
+    static func progress(since start:Date?,now:Date)->Double {
+        if let frozen { return frozen }
+        guard let start else { return 0 }
+        return eased(now.timeIntervalSince(start)/duration)
+    }
+    nonisolated static func eased(_ t:Double)->Double { let t=max(0,min(1,t)); return t*t*(3-2*t) }
 }
 /// Liquid Glass for a floating control; a solid panel under Reduce Transparency, Increase
 /// Contrast and night vision.
@@ -194,17 +258,27 @@ struct BortleFigure: View {
     private static let fallback:Park?=(try? ParkData.load())?.first { $0.id=="jotr" }
     private var park: Park? { home ?? Self.fallback }
     /// A summer night near new moon (July 15, 2026), with the Milky Way's core in the south.
-    private static let summer=Date(timeIntervalSince1970:1_784_116_800)
+    static let summer=Date(timeIntervalSince1970:1_784_116_800)
+    /// A winter night near new moon (December 9, 2026), for parks with no true darkness in July.
+    static let winter=Date(timeIntervalSince1970:1_796_850_000)
+    /// The figure's sky for a park: the middle of true darkness on the summer new-moon night (or the
+    /// middle of the night if it has none). The sky is cached by `HorizonSkies`.
+    static func sky(_ park:Park,night date:Date=summer)->HorizonSky {
+        let night=AstronomyEngine().conditions(for:park,on:park.evening(date))
+        let window=SkyAlmanac.nightWindow(night)
+        let middle=night.darkStart.flatMap { start in night.darkEnd.map { start.addingTimeInterval($0.timeIntervalSince(start)/2) } } ?? window.start.addingTimeInterval(window.duration/2)
+        return HorizonSkies.shared.sky(park:park,night:park.evening(date),at:middle)
+    }
+    /// The figure's view: toward the park's best direction, 40° up, without the Moon or names.
+    static func options(_ park:Park,bortle:Double)->PanoramaOptions {
+        PanoramaOptions(facing:SkyDome.facing(for:park),centreAltitude:40,span:1.9,labels:false,bortle:bortle,showsMoon:false)
+    }
     private var shownClass: Int { Int(level.rounded()) }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(.uppercase).kerning(1.6)
             if let park {
-                let night=AstronomyEngine().conditions(for:park,on:park.evening(Self.summer))
-                let window=SkyAlmanac.nightWindow(night)
-                let middle=night.darkStart.flatMap { start in night.darkEnd.map { start.addingTimeInterval($0.timeIntervalSince(start)/2) } } ?? window.start.addingTimeInterval(window.duration/2)
-                let sky=HorizonSkies.shared.sky(park:park,night:park.evening(Self.summer),at:middle)
-                PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:park),centreAltitude:40,span:1.9,labels:false,bortle:level,showsMoon:false))
+                PanoramaCanvas(sky:Self.sky(park),options:Self.options(park,bortle:level))
                     .frame(height:260)
                     .clipShape(RoundedRectangle(cornerRadius:20))
                     .overlay(RoundedRectangle(cornerRadius:20).stroke(palette.line,lineWidth:0.5))
@@ -255,6 +329,10 @@ enum EssayFigure {
 #Preview("Sky over the park") {
     let m=PlanModel()
     if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • Reduce Motion (whole, no caption)") {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark) }
 }
 #Preview("Sky window") {
     let m=PlanModel()

@@ -175,6 +175,11 @@ nonisolated struct PanoramaOptions: Equatable, Sendable {
     var bortle: Double?=nil
     var showsMoon=true
     var nightVision=false
+    /// How far eyes have adapted to the dark, 0…1. Below 1 the faintest stars are held back (only
+    /// the brightest show near 0) and the Milky Way gathers last, from 0.7. Planets, the Moon and
+    /// the light domes are drawn whole at any value. An illustration of the order stars arrive in,
+    /// not of its timing: real adaptation takes 20 to 30 minutes.
+    var adaptation: Double=1
 }
 /// Altitude and azimuth to a point on the view: a stereographic projection around the centre.
 nonisolated struct SkyFrame: Sendable {
@@ -215,8 +220,10 @@ struct PanoramaCanvas: View {
         // Twilight and moonlight wash out faint stars, as light pollution does.
         let twilight=max(0,min(1,(sky.sunAltitude+18)/12))
         let moonWash=options.showsMoon ? (sky.moon.map { max(0,min(1,$0.altitude/25)) } ?? 0)*sky.moonIllumination : 0
-        let limit=(bortle.map(BortleScale.limitingMagnitude) ?? 6.6)-2.2*moonWash-4*twilight
-        let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)*(1-0.85*moonWash)
+        var limit=(bortle.map(BortleScale.limitingMagnitude) ?? 6.6)-2.2*moonWash-4*twilight
+        let adaptation=max(0,min(1,options.adaptation))
+        limit=PanoramaCanvas.adaptedLimit(limit,adaptation:adaptation)
+        let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)*(1-0.85*moonWash)*PanoramaCanvas.milkyWayGathered(adaptation)
         let horizonY=frame.point(0,options.facing)?.y ?? size.height*0.8
         // The sky itself: near black, lifted by twilight, moonlight and city light toward the horizon.
         let lift=0.08*twilight+0.06*moonWash+(bortle.map(BortleScale.skyLift) ?? 0)
@@ -351,6 +358,16 @@ struct PanoramaCanvas: View {
         if milkyWay>0.15, let core=sky.core, let p=frame.point(core.altitude,core.azimuth), frame.visible(p) { label(String(localized:"Milky Way core"),at:p,gap:frame.scale*0.12) }
         if let radiant=sky.radiant, sky.dark, let p=frame.point(radiant.altitude,radiant.azimuth), frame.visible(p) { label(radiant.name,at:p,gap:24) }
     }
+    /// The limiting magnitude while eyes adapt: at 0 nothing fainter than magnitude −1.5 (no star
+    /// at all), rising to the sky's own limit at 1, so the brightest stars arrive first.
+    nonisolated static func adaptedLimit(_ limit:Double,adaptation:Double)->Double {
+        min(limit,-1.5+max(0,min(1,adaptation))*(limit+1.5))
+    }
+    /// How much of the Milky Way shows while eyes adapt: none until 0.7, all of it at 1 (smoothstep).
+    nonisolated static func milkyWayGathered(_ adaptation:Double)->Double {
+        let t=max(0,min(1,(adaptation-0.7)/0.3))
+        return t*t*(3-2*t)
+    }
     /// B−V colour index to a gentle warm or cool tint over starlight (Ballesteros).
     static func tint(_ colorIndex:Double,ink:Color)->Color {
         let temperature=4600*(1/(0.92*colorIndex+1.7)+1/(0.92*colorIndex+0.62))
@@ -386,6 +403,14 @@ struct PanoramaCanvas: View {
         let night=m.night(p)
         let sky=HorizonSkies.shared.sky(park:p,night:night.id,at:night.sky.darkStart.map { $0.addingTimeInterval(3*3600) } ?? night.id)
         PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:180,bortle:Double(p.bortleEstimate))).ignoresSafeArea()
+    }
+}
+#Preview("Panorama • eyes adapting (0.45)") {
+    let m=PlanModel()
+    if let p=m.home {
+        let night=m.night(p)
+        let sky=HorizonSkies.shared.sky(park:p,night:night.id,at:night.sky.darkStart.map { $0.addingTimeInterval(3*3600) } ?? night.id)
+        PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:180,bortle:Double(p.bortleEstimate),adaptation:0.45)).ignoresSafeArea()
     }
 }
 #Preview("Panorama • Bortle 8") {

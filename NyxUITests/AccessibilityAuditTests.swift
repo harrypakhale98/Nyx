@@ -136,6 +136,10 @@ final class AccessibilityAuditTests:XCTestCase {
         // Tonight scrolled with the tab bar minimised: content passing under the navigation bar's own
         // scroll-edge effect at the top is dimmed by design, as under the tab bar.
         if pass=="minimised", !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
+        // A screen without a tab bar (a pushed DEBUG route such as `light`): the scroll view's own bottom edge
+        // effect over the home indicator (34 pt) and about 28 pt above it, where content scrolling out is softened
+        // by design. Found when the Sky glow panel put a label across that edge (2026-10-09); it renders in full there.
+        if tabBar.isNull, UIDevice.current.userInterfaceIdiom == .phone { fadeZone=fadeZone.union(CGRect(x:0,y:window.height-62,width:window.width,height:62)) }
         // The minimised bar and the followed night's strip are what that pass is for: their own controls
         // are measured in full, never excused by the band they sit in.
         let barControl=pass=="minimised" && issue.element?.elementType == .button && !tabBar.isNull && tabBar.contains(frame)

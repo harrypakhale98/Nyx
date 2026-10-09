@@ -233,7 +233,7 @@ struct GlobeAtNightLink: View {
         if let url=BrowserLink.globeAtNight {
             VStack(alignment:.leading,spacing:8) {
                 Link(destination:url) { Label("Share your observation with Globe at Night",systemImage:"safari").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }.font(.body.weight(.medium)).foregroundStyle(palette.accent)
-                Text("A citizen-science project that maps light pollution from what people see. It opens in Safari; Nyx sends nothing, so you enter your night there yourself.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                Text("Counts like yours showed scientists that the night sky is brightening by 7 to 10 percent a year. It opens in Safari; Nyx sends nothing.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
         }
     }
