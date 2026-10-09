@@ -78,10 +78,49 @@ import SwiftUI
     @Test func roadlessParksShowTheirAccessNoteInstead() throws {
         let drto=try park("drto")
         #expect(!drto.drivable && drto.accessNote != nil)
+        #expect(NightDirections.offer(for:drto) == .accessNote)
+        // A drivable park with a step-free spot offers directions there, said as step-free.
+        let meve=try park("meve")
+        guard case .directions(let spot,let url,let stepFree)=NightDirections.offer(for:meve) else { Issue.record("Mesa Verde offers no directions"); return }
+        #expect(spot=="Far View Lodge" && stepFree == .yes && url.scheme=="maps")
+        // Joshua Tree's spot is only partly step-free, and the row says "partly" (never the step-free glyph alone).
+        guard case .directions(_,_,let jotrAccess)=NightDirections.offer(for:try park("jotr")) else { Issue.record("Joshua Tree offers no directions"); return }
+        #expect(jotrAccess == .partial)
     }
 
     // MARK: Month pager
 
+    @Test func aSettledSlideBecomesTheMonthAndThePagerReturnsToTheMiddle() {
+        #expect(MonthPager.commit(offset:0,position:1) == (1,0))
+        #expect(MonthPager.commit(offset:3,position:-1) == (2,0))
+        #expect(MonthPager.commit(offset:2,position:0) == (2,0))
+        #expect(MonthPager.commit(offset:2,position:nil) == (2,0))
+    }
+    @Test func aStepAcrossAMonthsEdgeStartsFromTheMonthInView() throws {
+        let jotr=try park("jotr")
+        // Tonight is 9 October at Joshua Tree.
+        var components=DateComponents(); components.year=2026; components.month=10; components.day=9; components.hour=21
+        let tonight=jotr.evening(try #require(jotr.calendar.date(from:components)))
+        let october=MonthPager.evenings(jotr,tonight:tonight,offset:0), november=MonthPager.evenings(jotr,tonight:tonight,offset:1)
+        #expect(october.count==31 && november.count==30)
+        let lastOfOctober=try #require(october.last), firstOfNovember=try #require(november.first)
+        // ⌘→ on 31 October slides one month on and lands on 1 November.
+        let first=try #require(MonthPager.step(jotr,tonight:tonight,offset:0,chosen:lastOfOctober,delta:1))
+        #expect(first.night==firstOfNovember && first.move==1)
+        // A second ⌘→ while that slide is still under way: read from October (the stale month), the
+        // chosen night is not in it and focus falls back to tonight, the bug the review found.
+        #expect(MonthPager.focus(october,chosen:firstOfNovember,tonight:tonight)==tonight)
+        // Settling the slide first, as the calendar now does, steps on from 1 November to the 2nd.
+        let settled=MonthPager.commit(offset:0,position:1)
+        let second=try #require(MonthPager.step(jotr,tonight:tonight,offset:settled.offset,chosen:firstOfNovember,delta:1))
+        #expect(second.night==jotr.date(firstOfNovember,addingDays:1) && second.move==0)
+        // ⌘← on 1 November slides back to 31 October.
+        let back=try #require(MonthPager.step(jotr,tonight:tonight,offset:1,chosen:firstOfNovember,delta:-1))
+        #expect(back.night==lastOfOctober && back.move == -1)
+        // A night chosen elsewhere: the step starts from tonight in tonight's month.
+        let fromTonight=try #require(MonthPager.step(jotr,tonight:tonight,offset:0,chosen:nil,delta:1))
+        #expect(fromTonight.night==jotr.date(tonight,addingDays:1) && fromTonight.move==0)
+    }
     @Test func everyPageHasItsOwnKey() throws {
         let jotr=try park("jotr"), deva=try park("deva")
         let keys=[-1,0,1].map { CalendarView.pageKey(jotr,$0) }+[CalendarView.pageKey(deva,0)]

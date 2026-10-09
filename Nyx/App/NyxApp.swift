@@ -27,6 +27,10 @@ import UserNotifications
         JournalAccess.configure(container:opened.container,unavailable:model.journalUnavailable)
         _model=State(initialValue:model)
         LaunchSignposts.end(planner)
+        #if DEBUG
+        // Captures (`-nyx-river-tip`): the river's tip shows even after a test run has closed it.
+        if DebugScenario.isEnabled("river-tip") { Tips.showAllTipsForTesting() }
+        #endif
         try? Tips.configure([.datastoreLocation(.applicationDefault)])
         UNUserNotificationCenter.current().delegate=NotificationRouter.shared
         // Registers park names as Siri / Shortcuts phrase parameters.

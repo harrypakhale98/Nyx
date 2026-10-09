@@ -8004,6 +8004,23 @@
         }
       }
     },
+    "Directions to %@ · partly step-free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions to %@ · partly step-free"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar a %@ · en parte sin escalones"
+          }
+        }
+      }
+    },
     "Directions to %@, %@, in Maps": {
       "extractionState": "manual",
       "localizations": {
