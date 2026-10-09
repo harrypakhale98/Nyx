@@ -25,6 +25,8 @@ struct GuideView:View {
     @State private var sent:[String]?
     /// The record a citation chip pointed to, briefly lit.
     @State private var lit:Int?
+    /// The uncited records under a checked answer, folded until opened.
+    @State private var othersOpen=false
     @FocusState private var typing:Bool
     private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details) }
     private var records:[String] {
@@ -67,28 +69,22 @@ struct GuideView:View {
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else {
                     let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }
-                    let nights=all.map(night)
-                    // One basis for every scored night is said once, above the records, not in each row.
-                    let bases=Set(nights.compactMap { $0.map(GuideRecordRow.basis) })
-                    let shared=bases.count == 1 && nights.compactMap({ $0 }).count>1 ? bases.first : nil
-                    VStack(alignment:.leading,spacing:0) {
-                        Eyebrow(text:"The records").padding(.bottom,shared == nil ? 8 : 4)
-                        if let shared {
-                            Text(GuideRecordRow.sharedCaption(shared)).font(.caption).foregroundStyle(palette.muted)
-                                .fixedSize(horizontal:false,vertical:true).padding(.bottom,8)
-                        }
-                        ForEach(Array(all.enumerated()),id:\.offset) { index,record in
-                            GuideRecordRow(number:index+1,record:record,night:nights[index],showsBasis:shared == nil,closure:record.park.flatMap { model.closure($0) },lit:lit==index)
-                                .id("record-\(index)")
-                            if index<all.count-1 { Divider().overlay(palette.line) }
-                        }
-                    }
+                    GuideRecords(all:all,cited:citedFirst(count:all.count),lit:lit,othersOpen:$othersOpen)
                 }
             }.padding(24).readableColumn() }
             .scrollDismissesKeyboard(.interactively)
             .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
             .onChange(of:lit) { _,index in
                 guard let index else { return }
+                // A folded record opens first, then scrolls into view once it is laid out.
+                if let cited=citedFirst(count:Int.max), !cited.contains(index), !othersOpen {
+                    othersOpen=true
+                    Task { @MainActor in
+                        try? await Task.sleep(for:.milliseconds(80))
+                        withAnimation(systemReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("record-\(index)",anchor:.center) }
+                    }
+                    return
+                }
                 withAnimation(systemReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("record-\(index)",anchor:.center) }
             }
         }
@@ -130,17 +126,19 @@ struct GuideView:View {
                           lookedUp:found.enumerated().map { (records.count+$0.offset,$0.element) },checked:checked)
     }
     #endif
+    /// The cited records' indices, once a planning answer is checked and cites any; nil while it
+    /// streams, before a question, in Learn and when nothing is cited, where the records stay one list.
+    private func citedFirst(count:Int)->Set<Int>? {
+        guard mode.isPlanning, guide.checked, !guide.loading else { return nil }
+        let cited=Set(guide.citations.filter { $0>=0 && $0<count })
+        return cited.isEmpty ? nil : cited
+    }
     /// Planning gets tools that call the engine; explainers reason over their records only.
     private var tools:NightLookup? { mode.isPlanning ? lookup : nil }
-    /// The night a scored park record is about, as Nyx scores it, for the row's Moon and basis.
-    private func night(_ record:GuideRecord)->Night? {
-        guard record.score != nil, let park=record.park, let night=record.night else { return nil }
-        return model.night(park,on:night)
-    }
     private func ask(_ text:String) {
         let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
         guard !trimmed.isEmpty, !guide.loading else { return }
-        asked=trimmed; question=""; typing=false; lit=nil; sent=records; requestID+=1
+        asked=trimmed; question=""; typing=false; lit=nil; othersOpen=false; sent=records; requestID+=1
     }
     /// A glass bar floating over the night, pinned to the bottom; solid where glass would cost contrast.
     private var inputBar:some View {
@@ -177,6 +175,63 @@ struct GuideView:View {
 }
 private extension GuideMode { var isPlanning:Bool { if case .planning = self { true } else { false } } }
 
+/// The records under an answer, each under its own number and id, so chips and the model's
+/// citations find them wherever they sit. Once a planning answer is checked (`cited` is set), the
+/// records it cites come first and the rest fold under "N other records", a native disclosure;
+/// otherwise one list in the order the model saw them.
+struct GuideRecords: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    let all:[GuideRecord]
+    var cited:Set<Int>?=nil
+    var lit:Int?=nil
+    @Binding var othersOpen:Bool
+    var body: some View {
+        let nights=all.map(night)
+        // One basis for every scored night is said once, above the records, not in each row.
+        let bases=Set(nights.compactMap { $0.map(GuideRecordRow.basis) })
+        let shared=bases.count == 1 && nights.compactMap({ $0 }).count>1 ? bases.first : nil
+        let rows=Array(all.enumerated())
+        VStack(alignment:.leading,spacing:0) {
+            Eyebrow(text:"The records").padding(.bottom,shared == nil ? 8 : 4)
+            if let shared {
+                Text(GuideRecordRow.sharedCaption(shared)).font(.caption).foregroundStyle(palette.muted)
+                    .fixedSize(horizontal:false,vertical:true).padding(.bottom,8)
+            }
+            if let cited {
+                let first=rows.filter { cited.contains($0.offset) }, others=rows.filter { !cited.contains($0.offset) }
+                recordRows(first,nights:nights,shared:shared)
+                if !others.isEmpty {
+                    Divider().overlay(palette.line)
+                    DisclosureGroup(isExpanded:$othersOpen) {
+                        VStack(alignment:.leading,spacing:0) { Divider().overlay(palette.line); recordRows(others,nights:nights,shared:shared) }
+                    } label:{
+                        Text("\(others.count) other records").font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                            .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
+                    }
+                    // The system's own disclosure, so VoiceOver says expanded and collapsed; its chevron
+                    // keeps the system's colour beside the amber words.
+                    .tint(palette.accent).padding(.horizontal,8)
+                }
+            } else {
+                recordRows(rows,nights:nights,shared:shared)
+            }
+        }
+    }
+    private func recordRows(_ rows:[(offset:Int,element:GuideRecord)],nights:[Night?],shared:String?)->some View {
+        ForEach(Array(rows.enumerated()),id:\.element.offset) { position,item in
+            let index=item.offset, record=item.element
+            GuideRecordRow(number:index+1,record:record,night:nights[index],showsBasis:shared == nil,closure:record.park.flatMap { model.closure($0) },lit:lit==index)
+                .id("record-\(index)")
+            if position<rows.count-1 { Divider().overlay(palette.line) }
+        }
+    }
+    /// The night a scored park record is about, as Nyx scores it, for the row's Moon and basis.
+    private func night(_ record:GuideRecord)->Night? {
+        guard record.score != nil, let park=record.park, let night=record.night else { return nil }
+        return model.night(park,on:night)
+    }
+}
 /// The answer as it arrives: the constellation loader until the first checked words, the words
 /// muted while they stream, then starlight with "Numbers checked against the records" and one chip per
 /// cited record. It reads the guide's streaming text itself, so only this view redraws with each
@@ -459,5 +514,13 @@ struct FlowLayout: Layout {
 #Preview("Ask Nyx") { NavigationStack { GuideView(mode:.planning) }.environment(PlanModel()).preferredColorScheme(.dark) }
 #Preview("Lookups") {
     GuideLookups(lines:["Best nights · Arches · 30 nights from Oct 9","What's up · Arches · Oct 9","Parks near · Joshua Tree · within 200 mi"]).padding().background(.black).preferredColorScheme(.dark)
+}
+#Preview("Records • cited first, the rest folded") {
+    @Previewable @State var open=false
+    let model=PlanModel()
+    let texts=model.parks.prefix(5).map { park in "\(park.shortName); tonight; score 80/100 Excellent" }+["Starting park: Arches. Distances are straight-line estimates."]
+    ScrollView {
+        GuideRecords(all:texts.map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) },cited:[3],othersOpen:$open).padding(24)
+    }.background(.black).environment(model).preferredColorScheme(.dark)
 }
 #Preview("Ask Nyx AX5") { NavigationStack { GuideView(mode:.planning) }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

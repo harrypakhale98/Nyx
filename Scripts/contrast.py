@@ -79,5 +79,29 @@ for name,red in [('Twilight lift, night vision',STANDARD),('Twilight lift, night
  rows.append(row)
 assert min(rows[-2]['secondaryOnLift'],rows[-2]['secondaryOnLiftDeutan'])>=4.5, rows[-2]
 assert min(rows[-1]['secondaryOnLift'+suffix] for suffix in ['','Protan','Deutan'])>=4.5, rows[-1]
+# The sky arc's canvas labels. "Core" (muted) sits over the twilight only after sunset, so its brightest
+# sky is the dusk colour at the Sun's -0.833 degrees (SkyArc.skyColor), and in true darkness over black
+# lifted by moonlight and the Milky Way's glow. The label stands 5 pt above the band's spine at a peak of at
+# least 8 degrees, so about 20 pt above the horizon, where a full Moon's wash (3% at the top to 18% at the
+# horizon) is at most 16% starlight; under the label's lower edge the blurred band (16% at its spine) is
+# about half as bright, 8%. The arc's vertical
+# wash (black at 30% at the top, clear by three quarters down) only darkens behind it, so the label is
+# measured without it. "True darkness" (amber) sits on the ridge, at most 6% grey. Night vision turns each
+# colour grey and multiplies it by the red, as above.
+def mix(a,b,t): return tuple(x*(1-t)+y*t for x,y in zip(a,b))
+INK=(0.961,.945,.902); AMBER=(1,.706,.329)
+DUSK=mix((0.20,0.23,0.42),(0.165,0.106,0.306),0.833/6)
+DUSK_RED=mix((0.30,0.04,0.03),(0.20,0.02,0.015),0.833/6)
+def grey(c): return .2126*c[0]+.7152*c[1]+.0722*c[2]
+arc={'palette':'Sky arc labels'}
+for name,bg in [('coreOnDusk',DUSK),('coreOnMoonlitDark',mix(mix((0,0,0),INK,.16),INK,.08))]:
+ arc[name]=round(contrast(mix(bg,INK,.72),bg),2)
+arc['trueDarknessOnRidge']=round(contrast(AMBER,(.06,.06,.06)),2)
+for name,bg in [('coreOnDuskNightVision',DUSK_RED),('coreOnMoonlitDarkNightVision',mix(mix((0,0,0),(1,1,1),.16),(1,1,1),.08))]:
+ floor=tuple(grey(bg)*c for c in STANDARD)
+ arc[name]=round(contrast(tuple(.96*a+.04*b for a,b in zip(STANDARD,floor)),floor),2)
+arc['trueDarknessOnRidgeNightVision']=round(contrast(STANDARD,tuple(.06*c for c in STANDARD)),2)
+assert min(v for k,v in arc.items() if k!='palette')>=4.5, arc
+rows.append(arc)
 Path('Research/contrast.json').write_text(json.dumps(rows,indent=2)+'\n')
 print(json.dumps(rows,indent=1))

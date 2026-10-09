@@ -70,5 +70,14 @@
     "secondaryOnLiftProtan": 4.58,
     "primaryOnLiftDeutan": 7.63,
     "secondaryOnLiftDeutan": 7.09
+  },
+  {
+    "palette": "Sky arc labels",
+    "coreOnDusk": 6.03,
+    "coreOnMoonlitDark": 6.35,
+    "trueDarknessOnRidge": 10.85,
+    "coreOnDuskNightVision": 5.4,
+    "coreOnMoonlitDarkNightVision": 4.62,
+    "trueDarknessOnRidgeNightVision": 5.92
   }
 ]

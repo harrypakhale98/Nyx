@@ -2191,6 +2191,47 @@
         }
       }
     },
+    "%lld other records": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld other record"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld other records"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld registro más"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld registros más"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld out of 100": {
       "extractionState": "manual",
       "localizations": {
@@ -13534,6 +13575,23 @@
         }
       }
     },
+    "Moonlit hours are lighter and hatched. Touch and hold to read any hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlit hours are lighter and hatched. Touch and hold to read any hour."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las horas con Luna se ven más claras y rayadas. Mantén presionado para leer cualquier hora."
+          }
+        }
+      }
+    },
     "Moonlit hours are lighter.": {
       "extractionState": "manual",
       "localizations": {
@@ -13547,6 +13605,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las horas con Luna se ven más claras."
+          }
+        }
+      }
+    },
+    "Moonlit hours are lighter. Touch and hold to read any hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonlit hours are lighter. Touch and hold to read any hour."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las horas con Luna se ven más claras. Mantén presionado para leer cualquier hora."
           }
         }
       }

@@ -1,4 +1,8 @@
 {
+  "%lld other records": {
+    "one": "%lld other record",
+    "other": "%lld other records"
+  },
   "Best nights · %@ · %lld nights from %@": {
     "one": "Best nights · %@ · %lld night from %@",
     "other": "Best nights · %@ · %lld nights from %@"

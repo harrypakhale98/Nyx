@@ -1817,5 +1817,7 @@
   "Numbers checked against the records": "Cifras comprobadas con los registros",
   "Numbers checked": "Cifras comprobadas",
   "Flashlight": "Linterna",
-  "Here (Class %lld, estimated)": "Aquí (clase %lld, estimada)"
+  "Here (Class %lld, estimated)": "Aquí (clase %lld, estimada)",
+  "Moonlit hours are lighter. Touch and hold to read any hour.": "Las horas con Luna se ven más claras. Mantén presionado para leer cualquier hora.",
+  "Moonlit hours are lighter and hatched. Touch and hold to read any hour.": "Las horas con Luna se ven más claras y rayadas. Mantén presionado para leer cualquier hora."
 }

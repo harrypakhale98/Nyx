@@ -178,6 +178,43 @@ final class NyxUITests:XCTestCase {
         sleep(2)
         XCTAssertEqual(toggle.identifier,"flashlight.off.circle","The lamp did not turn night vision off")
     }
+    /// The shape of the night answers a held finger: touch and hold the picture, then slide, and the
+    /// park page holds still while the finger reads the hours; a plain swipe over it still scrolls.
+    func testSkyArcHoldKeepsThePage() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","detail","-nyx-park","deva","-nyx-state","offline","-nyx-reduce-motion","-nyx-chapter","sky"]
+        app.launch()
+        let arc=app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Sun and Moon paths")).firstMatch
+        XCTAssertTrue(arc.waitForExistence(timeout:20),"No sky arc")
+        sleep(2)
+        let before=arc.frame
+        XCTAssertGreaterThan(before.height,0)
+        // On the picture, a third of the way across and 60 pt down; then up and to the right, the way
+        // a page scroll would carry it.
+        let from=arc.coordinate(withNormalizedOffset:.zero).withOffset(CGVector(dx:before.width*0.3,dy:60))
+        from.press(forDuration:1.5,thenDragTo:from.withOffset(CGVector(dx:before.width*0.5,dy:-140)),withVelocity:.slow,thenHoldForDuration:0.3)
+        sleep(1)
+        XCTAssertEqual(arc.frame.minY,before.minY,accuracy:1,"The page scrolled under a held finger")
+        // A plain swipe over the same spot scrolls at once.
+        from.press(forDuration:0.05,thenDragTo:from.withOffset(CGVector(dx:0,dy:-260)),withVelocity:.fast,thenHoldForDuration:0)
+        let moved=NSPredicate { _,_ in abs(arc.frame.minY-before.minY)>20 }
+        XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:moved,object:nil)],timeout:5),.completed,"A swipe over the arc did not scroll the page")
+    }
+    /// A checked answer shows the record it cites first, under its own number, and folds the rest
+    /// under one disclosure that opens to them.
+    func testAskNyxCitesFirst() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","ask","-nyx-state","answered","-nyx-reduce-motion"]
+        app.launch()
+        let others=app.buttons.matching(NSPredicate(format:"label ENDSWITH %@","other records")).firstMatch
+        XCTAssertTrue(others.waitForExistence(timeout:20),"No folded records")
+        XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 8")).firstMatch.exists,"The cited record is not shown")
+        XCTAssertFalse(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 1,")).firstMatch.exists,"An uncited record is not folded")
+        others.tap()
+        XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 1")).firstMatch.waitForExistence(timeout:5),"The disclosure did not open")
+    }
     func testOfflineLaunchResponsiveness() {
         let app=offlineApp()
         let options=XCTMeasureOptions()
