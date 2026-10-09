@@ -108,14 +108,6 @@ nonisolated enum SpotGlow {
         let lead=note.hasSuffix(caveat) ? String(note.dropLast(caveat.count)).trimmingCharacters(in:.whitespaces) : note
         return lead.isEmpty ? nil : lead
     }
-    /// Apple Maps, opened at the person's tap with driving directions to the spot. Nyx sends nothing;
-    /// Maps takes it from there.
-    static func directions(_ spot:ViewingSpot)->URL? {
-        var components=URLComponents()
-        components.scheme="maps"
-        components.queryItems=[URLQueryItem(name:"daddr",value:"\(spot.latitude),\(spot.longitude)"),URLQueryItem(name:"dirflg",value:"d")]
-        return components.url
-    }
 }
 struct ViewingSpotRow: View {
     @Environment(\.nyx) private var palette
@@ -162,7 +154,7 @@ struct ViewingSpotRow: View {
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
             .buttonStyle(.borderless).foregroundStyle(palette.accent)
             .accessibilityHint(String(localized:"Copies \(coordinates), approximate."))
-        if let url=SpotGlow.directions(spot) {
+        if let url=MapsHandOff.directions(spot) {
             Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
                 .buttonStyle(.borderless).foregroundStyle(palette.accent)
                 .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")

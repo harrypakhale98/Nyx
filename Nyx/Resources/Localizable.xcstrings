@@ -7953,6 +7953,23 @@
         }
       }
     },
+    "Directions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar"
+          }
+        }
+      }
+    },
     "Directions in Maps": {
       "extractionState": "manual",
       "localizations": {
@@ -7966,6 +7983,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cómo llegar en Mapas"
+          }
+        }
+      }
+    },
+    "Directions to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions to %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar a %@"
+          }
+        }
+      }
+    },
+    "Directions to %@, %@, in Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions to %@, %@, in Maps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar a %1$@, %2$@, en Mapas"
+          }
+        }
+      }
+    },
+    "Directions to %@, partly step-free, %@, in Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions to %@, partly step-free, %@, in Maps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar a %1$@, en parte sin escalones, %2$@, en Mapas"
+          }
+        }
+      }
+    },
+    "Directions to %@, step-free, %@, in Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions to %@, step-free, %@, in Maps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo llegar a %1$@, sin escalones, %2$@, en Mapas"
           }
         }
       }
@@ -12214,6 +12299,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapas"
           }
         }
       }
@@ -17650,19 +17752,19 @@
         }
       }
     },
-    "Past nights · %lld": {
+    "Past nights": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Past nights · %lld"
+            "value": "Past nights"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noches pasadas · %lld"
+            "value": "Noches pasadas"
           }
         }
       }

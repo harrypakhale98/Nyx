@@ -1785,5 +1785,12 @@
   "No closures listed": "Sin cierres publicados",
   "check alerts before you go": "revisa las alertas antes de ir",
   "confirm access before you go": "confirma el acceso antes de ir",
-  "forecast from %@": "pronóstico de %@"
+  "forecast from %@": "pronóstico de %@",
+  "Directions": "Cómo llegar",
+  "Maps": "Mapas",
+  "Directions to %@": "Cómo llegar a %@",
+  "Directions to %@, %@, in Maps": "Cómo llegar a %1$@, %2$@, en Mapas",
+  "Directions to %@, step-free, %@, in Maps": "Cómo llegar a %1$@, sin escalones, %2$@, en Mapas",
+  "Directions to %@, partly step-free, %@, in Maps": "Cómo llegar a %1$@, en parte sin escalones, %2$@, en Mapas",
+  "Past nights": "Noches pasadas"
 }

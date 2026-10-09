@@ -14,8 +14,10 @@ struct RiverScrubbingKey:PreferenceKey {
 /// three forecast models would give, so uncertainty is something you can see, not a footnote.
 /// The selected night's caption carries the meaning (date, score, what its clouds rest on); a
 /// one-time tip explains the marks instead of a standing legend. The chosen night sits under a
-/// small Liquid Glass lens that bends the river beneath it and answers the finger (solid in night
-/// vision, under Reduce Transparency and Increase Contrast).
+/// small Liquid Glass lens that bends the river beneath it. While a finger scrubs, the lens grows
+/// into a loupe lifted above the finger that shows the night's score, and the Moon steps beside
+/// it, since the page's gauge is usually scrolled away by then (solid in night vision, under
+/// Reduce Transparency and Increase Contrast; hidden from VoiceOver, which hears the river's value).
 /// Without a long drag: VoiceOver and Voice Control adjust it a night at a time (activating it
 /// says the night, never jumps to the middle one); with "prefers action slider alternative" or
 /// Switch Control, previous and next night buttons sit under it; at accessibility sizes it becomes
@@ -43,6 +45,8 @@ struct TimeRiver: View {
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
     @State private var detents=0
+    /// Paces the Moon-haptics detents of a fast scrub that skips nights.
+    @State private var pacer=RiverDetents()
     /// Counts a person's choices, so the Moon's texture follows a scrub once it settles.
     @State private var felt=0
     /// The night under an iPad's pointer, marked faintly before it is clicked.
@@ -58,6 +62,11 @@ struct TimeRiver: View {
         return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0, lensSize=30.0
+    /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may
+    /// rise above the river into the panel (over the eyebrow, never past the panel's padding).
+    private let loupeSize=56.0, loupeLift=34.0, loupeHeadroom=24.0
+    /// The loupe is up: a horizontal scrub is under way (or a DEBUG capture holds it up).
+    private var lifted:Bool { scrubbing==true || DebugScenario.isEnabled("loupe") }
     private let tip=RiverTip()
 
     var body: some View {
@@ -97,11 +106,15 @@ struct TimeRiver: View {
                 Canvas { context,size in draw(in:&context,size:size) }
                     .accessibilityHidden(true)
                 if let current,let index {
+                    let point=CGPoint(x:x(index,width:width),y:y(current.score.value,height:proxy.size.height))
+                    let loupe=lifted ? loupeCenter(point,width:width) : point
+                    let moon=lifted ? moonBeside(loupe,point:point,width:width) : CGPoint(x:point.x,y:moonSize/2)
+                    let size=lifted ? loupeSize : lensSize
                     MoonView(geometry:AstronomyEngine().moon(for:current).geometry)
                         .frame(width:moonSize,height:moonSize)
-                        .offset(x:x(index,width:width)-moonSize/2,y:0)
+                        .offset(x:moon.x-moonSize/2,y:moon.y-moonSize/2)
                         .accessibilityHidden(true)
-                    lens.offset(x:x(index,width:width)-lensSize/2,y:y(current.score.value,height:proxy.size.height)-lensSize/2)
+                    lens(current,size:size).offset(x:loupe.x-size/2,y:loupe.y-size/2)
                 }
             }
             .contentShape(Rectangle())
@@ -120,6 +133,8 @@ struct TimeRiver: View {
             }
         }
         .frame(height:150)
+        // The loupe grows and settles on the shared spring; under Reduce Motion it simply changes size.
+        .animation(reduceMotion ? nil : NyxMotion.spring,value:lifted)
         .accessibilityElement()
         .accessibilityLabel("Thirty-night darkness timeline")
         .accessibilityValue(spokenValue)
@@ -165,17 +180,38 @@ struct TimeRiver: View {
         return parts.joined(separator:" · ")
     }
     /// The scrub position: a small lens of Liquid Glass over the chosen night, which bends the river
-    /// under it and responds to the finger. Solid where glass would cost legibility or is unwanted.
-    @ViewBuilder private var lens: some View {
-        if palette.nightVision || palette.highContrast || reduceTransparency {
-            Circle().fill(palette.panel.opacity(0.35)).overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2))
-                .frame(width:lensSize,height:lensSize).allowsHitTesting(false).accessibilityHidden(true)
-        } else {
-            Color.clear.frame(width:lensSize,height:lensSize)
-                .glassEffect(.regular.interactive(),in:.circle)
-                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8))
-                .accessibilityHidden(true)
+    /// under it. While scrubbing it is a 56 pt loupe holding the night's score in light serif and a
+    /// short tick whose length follows the band, on glass tinted like the panel so the numeral keeps
+    /// its contrast over the river. Solid panel colour where glass would cost legibility or is unwanted.
+    @ViewBuilder private func lens(_ night:Night,size:Double)->some View {
+        let solid=palette.nightVision || palette.highContrast || reduceTransparency
+        ZStack {
+            if lifted {
+                VStack(spacing:4) {
+                    Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).monospacedDigit()
+                        .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
+                    Capsule().fill(palette.accent).frame(width:Self.tickWidth(night.score.band),height:2)
+                }.transition(.opacity)
+            }
         }
+        .frame(width:size,height:size)
+        .modifier(LoupeSurface(solid:solid,lifted:lifted))
+        .allowsHitTesting(false).accessibilityHidden(true)
+    }
+    /// The loupe's tick: longer for a better band, so the band reads in shape as well as in the numeral.
+    static func tickWidth(_ band:ScoreBand)->Double {
+        switch band { case .pristine: 24; case .excellent: 20; case .good: 16; case .fair: 12; case .poor: 8 }
+    }
+    /// Where the loupe sits: lifted above the night's point, kept inside the river's width and at
+    /// most `loupeHeadroom` above it (a Pristine night near the top lifts less, never out of the panel).
+    func loupeCenter(_ point:CGPoint,width:Double)->CGPoint {
+        CGPoint(x:min(max(point.x,loupeSize/2),width-loupeSize/2),y:max(point.y-loupeLift,loupeSize/2-loupeHeadroom))
+    }
+    /// The Moon beside the loupe while scrubbing, on the side toward the middle of the river, so
+    /// the loupe never covers it and the phase still morphs night by night.
+    func moonBeside(_ loupe:CGPoint,point:CGPoint,width:Double)->CGPoint {
+        let gap=loupeSize/2+6+moonSize/2
+        return CGPoint(x:point.x<width/2 ? loupe.x+gap : loupe.x-gap,y:loupe.y)
     }
     /// Previous and next night, for anyone who prefers buttons to a long drag.
     private var stepButtons: some View {
@@ -193,14 +229,36 @@ struct TimeRiver: View {
         if let current, let open { open(current); return }
         AccessibilityNotification.Announcement(spokenValue).post()
     }
-    /// At accessibility text sizes the drawn river gives way to a plain, large stepper.
+    /// At accessibility text sizes the drawn river gives way to a plain, large stepper: the date,
+    /// the score as a large numeral with its band, the stepper on a row of its own, then what the
+    /// score rests on. VoiceOver hears the stepper alone, exactly as before; the words above it are
+    /// what a sighted reader sees.
     private var stepper: some View {
-        Stepper(value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1)) {
-            Text(spokenValue).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-        }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
-            .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Moves one night at a time.")
-            .accessibilityInputLabels([Text("Night"),Text("Selected night")])
-            .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
+        VStack(alignment:.leading,spacing:10) {
+            if let current {
+                VStack(alignment:.leading,spacing:6) {
+                    Text(current.park.dayLabel(current.id)).font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    ViewThatFits(in:.horizontal) {
+                        HStack(alignment:.firstTextBaseline,spacing:10) { stepperScore(current) }
+                        VStack(alignment:.leading,spacing:2) { stepperScore(current) }
+                    }
+                }.accessibilityHidden(true)
+            }
+            Stepper("Selected night",value:Binding(get:{index ?? 0},set:choose),in:0...max(0,nights.count-1))
+                .labelsHidden().frame(maxWidth:.infinity,alignment:.leading)
+                .tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.muted)
+                .accessibilityLabel("Selected night").accessibilityValue(spokenValue).accessibilityHint("Moves one night at a time.")
+                .accessibilityInputLabels([Text("Night"),Text("Selected night")])
+                .modifier(RiverAccessibility(nights:nights,outlooks:outlooks,markers:markers,peaks:peakOrder,current:index,choose:choose))
+            if let current {
+                Text(caption(current)).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+            }
+        }
+    }
+    @ViewBuilder private func stepperScore(_ night:Night)->some View {
+        Text(verbatim:"\(night.score.value)").font(.system(.largeTitle,design:.serif).weight(.light)).foregroundStyle(palette.accent)
+            .contentTransition(.numericText(value:Double(night.score.value)))
+        Text(night.score.band.label).font(.title3).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }
 
     private var spokenValue: String {
@@ -236,9 +294,15 @@ struct TimeRiver: View {
     }
     private func choose(_ value:Int) {
         guard nights.indices.contains(value), value != index else { return }
+        let from=index
         withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=nights[value].id }
-        // The detent sharpens with the night's score where Core Haptics can say so.
-        if MoonHaptics.enabled { MoonHaptics.shared.detent(score:nights[value].score.value) } else { detents+=1 }
+        // The detent sharpens with the night's score where Core Haptics can say so. A fast scrub that
+        // skips nights feels each one it crossed (at most three, 40 ms apart); a tap, a step or
+        // VoiceOver's adjustment is one choice and one detent.
+        if MoonHaptics.enabled {
+            let crossed=scrubbing==true ? RiverDetents.crossed(from:from,to:value) : [value]
+            pacer.play(crossed.map { nights[$0].score.value })
+        } else { detents+=1 }
         felt+=1
         tip.invalidate(reason:.actionPerformed)
     }
@@ -250,7 +314,10 @@ struct TimeRiver: View {
 
         // Selected-night hairline, from the moon down to the date row.
         if let index {
-            var hairline=Path(); hairline.move(to:CGPoint(x:x(index,width:size.width),y:moonSize+2)); hairline.addLine(to:CGPoint(x:x(index,width:size.width),y:bottom+4))
+            // While scrubbing it hangs from the loupe instead, like a pin to the night's point.
+            let px=x(index,width:size.width), py=bottom-span*Double(nights[index].score.value)/100
+            let from=lifted ? loupeCenter(CGPoint(x:px,y:py),width:size.width).y+loupeSize/2 : moonSize+2
+            var hairline=Path(); hairline.move(to:CGPoint(x:px,y:from)); hairline.addLine(to:CGPoint(x:px,y:bottom+4))
             context.stroke(hairline,with:.color(palette.line),lineWidth:0.6)
         }
 
@@ -377,6 +444,7 @@ private struct RiverAccessibility: ViewModifier {
 #Preview("River • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().dynamicTypeSize(.accessibility5).background(.black) } }
 #Preview("River • Steps") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyxAccess,NyxAccess(preferSteps:true)).background(.black) } }
 #Preview("River • Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
+#Preview("River • Loupe") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();VStack(spacing:24) { LoupePreview(night:m.night(p),solid:false);LoupePreview(night:m.night(p),solid:true) }.padding(40).background(Color(red:0.043,green:0.063,blue:0.149)) } }
 #Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }
 #if DEBUG
 /// The river route's own selection, so a scrub, a step or an activation can move it (or not) as in a park page.
@@ -388,6 +456,64 @@ struct DebugRiverHost: View {
     var body: some View { TimeRiver(nights:nights,selected:$start,outlooks:outlooks,markers:markers) }
 }
 #endif
+/// The loupe's surface: panel-tinted, interactive Liquid Glass (the small lens is clear glass that
+/// bends the river), or under night vision, Reduce Transparency and Increase Contrast a solid
+/// panel fill that grows the same way, opaque while lifted so the numeral keeps 4.5:1.
+private struct LoupeSurface: ViewModifier {
+    @Environment(\.nyx) private var palette
+    let solid:Bool
+    let lifted:Bool
+    @ViewBuilder func body(content:Content)->some View {
+        if solid {
+            content.background(Circle().fill(lifted ? palette.panel : palette.panel.opacity(0.35)))
+                .overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2))
+        } else {
+            content.glassEffect(lifted ? Glass.regular.tint(palette.panel.opacity(0.7)).interactive() : Glass.regular.interactive(),in:.circle)
+                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8))
+        }
+    }
+}
+/// The detents a fast scrub plays: one per night crossed, at most three per change (evenly
+/// spaced, ending on the night chosen), each at least 40 ms after the last so they stay distinct.
+@MainActor final class RiverDetents {
+    private var last:ContinuousClock.Instant?
+    private var pending:Task<Void,Never>?
+    nonisolated static let maximum=3
+    static let spacing=Duration.milliseconds(40)
+    /// The nights to tick between `from` (exclusive) and `to` (inclusive), in order.
+    nonisolated static func crossed(from:Int?,to:Int)->[Int] {
+        guard let from, from != to else { return [to] }
+        let n=abs(to-from), k=min(maximum,n), sign=to>from ? 1 : -1
+        return (1...k).map { j in from+sign*Int((Double(n)*Double(j)/Double(k)).rounded()) }
+    }
+    func play(_ scores:[Int]) {
+        pending?.cancel()
+        pending=Task { @MainActor [weak self] in
+            for score in scores {
+                guard let self, !Task.isCancelled else { return }
+                if let last=self.last {
+                    let wait=last+Self.spacing-ContinuousClock.now
+                    if wait>Duration.zero { try? await Task.sleep(for:wait) }
+                }
+                if Task.isCancelled { return }
+                MoonHaptics.shared.detent(score:score)
+                self.last=ContinuousClock.now
+            }
+        }
+    }
+}
+/// The loupe alone, glass and solid, for previews.
+private struct LoupePreview: View {
+    @Environment(\.nyx) private var palette
+    let night:Night
+    let solid:Bool
+    var body: some View {
+        VStack(spacing:4) {
+            Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).foregroundStyle(palette.accent)
+            Capsule().fill(palette.accent).frame(width:TimeRiver.tickWidth(night.score.band),height:2)
+        }.frame(width:56,height:56).modifier(LoupeSurface(solid:solid,lifted:true))
+    }
+}
 /// The river explains itself once, then gets out of the way: it closes after the first scrub.
 struct RiverTip: Tip {
     var title: Text { Text("Drag along the nights") }

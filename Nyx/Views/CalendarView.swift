@@ -16,6 +16,10 @@ struct NightCell: View {
     var scale=1.0
     /// The night shown beside the month on a wide iPad.
     var selected=false
+    /// Whether the ring has drawn in: false until the month first settles after launch, then the
+    /// ring traces itself from 0 to 1 on the shared spring after `ringDelay` (the landing beat).
+    var ringDrawn=true
+    var ringDelay=0.0
     /// The score line's height, held open on a past night so its date lines up with the rest of the week.
     @ScaledMetric(relativeTo:.caption2) private var scoreLine=13.33
     var body:some View {
@@ -38,20 +42,14 @@ struct NightCell: View {
                     context.fill(Path(ellipseIn:CGRect(x:center.x-dot,y:center.y-dot,width:2*dot,height:2*dot)),with:.color(palette.muted))
                     return
                 }
-                if highlighted {
-                    let ring=12.5*scale, halo=9*scale
-                    context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.65)),lineWidth:0.7)
-                    // A soft halo: the new-moon window glows a little, like a dark sky does.
-                    context.drawLayer { glow in
-                        glow.addFilter(.blur(radius:5*scale))
-                        glow.fill(Path(ellipseIn:CGRect(x:center.x-halo,y:center.y-halo,width:2*halo,height:2*halo)),with:.color(palette.accent.opacity(0.22*access.glow*(isPast ? 0.35 : 1))))
-                    }
-                }
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
                 mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200)
-            }.frame(height:28*scale).accessibilityHidden(true)
+            }.frame(height:28*scale)
+            // The ring and its soft halo (the stretch glows a little, like a dark sky does), behind the dot.
+            .background { if highlighted && !isPast { ring } }
+            .accessibilityHidden(true)
             // Space, not hidden text: a hidden placeholder stretched the date's text frame over the whole cell.
             if isPast { Color.clear.frame(height:scoreLine) }
             else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
@@ -62,6 +60,15 @@ struct NightCell: View {
             .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(spoken)
+    }
+    private var ring: some View {
+        ZStack {
+            Circle().fill(palette.accent.opacity(0.22*access.glow)).frame(width:18*scale,height:18*scale).blur(radius:5*scale)
+                .opacity(ringDrawn ? 1 : 0)
+            Circle().trim(from:0,to:ringDrawn ? 1 : 0).stroke(palette.accent.opacity(0.65),lineWidth:0.7)
+                .rotationEffect(.degrees(-90)).frame(width:25*scale,height:25*scale)
+        }
+        .animation(NyxMotion.spring.delay(ringDelay),value:ringDrawn)
     }
     private var spoken:String {
         if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
@@ -132,7 +139,15 @@ struct CalendarView: View {
     @State private var peeking=false
     /// A night being added to Calendar from its context menu (no calendar permission: the system editor).
     @State private var calendarNight:Night?
-    @State private var forward=true
+    /// The pager's page in view, as a slot: -1 the month before, 0 the current month, 1 the month
+    /// after. Once a slide settles the month becomes current and the pager returns to slot 0, which
+    /// then draws that same month, so the window of three pages moves without a visible jump.
+    @State private var position:Int?=0
+    /// Months whose nights (and the stretch around them) are worked out, so a page can be drawn
+    /// without computing on the main thread; until then it shows skeleton cells.
+    @State private var prepared:Set<String>=[]
+    /// Months whose rings have drawn in since launch (`MonthLanding`).
+    @State private var landed:Set<String>=MonthLanding.seen
     /// The night in the inspector on a wide iPad; tonight (or the month's first night) until one is
     /// chosen. Kept for the window, like its park.
     @SceneStorage("planNight") private var focusedID:Date?
@@ -158,9 +173,10 @@ struct CalendarView: View {
         let stretch:Stretch
         let inWindow:Set<Date>
     }
-    private func month(_ park:Park)->Month {
+    private func month(_ park:Park)->Month { month(park,offset:monthOffset) }
+    private func month(_ park:Park,offset:Int)->Month {
         let base=Self.baseMonth(park,tonight:model.tonight(park))
-        let month=park.calendar.date(byAdding:.month,value:monthOffset,to:base) ?? base
+        let month=park.calendar.date(byAdding:.month,value:offset,to:base) ?? base
         let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
         let nights=model.nights(park,from:month,count:count)
         let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
@@ -176,17 +192,20 @@ struct CalendarView: View {
         ScrollView {
             if let park {
                 let data=month(park)
+                // The month bar and the ring's panel follow the page in view as soon as it is ready.
+                let shown=visible(park).map { month(park,offset:$0) } ?? data
                 VStack(alignment:.leading,spacing:24) {
-                    heading(park); monthBar(park,data)
-                    if typeSize.isAccessibilitySize { list(park,data) } else { grid(park,data,scale:wide && width>=640 ? 1.3 : 1) }
-                    windowPanel(park,data); legend
+                    heading(park); monthBar(park,shown)
+                    if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,scale:wide && width>=640 ? 1.3 : 1) }
+                    windowPanel(park,shown); legend
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar } }
             .measuringWidth($width)
             .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {
-                if let park, let night=focused(month(park)) { aside(night) }
+                // The page in view, so a keyboard step across a month's edge shows its night while the page slides.
+                if let park, let night=focused(visible(park).map { month(park,offset:$0) } ?? month(park)) { aside(night) }
             }
             .toolbar {
                 if inspectorRoom {
@@ -209,7 +228,19 @@ struct CalendarView: View {
                 guard let park else { return }
                 let base=Self.baseMonth(park,tonight:model.tonight(park)), offset=monthOffset
                 await model.prepareNights([park],from:{ park in park.date(park.calendar.date(byAdding:.month,value:offset-1,to:base) ?? base,addingDays:-4) },count:136)
+                if !Task.isCancelled { prepared.formUnion((offset-1...offset+1).map { Self.pageKey(park,$0) }) }
             }
+            // The landing beat: once a month settles, its five ringed nights draw in, once per month each launch.
+            .task(id:park.map { "\($0.id)-\(monthOffset)-\(typeSize.isAccessibilitySize)" } ?? "") {
+                guard let park, !typeSize.isAccessibilitySize else { return }
+                let key=Self.pageKey(park,monthOffset)
+                guard !landed.contains(key) else { return }
+                try? await Task.sleep(for:.milliseconds(150))
+                guard !Task.isCancelled else { return }
+                MonthLanding.seen.insert(key); landed.insert(key)
+            }
+            // One tick for each month that settles, never for a slide that springs back.
+            .sensoryFeedback(.selection,trigger:monthOffset)
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
@@ -261,7 +292,14 @@ struct CalendarView: View {
                         Text(park.dayLabel(night.id)).font(.body).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                             .accessibilityLabel("\(park.dayLabel(night.id)). Past night")
                     } }.padding(.top,10)
-                } label:{ Text("Past nights · \(past.count)").font(.headline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                } label:{
+                    // The list is the accessibility-size layout: the count on a line of its own, no dot to break.
+                    VStack(alignment:.leading,spacing:2) {
+                        Text("Past nights").font(.headline)
+                        Text("\(past.count) nights").font(.subheadline)
+                    }.foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    .accessibilityElement(children:.combine)
+                }
                 .tint(palette.muted)
             }
             ForEach(data.nights.filter { $0.id>=data.tonight }) { night in
@@ -286,34 +324,110 @@ struct CalendarView: View {
         .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
         .accessibilityRotor(Text(data.stretch.kind.title),entries:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
     }
-    /// `scale` enlarges each night's little sky on a wide iPad.
-    private func grid(_ park:Park,_ data:Month,scale:Double)->some View {
+    /// The month under the finger: a horizontal pager over the previous, current and next months,
+    /// which follows a swipe, can be caught mid-slide and settles a page at a time. Only the current
+    /// month is in the accessibility tree and carries the peek, the rotors and the keyboard steps.
+    /// Reduce Motion and Prefer Cross-Fade keep one page that fades between months.
+    @ViewBuilder private func months(_ park:Park,_ data:Month,scale:Double)->some View {
+        if !paging {
+            grid(park,data,scale:scale,current:true)
+                .id(monthOffset)
+                .transition(.opacity)
+                .contentShape(Rectangle())
+                .gesture(DragGesture(minimumDistance:30).onEnded { drag in
+                    guard abs(drag.translation.width)>abs(drag.translation.height)*1.5 else { return }
+                    move(drag.translation.width<0 ? 1 : -1)
+                })
+        } else {
+            ScrollView(.horizontal) {
+                HStack(alignment:.top,spacing:0) {
+                    ForEach(-1...1,id:\.self) { slot in
+                        let offset=monthOffset+slot
+                        Group {
+                            if offset==monthOffset { grid(park,data,scale:scale,current:true) }
+                            else if ready(park,offset) { grid(park,month(park,offset:offset),scale:scale,current:false) }
+                            else { skeleton(park,scale:scale) }
+                        }
+                        .padding(.horizontal,24)
+                        .containerRelativeFrame(.horizontal)
+                        .accessibilityHidden(offset != monthOffset)
+                    }
+                }.scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id:$position)
+            .defaultScrollAnchor(.center,for:.initialOffset)
+            .scrollIndicators(.hidden)
+            .onScrollPhaseChange { _,phase in if phase == .idle { commit() } }
+            // Edge to edge: the page slides under the column's margins instead of being cut at them.
+            .padding(.horizontal,-24)
+        }
+    }
+    /// The pager, unless motion should be still or cross-fade.
+    private var paging:Bool { !(reduceMotion || access.crossFade) }
+    /// The page in view when it differs from the current month and is ready to draw.
+    private func visible(_ park:Park)->Int? {
+        guard paging, let slot=position, slot != 0, ready(park,monthOffset+slot) else { return nil }
+        return monthOffset+slot
+    }
+    private func ready(_ park:Park,_ offset:Int)->Bool { offset==monthOffset || prepared.contains(Self.pageKey(park,offset)) }
+    static func pageKey(_ park:Park,_ offset:Int)->String { "\(park.id)|\(offset)" }
+    /// The weekday initials over every page.
+    private func weekdays(_ park:Park)->some View {
+        ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
+    }
+    /// One month's nights. Always six weeks tall, so a five-week month never makes the page jump.
+    /// `scale` enlarges each night's little sky on a wide iPad. `current` is the month in the
+    /// accessibility tree: only it has the long-press peek and the rotors.
+    private func grid(_ park:Park,_ data:Month,scale:Double,current:Bool)->some View {
         let focusedNight=wide ? focused(data)?.id : nil
+        let ringed=data.stretch.nights.map(\.id).filter { data.inWindow.contains($0) }
+        let drawn = !paging || landed.contains(Self.pageKey(park,Self.monthOffset(park,tonight:model.tonight(park),to:data.date)))
+        let trailing=max(0,42-data.lead-data.nights.count)
         return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
-            ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
-            ForEach(0..<data.lead,id:\.self) { _ in Color.clear.frame(height:78*scale) }
+            weekdays(park)
+            // Ids apart from the weekday initials' and the sixth week's: a lazy grid drops repeated ids.
+            ForEach(50..<(50+data.lead),id:\.self) { _ in Color.clear.frame(height:78*scale) }
             ForEach(data.nights) { night in
                 let events=model.events(night)
-                Button { choose(night) } label:{ NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight) }.buttonStyle(.plain)
-                    .hoverEffect(.highlight)
-                    .accessibilityAddTraits(night.id==focusedNight ? .isSelected : [])
-                    .accessibilityInputLabels(Self.spokenNames(night))
-                    .contextMenu {
-                        Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
-                        Button("Why this score",systemImage:"chart.bar") { chosen=night }
-                        if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
-                    } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
+                let cell=NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight,
+                                   ringDrawn:drawn,ringDelay:Double(ringed.firstIndex(of:night.id) ?? 0)*0.06)
+                if current {
+                    Button { choose(night) } label:{ cell }.buttonStyle(.plain)
+                        .hoverEffect(.highlight)
+                        .accessibilityAddTraits(night.id==focusedNight ? .isSelected : [])
+                        .accessibilityInputLabels(Self.spokenNames(night))
+                        .contextMenu {
+                            Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
+                            Button("Why this score",systemImage:"chart.bar") { chosen=night }
+                            if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
+                        } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
+                } else {
+                    cell
+                }
+            }
+            // A sixth week held open with invisible cells, as tall as real ones at any text size.
+            if let sample=data.nights.first { ForEach(100..<(100+trailing),id:\.self) { _ in NightCell(night:sample,scale:scale).hidden().accessibilityHidden(true) } }
+        }
+        .modifier(MonthRotors(enabled:current,best:Self.bestNights(data.nights,after:data.tonight),stretchTitle:data.stretch.kind.title,stretch:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) })))
+    }
+    /// A month not yet worked out: six quiet weeks of faint dots, the same size as the real page.
+    private func skeleton(_ park:Park,scale:Double)->some View {
+        let sample=model.night(park)
+        return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
+            weekdays(park)
+            ForEach(200..<242,id:\.self) { _ in
+                NightCell(night:sample,scale:scale).hidden()
+                    .overlay { Circle().fill(palette.line.opacity(0.5)).frame(width:5*scale,height:5*scale) }
             }
         }
-        .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
-        .accessibilityRotor(Text(data.stretch.kind.title),entries:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) }),entryID:\.id,entryLabel:\.label)
-        .id(monthOffset)
-        .transition(reduceMotion || access.crossFade ? .opacity : .asymmetric(insertion:.move(edge:forward ? .trailing : .leading).combined(with:.opacity),removal:.move(edge:forward ? .leading : .trailing).combined(with:.opacity)))
-        .contentShape(Rectangle())
-        .gesture(DragGesture(minimumDistance:30).onEnded { drag in
-            guard abs(drag.translation.width)>abs(drag.translation.height)*1.5 else { return }
-            move(drag.translation.width<0 ? 1 : -1)
-        })
+        .accessibilityHidden(true)
+    }
+    /// A slide has settled (or an arrow's spring has finished): the page in view becomes the month.
+    private func commit() {
+        guard let slot=position, slot != 0 else { return }
+        var still=Transaction(); still.disablesAnimations=true
+        withTransaction(still) { monthOffset+=slot; position=0 }
     }
     /// What the ring marks, said once: the best stretch while forecasts reach it, else the darkest Moon.
     private func windowPanel(_ park:Park,_ data:Month)->some View {
@@ -393,7 +507,7 @@ struct CalendarView: View {
         guard let target=model.park(request.parkID) else { return }
         parkID=target.id
         let months=Self.monthOffset(target,tonight:model.tonight(target),year:request.year,month:request.month)
-        forward=months>=monthOffset; monthOffset=months
+        monthOffset=months
     }
     /// The first of tonight's month at the park, which every month offset counts from. Tonight's
     /// month, not the clock's: at 1 AM on the 1st, tonight is still last month's last night.
@@ -412,7 +526,17 @@ struct CalendarView: View {
         let base=park.calendar.dateComponents([.year,.month],from:tonight)
         return (year-(base.year ?? year))*12+(month-(base.month ?? month))
     }
-    private func move(_ offset:Int) { forward=offset>0; withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset } }
+    /// The arrows, the month bar's buttons and the keyboard: the pager slides on the shared spring
+    /// and the month changes once it lands; a jump of more than a month (or the fading page) changes at once.
+    private func move(_ offset:Int) {
+        guard paging, !typeSize.isAccessibilitySize, abs(offset)==1 else {
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { monthOffset+=offset }
+            return
+        }
+        // A slide still under way finishes first, so the next month is always in the window.
+        commit()
+        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { position=offset } completion:{ commit() }
+    }
     /// The five nights the ring marks.
     struct Stretch {
         enum Kind {
@@ -452,6 +576,35 @@ struct CalendarView: View {
         return Stretch(kind:.moon,nights:nights[next..<(next+5)],inMonth:false)
     }
 }
+/// The month's VoiceOver rotors ("Best nights" and the ring's stretch), on the current page only.
+private struct MonthRotors: ViewModifier {
+    let enabled:Bool
+    let best:[CalendarView.RotorNight]
+    let stretchTitle:String
+    let stretch:[CalendarView.RotorNight]
+    @ViewBuilder func body(content:Content)->some View {
+        if enabled {
+            content
+                .accessibilityRotor(Text("Best nights"),entries:best,entryID:\.id,entryLabel:\.label)
+                .accessibilityRotor(Text(stretchTitle),entries:stretch,entryID:\.id,entryLabel:\.label)
+        } else { content }
+    }
+}
+/// The months whose rings have drawn in since launch: the landing beat plays once per month shown.
+@MainActor enum MonthLanding {
+    static var seen:Set<String>=[]
+}
 #Preview("Calendar") { NavigationStack { CalendarView() }.environment(PlanModel()).preferredColorScheme(.dark) }
 
 #Preview("Night cell • forecast / unknown / moon window") { let m=PlanModel();if let p=m.home { let n=m.night(p);HStack { NightCell(night:n);NightCell(night:n,highlighted:true) }.frame(width:150).padding().background(.black) } }
+#Preview("Night cell • ring drawing in") {
+    @Previewable @State var drawn=false
+    let m=PlanModel()
+    if let p=m.home {
+        let n=m.night(p)
+        VStack(spacing:16) {
+            HStack { ForEach(0..<5,id:\.self) { i in NightCell(night:n,highlighted:true,ringDrawn:drawn,ringDelay:Double(i)*0.06) } }
+            Button { drawn.toggle() } label:{ Text(verbatim:drawn ? "Undraw" : "Draw in") }
+        }.padding().background(.black).preferredColorScheme(.dark)
+    }
+}

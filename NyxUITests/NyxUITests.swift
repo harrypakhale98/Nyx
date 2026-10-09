@@ -80,6 +80,61 @@ final class NyxUITests:XCTestCase {
         let moved=NSPredicate { _,_ in (river.value as? String) != before }
         XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:moved,object:nil)],timeout:5),.completed,"A touch did not move the river")
     }
+    /// The month follows the finger: a swipe pages to the next month and back, the arrows slide the
+    /// same pager, the page in view is the one VoiceOver finds (only the current month is in the
+    /// tree, and its nights are on screen), and the long-press peek opens on the visible page.
+    func testMonthFollowsTheFinger() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","plan","-nyx-state","no-forecast"]
+        app.launch()
+        let next=app.buttons["Next month"].firstMatch
+        XCTAssertTrue(next.waitForExistence(timeout:20),"No month bar")
+        let header=app.staticTexts.matching(NSPredicate(format:"label MATCHES %@","^[A-Z][a-z]+ [0-9]{4}$")).firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout:5))
+        func month()->String { header.label }
+        /// The visible page's nights: a night of the month named by the header is on screen.
+        func pageMatches(_ title:String,file:StaticString=#filePath,line:UInt=#line) {
+            let short=String(title.prefix(3))
+            let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",short+" 15")).firstMatch
+            XCTAssertTrue(night.waitForExistence(timeout:5),"No night of \(title) in the tree",file:file,line:line)
+            XCTAssertTrue(night.isHittable,"\(title)'s nights are not on screen",file:file,line:line)
+            XCTAssertEqual(app.buttons.matching(NSPredicate(format:"label CONTAINS %@"," 15.")).count,1,"More than one month in the tree",file:file,line:line)
+        }
+        func waitChange(from old:String,file:StaticString=#filePath,line:UInt=#line)->String {
+            let changed=NSPredicate { _,_ in header.label != old }
+            XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:changed,object:nil)],timeout:5),.completed,"The month did not change",file:file,line:line)
+            sleep(1)
+            return month()
+        }
+        /// A quick horizontal drag across the month's middle row, most of the screen's width.
+        func drag(left:Bool) {
+            let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@"," 15")).firstMatch
+            let y=row.frame.midY/app.frame.height
+            let from=app.coordinate(withNormalizedOffset:CGVector(dx:left ? 0.85 : 0.15,dy:y))
+            from.press(forDuration:0.05,thenDragTo:app.coordinate(withNormalizedOffset:CGVector(dx:left ? 0.15 : 0.85,dy:y)),withVelocity:.fast,thenHoldForDuration:0)
+        }
+        let first=month()
+        pageMatches(first)
+        drag(left:true)
+        let second=waitChange(from:first)
+        pageMatches(second)
+        drag(left:true)
+        let third=waitChange(from:second)
+        XCTAssertNotEqual(third,first)
+        pageMatches(third)
+        drag(left:false)
+        XCTAssertEqual(waitChange(from:third),second,"Swiping back did not return to the month before")
+        pageMatches(second)
+        app.buttons["Previous month"].firstMatch.tap()
+        XCTAssertEqual(waitChange(from:second),first,"The arrow did not return to the first month")
+        pageMatches(first)
+        // The peek on the visible page.
+        let night=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",String(first.prefix(3))+" 20")).firstMatch
+        XCTAssertTrue(night.waitForExistence(timeout:5))
+        night.press(forDuration:1.2)
+        XCTAssertTrue(app.buttons["Why this score"].waitForExistence(timeout:5),"No peek on the visible month")
+    }
     /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
     /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
     /// settled the switch shows the stored setting again. Ends with night vision off, as it began.
