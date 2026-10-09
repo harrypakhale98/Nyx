@@ -164,7 +164,7 @@ import SwiftUI
         let jotr=try park("jotr")
         let spot=try #require(jotr.viewingSpots.first)
         #expect(SpotGlow.lead(spot)?.contains("not a navigation guide") != true)
-        let url=try #require(SpotGlow.directions(spot))
+        let url=try #require(MapsHandOff.directions(spot))
         #expect(url.scheme=="maps" && url.absoluteString.contains("daddr=") && url.absoluteString.contains("dirflg=d"))
     }
 

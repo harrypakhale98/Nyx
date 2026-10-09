@@ -483,6 +483,8 @@ struct ParkDetailView: View {
             AddNightToCalendar(night:night)
             // Tonight is followed from the hero, beside "I'm here tonight".
             if !isTonight { FollowNightButton(night:night) }
+            // Where the night is decided, the way there: a quiet row, or the access note for a roadless park.
+            NightDirections(park:park)
         }.id("river")
     }
     private var alerts: some View {
