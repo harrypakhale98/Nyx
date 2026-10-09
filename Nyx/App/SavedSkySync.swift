@@ -43,13 +43,15 @@ import WidgetKit
         let started=ContinuousClock.now
         await model.refreshForecasts(watching:parks)
         if !again, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
+        // A followed night's Live Activity follows the new forecast.
+        await Self.refreshFollowed(model)
         // In the background, alerts wait for the next run when time is up or the forecasts were
         // slow, and ask for one page only; the next refresh was already requested.
         if background, Task.isCancelled || ContinuousClock.now-started>Self.alertsAfter { return }
         let closures=Self.closures(model)
         await model.refreshParkUpdates(parks,alertPages:background ? 1 : ParkStore.alertPages)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
-        if !again, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model) }
+        if !again, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); await Self.refreshFollowed(model) }
         Self.scheduleRefresh()
     }
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
@@ -64,7 +66,16 @@ import WidgetKit
         await Self.run(within:Self.backgroundBudget) {
             await self.update(model,background:true)
             // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
-            if !Task.isCancelled { await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision")) }
+            if !Task.isCancelled { await Self.refreshFollowed(model) }
+        }
+    }
+    /// Brings followed nights' Live Activities up to date with what Nyx knows now: each night's
+    /// score and band from the latest forecasts, and its park's closure line once alerts are read.
+    static func refreshFollowed(_ model:PlanModel) async {
+        await FieldActivities.refresh(nightVision:SharedSettings.defaults.bool(forKey:"nightVision")) { attributes in
+            guard let park=model.park(attributes.parkID) else { return nil }
+            return FieldActivities.Now(night:model.night(park,on:attributes.nightID ?? park.evening(attributes.dusk)),closure:model.closure(park),
+                                       closureKnown:model.enrichments[park.id] != nil)
         }
     }
     static let backgroundBudget:Duration = .seconds(20)

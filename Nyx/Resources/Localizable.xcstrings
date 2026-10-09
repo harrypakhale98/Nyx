@@ -579,23 +579,6 @@
         }
       }
     },
-    "%@ · %lld %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld %@"
-          }
-        }
-      }
-    },
     "%@ · %lld parks tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -1310,6 +1293,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, nubosidad habitual"
+          }
+        }
+      }
+    },
+    "%@. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
           }
         }
       }
@@ -2371,6 +2371,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld · %@"
+          }
+        }
+      }
+    },
+    "%lld · %@ as of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@ as of %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@ · del %@"
           }
         }
       }
@@ -4297,19 +4314,19 @@
         }
       }
     },
-    "Answer ready": {
+    "Answer checked": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Answer ready"
+            "value": "Answer checked"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Respuesta lista"
+            "value": "Respuesta comprobada"
           }
         }
       }
@@ -4946,6 +4963,88 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mejores noches de esta semana"
+          }
+        }
+      }
+    },
+    "Best nights · %@ · %lld nights from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best nights · %@ · %lld night from %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best nights · %@ · %lld nights from %@"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Mejores noches · %@ · %lld noche desde el %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Mejores noches · %@ · %lld noches desde el %@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Best nights · %@ · %lld nights from tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best nights · %@ · %lld night from tonight"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Best nights · %@ · %lld nights from tonight"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Mejores noches · %@ · %lld noche desde esta noche"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Mejores noches · %@ · %lld noches desde esta noche"
+                }
+              }
+            }
           }
         }
       }
@@ -7510,6 +7609,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Índice de oscuridad: %lld de 100. Noche %@. %@"
+          }
+        }
+      }
+    },
+    "Darkness score %lld, %@, as of %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score %lld, %@, as of %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de oscuridad %lld, noche %@, del %@."
+          }
+        }
+      }
+    },
+    "Darkness score %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness score %lld, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de oscuridad %lld, noche %@."
           }
         }
       }
@@ -10963,6 +11096,23 @@
         }
       }
     },
+    "Its score from three days before, until Nyx refreshes it": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its score from three days before, until Nyx refreshes it"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su índice de tres días antes, hasta que Nyx lo actualice"
+          }
+        }
+      }
+    },
     "Its sky tonight, and the nights ahead, will open here.": {
       "extractionState": "manual",
       "localizations": {
@@ -11799,6 +11949,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pantalla bloqueada: en línea, Esta noche y la Luna"
+          }
+        }
+      }
+    },
+    "Looked up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looked up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consultado"
           }
         }
       }
@@ -17190,6 +17357,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parques y resplandor"
+          }
+        }
+      }
+    },
+    "Parks near · %@ · within %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks near · %@ · within %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques cerca · %@ · a menos de %@"
           }
         }
       }
@@ -22985,6 +23169,23 @@
         }
       }
     },
+    "The closure lifted since it was followed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The closure lifted since it was followed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cierre, levantado después de seguirla"
+          }
+        }
+      }
+    },
     "The core rises into the glow of %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -26368,6 +26569,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "En el cielo esta noche en %@"
+          }
+        }
+      }
+    },
+    "What's up · %@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up · %@ · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo · %@ · %@"
+          }
+        }
+      }
+    },
+    "What's up · %@ · tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up · %@ · tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo · %@ · esta noche"
           }
         }
       }

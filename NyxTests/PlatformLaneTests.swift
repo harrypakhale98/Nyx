@@ -80,9 +80,9 @@ import Testing
         // Only the moment it was worked out changing is no reason to update.
         var later=state
         later.updated=start.addingTimeInterval(600)
-        #expect(!FieldActivities.changed(state, later))
+        #expect(!FieldActivities.changed(state, later, attributes: attributes))
         later.nightVision=false
-        #expect(FieldActivities.changed(state, later))
+        #expect(FieldActivities.changed(state, later, attributes: attributes))
     }
     /// MP-02: three hours after the moment the activity was counting down to, with no update, the
     /// face names no moment next: it lists the night's remaining times and when it was updated.

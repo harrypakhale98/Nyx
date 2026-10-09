@@ -30,7 +30,9 @@ struct FieldActivityLockView: View {
                 Image(systemName:"moon.stars").accessibilityHidden(true)
                 Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
                 Spacer(minLength:8)
-                Text("\(attributes.score) · \(attributes.band)").monospacedDigit()
+                // The night's latest score; its day when it is old, so the face is never surer than Nyx.
+                Text(attributes.scoreLine(state)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+                    .accessibilityLabel(attributes.spokenScore(state))
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {
                 Text("The night is over. Rest your eyes.").font(.system(.title3,design:.serif)).foregroundStyle(colors.ink)
@@ -54,7 +56,7 @@ struct FieldActivityLockView: View {
                     timeMark(String(localized:"Sunset"),attributes.dusk)
                     if let dark=attributes.darkStart { timeMark(String(localized:"True darkness"),dark) }
                 }.font(.caption).foregroundStyle(colors.muted).lineLimit(1).minimumScaleFactor(0.8)
-                if let closure=attributes.closure {
+                if let closure=attributes.closure(state) {
                     Label { Text(closure).lineLimit(2) } icon:{ Image(systemName:"exclamationmark.triangle").accessibilityHidden(true) }
                         .font(.caption.weight(.medium)).foregroundStyle(colors.accent)
                 }
@@ -271,6 +273,12 @@ extension FieldActivityAttributes {
         FieldActivityAttributes(parkID:parkID,parkName:parkName,score:score,band:band,dusk:dusk+seconds,dawn:dawn+seconds,darkStart:darkStart.map { $0+seconds },darkEnd:darkEnd.map { $0+seconds },
             milestones:milestones.map { Milestone(title:$0.title,date:$0.date+seconds,symbol:$0.symbol) },timeZoneID:timeZoneID,nightID:nightID,closure:closure)
     }
+    /// A state carrying a later score, band and closure, for previews and the review screen.
+    static func rescored(_ state:ContentState,score:Int,band:String,closure:String?,at:Date)->ContentState {
+        var state=state
+        state.scored=Scored(score:score,band:band,closure:closure,at:at)
+        return state
+    }
     /// A real-looking night for previews: dusk at 6:20 PM, darkness 7:45 PM to 5:30 AM.
     static var preview: FieldActivityAttributes {
         let dusk=Date(timeIntervalSince1970:1_797_210_000)
@@ -285,6 +293,8 @@ extension FieldActivityAttributes {
     let a=FieldActivityAttributes.preview
     ScrollView { VStack(spacing:12) {
         FieldActivityLockView(attributes:a,state:a.state(at:a.dusk.addingTimeInterval(-1200),nightVision:false,heading:true),isStale:false)
+        FieldActivityLockView(attributes:a,state:FieldActivityAttributes.rescored(a.state(at:a.dusk.addingTimeInterval(-1200),nightVision:false,heading:true),
+            score:71,band:"Good",closure:nil,at:a.dusk.addingTimeInterval(-3*24*3600)),isStale:false)
         FieldActivityLockView(attributes:a,state:a.state(at:a.dusk.addingTimeInterval(3000),nightVision:false),isStale:false)
         FieldActivityLockView(attributes:a,state:a.state(at:a.dusk.addingTimeInterval(3000),nightVision:true),isStale:false)
         FieldActivityLockView(attributes:a,state:a.state(at:a.dusk.addingTimeInterval(3000),nightVision:false),isStale:true)

@@ -25,6 +25,29 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
         var heading: Bool?=nil
         /// When Nyx worked this state out; the stale face says so ("Updated 7:44 PM").
         var updated: Date?=nil
+        /// The night's darkness score, band and closure line as Nyx last worked them out, so a night
+        /// followed on Monday shows Friday's clouds once Nyx has seen them. Optional so a state
+        /// written by build 8 still decodes; the faces then read the attributes' copies, set when the
+        /// night was followed. Once `score` is set the state's closure is the whole truth: nil means
+        /// the closure was lifted.
+        var score: Int?=nil
+        var band: String?=nil
+        var closure: String?=nil
+        /// When that score was worked out: the time of the cloud forecast it rests on.
+        var scoredAt: Date?=nil
+        /// The four together, read and written as one.
+        var scored: Scored? {
+            get { score.map { Scored(score: $0, band: band ?? "", closure: closure, at: scoredAt ?? updated ?? .distantPast) } }
+            set { score=newValue?.score; band=newValue?.band; closure=newValue?.closure; scoredAt=newValue?.at }
+        }
+    }
+    /// A followed night's score as Nyx last worked it out (`ContentState.scored`).
+    struct Scored: Hashable, Sendable {
+        let score: Int
+        let band: String
+        let closure: String?
+        /// When the score was worked out: the time of the cloud forecast it rests on.
+        let at: Date
     }
     let parkID: String
     let parkName: String
@@ -45,6 +68,35 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     var nightID: Date?=nil
     /// The park's closure, as Nyx words it beside the score, when the night was followed.
     var closure: String?=nil
+    /// The score, band and closure the faces show: the state's, once it carries them, else the
+    /// copies made when the night was followed (a state written by build 8).
+    func score(_ state: ContentState) -> Int { state.score ?? score }
+    func band(_ state: ContentState) -> String { state.band ?? band }
+    func closure(_ state: ContentState) -> String? { state.score != nil ? state.closure : closure }
+    /// How long a score may be old before the faces name its day: "94 · Pristine as of Wed".
+    static let scoreAgeLimit: TimeInterval=18*3600
+    /// The day the shown score was worked out, when that was more than 18 hours before dusk; nil
+    /// when it is recent. A night followed ahead by build 8 has no score time; its plan time
+    /// (`updated`, set when it was followed) stands in, which is when its score was worked out.
+    func scoreDay(_ state: ContentState) -> Date? {
+        guard let at=state.scoredAt ?? (state.score == nil && state.heading == true ? state.updated : nil) else { return nil }
+        return dusk.timeIntervalSince(at)>Self.scoreAgeLimit ? at : nil
+    }
+    /// "94 · Pristine", or "94 · Pristine as of Wed" when the score is old. Park time.
+    func scoreLine(_ state: ContentState) -> String {
+        guard let day=scoreDay(state) else { return "\(score(state)) · \(band(state))" }
+        return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(weekday(.abbreviated)))")
+    }
+    /// What VoiceOver hears for the score: "Darkness score 94, Pristine, as of Wednesday."
+    func spokenScore(_ state: ContentState) -> String {
+        guard let day=scoreDay(state) else { return String(localized: "Darkness score \(score(state)), \(band(state)).") }
+        return String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(weekday(.wide))).")
+    }
+    private func weekday(_ width: Date.FormatStyle.Symbol.Weekday) -> Date.FormatStyle {
+        var style=Date.FormatStyle().weekday(width)
+        style.timeZone=timeZone
+        return style
+    }
     /// True when this activity is for that park on that night. An activity from an earlier build
     /// (no night recorded) matches the night whose sunset it starts from.
     func covers(parkID id: String, night evening: Date) -> Bool {
@@ -88,9 +140,11 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     }
     /// Stale when the countdown reaches its milestone (the view then shows the night's remaining
     /// times, not a timer); at dawn when nothing is left.
-    func content(at now: Date, nightVision: Bool, heading: Bool=false, updated: Date?=nil) -> ActivityContent<ContentState> {
+    /// `scored` carries the night's latest score, band and closure (`ContentState.scored`).
+    func content(at now: Date, nightVision: Bool, heading: Bool=false, updated: Date?=nil, scored: Scored?=nil) -> ActivityContent<ContentState> {
         var state=state(at: now, nightVision: nightVision, heading: heading)
         if let updated { state.updated=updated }
+        state.scored=scored
         return ActivityContent(state: state, staleDate: state.finished ? nil : state.next?.date ?? dawn, relevanceScore: state.finished ? 0 : 50)
     }
 }

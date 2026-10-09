@@ -91,19 +91,80 @@ nonisolated struct NightLookup: Sendable {
     }
 }
 
-/// Numbers every record the model sees, injected or looked up, so a citation can be checked.
+/// Numbers every record the model sees, injected or looked up, so a citation can be checked, and
+/// keeps the lookups the tools made in plain words, so Ask Nyx can show its work as it happens.
+/// Made with a session (its tools hold it) and reset for each question, so a session prepared
+/// ahead of the question answers from the records and the lookup of the moment it is asked.
 nonisolated final class GuideLedger: Sendable {
-    private let records: Mutex<[String]>
-    let firstID: Int
-    init(firstID: Int) { self.firstID=firstID; records=Mutex([]) }
-    /// Adds records and returns them as "ID n: …" lines for the model.
-    func add(_ lines: [String]) -> String {
-        records.withLock { list in
-            lines.map { line in list.append(line); return "ID \(firstID+list.count-1): \(line)" }.joined(separator: "\n")
-        }
+    private struct State {
+        var firstID: Int
+        var records: [String]=[]
+        var lookups: [String]=[]
+        var lookup: NightLookup?
+        var onAdd: (@Sendable ([String]) -> Void)?
     }
-    var all: [String] { records.withLock { $0 } }
-    var ids: Set<Int> { Set(firstID..<(firstID+all.count)) }
+    private let state: Mutex<State>
+    init(firstID: Int, lookup: NightLookup?=nil) { state=Mutex(State(firstID: firstID, lookup: lookup)) }
+    var firstID: Int { state.withLock { $0.firstID } }
+    /// What the tools look up in: the parks, forecasts and clock of the question being answered.
+    var lookup: NightLookup? { state.withLock { $0.lookup } }
+    /// A new question: records numbered from `firstID`, no lookups yet, and `onAdd` told of each
+    /// lookup (with the whole list so far) as a tool makes it.
+    func reset(firstID: Int, lookup: NightLookup?, onAdd: (@Sendable ([String]) -> Void)?=nil) {
+        state.withLock { $0=State(firstID: firstID, lookup: lookup, onAdd: onAdd) }
+    }
+    /// Adds records and returns them as "ID n: …" lines for the model. `lookup` is what was looked
+    /// up, in plain words ("Best nights · Arches · 30 nights from Oct 9"), for the person.
+    func add(_ lines: [String], lookup: String?=nil) -> String {
+        let (numbered, lookups, onAdd)=state.withLock { state -> (String, [String], (@Sendable ([String]) -> Void)?) in
+            let numbered=lines.map { line in state.records.append(line); return "ID \(state.firstID+state.records.count-1): \(line)" }.joined(separator: "\n")
+            if let lookup { state.lookups.append(lookup) }
+            return (numbered, state.lookups, lookup == nil ? nil : state.onAdd)
+        }
+        onAdd?(lookups)
+        return numbered
+    }
+    var all: [String] { state.withLock { $0.records } }
+    var lookups: [String] { state.withLock { $0.lookups } }
+    var ids: Set<Int> { state.withLock { Set($0.firstID..<($0.firstID+$0.records.count)) } }
+}
+
+nonisolated extension NightLookup {
+    /// The day a tool was asked about, as the person reads it: "Oct 9", or "tonight" for "tonight",
+    /// empty or unreadable text (the tools then use tonight too).
+    func lookupDay(_ text: String, at park: Park?) -> String? {
+        guard let day=TripDay(iso: text) else { return nil }
+        let zone=park?.timeZone ?? .current
+        var calendar=Calendar(identifier: .gregorian)
+        calendar.timeZone=zone
+        guard let date=calendar.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 12)) else { return nil }
+        var style=Date.FormatStyle().month(.abbreviated).day()
+        style.timeZone=zone
+        return date.formatted(style)
+    }
+    /// A park as the person knows it, or the words the model used when none matched.
+    private func lookupName(_ name: String) -> String {
+        park(named: name)?.shortName ?? String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(40))
+    }
+    /// "Best nights · Arches · 30 nights from Oct 9", from the tool's own arguments.
+    func bestNightsLookup(park name: String, from first: String, nights: Int) -> String {
+        let count=min(30, max(1, nights)), place=lookupName(name)
+        guard let day=lookupDay(first, at: park(named: name)) else { return String(localized: "Best nights · \(place) · \(count) nights from tonight") }
+        return String(localized: "Best nights · \(place) · \(count) nights from \(day)")
+    }
+    /// "What's up · Arches · Oct 9".
+    func whatsUpLookup(park name: String, on day: String) -> String {
+        let place=lookupName(name)
+        guard let date=lookupDay(day, at: park(named: name)) else { return String(localized: "What's up · \(place) · tonight") }
+        return String(localized: "What's up · \(place) · \(date)")
+    }
+    /// "Parks near · Joshua Tree · within 200 mi", in the device's units, straight-line as the tool is.
+    func parksNearLookup(park name: String, radiusMiles: Int) -> String {
+        let place=origin(named: name)?.label ?? lookupName(name)
+        let radius=Measurement(value: Double(min(1500, max(10, radiusMiles))), unit: UnitLength.miles)
+            .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0))))
+        return String(localized: "Parks near · \(place) · within \(radius)")
+    }
 }
 
 nonisolated struct BestNightsTool: Tool {
@@ -117,10 +178,11 @@ nonisolated struct BestNightsTool: Tool {
         @Guide(description: "How many nights to compare, 1 to 30", .range(1...30))
         var nights: Int
     }
-    let lookup: NightLookup
     let ledger: GuideLedger
     @concurrent func call(arguments: Arguments) async throws -> String {
-        ledger.add(lookup.bestNights(park: arguments.park, from: arguments.firstNight, nights: arguments.nights))
+        guard let lookup=ledger.lookup else { return "" }
+        return ledger.add(lookup.bestNights(park: arguments.park, from: arguments.firstNight, nights: arguments.nights),
+                          lookup: lookup.bestNightsLookup(park: arguments.park, from: arguments.firstNight, nights: arguments.nights))
     }
 }
 nonisolated struct WhatsUpTool: Tool {
@@ -132,10 +194,10 @@ nonisolated struct WhatsUpTool: Tool {
         @Guide(description: "The night as YYYY-MM-DD, or tonight")
         var night: String
     }
-    let lookup: NightLookup
     let ledger: GuideLedger
     @concurrent func call(arguments: Arguments) async throws -> String {
-        ledger.add(lookup.whatsUp(park: arguments.park, on: arguments.night))
+        guard let lookup=ledger.lookup else { return "" }
+        return ledger.add(lookup.whatsUp(park: arguments.park, on: arguments.night), lookup: lookup.whatsUpLookup(park: arguments.park, on: arguments.night))
     }
 }
 nonisolated struct ParksNearTool: Tool {
@@ -147,9 +209,10 @@ nonisolated struct ParksNearTool: Tool {
         @Guide(description: "Straight-line radius in miles", .range(10...1500))
         var radiusMiles: Int
     }
-    let lookup: NightLookup
     let ledger: GuideLedger
     @concurrent func call(arguments: Arguments) async throws -> String {
-        ledger.add(lookup.parksNear(park: arguments.park, radiusMiles: arguments.radiusMiles))
+        guard let lookup=ledger.lookup else { return "" }
+        return ledger.add(lookup.parksNear(park: arguments.park, radiusMiles: arguments.radiusMiles),
+                          lookup: lookup.parksNearLookup(park: arguments.park, radiusMiles: arguments.radiusMiles))
     }
 }

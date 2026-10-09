@@ -75,8 +75,46 @@ extension FieldActivityAttributes {
             if same || activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
         }
         let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.band.label, closure: closure)
-        _=try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision))
+        let scored=FieldActivityAttributes.Scored(score: score.value, band: score.band.label, closure: closure, at: now)
+        _=try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, scored: scored))
         NightFollowing.shared.reload()
+    }
+    /// What a followed night is now, handed to `refresh` by whoever holds fresh forecasts and park
+    /// alerts: its night as Nyx scores it, and the park's closure line once its alerts have been
+    /// read (`closureKnown`; without them the last closure line stays, never a lifted one).
+    nonisolated struct Now: Sendable {
+        let night: Night
+        let closure: String?
+        let closureKnown: Bool
+    }
+    /// When a night's score was worked out, for the "as of" day: the time of the cloud forecast it
+    /// rests on, or now for a night no forecast reaches (its score uses the usual clouds, or the
+    /// Moon and darkness alone, which do not age).
+    nonisolated static func scoredAt(_ night: Night, now: Date = .now) -> Date {
+        min(now, night.forecastUpdated ?? now)
+    }
+    /// The score, band and closure a followed night should carry, from what it is now. Nil `now`
+    /// keeps what the state already carries.
+    nonisolated static func scored(_ current: Now?, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState, now: Date) -> FieldActivityAttributes.Scored? {
+        guard let current else { return previous.scored }
+        let closure=current.closureKnown ? current.closure : attributes.closure(previous)
+        return .init(score: current.night.score.value, band: current.night.score.band.label, closure: closure, at: scoredAt(current.night, now: now))
+    }
+    /// What a refresh does to a followed night.
+    nonisolated enum Action: Equatable { case keep, update, reschedule }
+    /// The decision, kept pure so it can be tested. A running night is updated when its score,
+    /// band or closure changed, or when its score stops (or starts) being old enough to name its
+    /// day. A scheduled one cannot be updated before it starts (ActivityKit), so when its score,
+    /// band or closure changed it is ended and requested again for the same moment, with the same
+    /// alert; the person sees nothing until it starts. Nothing changes without a new score.
+    nonisolated static func action(pending: Bool, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState,
+                                   scored: FieldActivityAttributes.Scored?) -> Action {
+        guard let scored else { return .keep }
+        var next=previous
+        next.scored=scored
+        let moved=attributes.score(previous) != scored.score || attributes.band(previous) != scored.band || attributes.closure(previous) != scored.closure
+        if pending { return moved ? .reschedule : .keep }
+        return moved || (attributes.scoreDay(previous) == nil) != (attributes.scoreDay(next) == nil) ? .update : .keep
     }
     enum FollowResult: Equatable { case scheduled(Date), started, alreadyFollowing, unavailable, over }
     /// "Follow this night": the night's activity, scheduled for `followStart` (iOS 26), or at once
@@ -86,48 +124,82 @@ extension FieldActivityAttributes {
         guard enabled else { return .unavailable }
         guard !FieldNight.isOver(night.sky, at: now) else { return .over }
         guard !isFollowing(park: park, night: night.id) else { return .alreadyFollowing }
-        let field=FieldNight(park: park, sky: night.sky)
-        let attributes=FieldActivityAttributes(night: field, score: night.score.value, band: night.score.band.label, closure: closure)
+        let scored=FieldActivityAttributes.Scored(score: night.score.value, band: night.score.band.label, closure: closure, at: Self.scoredAt(night, now: now))
         let start=FieldActivityAttributes.followStart(night.sky)
         defer { NightFollowing.shared.reload() }
         if start<=now.addingTimeInterval(60) {
-            return (try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, heading: true))) == nil ? .unavailable : .started
+            let attributes=FieldActivityAttributes(night: FieldNight(park: park, sky: night.sky), score: scored.score, band: scored.band, closure: closure)
+            return (try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, heading: true, scored: scored))) == nil ? .unavailable : .started
         }
-        let words=FieldActivityAttributes.followAlert(park: park, sky: night.sky)
-        let alert=AlertConfiguration(title: LocalizedStringResource(stringLiteral: words.title), body: LocalizedStringResource(stringLiteral: words.body), sound: .default)
-        // Worked out for the moment it starts; `updated` says when it was planned.
-        let content=attributes.content(at: start, nightVision: nightVision, heading: true, updated: now)
-        do {
-            _=try Item.request(attributes: attributes, content: content, pushType: nil, style: .standard, alertConfiguration: alert, start: start)
-            return .scheduled(start)
-        } catch { return .unavailable }
+        return (try? schedule(night: night, scored: scored, start: start, nightVision: nightVision, now: now)) == nil ? .unavailable : .scheduled(start)
+    }
+    /// A followed night's activity, scheduled to start by itself at `start` with its alert. Opens
+    /// heading out, worked out for the moment it starts; `updated` says when it was planned.
+    @discardableResult private static func schedule(night: Night, scored: FieldActivityAttributes.Scored, start: Date, nightVision: Bool, now: Date) throws -> Item {
+        let attributes=FieldActivityAttributes(night: FieldNight(park: night.park, sky: night.sky), score: scored.score, band: scored.band, closure: scored.closure)
+        let content=attributes.content(at: start, nightVision: nightVision, heading: true, updated: now, scored: scored)
+        return try Item.request(attributes: attributes, content: content, pushType: nil, style: .standard, alertConfiguration: alert(night), start: start)
+    }
+    private static func alert(_ night: Night) -> AlertConfiguration {
+        let words=FieldActivityAttributes.followAlert(park: night.park, sky: night.sky)
+        return AlertConfiguration(title: LocalizedStringResource(stringLiteral: words.title), body: LocalizedStringResource(stringLiteral: words.body), sound: .default)
+    }
+    /// A scheduled night whose score, band or closure changed: ended and requested again for the
+    /// same start (`followStart` is astronomy only, so it gives the moment it was planned for) with
+    /// the same alert. Still one activity per park and night: nothing is requested while another
+    /// one covers it. If the new request is refused (the system's limit on Live Activities), the
+    /// night is requested again as it was, so a refresh never unfollows a night.
+    private static func reschedule(_ activity: sending Item, to current: Now, scored: FieldActivityAttributes.Scored, nightVision: Bool, now: Date) async {
+        let night=current.night
+        let start=FieldActivityAttributes.followStart(night.sky)
+        // About to start by itself: leave it; it is brought up to date once it runs.
+        guard start>now.addingTimeInterval(60) else { return }
+        let id=activity.id
+        let other=live.contains { $0.id != id && $0.attributes.covers(parkID: night.park.id, night: night.id) }
+        let previous=activity.content.state, attributes=activity.attributes
+        await activity.end(nil, dismissalPolicy: .immediate)
+        guard !other else { return }
+        if (try? schedule(night: night, scored: scored, start: start, nightVision: nightVision, now: now)) == nil {
+            var content=previous
+            content.nightVision=nightVision
+            _=try? Item.request(attributes: attributes, content: ActivityContent(state: content, staleDate: nil), pushType: nil, style: .standard, alertConfiguration: alert(night), start: start)
+        }
     }
     /// "Stop following": ends that night's activity, scheduled or running.
     static func unfollow(park: Park, night: Date) async {
         for activity in live where activity.attributes.covers(parkID: park.id, night: night) { await activity.end(nil, dismissalPolicy: .immediate) }
         NightFollowing.shared.reload()
     }
-    /// Brings every running activity up to date and ends one whose night is over. A scheduled one
-    /// is left as planned, unless its night has passed without it starting.
-    static func refresh(nightVision: Bool, now: Date = .now) async {
+    /// Brings every running activity up to date and ends one whose night is over. `current` says
+    /// what each followed night is now (its score, band and closure, from fresh forecasts and park
+    /// alerts); without it the score each one carries stays. A scheduled one keeps its plan unless
+    /// its score, band or closure changed (`action`), and ends if its night passed without it starting.
+    static func refresh(nightVision: Bool, now: Date = .now, current: (@MainActor (FieldActivityAttributes) -> Now?)?=nil) async {
         for activity in Item.activities {
+            let attributes=activity.attributes, previous=activity.content.state
+            let found=current?(attributes)
+            let scored=Self.scored(found, attributes: attributes, previous: previous, now: now)
             switch activity.activityState {
             case .pending:
-                if now>=activity.attributes.dawn { await activity.end(nil, dismissalPolicy: .immediate) }
+                if now>=attributes.dawn { await activity.end(nil, dismissalPolicy: .immediate) }
+                else if let found, let scored, Self.action(pending: true, attributes: attributes, previous: previous, scored: scored) == .reschedule {
+                    await reschedule(activity, to: found, scored: scored, nightVision: nightVision, now: now)
+                }
             case .active, .stale:
-                let previous=activity.content.state
-                let content=activity.attributes.content(at: now, nightVision: nightVision, heading: previous.heading ?? false)
+                let content=attributes.content(at: now, nightVision: nightVision, heading: previous.heading ?? false, scored: scored)
                 if content.state.finished { await activity.end(content, dismissalPolicy: .immediate) }
-                else if Self.changed(previous, content.state) || activity.activityState == .stale { await activity.update(content) }
+                else if Self.changed(previous, content.state, attributes: attributes) || activity.activityState == .stale { await activity.update(content) }
             default: break
             }
         }
         NightFollowing.shared.reload()
     }
-    /// A change worth an update: anything but the moment it was worked out.
-    nonisolated static func changed(_ a: FieldActivityAttributes.ContentState, _ b: FieldActivityAttributes.ContentState) -> Bool {
+    /// A change worth an update: anything but the moment it was worked out and the exact time of
+    /// its score, which matters only when it decides whether the face names the score's day.
+    nonisolated static func changed(_ a: FieldActivityAttributes.ContentState, _ b: FieldActivityAttributes.ContentState, attributes: FieldActivityAttributes) -> Bool {
+        if (attributes.scoreDay(a) == nil) != (attributes.scoreDay(b) == nil) { return true }
         var a=a, b=b
-        a.updated=nil; b.updated=nil
+        a.updated=nil; b.updated=nil; a.scoredAt=nil; b.scoredAt=nil
         return a != b
     }
     /// Leaves field mode's night: ends what is running; nights followed for later stay scheduled.
