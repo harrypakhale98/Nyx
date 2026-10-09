@@ -151,6 +151,39 @@ final class MoonHaptics {
         try? night?.stop(atTime:CHHapticTimeImmediate)
         night=nil
     }
+    /// The sky arc under a finger (`ArcTouch`): one long, low hum whose strength follows the finger,
+    /// with a firm click at true darkness's edges and a light tick at moonrise and moonset. Starts
+    /// only with the Moon-haptics switch on and a Taptic Engine; `endArcTouch()` on lift.
+    private var arc: CHHapticAdvancedPatternPlayer?
+    func beginArcTouch(strength: Double) {
+        endArcTouch()
+        // Core Haptics caps one continuous event at 30 s; the player loops it for a longer rest.
+        let hum=CHHapticEvent(eventType:.hapticContinuous,parameters:[
+            CHHapticEventParameter(parameterID:.hapticIntensity,value:1),
+            CHHapticEventParameter(parameterID:.hapticSharpness,value:0.12)],relativeTime:0,duration:30)
+        guard Self.enabled, let engine=ready(), let pattern=try? CHHapticPattern(events:[hum],parameterCurves:[]),
+              let player=try? engine.makeAdvancedPlayer(with:pattern) else { return }
+        player.loopEnabled=true
+        do { try player.start(atTime:CHHapticTimeImmediate) } catch { return }
+        arc=player
+        followArcTouch(strength:strength,crossings:[])
+    }
+    /// The finger moved to a new column: the hum takes its strength, and each moment crossed
+    /// (at most two, 40 ms apart, so a quick slide stays distinct) clicks or ticks.
+    func followArcTouch(strength: Double, crossings: [ArcTouch.Milestone]) {
+        guard let arc else { return }
+        try? arc.sendParameters([CHHapticDynamicParameter(parameterID:.hapticIntensityControl,value:Float(min(1,max(0,strength))),relativeTime:0)],atTime:CHHapticTimeImmediate)
+        let events=crossings.prefix(2).enumerated().map { k,moment in
+            CHHapticEvent(eventType:.hapticTransient,parameters:[
+                CHHapticEventParameter(parameterID:.hapticIntensity,value:moment.firm ? 1 : 0.5),
+                CHHapticEventParameter(parameterID:.hapticSharpness,value:moment.firm ? 0.8 : 0.55)],relativeTime:Double(k)*0.04)
+        }
+        if !events.isEmpty { play(events:events,curves:[]) }
+    }
+    func endArcTouch() {
+        try? arc?.stop(atTime:CHHapticTimeImmediate)
+        arc=nil
+    }
     func detent(score: Int) {
         let tap=MoonTexture.detent(score:score)
         play(events:[CHHapticEvent(eventType:.hapticTransient,parameters:[

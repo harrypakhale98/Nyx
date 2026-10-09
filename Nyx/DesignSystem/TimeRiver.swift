@@ -115,8 +115,8 @@ struct TimeRiver: View {
                     let point=CGPoint(x:x(index,width:width),y:y(current.score.value,height:proxy.size.height))
                     let top=lifted ? loupeCenter(point,width:width).y+loupeSize/2 : moonSize+2
                     let bottom=proxy.size.height-22+4
-                    Rectangle().fill(palette.line).frame(width:0.6,height:max(0,bottom-top))
-                        .offset(x:point.x-0.3,y:top).accessibilityHidden(true)
+                    Rectangle().fill(palette.line).frame(width:0.6*palette.stroke,height:max(0,bottom-top))
+                        .offset(x:point.x-0.3*palette.stroke,y:top).accessibilityHidden(true)
                 }
                 Canvas { context,size in draw(in:&context,size:size) }
                     .accessibilityHidden(true)
@@ -333,8 +333,8 @@ struct TimeRiver: View {
         if let hovered, hovered != index, nights.indices.contains(hovered) {
             let p=point(hovered)
             var hairline=Path(); hairline.move(to:CGPoint(x:p.x,y:moonSize+8)); hairline.addLine(to:CGPoint(x:p.x,y:bottom+4))
-            context.stroke(hairline,with:.color(palette.line),style:StrokeStyle(lineWidth:0.6,dash:[2,3]))
-            context.stroke(Path(ellipseIn:CGRect(x:p.x-6,y:p.y-6,width:12,height:12)),with:.color(palette.accent.opacity(0.7)),lineWidth:0.9)
+            context.stroke(hairline,with:.color(palette.line),style:StrokeStyle(lineWidth:0.6*palette.stroke,dash:[2,3]))
+            context.stroke(Path(ellipseIn:CGRect(x:p.x-6,y:p.y-6,width:12,height:12)),with:.color(palette.accent.opacity(0.7)),lineWidth:0.9*palette.stroke)
         }
         // A smooth river through every night; the forecast-free stretch is dashed.
         func river(_ range:ClosedRange<Int>)->Path {
@@ -348,10 +348,10 @@ struct TimeRiver: View {
         let all=river(0...(nights.count-1))
         var fill=all; fill.addLine(to:CGPoint(x:point(nights.count-1).x,y:bottom)); fill.addLine(to:CGPoint(x:point(0).x,y:bottom)); fill.closeSubpath()
         context.fill(fill,with:.linearGradient(Gradient(colors:[palette.accent.opacity(0.18),palette.accent.opacity(0)]),startPoint:CGPoint(x:0,y:top),endPoint:CGPoint(x:0,y:bottom)))
-        if let lastForecast, lastForecast>0 { context.stroke(river(0...lastForecast),with:.color(palette.accent),style:StrokeStyle(lineWidth:1.6,lineCap:.round)) }
+        if let lastForecast, lastForecast>0 { context.stroke(river(0...lastForecast),with:.color(palette.accent),style:StrokeStyle(lineWidth:1.6*palette.stroke,lineCap:.round)) }
         let dashedStart=(lastForecast ?? -1)+1
         if dashedStart<nights.count {
-            context.stroke(river(max(0,dashedStart-1)...(nights.count-1)),with:.color(palette.accent.opacity(0.55)),style:StrokeStyle(lineWidth:1.1,lineCap:.round,dash:[3,4]))
+            context.stroke(river(max(0,dashedStart-1)...(nights.count-1)),with:.color(palette.accent.opacity(0.55)),style:StrokeStyle(lineWidth:1.1*palette.stroke,lineCap:.round,dash:[3,4]))
         }
 
         // Model spread: a soft vertical glow from the cloudiest model's score to the clearest's,
@@ -372,13 +372,18 @@ struct TimeRiver: View {
         if let lastForecast, lastForecast<nights.count-1 {
             let fx=(x(lastForecast,width:size.width)+x(lastForecast+1,width:size.width))/2
             var tick=Path(); tick.move(to:CGPoint(x:fx,y:top+4)); tick.addLine(to:CGPoint(x:fx,y:bottom))
-            context.stroke(tick,with:.color(palette.ink.opacity(palette.highContrast ? 0.6 : 0.3)),style:StrokeStyle(lineWidth:0.7,dash:[1,3]))
+            context.stroke(tick,with:.color(palette.ink.opacity(palette.highContrast ? 0.6 : 0.3)),style:StrokeStyle(lineWidth:0.7*palette.stroke,dash:[1,3]))
             let label=context.resolve(Text("forecast ends").font(.caption2).foregroundStyle(palette.muted))
             let measured=label.measure(in:size)
             let lx=min(max(fx+4+measured.width/2,measured.width/2),size.width-measured.width/2)
             context.draw(label,at:CGPoint(x:lx,y:bottom-measured.height/2-2))
         }
 
+        // Thirty nights stand about 11 pt apart on a phone: the floor that keeps an unfilled mark's
+        // half fill readable (`NightMark.draw`) stops short of the neighbouring marks, so the river
+        // between them still shows under Bold Text and Increase Contrast.
+        let pitch=nights.count>1 ? abs(x(1,width:size.width)-x(0,width:size.width)) : size.width
+        let floor=min(2.6*palette.stroke,max(2.4,pitch*0.28))
         for i in nights.indices {
             let p=point(i), night=nights[i]
             if peaks.contains(i) {
@@ -396,7 +401,7 @@ struct TimeRiver: View {
             }
             let r=i==index ? 5.0 : 2.4
             let mark=NightMark.mark(night,differentiate:access.differentiate)
-            mark.draw(in:&context,center:p,radius:r,fill:night.basis.fill,color:palette.accent,fillOpacity:1,hollowBackground:.black)
+            mark.draw(in:&context,center:p,radius:r,fill:night.basis.fill,color:palette.accent,fillOpacity:1,stroke:palette.stroke,minimumRadius:i==index ? nil : floor,hollowBackground:.black)
         }
 
         // Sparse date labels: the selected night first, then the first night, then the first night
@@ -474,10 +479,10 @@ private struct LoupeSurface: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if solid {
             content.background(Circle().fill(lifted ? palette.panel : palette.panel.opacity(0.35)))
-                .overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2))
+                .overlay(Circle().strokeBorder(palette.accent,lineWidth:1.2*palette.stroke))
         } else {
             content.glassEffect(lifted ? Glass.regular.tint(palette.panel.opacity(0.7)).interactive() : Glass.regular.interactive(),in:.circle)
-                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8))
+                .overlay(Circle().strokeBorder(palette.accent.opacity(0.55),lineWidth:0.8*palette.stroke))
         }
     }
 }

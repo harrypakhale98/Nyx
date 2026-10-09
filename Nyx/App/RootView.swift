@@ -8,6 +8,7 @@ struct RootView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     @Query private var saved:[SavedPark]
     @Environment(\.modelContext) private var context
     @AppStorage("onboardingComplete") private var onboarded=false
@@ -48,7 +49,7 @@ struct RootView:View {
         voiceOver || switchControl || typeSize.isAccessibilitySize || DebugScenario.isEnabled("ax5") ? .never : .onScrollDown
     }
 
-    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
+    private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"),boldText:legibility == .bold || DebugScenario.isEnabled("bold")) }
     var body:some View {
         Group {
             if model.loadError { CalmState(symbol:"moon",title:"The park library could not open",message:"Close and reopen Nyx. Your saved nights remain on this iPhone.").background(Color.black) }
@@ -360,13 +361,14 @@ private struct ParkSheet:View {
     var whatsUp=false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     var body:some View {
         NavigationStack {
             ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
         }
-        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed)).nyxPresentation().nyxAccessibility()
+        .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)).nyxPresentation().nyxAccessibility()
     }
 }
 #Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }

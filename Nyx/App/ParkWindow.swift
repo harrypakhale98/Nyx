@@ -16,6 +16,7 @@ struct ParkWindowRoot: View {
     @Binding var value: ParkWindow?
     @Environment(PlanModel.self) private var model
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
@@ -24,7 +25,7 @@ struct ParkWindowRoot: View {
     @State private var commands=SceneCommands(parkWindow:true)
     var body: some View {
         // The same palette as the main window, brighter red included (`RootView`).
-        let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed)
+        let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)
         NavigationStack {
             if let value, let park=model.park(value.parkID) {
                 ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })

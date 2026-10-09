@@ -5,6 +5,14 @@ struct NyxPalette {
     let highContrast: Bool
     /// The person chose the brighter red (Settings › In the dark, or field mode's options).
     var brighterRed=false
+    /// Bold Text is on (`legibilityWeight == .bold`). Defaults to off so the widget, watch and
+    /// preview call sites keep building unchanged.
+    var boldText=false
+    /// How heavy drawn outlines and hairlines are: the honesty marks' rings, the week strip's and
+    /// the calendar's outlines, the river's and the sky arc's hairlines, the gauge's track and ticks.
+    /// 1.6× under Increase Contrast or Bold Text, as text grows heavier; 1 otherwise, so the default
+    /// drawing is unchanged.
+    var stroke: Double { highContrast || boldText ? 1.6 : 1.0 }
     /// Night vision's red is lifted under Increase Contrast or by choice, so it stays above 4.5:1
     /// for protan and deutan eyes too (`NightTint`).
     var red: NightTint { highContrast || brighterRed ? .brighter : .standard }

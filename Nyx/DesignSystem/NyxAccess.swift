@@ -217,7 +217,13 @@ nonisolated enum NightMark: Equatable, Sendable {
     /// A night's mark; an early look is drawn hollow with its lower half filled (`draw`).
     static func mark(_ night:Night,differentiate:Bool)->NightMark { mark(score:night.score.value,hasForecast:night.basis.fill == .full,differentiate:differentiate) }
     /// Draws a mark: filled, hollow, or hollow with its lower half filled for an early look.
-    func draw(in context:inout GraphicsContext,center:CGPoint,radius:Double,fill:NightFill,color:Color,fillOpacity:Double,lineWidth:Double=1.1,hollowBackground:Color?=nil) {
+    /// `stroke` is the palette's outline weight (`NyxPalette.stroke`: 1.6 under Increase Contrast or
+    /// Bold Text). A mark that is not filled is never smaller than 2.6 pt × `stroke` across its
+    /// radius, so its outline never closes over the hole and a half fill always reads as half.
+    /// `minimumRadius` replaces that floor where marks stand close together (the time river).
+    func draw(in context:inout GraphicsContext,center:CGPoint,radius:Double,fill:NightFill,color:Color,fillOpacity:Double,lineWidth:Double=1.1,stroke:Double=1,minimumRadius:Double?=nil,hollowBackground:Color?=nil) {
+        let radius=NightMark.drawnRadius(radius,fill:fill,stroke:stroke,minimum:minimumRadius)
+        let lineWidth=lineWidth*stroke
         let shape=path(center:center,radius:radius)
         switch fill {
         case .full: context.fill(shape,with:.color(color.opacity(fillOpacity)))
@@ -231,6 +237,11 @@ nonisolated enum NightMark: Equatable, Sendable {
             }
             context.stroke(shape,with:.color(color),lineWidth:lineWidth)
         }
+    }
+    /// The radius a mark is drawn at: as asked when filled, at least 2.6 pt × `stroke` (or
+    /// `minimum`) otherwise.
+    static func drawnRadius(_ radius:Double,fill:NightFill,stroke:Double,minimum:Double?=nil)->Double {
+        fill == .full ? radius : max(radius,minimum ?? 2.6*stroke)
     }
     var filled: Bool { switch self { case .dot(let filled),.star(let filled): filled } }
     var isStar: Bool { if case .star=self { true } else { false } }
