@@ -20,6 +20,7 @@ import SwiftUI
 /// on one spring; the band word stands only beside a number of its own band, so the old word
 /// steps away as the number leaves its band and the new one arrives as the number enters its own.
 struct CelestialGauge: View {
+    @Environment(\.skyResting) private var resting
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -393,7 +394,7 @@ struct CelestialGauge: View {
     /// resting while the dial is scrolled out of view.
     private func ambient(_ displayed:Double)->some View {
         let still=reduceMotion || export || access.reducedResources || PowerState.shared.lowPower
-        return TimelineView(.animation(minimumInterval:1/30,paused:still || !onScreen)) { timeline in
+        return TimelineView(.animation(minimumInterval:1/30,paused:still || resting || !onScreen)) { timeline in
             Canvas { context,size in
                 let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)

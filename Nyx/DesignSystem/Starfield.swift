@@ -5,6 +5,7 @@ struct Starfield: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.nyx) private var palette
+    @Environment(\.skyResting) private var resting
     @Environment(\.nyxAccess) private var access
     let seed: String
     var strength: Double=0.6
@@ -26,7 +27,7 @@ struct Starfield: View {
         // When the system asks for less, half the stars, holding still.
         let still=reduceMotion || access.reducedResources
         let faint=access.reducedResources ? fewerFaint : faint, bright=access.reducedResources ? fewerBright : bright
-        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
+        TimelineView(.animation(minimumInterval:1/30,paused:still || resting || PowerState.shared.lowPower)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             ZStack {
                 // The smaller, fainter stars in their own layer: under Increase Contrast they fade out
@@ -64,4 +65,9 @@ struct SeededGenerator: RandomNumberGenerator {
         state=state &* 6364136223846793005 &+ 1442695040888963407
         return state
     }
+}
+extension EnvironmentValues {
+    /// A page's own animated stars and dial rest (redraw nothing) while a full-screen sky covers
+    /// them: the picture is unchanged, only its twinkle waits.
+    @Entry var skyResting=false
 }

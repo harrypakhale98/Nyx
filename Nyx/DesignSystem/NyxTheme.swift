@@ -59,7 +59,11 @@ extension EnvironmentValues {
     var nyxAccess: NyxAccess { get { self[NyxAccessKey.self] } set { self[NyxAccessKey.self]=newValue } }
 }
 enum NyxMotion {
-    static let spring=Animation.spring(response:0.65,dampingFraction:0.82)
+    /// The shared spring's constants, for the few places that need the spring itself (a fling
+    /// that coasts with the finger's velocity, or reading where a turn has got to).
+    nonisolated static let response=0.65, dampingFraction=0.82
+    nonisolated static let model=Spring(response:response,dampingRatio:dampingFraction)
+    static let spring=Animation.spring(response:response,dampingFraction:dampingFraction)
 }
 /// A content card: solid deep indigo with a hairline, over the real sky. Liquid Glass is kept for
 /// the controls that float above content (the park pill, the river's thumb, the field controls,

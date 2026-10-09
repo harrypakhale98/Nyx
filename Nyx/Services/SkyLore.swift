@@ -1,6 +1,6 @@
 import Foundation
 
-/// Names and figures for the immersive sky: the IAU's proper names for the brightest stars
+/// Names and figures for the sky: the IAU's proper names for the brightest stars
 /// (`star-names.json`, from the Working Group on Star Names) and constellation stick figures
 /// drawn for Nyx between catalogue stars (`constellations.json`, keyed by Bayer designation).
 ///
@@ -8,6 +8,10 @@ import Foundation
 /// star catalogue within 0.2° of its J2000 position and 0.3 magnitudes of its brightness, so a
 /// star that does not match is left out rather than misnamed. `NyxTests` checks that every entry
 /// matches today, so the sky never shows a wrong name.
+///
+/// Shared by Tonight's sky on iPhone and iPad (the brightest few names and the figures as
+/// hairlines) and the Vision Pro sky (every name as a target, the figures as a mesh). The Vision
+/// Pro's words for a star ("high in the west", "a bright star") live beside its sky.
 nonisolated struct SkyLore: Sendable {
     struct Star: Sendable, Identifiable {
         /// "star.Vega": the id after "body:" on its sky entity and in `VisionModel.selectedBody`.
@@ -45,9 +49,10 @@ nonisolated struct SkyLore: Sendable {
         let stars: [String: Position]
     }
 
-    /// Loads both files and matches them to the catalogue. Missing or unreadable files give an
-    /// empty lore: the sky still works, unnamed.
-    static func load(catalogue: [SkyScene.CatalogueStar], bundle: Bundle = .main) -> SkyLore {
+    /// Loads both files and matches them to the catalogue (positions in radians, J2000; a star's
+    /// `row` is its index here). Missing or unreadable files give an empty lore: the sky still
+    /// works, unnamed.
+    static func load(catalogue: [(ra: Double, dec: Double, mag: Double)], bundle: Bundle = .main) -> SkyLore {
         let decoder = JSONDecoder()
         guard let namesURL = bundle.url(forResource: "star-names", withExtension: "json"),
               let figuresURL = bundle.url(forResource: "constellations", withExtension: "json"),
@@ -89,21 +94,5 @@ nonisolated struct SkyLore: Sendable {
         let r = Double.pi/180
         let c = sin(dec1*r)*sin(dec2*r) + cos(dec1*r)*cos(dec2*r)*cos((ra1-ra2)*r)
         return acos(max(-1, min(1, c)))/r
-    }
-
-    // MARK: Words
-
-    /// Where to look, in words: "high in the west", "low in the northeast", "nearly overhead".
-    static func direction(altitude: Double, azimuth: Double) -> String {
-        if altitude >= 75 { return String(localized: "nearly overhead") }
-        let compass = Compass.name(azimuth)
-        return altitude >= 30 ? String(localized: "high in the \(compass)") : altitude < 15 ? String(localized: "low in the \(compass)") : String(localized: "in the \(compass)")
-    }
-    /// A star's brightness in words, for the name card.
-    static func brightness(_ magnitude: Double) -> String {
-        magnitude < 0.5 ? String(localized: "one of the brightest stars")
-            : magnitude < 1.5 ? String(localized: "a bright star")
-            : magnitude < 2.5 ? String(localized: "easy to see")
-            : String(localized: "easy to see from a dark site")
     }
 }

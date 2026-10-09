@@ -13,6 +13,7 @@ struct RealSky: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
+    @Environment(\.skyResting) private var resting
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// When the system asks for less, the sky holds still: no twinkle, no tilt.
     private var still: Bool { reduceMotion || access.reducedResources }
@@ -60,7 +61,7 @@ struct RealSky: View {
         let seen=Visibility(sunAltitude:sky.sunAltitude,highContrast:palette.highContrast,liftAllowed:!reduceTransparency && !palette.highContrast,nightVision:palette.nightVision)
         let showDomes=domes && !sky.domes.isEmpty
         // Rests in Low Power Mode and while the device is hot, as the sensors do.
-        TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
+        TimelineView(.animation(minimumInterval:1/30,paused:still || resting || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {

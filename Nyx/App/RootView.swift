@@ -394,7 +394,8 @@ private struct DebugWindow: ViewModifier {
         } else { content }
     }
 }
-private struct DebugTypeSize: ViewModifier {
+/// DEBUG captures: `-nyx-ax5` and `-nyx-bold`, on the root and on the full-screen sky (a cover does not inherit them).
+struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
         let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)

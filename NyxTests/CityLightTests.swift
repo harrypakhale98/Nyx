@@ -46,17 +46,22 @@ struct CityLightTests {
         #expect(abs(middle-0.5)<0.001)
         #expect(PanoramaCanvas.milkyWayGathered(0.8)<PanoramaCanvas.milkyWayGathered(0.9))
     }
-    /// The reveal is eased, takes about four seconds, starts dark and lands whole.
+    /// The reveal is eased, takes about four seconds, starts from the 0.3 floor (the brightest
+    /// stars and planets already out, continuing from the lit card) and lands whole.
     @MainActor @Test func revealTiming() {
         #expect(SkyAdaptation.duration==4)
+        #expect(SkyAdaptation.floor==0.3 && SkyAdaptation.landingHold==3)
         #expect(SkyAdaptation.eased(0)==0)
         #expect(SkyAdaptation.eased(1)==1)
         #expect(SkyAdaptation.eased(-1)==0 && SkyAdaptation.eased(3)==1)
         let start=Date(timeIntervalSince1970:1_000)
-        #expect(SkyAdaptation.progress(since:nil,now:start)==0)
-        #expect(SkyAdaptation.progress(since:start,now:start)==0)
-        #expect(SkyAdaptation.progress(since:start,now:start.addingTimeInterval(2))==0.5)
+        #expect(SkyAdaptation.progress(since:nil,now:start)==0.3)
+        #expect(SkyAdaptation.progress(since:start,now:start)==0.3)
+        #expect(abs(SkyAdaptation.progress(since:start,now:start.addingTimeInterval(2))-0.65)<1e-12)
         #expect(SkyAdaptation.progress(since:start,now:start.addingTimeInterval(5))==1)
+        // At the floor a Bortle 3 sky shows only its brightest points: about magnitude 1.
+        let limit=PanoramaCanvas.adaptedLimit(BortleScale.limitingMagnitude(3),adaptation:SkyAdaptation.floor)
+        #expect(limit>0.5 && limit<1.2)
     }
     /// Once per park and night: another night, or another park, is a new reveal.
     @Test func revealKeyIsParkAndNight() {

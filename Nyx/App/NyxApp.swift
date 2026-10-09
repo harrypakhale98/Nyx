@@ -65,14 +65,14 @@ import UserNotifications
 }
 
 /// The bundled tables every first screen reads (sky glow, usual clouds, sky events, step-free
-/// spots, the star catalogue), decoded on a background thread at launch instead of on the main
+/// spots, the star catalogue and its names), decoded on a background thread at launch instead of on the main
 /// thread at first use. Each is a `static let`, initialised once and thread-safely: a screen that
 /// asks first simply waits for the same read.
 nonisolated enum BundledData {
     static func warm() {
         DispatchQueue.global(qos:.userInitiated).async {
             _=SkyGlow.shared; _=NightPlanner.glowRank(""); _=CloudClimate.shared
-            _=SkyEvents.shared; _=AccessData.shared; _=SkyProjection.catalogue.count
+            _=SkyEvents.shared; _=AccessData.shared; _=SkyProjection.catalogue.count; _=HorizonSkies.lore.stars.count
         }
     }
 }

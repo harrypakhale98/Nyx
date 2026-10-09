@@ -2,9 +2,9 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The Vision Pro sky's star names and constellation figures (`NyxVision/Resources`), checked
-/// against the star catalogue the sky draws (`Nyx/Resources/stars.json`). The files are read
-/// from the source tree: the Vision Pro target is not linked into these tests. The matching rule
+/// The star names and constellation figures (`Nyx/Resources`) that the Vision Pro sky and Tonight's
+/// sky share, checked against the star catalogue both draw (`Nyx/Resources/stars.json`). The files
+/// are read from the source tree, independent of either target's loader. The matching rule
 /// is written out again here on purpose, so a mistake in `SkyLore` cannot hide itself.
 /// No wrong name may ship: every name must land on a catalogue star within 0.2° and 0.3 magnitudes.
 struct VisionSkyLoreTests {
@@ -37,7 +37,7 @@ struct VisionSkyLoreTests {
                         "μ": "Mu", "ν": "Nu", "ξ": "Xi", "ο": "Omi", "π": "Pi", "ρ": "Rho", "σ": "Sig", "τ": "Tau", "υ": "Ups", "φ": "Phi", "χ": "Chi", "ψ": "Psi", "ω": "Ome"]
 
     @Test func everyNamedStarIsTheCatalogueStarItNames() throws {
-        let rows = try Self.catalogue(), names = try Self.load("NyxVision/Resources/star-names.json", as: Names.self)
+        let rows = try Self.catalogue(), names = try Self.load("Nyx/Resources/star-names.json", as: Names.self)
         #expect((60...70).contains(names.stars.count))
         #expect(Set(names.stars.map(\.name)).count == names.stars.count, "a name used twice")
         var used: [Int: String] = [:]
@@ -56,7 +56,7 @@ struct VisionSkyLoreTests {
     }
 
     @Test func everyFigureLineJoinsTwoCatalogueStars() throws {
-        let rows = try Self.catalogue(), figures = try Self.load("NyxVision/Resources/constellations.json", as: Figures.self)
+        let rows = try Self.catalogue(), figures = try Self.load("Nyx/Resources/constellations.json", as: Figures.self)
         #expect((28...40).contains(figures.figures.count))
         var resolved: [String: Int] = [:]
         for (key, star) in figures.stars {
@@ -84,8 +84,8 @@ struct VisionSkyLoreTests {
     /// star (IAU's Betelgeuse, the figures' "Alp Ori") lands on the same catalogue row.
     @Test func namesAndFiguresAgreeOnSharedStars() throws {
         let rows = try Self.catalogue()
-        let names = try Self.load("NyxVision/Resources/star-names.json", as: Names.self)
-        let figures = try Self.load("NyxVision/Resources/constellations.json", as: Figures.self)
+        let names = try Self.load("Nyx/Resources/star-names.json", as: Names.self)
+        let figures = try Self.load("Nyx/Resources/constellations.json", as: Figures.self)
         var checked = 0
         for star in names.stars {
             let parts = star.designation.split(separator: " ")

@@ -58,8 +58,8 @@ def data_keys():
     return en,es
 
 def constellation_keys():
-    """English names for the Vision Pro sky (NyxVision/Resources/constellations.json); Spanish is in es-vision-strings.json."""
-    path=ROOT/'NyxVision/Resources/constellations.json'
+    """English names for the Vision Pro sky (Nyx/Resources/constellations.json); Spanish is in es-vision-strings.json."""
+    path=ROOT/'Nyx/Resources/constellations.json'
     names=load(path).get('names',{}) if path.exists() else {}
     return {'constellation.'+abbr:name for abbr,name in names.items()}
 

@@ -170,7 +170,7 @@ import UIKit
 
     /// Named stars' targets and the constellation figures' mesh.
     private func buildLore(_ catalogue: [CatalogueStar]) {
-        lore = SkyLore.load(catalogue: catalogue)
+        lore = SkyLore.load(catalogue: catalogue.map { (ra: $0.ra, dec: $0.dec, mag: $0.mag) })
         if let image = SkyTextures.image(width: 32, height: 4, pixel: { x, _ in
             // Across the ribbon: bright in the middle, soft to nothing at both edges, so a thin
             // line far away stays smooth instead of stepping.
