@@ -44,8 +44,6 @@ final class NyxUITests:XCTestCase {
         XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout:5))
         XCTAssertTrue(app.keyboards.firstMatch.exists || (app.searchFields.firstMatch.value(forKey:"hasKeyboardFocus") as? Bool ?? false),"⌘F did not focus search")
     }
-    /// At accessibility text sizes Parks searches from a field in the page (the bar's field draws
-    /// nothing at AX5 on iOS 27). Typing in it narrows the list.
     /// The Sky glow comparison: the segments read "Here · Class 2" and "City · Class 8" for VoiceOver as
     /// on screen (the bridge to the segmented control ignores per-segment accessibility labels, so the
     /// figure's own label carries "estimated"). Choosing the city's sky selects that segment.
@@ -67,6 +65,8 @@ final class NyxUITests:XCTestCase {
         city.tap()
         XCTAssertTrue(city.isSelected,"The city's segment is not selected after a tap")
     }
+    /// At accessibility text sizes Parks searches from a field in the page (the bar's field draws
+    /// nothing at AX5 on iOS 27). Typing in it narrows the list.
     func testAccessibilitySizeSearch() {
         continueAfterFailure=false
         let app=XCUIApplication()

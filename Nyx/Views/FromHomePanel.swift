@@ -71,16 +71,12 @@ struct FromHomePanel: View {
         HStack(alignment:.top,spacing:14) {
             if !typeSize.isAccessibilitySize { glyph().frame(width:glyphSize,height:glyphSize).padding(.top,1).accessibilityHidden(true) }
             VStack(alignment:.leading,spacing:4) {
-                ViewThatFits(in:.horizontal) {
-                    HStack(alignment:.firstTextBaseline) {
-                        title.font(.headline).foregroundStyle(palette.ink)
-                        Spacer(minLength:8)
-                        if let value { Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(palette.accent).multilineTextAlignment(.trailing) }
-                    }
-                    VStack(alignment:.leading,spacing:3) {
-                        title.font(.headline).foregroundStyle(palette.ink)
-                        if let value { Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(palette.accent) }
-                    }
+                // One line when the title and value fit side by side at their natural widths, the value
+                // under the title when they do not (a long name, a larger size, Spanish). A layout rather
+                // than `ViewThatFits`, so only the texts on screen are in the tree and none reads as clipped.
+                TitleValueLayout {
+                    title.font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    if let value { Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
                 }
                 if let detail { Text(detail).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
@@ -99,6 +95,42 @@ struct FromHomePanel: View {
         .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }
 }
+/// A title and its value: on one line, baselines aligned and the value trailing, when both fit at
+/// their natural widths; otherwise the value goes under the title, both leading and free to wrap.
+struct TitleValueLayout: Layout {
+    var spacing:CGFloat=8
+    var stackedSpacing:CGFloat=3
+    func sizeThatFits(proposal:ProposedViewSize,subviews:Subviews,cache:inout ())->CGSize {
+        frames(in:proposal.width,subviews:subviews).size
+    }
+    func placeSubviews(in bounds:CGRect,proposal:ProposedViewSize,subviews:Subviews,cache:inout ()) {
+        let laid=frames(in:bounds.width,subviews:subviews)
+        for (subview,frame) in zip(subviews,laid.frames) {
+            subview.place(at:CGPoint(x:bounds.minX+frame.minX,y:bounds.minY+frame.minY),proposal:ProposedViewSize(frame.size))
+        }
+    }
+    /// Each subview's frame and the size they take together, for a width (nil: as wide as they like).
+    private func frames(in width:CGFloat?,subviews:Subviews)->(frames:[CGRect],size:CGSize) {
+        let ideals=subviews.map { $0.sizeThatFits(.unspecified) }
+        let natural=ideals.reduce(0) { $0+$1.width }+spacing*CGFloat(max(subviews.count-1,0))
+        let available=width ?? natural
+        if subviews.count==2, natural<=available+0.5 {
+            let baselines=subviews.map { $0.dimensions(in:.unspecified)[VerticalAlignment.firstTextBaseline] }
+            let ascent=baselines.max() ?? 0
+            let title=CGRect(x:0,y:ascent-baselines[0],width:ideals[0].width,height:ideals[0].height)
+            let value=CGRect(x:available-ideals[1].width,y:ascent-baselines[1],width:ideals[1].width,height:ideals[1].height)
+            return ([title,value],CGSize(width:available,height:max(title.maxY,value.maxY)))
+        }
+        var y:CGFloat=0, widest:CGFloat=0, laid:[CGRect]=[]
+        for (index,subview) in subviews.enumerated() {
+            if index>0 { y+=stackedSpacing }
+            let size=subview.sizeThatFits(ProposedViewSize(width:width,height:nil))
+            laid.append(CGRect(x:0,y:y,width:size.width,height:size.height))
+            y+=size.height; widest=max(widest,size.width)
+        }
+        return (laid,CGSize(width:width ?? widest,height:y))
+    }
+}
 /// Gives a combined row the item's own spoken sentence, which reads ranges as "from … to …".
 private struct SpokenOverride: ViewModifier {
     let text: String?
@@ -110,3 +142,4 @@ private struct SpokenOverride: ViewModifier {
 #Preview("From Chicago") { if let place=StartingPlaces.named("Chicago, IL"), let origin=HomeSky.origin(location:nil,place:place,park:nil) { ScrollView { FromHomePanel(origin:origin,now:.now).padding() }.background(.black).preferredColorScheme(.dark) } }
 #Preview("Geminids • AX5") { if let place=StartingPlaces.named("Denver"), let origin=HomeSky.origin(location:nil,place:place,park:nil) { ScrollView { FromHomePanel(origin:origin,now:Date(timeIntervalSince1970:1797195600)).padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }
 #Preview("Midnight sun • night vision") { if let park=try? ParkData.load().first(where:{ $0.id=="gaar" }), let origin=HomeSky.origin(location:nil,place:nil,park:park) { ScrollView { FromHomePanel(origin:origin,now:Date(timeIntervalSince1970:1782086400)).padding() }.background(.black).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) } }
+#Preview("Spanish • XXXL (values under titles)") { if let place=StartingPlaces.named("Chicago, IL"), let origin=HomeSky.origin(location:nil,place:place,park:nil) { ScrollView { FromHomePanel(origin:origin,now:.now).padding() }.background(.black).environment(\.locale,Locale(identifier:"es_MX")).dynamicTypeSize(.xxxLarge).preferredColorScheme(.dark) } }
