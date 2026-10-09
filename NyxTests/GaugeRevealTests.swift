@@ -178,34 +178,76 @@ import Testing
 
     // MARK: A sweep moves as one
 
-    @Test func aSweepKeepsTheOldWordUntilTheArcLands() {
-        for plan:Plan in [.sweep,.settle] {
-            #expect(CelestialGauge.bandShown(plan:plan,previous:.excellent,target:.pristine,completed:false) == .excellent)
-            #expect(CelestialGauge.bandShown(plan:plan,previous:.excellent,target:.pristine,completed:true) == .pristine)
+    /// The words on show while a sweep's numeral travels from `from` to `to` (the spring's small
+    /// overshoot past the target included), one entry per frame, nil while no word shows.
+    private func words(sweeping start:Face,to target:Int,overshoot:Double=1.2)->[(numeral:Int,word:ScoreBand?)] {
+        let sweep=CelestialGauge.sweepStart(from:start,to:target)
+        let from=Double(start.shown), past=Double(target)+(Double(target)>from ? overshoot : -overshoot)
+        return (0...400).map { step in
+            let value=from+(past-from)*Double(step)/400
+            let numeral=CelestialGauge.numeral(value:value,target:target)
+            return (numeral,CelestialGauge.wordShown(numeral:numeral,leaving:sweep.leaving,target:ScoreBand.band(target)))
         }
     }
-    @Test func withoutMotionTheNewWordShowsAtOnce() {
-        #expect(CelestialGauge.bandShown(plan:.instant,previous:.excellent,target:.pristine,completed:false) == .pristine)
-        #expect(CelestialGauge.bandShown(plan:.instant,previous:.excellent,target:.pristine,completed:true) == .pristine)
-        // The count hides its word until it lands, so it may carry the answer's word from the start.
-        #expect(CelestialGauge.bandShown(plan:.odometer,previous:.poor,target:.pristine,completed:false) == .pristine)
-        #expect(CelestialGauge.bandShown(plan:.hold,previous:.good,target:.pristine,completed:false) == .good)
+    @Test func aSweepHeadsForTheWholeAnswer() {
+        let start=CelestialGauge.sweepStart(from:.answer(97),to:72)
+        #expect(start.face == .answer(72))
+        #expect(start.leaving == [.pristine])
     }
-    /// Cached 81 overtaken by a computed 97: at every point of the travel the word on show (the old
-    /// one until the landing, the new one after) stands only beside a number of its own band.
-    @Test func theOvertakeNeverPairsANumberWithAnotherBandsWord() {
-        let target=97
-        for start in [51.0,81] {
-            // Every point of the travel, the spring's small overshoot past 97 included.
-            for step in 0...400 {
-                let value=start+(98.2-start)*Double(step)/400
-                let numeral=CelestialGauge.numeral(value:value,target:target)
-                let word=CelestialGauge.bandShown(plan:.sweep,previous:.excellent,target:.pristine,completed:false)
-                if CelestialGauge.wordFits(word,numeral:numeral) { #expect(ScoreBand.band(numeral) == word) }
-            }
-            let landed=CelestialGauge.bandShown(plan:.sweep,previous:.excellent,target:.pristine,completed:true)
-            #expect(CelestialGauge.wordFits(landed,numeral:CelestialGauge.numeral(value:Double(target),target:target)))
+    /// Cached 81 overtaken by a computed 97 while its count was under way: the count had hidden its
+    /// word, so nothing is left behind, "Excellent" never flashes as the number passes 75 to 89,
+    /// and "Pristine" arrives with the first 90.
+    @Test func theOvertakeNeverShowsTheBandsItPasses() {
+        for counted in [0,51,81] {
+            let midCount=Face(arc:Double(counted),shown:counted,settled:false)
+            #expect(CelestialGauge.sweepStart(from:midCount,to:97).leaving.isEmpty)
+            let frames=words(sweeping:midCount,to:97)
+            #expect(frames.allSatisfy { $0.word == nil || $0.word == ScoreBand.band($0.numeral) })
+            #expect(!frames.contains { $0.word == .excellent })
+            #expect(frames.first { $0.word == .pristine }?.numeral == 90)
+            #expect(frames.last?.word == .pristine)
         }
+    }
+    /// 97 down to 72 and back up to 92, as the capture route does: the old word stays while its
+    /// number does, steps away as the number leaves its band, and the new word arrives as the
+    /// number enters its own, before the spring has come to rest.
+    @Test func aSweepAcrossBandsChangesTheWordAtTheBorder() {
+        let down=words(sweeping:.answer(97),to:72)
+        #expect(down.allSatisfy { $0.word == nil || $0.word == ScoreBand.band($0.numeral) })
+        #expect(down.filter { $0.word == .pristine }.map(\.numeral).min() == 90)
+        #expect(down.first { $0.word == .good }?.numeral == 74)
+        #expect(!down.contains { $0.word == .excellent })
+        let up=words(sweeping:.answer(72),to:92)
+        #expect(up.filter { $0.word == .good }.map(\.numeral).max() == 74)
+        #expect(up.first { $0.word == .pristine }?.numeral == 90)
+    }
+    /// A sweep inside one band keeps its word the whole way.
+    @Test func aSweepWithinABandKeepsItsWord() {
+        #expect(words(sweeping:.answer(91),to:97).allSatisfy { $0.word == .pristine })
+    }
+    @Test func aWordFromNoBandLeftBehindNeverShows() {
+        #expect(CelestialGauge.wordShown(numeral:82,leaving:[],target:.pristine) == nil)
+        #expect(CelestialGauge.wordShown(numeral:82,leaving:[.excellent],target:.pristine) == .excellent)
+        #expect(CelestialGauge.wordShown(numeral:62,leaving:[.excellent],target:.pristine) == nil)
+        #expect(CelestialGauge.wordShown(numeral:93,leaving:[.excellent],target:.pristine) == .pristine)
+    }
+    /// A scrub outruns the spring: 80, 77, 74, 71 a detent apart, with the number still at 77 when
+    /// 71 is asked for. The sweep to 71 carries the bands of the nights still in flight, so
+    /// "Excellent" stays beside 77 instead of blinking out at every border; a sweep that had come
+    /// to rest carries nothing, and an overtaken count carries nothing either.
+    @Test func aScrubKeepsTheWordsOfTheNightsItPasses() {
+        var leaving=Set<ScoreBand>()
+        var face=Face.answer(83)
+        for detent in [80,77,74,71] {
+            let start=CelestialGauge.sweepStart(from:face,to:detent,carrying:leaving)
+            leaving=start.leaving; face=start.face
+        }
+        #expect(leaving == [.excellent,.good])
+        #expect(CelestialGauge.wordShown(numeral:77,leaving:leaving,target:ScoreBand.band(71)) == .excellent)
+        #expect(CelestialGauge.wordShown(numeral:73,leaving:leaving,target:ScoreBand.band(71)) == .good)
+        // Came to rest at 74, then one detent to 71: only Good may show.
+        #expect(CelestialGauge.sweepStart(from:.answer(74),to:71).leaving == [.good])
+        #expect(CelestialGauge.sweepStart(from:Face(arc:60,shown:58,settled:false),to:97,carrying:[]).leaving.isEmpty)
     }
     @Test func aSweepingNumeralNeverOvershootsTheAnswer() {
         #expect(CelestialGauge.numeral(value:97.9,target:97)==97)

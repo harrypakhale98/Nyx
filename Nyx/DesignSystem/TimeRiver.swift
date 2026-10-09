@@ -305,7 +305,8 @@ struct TimeRiver: View {
             }
         }
     }
-    /// The AX stepper's capsule: amber-brown on the panel (grey in night vision), as the journal's
+    /// The AX stepper's capsule: amber-brown on the panel (in night vision a dark red, the red ink at
+    /// 0.26), as the journal's
     /// Bortle stepper, but translucent. The stepper draws a glyph it has disabled (− on tonight, +
     /// on the last night) in this same style over the capsule, so an opaque fill would make that
     /// glyph vanish; at half strength it stays a dim, legible mark, and the enabled glyph in
