@@ -405,7 +405,7 @@ struct ScoreAnatomy:View {
     private func shade(_ i:Int)->Double { [1,0.75,0.55,0.4][i] }
     var body:some View {
         VStack(spacing:12) {
-            CelestialGauge(score:94).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 176) // fresh count-up each time the page arrives
+            CelestialGauge(score:94,haptics:false).id(active).frame(height:typeSize.isAccessibilitySize ? nil : 176) // fresh, silent count-up each time the page arrives; the real answer owns the pulses
             VStack(alignment:.leading,spacing:8) {
                 Text("Share of the score").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 GeometryReader { proxy in

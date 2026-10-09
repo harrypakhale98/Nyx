@@ -11,6 +11,8 @@ struct TonightView: View {
     @State private var refreshed=0
     /// The subtle double tap: Tonight's answer is a night a reminder would announce.
     @State private var found=0
+    /// The hero's score has settled (landed, or shown at once): the double tap waits for it.
+    @State private var heroSettled=false
     @Environment(\.openURL) private var openURL
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.scenePhase) private var scenePhase
@@ -89,7 +91,8 @@ struct TonightView: View {
             .overlay(alignment:.top) { ShootingStar(progress:shooting).frame(height:170) }
             .sensoryFeedback(.selection,trigger:refreshed)
             .sensoryFeedback(.impact(weight:.light,intensity:0.8),trigger:found)
-            .task(id:worthy) { await feelFound(worthy) }
+            // The double tap is the reveal's last beat, after the landing and any 70/90 pulses.
+            .task(id:heroSettled ? worthy : nil) { await feelFound(heroSettled ? worthy : nil) }
             .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
@@ -194,7 +197,10 @@ struct TonightView: View {
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
             let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
-            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis).frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
+                           revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
+                           range:CelestialGauge.modelRange(score:night.score.value,models:model.outlook(night)?.scoreRange,basis:night.basis)) { heroSettled=true }
+                .frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
             // The gauge speaks this line, so VoiceOver does not hear it twice.
@@ -220,10 +226,11 @@ struct TonightView: View {
         let night=model.night(park)
         return NotificationScheduler.worthAReminder(night) ? park.id+"-"+park.isoDay(night.id) : nil
     }
-    /// The haptic vocabulary's subtle double tap, once per park and night, after the gauge has landed.
+    /// The haptic vocabulary's subtle double tap, once per park and night, 0.8 s after the gauge
+    /// has settled (0.6 s without motion), so it never overlaps the count-up's pulses.
     private func feelFound(_ key:String?) async {
         guard let key, DebugScenario.screen == nil, !FoundNights.felt(key) else { return }
-        try? await Task.sleep(for:.seconds(systemReduceMotion || forcedReduceMotion ? 0.6 : 1.9))
+        try? await Task.sleep(for:.seconds(systemReduceMotion || forcedReduceMotion ? 0.6 : 0.8))
         guard !Task.isCancelled else { return }
         FoundNights.note(key)
         found+=1
