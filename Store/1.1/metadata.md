@@ -49,7 +49,7 @@ A more honest score. Clouds, smoke and city light now cap a night's score instea
 
 Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip. Start from your city, not only from a park. Follow a night and its countdown appears on your Lock Screen at dusk by itself. Add any night to Calendar, and keep it in your journal at dawn.
 
-Park pages in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with sky glow, viewing spots, campgrounds and ranger programs.
+Park pages in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, where the park's sky can be switched to the same sky under a city's glow, with the towns lighting its horizon, viewing spots, campgrounds and ranger programs.
 
 For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, photo descriptions in your journal, and better VoiceOver throughout.
 

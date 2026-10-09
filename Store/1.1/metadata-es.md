@@ -117,7 +117,7 @@ Un índice más honesto. Las nubes, el humo y la luz de las ciudades ahora limit
 
 Planea tus noches. Una pestaña nueva, Planear, reúne el mes de un parque y Mis noches libres para un viaje. Parte desde tu ciudad, no solo desde un parque. Sigue una noche y su cuenta regresiva aparece sola en tu pantalla bloqueada al anochecer. Agrega cualquier noche a Calendario y guárdala en tu diario al amanecer.
 
-La página del parque, en tres partes: Esta noche; El cielo, con la Luna a tamaño completo y el cielo de esta noche en pantalla completa; y El lugar, con el brillo del cielo, los puntos de observación, los campamentos y los programas con guardaparques.
+La página del parque, en tres partes: Esta noche; El cielo, con la Luna a tamaño completo y el cielo de esta noche en pantalla completa; y El lugar, donde el cielo del parque puede cambiarse por el mismo cielo bajo el brillo de una ciudad, con los pueblos que iluminan su horizonte, los puntos de observación, los campamentos y los programas con guardaparques.
 
 Para más personas. Acceso asistido, un rojo más claro para ojos con daltonismo, Sentir esta noche con el Taptic Engine, Hacia dónde mirar con sonido y AirPods, descripciones de fotos en tu diario y mejor VoiceOver en toda la app.
 

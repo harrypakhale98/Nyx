@@ -36,14 +36,14 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 - **Localizations:** English (add Spanish only after review).
 - **In-App Events:** the November new-moon weekend event, once approved.
 
-**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. "Follow this night" and the journal's photo descriptions are left out: the first waits for the version after build 9, the second works only on iOS 27 with Apple Intelligence.
+**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. The journal's photo descriptions are left out: they work only on iOS 27 with Apple Intelligence. "Follow this night" is in: its Live Activity fixes are in build 9, the build submitted.
 
 ```
 Nyx 1.2 is a large update to a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?
 
 A more honest score. Clouds, smoke and city light now cap a night's score instead of only subtracting from it, so an overcast desert night no longer reads Good, and a park beside a city can no longer read Pristine. Beyond the forecast, nights use each park's usual clouds for that month and say so. The park page says what limits tonight and shows the best clear window.
 
-Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip, starting from your city or from a park. Park pages come in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with sky glow, viewing spots, campgrounds and ranger programs.
+Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip, starting from your city or from a park. Follow a night and its countdown appears on your Lock Screen at dusk. Park pages come in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, where the park's sky can be switched to the same sky under a city's glow, with the towns lighting its horizon, viewing spots, campgrounds and ranger programs.
 
 For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, and better VoiceOver throughout. On Apple Watch, a dark-adaptation clock; on Apple Vision Pro, named stars and constellations; on iPad, parks in their own windows.
 
@@ -73,6 +73,7 @@ Accessibility: every custom control (the score dial, the Moon, the time river, t
 Night-adapted eyes: a red mode for the whole app with measured contrast (red text on black 6.2:1, secondary red 5.3:1), and a field mode that dims the screen and tracks dark adaptation.
 Inclusivity: free, no account, no purchase; step-free notes for viewing spots that quote each park's accessibility page.
 Unique aspects: uncertainty drawn rather than hidden; closures beside the score; on-device astronomy that works offline; no tracking.
+Social impact: each park page names the towns whose light rises on its horizon (58 of 63 parks, NASA Black Marble), switches the park's sky to the same sky at a city's class 8 (62 of 63), and links a Learn essay that quotes Falchi 2016 and Kyba 2023, plus Globe at Night in Safari; Nyx sends nothing.
 Priority: High. The publish window is the November new-moon weekend, the darkest of the month.
 ```
 
