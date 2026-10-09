@@ -65,6 +65,14 @@ enum DebugScenario {
         return nil
         #endif
     }
+    /// A text launch argument, such as `-nyx-glow-compare city`.
+    static func text(_ key: String) -> String? {
+        #if DEBUG
+        return argument(key)
+        #else
+        return nil
+        #endif
+    }
     static func isEnabled(_ value: String) -> Bool {
         #if DEBUG
         return ProcessInfo.processInfo.arguments.contains("-nyx-"+value)

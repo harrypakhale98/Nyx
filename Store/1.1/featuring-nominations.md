@@ -22,7 +22,7 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 | Supplemental materials | Up to 5 URLs. |
 | Helpful details | Accessibility, inclusivity, priority, unique aspects. |
 
-**Lead time.** App Store Connect asks for at least **3 weeks** before the publish date (Apple's developer page says at least 2 weeks and recommends up to 3 months). Use 3 weeks as the floor. Nominations can be edited after submission except for the type and related apps. Keep every claim true on the publish date: if a feature slips from build 8, delete its sentence.
+**Lead time.** App Store Connect asks for at least **3 weeks** before the publish date (Apple's developer page says at least 2 weeks and recommends up to 3 months). Use 3 weeks as the floor. Nominations can be edited after submission except for the type and related apps. Keep every claim true on the publish date: if a feature is not in the 1.2 build that is released, delete its sentence.
 
 ---
 
@@ -36,14 +36,16 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 - **Localizations:** English (add Spanish only after review).
 - **In-App Events:** the November new-moon weekend event, once approved.
 
-**Description (short):**
+**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. "Follow this night" and the journal's photo descriptions are left out: the first waits for the version after build 9, the second works only on iOS 27 with Apple Intelligence.
 
 ```
-Nyx is a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?
+Nyx 1.2 is a large update to a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?
 
-For every park and night, Nyx gives a Darkness Score from 0 to 100 from the Moon, the clouds, the sky glow and the hours of true darkness. The parts add up and the weakest can cap the total, so a cloudy night never looks good, and the score is explained in four plain parts. Park closures sit beside the number.
+A more honest score. Clouds, smoke and city light now cap a night's score instead of only subtracting from it, so an overcast desert night no longer reads Good, and a park beside a city can no longer read Pristine. Beyond the forecast, nights use each park's usual clouds for that month and say so. The park page says what limits tonight and shows the best clear window.
 
-It is honest about uncertainty: three weather models are compared, and nights beyond a reliable forecast use each park's usual clouds and say so. At the park, field mode turns the screen red and dim, counts down to true darkness and turns the real sky to wherever you point the phone, with no camera. Nyx also runs on Apple Watch, iPad and Apple Vision Pro.
+Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip, starting from your city or from a park. Park pages come in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with sky glow, viewing spots, campgrounds and ranger programs.
+
+For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, and better VoiceOver throughout. On Apple Watch, a dark-adaptation clock; on Apple Vision Pro, named stars and constellations; on iPad, parks in their own windows.
 
 The astronomy runs on the device and works offline. There is no account, advertising or tracking; the App Privacy label reads Data Not Collected. One independent developer made it.
 ```
@@ -58,7 +60,7 @@ What is made by hand: a Moon drawn by a Metal shader from NASA's lunar map, lit 
 
 **Supplemental materials (5 URLs):**
 
-1. `https://get-nyx.com/` (landing page; says "Coming to the App Store" until launch)
+1. `https://get-nyx.com/` (landing page, with the App Store link since 1.1 went live)
 2. `https://get-nyx.com/press/` (press kit)
 3. `https://get-nyx.com/case-study` (case study: designing for night-adapted eyes)
 4. TestFlight public link: `[add after external testing is enabled]` (editors who cannot see the store page yet can try the build)
@@ -95,12 +97,11 @@ The Geminids peak on December 14, and in 2026 a thin crescent Moon sets in the e
 ## Later (not filed now)
 
 - **Eta Aquariids at new moon** (New Content), publish 2027-05-04 to 05-08, file by Apr 12, 2027. Copy in the git history of this file.
-- **App Enhancements** for 1.2, once a real update exists.
 - Monthly new-moon weekend events are too routine to nominate one by one; mention them as a series in Nomination 2's helpful details.
 
 ## Submission order
 
 1. By Oct 16: enable the public TestFlight link, publish `docs/` (landing page, press kit, case study), then file Nomination 1.
-2. Submit the November new-moon and Geminids In-App Events once build 8 is approved; attach them.
+2. Submit the November new-moon and Geminids In-App Events once the 1.2 build is approved; attach them.
 3. By Nov 20: file Nomination 2.
 4. Never send the same nomination twice; edit instead. Keep the final text of each nomination here.

@@ -218,7 +218,8 @@ enum Essay: String,CaseIterable,Identifiable {
     var symbol:String { switch self { case .score:"gauge.with.dots.needle.67percent";case .darkness:"sparkles";case .milkyway:"sparkle";case .photo:"camera.aperture";case .meteors:"sparkles.2";case .bortle:"circle.lefthalf.filled";case .forecast:"cloud.moon";case .safety:"figure.hiking";case .etiquette:"moon.stars";case .access:"accessibility" } }
     /// About 200 words a minute, never less than one.
     var minutes:Int { max(1,Int((Double(content.split(whereSeparator:\.isWhitespace).count)/200).rounded())) }
-    var content:String { switch self { case .darkness:String(localized:"essay.darkness");case .milkyway:String(localized:"essay.milkyway");case .meteors:String(localized:"essay.meteors");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette");case .access:String(localized:"essay.access");case .score,.photo,.forecast,.safety:Self.text(rawValue) } }
+    /// Essays that quote a percentage ("60%") read their text without formatting, so a "%" stays a "%".
+    var content:String { switch self { case .milkyway:String(localized:"essay.milkyway");case .meteors:String(localized:"essay.meteors");case .bortle:String(localized:"essay.bortle");case .etiquette:String(localized:"essay.etiquette");case .access:String(localized:"essay.access");case .score,.darkness,.photo,.forecast,.safety:Self.text(rawValue) } }
     /// One way from the essay into Nyx itself: the place where what it explains can be seen tonight.
     func link(model:PlanModel)->(label:String,url:URL)? {
         link(home:model.home,tonight:model.home.map { $0.isoDay(model.tonight($0)) })
@@ -235,6 +236,8 @@ enum Essay: String,CaseIterable,Identifiable {
         case .bortle,.etiquette,.access: return nil
         }
     }
+    /// A closing paragraph that lists sources ("Sources: …", "Fuentes: …"), drawn as a footnote.
+    static func isSources(_ paragraph:String)->Bool { paragraph.hasPrefix(String(localized:"Sources")+":") }
     /// The catalog's `essay.<name>` in the reader's language; until the catalog holds it, the
     /// bundled English source, so a new essay never shows its key.
     static func text(_ name:String,bundle:Bundle = .main)->String {
@@ -297,7 +300,14 @@ struct EssayView:View {
     let essay:Essay
     var body:some View {
         let figure=EssayFigure(essay)
-        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { index,paragraph in Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled); if let figure, index==figure.afterParagraph { figure.view } };if let model,let link=essay.link(model:model) { Button { follow(link.url) } label:{ Label(link.label,systemImage:"arrow.up.right") }.buttonStyle(.bordered).accessibilityHint("Leaves the essay and opens it in Nyx.") };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
+        ScrollView { VStack(alignment:.leading,spacing:28) { EssayIcon(essay:essay,size:48);Text(essay.title).font(.system(.largeTitle,design:.serif));ForEach(Array(essay.content.components(separatedBy:"\n\n").dropFirst().enumerated()),id:\.offset) { index,paragraph in
+            if Essay.isSources(paragraph) {
+                // The essay's sources: a quiet footnote, after the Globe at Night invitation's link.
+                if essay == .darkness { GlobeAtNightLink() }
+                Text(paragraph).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
+            } else { Text(paragraph).font(.system(.body,design:.serif)).lineSpacing(7).foregroundStyle(palette.ink).textSelection(.enabled) }
+            if let figure, index==figure.afterParagraph { figure.view }
+        };if let model,let link=essay.link(model:model) { Button { follow(link.url) } label:{ Label(link.label,systemImage:"arrow.up.right") }.buttonStyle(.bordered).accessibilityHint("Leaves the essay and opens it in Nyx.") };if OnDeviceGuide.available { NavigationLink("Explain this another way") { GuideView(mode:.learn(essay)) }.buttonStyle(.bordered) } }.padding(26).readableColumn(WideLayout.proseWidth) }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(veil:0.6)).navigationTitle("Learn").navigationBarTitleDisplayMode(.inline)
     }
     /// Settings closes first (Learn lives in it), then the link opens where the essay points.
     private func follow(_ url:URL) {

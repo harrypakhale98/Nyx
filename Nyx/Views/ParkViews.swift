@@ -566,7 +566,8 @@ struct ParkDetailView: View {
 
     @ViewBuilder private var placeChapter: some View {
         chapterHeading(.place,detail:eyebrow)
-        Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"Sky glow"); LightPollution(park:park) } }
+        // Sky glow: what city light takes (an illustration), where this park's comes from, and what anyone can do.
+        SkyGlowPanel(park:park).id("glow")
         Panel { ViewingSpots(park:park) }.id("spots")
         // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
         WhereToStayPanel(park:park).id("stay")
@@ -579,7 +580,6 @@ struct ParkDetailView: View {
                 ForEach(programs) { program in ProgramCard(park:park,program:program) }
             } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
         } }.id("programs")
-        Panel { ProtectThisSky(park:park) }
         if !park.description.isEmpty {
             VStack(alignment:.leading,spacing:8) {
                 Eyebrow(text:"From the National Park Service")

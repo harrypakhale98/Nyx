@@ -1,5 +1,10 @@
-// Builds 1080×1350 (4:5) social images from the App Store captures.
+// Builds 1080×1350 (4:5) social images from the App Store screenshots.
 // Usage: swift Scripts/make_social.swift  (run from the repo root)
+// The sources are the 1.2 App Store frames in `Store/1.1 v8/iPhone` (1206×2622), which already carry
+// their eyebrow, caption and starfield (`Scripts/make_store_frames.swift`). A framed source is drawn
+// whole across the card's width from the top, cut at 4:5 with the bottom fading into the night, so
+// its caption is the card's headline. A raw capture (`framed: false`) gets this script's own eyebrow,
+// headline and rounded phone, as before.
 import AppKit
 
 struct Card {
@@ -8,17 +13,19 @@ struct Card {
     let eyebrow: String
     let headline: String
     let cropTop: CGFloat  // fraction of the capture hidden above the frame
+    var framed = false    // an App Store frame that already carries its own caption
 }
 
+// Framed sources: the eyebrow and headline below are the frames' own captions, for reference.
 let cards = [
-    Card(source: "Store/Screenshots/01-tonight-6.9.png", output: "01-tonight.png",
-         eyebrow: "NYX FOR IPHONE", headline: "Where is the sky\ndarkest tonight?", cropTop: 0),
-    Card(source: "Store/Screenshots/02-detail-6.9.png", output: "02-score.png",
-         eyebrow: "THE NEXT 30 NIGHTS", headline: "Follow the moon.\nFind the darker nights.", cropTop: 0.33),
-    Card(source: "Store/Screenshots/03-calendar-6.9.png", output: "03-calendar.png",
-         eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive.", cropTop: 0.12),
-    Card(source: "Store/Screenshots/04-parks-6.9.png", output: "04-parks.png",
-         eyebrow: "63 NATIONAL PARKS", headline: "Every park,\nscored every night.", cropTop: 0.12),
+    Card(source: "Store/1.1 v8/iPhone/01-tonight.png", output: "01-tonight.png",
+         eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?", cropTop: 0, framed: true),
+    Card(source: "Store/1.1 v8/iPhone/02-score.png", output: "02-score.png",
+         eyebrow: "THE DARKNESS SCORE", headline: "One number,\nand its reasons.", cropTop: 0, framed: true),
+    Card(source: "Store/1.1 v8/iPhone/07-plan.png", output: "03-calendar.png",
+         eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive.", cropTop: 0, framed: true),
+    Card(source: "Store/1.1 v8/iPhone/08-parks-map.png", output: "04-parks.png",
+         eyebrow: "EVERY PARK TONIGHT", headline: "63 parks,\ndarkest first.", cropTop: 0, framed: true),
 ]
 
 let W: CGFloat = 1080, H: CGFloat = 1350
@@ -52,6 +59,17 @@ for (index, card) in cards.enumerated() {
     let ctx = gctx.cgContext
     // Flip to top-left origin.
     ctx.translateBy(x: 0, y: H); ctx.scaleBy(x: 1, y: -1)
+
+    if card.framed {
+        // The store frame across the full width, top-aligned: its caption and the top of its screen.
+        let height = CGFloat(shotCG.height) * W / CGFloat(shotCG.width)
+        ctx.setFillColor(NSColor.black.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: W, height: H))
+        ctx.saveGState()
+        ctx.translateBy(x: 0, y: height); ctx.scaleBy(x: 1, y: -1)
+        ctx.interpolationQuality = .high
+        ctx.draw(shotCG, in: CGRect(x: 0, y: 0, width: W, height: height))
+        ctx.restoreGState()
+    } else {
 
     // Void black, with a low indigo/violet glow behind the phone.
     ctx.setFillColor(NSColor.black.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: W, height: H))
@@ -112,6 +130,7 @@ for (index, card) in cards.enumerated() {
     }
     ctx.restoreGState()
     ctx.addPath(path); ctx.setStrokeColor(starlight.withAlphaComponent(0.16).cgColor); ctx.setLineWidth(2); ctx.strokePath()
+    }
 
     // Fade the bottom edge into the night.
     let bottom = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),

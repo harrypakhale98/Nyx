@@ -250,8 +250,9 @@ struct RootView:View {
         // Your privacy → Advanced on its own, opened (`-nyx-advanced`).
         case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
-        // Light pollution, viewing spots (sky glow, step-free) and Protect this sky for one park: `-nyx-park deva | grca | sequ`.
-        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { Panel { LightPollution(park:park) }; Panel { ViewingSpots(park:park) }; Panel { ProtectThisSky(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
+        // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:
+        // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky.
+        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
         // Where to stay for one park (`-nyx-park`; `-nyx-state live` loads campgrounds), and From home
         // tonight for the starting point (`-nyx-place "Chicago, IL"`, `-nyx-date`).

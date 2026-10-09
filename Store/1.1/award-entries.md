@@ -1,14 +1,14 @@
-# Nyx — award entries (one set, for the first public release)
+# Nyx — award entries (one set: 1.1 live, 1.2 the update)
 
-Rewritten 2026-10-07. Version 1.1 is Nyx's first public release, so the old "1.0-safe" variants are gone: there is one text per length, and it describes build 8. Every sentence below is something a juror can check in the app, on the website or in the repository. Nothing invents users, downloads, press or reviews.
+Rewritten 2026-10-07; brought up to date 2026-10-09. Nyx 1.1 is live on the App Store (released October 7, 2026, App Store ID 6818817800), and version 1.2 is the update (build 9 in `project.yml`; What's New in `metadata.md`). There is one text per length, and it describes 1.2: file each entry once 1.2 is released, or cut any sentence the live version cannot show. Every sentence below is something a juror can check in the app, on the website or in the repository. Nothing invents users, downloads, press or reviews.
 
-**Before filing any entry:** (1) confirm each named feature is in the live build (same table as `metadata.md` § Confirm before pasting); (2) keep the accessibility wording at "designed for" / "carries" until the physical-device pass in `accessibility-nutrition-labels.md` is signed, then the stronger "works with" wording may be used; (3) re-read each form's field limits, which were not opened for this draft.
+**Before filing any entry:** (1) confirm each named feature is in the live version (same table as `metadata.md` § Confirm before pasting); (2) keep the accessibility wording at "designed for" / "carries" until the physical-device pass in `accessibility-nutrition-labels.md` is signed, then the stronger "works with" wording may be used; (3) re-read each form's field limits, which were not opened for this draft.
 
 ## Programs, deadlines and fees
 
 | Program | Category | Deadline | Fee | Decision |
 |---|---|---|---|---|
-| **Webby Awards, 31st** | Apps, Software & Immersive → App Excellence → **Accessibility & Inclusion** | Early entry Fri Oct 30, 2026; final entry mid-December (an earlier edition's pattern; confirm) | $645 early, $715 final, per entry | **Enter**, once the app is live (Webby requires the work to be live and accessible at entry and through mid-2027). If the release is not live by Oct 30, enter at the final deadline; do not rush for the $70. Verified on webbyawards.com 2026-10-06. |
+| **Webby Awards, 31st** | Apps, Software & Immersive → App Excellence → **Accessibility & Inclusion** | Early entry Fri Oct 30, 2026; final entry mid-December (an earlier edition's pattern; confirm) | $645 early, $715 final, per entry | **Enter.** Webby requires the work to be live and accessible at entry and through mid-2027; 1.1 is live, so the early deadline is open. Enter early only if 1.2 is released by Oct 30, otherwise at the final deadline; do not rush for the $70. Verified on webbyawards.com 2026-10-06. |
 | **UX Design Awards, Spring 2027** | **Product** | Call for entries Sep 1 – **Nov 15, 2026** | **EUR 320** (excl. VAT); optional nomination package EUR 2,250 is not needed | **Enter by Nov 15.** Eligible products are "currently on the market or launching within one year of entry", so a pre-launch entry is allowed. Verified on ux-design-awards.com 2026-10-07; the entry materials and limits are in their "Participant Information" document, not read. |
 | Red Dot: Brands & Communication Design 2027 | Digital → Interface & User Experience Design | 2026 pattern: early bird late Jan – mid Feb (EUR 250), regular to late Apr (EUR 330) | see left | **Later** (January 2027), and only if reviews and press exist to cite. 2027 dates unpublished. |
 | iF Design Award 2027 | UI or UX | Last chance Nov 4, 2026 | EUR 500, about EUR 3,700 in total if it wins | **Skip this cycle** (AM-02 timeline): the cost is high before there is any evidence from real use. |
@@ -26,8 +26,16 @@ Recommended spend this cycle: Webby Accessibility & Inclusion ($645 or $715) and
 - App Privacy label: Data Not Collected. Three public data services, each switchable; no analytics or third-party code (`PRIVACY.md`, `Scripts/verify_release.py`).
 - Apple's automated accessibility audit passes on every screen in both palettes in the simulator; contrast ratios are published (`Research/contrast.json`: red text on black 6.2:1). The physical-device pass is open and is said to be open (`AUDIT.md`).
 - Astronomy checked against the U.S. Naval Observatory: Moon rise and set within 3.7 minutes at mid-latitude parks and within a minute at the Alaska, Hawaiʻi, American Samoa and Virgin Islands checks; Sun within a minute (`Research/accuracy.md`, `NyxTests/usno-polar-tropical.json`).
-- A unit suite of 232 tests on iOS 26 and iOS 27 (count on 2026-10-07; update at filing).
+- 357 unit tests in 33 suites, passing on iOS 26.5 and iOS 27 (build 9, verified 2026-10-08; recount at filing).
 - Free, with no purchase or subscription.
+
+**Social impact (facts only, for Webby's statement fields, UX Design Awards and any later Anthem or Core77 entry):**
+
+```
+Nyx treats light pollution as something you can see and do something about, using public data only. Each park's page names the towns whose light rises on its horizon, from NASA's Black Marble satellite night lights: 58 of the 63 parks have at least one named light dome, such as Las Vegas from Death Valley. For 30 parks it also says whether the light around the park grew faster or more slowly than around most parks between 2013 and 2025; Alaska, and parks where gas flares or lava decide the trend, are left out, and the middle third is not named because the data can rank but not measure. The same panel draws the park's sky beside a city's, lists three habits for outdoor lighting at home, and leads to a Learn essay with two sourced figures. A link opens Globe at Night, the citizen-science star count, in Safari; Nyx sends nothing. For accessibility, 60 of the 85 viewing spots carry step-free notes (35 step-free, 25 partly step-free) quoted from each park's own accessibility pages.
+```
+
+Counts checked against the bundled data on 2026-10-09 (`skyglow.json`, `accessible-spots.json`, `SkyGlow.trendRank`). Make no claim that Nyx reduces light pollution, and cite "Follow this night" only once the version that carries its Live Activity fixes (after build 9) is live.
 
 **After launch,** add only measured facts: App Store ratings, accessibility testers' feedback, parks or dark-sky groups that link to Nyx.
 
