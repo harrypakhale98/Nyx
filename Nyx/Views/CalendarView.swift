@@ -52,7 +52,8 @@ struct NightCell: View {
             .accessibilityHidden(true)
             // Space, not hidden text: a hidden placeholder stretched the date's text frame over the whole cell.
             if isPast { Color.clear.frame(height:scoreLine) }
-            else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted) }
+            // As tall as the score line, so an overcast night's date sits on its row.
+            else if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted).frame(height:scoreLine) }
             // Medium weight: at 11 pt the thin diagonals of a regular "7" fade into the sky.
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit().weight(.medium)).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78*scale)
@@ -158,6 +159,9 @@ struct CalendarView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     /// The month's own width (an open inspector is not part of it).
     @State private var width=0.0
+    /// The pager's own width: a change (the inspector opening, an iPad window resized) rebuilds it on
+    /// the current month, since a paging scroll view keeps its old offset in points.
+    @State private var pagerWidth=0
     private var park:Park? { model.park(parkID) ?? model.home }
     /// A wide iPad window shows the chosen night's breakdown in a trailing inspector beside a larger
     /// month, and a tap chooses the night; otherwise a tap opens the breakdown in a sheet.
@@ -341,8 +345,9 @@ struct CalendarView: View {
     /// month is in the accessibility tree and carries the peek, the rotors and the keyboard steps.
     /// Reduce Motion and Prefer Cross-Fade keep one page that fades between months.
     @ViewBuilder private func months(_ park:Park,_ data:Month,others:[Int:Month],scale:Double)->some View {
+        let weeks=MonthPager.weeks(park,tonight:model.tonight(park),around:monthOffset)
         if !paging {
-            grid(park,data,scale:scale,current:true)
+            grid(park,data,scale:scale,current:true,weeks:weeks)
                 .id(monthOffset)
                 .transition(.opacity)
                 .contentShape(Rectangle())
@@ -356,9 +361,9 @@ struct CalendarView: View {
                     ForEach(-1...1,id:\.self) { slot in
                         let offset=monthOffset+slot
                         Group {
-                            if offset==monthOffset { grid(park,data,scale:scale,current:true) }
-                            else if let page=others[offset] { grid(park,page,scale:scale,current:false) }
-                            else { skeleton(park,scale:scale) }
+                            if offset==monthOffset { grid(park,data,scale:scale,current:true,weeks:weeks) }
+                            else if let page=others[offset] { grid(park,page,scale:scale,current:false,weeks:weeks) }
+                            else { skeleton(park,scale:scale,weeks:weeks) }
                         }
                         .padding(.horizontal,24)
                         .containerRelativeFrame(.horizontal)
@@ -373,6 +378,9 @@ struct CalendarView: View {
             .onScrollPhaseChange { _,phase in if phase == .idle { commit() } }
             // Edge to edge: the page slides under the column's margins instead of being cut at them.
             .padding(.horizontal,-24)
+            // A new width rebuilds the pager, which lands on the current month through its initial anchor.
+            .id(pagerWidth)
+            .onGeometryChange(for:Int.self) { Int($0.size.width) } action:{ pagerWidth=$0 }
         }
     }
     /// The pager, unless motion should be still or cross-fade.
@@ -388,14 +396,16 @@ struct CalendarView: View {
     private func weekdays(_ park:Park)->some View {
         ForEach(0..<7,id:\.self) { i in Text(park.calendar.veryShortWeekdaySymbols[(i+park.calendar.firstWeekday-1)%7]).font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
     }
-    /// One month's nights. Always six weeks tall, so a five-week month never makes the page jump.
+    /// One month's nights, `weeks` tall (the tallest of the three months in the pager), so a page
+    /// never jumps mid-slide and a five-week window keeps no empty sixth row.
     /// `scale` enlarges each night's little sky on a wide iPad. `current` is the month in the
-    /// accessibility tree: only it has the long-press peek and the rotors.
-    private func grid(_ park:Park,_ data:Month,scale:Double,current:Bool)->some View {
-        let focusedNight=wide ? focused(data)?.id : nil
+    /// accessibility tree: only it has the long-press peek and the rotors, and only it shows the
+    /// chosen night, so a neighbouring page never peeks in with a second selection.
+    private func grid(_ park:Park,_ data:Month,scale:Double,current:Bool,weeks:Int)->some View {
+        let focusedNight=wide && current ? focused(data)?.id : nil
         let ringed=data.stretch.nights.map(\.id).filter { data.inWindow.contains($0) }
         let drawn = !paging || landed.contains(Self.pageKey(park,Self.monthOffset(park,tonight:model.tonight(park),to:data.date)))
-        let trailing=max(0,42-data.lead-data.nights.count)
+        let trailing=max(0,weeks*7-data.lead-data.nights.count)
         return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
             weekdays(park)
             // Ids apart from the weekday initials' and the sixth week's: a lazy grid drops repeated ids.
@@ -418,17 +428,17 @@ struct CalendarView: View {
                     cell
                 }
             }
-            // A sixth week held open with invisible cells, as tall as real ones at any text size.
+            // The last weeks held open with invisible cells, as tall as real ones at any text size.
             if let sample=data.nights.first { ForEach(100..<(100+trailing),id:\.self) { _ in NightCell(night:sample,scale:scale).hidden().accessibilityHidden(true) } }
         }
         .modifier(MonthRotors(enabled:current,best:Self.bestNights(data.nights,after:data.tonight),stretchTitle:data.stretch.kind.title,stretch:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) })))
     }
-    /// A month not yet worked out: six quiet weeks of faint dots, the same size as the real page.
-    private func skeleton(_ park:Park,scale:Double)->some View {
+    /// A month not yet worked out: quiet weeks of faint dots, the same size as the real page.
+    private func skeleton(_ park:Park,scale:Double,weeks:Int)->some View {
         let sample=model.night(park)
         return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
             weekdays(park)
-            ForEach(200..<242,id:\.self) { _ in
+            ForEach(200..<(200+weeks*7),id:\.self) { _ in
                 NightCell(night:sample,scale:scale).hidden()
                     .overlay { Circle().fill(palette.line.opacity(0.5)).frame(width:5*scale,height:5*scale) }
             }
@@ -637,6 +647,19 @@ nonisolated enum MonthPager {
         let month=park.calendar.date(byAdding:.month,value:offset,to:base) ?? base
         let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
         return (0..<count).map { park.evening(park.date(month,addingDays:$0)) }
+    }
+    /// Weeks a month spans in the park's calendar (4 to 6).
+    static func weeks(_ park:Park,tonight:Date,offset:Int)->Int {
+        let base=CalendarView.baseMonth(park,tonight:tonight)
+        let month=park.calendar.date(byAdding:.month,value:offset,to:base) ?? base
+        let count=park.calendar.range(of:.day,in:.month,for:month)?.count ?? 30
+        let lead=(park.calendar.component(.weekday,from:month)-park.calendar.firstWeekday+7)%7
+        return (lead+count+6)/7
+    }
+    /// The pager's height in weeks: the tallest of the month at `offset` and its two neighbours, so
+    /// it changes only when the window of three months moves, never during a slide.
+    static func weeks(_ park:Park,tonight:Date,around offset:Int)->Int {
+        (offset-1...offset+1).map { weeks(park,tonight:tonight,offset:$0) }.max() ?? 6
     }
     /// The night a month focuses: the chosen one when it is in the month, else tonight, else the first.
     static func focus(_ ids:[Date],chosen:Date?,tonight:Date)->Date? {

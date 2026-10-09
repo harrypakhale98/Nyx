@@ -3,7 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// The night as artwork to share, led by the night itself: the park's real sky, the Moon as it
-/// will look (or "New moon" in words, never a dark disc), the score as a light serif numeral with its
+/// will look (or, at new Moon, a hairline circle with "New moon" in words, never a dark disc), the score as a light serif numeral with its
 /// band, the forecast models' range when they disagree, then the park, the date, one line on why
 /// the night is good and what the clouds rest on. A small wordmark at the foot. Two shapes in one
 /// layout: a card (4:5-ish, for messages) and a 9:16 story. The words travel with the image as its
@@ -55,6 +55,12 @@ struct ShareCard:View {
                 MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
                     .frame(width:side,height:side)
                     .padding(.bottom,shape == .story ? 18 : 6)
+            } else if night.sky.moon.isNew {
+                // The new Moon as the almanac draws it: a hairline circle where the Moon would be, not
+                // a dark disc and not a lit one (it is up by day, beside the Sun). "New moon" stays in words.
+                Circle().strokeBorder(palette.ink.opacity(0.4),lineWidth:1)
+                    .frame(width:side,height:side)
+                    .padding(.bottom,shape == .story ? 18 : 6)
             }
             VStack(spacing:0) {
                 score
@@ -82,7 +88,7 @@ struct ShareCard:View {
     private var score:some View {
         VStack(spacing:0) {
             Text(night.score.value,format:.number)
-                .font(.system(size:Self.numeralSize,weight:.light,design:.serif)).tracking(-Self.numeralSize*0.046)
+                .font(.system(size:Self.numeralSize,weight:.light,design:.serif)).tracking(-Self.numeralSize*0.02)
                 .foregroundStyle(palette.accent).lineLimit(1).fixedSize()
                 .overlay(alignment:Alignment(horizontal:.trailing,vertical:.lastTextBaseline)) {
                     Text(verbatim:"/100").font(.system(.title3,design:.serif)).foregroundStyle(palette.muted).fixedSize()

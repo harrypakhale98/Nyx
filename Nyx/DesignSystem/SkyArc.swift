@@ -52,12 +52,13 @@ struct SkyArc: View {
             }
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
-            .overlay(alignment:.topLeading) { finger }
             .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch"), !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
             .clipShape(RoundedRectangle(cornerRadius:14))
             // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
             .accessibilityIgnoresInvertColors()
             .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+            // Outside the drawing's text-size cap, so the finger's words grow for the readers who use it.
+            .overlay(alignment:.topLeading) { finger }
             .accessibilityHidden(true)
             ViewThatFits(in:.horizontal) {
                 HStack(spacing:16) { legend;Spacer() }
@@ -233,7 +234,8 @@ struct SkyArc: View {
         // The Moon itself sits at its highest point in view; its track stops at the disc's edge.
         let moonPeak:CGPoint?=moonPoints.max(by:{ $0.1<$1.1 }).flatMap { peak in
             guard peak.1>0 else { return nil }
-            let edge=12*grow
+            // Held a clear 6 pt inside the chart's rounded clip, so the disc never touches its edge at dusk or dawn.
+            let edge=moonSize/2+6
             return CGPoint(x:min(max(x(peak.0),edge),size.width-edge),y:max(y(peak.1),edge))
         }
         let moonRadius=moonSize/2+0.5
@@ -298,11 +300,15 @@ struct SkyArc: View {
             ZStack(alignment:.topLeading) {
                 Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:chartHeight-22)
                     .offset(x:x-palette.stroke/2)
-                Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).lineLimit(1)
+                // Short captions hug the finger; at large text sizes a long one wraps to two lines
+                    // inside the chart (6 pt from each edge) instead of being cut at both ends.
+                Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).multilineTextAlignment(.center)
                     .padding(.horizontal,8).padding(.vertical,3)
-                    .background(Capsule().fill(palette.panel)).overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
-                    .fixedSize()
-                    .alignmentGuide(.leading) { d in -min(max(x-d.width/2,6),width-d.width-6) }
+                    .background(RoundedRectangle(cornerRadius:10).fill(palette.panel)).overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5*palette.stroke))
+                    .padding(.horizontal,6)
+                    .fixedSize(horizontal:false,vertical:true)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                    .alignmentGuide(.leading) { d in -min(max(x-d.width/2,0),width-d.width) }
                     .offset(y:6)
             }
             .frame(width:chartWidth,height:chartHeight,alignment:.topLeading)
