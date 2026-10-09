@@ -72,8 +72,7 @@ struct NightDetail: View {
     private func limitLine(_ plan: NightPlan) -> String? {
         let score = plan.score
         guard let limit = score.limit else { return nil }
-        let sum = Int((score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints).rounded())
-        return limit.cap < sum ? limit.sentence(tonight: model.nightOffset == 0) : nil
+        return limit.cap < score.partsSum ? limit.sentence(tonight: model.nightOffset == 0) : nil
     }
     private func moon(_ plan: NightPlan) -> some View {
         VStack(spacing: 10) {
