@@ -273,7 +273,6 @@ struct LearnView:View {
     @Environment(\.nyx) private var palette
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
-            Text("Learn to look up").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
             LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:18,alignment:.top)],spacing:18) { ForEach(Essay.allCases) { essay in
                 NavigationLink { EssayView(essay:essay) } label:{ Panel { HStack(alignment:.top,spacing:14) {
                     EssayIcon(essay:essay,size:24)
@@ -334,7 +333,7 @@ struct OnboardingView:View {
                             Text(titles[index]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
                             Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
                             if index==2 { redToggle }
-                        }.padding(.horizontal,28).padding(.vertical,index==1 ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
+                        }.padding(.horizontal,28).padding(.vertical,index==1 || typeSize.isAccessibilitySize ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy that runs past the controls fades out instead of being cut mid-line.
                     .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:24) } }
@@ -351,18 +350,22 @@ struct OnboardingView:View {
             }.padding(.bottom,28)
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
     }
+    /// At accessibility sizes the Moon steps back, so the whole headline and the start of the
+    /// message sit above the page dots.
+    private var moonSize:CGFloat { typeSize.isAccessibilitySize ? 96 : 170 }
+    private var moonPadding:CGFloat { typeSize.isAccessibilitySize ? 8 : 24 }
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
-        case 0: OnboardingMoon(daysAfterNew:3).frame(width:170,height:170).padding(.vertical,24)
+        case 0: OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding)
         case 1: ScoreAnatomy(active:page==1)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
-        default: OnboardingMoon(daysAfterNew:11).frame(width:170,height:170).padding(.vertical,24)
+        default: OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding)
         }
     }
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
     private var redToggle:some View {
         Toggle(isOn:$nightVision) {
-            Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "moon.circle.fill" : "moon.circle").foregroundStyle(palette.accent) }.font(.headline)
+            Label { Text("Night vision") } icon:{ Image(systemName:nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle").foregroundStyle(palette.accent) }.font(.headline)
         }
         .tint(palette.controlTint)
         .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)

@@ -80,6 +80,28 @@ final class NyxUITests:XCTestCase {
         let moved=NSPredicate { _,_ in (river.value as? String) != before }
         XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:moved,object:nil)],timeout:5),.completed,"A touch did not move the river")
     }
+    /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
+    /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
+    /// settled the switch shows the stored setting again. Ends with night vision off, as it began.
+    func testNightVisionLamp() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","tonight","-nyx-state","offline"]
+        app.launch()
+        let toggle=app.buttons["Night vision"].firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout:15))
+        if toggle.identifier != "flashlight.off.circle" { toggle.tap(); sleep(2) }
+        XCTAssertEqual(toggle.identifier,"flashlight.off.circle")
+        toggle.tap()
+        sleep(2)
+        XCTAssertEqual(toggle.identifier,"flashlight.on.circle.fill","The lamp did not turn night vision on")
+        toggle.tap(); toggle.tap()
+        sleep(2)
+        XCTAssertEqual(toggle.identifier,"flashlight.on.circle.fill","Two quick taps did not end where they began")
+        toggle.tap()
+        sleep(2)
+        XCTAssertEqual(toggle.identifier,"flashlight.off.circle","The lamp did not turn night vision off")
+    }
     func testOfflineLaunchResponsiveness() {
         let app=offlineApp()
         let options=XCTMeasureOptions()

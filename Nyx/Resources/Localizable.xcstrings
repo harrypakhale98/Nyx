@@ -3123,23 +3123,6 @@
         }
       }
     },
-    "A number with a reason": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A number with a reason"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un número con sus razones"
-          }
-        }
-      }
-    },
     "A park's closure (illustrative text)": {
       "extractionState": "manual",
       "localizations": {
@@ -7477,6 +7460,23 @@
         }
       }
     },
+    "Darkest within %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest within %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo más oscuro a menos de %@"
+          }
+        }
+      }
+    },
     "Darkest: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -8021,6 +8021,23 @@
         }
       }
     },
+    "Distance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distancia"
+          }
+        }
+      }
+    },
     "Distances are straight lines, not driving routes. Scores are estimates. Check closures and the forecast before you go.": {
       "extractionState": "manual",
       "localizations": {
@@ -8269,6 +8286,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cada parque tiene una zona horaria IANA. Una noche va del mediodía local al mediodía local siguiente, y “esta noche” pasa a la tarde siguiente cuando sale el Sol. Las horas que se muestran en el detalle son las del parque, incluidos los cambios de horario de verano. Las estrellas detrás de cada pantalla son el cielo real sobre ese parque a mitad de la oscuridad de la noche, según el Yale Bright Star Catalogue (Hoffleit y Warren, vía NASA HEASARC); muestran dónde están las estrellas, no si las nubes las ocultarán. En Apple Vision Pro, los nombres de las estrellas provienen del Grupo de Trabajo sobre Nombres de Estrellas de la UAI (IAU WGSN)."
+          }
+        }
+      }
+    },
+    "Each park uses its own local date.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each park uses its own local date."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada parque usa su propia fecha local."
           }
         }
       }
@@ -8626,6 +8660,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Índice de ejemplo 94 de 100. Parte del índice: luz de luna 40 por ciento, nubes 25, resplandor 20 y oscuridad total 15. 90 o más es Prístina, 75 Excelente, 60 Buena."
+          }
+        }
+      }
+    },
+    "Example: from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example: from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejemplo: desde %@"
           }
         }
       }
@@ -9187,23 +9238,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Calcula en el dispositivo el índice de oscuridad de un parque nacional. Devuelve el índice, de 0 a 100."
-          }
-        }
-      }
-    },
-    "Find your dark sky": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Find your dark sky"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encuentra tu cielo oscuro"
           }
         }
       }
@@ -14170,6 +14204,23 @@
         }
       }
     },
+    "Night vision off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night vision off"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visión nocturna desactivada"
+          }
+        }
+      }
+    },
     "Night vision on": {
       "extractionState": "manual",
       "localizations": {
@@ -14398,6 +14449,23 @@
         }
       }
     },
+    "No alerts listed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts listed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin alertas publicadas"
+          }
+        }
+      }
+    },
     "No bright planets up in the dark hours tonight.": {
       "extractionState": "manual",
       "localizations": {
@@ -14462,6 +14530,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sin cierres en la última actualización del parque. Revisa todas las alertas del parque antes de ir."
+          }
+        }
+      }
+    },
+    "No closures listed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No closures listed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin cierres publicados"
           }
         }
       }
@@ -28544,6 +28629,23 @@
         }
       }
     },
+    "check alerts before you go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "check alerts before you go"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "revisa las alertas antes de ir"
+          }
+        }
+      }
+    },
     "clear": {
       "extractionState": "manual",
       "localizations": {
@@ -28591,6 +28693,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "aún no se conocen las nubes"
+          }
+        }
+      }
+    },
+    "confirm access before you go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "confirm access before you go"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "confirma el acceso antes de ir"
           }
         }
       }
@@ -28880,6 +28999,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "fin del pronóstico"
+          }
+        }
+      }
+    },
+    "forecast from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forecast from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de %@"
           }
         }
       }
