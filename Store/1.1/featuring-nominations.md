@@ -36,7 +36,7 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 - **Localizations:** English (add Spanish only after review).
 - **In-App Events:** the November new-moon weekend event, once approved.
 
-**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. The journal's photo descriptions are left out: they work only on iOS 27 with Apple Intelligence. "Follow this night" is in: its Live Activity fixes are in build 9, the build submitted.
+**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. The journal's photo descriptions are left out: they work only on iOS 27 with Apple Intelligence. "Follow this night" is in: its Live Activity fixes are in build 10, the build submitted.
 
 ```
 Nyx 1.2 is a large update to a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?

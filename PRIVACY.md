@@ -1,4 +1,4 @@
-# Privacy review — 2026-10-02, updated 2026-10-08 for version 1.2 (9), the update to 1.1 (7), public since 2026-10-07
+# Privacy review — 2026-10-02, updated 2026-10-09 for version 1.2 (10), the update to 1.1 (7), public since 2026-10-07
 
 ## Implementation evidence
 

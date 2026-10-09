@@ -31,7 +31,7 @@ The description and What's New name features from main. Each row below was check
 - **Categories:** Travel (primary), Weather (secondary).
 - **Price:** Free. No subscriptions, advertising or in-app purchases (a standing condition of Open-Meteo's free, non-commercial terms).
 - **Copyright:** `2026 Hardik Pakhale`.
-- **Version / build:** 1.2 (9). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
+- **Version / build:** 1.2 (10). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
