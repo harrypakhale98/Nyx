@@ -4,8 +4,15 @@ import SwiftUI
 /// real phase, the tilt seen from that place at the Moon's highest point that night, libration,
 /// and earthshine on the night side. Falls back to the vector `MoonDisc` where Metal shaders
 /// don't run (widgets) and in the tab bar.
+///
+/// Two sizes of map. From 120 pt (the Moon hero, onboarding, the share card, Assistive Access) it
+/// draws on `MoonAtlas`: the 4096×2048 colour map, and LOLA's relief, which casts crater shadows
+/// along the terminator unless `moonRelief` is off (while the Moon is being scrubbed). Smaller
+/// Moons keep the 1024×512 `MoonMap` and gain a faint limb ring under 90 pt, so a Moon near new
+/// reads as a Moon rather than a hole (the Tonight tab icon's convention).
 struct MoonView: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.moonRelief) private var relief
     let geometry: MoonGeometry
     /// Spoken with the label, e.g. "as seen at 11:40 PM".
     var moment: String?=nil
@@ -16,6 +23,7 @@ struct MoonView: View {
                 .frame(width:side,height:side)
                 .colorEffect(shader(side:side))
                 .background { halo(side:side) }
+                .overlay { limb(side:side) }
                 .position(x:proxy.size.width/2,y:proxy.size.height/2)
         }
         .aspectRatio(1,contentMode:.fit)
@@ -23,10 +31,22 @@ struct MoonView: View {
         .accessibilityLabel(label)
         .accessibilityIgnoresInvertColors()
     }
+    /// From this size the Moon draws on the atlas (and its relief); below it, never.
+    nonisolated static let atlasSide=120.0
+    /// Below this size the Moon gains its limb ring and a brighter earthshine.
+    nonisolated static let smallSide=90.0
+    /// The terrain's slopes, exaggerated 2.5 times: at 280 pt one texel of relief is about a point,
+    /// and real slopes at that scale only show at the very edge of the terminator.
+    nonisolated static let reliefStrength=2.5
     private func shader(side:Double)->Shader {
         let sun=light
-        return ShaderLibrary.nyxMoon(.float2(CGSize(width:side,height:side)),.float4(sun.x,sun.y,sun.z,earthshine),
-            .float4(cos(geometry.north),sin(geometry.north),geometry.librationLongitude,geometry.librationLatitude),.image(Image("MoonMap")))
+        let size=Shader.Argument.float2(CGSize(width:side,height:side))
+        let lighting=Shader.Argument.float4(sun.x,sun.y,sun.z,Self.earthshine(geometry,side:side))
+        let frame=Shader.Argument.float4(cos(geometry.north),sin(geometry.north),geometry.librationLongitude,geometry.librationLatitude)
+        if side>=Self.atlasSide {
+            return ShaderLibrary.nyxMoonRelief(size,lighting,frame,.float(relief ? Self.reliefStrength : 0),.image(Image("MoonAtlas")))
+        }
+        return ShaderLibrary.nyxMoon(size,lighting,frame,.image(Image("MoonMap")))
     }
     /// The Sun's direction in screen space (x right, y up, z toward the viewer).
     private var light:SIMD3<Double> {
@@ -34,7 +54,24 @@ struct MoonView: View {
         return SIMD3(sin(i) * -sin(a), sin(i)*cos(a), cos(i))
     }
     /// Earth as seen from the Moon is full when the Moon is new: the night side glows most then.
-    private var earthshine:Double { 0.09*(1-cos(geometry.phaseAngle))/2 }
+    /// The hero is physically scaled (0.09 of the albedo at most); under 90 pt the floor is lifted
+    /// to 0.14, so a 20–60 pt Moon near new keeps a visible night side.
+    nonisolated static func earthshine(_ geometry:MoonGeometry,side:Double)->Double {
+        (side<smallSide ? 0.14 : 0.09)*(1-cos(geometry.phaseAngle))/2
+    }
+    /// The limb ring's strength: starlight at 30%, or at the palette's hairline strength (3:1 or
+    /// more against black) under Increase Contrast and in night vision, which mirrors `NyxPalette.line`.
+    nonisolated static func limbOpacity(nightVision:Bool,highContrast:Bool)->Double {
+        nightVision ? 0.7 : highContrast ? 0.6 : 0.3
+    }
+    @ViewBuilder private func limb(side:Double)->some View {
+        if side<Self.smallSide {
+            let strong=palette.nightVision || palette.highContrast
+            Circle().strokeBorder(palette.ink.opacity(Self.limbOpacity(nightVision:palette.nightVision,highContrast:palette.highContrast)),lineWidth:strong ? 1 : 0.75)
+                .frame(width:side,height:side)
+                .allowsHitTesting(false)
+        }
+    }
     private func halo(side:Double)->some View {
         // Fades out well inside its frame, so no container can clip it into a visible square.
         Circle().fill(RadialGradient(colors:[palette.ink.opacity(0.08+0.12*geometry.illumination),.clear],center:.center,startRadius:side*0.46,endRadius:side*0.68))
@@ -67,6 +104,11 @@ struct MoonView: View {
         }
     }
 }
+extension EnvironmentValues {
+    /// Whether a large Moon may draw its relief. Off while the Moon or the time river is being
+    /// scrubbed, so the drag holds the display's full frame rate; the relief returns on release.
+    @Entry var moonRelief=true
+}
 extension AstronomyEngine {
     /// The Moon for a night at a park, oriented as it looks at its highest point that night.
     func moon(for night:Night)->(geometry:MoonGeometry,moment:Date) {
@@ -80,5 +122,31 @@ extension AstronomyEngine {
         HStack { ForEach([0,4,8,12,16,22],id:\.self) { day in
             MoonView(geometry:engine.moonGeometry(for:park,at:Date(timeIntervalSince1970:1791100000+Double(day)*86400))).frame(width:56)
         } }.padding().background(.black)
+    }
+}
+#Preview("Small Moons near new • contrast and night vision") {
+    let engine=AstronomyEngine()
+    if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
+        let near=Date(timeIntervalSince1970:1791100000+28*86400)
+        VStack(spacing:16) {
+            HStack { ForEach([20.0,26,56,64],id:\.self) { side in MoonView(geometry:engine.moonGeometry(for:park,at:near)).frame(width:side) } }
+            HStack { ForEach([20.0,26,56,64],id:\.self) { side in MoonView(geometry:engine.moonGeometry(for:park,at:near)).frame(width:side) } }
+                .environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
+            HStack { ForEach([20.0,26,56,64],id:\.self) { side in MoonView(geometry:engine.moonGeometry(for:park,at:near)).frame(width:side) } }
+                .environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true))
+        }.padding().background(.black)
+    }
+}
+#Preview("Relief along the terminator") {
+    let engine=AstronomyEngine()
+    if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
+        let crescent=Date(timeIntervalSince1970:1791100000+4*86400), quarter=Date(timeIntervalSince1970:1791100000+8*86400)
+        VStack(spacing:20) {
+            MoonView(geometry:engine.moonGeometry(for:park,at:quarter)).frame(width:280)
+            HStack(spacing:20) {
+                MoonView(geometry:engine.moonGeometry(for:park,at:crescent)).frame(width:150)
+                MoonView(geometry:engine.moonGeometry(for:park,at:crescent)).frame(width:150).environment(\.moonRelief,false)
+            }
+        }.padding().background(.black)
     }
 }

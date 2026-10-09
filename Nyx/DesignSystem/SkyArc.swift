@@ -36,7 +36,9 @@ struct SkyArc: View {
     private var chart: some View {
         VStack(alignment:.leading,spacing:14) {
             Canvas { context,size in draw(in:&context,size:size) } symbols: {
-                MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
+                // Added as light, so an unlit Moon near new vanishes into a bright twilight as it does
+                // in the sky, instead of punching a black disc in it; opaque under Increase Contrast.
+                MoonView(geometry:AstronomyEngine().moon(for:night).geometry).blendMode(palette.highContrast ? .normal : .plusLighter)
                     .frame(width:moonSize,height:moonSize).tag("moon")
             }
             .frame(height:chartHeight)

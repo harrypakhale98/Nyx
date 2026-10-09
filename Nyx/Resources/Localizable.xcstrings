@@ -705,6 +705,40 @@
         }
       }
     },
+    "%@ · Moon %lld%% lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Moon %lld%% lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Luna %lld%% iluminada"
+          }
+        }
+      }
+    },
+    "%@ · New moon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · New moon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Luna nueva"
+          }
+        }
+      }
+    },
     "%@ – %@": {
       "extractionState": "manual",
       "localizations": {
@@ -9646,6 +9680,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Modelos de pronóstico: de %lld a %lld."
+          }
+        }
+      }
+    },
+    "Forecast models: %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models: %lld–%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos de pronóstico: %lld–%lld"
           }
         }
       }
@@ -19955,6 +20006,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Compartir tu año"
+          }
+        }
+      }
+    },
+    "Shares a full-color image.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shares a full-color image."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparte una imagen a todo color."
           }
         }
       }
