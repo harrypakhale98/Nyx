@@ -46,6 +46,18 @@ import Accessibility
         #expect(ColorVision.typical.contrast(starlight*0.4,black)>=3)
         #expect(ColorVision.typical.contrast(NightTint.standard.rgb*0.7,black)>=3)
     }
+    /// Tonight's sky's star names are footnote text: 4.5:1 on black in every palette, through the
+    /// night-vision red at the planets' 0.92, and through the brighter red for every eye.
+    @Test func skyStarNamesReachFourAndAHalf() {
+        let starlight=SIMD3(0.961,0.945,0.902), black=SIMD3<Double>(0,0,0)
+        #expect(ColorVision.typical.contrast(starlight*PanoramaCanvas.starNameOpacity(nightVision:false,highContrast:false),black)>=4.5)
+        #expect(ColorVision.typical.contrast(NightTint.standard.rgb*PanoramaCanvas.starNameOpacity(nightVision:true,highContrast:false),black)>=4.5)
+        // The 0.7 that reads well in starlight would not in red.
+        #expect(ColorVision.typical.contrast(NightTint.standard.rgb*0.7,black)<4.5)
+        for vision in ColorVision.allCases {
+            #expect(vision.contrast(NightTint.brighter.rgb*PanoramaCanvas.starNameOpacity(nightVision:true,highContrast:true),black)>=4.5, "\(vision)")
+        }
+    }
     /// Field mode never raises the screen, dims to 12%, or 20% for people who need more light, and
     /// "Keep my brightness" leaves it alone.
     @Test func fieldBrightnessFloor() {
