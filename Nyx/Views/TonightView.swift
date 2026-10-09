@@ -7,6 +7,7 @@ struct TonightView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyxAccess) private var access
+    @ScaledMetric(relativeTo:.subheadline) private var dotSize=3.0
     @State private var shooting=0.0
     @State private var refreshed=0
     /// The subtle double tap: Tonight's answer is a night a reminder would announce.
@@ -388,7 +389,9 @@ struct TonightView: View {
     private var crowFlies: some View {
         Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
     }
-    private var dot: some View { Text(verbatim:"·").font(.subheadline).foregroundStyle(palette.muted).accessibilityHidden(true) }
+    /// The separator between the starting point and its radius, drawn as a shape rather than a "·"
+    /// glyph: a four-point character is mostly anti-aliasing, which the contrast audit measures as text.
+    private var dot: some View { Circle().fill(palette.muted).frame(width:dotSize,height:dotSize).accessibilityHidden(true) }
     private func origin(wraps:Bool)->some View {
         Button { chooseHome=true } label:{
             Group {

@@ -54,11 +54,7 @@ final class AccessibilityAuditTests:XCTestCase {
             // no longer shrinks fails here rather than being audited at full size.
             XCTAssertLessThan(after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
             let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
-            // The two rows built as one line with a stacked fallback (`ViewThatFits`): the audit's text-size
-            // probe swaps their layout under it, so their texts alone may read as clipped in this pass.
-            let swapRows=["startingPoint","fromHome"].map { app.descendants(matching:.any)[$0] }.filter(\.exists).map(\.frame)
-            print("SWAPROWS|\(state)|\(swapRows)")
-            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised",swapRows:swapRows)
+            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
             app.terminate()
         }
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
@@ -84,8 +80,14 @@ final class AccessibilityAuditTests:XCTestCase {
             .reduce(CGRect.null) { $0.union($1.frame) }
     }
     /// Audits the screen the app shows now; returns the findings that are not known false positives.
-    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,swapRows:[CGRect]=[]) throws->[String] {
+    /// When every finding is about an element that no longer exists by the time it is reported (no
+    /// element, no frame), the screen is audited once more after it settles and that pass decides: on
+    /// iOS 26.5 the minimised pass sometimes catches the system tab bar re-expanding under the audit's
+    /// own probing, and the views in flight report "no description" (2026-10-09; the tree at that moment
+    /// held only labelled app elements). A finding that is still there the second time fails.
+    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,retry:Bool=true) throws->[String] {
         var failures:[String]=[]
+        var unresolved=0
         let window=app.frame
         // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
         // design): the lowest 30% of the window, where cards scroll out under the clock.
@@ -99,10 +101,16 @@ final class AccessibilityAuditTests:XCTestCase {
             let label=issue.element?.label ?? ""
             let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
             print(line)
-            if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar,swapRows:swapRows) { return true }
+            if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
             if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
             failures.append(line)
+            if issue.element==nil { unresolved+=1 }
             return true // collect everything; fail once at the end with the full list
+        }
+        if retry, !failures.isEmpty, unresolved==failures.count {
+            print("AUDITRETRY|\(pass)|\(state)|\(screen)|\(failures.count) findings without an element")
+            sleep(2)
+            return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false)
         }
         return failures
     }
@@ -125,26 +133,24 @@ final class AccessibilityAuditTests:XCTestCase {
         ("parks",""),
     ]
     /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
-    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect,swapRows:[CGRect]=[])->Bool {
+    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
         // scrolling through that band is dimmed by design, whatever the app's colours.
         // On iPad the tab bar floats at the top of the window and the edge effect runs below it (to about 84 pt).
         let topBar = !tabBar.isNull && tabBar.midY<window.height/2
-        var fadeZone=tabBar.isNull ? CGRect.null : tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:topBar ? 28 : -28)
+        // Separate bands, never one union: the bounding box of a top band and a bottom band is the whole
+        // window, which would excuse every finding on the page (the minimised pass did until 2026-10-09).
+        var fadeZones:[CGRect]=tabBar.isNull ? [] : [tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:topBar ? 28 : -28)]
+        let navigationFade=navigationBar.isNull ? CGRect.null : CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)
         // iPad: the navigation bar's own scroll-edge effect at the top of the window, whatever the tab bar reports.
-        if UIDevice.current.userInterfaceIdiom == .pad, !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
+        if UIDevice.current.userInterfaceIdiom == .pad, !navigationFade.isNull { fadeZones.append(navigationFade) }
         // Tonight scrolled with the tab bar minimised: content passing under the navigation bar's own
         // scroll-edge effect at the top is dimmed by design, as under the tab bar.
-        if pass=="minimised", !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
-        // The DEBUG `light` route only (a pushed panel with no tab bar): the scroll view's own bottom edge effect over
-        // the home indicator (34 pt) and about 28 pt above it, where content scrolling out is softened by design. Found
-        // when the Sky glow panel put "An International Dark Sky Park…" across that edge (2026-10-09); it renders in
-        // full there. Every other screen's bottom edge is still measured, fixed buttons and captions included.
-        if screen=="light", tabBar.isNull, UIDevice.current.userInterfaceIdiom == .phone { fadeZone=fadeZone.union(CGRect(x:0,y:window.height-62,width:window.width,height:62)) }
+        if pass=="minimised", !navigationFade.isNull { fadeZones.append(navigationFade) }
         // The minimised bar and the followed night's strip are what that pass is for: their own controls
         // are measured in full, never excused by the band they sit in.
         let barControl=pass=="minimised" && issue.element?.elementType == .button && !tabBar.isNull && tabBar.contains(frame)
-        let visible=frame.isNull ? false : window.contains(frame) && (barControl || !(fadeZone.isNull ? false : frame.intersects(fadeZone)))
+        let visible=frame.isNull ? false : window.contains(frame) && (barControl || !fadeZones.contains { frame.intersects($0) })
         switch issue.auditType {
         case .dynamicType:
             // "Fully unsupported" always fails (the share card's route shows the rendered image, as people
@@ -197,13 +203,14 @@ final class AccessibilityAuditTests:XCTestCase {
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).
             // On iPad the Parks search field sits in the split view's list column; its placeholder is reported as its own element.
-            // The minimised pass scrolls Tonight to rows built as a one-line layout with a stacked fallback
-            // (`ViewThatFits`: the starting point, From home tonight); the audit's own text-size probe swaps
-            // the layout under it and reports the one-line texts as clipped. They render in full at every
-            // size (captures at default and AX5, 2026-10-08); the default and AX5 passes still audit clipping.
-            // Only texts inside those two rows: a truncation anywhere else on Tonight still fails.
-            let probeSwap=pass=="minimised" && !barControl && swapRows.contains { $0.insetBy(dx:-1,dy:-1).contains(frame) }
-            return !visible || probeSwap || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // The DEBUG `light` route (the Sky glow panel pushed alone, no tab bar) opens at the top with its content running
+            // on past the home indicator, so whichever line lies across the home-indicator inset (the bottom 34 pt) at rest is
+            // reported as clipped by that inset. It renders in full there (capture 2026-10-09) and scrolls clear of it; on the
+            // park page the same panel sits mid-page. Clipping only, and only across that inset: contrast there is measured, as
+            // is clipping everywhere else on the route. Replaces a 62 pt band that also excused contrast.
+            let homeIndicator=CGRect(x:0,y:window.height-34,width:window.width,height:34)
+            let pastHomeIndicator=screen=="light" && tabBar.isNull && UIDevice.current.userInterfaceIdiom == .phone && frame.intersects(homeIndicator)
+            return !visible || pastHomeIndicator || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
             // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a
