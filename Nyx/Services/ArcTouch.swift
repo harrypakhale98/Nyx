@@ -2,8 +2,9 @@ import Foundation
 
 /// "Feel the night under your finger": the sky arc explored by touch. With VoiceOver on, a double
 /// tap hands the arc to the finger (`accessibilityDirectTouch`); sliding across it plays a hum
-/// whose strength follows the sky at that moment, a firm click where true darkness begins and
-/// ends, a light tick at moonrise and moonset, and a resting finger hears the time and the sky.
+/// whose strength follows the sky at that moment, a firm, deep knock where true darkness begins and
+/// ends, Feel tonight's sharp tap (lighter) at moonrise and moonset, and a resting finger hears the
+/// time and the sky.
 ///
 /// Built from the same 96 columns `SkyArc` paints, and the hum's strength is Feel tonight's own
 /// (`NightTouch.strength`, from `NightSonification`'s darkness and moonlight), so the finger, the
@@ -15,7 +16,7 @@ nonisolated enum ArcTouch {
     /// A moment the finger crosses.
     enum Milestone: String, Sendable, Equatable {
         case darknessBegins, darknessEnds, moonrise, moonset
-        /// True darkness's edges click firmly; the Moon's only ticks.
+        /// True darkness's edges knock firmly; the Moon's are Feel tonight's sharp tap, lighter.
         var firm: Bool { self == .darknessBegins || self == .darknessEnds }
     }
     /// The sky in a column, in the words the finger hears.

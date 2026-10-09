@@ -8276,6 +8276,23 @@
         }
       }
     },
+    "Double-tap, then slide a finger to explore the night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double-tap, then slide a finger to explore the night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca dos veces y desliza un dedo para explorar la noche."
+          }
+        }
+      }
+    },
     "Double-tap, then slide a finger to feel the night.": {
       "extractionState": "manual",
       "localizations": {

@@ -152,7 +152,8 @@ final class MoonHaptics {
         night=nil
     }
     /// The sky arc under a finger (`ArcTouch`): one long, low hum whose strength follows the finger,
-    /// with a firm click at true darkness's edges and a light tick at moonrise and moonset. Starts
+    /// with a firm, deep knock at true darkness's edges and, at moonrise and moonset, the same sharp
+    /// tap Feel tonight plays there (sharpness 1), lighter so it stays a tick. Starts
     /// only with the Moon-haptics switch on and a Taptic Engine; `endArcTouch()` on lift.
     private var arc: CHHapticAdvancedPatternPlayer?
     func beginArcTouch(strength: Double) {
@@ -169,14 +170,15 @@ final class MoonHaptics {
         followArcTouch(strength:strength,crossings:[])
     }
     /// The finger moved to a new column: the hum takes its strength, and each moment crossed
-    /// (at most two, 40 ms apart, so a quick slide stays distinct) clicks or ticks.
+    /// (at most two, 40 ms apart, so a quick slide stays distinct) knocks or taps. Sharp means the
+    /// Moon in both features; true darkness's edges, which Feel tonight leaves to the hum, are round.
     func followArcTouch(strength: Double, crossings: [ArcTouch.Milestone]) {
         guard let arc else { return }
         try? arc.sendParameters([CHHapticDynamicParameter(parameterID:.hapticIntensityControl,value:Float(min(1,max(0,strength))),relativeTime:0)],atTime:CHHapticTimeImmediate)
         let events=crossings.prefix(2).enumerated().map { k,moment in
             CHHapticEvent(eventType:.hapticTransient,parameters:[
-                CHHapticEventParameter(parameterID:.hapticIntensity,value:moment.firm ? 1 : 0.5),
-                CHHapticEventParameter(parameterID:.hapticSharpness,value:moment.firm ? 0.8 : 0.55)],relativeTime:Double(k)*0.04)
+                CHHapticEventParameter(parameterID:.hapticIntensity,value:moment.firm ? 1 : 0.6),
+                CHHapticEventParameter(parameterID:.hapticSharpness,value:moment.firm ? 0.35 : 1)],relativeTime:Double(k)*0.04)
         }
         if !events.isEmpty { play(events:events,curves:[]) }
     }

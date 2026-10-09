@@ -108,15 +108,23 @@ import Testing
         #expect(NyxPalette(nightVision: false, highContrast: false, boldText: true).stroke == 1.6)
         #expect(NyxPalette(nightVision: true, highContrast: false, brighterRed: true, boldText: true).stroke == 1.6)
     }
-    /// A mark that is not filled never shrinks below 2.6 pt × stroke, so a score-40 early look
-    /// still shows its half; filled marks keep the size their score gives them.
+    /// A mark that is not filled never shrinks below 2.6 pt, grown only by the inward half of a
+    /// heavier outline, so a score-40 early look still shows its half and its hole stays the size
+    /// it is by default; filled marks keep the size their score gives them.
     @Test func unfilledMarksKeepAMinimumRadius() {
         let forty = 1.3+3.6*pow(0.4, 1.5)
         #expect(forty < 2.6)
         #expect(NightMark.drawnRadius(forty, fill: .half, stroke: 1) == 2.6)
-        #expect(NightMark.drawnRadius(forty, fill: .hollow, stroke: 1.6) == 2.6*1.6)
+        let bold = NightMark.drawnRadius(forty, fill: .hollow, stroke: 1.6)
+        #expect(abs(bold - (2.6+1.1*0.6/2)) < 1e-12)
+        // The hole inside the ring is the same at 1 and at 1.6.
+        #expect(abs((bold - 1.1*1.6/2) - (2.6 - 1.1/2)) < 1e-12)
+        // A score-40 early look stays well below a score-85 dot under Bold Text.
+        let eightyFive = 1.3+3.6*pow(0.85, 1.5)
+        #expect(bold < eightyFive - 0.8)
         #expect(NightMark.drawnRadius(forty, fill: .full, stroke: 1.6) == forty)
         #expect(NightMark.drawnRadius(5, fill: .half, stroke: 1) == 5)
+        #expect(NightMark.drawnRadius(forty, fill: .half, lineWidth: 0.8, stroke: 1.6, minimum: 3) == 3)
     }
     /// The week strip's pitch grows with the caption beside it and stops at 1.8×.
     @Test func weekStripPitchScalesAndCaps() {

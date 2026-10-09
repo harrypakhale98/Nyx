@@ -8,6 +8,7 @@ struct SkyArc: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.scenePhase) private var scenePhase
     let night: Night
     /// Whether this is tonight's night, for copy that names it.
     var isTonight=true
@@ -29,6 +30,10 @@ struct SkyArc: View {
     @State private var touchColumns:[ArcTouch.Column]=[]
     @State private var touchColumn:Int?
     @State private var restTask:Task<Void,Never>?
+    /// True while a finger is down. A gesture's state resets when it ends and when it is cancelled
+    /// (a call, a banner, Control Center, the app leaving), which `onEnded` never hears; the hum,
+    /// the hairline and the pending words end with it.
+    @GestureState private var touching=false
     private var touchEnabled:Bool { voiceOver || DebugScenario.isEnabled("arc-touch") }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
@@ -48,9 +53,6 @@ struct SkyArc: View {
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
             .overlay(alignment:.topLeading) { finger }
-            .contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance:0).onChanged { touch(at:$0.location.x) }.onEnded { _ in endTouch() },including:touchEnabled ? .all : .subviews)
-            .onDisappear { endTouch() }
             .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch"), !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
             .clipShape(RoundedRectangle(cornerRadius:14))
             // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
@@ -71,15 +73,29 @@ struct SkyArc: View {
                 }
             }
             Text("Times in \(night.park.timeZoneName)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-        }.accessibilityElement(children:.ignore)
+        }
+            // The whole element answers the finger, as VoiceOver hands the whole element to it: below
+            // the picture, the finger still reads the hour above it (the chart spans the full width).
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance:0).updating($touching) { _,state,_ in state=true }.onChanged { touch(at:$0.location.x) },including:touchEnabled ? .all : .subviews)
+            .onChange(of:touching) { _,down in if !down { endTouch() } }
+            .onChange(of:scenePhase) { _,phase in if phase != .active { endTouch() } }
+            .onChange(of:voiceOver) { _,on in if !on { endTouch() } }
+            .onDisappear { endTouch() }
+            .accessibilityElement(children:.ignore)
             .accessibilityInputLabels([Text("Shape of the night"),Text("Sky arc")])
-            .accessibilityHint(String(localized:"Double-tap, then slide a finger to feel the night.")+" "+String(localized:"An audio graph of the Sun, Moon and Milky Way core is available."))
+            .accessibilityHint(touchHint+" "+String(localized:"An audio graph of the Sun, Moon and Milky Way core is available."))
             // A double tap hands the arc to the finger; ordinary swipes and the audio graph are untouched.
             .accessibilityDirectTouch(true,options:[.silentOnTouch,.requiresActivation])
             .nightChart { [night=night,window=window,summary=spokenSummary] in NightChart.sky(night,window:window,summary:summary) }
             .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). \(core.map { $0.spoken+" " } ?? "")Times in \(night.park.timeZoneName).")
     }
 
+    /// "Feel" only where there is something to feel: an iPad without a Taptic Engine, or the
+    /// Moon-haptics switch off, explores the night by the resting words alone.
+    private var touchHint:String {
+        MoonHaptics.enabled ? String(localized:"Double-tap, then slide a finger to feel the night.") : String(localized:"Double-tap, then slide a finger to explore the night.")
+    }
     private var spokenSummary:String {
         let darkness=night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
         return String(localized:"Sunset \(night.park.time(night.sky.sunset)).")+" "+darkness+" "+String(localized:"Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)).")
