@@ -145,10 +145,11 @@ import Testing
     @Test func greatNightsCountTowardTheThird() throws {
         let defaults=try #require(UserDefaults(suiteName:"nyx-shell-tests"))
         defaults.removePersistentDomain(forName:"nyx-shell-tests")
-        ReviewPrompt.noteNightViewed(score:60,defaults:defaults)
-        #expect(defaults.integer(forKey:ReviewPrompt.greatNightsKey)==0)
-        ReviewPrompt.noteNightViewed(score:75,defaults:defaults); ReviewPrompt.noteNightViewed(score:94,defaults:defaults)
-        #expect(defaults.integer(forKey:ReviewPrompt.greatNightsKey)==2)
+        let key=ReviewPrompt.greatNightsKey(version:"1.1")
+        ReviewPrompt.noteNightViewed(score:60,defaults:defaults,version:"1.1") { _ in }
+        #expect(defaults.integer(forKey:key)==0)
+        ReviewPrompt.noteNightViewed(score:75,defaults:defaults,version:"1.1") { _ in }; ReviewPrompt.noteNightViewed(score:94,defaults:defaults,version:"1.1") { _ in }
+        #expect(defaults.integer(forKey:key)==2)
         defaults.removePersistentDomain(forName:"nyx-shell-tests")
     }
     @Test func supportLinksStayOnTheirHosts() {

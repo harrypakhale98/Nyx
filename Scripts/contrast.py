@@ -56,5 +56,13 @@ lines={'palette':'Lines (graphical objects)',
        'nightRed70OnBlack':round(contrast(tuple(.7*c for c in STANDARD),(0,0,0)),2)}
 assert min(v for k,v in lines.items() if k!='palette')>=3
 rows.append(lines)
+# The twilight lift behind a night without true darkness (RealSky.liftColor, at its brightest at the bottom of the
+# screen): muted captions keep 4.5:1 over it by default. Under Increase Contrast the lift is off (plain black).
+LIFT=(.078,.106,.227)
+lift={'palette':'Twilight lift','primaryOnLift':round(contrast((0.961,.945,.902),LIFT),2),
+      'secondaryOnLift':round(contrast(tuple(.72*c+.28*b for c,b in zip((0.961,.945,.902),LIFT)),LIFT),2),
+      'accentOnLift':round(contrast((1,.706,.329),LIFT),2)}
+assert lift['secondaryOnLift']>=4.5 and lift['accentOnLift']>=4.5, lift
+rows.append(lift)
 Path('Research/contrast.json').write_text(json.dumps(rows,indent=2)+'\n')
 print(json.dumps(rows,indent=1))

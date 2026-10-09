@@ -1,19 +1,37 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
-/// Nyx in Assistive Access: one answer, in large type, with nothing to learn. Two choices:
-/// "Tonight" (the darkest park within reach of the chosen starting point) and "Saved parks".
+/// Nyx in Assistive Access: one answer, in large type, with nothing to learn. Three choices:
+/// "Tonight" (the darkest park within reach of the chosen starting point), "Saved parks" and the
+/// "Red light" switch, which is the same night vision as the full app's.
 /// Each park is one card: its name, one word for the night ("Excellent night"), the Moon as it
 /// will look, when true darkness begins, and a closure if the park reported one. No river,
 /// calendar, journal or Ask Nyx. The same `PlanModel` and journal store as the full app; system
 /// controls take Assistive Access's own large style by themselves.
 struct AssistiveAccessRoot: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     var body: some View {
+        // High contrast throughout: amber and starlight at full strength, and the brighter red.
+        let palette=NyxPalette(nightVision:nightVision,highContrast:true)
         NavigationStack { AssistiveHome() }
-            // High contrast throughout: amber and starlight at full strength.
-            .environment(\.nyx,NyxPalette(nightVision:false,highContrast:true))
+            .environment(\.nyx,palette)
             .preferredColorScheme(.dark)
             .background(AssistiveSavedSync())
+            .modifier(NightVisionFilter(enabled:nightVision,red:palette.red))
+            .animation(reduceMotion ? nil : NyxMotion.spring,value:nightVision)
+            .task { model.savedSync.palette=palette }
+            .onChange(of:nightVision) { _,on in
+                // The same follow-through as the full app (`RootView`): widgets, the Control Center
+                // control, the watch and a followed night's Live Activity change colour with the switch.
+                model.savedSync.palette=NyxPalette(nightVision:on,highContrast:true)
+                WidgetCenter.shared.reloadAllTimelines()
+                ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
+                model.savedSync.pushWatch(model)
+                if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
+            }
     }
 }
 /// The main window's saved-park upkeep, for this scene: the full app's `RootView` does not run in
@@ -37,13 +55,20 @@ private struct AssistiveSavedSync: View {
     }
     private func update() async { await model.savedSync.update(model, parkIDs: saved.map(\.parkID)) }
 }
-/// The two choices.
+/// The three choices: the guidance's limit for a home screen.
 struct AssistiveHome: View {
     @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     var body: some View {
         List {
             NavigationLink { AssistiveTonight() } label:{ Label("Tonight",systemImage:"moon.stars") }
             NavigationLink { AssistiveSaved() } label:{ Label("Saved parks",systemImage:"star") }
+            // Night vision, shared with the full app, widgets, the Live Activity and the watch. Reads
+            // the palette, so what the switch says is what the screen shows.
+            Toggle(isOn:Binding(get:{ palette.nightVision },set:{ nightVision=$0 })) { Label("Red light",systemImage:"flashlight.on.circle") }
+                // A track that stays distinct from the white thumb once the screen is red.
+                .tint(palette.controlTint)
         }
         .navigationTitle("Nyx")
         .task { if let park=AssistiveTonight.best(model) { await model.refresh([park]) } }
