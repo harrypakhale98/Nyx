@@ -45,7 +45,7 @@ struct NightCell: View {
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
-                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200,stroke:palette.stroke)
             }.frame(height:28*scale)
             // The ring and its soft halo (the stretch glows a little, like a dark sky does), behind the dot.
             .background { if highlighted && !isPast { ring } }
@@ -56,7 +56,7 @@ struct NightCell: View {
             // Medium weight: at 11 pt the thin diagonals of a regular "7" fade into the sky.
             else { Text("\(night.score.value)").font(.caption2.monospacedDigit().weight(.medium)).foregroundStyle(palette.muted) }
         }.frame(maxWidth:.infinity,minHeight:78*scale)
-            .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8)) } }
+            .background { if selected { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)).overlay(RoundedRectangle(cornerRadius:14).stroke(palette.accent.opacity(0.5),lineWidth:0.8*palette.stroke)) } }
             .contentShape(.hoverEffect,RoundedRectangle(cornerRadius:14)).contentShape(Rectangle())
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(spoken)
@@ -65,7 +65,7 @@ struct NightCell: View {
         ZStack {
             Circle().fill(palette.accent.opacity(0.22*access.glow)).frame(width:18*scale,height:18*scale).blur(radius:5*scale)
                 .opacity(ringDrawn ? 1 : 0)
-            Circle().trim(from:0,to:ringDrawn ? 1 : 0).stroke(palette.accent.opacity(0.65),lineWidth:0.7)
+            Circle().trim(from:0,to:ringDrawn ? 1 : 0).stroke(palette.accent.opacity(0.65),lineWidth:0.7*palette.stroke)
                 .rotationEffect(.degrees(-90)).frame(width:25*scale,height:25*scale)
         }
         .animation(NyxMotion.spring.delay(ringDelay),value:ringDrawn)

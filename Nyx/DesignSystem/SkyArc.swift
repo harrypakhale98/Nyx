@@ -7,6 +7,7 @@ import SwiftUI
 struct SkyArc: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     let night: Night
     /// Whether this is tonight's night, for copy that names it.
     var isTonight=true
@@ -20,12 +21,15 @@ struct SkyArc: View {
     /// The Moon grows with the chart: 20 pt at the phone's height.
     private var moonSize:Double { (20*chartHeight/168).rounded() }
     /// Sunset minus an hour to sunrise plus an hour; 18:00–06:00 local when the Sun never crosses.
-    private var window:(start:Date,end:Date) {
-        if let sunset=night.sky.sunset,let sunrise=night.sky.sunrise,sunrise>sunset {
-            return (sunset.addingTimeInterval(-3600),sunrise.addingTimeInterval(3600))
-        }
-        return (night.sky.evening.addingTimeInterval(6*3600),night.sky.evening.addingTimeInterval(18*3600))
-    }
+    private var window:(start:Date,end:Date) { ArcTouch.window(night) }
+    /// Feel the night under your finger: the arc's columns while a finger explores it, the column
+    /// under the finger, and the pending resting announcement. Only with VoiceOver running (after
+    /// its double tap hands the arc to the finger), so sighted scrolling over the arc is unchanged;
+    /// DEBUG `-nyx-arc-touch` turns it on without VoiceOver and rests a finger for captures.
+    @State private var touchColumns:[ArcTouch.Column]=[]
+    @State private var touchColumn:Int?
+    @State private var restTask:Task<Void,Never>?
+    private var touchEnabled:Bool { voiceOver || DebugScenario.isEnabled("arc-touch") }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             // The heading stays its own element, so the heading rotor still finds this section.
@@ -43,6 +47,11 @@ struct SkyArc: View {
             }
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
+            .overlay(alignment:.topLeading) { finger }
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance:0).onChanged { touch(at:$0.location.x) }.onEnded { _ in endTouch() },including:touchEnabled ? .all : .subviews)
+            .onDisappear { endTouch() }
+            .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch"), !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
             .clipShape(RoundedRectangle(cornerRadius:14))
             // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
             .accessibilityIgnoresInvertColors()
@@ -64,7 +73,9 @@ struct SkyArc: View {
             Text("Times in \(night.park.timeZoneName)").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }.accessibilityElement(children:.ignore)
             .accessibilityInputLabels([Text("Shape of the night"),Text("Sky arc")])
-            .accessibilityHint("An audio graph of the Sun, Moon and Milky Way core is available.")
+            .accessibilityHint(String(localized:"Double-tap, then slide a finger to feel the night.")+" "+String(localized:"An audio graph of the Sun, Moon and Milky Way core is available."))
+            // A double tap hands the arc to the finger; ordinary swipes and the audio graph are untouched.
+            .accessibilityDirectTouch(true,options:[.silentOnTouch,.requiresActivation])
             .nightChart { [night=night,window=window,summary=spokenSummary] in NightChart.sky(night,window:window,summary:summary) }
             .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). \(core.map { $0.spoken+" " } ?? "")Times in \(night.park.timeZoneName).")
     }
@@ -126,7 +137,7 @@ struct SkyArc: View {
                     var hatch=Path(), x0=a-horizon
                     while x0<b { hatch.move(to:CGPoint(x:x0,y:horizon)); hatch.addLine(to:CGPoint(x:x0+horizon,y:0)); x0+=9 }
                     var clipped=context; clipped.clip(to:Path(CGRect(x:a,y:0,width:b-a,height:horizon)))
-                    clipped.stroke(hatch,with:.color(palette.ink.opacity(0.22)),lineWidth:0.6)
+                    clipped.stroke(hatch,with:.color(palette.ink.opacity(0.22)),lineWidth:0.6*palette.stroke)
                 }
             }
         }
@@ -152,7 +163,7 @@ struct SkyArc: View {
         }
         ridge.addLine(to:CGPoint(x:size.width,y:size.height)); ridge.closeSubpath()
         context.fill(ridge,with:.linearGradient(Gradient(colors:[Color(white:0.06),.black]),startPoint:CGPoint(x:0,y:horizon-9),endPoint:CGPoint(x:0,y:horizon+30)))
-        context.stroke(ridge,with:.color(palette.line.opacity(0.8)),lineWidth:0.6)
+        context.stroke(ridge,with:.color(palette.line.opacity(0.8)),lineWidth:0.6*palette.stroke)
 
         // Paths: bright above the horizon, a faint trace below it.
         // `gap` keeps the path out from under a disc drawn on it (the Moon, which is added as light
@@ -165,9 +176,9 @@ struct SkyArc: View {
             }
             var above=context; above.clip(to:Path(CGRect(x:0,y:0,width:size.width,height:horizon)))
             if let gap { above.clip(to:gap,options:.inverse) }
-            above.stroke(path,with:.color(color),style:StrokeStyle(lineWidth:width,lineCap:.round,lineJoin:.round))
+            above.stroke(path,with:.color(color),style:StrokeStyle(lineWidth:width*palette.stroke,lineCap:.round,lineJoin:.round))
             var below=context; below.clip(to:Path(CGRect(x:0,y:horizon,width:size.width,height:size.height-horizon-labelBand)))
-            below.stroke(path,with:.color(color.opacity(0.28)),style:StrokeStyle(lineWidth:1,dash:[2,3]))
+            below.stroke(path,with:.color(color.opacity(0.28)),style:StrokeStyle(lineWidth:palette.stroke,dash:[2,3]))
         }
         let sunPoints=(0...samples).map { step -> (Date,Double) in
             let d=start.addingTimeInterval(duration*Double(step)/Double(samples))
@@ -194,7 +205,7 @@ struct SkyArc: View {
                 band.addFilter(.blur(radius:4))
                 for path in corePaths { band.stroke(path,with:.color(palette.ink.opacity(0.16*access.glow)),style:StrokeStyle(lineWidth:10*grow,lineCap:.round,lineJoin:.round)) }
             }
-            for path in corePaths { context.stroke(path,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:1.3,lineCap:.round,dash:[0.1,3.6])) }
+            for path in corePaths { context.stroke(path,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:1.3*palette.stroke,lineCap:.round,dash:[0.1,3.6])) }
             if let peak=corePeak, peak.altitude>=8 {
                 let label=context.resolve(Text("Core").font(.caption2).foregroundStyle(palette.muted))
                 let measured=label.measure(in:CGSize(width:80,height:20))
@@ -223,7 +234,7 @@ struct SkyArc: View {
         if let darkStart=night.sky.darkStart,let darkEnd=night.sky.darkEnd,darkEnd>darkStart {
             let a=max(0,x(darkStart)), b=min(size.width,x(darkEnd)), barY=horizon+9
             var bar=Path(); bar.move(to:CGPoint(x:a,y:barY)); bar.addLine(to:CGPoint(x:b,y:barY))
-            context.stroke(bar,with:.color(palette.accent.opacity(0.85)),style:StrokeStyle(lineWidth:2,lineCap:.round))
+            context.stroke(bar,with:.color(palette.accent.opacity(0.85)),style:StrokeStyle(lineWidth:2*palette.stroke,lineCap:.round))
             if b-a>70 {
                 let label=context.resolve(Text("True darkness").font(.caption2).foregroundStyle(palette.accent))
                 context.draw(label,at:CGPoint(x:(a+b)/2,y:barY+11))
@@ -242,7 +253,7 @@ struct SkyArc: View {
                     let tx=x(tick)
                     if tx>18 && tx<size.width-18 {
                         var mark=Path(); mark.move(to:CGPoint(x:tx,y:size.height-labelBand)); mark.addLine(to:CGPoint(x:tx,y:size.height-labelBand+3))
-                        context.stroke(mark,with:.color(palette.line),lineWidth:0.6)
+                        context.stroke(mark,with:.color(palette.line),lineWidth:0.6*palette.stroke)
                         context.draw(context.resolve(Text(tick.formatted(format)).font(.caption2).foregroundStyle(palette.muted)),at:CGPoint(x:tx,y:size.height-labelBand/2+2))
                     }
                 }
@@ -255,11 +266,59 @@ struct SkyArc: View {
         if now>start && now<end {
             let nx=x(now)
             var marker=Path(); marker.move(to:CGPoint(x:nx,y:14)); marker.addLine(to:CGPoint(x:nx,y:horizon))
-            context.stroke(marker,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:0.8,dash:[2,2]))
+            context.stroke(marker,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:0.8*palette.stroke,dash:[2,2]))
             context.fill(Path(ellipseIn:CGRect(x:nx-3.5,y:horizon-3.5,width:7,height:7)),with:.color(palette.ink))
             let label=context.resolve(Text("Now").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink))
             context.draw(label,at:CGPoint(x:min(max(nx,16),size.width-16),y:8))
         }
+    }
+
+    /// Where the finger rests: a hairline through the arc and the time and sky beside it, for anyone
+    /// who explores by touch with some sight. VoiceOver hears the same line when the finger rests.
+    @ViewBuilder private var finger:some View {
+        if let i=touchColumn, touchColumns.indices.contains(i), chartWidth>0 {
+            let x=(Double(i)+0.5)*chartWidth/Double(ArcTouch.columnCount)
+            let caption=ArcTouch.caption(touchColumns[i],night:night), width=chartWidth
+            ZStack(alignment:.topLeading) {
+                Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:chartHeight-22)
+                    .offset(x:x-palette.stroke/2)
+                Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).lineLimit(1)
+                    .padding(.horizontal,8).padding(.vertical,3)
+                    .background(Capsule().fill(palette.panel)).overlay(Capsule().stroke(palette.line,lineWidth:0.5*palette.stroke))
+                    .fixedSize()
+                    .alignmentGuide(.leading) { d in -min(max(x-d.width/2,6),width-d.width-6) }
+                    .offset(y:6)
+            }
+            .frame(width:chartWidth,height:chartHeight,alignment:.topLeading)
+            .allowsHitTesting(false).accessibilityHidden(true)
+        }
+    }
+    /// A finger at `x` on the arc: the hum follows it, moments crossed click, and resting 0.4 s
+    /// says the time and the sky. `quiet` (DEBUG captures) draws the finger only.
+    private func touch(at x:Double,quiet:Bool=false) {
+        guard touchEnabled, chartWidth>0 else { return }
+        let fresh=touchColumns.isEmpty
+        if fresh { touchColumns=ArcTouch.columns(night:night,window:window) }
+        let sample=ArcTouch.sample(x:x,width:chartWidth,columns:touchColumns,night:night,tonight:isTonight)
+        guard sample.column != touchColumn else { return }
+        let previous=touchColumn
+        touchColumn=sample.column
+        if quiet { return }
+        if fresh { MoonHaptics.shared.beginArcTouch(strength:sample.strength) }
+        let crossed=previous.map { ArcTouch.crossed(touchColumns,from:$0,to:sample.column) } ?? sample.crossing.map { [$0] } ?? []
+        MoonHaptics.shared.followArcTouch(strength:sample.strength,crossings:crossed)
+        restTask?.cancel()
+        let spoken=sample.spoken
+        restTask=Task {
+            try? await Task.sleep(for:.milliseconds(400))
+            if !Task.isCancelled { NightListener.announce(spoken,priority:.low) }
+        }
+    }
+    private func endTouch() {
+        restTask?.cancel(); restTask=nil
+        MoonHaptics.shared.endArcTouch()
+        touchColumn=nil
+        touchColumns=[]
     }
 
     @ViewBuilder private var legend:some View {
@@ -272,5 +331,7 @@ struct SkyArc: View {
     }
 }
 #Preview("Arc") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let sky=AstronomyEngine().conditions(for:p,on:.now); SkyArc(night:Night(park:p,sky:sky,score:ScoreEngine().score(sky:sky,bortle:p.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil)).padding().background(.black) } }
+
+#Preview("Arc • Bold Text") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let sky=AstronomyEngine().conditions(for:p,on:.now); SkyArc(night:Night(park:p,sky:sky,score:ScoreEngine().score(sky:sky,bortle:p.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil)).padding().background(.black).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)) } }
 
 #Preview("No astronomical darkness • AX5") { let m=PlanModel();if let p=m.park("dena") { SkyArc(night:m.night(p,on:Date(timeIntervalSince1970:1782086400))).padding().dynamicTypeSize(.accessibility5).background(.black) } }

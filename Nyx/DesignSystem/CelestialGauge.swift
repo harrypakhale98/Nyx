@@ -386,7 +386,7 @@ private struct DialFace: View, Animatable {
             context.fill(Path(ellipseIn:CGRect(x:center.x-well,y:center.y-well,width:2*well,height:2*well)),with:.radialGradient(Gradient(stops:[.init(color:.black.opacity(0.55),location:0),.init(color:.black.opacity(0.35),location:0.8),.init(color:.black.opacity(0.6),location:1)]),center:center,startRadius:0,endRadius:well))
             let start=Angle.degrees(140), end=Angle.degrees(400)
             var track=Path(); track.addArc(center:center,radius:radius,startAngle:start,endAngle:end,clockwise:false)
-            context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
+            context.stroke(track,with:.color(palette.line),style:StrokeStyle(lineWidth:1.2*palette.stroke,lineCap:.round))
             let displayed=min(100,max(0,value))
             let tip=Angle.degrees(140+260*displayed/100)
             var arc=Path(); arc.addArc(center:center,radius:radius,startAngle:start,endAngle:tip,clockwise:false)
@@ -406,7 +406,7 @@ private struct DialFace: View, Animatable {
                 let aPoint=CGPoint(x:center.x+cos(a)*outer,y:center.y+sin(a)*outer)
                 let bPoint=CGPoint(x:center.x+cos(a)*inner,y:center.y+sin(a)*inner)
                 var line=Path(); line.move(to:aPoint); line.addLine(to:bPoint)
-                context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:tick%10==0 ? 0.9 : 0.6)
+                context.stroke(line,with:.color(lit ? palette.accent.opacity(tick%10==0 ? 0.75 : 0.45) : palette.line),lineWidth:(tick%10==0 ? 0.9 : 0.6)*palette.stroke)
             }
         }
     }
@@ -433,7 +433,7 @@ private struct ModelRangeBand: View {
                     path.move(to:CGPoint(x:center.x+cos(end.radians)*(r-3.5),y:center.y+sin(end.radians)*(r-3.5)))
                     path.addLine(to:CGPoint(x:center.x+cos(end.radians)*(r+3.5),y:center.y+sin(end.radians)*(r+3.5)))
                 }
-                context.stroke(path,with:.color(palette.accent),style:StrokeStyle(lineWidth:1.5,lineCap:.butt))
+                context.stroke(path,with:.color(palette.accent),style:StrokeStyle(lineWidth:1.5*palette.stroke,lineCap:.butt))
             } else {
                 // Riding the rim just outside the track, so the part below the score shows beside the lit arc.
                 var path=Path(); path.addArc(center:center,radius:radius+6*k,startAngle:from,endAngle:to,clockwise:false)
@@ -450,7 +450,7 @@ private struct ModelRangeBand: View {
                     ends.move(to:CGPoint(x:center.x+cos(end.radians)*(r-half),y:center.y+sin(end.radians)*(r-half)))
                     ends.addLine(to:CGPoint(x:center.x+cos(end.radians)*(r+half),y:center.y+sin(end.radians)*(r+half)))
                 }
-                context.stroke(ends,with:.color(palette.accent.opacity(0.4+0.4*glow)),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
+                context.stroke(ends,with:.color(palette.accent.opacity(0.4+0.4*glow)),style:StrokeStyle(lineWidth:1.2*palette.stroke,lineCap:.round))
             }
         }
         .allowsHitTesting(false)
@@ -520,3 +520,4 @@ extension EnvironmentValues {
 #Preview("Held • waiting") { CelestialGauge(score:94,revealKey:"preview|2026-10-08|94").environment(\.nyxRevealHeld,true).background(.black) }
 #Preview("Silent example • 176 pt") { CelestialGauge(score:94,haptics:false).frame(height:176).background(.black) }
 #Preview("Night vision") { CelestialGauge(score:91).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) }
+#Preview("Bold Text strokes") { CelestialGauge(score:72).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)).environment(\.nyxReduceMotion,true).background(.black) }

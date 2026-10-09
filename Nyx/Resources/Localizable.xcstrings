@@ -1382,6 +1382,23 @@
         }
       }
     },
+    "%@. Sun up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Sun up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Sol en el cielo."
+          }
+        }
+      }
+    },
     "%@. The Moon sets at %@; truly dark from then.": {
       "extractionState": "manual",
       "localizations": {
@@ -1433,6 +1450,40 @@
         }
       }
     },
+    "%@. True darkness. Moon down.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. True darkness. Moon down."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Oscuridad total. Luna oculta."
+          }
+        }
+      }
+    },
+    "%@. True darkness. Moon up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. True darkness. Moon up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Oscuridad total. Luna en el cielo."
+          }
+        }
+      }
+    },
     "%@. Truly dark now, until %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -1446,6 +1497,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@. Oscuridad total ahora, hasta %@"
+          }
+        }
+      }
+    },
+    "%@. Twilight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Twilight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Crepúsculo."
+          }
+        }
+      }
+    },
+    "%@. Twilight. Moon up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Twilight. Moon up."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Crepúsculo. Luna en el cielo."
           }
         }
       }
@@ -8187,6 +8272,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "OK"
+          }
+        }
+      }
+    },
+    "Double-tap, then slide a finger to feel the night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double-tap, then slide a finger to feel the night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca dos veces y desliza un dedo para sentir la noche."
           }
         }
       }

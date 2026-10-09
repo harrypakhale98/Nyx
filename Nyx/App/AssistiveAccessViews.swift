@@ -12,10 +12,11 @@ import WidgetKit
 struct AssistiveAccessRoot: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.legibilityWeight) private var legibility
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     var body: some View {
         // High contrast throughout: amber and starlight at full strength, and the brighter red.
-        let palette=NyxPalette(nightVision:nightVision,highContrast:true)
+        let palette=NyxPalette(nightVision:nightVision,highContrast:true,boldText:legibility == .bold)
         NavigationStack { AssistiveHome() }
             .environment(\.nyx,palette)
             .preferredColorScheme(.dark)
@@ -26,7 +27,7 @@ struct AssistiveAccessRoot: View {
             .onChange(of:nightVision) { _,on in
                 // The same follow-through as the full app (`RootView`): widgets, the Control Center
                 // control, the watch and a followed night's Live Activity change colour with the switch.
-                model.savedSync.palette=NyxPalette(nightVision:on,highContrast:true)
+                model.savedSync.palette=NyxPalette(nightVision:on,highContrast:true,boldText:legibility == .bold)
                 WidgetCenter.shared.reloadAllTimelines()
                 ControlCenter.shared.reloadControls(ofKind:"NightVisionControl")
                 model.savedSync.pushWatch(model)

@@ -64,11 +64,11 @@ struct TonightMapCanvas: View {
                     }
                 }
                 let shape=NightMark.mark(score:mark.score,hasForecast:mark.fill == .full,differentiate:access.differentiate)
-                shape.draw(in:&layer,center:p,radius:radius,fill:mark.fill,color:palette.accent,fillOpacity:mark.fillOpacity,lineWidth:1,hollowBackground:palette.panel)
-                if mark.closure != nil { layer.stroke(Self.triangle(at:CGPoint(x:p.x+radius*0.8+4,y:p.y-radius*0.8-2),size:6),with:.color(palette.ink),lineWidth:1.1) }
+                shape.draw(in:&layer,center:p,radius:radius,fill:mark.fill,color:palette.accent,fillOpacity:mark.fillOpacity,lineWidth:1,stroke:palette.stroke,hollowBackground:palette.panel)
+                if mark.closure != nil { layer.stroke(Self.triangle(at:CGPoint(x:p.x+radius*0.8+4,y:p.y-radius*0.8-2),size:6),with:.color(palette.ink),lineWidth:1.1*palette.stroke) }
                 if mark.id==highlighted {
                     let ring=radius+5
-                    layer.stroke(Path(ellipseIn:CGRect(x:p.x-ring,y:p.y-ring,width:2*ring,height:2*ring)),with:.color(palette.ink.opacity(0.9)),lineWidth:1)
+                    layer.stroke(Path(ellipseIn:CGRect(x:p.x-ring,y:p.y-ring,width:2*ring,height:2*ring)),with:.color(palette.ink.opacity(0.9)),lineWidth:palette.stroke)
                 }
             }
         }
@@ -401,11 +401,11 @@ private struct LegendGlyph: View {
                 }
             case .fills:
                 for (i,fill) in [NightFill.full,.half,.hollow].enumerated() {
-                    NightMark.dot(filled:fill == .full).draw(in:&context,center:CGPoint(x:6+Double(i)*16,y:y),radius:5,fill:fill,color:palette.accent,fillOpacity:0.85,hollowBackground:palette.panel)
+                    NightMark.dot(filled:fill == .full).draw(in:&context,center:CGPoint(x:6+Double(i)*16,y:y),radius:5,fill:fill,color:palette.accent,fillOpacity:0.85,stroke:palette.stroke,hollowBackground:palette.panel)
                 }
             case .closure:
                 context.fill(Path(ellipseIn:CGRect(x:2,y:y-4,width:8,height:8)),with:.color(palette.accent.opacity(0.8)))
-                context.stroke(TonightMapCanvas.triangle(at:CGPoint(x:17,y:y-3),size:7),with:.color(palette.ink),lineWidth:1.1)
+                context.stroke(TonightMapCanvas.triangle(at:CGPoint(x:17,y:y-3),size:7),with:.color(palette.ink),lineWidth:1.1*palette.stroke)
             }
         }.accessibilityHidden(true)
     }

@@ -6,27 +6,43 @@ import SwiftUI
 struct WeekStrip: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// The column pitch grows with the caption beside it (13 pt at the default size), so the dots
+    /// keep company with the text; capped at 1.8× (`WeekStrip.pitch`), where accessibility sizes
+    /// take over with the sentence alone.
+    @ScaledMetric(relativeTo:.caption2) private var scaledPitch=13.0
     let nights: [Night]
     /// The best night, ties broken as everywhere (`NightPlanner.best`).
     private var best: Night? { NightPlanner.best(nights) }
     var body: some View {
         if let best, let first=nights.first {
-            HStack(spacing:10) {
-                dots(best:best).frame(width:CGFloat(nights.count)*13,height:16)
-                Text(best.id==first.id ? String(localized:"Best tonight") : String(localized:"Best \(weekday(best)) · \(best.score.value)"))
-                    .font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            let line=Text(best.id==first.id ? String(localized:"Best tonight") : String(localized:"Best \(weekday(best)) · \(best.score.value)"))
+                .font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            // At accessibility sizes the sentence carries the week alone: it already names the best
+            // night, and dots a few points across beside 40 pt text read as specks.
+            if typeSize.isAccessibilitySize { line }
+            else {
+                let pitch=WeekStrip.pitch(scaledPitch)
+                HStack(spacing:10) {
+                    dots(best:best,pitch:pitch).frame(width:CGFloat(nights.count)*pitch,height:16*pitch/13)
+                    line
+                }
             }
         }
     }
-    private func dots(best:Night)->some View {
+    /// The column pitch for a scaled 13 pt: never below 13, never above 1.8× it.
+    static func pitch(_ scaled:Double)->Double { min(max(scaled,13),13*1.8) }
+    private func dots(best:Night,pitch:Double)->some View {
         Canvas { context,size in
+            let scale=pitch/13
             for (index,night) in nights.enumerated() {
-                let center=CGPoint(x:6.5+CGFloat(index)*13,y:size.height/2)
-                let radius=1.3+3.6*pow(Double(night.score.value)/100,1.5)
+                let center=CGPoint(x:pitch/2+CGFloat(index)*pitch,y:size.height/2)
+                let radius=(1.3+3.6*pow(Double(night.score.value)/100,1.5))*scale
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
-                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.8)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.8*scale,stroke:palette.stroke)
                 if night.id==best.id {
-                    context.stroke(Path(ellipseIn:CGRect(x:center.x-6.5,y:center.y-6.5,width:13,height:13)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7)
+                    let ring=pitch/2
+                    context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7*scale*palette.stroke)
                 }
             }
         }.accessibilityHidden(true)
@@ -44,3 +60,6 @@ struct WeekStrip: View {
     }
 }
 #Preview("Week strip") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).preferredColorScheme(.dark) } }
+#Preview("Week strip • Bold Text") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)).preferredColorScheme(.dark) } }
+#Preview("Week strip • xxxLarge") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).dynamicTypeSize(.xxxLarge).preferredColorScheme(.dark) } }
+#Preview("Week strip • accessibility size") { let m=PlanModel();if let p=m.home { WeekStrip(nights:m.nights(p,from:m.tonight(p),count:7)).padding().background(.black).dynamicTypeSize(.accessibility3).preferredColorScheme(.dark) } }
