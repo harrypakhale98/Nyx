@@ -30,7 +30,11 @@ import UserNotifications
         ask(defaults)
     }
     nonisolated static func isJournalMoment(old:Int,new:Int)->Bool { new==old+1 }
-    /// "Keep this night" saved the morning after field mode: the night itself, written down.
+    /// "Keep this night" saved: at dawn in field mode or on the park's page the morning after. The
+    /// save also grows the journal by one, so while the tabs are alive `MomentsWatcher` reaches the
+    /// same `request` and the second call finds the version claimed. This path is kept for a park
+    /// opened in its own iPad window, where no watcher runs. At dawn inside field mode both are
+    /// refused (`inField`), and nothing is recorded, so a later moment can still ask.
     static func noteFieldNightKept(defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void=request) { ask(defaults) }
     /// Pure: whether to ask now. Once per version, never in the dark.
     nonisolated static func shouldAsk(askedVersion:String?,version:String,nightVision:Bool,inField:Bool)->Bool {
@@ -42,11 +46,21 @@ import UserNotifications
         defaults.set(version,forKey:askedKey)
         return true
     }
+    /// Whether field mode is anywhere in a presentation chain, not only on top: its own sheets
+    /// (the "Keep this night" editor at dawn) are presented above it.
+    static func inField(_ chain:[UIViewController])->Bool { chain.contains { $0 is FieldHostingController } }
+    /// Every controller presented in the scene's windows, each window's root first.
+    static func presented(in scene:UIWindowScene)->[UIViewController] {
+        scene.windows.flatMap { window in
+            var chain:[UIViewController]=[], next=window.rootViewController
+            while let controller=next { chain.append(controller); next=controller.presentedViewController }
+            return chain
+        }
+    }
     static func request(defaults:UserDefaults) {
-        guard DebugScenario.screen == nil else { return }
-        let scene=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first { $0.activationState == .foregroundActive }
-        let inField=SceneCommands.top(in:scene) is FieldHostingController
-        guard let scene, claim(defaults:defaults,version:version,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),inField:inField) else { return }
+        guard DebugScenario.screen == nil,
+              let scene=UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where:{ $0.activationState == .foregroundActive }),
+              claim(defaults:defaults,version:version,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),inField:inField(presented(in:scene))) else { return }
         // A beat after the moment itself, so the prompt never lands on top of a closing sheet.
         Task { try? await Task.sleep(for:.seconds(1.5)); AppStore.requestReview(in:scene) }
     }

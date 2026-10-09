@@ -52,5 +52,23 @@
     "primaryOnLift": 14.92,
     "secondaryOnLift": 8.24,
     "accentOnLift": 9.55
+  },
+  {
+    "palette": "Twilight lift, night vision",
+    "primaryOnLift": 5.9,
+    "secondaryOnLift": 5.5,
+    "primaryOnLiftProtan": 4.15,
+    "secondaryOnLiftProtan": 3.89,
+    "primaryOnLiftDeutan": 7.04,
+    "secondaryOnLiftDeutan": 6.54
+  },
+  {
+    "palette": "Twilight lift, night vision, brighter red",
+    "primaryOnLift": 6.55,
+    "secondaryOnLift": 6.1,
+    "primaryOnLiftProtan": 4.89,
+    "secondaryOnLiftProtan": 4.58,
+    "primaryOnLiftDeutan": 7.63,
+    "secondaryOnLiftDeutan": 7.09
   }
 ]

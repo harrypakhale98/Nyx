@@ -27,6 +27,26 @@ import Foundation
         #expect(!sky.bright.isEmpty)
     }
 
+    @Test func theMidnightSunShowsNoStars() throws {
+        // Gates of the Arctic on 21 June: the Sun stays about 1° up at its lowest, as field mode says
+        // ("The Sun stays up all night."), so the sky is all lift and no star.
+        let (sky,seen)=try visibility("gaar","2026-06-21 12:00")
+        #expect(sky.sunAltitude > 0)
+        #expect(!sky.dark)
+        #expect(seen.bright==0 && seen.middle==0 && seen.faint==0)
+        #expect(seen.lift==1)
+        // The bright stars fade in from the horizon: none at −0.833°, half by −2°.
+        #expect(RealSky.Visibility(sunAltitude:-0.833).bright==0)
+        let between=RealSky.Visibility(sunAltitude:-1.4).bright
+        #expect(between>0 && between<0.5)
+        #expect(RealSky.Visibility(sunAltitude:-2).bright==0.5)
+    }
+
+    @Test func nightVisionKeepsTheLiftLow() {
+        #expect(abs(RealSky.Visibility(sunAltitude:-3,nightVision:true).lift-0.6)<1e-9)
+        #expect(RealSky.Visibility(sunAltitude:-3,liftAllowed:false,nightVision:true).lift==0)
+    }
+
     @Test func gatesOfTheArcticInDecemberShowsEveryStar() throws {
         let (sky,seen)=try visibility("gaar","2026-12-21 12:00")
         #expect(sky.sunAltitude < -18)

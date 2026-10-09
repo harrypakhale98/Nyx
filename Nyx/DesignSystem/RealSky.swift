@@ -33,13 +33,19 @@ struct RealSky: View {
         var bright: Double
         /// 0…1: the twilight lift low in the sky; 0 below −18°, full at −6° and above.
         var lift: Double
-        init(sunAltitude:Double,highContrast:Bool=false,liftAllowed:Bool=true) {
-            // Above −6° (civil twilight, a white night): only the brightest stars, at half strength.
+        /// The Sun's upper limb on a refracted horizon, as the engine's sunrise and sunset use it.
+        static let horizon = -0.833
+        init(sunAltitude:Double,highContrast:Bool=false,liftAllowed:Bool=true,nightVision:Bool=false) {
+            // Above −6° (civil twilight, a white night): only the brightest stars, at half strength,
+            // fading to none as the Sun nears the horizon (half at −2°, none from −0.833°): under the
+            // midnight sun, where field mode says "The Sun stays up all night.", no star is drawn.
             // Between −6° and −12°: the bright and middle stars. Below −12°: all of them.
             faint=sunAltitude < -12 ? 1 : 0
             middle=sunAltitude < -6 ? 1 : 0
-            bright=sunAltitude < -6 ? 1 : 0.5
-            lift=liftAllowed ? max(0,min(1,(sunAltitude+18)/12)) : 0
+            bright=sunAltitude < -6 ? 1 : sunAltitude < -2 ? 0.5 : 0.5*max(0,min(1,(Self.horizon-sunAltitude)/(Self.horizon+2)))
+            // Night vision keeps the lift at 60%, as it keeps the stars faint: the brighter red's
+            // muted captions stay above 4.5:1 over it for protan eyes too (`Scripts/contrast.py`).
+            lift=liftAllowed ? max(0,min(1,(sunAltitude+18)/12))*(nightVision ? 0.6 : 1) : 0
             // Increase Contrast: the faint set goes and the middle set (magnitude 2.2–3.6) dims.
             if highContrast { faint=0; middle=min(middle,0.35) }
         }
@@ -51,7 +57,7 @@ struct RealSky: View {
         let sky=SkyProjection.shared.sky(for:park,night:night)
         let strength=palette.nightVision ? strength*0.45 : strength
         // The lift is off under Reduce Transparency and Increase Contrast: plain black behind text.
-        let seen=Visibility(sunAltitude:sky.sunAltitude,highContrast:palette.highContrast,liftAllowed:!reduceTransparency && !palette.highContrast)
+        let seen=Visibility(sunAltitude:sky.sunAltitude,highContrast:palette.highContrast,liftAllowed:!reduceTransparency && !palette.highContrast,nightVision:palette.nightVision)
         let showDomes=domes && !sky.domes.isEmpty
         // Rests in Low Power Mode and while the device is hot, as the sensors do.
         TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
@@ -65,12 +71,13 @@ struct RealSky: View {
                 // Light domes sit on the horizon, farthest of all.
                 if showDomes { DomeLayer(sky:sky,strength:strength).equatable().offset(x:tilt.x*1.5,y:tilt.y*1.5) }
                 // Far to near: the Milky Way and faint stars barely move, bright stars move most.
-                // Each set fades rather than pops when Increase Contrast changes.
-                if seen.faint>0 || palette.highContrast {
-                    StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2).opacity(seen.faint)
+                // Each set fades rather than pops when Increase Contrast changes, and leaves the tree
+                // once faded, so a hidden layer (the faint one carries the Milky Way) costs nothing.
+                if seen.faint>0 {
+                    StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2).opacity(seen.faint).transition(.opacity)
                 }
-                if seen.middle>0 || palette.highContrast {
-                    StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4).opacity(seen.middle)
+                if seen.middle>0 {
+                    StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4).opacity(seen.middle).transition(.opacity)
                 }
                 MarkLayer(sky:sky,ink:palette.ink,strength:strength).equatable().offset(x:tilt.x*5,y:tilt.y*5)
                 Canvas { context,size in
@@ -279,13 +286,21 @@ private struct DomeLayer: View, Equatable {
         let engine=AstronomyEngine()
         let sky=engine.conditions(for:park,on:night)
         // The middle of true darkness; otherwise the night's darkest moment, when the Sun is lowest
-        // (in Alaska's summer about two hours after local midnight), found to the nearest ten minutes.
+        // (in Alaska's summer about two hours after local midnight).
         let moment:Date
         if let instant { moment=Date(timeIntervalSince1970:(instant.timeIntervalSince1970/300).rounded(.down)*300) }
         else if let a=sky.darkStart,let b=sky.darkEnd,b>a { moment=a.addingTimeInterval(b.timeIntervalSince(a)/2) }
+        // Under the midnight sun the engine has already found that moment (`lowestSun`, to the minute);
+        // with a sunset but no true darkness, solar midnight falls halfway between sunset and sunrise;
+        // any other night (the Sun never up, yet never 18° down) is searched every ten minutes, 6 PM to 6 AM.
+        else if let lowest=sky.lowestSun { moment=lowest }
+        else if let set=sky.sunset,let rise=sky.sunrise,rise>set { moment=set.addingTimeInterval(rise.timeIntervalSince(set)/2) }
         else {
-            let candidates=stride(from:6*3600.0,through:18*3600.0,by:600).map { sky.evening.addingTimeInterval($0) }
-            moment=candidates.min { engine.solarAltitude(at:$0,park:park) < engine.solarAltitude(at:$1,park:park) } ?? sky.evening.addingTimeInterval(12*3600)
+            let candidates=stride(from:6*3600.0,through:18*3600.0,by:600).map { offset in
+                let date=sky.evening.addingTimeInterval(offset)
+                return (date:date,altitude:engine.solarAltitude(at:date,park:park))
+            }
+            moment=candidates.min { $0.altitude<$1.altitude }?.date ?? sky.evening.addingTimeInterval(12*3600)
         }
         let facing=park.latitude<0 ? 0.0 : 180.0, centreAltitude=45.0*Double.pi/180
         func project(altitude:Double,azimuth:Double)->SIMD2<Double> {

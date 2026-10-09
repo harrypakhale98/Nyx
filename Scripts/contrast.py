@@ -64,5 +64,20 @@ lift={'palette':'Twilight lift','primaryOnLift':round(contrast((0.961,.945,.902)
       'accentOnLift':round(contrast((1,.706,.329),LIFT),2)}
 assert lift['secondaryOnLift']>=4.5 and lift['accentOnLift']>=4.5, lift
 rows.append(lift)
+# Through night vision the lift is drawn at 60% (RealSky.Visibility), turned grey, then multiplied by the red;
+# text is the red itself, muted text 96% of it. With Increase Contrast the lift is off, so the brighter red meets
+# it only when chosen by hand: it keeps 4.5:1 for typical, protan and deutan eyes; the standard red for typical
+# and deutan eyes (protan eyes get the brighter red's 4.5:1 or better, as on the panel).
+liftGrey=.6*(.2126*LIFT[0]+.7152*LIFT[1]+.0722*LIFT[2])
+for name,red in [('Twilight lift, night vision',STANDARD),('Twilight lift, night vision, brighter red',BRIGHTER)]:
+ bg=tuple(liftGrey*c for c in red); muted=tuple(.96*a+.04*b for a,b in zip(red,bg))
+ row={'palette':name}
+ for vision in MATRICES:
+  suffix='' if vision=='typical' else vision.capitalize()
+  row['primaryOnLift'+suffix]=round(contrast(red,bg,vision),2)
+  row['secondaryOnLift'+suffix]=round(contrast(muted,bg,vision),2)
+ rows.append(row)
+assert min(rows[-2]['secondaryOnLift'],rows[-2]['secondaryOnLiftDeutan'])>=4.5, rows[-2]
+assert min(rows[-1]['secondaryOnLift'+suffix] for suffix in ['','Protan','Deutan'])>=4.5, rows[-1]
 Path('Research/contrast.json').write_text(json.dumps(rows,indent=2)+'\n')
 print(json.dumps(rows,indent=1))

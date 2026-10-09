@@ -77,7 +77,7 @@ struct RootView:View {
         .modifier(DebugTypeSize())
         .modifier(DebugWindow()).modifier(DebugOpenParkWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
-        .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass"].contains(DebugScenario.screen ?? ""),red:palette.red))
+        .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass","assistive","assistive-tonight","assistive-saved"].contains(DebugScenario.screen ?? ""),red:palette.red))
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp) }
@@ -238,10 +238,11 @@ struct RootView:View {
         case "share": if let park=model.home { ShareCardReview(park:park,daysAhead:Int(DebugScenario.number("-nyx-share-night") ?? 0)) }
         case "listen": if let park=model.home { ScrollView { Panel { NightListenView(night:model.night(park),expanded:true) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) }
         case "accessibility": SoundAndTouchView()
-        // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on).
-        case "assistive": AssistiveHome().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
-        case "assistive-tonight": AssistiveTonight().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
-        case "assistive-saved": AssistiveSaved().environment(\.nyx,NyxPalette(nightVision:palette.nightVision,highContrast:true))
+        // The Assistive Access scene's root, for captures (the simulator cannot switch Assistive Access on),
+        // with that scene's own palette and red (the brighter one); the root's filter skips these routes.
+        case "assistive": AssistiveHome().modifier(AssistiveReview(nightVision:palette.nightVision))
+        case "assistive-tonight": AssistiveTonight().modifier(AssistiveReview(nightVision:palette.nightVision))
+        case "assistive-saved": AssistiveSaved().modifier(AssistiveReview(nightVision:palette.nightVision))
         // Settings → Support → Diagnostics, with two illustrative reports (`-nyx-state empty` for none).
         case "diagnostics": DiagnosticsView(records:DebugScenario.state=="empty" ? [] : [DiagnosticRecord(id:"a",kind:.crash,received:.now-86_400,json:"{}"),DiagnosticRecord(id:"b",kind:.hang,received:.now-3*86_400,json:"{}")])
         // Delight: `trip` (`-nyx-state weekends`), `constellation` (`-nyx-state empty`), `recap`, `icons`, `first-light`.
@@ -350,5 +351,14 @@ private struct DebugTypeSize: ViewModifier {
         // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
         let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
         if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
+    }
+}
+/// The `assistive*` capture routes: the Assistive Access scene's palette (high contrast) and its own
+/// night-vision filter with that palette's brighter red, as `AssistiveAccessRoot` applies them.
+private struct AssistiveReview: ViewModifier {
+    let nightVision: Bool
+    func body(content:Content)->some View {
+        let palette=NyxPalette(nightVision:nightVision,highContrast:true)
+        return content.environment(\.nyx,palette).modifier(NightVisionFilter(enabled:nightVision,red:palette.red))
     }
 }
