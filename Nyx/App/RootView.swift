@@ -62,6 +62,9 @@ struct RootView:View {
                 .tint(commands.sidebar ? palette.controlTint : palette.accent)
                 .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
+                // Tonight's first answer waits for the person: not behind onboarding (from the first
+                // frame, before the sheet rises) or first light. Swiping the sheet away releases it too.
+                .environment(\.nyxRevealHeld,(!onboarded && DebugScenario.screen == nil) || intro || firstLight != nil)
                 }
             }
         }

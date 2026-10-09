@@ -567,6 +567,7 @@
   "Forecast models disagree; the score could be %lld to %lld.": "Los modelos de pronóstico discrepan; el índice podría ir de %lld a %lld.",
   "Forecast models roughly agree: %@ cloud.": "Los modelos de pronóstico casi coinciden: %@ de nubes.",
   "Forecast models roughly agree; the score could be %lld to %lld.": "Los modelos de pronóstico casi coinciden; el índice podría ir de %lld a %lld.",
+  "Forecast models: %lld to %lld.": "Modelos de pronóstico: de %lld a %lld.",
   "Forecasts": "Pronósticos",
   "Four parts, the weakest link and the bands": "Cuatro partes, el eslabón más débil y las categorías",
   "Friday and Saturday nights": "Noches de viernes y sábado",

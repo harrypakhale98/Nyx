@@ -9633,6 +9633,23 @@
         }
       }
     },
+    "Forecast models: %lld to %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models: %lld to %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos de pronóstico: de %lld a %lld."
+          }
+        }
+      }
+    },
     "Forecasts": {
       "extractionState": "manual",
       "localizations": {
