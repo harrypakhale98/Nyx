@@ -383,7 +383,7 @@ struct TimeRiver: View {
         // half fill readable (`NightMark.draw`) stops short of the neighbouring marks, so the river
         // between them still shows under Bold Text and Increase Contrast.
         let pitch=nights.count>1 ? abs(x(1,width:size.width)-x(0,width:size.width)) : size.width
-        let floor=min(2.6*palette.stroke,max(2.4,pitch*0.28))
+        let floor=min(NightMark.unfilledFloor(stroke:palette.stroke),max(2.4,pitch*0.28))
         for i in nights.indices {
             let p=point(i), night=nights[i]
             if peaks.contains(i) {

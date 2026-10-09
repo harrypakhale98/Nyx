@@ -218,11 +218,12 @@ nonisolated enum NightMark: Equatable, Sendable {
     static func mark(_ night:Night,differentiate:Bool)->NightMark { mark(score:night.score.value,hasForecast:night.basis.fill == .full,differentiate:differentiate) }
     /// Draws a mark: filled, hollow, or hollow with its lower half filled for an early look.
     /// `stroke` is the palette's outline weight (`NyxPalette.stroke`: 1.6 under Increase Contrast or
-    /// Bold Text). A mark that is not filled is never smaller than 2.6 pt × `stroke` across its
-    /// radius, so its outline never closes over the hole and a half fill always reads as half.
+    /// Bold Text). A mark that is not filled is never smaller than 2.6 pt in radius, grown by the
+    /// half of the heavier outline that falls inward, so its hole stays the size it is at default
+    /// settings and a half fill always reads as half, without a low score looking like a high one.
     /// `minimumRadius` replaces that floor where marks stand close together (the time river).
     func draw(in context:inout GraphicsContext,center:CGPoint,radius:Double,fill:NightFill,color:Color,fillOpacity:Double,lineWidth:Double=1.1,stroke:Double=1,minimumRadius:Double?=nil,hollowBackground:Color?=nil) {
-        let radius=NightMark.drawnRadius(radius,fill:fill,stroke:stroke,minimum:minimumRadius)
+        let radius=NightMark.drawnRadius(radius,fill:fill,lineWidth:lineWidth,stroke:stroke,minimum:minimumRadius)
         let lineWidth=lineWidth*stroke
         let shape=path(center:center,radius:radius)
         switch fill {
@@ -238,11 +239,14 @@ nonisolated enum NightMark: Equatable, Sendable {
             context.stroke(shape,with:.color(color),lineWidth:lineWidth)
         }
     }
-    /// The radius a mark is drawn at: as asked when filled, at least 2.6 pt × `stroke` (or
-    /// `minimum`) otherwise.
-    static func drawnRadius(_ radius:Double,fill:NightFill,stroke:Double,minimum:Double?=nil)->Double {
-        fill == .full ? radius : max(radius,minimum ?? 2.6*stroke)
+    /// The radius a mark is drawn at: as asked when filled, at least `floor` (or `minimum`) otherwise.
+    static func drawnRadius(_ radius:Double,fill:NightFill,lineWidth:Double=1.1,stroke:Double,minimum:Double?=nil)->Double {
+        fill == .full ? radius : max(radius,minimum ?? unfilledFloor(lineWidth:lineWidth,stroke:stroke))
     }
+    /// The smallest radius for a mark that is not filled: 2.6 pt, plus the inward half of the extra
+    /// outline `stroke` adds, so the hole inside the ring is the same at 1 and at 1.6. A score-40
+    /// early look stays smaller than a score-85 dot under Bold Text, as it is by default.
+    static func unfilledFloor(lineWidth:Double=1.1,stroke:Double)->Double { 2.6+lineWidth*max(0,stroke-1)/2 }
     var filled: Bool { switch self { case .dot(let filled),.star(let filled): filled } }
     var isStar: Bool { if case .star=self { true } else { false } }
     /// The mark's outline, `radius` being the dot's own radius; a star reaches a little farther so

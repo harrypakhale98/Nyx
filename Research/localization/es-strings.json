@@ -478,6 +478,7 @@
   "Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.": "Las distancias son en línea recta, no por carretera. Los índices son estimaciones; un cierre en la última actualización del parque cuenta en su contra. Revisa los cierres y el pronóstico antes de ir.",
   "Distances use your region's units. Radius is always a straight line.": "Las distancias usan las unidades de tu región. El radio siempre es en línea recta.",
   "Done": "OK",
+  "Double-tap, then slide a finger to explore the night.": "Toca dos veces y desliza un dedo para explorar la noche.",
   "Double-tap, then slide a finger to feel the night.": "Toca dos veces y desliza un dedo para sentir la noche.",
   "Down to %@": "Baja a %@",
   "Down to %@ around %@": "Baja a %1$@; hora aproximada: %2$@",
