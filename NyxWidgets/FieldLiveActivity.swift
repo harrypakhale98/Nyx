@@ -34,7 +34,8 @@ struct FieldLiveActivity: Widget {
                         if context.isStale && !context.state.finished {
                             FieldActivityUpdated(attributes:context.attributes,state:context.state).font(.caption2).foregroundStyle(colors.muted)
                         } else {
-                            Text("\(context.attributes.parkName) · \(context.attributes.score) \(context.attributes.band)").font(.caption2).foregroundStyle(colors.muted)
+                            Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state))").font(.caption2).foregroundStyle(colors.muted)
+                                .accessibilityLabel("\(context.attributes.parkName). \(context.attributes.spokenScore(context.state))")
                         }
                     }.environment(\.timeZone,zone)
                 }
@@ -110,6 +111,8 @@ struct FieldAlarmLiveActivity: Widget {
 }
 #Preview("Island expanded",as:.dynamicIsland(.expanded),using:FieldActivityAttributes.preview) { FieldLiveActivity() } contentStates:{
     FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:false)
+    FieldActivityAttributes.rescored(FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:false),
+                                     score:71,band:"Good",closure:nil,at:FieldActivityAttributes.preview.dusk.addingTimeInterval(-3*24*3600))
 }
 #Preview("Island compact",as:.dynamicIsland(.compact),using:FieldActivityAttributes.preview) { FieldLiveActivity() } contentStates:{
     FieldActivityAttributes.ContentState(next:FieldActivityAttributes.preview.milestones[1],nightVision:false)

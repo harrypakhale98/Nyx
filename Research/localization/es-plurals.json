@@ -1,4 +1,12 @@
 {
+  "Best nights · %@ · %lld nights from %@": {
+    "one": "Mejores noches · %@ · %lld noche desde el %@",
+    "other": "Mejores noches · %@ · %lld noches desde el %@"
+  },
+  "Best nights · %@ · %lld nights from tonight": {
+    "one": "Mejores noches · %@ · %lld noche desde esta noche",
+    "other": "Mejores noches · %@ · %lld noches desde esta noche"
+  },
   "%@ · %lld parks tonight": {
     "one": "%@ · %lld parque esta noche",
     "other": "%@ · %lld parques esta noche"

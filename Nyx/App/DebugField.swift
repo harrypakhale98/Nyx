@@ -58,11 +58,14 @@ struct FieldActivityReview: View {
         let stale=attributes.state(at: now.addingTimeInterval(-3*3600), nightVision: false)
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                // `-nyx-state stale-score` puts the followed night's later scores first.
+                if DebugScenario.state == "stale-score" { rescored(early, heading) }
                 Eyebrow(text: "Lock Screen")
                 face { FieldActivityLockView(attributes: attributes, state: state, isStale: false) }
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: now, nightVision: true), isStale: false) }
                 Eyebrow(text: "Heading out: a night followed ahead")
                 face { FieldActivityLockView(attributes: early, state: heading, isStale: false) }
+                if DebugScenario.state != "stale-score" { rescored(early, heading) }
                 Eyebrow(text: "Three hours after its moment, before Nyx updates it")
                 face { FieldActivityLockView(attributes: attributes, state: stale, isStale: true) }
                 face { FieldActivityLockView(attributes: attributes, state: attributes.state(at: attributes.dawn, nightVision: false), isStale: false) }
@@ -90,8 +93,26 @@ struct FieldActivityReview: View {
             }.padding(24)
         }.defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(LinearGradient(colors: [Color(red: 0.05, green: 0.06, blue: 0.14), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
     }
+    /// A followed night after its forecast moved: a lower score worked out three days before dusk
+    /// (the face names its day), in starlight and in red, and the closure lifted since it was followed.
+    @ViewBuilder private func rescored(_ early: FieldActivityAttributes, _ heading: FieldActivityAttributes.ContentState) -> some View {
+        let old=early.dusk.addingTimeInterval(-3*24*3600)
+        let lower=max(0, night.score.value-23)
+        let band=ScoreBand.band(lower).label
+        let red=Self.red(heading)
+        Eyebrow(text: "Its score from three days before, until Nyx refreshes it")
+        face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: lower, band: band, closure: early.closure, at: old), isStale: false) }
+        face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(red, score: lower, band: band, closure: early.closure, at: old), isStale: false) }
+        Eyebrow(text: "The closure lifted since it was followed")
+        face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: night.score.value, band: night.score.band.label, closure: nil, at: Date.now), isStale: false) }
+    }
     private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content().background(Color.black.opacity(0.88), in: RoundedRectangle(cornerRadius: 22))
+    }
+    private static func red(_ state: FieldActivityAttributes.ContentState) -> FieldActivityAttributes.ContentState {
+        var state=state
+        state.nightVision=true
+        return state
     }
     private static func planned(_ state: FieldActivityAttributes.ContentState, at date: Date) -> FieldActivityAttributes.ContentState {
         var state=state

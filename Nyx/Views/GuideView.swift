@@ -56,10 +56,17 @@ struct GuideView:View {
             ScrollView { VStack(alignment:.leading,spacing:22) {
                 Text("Written on this iPhone from the records below. Check them before making plans.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if !asked.isEmpty { Text(asked).font(.headline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader) }
-                if guide.loading { ConstellationLoader().frame(maxWidth:.infinity) }
+                if !guide.lookups.isEmpty { GuideLookups(lines:guide.lookups) }
+                if guide.loading && guide.text.isEmpty { ConstellationLoader().frame(maxWidth:.infinity) }
                 if !guide.text.isEmpty {
-                    Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
-                    citationChips(shown,proxy:proxy)
+                    // Muted while it streams, each part already checked against the records; starlight
+                    // once the whole answer has passed. VoiceOver reads it only then, and no live region
+                    // speaks the words as they come.
+                    Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6).foregroundStyle(guide.checked ? palette.ink : palette.muted)
+                        .fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
+                        .accessibilityHidden(!guide.checked)
+                        .animation(systemReduceMotion ? nil : NyxMotion.spring,value:guide.checked)
+                    if guide.checked { citationChips(shown,proxy:proxy) }
                 }
                 if let error=guide.error { Text(error).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if asked.isEmpty && !guide.loading { suggestionChips }
@@ -67,11 +74,19 @@ struct GuideView:View {
                     // The source is the essay the reader just left; don't print it twice.
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else {
+                    let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }
+                    let nights=all.map(night)
+                    // One basis for every scored night is said once, above the records, not in each row.
+                    let bases=Set(nights.compactMap { $0.map(GuideRecordRow.basis) })
+                    let shared=bases.count == 1 && nights.compactMap({ $0 }).count>1 ? bases.first : nil
                     VStack(alignment:.leading,spacing:0) {
-                        Eyebrow(text:"The records").padding(.bottom,8)
-                        let all=shown+guide.lookedUp.map(\.text)
+                        Eyebrow(text:"The records").padding(.bottom,shared == nil ? 8 : 4)
+                        if let shared {
+                            Text(GuideRecordRow.sharedCaption(shared)).font(.caption).foregroundStyle(palette.muted)
+                                .fixedSize(horizontal:false,vertical:true).padding(.bottom,8)
+                        }
                         ForEach(Array(all.enumerated()),id:\.offset) { index,record in
-                            GuideRecordRow(number:index+1,record:GuideRecord(record,parks:model.parks,tonight:{ model.tonight($0) }),lit:lit==index)
+                            GuideRecordRow(number:index+1,record:record,night:nights[index],showsBasis:shared == nil,closure:record.park.flatMap { model.closure($0) },lit:lit==index)
                                 .id("record-\(index)")
                             if index<all.count-1 { Divider().overlay(palette.line) }
                         }
@@ -79,6 +94,7 @@ struct GuideView:View {
                 }
             }.padding(24).readableColumn() }
             .scrollDismissesKeyboard(.interactively)
+            .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
             .onChange(of:lit) { _,index in
                 guard let index else { return }
                 withAnimation(systemReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("record-\(index)",anchor:.center) }
@@ -87,15 +103,45 @@ struct GuideView:View {
         .safeAreaBar(edge:.bottom) { inputBar }
         .background(NightBackground()).navigationTitle(mode.title).navigationBarTitleDisplayMode(.inline)
         .task(id:requestID) {
-            guard requestID>0, requestID != answeredID else { return }
-            // Planning gets tools that call the engine; explainers reason over their records only.
-            var tools:NightLookup?
-            if case .planning = mode { tools=lookup }
+            guard requestID>0, requestID != answeredID else {
+                // Opening Ask Nyx makes and warms the session the first question will use.
+                if requestID == 0 { guide.prepare(lookup:tools) }
+                #if DEBUG
+                if requestID == 0, let state=DebugScenario.state, state == "streaming" || state == "answered" { showFixture(checked:state == "answered") }
+                #endif
+                return
+            }
             await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:sent ?? records,lookup:tools)
             guard !Task.isCancelled else { return }
             answeredID=requestID
-            AccessibilityNotification.Announcement(guide.error ?? String(localized:"Answer ready")).post()
+            // Said once, at the end: nothing is announced while the answer streams.
+            AccessibilityNotification.Announcement(guide.error ?? String(localized:"Answer checked")).post()
         }
+    }
+    #if DEBUG
+    /// `-nyx-state streaming|answered`: a question with real lookups from the engine (best nights
+    /// and what's up at Arches) and sample words built from those records' own figures, as they
+    /// look mid-stream (muted) or checked. DEBUG only; the model is never imitated in a build.
+    private func showFixture(checked:Bool) {
+        let today=TripDay(model.today).iso
+        let best=lookup.bestNights(park:"Arches",from:today,nights:30,limit:3)
+        let tonight=lookup.whatsUp(park:"Arches",on:today).prefix(1)
+        let found=best+tonight
+        let records=records
+        guard let first=found.first.map({ GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }), let park=first.park, let night=first.night, let score=first.score else { return }
+        let words="The best of the next 30 nights at Arches is \(park.dayLabel(night)), at \(score) out of 100, \(first.band ?? ""). Check the clouds and park alerts again closer to the night."
+        let shown=checked ? words : String(words.prefix(words.count*3/5))
+        asked=suggestions[0]; sent=records
+        guide.showFixture(text:shown,citations:[records.count],lookups:[lookup.bestNightsLookup(park:"Arches",from:today,nights:30),lookup.whatsUpLookup(park:"Arches",on:today)],
+                          lookedUp:found.enumerated().map { (records.count+$0.offset,$0.element) },checked:checked)
+    }
+    #endif
+    /// Planning gets tools that call the engine; explainers reason over their records only.
+    private var tools:NightLookup? { mode.isPlanning ? lookup : nil }
+    /// The night a scored park record is about, as Nyx scores it, for the row's Moon and basis.
+    private func night(_ record:GuideRecord)->Night? {
+        guard record.score != nil, let park=record.park, let night=record.night else { return nil }
+        return model.night(park,on:night)
     }
     private func ask(_ text:String) {
         let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
@@ -165,6 +211,9 @@ struct GuideRecord: Equatable {
     let score:Int?
     let band:String?
     let line:String
+    /// A "parks near" record's distance ("220 miles straight-line from Denver, CO"): its second
+    /// part, after "Arches, UT". Nil for every other record.
+    let detail:String?
     init(_ text:String,parks:[Park],tonight:(Park)->Date) {
         let parts=text.components(separatedBy:"; ").map { $0.trimmingCharacters(in:.whitespaces) }
         // The longest name the record starts with, so "Sequoia" never claims "Sequoia and Kings Canyon".
@@ -185,6 +234,7 @@ struct GuideRecord: Equatable {
             return true
         }.map(\.element)
         line=rest.joined(separator:" · ")
+        detail=park != nil && parts.count>1 && parts[0].contains(",") && !parts[1].contains("/100") ? parts[1] : nil
     }
     /// The chip's words: the record's number, park and night.
     func chip(number:Int)->String {
@@ -194,13 +244,32 @@ struct GuideRecord: Equatable {
     }
 }
 /// One record as a compact row: its number (the citations name it), park and night, a score chip,
-/// and one line. A record about a park's night opens that night.
+/// and one line. A park's scored night speaks Nyx: what its clouds rest on (unless every record
+/// shares it, said once above the records), the Moon's phase and how much of it is lit, and the
+/// park's closure. The model's own wording of the record stays the model's input, never the row.
+/// Other records (a starting point, a sky event) keep their line. A record about a park's night
+/// opens that night.
 struct GuideRecordRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     let number:Int
     let record:GuideRecord
+    var night:Night?=nil
+    var showsBasis=true
+    var closure:String?=nil
     var lit=false
+    /// What a night's clouds rest on, in the app's short words.
+    static func basis(_ night:Night)->String {
+        switch night.basis {
+        case .forecast: String(localized:"\(Int((night.cloudCover ?? 0).rounded()))% cloud forecast")
+        case .blended: String(localized:"\(Int((night.cloudCover ?? 0).rounded()))% cloud forecast, an early look")
+        case .usual: String(localized:"No cloud forecast yet")
+        }
+    }
+    /// The basis said once above the records.
+    static func sharedCaption(_ basis:String)->String {
+        basis == String(localized:"No cloud forecast yet") ? String(localized:"No cloud forecast yet · usual clouds for the month") : basis
+    }
     var body: some View {
         Group {
             if let park=record.park {
@@ -210,29 +279,99 @@ struct GuideRecordRow: View {
         }
         .accessibilityElement(children:.combine)
     }
+    /// Side by side at most sizes; at accessibility sizes the number, the lines and the score
+    /// stack, so a park's name and its band are never broken mid-word.
     private var content:some View {
-        HStack(alignment:.top,spacing:12) {
-            Text("\(number)").font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(palette.muted)
-                .frame(minWidth:24,minHeight:24).overlay(Circle().stroke(palette.line,lineWidth:0.8))
-                .accessibilityLabel(String(localized:"Record \(number)"))
-            VStack(alignment:.leading,spacing:4) {
-                if let park=record.park {
-                    Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink)
-                    if let night=record.night { Text(park.dayLabel(night)).font(.caption).foregroundStyle(palette.muted) }
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment:.leading,spacing:6) {
+                    badge
+                    lines
+                    if let score=record.score {
+                        HStack(alignment:.firstTextBaseline,spacing:8) { scoreNumeral(score); bandLabel }
+                            .accessibilityElement(children:.combine).accessibilityLabel(String(localized:"\(score) out of 100, \(record.band ?? "")"))
+                    }
+                }.frame(maxWidth:.infinity,alignment:.leading)
+            } else {
+                HStack(alignment:.top,spacing:12) {
+                    badge
+                    lines
+                    Spacer(minLength:8)
+                    if let score=record.score {
+                        VStack(alignment:.trailing,spacing:0) { scoreNumeral(score); bandLabel.multilineTextAlignment(.trailing) }
+                            .accessibilityElement(children:.combine).accessibilityLabel(String(localized:"\(score) out of 100, \(record.band ?? "")"))
+                    }
                 }
-                if !record.line.isEmpty { Text(record.line).font(.subheadline).foregroundStyle(record.park == nil ? palette.ink : palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : 3).fixedSize(horizontal:false,vertical:true) }
-            }
-            Spacer(minLength:8)
-            if let score=record.score {
-                VStack(alignment:.trailing,spacing:0) {
-                    Text("\(score)").font(.system(.title2,design:.serif,weight:.light)).foregroundStyle(palette.accent)
-                    if let band=record.band { Text(band).font(.caption2).foregroundStyle(palette.muted).multilineTextAlignment(.trailing) }
-                }.accessibilityElement(children:.combine).accessibilityLabel(String(localized:"\(score) out of 100, \(record.band ?? "")"))
             }
         }
         .padding(.vertical,12).padding(.horizontal,8)
         .background { if lit { RoundedRectangle(cornerRadius:14).fill(palette.accent.opacity(palette.nightVision ? 0.2 : 0.12)) } }
         .contentShape(Rectangle())
+    }
+    private var badge:some View {
+        Text("\(number)").font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(palette.muted)
+            .frame(minWidth:24,minHeight:24).padding(.horizontal,typeSize.isAccessibilitySize ? 8 : 0)
+            .overlay(Capsule().stroke(palette.line,lineWidth:0.8)).fixedSize()
+            .accessibilityLabel(String(localized:"Record \(number)"))
+    }
+    private var lines:some View {
+        VStack(alignment:.leading,spacing:4) {
+            if let park=record.park {
+                Text(park.shortName).font(.system(.headline,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                if let night=record.night { Text(park.dayLabel(night)).font(.caption).foregroundStyle(palette.muted) }
+            }
+            if let night { nightLines(night) }
+            else if !record.line.isEmpty { Text(record.line).font(.subheadline).foregroundStyle(record.park == nil ? palette.ink : palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : 3).fixedSize(horizontal:false,vertical:true) }
+        }
+    }
+    private func scoreNumeral(_ score:Int)->some View {
+        Text("\(score)").font(.system(.title2,design:.serif,weight:.light)).foregroundStyle(palette.accent)
+    }
+    @ViewBuilder private var bandLabel:some View {
+        if let band=record.band { Text(band).font(.caption2).foregroundStyle(palette.muted) }
+    }
+    /// A scored night: a "parks near" record's distance (its second part, the only thing the row
+    /// cannot work out itself), the Moon and the basis, the closure, and how to get there.
+    @ViewBuilder private func nightLines(_ night:Night)->some View {
+        if let distance=record.detail { Text(distance).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+        let lit=Int((night.sky.moon.illumination*100).rounded())
+        let line=showsBasis ? "\(String(localized:"\(lit)% lit")) · \(Self.basis(night))" : String(localized:"\(lit)% lit")
+        Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ MoonSymbol(night:night).accessibilityHidden(true) }
+            .font(.subheadline).foregroundStyle(palette.muted).labelStyle(GuideLineLabelStyle())
+            .accessibilityElement(children:.ignore)
+            .accessibilityLabel(showsBasis ? "\(String(localized:"\(night.sky.moon.name), \(lit)% lit")). \(Self.basis(night))" : String(localized:"\(night.sky.moon.name), \(lit)% lit"))
+        if let closure {
+            Label { Text(closure).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"exclamationmark.triangle").accessibilityHidden(true) }
+                .font(.subheadline.weight(.medium)).foregroundStyle(palette.accent).labelStyle(GuideLineLabelStyle())
+        }
+        if let park=record.park { AccessNoteLabel(park:park) }
+    }
+}
+/// An icon and its line on one baseline, the icon in a fixed column so lines align.
+private struct GuideLineLabelStyle: LabelStyle {
+    @ScaledMetric(relativeTo:.subheadline) private var column=18
+    func makeBody(configuration:Configuration)->some View {
+        HStack(alignment:.firstTextBaseline,spacing:6) { configuration.icon.frame(width:column); configuration.title }
+    }
+}
+/// What Ask Nyx looked up for this answer, one line per lookup as it happens, in the tool's own
+/// terms: "Best nights · Arches · 30 nights from Oct 9". One VoiceOver element whose value grows,
+/// never a new stop for each lookup.
+struct GuideLookups: View {
+    @Environment(\.nyx) private var palette
+    let lines:[String]
+    var body: some View {
+        VStack(alignment:.leading,spacing:6) {
+            Text("Looked up").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+            ForEach(Array(lines.enumerated()),id:\.offset) { _,line in
+                Label { Text(line).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:"magnifyingglass") }
+                    .font(.footnote).foregroundStyle(palette.muted).labelStyle(GuideLineLabelStyle())
+            }
+        }
+        .frame(maxWidth:.infinity,alignment:.leading)
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel(Text("Looked up"))
+        .accessibilityValue(lines.joined(separator:". "))
     }
 }
 /// Chips that wrap onto as many lines as they need, left to right.
@@ -268,4 +407,7 @@ struct FlowLayout: Layout {
     }
 }
 #Preview("Ask Nyx") { NavigationStack { GuideView(mode:.planning) }.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Lookups") {
+    GuideLookups(lines:["Best nights · Arches · 30 nights from Oct 9","What's up · Arches · Oct 9","Parks near · Joshua Tree · within 200 mi"]).padding().background(.black).preferredColorScheme(.dark)
+}
 #Preview("Ask Nyx AX5") { NavigationStack { GuideView(mode:.planning) }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
