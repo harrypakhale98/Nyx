@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import UIKit
 @testable import Nyx
 
 /// The rating request's moments: counters that start again in each version, a journal entry in a
@@ -51,6 +52,15 @@ import Foundation
         let asks=Asks()
         ReviewPrompt.noteFieldNightKept(defaults:defaults) { _ in asks.count+=1 }
         #expect(asks.count==1)
+    }
+
+    @Test func fieldModeCountsAnywhereInThePresentationChain() {
+        // The dawn editor is a sheet over field mode: the top controller is the sheet, not field mode.
+        let field=FieldHostingController(parkID:"gaar")
+        #expect(ReviewPrompt.inField([UIViewController(),field,UIViewController()]))
+        #expect(ReviewPrompt.inField([UIViewController(),field]))
+        #expect(!ReviewPrompt.inField([UIViewController(),UIViewController()]))
+        #expect(!ReviewPrompt.inField([]))
     }
 
     @Test func neverInTheDark() throws {

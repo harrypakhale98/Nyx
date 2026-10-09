@@ -11,24 +11,28 @@ struct Starfield: View {
     /// 0...1. Higher-scoring nights twinkle harder and a little faster.
     var twinkle: Double=0.3
     private struct Star { let x:Double; let y:Double; let radius:Double; let phase:Double }
-    private let stars: [Star]
+    /// The field split once, by size: all 88 stars, and the first 44 for reduced resources.
+    private let faint: [Star], bright: [Star], fewerFaint: [Star], fewerBright: [Star]
     init(seed: String, strength: Double=0.6, twinkle: Double=0.3) {
         self.seed=seed; self.strength=strength; self.twinkle=min(1,max(0,twinkle))
         var state=seed.utf8.reduce(UInt64(5381)) { ($0 &* 33) &+ UInt64($1) }
         func random()->Double { state=state &* 6364136223846793005 &+ 1442695040888963407; return Double(state>>11)/Double(UInt64(1)<<53) }
-        stars=(0..<88).map { _ in Star(x:random(),y:random(),radius:0.35+random()*1.05,phase:random()*6.28) }
+        let stars=(0..<88).map { _ in Star(x:random(),y:random(),radius:0.35+random()*1.05,phase:random()*6.28) }
+        let fewer=stars.prefix(44)
+        faint=stars.filter { $0.radius<Self.faintRadius }; bright=stars.filter { $0.radius>=Self.faintRadius }
+        fewerFaint=fewer.filter { $0.radius<Self.faintRadius }; fewerBright=fewer.filter { $0.radius>=Self.faintRadius }
     }
     var body: some View {
         // When the system asks for less, half the stars, holding still.
         let still=reduceMotion || access.reducedResources
-        let field=access.reducedResources ? Array(stars.prefix(44)) : stars
+        let faint=access.reducedResources ? fewerFaint : faint, bright=access.reducedResources ? fewerBright : bright
         TimelineView(.animation(minimumInterval:1/30,paused:still || PowerState.shared.lowPower)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             ZStack {
                 // The smaller, fainter stars in their own layer: under Increase Contrast they fade out
-                // (rather than pop), leaving a calmer field behind text.
-                layer(field.filter { $0.radius<Self.faintRadius },t:t).opacity(palette.highContrast ? 0 : 1)
-                layer(field.filter { $0.radius>=Self.faintRadius },t:t)
+                // (rather than pop), leaving a calmer field behind text, and then leave the tree.
+                if !palette.highContrast { layer(faint,t:t).transition(.opacity) }
+                layer(bright,t:t)
             }.animation(.easeInOut(duration:0.6),value:palette.highContrast)
         }.allowsHitTesting(false).accessibilityHidden(true).accessibilityIgnoresInvertColors()
     }
