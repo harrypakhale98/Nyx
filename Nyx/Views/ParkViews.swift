@@ -314,6 +314,8 @@ struct ParkDetailView: View {
                 }
             }
             .onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+            // The Moon hero drops its relief while the river or the Moon is scrubbed.
+            .environment(\.moonRelief,!scrubbing)
             .task {
                 // DEBUG store capture (`-nyx-listen`): the shape of the night at the top.
                 if DebugScenario.isEnabled("listen") {

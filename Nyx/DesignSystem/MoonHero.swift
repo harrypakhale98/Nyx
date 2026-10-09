@@ -10,6 +10,8 @@ struct MoonHero: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// Off while the page's time river is scrubbed (set by the park page).
+    @Environment(\.moonRelief) private var relief
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let night: Night
     /// Moves the selected night by a number of nights and says whether it moved (false at the
@@ -30,6 +32,8 @@ struct MoonHero: View {
                                librationLongitude:target.geometry.librationLongitude,librationLatitude:target.geometry.librationLatitude)
         VStack(spacing:18) {
             MorphingMoon(geometry:shown)
+                // Relief while still; a smooth sphere while scrubbed, so the drag holds 120 Hz.
+                .environment(\.moonRelief,relief && scrubbing != true)
                 .frame(maxWidth:280).aspectRatio(1,contentMode:.fit)
                 .padding(.horizontal,8)
                 .contentShape(Circle())
