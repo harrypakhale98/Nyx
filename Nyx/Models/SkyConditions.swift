@@ -7,9 +7,11 @@ nonisolated struct MoonPhase: Codable, Sendable {
     let fraction: Double
     var illumination: Double { (1-cos(fraction * 2 * .pi))/2 }
     var waxing: Bool { fraction < 0.5 }
+    /// Within about a day of new: the phase `name` calls "New moon", decided here once.
+    var isNew: Bool { fraction < 0.03 || fraction >= 0.97 }
     var name: String {
-        switch fraction {
-        case ..<0.03, 0.97...: String(localized: "New moon")
+        if isNew { return String(localized: "New moon") }
+        return switch fraction {
         case ..<0.22: String(localized: "Waxing crescent")
         case ..<0.28: String(localized: "First quarter")
         case ..<0.47: String(localized: "Waxing gibbous")

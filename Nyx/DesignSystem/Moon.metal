@@ -10,6 +10,17 @@ constant float colourBand = 2048.0 / 3072.0;
 /// (1,737.4 km) and two texels of arc: turns a central difference of grey levels into a slope.
 constant float reliefSlopePerLevel = 34.62 / (1737400.0 * 2.0 * (2.0 * M_PI_F / 2048.0));
 
+/// One relief sample in grey levels, at a relief longitude u (0…1, wrapped) and an atlas row v.
+/// The tap is clamped inside the relief band, so it never blends with the colour band above or the
+/// empty right half: across the seam it wraps, at the poles it stops at the band's last row.
+static float reliefLevel(texture2d<half> map, float u, float v) {
+    constexpr sampler linearClamp(filter::linear, address::clamp_to_edge);
+    float2 q = clamp(float2(fract(u) * 0.5, v),
+                     float2(0.5 / atlasWidth, colourBand + 0.5 / atlasHeight),
+                     float2(0.5 - 0.5 / atlasWidth, 1.0 - 0.5 / atlasHeight));
+    return float(map.sample(linearClamp, q).r) * 255.0;
+}
+
 /// The Moon as a lit sphere, one pixel at a time.
 /// - size: the drawing's size in points.
 /// - light: (x, y, z, earthshine). The Sun's direction in screen space (x right, y up, z toward
@@ -51,15 +62,19 @@ static half4 moonShade(float2 position, float2 size, float4 light, float4 frame,
     float mu = max(n.z, 0.02);                      // cosine of emission, always on the smooth sphere
 
     // Relief: the terrain's slope tilts the normal for the incidence term only, and only where the
-    // Sun is low (near the terminator), where real shadows and lit rims are what the eye sees.
-    float weight = relief * (1.0 - smoothstep(0.12, 0.32, abs(mu0)));
+    // Sun is low (near the terminator), where real shadows and lit rims are what the eye sees. It
+    // fades toward the limb, where the emission term is tiny and a tilted incidence would blow the
+    // Lommel-Seeliger ratio up into white specks and black notches, and toward full Moon, when the
+    // shadows hide behind the terrain that casts them (gone within 20° of opposition, whole from 35°).
+    float smoothLit = mu0 > 0.0 ? 2.0 * mu0 / (mu0 + mu) : 0.0;
+    float weight = relief * (1.0 - smoothstep(0.12, 0.32, abs(mu0)))
+                 * smoothstep(0.08, 0.3, n.z)
+                 * (1.0 - smoothstep(cos(35.0 * M_PI_F / 180.0), cos(20.0 * M_PI_F / 180.0), sun.z));
     if (atlas && weight > 0.0) {
-        float u = fract(uv.x);
-        float2 du = float2(1.0 / atlasWidth, 0.0), dv = float2(0.0, 1.0 / atlasHeight);
-        float2 h = float2(clamp(u * 0.5, 0.5 / atlasWidth, 0.5 - 0.5 / atlasWidth),
-                          clamp(colourBand + (0.5 - latitude / M_PI_F) * (1.0 - colourBand), colourBand + 0.5 / atlasHeight, 1.0 - 0.5 / atlasHeight));
-        float east = float(map.sample(linearRepeat, h + du).r - map.sample(linearRepeat, h - du).r) * 255.0;
-        float north = float(map.sample(linearRepeat, h - dv).r - map.sample(linearRepeat, h + dv).r) * 255.0;
+        float v = colourBand + (0.5 - latitude / M_PI_F) * (1.0 - colourBand);
+        float u = fract(uv.x), texel = 1.0 / 2048.0;
+        float east = reliefLevel(map, u + texel, v) - reliefLevel(map, u - texel, v);
+        float north = reliefLevel(map, u, v - 1.0 / atlasHeight) - reliefLevel(map, u, v + 1.0 / atlasHeight);
         float gEast = east * reliefSlopePerLevel / max(cos(latitude), 0.15);
         float gNorth = north * reliefSlopePerLevel;
         // East and north on the sphere, in the Moon's frame, then back to screen space.
@@ -73,6 +88,8 @@ static half4 moonShade(float2 position, float2 size, float4 light, float4 frame,
         mu0 = dot(bumped, sun);
     }
     float lit = mu0 > 0.0 ? 2.0 * mu0 / (mu0 + mu) : 0.0;
+    // A lit rim may be brighter than the smooth sphere there, never a saturated speck.
+    lit = min(lit, smoothLit * 1.5 + 0.35);
     lit *= smoothstep(-0.015, 0.05, mu0);           // the terminator is soft but narrow
 
     // A gentle lift: the map is a calibrated mosaic, darker than the Moon looks to the eye at night.

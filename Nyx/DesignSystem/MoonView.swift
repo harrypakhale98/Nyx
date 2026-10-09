@@ -150,3 +150,17 @@ extension AstronomyEngine {
         }.padding().background(.black)
     }
 }
+/// Near full the relief fades out (toward opposition and toward the limb): the edge stays clean.
+#Preview("Relief near full Moon • limb stays clean") {
+    let engine=AstronomyEngine()
+    if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) {
+        let full=Date(timeIntervalSince1970:1791100000+22*86400), gibbous=Date(timeIntervalSince1970:1791100000+20*86400)
+        VStack(spacing:20) {
+            MoonView(geometry:engine.moonGeometry(for:park,at:full)).frame(width:280)
+            HStack(spacing:20) {
+                MoonView(geometry:engine.moonGeometry(for:park,at:gibbous)).frame(width:120)
+                MoonView(geometry:engine.moonGeometry(for:park,at:full)).frame(width:120)
+            }
+        }.padding().background(.black)
+    }
+}

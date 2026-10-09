@@ -93,4 +93,27 @@ import SwiftUI
         #expect(abs(MoonView.earthshine(new,side:280)-0.09*(1-cos(new.phaseAngle))/2)<1e-9)
         #expect(MoonView.atlasSide>MoonView.smallSide)
     }
+
+    /// "New moon" in words comes from the phase itself, never from comparing its display name.
+    @Test func newMoonWordingFollowsThePhase() throws {
+        for fraction in [0.0,0.01,0.029,0.97,0.995] {
+            let phase=MoonPhase(fraction:fraction)
+            #expect(phase.isNew)
+            #expect(phase.name==String(localized:"New moon"))
+        }
+        for fraction in [0.03,0.25,0.5,0.75,0.969] { #expect(!MoonPhase(fraction:fraction).isNew) }
+        let jotr=try park("jotr"), new=try night(jotr,"2026-10-10")
+        #expect(new.sky.moon.isNew)
+        #expect(ShareCard(night:new).dateLine.hasSuffix("New moon"))
+        #expect(ShareCard(night:new).summary.contains("New moon."))
+    }
+    /// The Moon gives way to long words in steps, largest first, never below 80 pt on the card.
+    @Test func moonShrinksInStepsBeforeTheWordsMove() {
+        for shape in ShareCard.Format.allCases {
+            let sides=ShareCard.moonSides(shape)
+            #expect(sides==sides.sorted(by:>))
+            #expect((sides.last ?? 0)>=80)
+        }
+        #expect(ShareCard.moonSides(.card).first==120)
+    }
 }

@@ -155,13 +155,16 @@ struct SkyArc: View {
         context.stroke(ridge,with:.color(palette.line.opacity(0.8)),lineWidth:0.6)
 
         // Paths: bright above the horizon, a faint trace below it.
-        func trace(_ points:[(Date,Double)],color:Color,width:Double) {
+        // `gap` keeps the path out from under a disc drawn on it (the Moon, which is added as light
+        // and would otherwise show its own track running through it).
+        func trace(_ points:[(Date,Double)],color:Color,width:Double,gap:Path?=nil) {
             var path=Path()
             for (i,point) in points.enumerated() {
                 let p=CGPoint(x:x(point.0),y:y(point.1))
                 if i==0 { path.move(to:p) } else { path.addLine(to:p) }
             }
             var above=context; above.clip(to:Path(CGRect(x:0,y:0,width:size.width,height:horizon)))
+            if let gap { above.clip(to:gap,options:.inverse) }
             above.stroke(path,with:.color(color),style:StrokeStyle(lineWidth:width,lineCap:.round,lineJoin:.round))
             var below=context; below.clip(to:Path(CGRect(x:0,y:horizon,width:size.width,height:size.height-horizon-labelBand)))
             below.stroke(path,with:.color(color.opacity(0.28)),style:StrokeStyle(lineWidth:1,dash:[2,3]))
@@ -200,19 +203,21 @@ struct SkyArc: View {
             }
         }
         trace(sunPoints,color:palette.accent,width:1.8)
-        trace(moonPoints,color:palette.ink,width:1.4)
+        // The Moon itself sits at its highest point in view; its track stops at the disc's edge.
+        let moonPeak:CGPoint?=moonPoints.max(by:{ $0.1<$1.1 }).flatMap { peak in
+            guard peak.1>0 else { return nil }
+            let edge=12*grow
+            return CGPoint(x:min(max(x(peak.0),edge),size.width-edge),y:max(y(peak.1),edge))
+        }
+        let moonRadius=moonSize/2+0.5
+        trace(moonPoints,color:palette.ink,width:1.4,gap:moonPeak.map { Path(ellipseIn:CGRect(x:$0.x-moonRadius,y:$0.y-moonRadius,width:moonRadius*2,height:moonRadius*2)) })
         // Without colour, the Sun's path is named where it last stands clear of the horizon.
         if access.differentiate, let last=sunPoints.last(where:{ $0.1>3 && x($0.0)>24 }) ?? sunPoints.first(where:{ $0.1>3 }) {
             let label=context.resolve(Text("Sun").font(.caption2.weight(.semibold)).foregroundStyle(palette.accent))
             let measured=label.measure(in:CGSize(width:60,height:20))
             context.draw(label,at:CGPoint(x:min(max(x(last.0),measured.width/2+4),size.width-measured.width/2-4),y:max(measured.height/2+2,y(last.1)-measured.height/2-3)))
         }
-        // The Moon itself, at its highest point in view.
-        if let peak=moonPoints.max(by:{ $0.1<$1.1 }),peak.1>0,let symbol=context.resolveSymbol(id:"moon") {
-            let edge=12*grow
-            let px=min(max(x(peak.0),edge),size.width-edge), py=max(y(peak.1),edge)
-            context.draw(symbol,at:CGPoint(x:px,y:py))
-        }
+        if let moonPeak,let symbol=context.resolveSymbol(id:"moon") { context.draw(symbol,at:moonPeak) }
 
         // True darkness, bracketed on the ground in amber.
         if let darkStart=night.sky.darkStart,let darkEnd=night.sky.darkEnd,darkEnd>darkStart {
