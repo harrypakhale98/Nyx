@@ -263,6 +263,8 @@ struct TonightView: View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
             ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).hoverEffect(.highlight).draggable(park);Divider().overlay(palette.line) }
+            // Only worth saying when a row actually reads "Estimate", as on Parks.
+            if best.dropFirst().contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's
@@ -359,27 +361,32 @@ struct TonightView: View {
         .accessibilityHint(hint)
     }
     /// The starting point is a chosen park, a city or town, or the device location: one at a time.
-    /// One row, "From Joshua Tree · 200 mi ⌃" with Near me trailing, and how the distance is measured
-    /// under it. Below the alternatives it carries its own heading, so the headings rotor finds it.
+    /// "From Joshua Tree · 200 mi ⌃" on the first line; how the distance is measured under it, with
+    /// Near me trailing that line in full words. Below the alternatives it carries its own heading,
+    /// so the headings rotor finds it.
     @ViewBuilder private func startingPoint(heading:Bool)->some View {
         if heading { Eyebrow(text:"Starting point") }
         Panel { VStack(alignment:.leading,spacing:0) {
             ViewThatFits(in:.horizontal) {
-                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl(compact:false) }
-                // A long name keeps the row by showing Near me as its symbol alone.
-                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl(compact:true) }
-                // The longest names: the name wraps, the radius and Near me share a line.
-                VStack(alignment:.leading,spacing:4) {
-                    origin(wraps:true)
-                    HStack(spacing:8) { radiusMenu; Spacer(minLength:8); locationControl(compact:false) }
-                }
-                // Accessibility sizes: one control per line, none wider than the card.
-                VStack(alignment:.leading,spacing:4) { origin(wraps:true); radiusMenu; locationControl(compact:false) }
+                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu }
+                // A long name, or accessibility sizes: the name wraps and the radius goes underneath.
+                VStack(alignment:.leading,spacing:4) { origin(wraps:true); radiusMenu }
             }
-            Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:8) { crowFlies; Spacer(minLength:8); locationControl }
+                VStack(alignment:.leading,spacing:8) { crowFlies; locationControl }
+            }
             if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
-        } }
+        }
+        // The layouts settle on their first pass; a surrounding animation must not morph one into another.
+        .transaction { $0.animation=nil }
+        // One container, so the accessibility audit can find the row (`startingPoint`).
+        .accessibilityElement(children:.contain).accessibilityIdentifier("startingPoint") }
+    }
+    /// Heard with the radius it qualifies ("Radius, 200 mi, as the crow flies"), so not read again here.
+    private var crowFlies: some View {
+        Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
     }
     private var dot: some View { Text(verbatim:"·").font(.subheadline).foregroundStyle(palette.muted).accessibilityHidden(true) }
     private func origin(wraps:Bool)->some View {
@@ -390,15 +397,11 @@ struct TonightView: View {
             }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
         }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
     }
-    @ViewBuilder private func locationControl(compact:Bool)->some View {
+    /// Near me (or Settings when location is off), always in words: it is the main way into location.
+    @ViewBuilder private var locationControl:some View {
         if location.locating { ProgressView().accessibilityLabel("Finding your location") }
-        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ controlLabel("Settings",symbol:"location.slash",compact:compact) }.buttonStyle(.bordered).buttonBorderShape(compact ? .circle : .capsule).fixedSize().accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-        else if location.latitude==nil { Button { explainLocation=true } label:{ controlLabel("Near me",symbol:"location",compact:compact) }.buttonStyle(.bordered).buttonBorderShape(compact ? .circle : .capsule).fixedSize().accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
-    }
-    /// A bordered control's label, or its symbol alone when the row is short of room (still 44 pt).
-    @ViewBuilder private func controlLabel(_ title:LocalizedStringKey,symbol:String,compact:Bool)->some View {
-        if compact { Label(title,systemImage:symbol).labelStyle(.iconOnly).font(.subheadline).frame(minWidth:30,minHeight:30) }
-        else { Label(title,systemImage:symbol).font(.subheadline).frame(minHeight:30) }
+        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize().accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
+        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize().accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
     }
     /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
     /// distances. A plain label, so "200 mi" sits on the row's text with no control inset of its own.
@@ -417,7 +420,7 @@ struct TonightView: View {
             .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
         }
         .buttonStyle(.plain).fixedSize()
-        .accessibilityLabel("Radius").accessibilityValue(distance).accessibilityInputLabels([Text("Radius"),Text("Distance")])
+        .accessibilityLabel("Radius").accessibilityValue(distance+", "+String(localized:"as the crow flies")).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
 }
 /// The quiet facts under Tonight's dial when nothing is closed: "No closures listed · check alerts
@@ -464,6 +467,11 @@ struct PermissionExplainer: View {
     }
 }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Caveat • two facts") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go")]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
+#Preview("Caveat • no alerts listed") { CaveatLine(facts:[String(localized:"No alerts listed"),String(localized:"confirm access before you go")]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
+#Preview("Caveat • old forecast, wraps at the last dot") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
+#Preview("Caveat • old forecast, AX5") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+#Preview("Caveat • night vision") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) }
 /// The nights Tonight has already marked with the double tap, so each is felt once.
 enum FoundNights {
     private static let key="foundNights"

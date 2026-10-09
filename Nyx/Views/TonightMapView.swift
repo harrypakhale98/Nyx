@@ -335,7 +335,11 @@ struct ParksMapView: View {
                     }
                 }
                 if typeSize.isAccessibilitySize { legend }
-                Text("Each park uses its own local date. Scores without a full forecast can change when one arrives.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                // As on the Parks list and Tonight: said only when a row here reads "Estimate". The local date is
+                // explained in each night's score breakdown.
+                if map.darkest.prefix(5).contains(where:{ mark in model.park(mark.id).map { model.night($0).basis == .usual } ?? false }) {
+                    Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
             }.padding(24).readableColumn(1100)
         }
         .background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
