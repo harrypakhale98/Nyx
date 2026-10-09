@@ -69,8 +69,8 @@ struct TonightSkyView: View {
             .accessibilityHint("Swipe up or down to turn 45 degrees.")
             .accessibilityAdjustableAction { direction in
                 switch direction {
-                case .increment: face(facing+45)
-                case .decrement: face(facing-45)
+                case .increment: completeReveal(); face(facing+45)
+                case .decrement: completeReveal(); face(facing-45)
                 @unknown default: break
                 }
             }

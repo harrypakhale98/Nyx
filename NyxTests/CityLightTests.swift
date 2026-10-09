@@ -103,6 +103,11 @@ struct CityLightTests {
         #expect(text.contains("“The Milky Way is hidden from more than one-third of humanity, including 60% of Europeans and nearly 80% of North Americans.”"))
         #expect(text.contains("“The number of visible stars decreased by an amount that can be explained by an increase in sky brightness of 7 to 10% per year in the human visible band.”"))
         #expect(text.contains("Las Vegas"))
+        // Not every park: 5 of 63 have a light dome with no town named, and the brightest shows no comparison.
+        #expect(!text.contains("Each park's page"))
+        #expect(text.contains("Most parks' pages"))
+        #expect(text.contains("For every park darker than a city"))
+        #expect(parks.contains { !CityLightFigure.compares($0) })
         #expect(!text.contains("!"))
         let paragraphs=text.components(separatedBy:"\n\n")
         let last=paragraphs.last ?? ""
@@ -116,6 +121,8 @@ struct CityLightTests {
         let text=try spanish("essay.darkness")
         for number in ["60%","80%","7 y 10%","51,351","2011","2022","2016","2023"] { #expect(text.contains(number),"\(number)") }
         #expect(text.components(separatedBy:"\n\n").last?.hasPrefix("Fuentes:")==true)
+        #expect(text.contains("la mayoría de los parques"))
+        #expect(!text.contains("La página de cada parque"))
         #expect(try spanish("Sources")=="Fuentes")
     }
 }

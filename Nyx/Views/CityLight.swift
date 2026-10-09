@@ -19,6 +19,7 @@ struct CityLightFigure: View {
     @State private var onScreen=false
     static let cityClass=8.0
     private static var nights:[String:Date]=[:]
+    private static var skies:[String:HorizonSky]=[:]
     /// The figure's night: the summer new moon, or the winter one where July has no true darkness
     /// (Alaska's parks). Worked out once per park.
     static func night(_ park:Park)->Date {
@@ -26,6 +27,14 @@ struct CityLightFigure: View {
         let night=AstronomyEngine().conditions(for:park,on:park.evening(BortleFigure.summer)).darkStart == nil ? BortleFigure.winter : BortleFigure.summer
         nights[park.id]=night
         return night
+    }
+    /// The figure's sky, worked out once per park: the body runs several times as the control's
+    /// width settles and on every switch, and the conditions behind it are a full night's astronomy.
+    static func sky(_ park:Park)->HorizonSky {
+        if let sky=skies[park.id] { return sky }
+        let sky=BortleFigure.sky(park,night:night(park))
+        skies[park.id]=sky
+        return sky
     }
     /// Only where the park's estimate is clearly darker than a city's (class 6 or lower).
     static func compares(_ park:Park)->Bool { Double(park.bortleEstimate)<=cityClass-2 }
@@ -39,7 +48,7 @@ struct CityLightFigure: View {
         VStack(alignment:.leading,spacing:12) {
             let shape=RoundedRectangle(cornerRadius:18)
             Group {
-                if onScreen { GlowComparisonSky(sky:BortleFigure.sky(park,night:Self.night(park)),base:BortleFigure.options(park,bortle:drawnClass),bortle:drawnClass) }
+                if onScreen { GlowComparisonSky(sky:Self.sky(park),base:BortleFigure.options(park,bortle:drawnClass),bortle:drawnClass) }
                 else { Color.black }
             }
             .frame(height:Self.height)
@@ -47,7 +56,7 @@ struct CityLightFigure: View {
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
             .onScrollVisibilityChange(threshold:0.01) { visible in if visible { onScreen=true } }
             .accessibilityElement()
-            .accessibilityLabel(String(localized:"Illustration. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
+            .accessibilityLabel(String(localized:"Illustration: this park's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
             .accessibilityAddTraits(.isImage)
             picker
             Text("An illustration: the same sky drawn at this park's estimated class and at a city's.")
@@ -60,38 +69,37 @@ struct CityLightFigure: View {
             withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { drawnClass=target }
         }
     }
-    /// The park's label in full, and short for a phone's width ("Here (Class 3)"): the caption and
-    /// the estimate row just below say "estimated", and VoiceOver always hears the full label.
+    /// The labels in full for the menu, and short for the segments ("Here · Class 3", "City · Class 8"),
+    /// short enough for a phone's width at standard sizes (the menu takes over where they are not). The segmented control's
+    /// bridge ignores a per-segment accessibility label (checked by a UI test), so VoiceOver hears the
+    /// short ones; the figure's own label, the caption and the estimate row below say "estimated".
     private var hereFull: String { String(localized:"Here (Class \(park.bortleEstimate), estimated)") }
-    private var hereShort: String { String(localized:"Here (Class \(park.bortleEstimate))") }
+    private var hereShort: String { String(localized:"Here · Class \(park.bortleEstimate)") }
     private var cityLabel: String { String(localized:"From a city (Class 8)") }
+    private var cityShort: String { String(localized:"City · Class 8") }
     @State private var available: CGFloat=0
-    @State private var fullWidth: CGFloat=0
-    @State private var shortWidth: CGFloat=0
-    /// Segmented, full width, with the full labels where they fit and the short "Here" where only
-    /// that fits; a menu with a wrapping label at accessibility sizes or when neither fits.
+    @State private var segmentedWidth: CGFloat=0
+    /// Segmented and full width; a menu with a wrapping label at accessibility sizes, or where even
+    /// the short segments would not fit (a narrow column), measured rather than guessed.
     @ViewBuilder private var picker: some View {
         if typeSize.isAccessibilitySize { menu }
         else {
             Group {
-                if available>0 && shortWidth>available { menu }
-                else { segmented(here:available>0 && fullWidth>available ? hereShort : hereFull) }
+                if available>0 && segmentedWidth>available { menu } else { segmented }
             }
             .frame(maxWidth:.infinity,alignment:.leading)
             .onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ available=$0 }
             .background {
-                // Each segmented form at its natural width, measured and never shown.
-                VStack {
-                    segmented(here:hereFull).fixedSize().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ fullWidth=$0 }
-                    segmented(here:hereShort).fixedSize().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ shortWidth=$0 }
-                }.hidden().accessibilityHidden(true)
+                // The segmented form at its natural width, measured and never shown.
+                segmented.fixedSize().onGeometryChange(for:CGFloat.self) { $0.size.width } action:{ segmentedWidth=$0 }
+                    .hidden().accessibilityHidden(true)
             }
         }
     }
-    private func segmented(here:String)->some View {
+    private var segmented: some View {
         Picker("Sky drawn",selection:$selection) {
-            Text(here).accessibilityLabel(hereFull).tag(Sky.here)
-            Text(cityLabel).tag(Sky.city)
+            Text(hereShort).tag(Sky.here)
+            Text(cityShort).tag(Sky.city)
         }
         .pickerStyle(.segmented)
     }
@@ -138,7 +146,8 @@ struct SkyGlowPanel: View {
             VStack(alignment:.leading,spacing:16) {
                 Eyebrow(text:"Sky glow")
                 // A park already under a city's glow has nothing to compare: the two skies would match.
-                if CityLightFigure.compares(park) { CityLightFigure(park:park,selection:comparison) }
+                // Identity per park: the selection and the drawn class are seeded from the park once.
+                if CityLightFigure.compares(park) { CityLightFigure(park:park,selection:comparison).id(park.id) }
                 LightPollution(park:park)
                 Divider().overlay(palette.line).padding(.vertical,4)
                 ProtectThisSky(park:park)
