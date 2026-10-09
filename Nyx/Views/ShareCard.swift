@@ -33,39 +33,49 @@ struct ShareCard:View {
             // Exported art has no accessibility settings to lean on: the sky is veiled behind the
             // words, so no star ever sits beside a letter like stray punctuation.
             RadialGradient(colors:[.black.opacity(0.6),.black.opacity(0.35),.clear],center:UnitPoint(x:0.5,y:0.55),startRadius:0,endRadius:shape.size.height*0.6)
-            VStack(spacing:0) {
-                Spacer(minLength:0)
-                if drawsMoon {
-                    // Fixed frames throughout: ImageRenderer proposes no size.
-                    MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
-                        .frame(width:shape == .story ? 132 : 120,height:shape == .story ? 132 : 120)
-                        .padding(.bottom,shape == .story ? 18 : 6)
-                }
-                VStack(spacing:0) {
-                    score
-                    if let range {
-                        Text(Self.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).padding(.top,6)
-                    }
-                    VStack(spacing:6) {
-                        Text(night.park.shortName).font(.system(.title,design:.serif)).foregroundStyle(palette.ink)
-                        Text(dateLine).font(.subheadline).foregroundStyle(palette.ink)
-                        if let why { Text(why).font(.system(.callout,design:.serif)).foregroundStyle(palette.ink).padding(.top,6) }
-                        Text(basis).font(.caption).foregroundStyle(palette.muted).padding(.top,2)
-                    }
-                    .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                    .padding(.top,shape == .story ? 28 : 16)
-                }
-                .padding(.horizontal,22).padding(.vertical,22)
-                // Night itself right behind the words: the stars stop short of every letter.
-                .background { RoundedRectangle(cornerRadius:48).fill(.black).blur(radius:20) }
-                Spacer(minLength:0)
-                Text("NYX").font(.caption2.weight(.medium)).tracking(6).foregroundStyle(palette.muted).padding(.top,12)
-            }.padding(.horizontal,28).padding(.top,shape == .story ? 40 : 30).padding(.bottom,shape == .story ? 30 : 22)
+            // The Moon gives way before the words do: a long park name, the models' range and a
+            // wrapped line (Spanish runs longer) shrink it, so the wordmark never leaves the frame.
+            ViewThatFits(in:.vertical) {
+                ForEach(Self.moonSides(shape),id:\.self) { side in column(moon:side) }
+            }
+            .padding(.horizontal,28).padding(.top,shape == .story ? 40 : 30).padding(.bottom,shape == .story ? 30 : 22)
         }.frame(width:shape.size.width,height:shape.size.height)
             // ImageRenderer does not inherit the window's dark scheme; every color here is explicit.
             .environment(\.colorScheme,.dark)
             // This is fixed-size exported artwork, with a complete spoken alternative.
             .dynamicTypeSize(.large).accessibilityElement(children:.ignore).accessibilityLabel(summary)
+    }
+    /// The Moon's sizes, largest first: 120 pt on the card (132 on the story), then smaller as the words need room.
+    nonisolated static func moonSides(_ shape:Format)->[Double] { shape == .story ? [132,108,88] : [120,100,80] }
+    private func column(moon side:Double)->some View {
+        VStack(spacing:0) {
+            Spacer(minLength:0)
+            if drawsMoon {
+                // Fixed frames throughout: ImageRenderer proposes no size.
+                MoonView(geometry:AstronomyEngine().moon(for:night).geometry)
+                    .frame(width:side,height:side)
+                    .padding(.bottom,shape == .story ? 18 : 6)
+            }
+            VStack(spacing:0) {
+                score
+                if let range {
+                    Text(Self.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).padding(.top,6)
+                }
+                VStack(spacing:6) {
+                    Text(night.park.shortName).font(.system(.title,design:.serif)).foregroundStyle(palette.ink)
+                    Text(dateLine).font(.subheadline).foregroundStyle(palette.ink)
+                    if let why { Text(why).font(.system(.callout,design:.serif)).foregroundStyle(palette.ink).padding(.top,6) }
+                    Text(basis).font(.caption).foregroundStyle(palette.muted).padding(.top,2)
+                }
+                .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                .padding(.top,shape == .story ? 28 : 16)
+            }
+            .padding(.horizontal,22).padding(.vertical,22)
+            // Night itself right behind the words: the stars stop short of every letter.
+            .background { RoundedRectangle(cornerRadius:48).fill(.black).blur(radius:20) }
+            Spacer(minLength:0)
+            Text("NYX").font(.caption2.weight(.medium)).tracking(6).foregroundStyle(palette.muted).padding(.top,12)
+        }
     }
     /// The numeral, light and tightly set as on the gauge, with "/100" hung off its right side so
     /// the number itself stays centred; the band word under it.
@@ -88,7 +98,7 @@ struct ShareCard:View {
     var dateLine:String {
         let day=night.park.dayLabel(night.id)
         guard !drawsMoon else { return day }
-        if night.sky.moon.name == String(localized:"New moon") { return String(localized:"\(day) · New moon") }
+        if night.sky.moon.isNew { return String(localized:"\(day) · New moon") }
         return String(localized:"\(day) · Moon \(Self.percent(night))% lit")
     }
     nonisolated static func percent(_ night:Night)->Int { Int((night.sky.moon.illumination*100).rounded()) }
@@ -108,7 +118,7 @@ struct ShareCard:View {
     /// The Moon as the card shows it: its phase and how much is lit, or in words when not drawn.
     private var moonPhrase:String {
         if drawsMoon { return String(localized:"\(night.sky.moon.name), \(Self.percent(night))% lit") }
-        if night.sky.moon.name == String(localized:"New moon") { return String(localized:"New moon") }
+        if night.sky.moon.isNew { return String(localized:"New moon") }
         return String(localized:"Moon \(Self.percent(night))% lit")
     }
     /// What travels beside the image: the summary, then where it came from.
@@ -229,20 +239,32 @@ extension ShareCard {
     let m=PlanModel()
     if let p=m.home { ShareCard(night:m.night(p,on:p.date(m.tonight(p),addingDays:6))).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).environment(\.nyxReduceMotion,true).modifier(NightVisionFilter(enabled:true)) }
 }
+/// The longest card: a two-line park name, the models' range, a why line and the Moon drawn.
+/// Try it in Spanish as well (the scheme's App Language); the Moon shrinks before the words move.
+#Preview("Share card • longest words") {
+    let m=PlanModel()
+    if let p=m.parks.first(where:{ $0.id=="blca" }) {
+        ShareCard(night:m.night(p,on:p.date(m.tonight(p),addingDays:6)),why:"Moon-free for 70% of true darkness",range:58...86).environment(\.nyxReduceMotion,true)
+    }
+}
 #Preview("Share story") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p),shape:.story,why:"Milky Way core 8:10 PM – 11:30 PM").environment(\.nyxReduceMotion,true) } }
 #Preview("Share story • gibbous") { let m=PlanModel();if let p=m.home { ShareCard(night:m.night(p,on:p.date(m.tonight(p),addingDays:12)),shape:.story).environment(\.nyxReduceMotion,true) } }
 #if DEBUG
 /// `-nyx-screen share`: the card as people receive it, the exported image (fixed-size artwork, never
 /// live text) with its spoken summary. The export is always drawn in starlight; in night vision the
 /// app's own filter reddens it on this screen, as the share sheet's preview is drawn red.
-/// `-nyx-share-night N` shows the night N days ahead (a crescent, a gibbous Moon).
+/// `-nyx-share-night N` shows the night N days ahead (a crescent, a gibbous Moon). The forecast
+/// fixtures apply (`-nyx-state agree|disagree`), so the models' range can be seen on the card.
 struct ShareCardReview:View {
     @Environment(\.displayScale) private var displayScale
     @Environment(PlanModel.self) private var model
-    let night:Night
+    let park:Park
+    let daysAhead:Int
     @State private var image:UIImage?
     var body:some View {
+        let night=model.night(park,on:park.date(model.tonight(park),addingDays:daysAhead))
         let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis), why=ShareCard.why(night:night,core:model.whatsUp(night).core)
+        let artwork=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:nil,scale:displayScale)
         Group {
             if let image {
                 Image(uiImage:image).resizable().scaledToFit().frame(maxWidth:ShareCard.Format.card.size.width)
@@ -251,7 +273,9 @@ struct ShareCardReview:View {
             } else { Color.black }
         }
         .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color.black)
-        .task { image=ShareArtwork(night:night,shape:.card,why:why,range:range,palette:nil,scale:displayScale).image() }
+        .task { await model.refreshForecasts(watching:[park]) }
+        // Redrawn when the forecast (or its fixture) changes the night's score, basis or range.
+        .task(id:artwork.key) { image=artwork.image() }
     }
 }
 #endif
