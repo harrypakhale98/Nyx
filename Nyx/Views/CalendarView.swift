@@ -213,7 +213,7 @@ struct CalendarView: View {
                     windowPanel(park,shown); legend
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
-        }.background(NightBackground(seed:park?.id ?? "nyx",park:park))
+        }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar } }
             .measuringWidth($width)
             .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {

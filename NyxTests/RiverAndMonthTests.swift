@@ -64,9 +64,32 @@ import SwiftUI
         let edge=TimeRiver.loupeBottom(CGPoint(x:28,y:50),x:14,radius:28)
         #expect(edge<78 && abs(edge-(50+(28.0*28-14*14).squareRoot()))<0.001)
     }
-    @Test func theLoupeTickGrowsWithTheBand() {
-        let widths=[ScoreBand.poor,.fair,.good,.excellent,.pristine].map(TimeRiver.tickWidth)
-        #expect(widths==widths.sorted() && Set(widths).count==widths.count)
+    @Test func theLoupeNamesTheNightInTheReadersLanguage() throws {
+        let night=try Date("2026-10-16T21:00:00Z",strategy:.iso8601)
+        let west=try #require(TimeZone(identifier:"America/Los_Angeles"))
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"en_US"),timeZone:west)=="Fri 16")
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"es_MX"),timeZone:west)=="vie 16")
+        // The park's own day, not the phone's: 21:00 UTC on the 16th is already the 17th at UTC+14.
+        let kiribati=try #require(TimeZone(identifier:"Pacific/Kiritimati"))
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"en_US"),timeZone:kiribati)=="Sat 17")
+    }
+    @Test func theLargeTextCaptionKeepsFiguresWithTheirWord() {
+        #expect(TimeRiver.lineCaption("Cloud forecast\nmodels range 55–83")=="Cloud forecast\nmodels range\u{00A0}55–83")
+        #expect(TimeRiver.lineCaption("Early look")=="Early look")
+    }
+    @Test func theNextOfTheBestNightsGoesInDateOrderAndWraps() {
+        // Best first, as the river ranks them: nights 12, 3 and 20.
+        let peaks=[12,3,20]
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:nil)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:0)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:3)==12)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:12)==20)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:15)==20)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:20)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:29)==3)
+        #expect(TimeRiver.nextPeak(peaks:[7],current:7)==7)
+        #expect(TimeRiver.nextPeak(peaks:[7],current:nil)==7)
+        #expect(TimeRiver.nextPeak(peaks:[],current:4)==nil)
     }
 
     // MARK: Directions

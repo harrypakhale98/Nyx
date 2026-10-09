@@ -14,8 +14,10 @@ import SwiftUI
 ///
 /// Only the drawing scales with the dial, the glass rim included (`DialMetrics`). The numeral is
 /// part of the drawing; the band and "DARKNESS / 100" keep their own text styles and move below
-/// the dial when it is too small to hold them (onboarding, a small hero) or the text is at an
-/// accessibility size, where the numeral stays more than twice the band's size, capped by the width.
+/// the dial when the space offered is too small to hold them (onboarding, a small hero;
+/// `labelsInside(offered:)`) or the text is at an accessibility size, where the numeral stays more
+/// than twice the band's size, capped by the width. A later sweep moves the numeral with the arc
+/// on one spring, and the band word changes only once the arc has landed.
 struct CelestialGauge: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
@@ -73,13 +75,24 @@ struct CelestialGauge: View {
     @State private var spoken=SpokenLabel()
     /// Whether any of the dial shows in its scroll view; the ambient stars rest while it is scrolled away.
     @State private var onScreen=true
-    /// The dial's side, measured.
+    /// The dial's side, measured: it sizes the numeral, never where the labels go.
     @State private var side: CGFloat=300
+    /// The space the page offers the whole instrument at standard text sizes.
+    @State private var offered=CGSize(width:300,height:300)
+    /// The band word shown: it changes only once a sweep has landed (`bandShown`).
+    @State private var shownBand: ScoreBand?
+    /// The numeral is the odometer's own count (with its rolling digits) rather than a sweep's.
+    @State private var counting=false
     /// The width offered at accessibility sizes, where the dial grows with the text up to it.
     @State private var available: CGFloat=0
     /// Band and units fit inside a dial this size at standard text sizes.
-    static let labelsInsideFrom: CGFloat=236
-    private var labelsInside: Bool { !typeSize.isAccessibilitySize && side>=Self.labelsInsideFrom }
+    nonisolated static let labelsInsideFrom: CGFloat=236
+    /// Where the band and units go is decided by the space the page offers the instrument, never by
+    /// the dial's own measured side: that side shrinks when the labels move below it, so a choice
+    /// made from it would hold itself (a 240 pt hero stuck as a 183 pt ring with its word outside).
+    /// No taller than on the widest iPhone (354 pt), as the dial itself.
+    nonisolated static func labelsInside(offered:CGSize)->Bool { min(offered.width,offered.height,354)>=labelsInsideFrom }
+    private var labelsInside: Bool { !typeSize.isAccessibilitySize && Self.labelsInside(offered:offered) }
     private var still: Bool { reduceMotion || export }
     /// An unseen reveal waits while nobody can watch it: onboarding or first light over the tabs,
     /// scrolled away or in another tab, or Nyx in the background. Not while merely inactive: a
@@ -115,6 +128,10 @@ struct CelestialGauge: View {
                         }
                     if !labelsInside { band; units }
                 }
+                // The whole space offered decides the labels' place (`labelsInside(offered:)`). A page
+                // that proposes no height (the park page) offers the instrument's own height.
+                .frame(maxWidth:.infinity,maxHeight:.infinity)
+                .onGeometryChange(for:CGSize.self) { $0.size } action:{ offered=$0 }
             }
         }
         .accessibilityElement(children:.ignore)
@@ -209,32 +226,63 @@ struct CelestialGauge: View {
         let plan=Self.plan(seen:key.map { ScoreReveals.seen.contains($0) } ?? false,held:held,reduceMotion:reduceMotion,export:export,
                            alreadyRevealed:Self.alreadyRevealed(revealedOnce:revealedOnce,countedScore:countedScore,score:score))
         let end=Self.face(after:plan,score:score)
+        let target=ScoreBand.band(score), previous=shownBand ?? target
         switch plan {
         case .instant:
-            face=end; waiting=false; rangeShown=true
+            face=end; waiting=false; rangeShown=true; counting=false
+            shownBand=Self.bandShown(plan:plan,previous:previous,target:target,completed:true)
             onSettled?(key)
         case .hold:
             face=end; waiting=true; rangeShown=false; countedScore=nil
-        case .sweep:
-            let landing = !revealedOnce
-            withAnimation(NyxMotion.spring) {
-                face=end; waiting=false
-                if landing { landed+=1 }
+        case .sweep, .settle:
+            // The numeral and the arc travel on one spring (`DialNumeral`, `DialFace`); the word
+            // waits for the landing, and a word not showing before the sweep stays away until then.
+            let landing = plan == .settle || !revealedOnce
+            let wordWasShowing=settled
+            counting=false
+            shownBand=Self.bandShown(plan:plan,previous:previous,target:target,completed:false)
+            withAnimation(plan == .settle ? .spring(duration:Self.settleDuration) : NyxMotion.spring,completionCriteria:.logicallyComplete) {
+                arc=end.arc; shown=end.shown; settled=wordWasShowing; waiting=false
+            } completion: {
+                // A later reveal owns the dial now; its own landing names the word.
+                guard generation==mine else { return }
+                withAnimation(NyxMotion.spring) {
+                    shownBand=Self.bandShown(plan:plan,previous:previous,target:target,completed:true)
+                    settled=true
+                    if landing { landed+=1 }
+                }
             }
             revealedOnce=true
-            ScoreReveals.note(key,plan:.sweep,landed:true)
-            onSettled?(key); showRange()
-        case .settle:
-            withAnimation(.spring(duration:Self.settleDuration)) { face=end; waiting=false; landed+=1 }
-            revealedOnce=true
+            if plan == .sweep { ScoreReveals.note(key,plan:.sweep,landed:true) }
             onSettled?(key); showRange()
         case .odometer:
             await count(key:key,generation:mine)
         }
     }
+    /// The band word a reveal shows: at once without motion and under the count (which hides the
+    /// word until it lands), and for a sweep or a settle the old word until the arc has landed,
+    /// then the new one. Never a word ahead of its number.
+    nonisolated static func bandShown(plan:RevealPlan,previous:ScoreBand,target:ScoreBand,completed:Bool)->ScoreBand {
+        switch plan {
+        case .instant, .odometer: target
+        case .hold: previous
+        case .sweep, .settle: completed ? target : previous
+        }
+    }
+    /// The whole number a sweeping numeral shows for `value` on its way to `target`: rounded, held
+    /// to 0…100, and within 1.2 points of the target the target itself, so the spring's small
+    /// overshoot never flickers a digit past the answer and back.
+    nonisolated static func numeral(value:Double,target:Int)->Int {
+        if abs(value-Double(target))<1.2 { return target }
+        return min(100,max(0,Int(value.rounded())))
+    }
+    /// The word shows only beside a number of its own band: during a sweep that leaves the band it
+    /// steps away as the number crosses out, and the new word arrives when the arc lands.
+    nonisolated static func wordFits(_ band:ScoreBand,numeral:Int)->Bool { ScoreBand.band(numeral) == band }
     private func count(key:String?,generation mine:Int) async {
         countedScore=score
-        face=Self.face(after:.odometer,score:score); waiting=false; rangeShown=false
+        face=Self.face(after:.odometer,score:score); waiting=false; rangeShown=false; counting=true
+        shownBand=Self.bandShown(plan:.odometer,previous:shownBand ?? ScoreBand.band(score),target:ScoreBand.band(score),completed:false)
         let interval=LaunchSignposts.begin("Score reveal"), began=Date.now
         var finished=false
         defer {
@@ -243,6 +291,7 @@ struct CelestialGauge: View {
                 ScoreReveals.note(key,plan:.odometer,landed:false)
                 // Cut short: the whole answer if nothing followed, otherwise the next reveal's dial.
                 face=Self.cancelled(face,score:score,generation:generation,mine:mine)
+                if generation==mine { counting=false }
             }
         }
         let clock=ContinuousClock(), start=clock.now, total=Self.duration(score:score)
@@ -260,7 +309,10 @@ struct CelestialGauge: View {
         finished=true
         LaunchSignposts.end(interval); LaunchSignposts.firstLanding(countStarted:began)
         // The final digit, the word and the light tick in one transaction.
-        withAnimation(NyxMotion.spring) { face = .answer(score); landed+=1 }
+        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { face = .answer(score); landed+=1 } completion: {
+            // At rest the numeral is the sweep's, so a later score travels with the arc.
+            if generation==mine { counting=false }
+        }
         revealedOnce=true
         ScoreReveals.note(key,plan:.odometer,landed:true)
         onSettled?(key); showRange()
@@ -281,11 +333,11 @@ struct CelestialGauge: View {
     }
     // MARK: Parts
 
+    /// The number the dial shows, as a value the shared spring can carry: a sweep moves it with the
+    /// arc in the same transaction.
+    private var numeralValue: Double { Double(still ? score : shown) }
     private func numeral(size:CGFloat)->some View {
-        Text(reduceMotion || export ? score : shown,format:.number)
-            .font(.system(size:max(24,size),weight:.light,design:.serif)).tracking(-size*0.02)
-            .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(shown)))
-            .lineLimit(1).fixedSize()
+        DialNumeral(value:numeralValue,target:still ? score : shown,rolling:counting && !still,size:max(24,size),color:palette.accent)
             .opacity(numeralVisible ? 1 : 0)
     }
     /// At accessibility sizes the numeral is at least 2.2 times the band label's size (and never
@@ -296,11 +348,12 @@ struct CelestialGauge: View {
         return max(160,min(width>0 ? width : 300,wanted))
     }
     /// Always laid out, so its slot is reserved and nothing moves when it arrives (at accessibility
-    /// sizes too). It shows only once the score has settled, and a new night's word cross-fades;
-    /// it never steps through the bands the count passes.
+    /// sizes too). It shows only once the score has settled; a sweep keeps the old word only while
+    /// the number stays in its band, and the new word fades in once the arc lands. It never steps
+    /// through the bands the count passes.
     private var band:some View {
-        Text(ScoreBand.band(score).label).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-            .contentTransition(.opacity)
+        let word=still ? ScoreBand.band(score) : (shownBand ?? ScoreBand.band(score))
+        return DialBandWord(value:numeralValue,target:still ? score : shown,band:word,color:palette.ink)
             .opacity(bandVisible ? 1 : 0).blur(radius:bandVisible ? 0 : 6)
     }
     private var units:some View { Text("Darkness / 100").textCase(.uppercase).font(.caption2).tracking(typeSize.isAccessibilitySize ? 0 : 2.5*min(1,max(0.4,(side-200)/100))).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true) }
@@ -367,6 +420,39 @@ struct CelestialGauge: View {
                 }
             }
         }
+    }
+}
+/// The dial's numeral. Animatable, so a sweep carries the number on the same spring as the arc
+/// (`DialFace`) and number and needle travel together; the odometer writes its own count and keeps
+/// its rolling digits (`rolling`).
+private struct DialNumeral: View, Animatable {
+    var value: Double
+    let target: Int
+    let rolling: Bool
+    let size: CGFloat
+    let color: Color
+    var animatableData: Double { get { value } set { value=newValue } }
+    var body: some View {
+        Text(CelestialGauge.numeral(value:value,target:target),format:.number)
+            .font(.system(size:size,weight:.light,design:.serif)).tracking(-size*0.02).monospacedDigit()
+            .foregroundStyle(color).contentTransition(rolling ? .numericText(value:value) : .identity)
+            .lineLimit(1).fixedSize()
+    }
+}
+/// The band word, which reads the same travelling number as the numeral: it never stands beside a
+/// number from another band (`CelestialGauge.wordFits`).
+private struct DialBandWord: View, Animatable {
+    var value: Double
+    let target: Int
+    let band: ScoreBand
+    let color: Color
+    var animatableData: Double { get { value } set { value=newValue } }
+    var body: some View {
+        // A word only ever changes while it is hidden (it steps away as the number leaves its band),
+        // so the new word simply fades in: a cross-fade would ghost the old word beside the new number.
+        Text(band.label).font(.system(.title3,design:.serif)).foregroundStyle(color).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            .contentTransition(.identity)
+            .opacity(CelestialGauge.wordFits(band,numeral:CelestialGauge.numeral(value:value,target:target)) ? 1 : 0)
     }
 }
 /// The dial's well, track, glow, arc and ticks for a value 0…100. Animatable, so a new night's
@@ -519,6 +605,40 @@ extension EnvironmentValues {
 #Preview("Model range • still") { CelestialGauge(score:84,range:76...92).environment(\.nyxReduceMotion,true).background(.black) }
 #Preview("Model range • contrast hairline") { CelestialGauge(score:84,range:76...92).environment(\.nyx,NyxPalette(nightVision:false,highContrast:true)).environment(\.nyxReduceMotion,true).background(.black) }
 #Preview("Held • waiting") { CelestialGauge(score:94,revealKey:"preview|2026-10-08|94").environment(\.nyxRevealHeld,true).background(.black) }
+#Preview("Tonight's framing • models' range") { CelestialGauge(score:85,range:73...96).frame(height:240).padding(.horizontal,24).background(.black) }
 #Preview("Silent example • 176 pt") { CelestialGauge(score:94,haptics:false).frame(height:176).background(.black) }
 #Preview("Night vision") { CelestialGauge(score:91).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) }
 #Preview("Bold Text strokes") { CelestialGauge(score:72).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)).environment(\.nyxReduceMotion,true).background(.black) }
+#if DEBUG
+/// `-nyx-screen gauge`: Tonight's 240 pt dial for frame-by-frame checks of a sweep.
+/// `-nyx-state overtake`: a cached 81 counting up is overtaken by a computed 97 after 0.5 s.
+/// `-nyx-state sweep`: 97 counts up, then sweeps down to 72 and back up to 92 (both cross a band).
+/// `-nyx-state settle`: a score already revealed this session settles in 0.35 s.
+struct DebugGaugeSweep: View {
+    @State private var score=81
+    @State private var shown=true
+    var body: some View {
+        VStack {
+            if shown {
+                CelestialGauge(score:score,revealKey:ScoreReveals.key(parkID:"debug",night:"2026-10-09",score:score),range:nil)
+                    .frame(height:240).padding(.horizontal,24)
+            }
+        }
+        .frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
+        .task {
+            switch DebugScenario.state {
+            case "sweep":
+                score=97
+                try? await Task.sleep(for:.seconds(2.5)); score=72
+                try? await Task.sleep(for:.seconds(2)); score=92
+            case "settle":
+                ScoreReveals.seen.insert(ScoreReveals.key(parkID:"debug",night:"2026-10-09",score:94))
+                shown=false; score=94
+                try? await Task.sleep(for:.seconds(1.5)); shown=true
+            default:
+                try? await Task.sleep(for:.seconds(0.5)); score=97
+            }
+        }
+    }
+}
+#endif
