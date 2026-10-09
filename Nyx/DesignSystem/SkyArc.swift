@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The night as a picture: the sky deepens from dusk through each twilight to true darkness
-/// and back, column by column from the Sun's real altitude. The Sun and Moon trace their
+/// and back, continuously from the Sun's real altitude. The Sun and Moon trace their
 /// paths above a horizon line, moonlight washes over the dark hours it spoils, and a marker
 /// shows where the night stands now. Times are park-local.
 struct SkyArc: View {
@@ -24,16 +24,23 @@ struct SkyArc: View {
     /// Sunset minus an hour to sunrise plus an hour; 18:00–06:00 local when the Sun never crosses.
     private var window:(start:Date,end:Date) { ArcTouch.window(night) }
     /// Feel the night under your finger: the arc's columns while a finger explores it, the column
-    /// under the finger, and the pending resting announcement. Only with VoiceOver running (after
-    /// its double tap hands the arc to the finger), so sighted scrolling over the arc is unchanged;
-    /// DEBUG `-nyx-arc-touch` turns it on without VoiceOver and rests a finger for captures.
+    /// under the finger, and the pending resting announcement. With VoiceOver running, its double tap
+    /// hands the whole element to the finger. Without it, a finger held 0.3 s on the picture reads the
+    /// hour (`ArcHold`); one that moves first fails the hold, so a flick over the arc still scrolls the
+    /// page. DEBUG `-nyx-arc-touch` takes the VoiceOver path without VoiceOver and rests a finger for
+    /// captures; `restsFinger` rests one in previews.
     @State private var touchColumns:[ArcTouch.Column]=[]
     @State private var touchColumn:Int?
     @State private var restTask:Task<Void,Never>?
+    /// Previews: a finger resting at 55% of the night, as `-nyx-arc-touch` draws it for captures.
+    var restsFinger=false
     /// True while a finger is down. A gesture's state resets when it ends and when it is cancelled
     /// (a call, a banner, Control Center, the app leaving), which `onEnded` never hears; the hum,
     /// the hairline and the pending words end with it.
     @GestureState private var touching=false
+    /// True while a sighted finger holds the picture. UIKit's recognizer reports its end, its
+    /// cancellation and its failure alike, and each ends the touch.
+    @State private var holding=false
     private var touchEnabled:Bool { voiceOver || DebugScenario.isEnabled("arc-touch") }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
@@ -52,7 +59,13 @@ struct SkyArc: View {
             }
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
-            .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch"), !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
+            .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch") || restsFinger, !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
+            // Sighted touch reads the picture only, never the legend or the times below it, and steps
+            // aside for the VoiceOver path's gesture over the whole element.
+            .contentShape(Rectangle())
+            .gesture(ArcHold(enabled:!touchEnabled) { x in
+                if let x { holding=true; touch(at:x,held:true) } else if holding { holding=false }
+            })
             .clipShape(RoundedRectangle(cornerRadius:14))
             // The Moon is drawn into the canvas, where MoonView's own exemption cannot reach.
             .accessibilityIgnoresInvertColors()
@@ -64,7 +77,9 @@ struct SkyArc: View {
                 HStack(spacing:16) { legend;Spacer() }
                 VStack(alignment:.leading,spacing:8) { legend }
             }.font(.caption).foregroundStyle(palette.muted)
-            Text(access.differentiate ? "Moonlit hours are lighter and hatched." : "Moonlit hours are lighter.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            // VoiceOver's hint already explains direct touch, where "touch and hold" would be wrong.
+            Text(voiceOver ? (access.differentiate ? "Moonlit hours are lighter and hatched." : "Moonlit hours are lighter.")
+                 : (access.differentiate ? "Moonlit hours are lighter and hatched. Touch and hold to read any hour." : "Moonlit hours are lighter. Touch and hold to read any hour.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             if night.sky.darkHours==0 {
                 Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.ink)
             } else {
@@ -79,7 +94,10 @@ struct SkyArc: View {
             // the picture, the finger still reads the hour above it (the chart spans the full width).
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance:0).updating($touching) { _,state,_ in state=true }.onChanged { touch(at:$0.location.x) },including:touchEnabled ? .all : .subviews)
+            // A held finger holds the park page still, as the river's scrub does.
+            .preference(key:RiverScrubbingKey.self,value:holding)
             .onChange(of:touching) { _,down in if !down { endTouch() } }
+            .onChange(of:holding) { _,down in if !down { endTouch() } }
             .onChange(of:scenePhase) { _,phase in if phase != .active { endTouch() } }
             .onChange(of:voiceOver) { _,on in if !on { endTouch() } }
             .onDisappear { endTouch() }
@@ -127,12 +145,15 @@ struct SkyArc: View {
         func date(_ x:Double)->Date { start.addingTimeInterval(x/size.width*duration) }
         func y(_ altitude:Double)->Double { horizon-altitude/90*(horizon-10) }
 
-        // The sky, one column at a time.
-        let columns=96, column=size.width/Double(columns)
-        for i in 0..<columns {
-            let altitude=engine.solarAltitude(at:date((Double(i)+0.5)*column),park:park)
-            context.fill(Path(CGRect(x:Double(i)*column,y:0,width:column+0.6,height:horizon)),with:.color(skyColor(altitude)))
-        }
+        // The sky: one continuous twilight from the Sun's altitude at 65 points across the night,
+        // then one wash that deepens it toward the zenith, as a real sky darkens overhead.
+        let sky=Gradient(stops:(0...64).map { i in
+            let u=Double(i)/64
+            return Gradient.Stop(color:skyColor(engine.solarAltitude(at:date(u*size.width),park:park)),location:u)
+        })
+        let skyRect=Path(CGRect(x:0,y:0,width:size.width,height:horizon))
+        context.fill(skyRect,with:.linearGradient(sky,startPoint:.zero,endPoint:CGPoint(x:size.width,y:0)))
+        context.fill(skyRect,with:.linearGradient(Gradient(stops:[.init(color:.black.opacity(0.3),location:0),.init(color:.clear,location:0.75)]),startPoint:.zero,endPoint:CGPoint(x:0,y:horizon)))
         // Moonlight washing over the dark hours: brighter for a fuller Moon.
         let samples=72
         let moonPoints=(0...samples).map { step -> (Date,Double) in
@@ -297,9 +318,16 @@ struct SkyArc: View {
         if let i=touchColumn, touchColumns.indices.contains(i), chartWidth>0 {
             let x=(Double(i)+0.5)*chartWidth/Double(ArcTouch.columnCount)
             let caption=ArcTouch.caption(touchColumns[i],night:night), width=chartWidth
+            let ground=chartHeight-22, label=labelRow(at:x)
             ZStack(alignment:.topLeading) {
-                Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:chartHeight-22)
+                // Through the sky and the amber bar, then again below the "True darkness" label, never
+                // through its words.
+                Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:label.map { $0.lowerBound } ?? ground)
                     .offset(x:x-palette.stroke/2)
+                if let label {
+                    Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:max(0,ground-label.upperBound))
+                        .offset(x:x-palette.stroke/2,y:label.upperBound)
+                }
                 // Short captions hug the finger; at large text sizes a long one wraps to two lines
                     // inside the chart (6 pt from each edge) instead of being cut at both ends.
                 Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).multilineTextAlignment(.center)
@@ -315,10 +343,22 @@ struct SkyArc: View {
             .allowsHitTesting(false).accessibilityHidden(true)
         }
     }
+    /// The rows the "True darkness" label takes under the amber bar, when the drawing names it and
+    /// the finger at `x` stands over the bar (as `draw` places them: the bar 9 pt under the horizon).
+    private func labelRow(at x:Double)->ClosedRange<Double>? {
+        guard let darkStart=night.sky.darkStart, let darkEnd=night.sky.darkEnd, darkEnd>darkStart, chartWidth>0 else { return nil }
+        let (start,end)=window, duration=end.timeIntervalSince(start)
+        guard duration>0 else { return nil }
+        let a=max(0,darkStart.timeIntervalSince(start)/duration*chartWidth), b=min(chartWidth,darkEnd.timeIntervalSince(start)/duration*chartWidth)
+        guard b-a>70, x>=a, x<=b else { return nil }
+        let barY=(chartHeight-22)*0.74+9
+        return (barY+3)...(barY+19)
+    }
     /// A finger at `x` on the arc: the hum follows it, moments crossed click, and resting 0.4 s
     /// says the time and the sky. `quiet` (DEBUG captures) draws the finger only.
-    private func touch(at x:Double,quiet:Bool=false) {
-        guard touchEnabled, chartWidth>0 else { return }
+    /// `held`: from the sighted hold.
+    private func touch(at x:Double,quiet:Bool=false,held:Bool=false) {
+        guard touchEnabled || touching || holding || held || quiet, chartWidth>0 else { return }
         let fresh=touchColumns.isEmpty
         if fresh { touchColumns=ArcTouch.columns(night:night,window:window) }
         let sample=ArcTouch.sample(x:x,width:chartWidth,columns:touchColumns,night:night,tonight:isTonight)
@@ -330,6 +370,8 @@ struct SkyArc: View {
         let crossed=previous.map { ArcTouch.crossed(touchColumns,from:$0,to:sample.column) } ?? sample.crossing.map { [$0] } ?? []
         MoonHaptics.shared.followArcTouch(strength:sample.strength,crossings:crossed)
         restTask?.cancel()
+        // Spoken only for VoiceOver; a sighted finger reads the same words in the caption.
+        guard voiceOver else { return }
         let spoken=sample.spoken
         restTask=Task {
             try? await Task.sleep(for:.milliseconds(400))
@@ -337,6 +379,7 @@ struct SkyArc: View {
         }
     }
     private func endTouch() {
+        holding=false
         restTask?.cancel(); restTask=nil
         MoonHaptics.shared.endArcTouch()
         touchColumn=nil
@@ -352,8 +395,38 @@ struct SkyArc: View {
         VStack(alignment:.leading,spacing:4) { Text(title).font(.caption).foregroundStyle(palette.muted); Text(night.park.time(time)).font(.system(.title3,design:.serif)) }
     }
 }
+/// Touch and hold the sky arc's picture, then slide: UIKit's long press (0.3 s, 10 pt of slack).
+/// It hands over where the finger is the moment the hold succeeds, so the hairline appears under a
+/// still finger, and it fails as soon as a finger travels first, so a flick over the arc scrolls the
+/// page; a SwiftUI long press sequenced before a drag reported no place until the finger moved, and
+/// over the park page's scroll view it kept a swipe that began on the arc from scrolling (iOS 27).
+/// `changed` gets the finger's x in the picture while held and nil when the hold ends, is cancelled
+/// or fails. Off while VoiceOver's direct touch owns the arc.
+private struct ArcHold: UIGestureRecognizerRepresentable {
+    var enabled=true
+    let changed:(Double?)->Void
+    func makeUIGestureRecognizer(context:Context)->UILongPressGestureRecognizer {
+        let recognizer=UILongPressGestureRecognizer()
+        recognizer.minimumPressDuration=0.3
+        recognizer.allowableMovement=10
+        recognizer.isEnabled=enabled
+        return recognizer
+    }
+    func updateUIGestureRecognizer(_ recognizer:UILongPressGestureRecognizer,context:Context) {
+        recognizer.isEnabled=enabled
+    }
+    func handleUIGestureRecognizerAction(_ recognizer:UILongPressGestureRecognizer,context:Context) {
+        switch recognizer.state {
+        case .began,.changed: changed(context.converter.localLocation.x)
+        default: changed(nil)
+        }
+    }
+}
 #Preview("Arc") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let sky=AstronomyEngine().conditions(for:p,on:.now); SkyArc(night:Night(park:p,sky:sky,score:ScoreEngine().score(sky:sky,bortle:p.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil)).padding().background(.black) } }
 
 #Preview("Arc • Bold Text") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let sky=AstronomyEngine().conditions(for:p,on:.now); SkyArc(night:Night(park:p,sky:sky,score:ScoreEngine().score(sky:sky,bortle:p.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil)).padding().background(.black).environment(\.nyx,NyxPalette(nightVision:false,highContrast:false,boldText:true)) } }
 
 #Preview("No astronomical darkness • AX5") { let m=PlanModel();if let p=m.park("dena") { SkyArc(night:m.night(p,on:Date(timeIntervalSince1970:1782086400))).padding().dynamicTypeSize(.accessibility5).background(.black) } }
+
+#Preview("Arc • Finger resting") { if let p=try? ParkData.load().first(where:{$0.id=="deva"}) { let sky=AstronomyEngine().conditions(for:p,on:.now); SkyArc(night:Night(park:p,sky:sky,score:ScoreEngine().score(sky:sky,bortle:p.bortleEstimate,cloudCover:nil),cloudCover:nil,forecastUpdated:nil),restsFinger:true).padding().background(.black) } }
+
