@@ -95,37 +95,49 @@ import Testing
         #expect(FieldActivities.scoredAt(usual, now: now) == now)
     }
 
-    /// The decision: a scheduled night is requested again when its score, band or closure changed;
-    /// a running one is updated; nothing changes without a new score.
+    /// The decision: a scheduled night is requested again when its face changed and Nyx is in the
+    /// foreground; a running one is updated; nothing changes without a new score.
     @Test func refreshDecidesKeepUpdateOrReschedule() throws {
         let (_, _, attributes, heading)=try followed()
-        let monday=attributes.dusk.addingTimeInterval(-5*24*3600), thursday=attributes.dusk.addingTimeInterval(-26*3600)
-        let followed=scored(heading, 94, "Pristine", "Keys View Road closed", at: monday)
-        func action(pending: Bool, _ previous: State, _ next: Scored?) -> FieldActivities.Action {
-            FieldActivities.action(pending: pending, attributes: attributes, previous: previous, scored: next)
+        // Tuesday 8 and Saturday 12 December, in park time, before Sunday's dusk.
+        let tuesday=attributes.dusk.addingTimeInterval(-5*24*3600), saturday=attributes.dusk.addingTimeInterval(-26*3600)
+        let followed=scored(heading, 94, "Pristine", "Keys View Road closed", at: tuesday)
+        func action(pending: Bool, canRequest: Bool=true, _ previous: State, _ next: Scored?) -> FieldActivities.Action {
+            FieldActivities.action(pending: pending, canRequest: canRequest, attributes: attributes, previous: previous, scored: next)
         }
         // Scheduled: 70% cloud arrived, the band changed.
-        #expect(action(pending: true, followed, Scored(score: 58, band: "Fair", closure: "Keys View Road closed", at: thursday)) == .reschedule)
+        #expect(action(pending: true, followed, Scored(score: 58, band: "Fair", closure: "Keys View Road closed", at: saturday)) == .reschedule)
         // Scheduled: the closure lifted, or a new one posted.
-        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: nil, at: thursday)) == .reschedule)
-        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Park Boulevard closed", at: thursday)) == .reschedule)
-        // Scheduled: the same answer, only newer, keeps its plan; no new score keeps it too.
-        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: thursday)) == .keep)
+        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: nil, at: saturday)) == .reschedule)
+        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Park Boulevard closed", at: saturday)) == .reschedule)
+        // Scheduled: the same answer from a later day moves its "as of" day, so it is requested again.
+        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: saturday)) == .reschedule)
+        // ... and confirmed within 18 hours of dusk, it names no day at all.
+        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: attributes.dusk.addingTimeInterval(-3600))) == .reschedule)
+        // Scheduled: the same answer later the same day shows the same face and keeps its plan.
+        #expect(action(pending: true, followed, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: tuesday.addingTimeInterval(3600))) == .keep)
         #expect(action(pending: true, followed, nil) == .keep)
+        // In the background iOS refuses a request: a scheduled night keeps its plan, never unfollowed.
+        #expect(action(pending: true, canRequest: false, followed, Scored(score: 58, band: "Fair", closure: nil, at: saturday)) == .keep)
+        #expect(action(pending: true, canRequest: false, followed, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: saturday)) == .keep)
         // A build-8 scheduled night (no score in its state) compares with its attributes.
-        #expect(action(pending: true, heading, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: thursday)) == .keep)
-        #expect(action(pending: true, heading, Scored(score: 61, band: "Good", closure: "Keys View Road closed", at: thursday)) == .reschedule)
-        // Running: any change of score, band or closure updates it.
+        let recent=attributes.dusk.addingTimeInterval(-3600)
+        #expect(action(pending: true, heading, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: recent)) == .keep)
+        #expect(action(pending: true, heading, Scored(score: 61, band: "Good", closure: "Keys View Road closed", at: recent)) == .reschedule)
+        // Running: any change of score, band or closure updates it, foreground or not.
         let running=attributes.state(at: attributes.dusk.addingTimeInterval(3000), nightVision: false)
         let tonight=scored(running, 94, "Pristine", "Keys View Road closed", at: attributes.dusk.addingTimeInterval(-3600))
-        #expect(action(pending: false, tonight, Scored(score: 92, band: "Pristine", closure: "Keys View Road closed", at: attributes.dusk)) == .update)
+        #expect(action(pending: false, canRequest: false, tonight, Scored(score: 92, band: "Pristine", closure: "Keys View Road closed", at: attributes.dusk)) == .update)
         #expect(action(pending: false, tonight, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: attributes.dusk)) == .keep)
-        // Running with Monday's score: the same score confirmed today drops "as of Mon".
-        let stale=scored(running, 94, "Pristine", "Keys View Road closed", at: monday)
+        // Running with Tuesday's score: the same score confirmed today drops "as of Tue".
+        let stale=scored(running, 94, "Pristine", "Keys View Road closed", at: tuesday)
         #expect(action(pending: false, stale, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: attributes.dusk)) == .update)
+        // ... and confirmed on a later, still old, day it reads that day instead.
+        #expect(action(pending: false, stale, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: saturday)) == .update)
+        #expect(action(pending: false, stale, Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: tuesday.addingTimeInterval(3600))) == .keep)
     }
 
-    /// `changed` ignores the exact score time unless it decides whether the face names its day.
+    /// `changed` ignores the exact score time unless it changes the day the face names.
     @Test func changedIgnoresScoreTimeUnlessTheDayShows() throws {
         let (_, _, attributes, heading)=try followed()
         let a=scored(heading, 94, "Pristine", nil, at: attributes.dusk.addingTimeInterval(-3600))
@@ -133,6 +145,11 @@ import Testing
         #expect(!FieldActivities.changed(a, b, attributes: attributes))
         let old=scored(heading, 94, "Pristine", nil, at: attributes.dusk.addingTimeInterval(-3*86400))
         #expect(FieldActivities.changed(a, old, attributes: attributes))
+        // Two old scores from different days name different days; from the same day, the same one.
+        let older=scored(heading, 94, "Pristine", nil, at: attributes.dusk.addingTimeInterval(-4*86400))
+        #expect(attributes.scoreLine(old) != attributes.scoreLine(older))
+        #expect(FieldActivities.changed(old, older, attributes: attributes))
+        #expect(!FieldActivities.changed(old, scored(heading, 94, "Pristine", nil, at: attributes.dusk.addingTimeInterval(-3*86400+3600)), attributes: attributes))
         #expect(FieldActivities.changed(a, scored(heading, 94, "Pristine", "Park Boulevard closed", at: attributes.dusk.addingTimeInterval(-3600)), attributes: attributes))
     }
 }

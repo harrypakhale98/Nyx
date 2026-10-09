@@ -5,6 +5,7 @@ import CoreLocation
 import CoreMotion
 import Foundation
 import SwiftUI
+import UIKit
 import simd
 
 // MARK: Live Activity content
@@ -102,19 +103,22 @@ extension FieldActivityAttributes {
     }
     /// What a refresh does to a followed night.
     nonisolated enum Action: Equatable { case keep, update, reschedule }
-    /// The decision, kept pure so it can be tested. A running night is updated when its score,
-    /// band or closure changed, or when its score stops (or starts) being old enough to name its
-    /// day. A scheduled one cannot be updated before it starts (ActivityKit), so when its score,
-    /// band or closure changed it is ended and requested again for the same moment, with the same
-    /// alert; the person sees nothing until it starts. Nothing changes without a new score.
-    nonisolated static func action(pending: Bool, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState,
+    /// The decision, kept pure so it can be tested. A night changes when what its face shows
+    /// changes: the score, the band, the closure, or the day an old score is "as of" (Monday's 94
+    /// confirmed on Thursday reads "as of Thu", confirmed on the day itself it names no day). A
+    /// running night is updated. A scheduled one cannot be updated before it starts (ActivityKit),
+    /// so it is requested again for the same moment, with the same alert, and only while Nyx is in
+    /// the foreground (`canRequest`): iOS refuses a request from the background. Otherwise it keeps
+    /// its plan, is updated once it runs, and its "as of" day says how old its score is meanwhile.
+    /// Nothing changes without a new score.
+    nonisolated static func action(pending: Bool, canRequest: Bool, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState,
                                    scored: FieldActivityAttributes.Scored?) -> Action {
         guard let scored else { return .keep }
         var next=previous
         next.scored=scored
-        let moved=attributes.score(previous) != scored.score || attributes.band(previous) != scored.band || attributes.closure(previous) != scored.closure
-        if pending { return moved ? .reschedule : .keep }
-        return moved || (attributes.scoreDay(previous) == nil) != (attributes.scoreDay(next) == nil) ? .update : .keep
+        guard attributes.shows(previous) != attributes.shows(next) else { return .keep }
+        if pending { return canRequest ? .reschedule : .keep }
+        return .update
     }
     enum FollowResult: Equatable { case scheduled(Date), started, alreadyFollowing, unavailable, over }
     /// "Follow this night": the night's activity, scheduled for `followStart` (iOS 26), or at once
@@ -144,26 +148,21 @@ extension FieldActivityAttributes {
         let words=FieldActivityAttributes.followAlert(park: night.park, sky: night.sky)
         return AlertConfiguration(title: LocalizedStringResource(stringLiteral: words.title), body: LocalizedStringResource(stringLiteral: words.body), sound: .default)
     }
-    /// A scheduled night whose score, band or closure changed: ended and requested again for the
-    /// same start (`followStart` is astronomy only, so it gives the moment it was planned for) with
-    /// the same alert. Still one activity per park and night: nothing is requested while another
-    /// one covers it. If the new request is refused (the system's limit on Live Activities), the
-    /// night is requested again as it was, so a refresh never unfollows a night.
+    /// A scheduled night whose face changed: requested again for the same start (`followStart` is
+    /// astronomy only, so it gives the moment it was planned for) with the same alert, and the old
+    /// one ended only once the new one is accepted. If the request is refused (the app left the
+    /// foreground, or the system's limit on Live Activities), the night stays as it was planned:
+    /// a refresh never unfollows a night. Still one activity per park and night: nothing is
+    /// requested while another one covers it.
     private static func reschedule(_ activity: sending Item, to current: Now, scored: FieldActivityAttributes.Scored, nightVision: Bool, now: Date) async {
         let night=current.night
         let start=FieldActivityAttributes.followStart(night.sky)
         // About to start by itself: leave it; it is brought up to date once it runs.
         guard start>now.addingTimeInterval(60) else { return }
         let id=activity.id
-        let other=live.contains { $0.id != id && $0.attributes.covers(parkID: night.park.id, night: night.id) }
-        let previous=activity.content.state, attributes=activity.attributes
+        guard !live.contains(where: { $0.id != id && $0.attributes.covers(parkID: night.park.id, night: night.id) }) else { return }
+        guard (try? schedule(night: night, scored: scored, start: start, nightVision: nightVision, now: now)) != nil else { return }
         await activity.end(nil, dismissalPolicy: .immediate)
-        guard !other else { return }
-        if (try? schedule(night: night, scored: scored, start: start, nightVision: nightVision, now: now)) == nil {
-            var content=previous
-            content.nightVision=nightVision
-            _=try? Item.request(attributes: attributes, content: ActivityContent(state: content, staleDate: nil), pushType: nil, style: .standard, alertConfiguration: alert(night), start: start)
-        }
     }
     /// "Stop following": ends that night's activity, scheduled or running.
     static func unfollow(park: Park, night: Date) async {
@@ -173,7 +172,8 @@ extension FieldActivityAttributes {
     /// Brings every running activity up to date and ends one whose night is over. `current` says
     /// what each followed night is now (its score, band and closure, from fresh forecasts and park
     /// alerts); without it the score each one carries stays. A scheduled one keeps its plan unless
-    /// its score, band or closure changed (`action`), and ends if its night passed without it starting.
+    /// its face changed while Nyx is in the foreground (`action`), and ends if its night passed
+    /// without it starting.
     static func refresh(nightVision: Bool, now: Date = .now, current: (@MainActor (FieldActivityAttributes) -> Now?)?=nil) async {
         for activity in Item.activities {
             let attributes=activity.attributes, previous=activity.content.state
@@ -182,7 +182,9 @@ extension FieldActivityAttributes {
             switch activity.activityState {
             case .pending:
                 if now>=attributes.dawn { await activity.end(nil, dismissalPolicy: .immediate) }
-                else if let found, let scored, Self.action(pending: true, attributes: attributes, previous: previous, scored: scored) == .reschedule {
+                // Asked for each night: a refresh can outlast the app's time in the foreground.
+                else if let found, let scored, Self.action(pending: true, canRequest: UIApplication.shared.applicationState == .active,
+                                                            attributes: attributes, previous: previous, scored: scored) == .reschedule {
                     await reschedule(activity, to: found, scored: scored, nightVision: nightVision, now: now)
                 }
             case .active, .stale:
@@ -195,9 +197,9 @@ extension FieldActivityAttributes {
         NightFollowing.shared.reload()
     }
     /// A change worth an update: anything but the moment it was worked out and the exact time of
-    /// its score, which matters only when it decides whether the face names the score's day.
+    /// its score, which matters only through the day an old score is "as of" (`shows`).
     nonisolated static func changed(_ a: FieldActivityAttributes.ContentState, _ b: FieldActivityAttributes.ContentState, attributes: FieldActivityAttributes) -> Bool {
-        if (attributes.scoreDay(a) == nil) != (attributes.scoreDay(b) == nil) { return true }
+        if attributes.shows(a) != attributes.shows(b) { return true }
         var a=a, b=b
         a.updated=nil; b.updated=nil; a.scoredAt=nil; b.scoredAt=nil
         return a != b

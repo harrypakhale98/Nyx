@@ -115,7 +115,7 @@
   "%lld out of 100, %@. %@ %@, %lld percent lit.": "%lld de 100, %@. %@ %@, %lld por ciento iluminada.",
   "%lld out of 100. %@. Check park alerts before you go.": "%1$lld de 100. %2$@. Revisa las alertas del parque antes de ir.",
   "%lld · %@": "%lld · %@",
-  "%lld · %@ as of %@": "%lld · %@ · del %@",
+  "%lld · %@ as of %@": "%lld · %@ · datos del %@",
   "%lld · %@ at %@": "%1$lld · %2$@: %3$@",
   "%lld%%": "%lld%%",
   "%lld%% average": "%lld%% en promedio",
@@ -434,7 +434,7 @@
   "Darkness score %lld out of 100 (%@), with the cloud forecast as Nyx last saw it.": "Índice de oscuridad %1$lld de 100 (noche %2$@), con el pronóstico de nubes como Nyx lo vio por última vez.",
   "Darkness score %lld out of 100 (%@).": "Índice de oscuridad %1$lld de 100 (noche %2$@).",
   "Darkness score %lld out of 100. %@. %@": "Índice de oscuridad: %lld de 100. Noche %@. %@",
-  "Darkness score %lld, %@, as of %@.": "Índice de oscuridad %lld, noche %@, del %@.",
+  "Darkness score %lld, %@, as of %@.": "Índice de oscuridad %lld, noche %@, según datos del %@.",
   "Darkness score %lld, %@.": "Índice de oscuridad %lld, noche %@.",
   "Darkness score %lld/100 (%@), with the cloud forecast as Nyx last saw it.": "Índice de oscuridad %lld/100 (noche %@), con el pronóstico de nubes tal como Nyx lo vio por última vez.",
   "Darkness score %lld/100, Moon and darkness only. No cloud forecast reached this night yet.": "Índice de oscuridad %lld/100, solo Luna y oscuridad. Aún no hay pronóstico de nubes para esta noche.",
@@ -1775,5 +1775,7 @@
   "within %@ of %@": "a menos de %@ de %@",
   "within %@ of you": "a menos de %@ de ti",
   "your location": "tu ubicación",
-  "· %lld–%lld": "· %lld–%lld"
+  "· %lld–%lld": "· %lld–%lld",
+  "Checked against the records": "Comprobada con los registros",
+  "Checking the answer against the records": "Comprobando la respuesta con los registros"
 }

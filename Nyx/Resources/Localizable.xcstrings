@@ -2387,7 +2387,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld · %@ · del %@"
+            "value": "%lld · %@ · datos del %@"
           }
         }
       }
@@ -5661,6 +5661,40 @@
         }
       }
     },
+    "Checked against the records": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checked against the records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobada con los registros"
+          }
+        }
+      }
+    },
+    "Checking the answer against the records": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking the answer against the records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando la respuesta con los registros"
+          }
+        }
+      }
+    },
     "Choose a city": {
       "extractionState": "manual",
       "localizations": {
@@ -7625,7 +7659,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Índice de oscuridad %lld, noche %@, del %@."
+            "value": "Índice de oscuridad %lld, noche %@, según datos del %@."
           }
         }
       }
