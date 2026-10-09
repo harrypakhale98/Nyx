@@ -35,6 +35,28 @@ final class AccessibilityAuditTests:XCTestCase {
         try audit(state:"night-vision",screens:keyScreens,extra:["-UIPreferredContentSizeCategoryName","UICTContentSizeCategoryAccessibilityXXXL","-nyx-contrast","-nyx-bold"],pass:"ax5")
     }
 
+    /// Tonight scrolled down, with the tab bar minimised (`RootView`'s `.onScrollDown`) and a followed
+    /// night's strip beside it when one is under way: the small bar and the accessory pass too.
+    func testMinimisedTabBarPassesTheAudit() throws {
+        var failures:[String]=[]
+        for state in ["offline","night-vision"] {
+            let app=XCUIApplication()
+            app.launchArguments=["-nyx-screen","tonight","-nyx-state",state,"-nyx-reduce-motion","-nyx-following"]
+            app.launch()
+            _=app.wait(for:.runningForeground,timeout:30)
+            sleep(2)
+            let before=app.tabBars.firstMatch.frame
+            app.swipeUp(velocity:.slow)
+            sleep(2)
+            let after=app.tabBars.firstMatch.frame
+            print("MINIMISED|\(state)|before \(before)|after \(after)")
+            let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
+            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
+            app.terminate()
+        }
+        XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
+    }
+
     private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
         for screen in screens {
@@ -43,27 +65,33 @@ final class AccessibilityAuditTests:XCTestCase {
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
-            let window=app.frame
-            // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
-            // design): the lowest 30% of the window, where cards scroll out under the clock.
-            let fieldFade=screen=="field" ? CGRect(x:0,y:window.height*0.7,width:window.width,height:window.height*0.3) : .null
-            let tabBar=app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame : .null
-            let navigationBar=app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame : .null
-            // The bars each pass measured against, so a finding near an edge can be read in context.
-            print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
-            try app.performAccessibilityAudit { issue in
-                let frame=issue.element?.frame ?? .null
-                let label=issue.element?.label ?? ""
-                let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
-                print(line)
-                if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
-                if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
-                failures.append(line)
-                return true // collect everything; fail once at the end with the full list
-            }
+            failures+=try auditOpen(app,screen:screen,state:state,pass:pass)
             app.terminate()
         }
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
+    }
+    /// Audits the screen the app shows now; returns the findings that are not known false positives.
+    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String) throws->[String] {
+        var failures:[String]=[]
+        let window=app.frame
+        // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
+        // design): the lowest 30% of the window, where cards scroll out under the clock.
+        let fieldFade=screen=="field" ? CGRect(x:0,y:window.height*0.7,width:window.width,height:window.height*0.3) : .null
+        let tabBar=app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame : .null
+        let navigationBar=app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame : .null
+        // The bars each pass measured against, so a finding near an edge can be read in context.
+        print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
+        try app.performAccessibilityAudit { issue in
+            let frame=issue.element?.frame ?? .null
+            let label=issue.element?.label ?? ""
+            let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
+            print(line)
+            if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
+            if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
+            failures.append(line)
+            return true // collect everything; fail once at the end with the full list
+        }
+        return failures
     }
 
     /// Elements the audit calls "partially" Dynamic Type, each checked by hand at AX5 (screen, label
@@ -92,7 +120,13 @@ final class AccessibilityAuditTests:XCTestCase {
         var fadeZone=tabBar.isNull ? CGRect.null : tabBar.insetBy(dx:0,dy:-56).offsetBy(dx:0,dy:topBar ? 28 : -28)
         // iPad: the navigation bar's own scroll-edge effect at the top of the window, whatever the tab bar reports.
         if UIDevice.current.userInterfaceIdiom == .pad, !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
-        let visible=frame.isNull ? false : window.contains(frame) && !(fadeZone.isNull ? false : frame.intersects(fadeZone))
+        // Tonight scrolled with the tab bar minimised: content passing under the navigation bar's own
+        // scroll-edge effect at the top is dimmed by design, as under the tab bar.
+        if pass=="minimised", !navigationBar.isNull { fadeZone=fadeZone.union(CGRect(x:0,y:0,width:window.width,height:navigationBar.maxY+56)) }
+        // The minimised bar and the followed night's strip are what that pass is for: their own controls
+        // are measured in full, never excused by the band they sit in.
+        let barControl=pass=="minimised" && issue.element?.elementType == .button && !tabBar.isNull && tabBar.contains(frame)
+        let visible=frame.isNull ? false : window.contains(frame) && (barControl || !(fadeZone.isNull ? false : frame.intersects(fadeZone)))
         switch issue.auditType {
         case .dynamicType:
             // "Fully unsupported" always fails (the share card's route shows the rendered image, as people
@@ -145,7 +179,12 @@ final class AccessibilityAuditTests:XCTestCase {
             // Scrolled below the fold or behind the tab bar, not truncated; the system search field's placeholder;
             // or PhotosPicker's own "Choose photos" label, which renders in full (checked by screenshot).
             // On iPad the Parks search field sits in the split view's list column; its placeholder is reported as its own element.
-            return !visible || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // The minimised pass scrolls Tonight to rows built as a one-line layout with a stacked fallback
+            // (`ViewThatFits`: the starting point, From home tonight); the audit's own text-size probe swaps
+            // the layout under it and reports the one-line texts as clipped. They render in full at every
+            // size (captures at default and AX5, 2026-10-08); the default and AX5 passes still audit clipping.
+            let probeSwap=pass=="minimised" && !barControl
+            return !visible || probeSwap || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
             // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a

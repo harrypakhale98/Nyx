@@ -37,6 +37,15 @@ import SwiftUI
     }
     /// Whether the tabs stand in an iPad sidebar, where the selected row is white text on the tint.
     var sidebar=false
+    /// Night vision asked of this window's toolbar switch: `RootView` dims the window to black,
+    /// turns the palette under the cover and reveals it (`NightVisionLamp`). Each tap is a new request.
+    private(set) var lampRequest:NightVisionLamp.Request?
+    /// The state the switch shows while the lamp runs, so it answers the tap at once; nil at rest.
+    var lampTarget:Bool?
+    func requestNightVision(_ on:Bool) {
+        lampTarget=on
+        lampRequest=NightVisionLamp.Request(id:(lampRequest?.id ?? 0)+1,on:on)
+    }
     /// Bumped by ⌘F: the Parks list focuses its search field.
     private(set) var searchRequest=0
     /// ⌘← and ⌘→: the night view showing on the current tab moves one night.

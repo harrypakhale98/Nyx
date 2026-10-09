@@ -44,7 +44,7 @@ struct TonightView: View {
                     if !model.startChosen { firstRun }
                     HStack(alignment:.top,spacing:36) {
                         VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:22) { startingPoint; more(best); footnote; fromHome; extras }.frame(maxWidth:500)
+                        VStack(alignment:.leading,spacing:22) { startingPoint(heading:false); more(best); fromHome; extras }.frame(maxWidth:500)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
@@ -53,20 +53,21 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint;fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint(heading:false);fromHome }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         farther(than:park)
-                        startingPoint
+                        // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
-                        footnote
+                        startingPoint(heading:best.count>1)
                         fromHome
                     }
                     extras
                 }.padding(24).readableColumn()
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
-        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+        // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.
+        .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
@@ -99,7 +100,7 @@ struct TonightView: View {
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
                 if !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting && shooting==0 {
-                    withAnimation(.spring(response:0.9,dampingFraction:1)) { shooting=1 } completion:{ shooting=0 }
+                    withAnimation(ShootingStar.launch) { shooting=1 } completion:{ shooting=0 }
                 }
                 let before=model.forecasts.mapValues(\.updated)
                 await model.refresh(candidates,force:true)
@@ -137,11 +138,17 @@ struct TonightView: View {
     }
     /// The line above the answer, all data: the night, and where "in reach" is measured from.
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
-    private func answerLine(_ park:Park)->Text {
+    /// At accessibility sizes the two facts stack as two lines, with no "·" left dangling at a wrap.
+    @ViewBuilder private func answerLine(_ park:Park)->some View {
         let day=park.dayLabel(model.night(park).id), radius=Self.distance(model.radiusMiles)
-        if !model.startChosen { return Text("\(day) · Example: from \(model.originName)") }
+        if typeSize.isAccessibilitySize {
+            VStack(spacing:4) {
+                Text(day)
+                if !model.startChosen { Text("Example: from \(model.originName)") } else { Text("Darkest within \(radius)") }
+            }.accessibilityElement(children:.combine)
+        } else if !model.startChosen { Text("\(day) · Example: from \(model.originName)") }
         // The card below names where from ("From Joshua Tree", "Near me") and how it is measured.
-        return Text("\(day) · Darkest within \(radius)")
+        else { Text("\(day) · Darkest within \(radius)") }
     }
     private static func distance(_ miles:Double)->String { Measurement(value:miles,unit:UnitLength.miles).formatted(.measurement(width:.abbreviated,usage:.road)) }
     /// A thin answer (fewer than three parks in reach, or a bright sky at the best of them) points to
@@ -208,18 +215,26 @@ struct TonightView: View {
             // The gauge speaks this line, so VoiceOver does not hear it twice.
             if let basis { Text(basis).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             // A forecast more than six hours old says when it is from.
-            if night.score.hasForecast, let updated=night.forecastUpdated, Date.now.timeIntervalSince(updated)>6*3600 {
-                Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
-            }
+            let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
-            if let closure=model.closure(park) { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+            if let closure=model.closure(park) {
+                if let stale { forecastAsOf(park,stale) }
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
-            else { Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12) }
+            // Nothing listed: the alerts and the forecast's age share one quiet caption, the safety cue kept.
+            else if let listed=model.alertFacts(park) { CaveatLine(facts:listed+(stale.map { [String(localized:"forecast from \(park.timestamp($0))")] } ?? [])).padding(.horizontal,12) }
+            else {
+                if let stale { forecastAsOf(park,stale) }
+                Text(model.alertSummary(park)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).padding(.horizontal,12)
+            }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center).padding(.horizontal,12) }
             AccessNoteLabel(park:park,alignment:.center).padding(.horizontal,12)
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
         }.frame(maxWidth:.infinity)
+    }
+    private func forecastAsOf(_ park:Park,_ updated:Date)->some View {
+        Text("Forecast as of \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
     }
     /// The hero dial's reveal key for a park tonight.
     private func revealKey(_ park:Park)->String {
@@ -256,9 +271,6 @@ struct TonightView: View {
     @ViewBuilder private var fromHome: some View {
         let here=location.latitude.flatMap { lat in location.longitude.map { (latitude:lat,longitude:$0) } }
         if model.startChosen, let origin=HomeSky.origin(location:here,place:model.homePlace,park:model.home) { FromHomePanel(origin:origin,now:model.today) }
-    }
-    private var footnote: some View {
-        Text("Each park uses its own local date. Scores without a full forecast can change when one arrives.").font(.caption).foregroundStyle(palette.muted)
     }
     @ViewBuilder private var extras: some View {
         if DebugScenario.state=="error" || DebugScenario.state=="offline" || (model.weatherEnabled && candidates.contains { model.staleForecasts.contains($0.id) }) { Panel { Label("Offline calculations are ready. Refresh when a connection returns.",systemImage:"wifi.slash").font(.subheadline).foregroundStyle(palette.muted) } }
@@ -347,34 +359,99 @@ struct TonightView: View {
         .accessibilityHint(hint)
     }
     /// The starting point is a chosen park, a city or town, or the device location: one at a time.
-    private var startingPoint:some View {
-        Panel { VStack(alignment:.leading,spacing:12) {
-            HStack(alignment:.center) {
-                Button { chooseHome=true } label:{
-                    if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:model.homePlace == nil ? "mappin.and.ellipse" : "building.2") }
-                    else { Label("From your location",systemImage:"location.fill") }
-                }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
-                Spacer(minLength:8)
-                if location.locating { ProgressView().accessibilityLabel("Finding your location") }
-                else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-                else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline) }.buttonStyle(.bordered).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
-            }
+    /// One row, "From Joshua Tree · 200 mi ⌃" with Near me trailing, and how the distance is measured
+    /// under it. Below the alternatives it carries its own heading, so the headings rotor finds it.
+    @ViewBuilder private func startingPoint(heading:Bool)->some View {
+        if heading { Eyebrow(text:"Starting point") }
+        Panel { VStack(alignment:.leading,spacing:0) {
             ViewThatFits(in:.horizontal) {
-                HStack { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                VStack(alignment:.leading,spacing:8) { radiusPicker;Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl(compact:false) }
+                // A long name keeps the row by showing Near me as its symbol alone.
+                HStack(spacing:6) { origin(wraps:false); dot; radiusMenu; Spacer(minLength:8); locationControl(compact:true) }
+                // The longest names: the name wraps, the radius and Near me share a line.
+                VStack(alignment:.leading,spacing:4) {
+                    origin(wraps:true)
+                    HStack(spacing:8) { radiusMenu; Spacer(minLength:8); locationControl(compact:false) }
+                }
+                // Accessibility sizes: one control per line, none wider than the card.
+                VStack(alignment:.leading,spacing:4) { origin(wraps:true); radiusMenu; locationControl(compact:false) }
             }
-            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted) }
-            if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted) }
+            Text("as the crow flies").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            if location.denied || DebugScenario.state=="no-location" { Text("Location is off. Choose your city or the park closest to you.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
+            if let message=location.message { Text(message).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
         } }
     }
-    private var radiusPicker:some View {
+    private var dot: some View { Text(verbatim:"·").font(.subheadline).foregroundStyle(palette.muted).accessibilityHidden(true) }
+    private func origin(wraps:Bool)->some View {
+        Button { chooseHome=true } label:{
+            Group {
+                if location.latitude==nil { Label(String(localized:"From \(model.homePlace?.label ?? model.originName)"),systemImage:model.homePlace == nil ? "mappin.and.ellipse" : "building.2") }
+                else { Label("From your location",systemImage:"location.fill") }
+            }.multilineTextAlignment(.leading).fixedSize(horizontal:!wraps,vertical:true)
+        }.font(.subheadline).frame(minHeight:44).contentShape(Rectangle()).accessibilityHint("Choose a city, town or park to start from")
+    }
+    @ViewBuilder private func locationControl(compact:Bool)->some View {
+        if location.locating { ProgressView().accessibilityLabel("Finding your location") }
+        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ controlLabel("Settings",symbol:"location.slash",compact:compact) }.buttonStyle(.bordered).buttonBorderShape(compact ? .circle : .capsule).fixedSize().accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
+        else if location.latitude==nil { Button { explainLocation=true } label:{ controlLabel("Near me",symbol:"location",compact:compact) }.buttonStyle(.bordered).buttonBorderShape(compact ? .circle : .capsule).fixedSize().accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
+    }
+    /// A bordered control's label, or its symbol alone when the row is short of room (still 44 pt).
+    @ViewBuilder private func controlLabel(_ title:LocalizedStringKey,symbol:String,compact:Bool)->some View {
+        if compact { Label(title,systemImage:symbol).labelStyle(.iconOnly).font(.subheadline).frame(minWidth:30,minHeight:30) }
+        else { Label(title,systemImage:symbol).font(.subheadline).frame(minHeight:30) }
+    }
+    /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
+    /// distances. A plain label, so "200 mi" sits on the row's text with no control inset of its own.
+    private var radiusMenu:some View {
         @Bindable var model=model
-        // Its own size both ways: vertically flexible, it left the panel a tall empty band under the row.
-        return Picker("Radius",selection:$model.radiusMiles) {
-            ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).fixedSize().tag(miles) }
-        }.pickerStyle(.menu).fixedSize()
+        let distance=Self.distance(model.radiusMiles)
+        return Menu {
+            Picker("Radius",selection:$model.radiusMiles) {
+                ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Self.distance(miles)).tag(miles) }
+            }.pickerStyle(.inline)
+        } label:{
+            HStack(spacing:4) {
+                Text(distance)
+                Image(systemName:"chevron.up.chevron.down").font(.caption.weight(.semibold)).accessibilityHidden(true)
+            }
+            .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
+        }
+        .buttonStyle(.plain).fixedSize()
+        .accessibilityLabel("Radius").accessibilityValue(distance).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
 }
+/// The quiet facts under Tonight's dial when nothing is closed: "No closures listed · check alerts
+/// before you go · forecast from Oct 8, 1:51 PM" on one line when it fits, wrapped at a dot when it
+/// does not, and one fact per line, each a sentence, at accessibility sizes.
+struct CaveatLine: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let facts:[String]
+    var body: some View {
+        Group {
+            if typeSize.isAccessibilitySize || facts.count<2 { stacked }
+            else {
+                ViewThatFits(in:.horizontal) {
+                    line(facts)
+                    VStack(spacing:2) { line(Array(facts.dropLast())); line([Self.sentence(facts[facts.count-1])]) }
+                    stacked
+                }
+            }
+        }
+        .font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+    }
+    /// Each line speaks its facts as sentences, without the dots. (Not one ignoring container over the
+    /// `ViewThatFits`: the accessibility audit then finds the unused layouts as empty, too-small nodes.)
+    private func line(_ parts:[String])->some View {
+        Text(parts.joined(separator:" · ")).lineLimit(1).accessibilityLabel(parts.map(Self.sentence).joined(separator:". "))
+    }
+    private var stacked: some View {
+        VStack(spacing:2) { ForEach(Array(facts.enumerated()),id:\.offset) { _,fact in Text(Self.sentence(fact)).fixedSize(horizontal:false,vertical:true) } }
+    }
+    /// A fact that starts a line starts with a capital, in either language.
+    static func sentence(_ fact:String)->String { fact.prefix(1).uppercased(with:.current)+fact.dropFirst() }
+}
+
 struct PermissionExplainer: View {
     @Environment(\.dismiss) private var dismiss
     let symbol:String

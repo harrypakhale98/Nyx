@@ -423,6 +423,14 @@ import CoreLocation
         if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
         return String(localized:"No closures in the last park update. Check all park alerts before you go.")
     }
+    /// `alertSummary` as short facts for one caption, only when the last park update lists nothing
+    /// to stop a trip (no closure, no danger): the fact, then the cue to check before going. Nil
+    /// otherwise, when the summary's full sentence stands alone.
+    func alertFacts(_ park:Park)->[String]? {
+        guard let data=enrichments[park.id], closure(park) == nil, !data.alerts.contains(where:{ $0.kind == .danger }) else { return nil }
+        if data.alerts.isEmpty { return [String(localized:"No alerts listed"),String(localized:"confirm access before you go")] }
+        return [String(localized:"No closures listed"),String(localized:"check alerts before you go")]
+    }
 }
 @MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {
     var latitude:Double?

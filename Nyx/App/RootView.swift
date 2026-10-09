@@ -35,6 +35,18 @@ struct RootView:View {
     /// The launch's own update of the saved parks has run: until then, becoming active (which
     /// also happens at launch) leaves it to that one rather than publishing twice.
     @State private var launchPublished=false
+    /// The night-vision lamp's black cover (0 clear, 1 black), where it is heading, and its run.
+    @State private var lampCover=0.0
+    @State private var lampMotion=NightVisionLamp.Cover()
+    @State private var lampTask:Task<Void,Never>?
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
+    /// moves would cost someone their place: VoiceOver, Switch Control and accessibility text sizes.
+    private var tabBarMinimize:TabBarMinimizeBehavior {
+        voiceOver || switchControl || typeSize.isAccessibilitySize || DebugScenario.isEnabled("ax5") ? .never : .onScrollDown
+    }
 
     private var palette:NyxPalette { NyxPalette(nightVision:nightVision || DebugScenario.state=="night-vision" || DebugScenario.isEnabled("night-vision"),highContrast:contrast == .increased || DebugScenario.isEnabled("contrast"),brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red")) }
     var body:some View {
@@ -57,6 +69,7 @@ struct RootView:View {
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
+                .tabBarMinimizeBehavior(tabBarMinimize)
                 // A followed night under way: a strip above the tabs that opens field mode (iOS 26.1).
                 .modifier(NightInProgressAccessory { id in if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) } })
                 .tint(commands.sidebar ? palette.controlTint : palette.accent)
@@ -78,7 +91,11 @@ struct RootView:View {
         .modifier(DebugWindow()).modifier(DebugOpenParkWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.
         .modifier(NightVisionFilter(enabled:palette.nightVision && !["field","field-compass","assistive","assistive-tonight","assistive-saved"].contains(DebugScenario.screen ?? ""),red:palette.red))
-        .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") ? nil : NyxMotion.spring,value:palette.nightVision)
+        // The lamp turns the palette under its cover, at once; every other path (Control Center, Siri, a
+        // Focus, onboarding, Reduce Motion) crossfades on the shared spring.
+        .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") || lampCover>0 ? nil : NyxMotion.spring,value:palette.nightVision)
+        .overlay { Color.black.opacity(lampCover).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
+        .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on) } }
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
@@ -175,6 +192,30 @@ struct RootView:View {
         }
         // Differentiate Without Color, Reduce Highlighting, Cross-Fade, reduced resources: read once, for every screen and sheet.
         .nyxAccessibility()
+    }
+    /// The toolbar switch's lamp: down to black over the rest of ~0.2 s, the palette turned under the
+    /// cover with one soft tap and the state announced, then revealed on the shared spring. A tap that
+    /// lands mid-way starts again from wherever the cover is, toward the state now asked for.
+    private func runLamp(_ on:Bool) {
+        lampTask?.cancel()
+        lampTask=Task { @MainActor in
+            if on != nightVision {
+                let now=Date.now, time=NightVisionLamp.dimTime(from:lampMotion.value(at:now))
+                lampMotion=NightVisionLamp.Cover(from:lampMotion.value(at:now),to:1,start:now,duration:time)
+                withAnimation(.easeIn(duration:time)) { lampCover=1 }
+                try? await Task.sleep(for:.seconds(time))
+                guard !Task.isCancelled else { return }
+                var quiet=Transaction(); quiet.disablesAnimations=true
+                withTransaction(quiet) { nightVision=on }
+                NightVisionLamp.announce(on)
+            }
+            let start=Date.now
+            lampMotion=NightVisionLamp.Cover(from:lampMotion.value(at:start),to:0,start:start,duration:NightVisionLamp.reveal)
+            withAnimation(NyxMotion.spring) { lampCover=0 }
+            try? await Task.sleep(for:.seconds(NightVisionLamp.reveal))
+            guard !Task.isCancelled else { return }
+            commands.lampTarget=nil
+        }
     }
     /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.
     private func handle(_ link:DeepLink?) {

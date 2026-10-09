@@ -169,7 +169,6 @@
   "A night to consider at %@": "Una noche a tener en cuenta en %@",
   "A night to remember": "Una noche para recordar",
   "A night worth making time for": "Una noche que merece tu tiempo",
-  "A number with a reason": "Un número con sus razones",
   "A park's closure (illustrative text)": "Cierre de un parque (texto ilustrativo)",
   "A promising night at %@": "Una noche prometedora en %@",
   "A red palette reduces glare. Lower the screen brightness too. Field mode, from a park's \"I'm here tonight\", turns this on and dims the screen while it is open, then puts both back.": "Una paleta roja reduce el deslumbramiento. Baja también el brillo de la pantalla. El modo de campo, desde \"Estoy aquí esta noche\" en un parque, la activa y atenúa la pantalla mientras está abierto; después restaura ambas cosas.",
@@ -536,7 +535,6 @@
   "Find the national parks and nights that give the stars their best chance.": "Encuentra los parques nacionales y las noches que dan a las estrellas su mejor oportunidad.",
   "Find the on-device darkness estimate for a national park.": "Consulta la estimación de oscuridad, calculada en el dispositivo, para un parque nacional.",
   "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.": "Calcula en el dispositivo el índice de oscuridad de un parque nacional. Devuelve el índice, de 0 a 100.",
-  "Find your dark sky": "Encuentra tu cielo oscuro",
   "Finding the Milky Way": "Encontrar la Vía Láctea",
   "Finding the Milky Way": "Encontrar la Vía Láctea",
   "Finding your location": "Buscando tu ubicación",
@@ -1777,5 +1775,15 @@
   "your location": "tu ubicación",
   "· %lld–%lld": "· %lld–%lld",
   "Checked against the records": "Comprobada con los registros",
-  "Checking the answer against the records": "Comprobando la respuesta con los registros"
+  "Checking the answer against the records": "Comprobando la respuesta con los registros",
+  "Darkest within %@": "Lo más oscuro a menos de %@",
+  "Distance": "Distancia",
+  "Each park uses its own local date.": "Cada parque usa su propia fecha local.",
+  "Example: from %@": "Ejemplo: desde %@",
+  "Night vision off": "Visión nocturna desactivada",
+  "No alerts listed": "Sin alertas publicadas",
+  "No closures listed": "Sin cierres publicados",
+  "check alerts before you go": "revisa las alertas antes de ir",
+  "confirm access before you go": "confirma el acceso antes de ir",
+  "forecast from %@": "pronóstico de %@"
 }

@@ -10,7 +10,7 @@ struct AccessNoteLabel: View {
     var alignment: HorizontalAlignment = .leading
     var body: some View {
         if let note=park.accessNote {
-            Label { Text(note).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:park.drivable ? "road.lanes" : "ferry") }
+            Label { Text(note).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:park.drivable ? "car.fill" : "ferry") }
                 .font(.caption).foregroundStyle(palette.muted)
                 .multilineTextAlignment(alignment == .center ? .center : .leading)
                 .accessibilityElement(children:.ignore)
@@ -123,7 +123,6 @@ struct ParksView: View {
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : narrowed ? LocalizedStringKey("\(shown.count) of 63 parks") : LocalizedStringKey("63 places to look up"))
-                Text("Find your dark sky").font(.system(.largeTitle,design:.serif)).foregroundStyle(palette.ink)
                 if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"Park or state",focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate".
                 if shown.contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
@@ -718,10 +717,8 @@ struct ScoreBreakdownView: View {
     }
     private var content: some View {
         VStack(alignment:.leading,spacing:26) {
-            VStack(alignment:.leading,spacing:10) {
-                Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
-                Text("A number with a reason").font(.system(.largeTitle,design:.serif)).fixedSize(horizontal:false,vertical:true)
-            }
+            // The eyebrow, then the numeral: the navigation bar already says "Score breakdown".
+            Eyebrow(text:"\(night.park.shortName) · \(night.park.dayLabel(night.id))")
             // The band keeps its whole width beside the numeral (a one-word band cannot wrap, so a squeezed
             // frame clips it); when both do not fit, as at accessibility sizes, the band goes underneath.
             ViewThatFits(in:.horizontal) {
@@ -758,7 +755,8 @@ struct ScoreBreakdownView: View {
                 }
                 .accessibilityElement(children:.ignore).accessibilityLabel(event.spoken+" "+String(localized:"Also in the sky this night. Not part of the score."))
             }
-            Text("The score is a planning guide, not a guarantee of visibility or safe access.").font(.caption).foregroundStyle(palette.muted)
+            // Dates and the night's hours here are the park's own, wherever this phone is.
+            Text(String(localized:"Each park uses its own local date.")+" "+String(localized:"The score is a planning guide, not a guarantee of visibility or safe access.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             ShareCardButton(night:night)
         }
     }
@@ -837,14 +835,15 @@ struct ScoreBreakdownView: View {
 #Preview("Park row") { if let p=PlanModel().home { ParkRow(night:PlanModel().night(p)).padding().background(.black) } }
 #Preview("Detail") { let m=PlanModel();if let p=m.home { NavigationStack { ParkDetailView(park:p) }.environment(m).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) } }
 
-/// iOS 27: the bars recede as the park's page scrolls down, so its sky runs edge to edge; they
-/// return on the way back up. iOS 26 keeps the standard bars.
+/// iOS 27: the navigation bar recedes as the park's page scrolls down, so its sky runs edge to edge;
+/// it returns on the way back up. The tab bar follows the root's own rule (`RootView`), which keeps
+/// it in place under VoiceOver, Switch Control and accessibility sizes. iOS 26 keeps the standard bar.
 private struct SkyFullBleed: ViewModifier {
     /// Off in two columns, where the night's column stays put beside the scrolling detail and bars
     /// receding over one column would read as a glitch.
     var enabled=true
     @ViewBuilder func body(content:Content)->some View {
-        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar,.tabBar) } else { content }
+        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar) } else { content }
     }
 }
 #Preview("Access note • boat, limited road, none") {
