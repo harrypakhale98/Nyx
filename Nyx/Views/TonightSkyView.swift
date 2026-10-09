@@ -85,7 +85,7 @@ struct TonightSkyView: View {
             .gesture(turn)
             .accessibilityElement()
             .accessibilityLabel(title)
-            .accessibilityValue(PanoramaCanvas.summary(sky:sky,facing:facing,park:park,bortle:Double(park.bortleEstimate),size:size == .zero ? CGSize(width:390,height:800) : size,labelTop:headerBottom))
+            .accessibilityValue(PanoramaCanvas.summary(sky:sky,facing:facing,park:park,bortle:Double(park.bortleEstimate),size:size == .zero ? CGSize(width:390,height:800) : size))
             .accessibilityHint("Swipe up or down to turn 45 degrees.")
             .accessibilityAdjustableAction { direction in
                 switch direction {
@@ -256,10 +256,12 @@ struct TonightSkyView: View {
         withTransaction(still) { facing=azimuth }
     }
     /// A direction button: the shortest way round on the shared spring, or at once under Reduce Motion.
+    /// A turn already in flight starts from where the sky is on screen, not from its old target.
     private func turn(toward azimuth:Double) {
-        let target=SkyTurn.shortestTurn(from:facing,to:azimuth)
-        guard !reduceMotion, abs(target-facing)>0.01 else { face(target); return }
-        turning=SkyTurn.Motion(from:facing,to:target,velocity:0,start:.now)
+        let from=turning?.position(at:.now) ?? facing
+        let target=SkyTurn.shortestTurn(from:from,to:azimuth)
+        guard !reduceMotion, abs(target-from)>0.01 else { face(target); return }
+        turning=SkyTurn.Motion(from:from,to:target,velocity:0,start:.now)
         withAnimation(NyxMotion.spring) { facing=target }
     }
     private var frame: SkyFrame { SkyFrame(options:options,size:size == .zero ? CGSize(width:390,height:800) : size) }

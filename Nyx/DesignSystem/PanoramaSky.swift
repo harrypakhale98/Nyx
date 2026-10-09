@@ -413,10 +413,12 @@ struct PanoramaCanvas: View {
         for planet in sky.planets.sorted(by:{ $0.magnitude<$1.magnitude }) { if let p=frame.point(planet.altitude,planet.azimuth), frame.visible(p) { label(planet.name,at:p,gap:14) } }
         if milkyWay>0.15, let core=sky.core, let p=frame.point(core.altitude,core.azimuth), frame.visible(p) { label(String(localized:"Milky Way core"),at:p,gap:frame.scale*0.12) }
         if let radiant=sky.radiant, sky.dark, let p=frame.point(radiant.altitude,radiant.azimuth), frame.visible(p) { label(radiant.name,at:p,gap:24) }
-        // Then the brightest named stars, quieter than the planets, each as it arrives.
+        // Then the brightest named stars, quieter than the planets, each as it arrives; as legible as
+        // the planets in night vision and under Increase Contrast.
+        let peak=PanoramaCanvas.starNameOpacity(nightVision:options.nightVision,highContrast:highContrast)
         for star in labelledStars(sky:sky,options:options,size:size) where star.magnitude<limit {
             guard let p=frame.point(star.altitude,star.azimuth) else { continue }
-            label(star.name,at:p,gap:13,opacity:0.7*min(1,limit-star.magnitude))
+            label(star.name,at:p,gap:13,opacity:peak*min(1,limit-star.magnitude))
         }
     }
     /// The faintest star the sky shows once eyes have adapted: the Bortle class's limit, less what
@@ -425,6 +427,12 @@ struct PanoramaCanvas: View {
         let twilight=max(0,min(1,(sky.sunAltitude+18)/12))
         let moonWash=options.showsMoon ? (sky.moon.map { max(0,min(1,$0.altitude/25)) } ?? 0)*sky.moonIllumination : 0
         return (options.bortle.map(BortleScale.limitingMagnitude) ?? 6.6)-2.2*moonWash-4*twilight
+    }
+    /// A fully arrived star name's opacity: 0.7 so planets read first, but 0.92 (the planets' own)
+    /// in night vision, where the red filter would take 0.7 below 4.5:1 on black, and full ink under
+    /// Increase Contrast, whose brighter red passes for protan eyes only at full strength.
+    nonisolated static func starNameOpacity(nightVision:Bool,highContrast:Bool)->Double {
+        highContrast ? 1 : nightVision ? 0.92 : 0.7
     }
     /// At most this many star names on the sky at once.
     nonisolated static let starLabels=6
@@ -457,8 +465,10 @@ struct PanoramaCanvas: View {
             : Color(red:1+0.25*warmth,green:1+0.1*warmth,blue:1).mix(with:ink,by:0.35)
     }
     /// What is up and where, for VoiceOver: "Facing south at 11:40 PM. Jupiter, high in the southeast. …"
-    /// `size` is the view's, for which named stars are in view (as `labelledStars`).
-    static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?,size:CGSize=CGSize(width:390,height:800),labelTop:Double=0)->String {
+    /// `size` is the view's, for which named stars are in view (as `labelledStars`). The floating
+    /// header is ignored here: a star under the title is still in the sky, so the summary does not
+    /// shrink as text grows.
+    static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?,size:CGSize=CGSize(width:390,height:800))->String {
         var lines=[String(localized:"Facing \(Compass.name(facing)), \(park.time(sky.moment)).")]
         if sky.sunAltitude > -6 { lines.append(String(localized:"The Sun is barely down; the sky is still bright.")) }
         else if !sky.dark { lines.append(String(localized:"The sky is still in twilight.")) }
@@ -472,7 +482,7 @@ struct PanoramaCanvas: View {
         let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)
         if milkyWay>0.15, let core=sky.core { lines.append(String(localized:"The Milky Way's core, \(place((core.altitude,core.azimuth))).")) }
         if let radiant=sky.radiant, sky.dark { lines.append("\(radiant.name), \(place((radiant.altitude,radiant.azimuth))).") }
-        let view=PanoramaOptions(facing:facing,bortle:bortle,labelTop:labelTop)
+        let view=PanoramaOptions(facing:facing,bortle:bortle)
         for star in labelledStars(sky:sky,options:view,size:size) where star.magnitude<skyLimit(sky:sky,options:view) {
             lines.append(String(localized:"\(star.name), a bright star, \(place((star.altitude,star.azimuth)))."))
         }
