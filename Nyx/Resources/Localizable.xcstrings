@@ -2970,19 +2970,19 @@
         }
       }
     },
-    "A citizen-science project. Observations like yours showed scientists that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing.": {
+    "A citizen-science project. Observations like yours let scientists estimate that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A citizen-science project. Observations like yours showed scientists that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing."
+            "value": "A citizen-science project. Observations like yours let scientists estimate that the night sky grew brighter by 7 to 10 percent a year from 2011 to 2022. It opens in Safari; Nyx sends nothing."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un proyecto de ciencia ciudadana. Observaciones como la tuya mostraron a los científicos que el cielo nocturno se volvió más brillante entre un 7 y un 10 por ciento al año de 2011 a 2022. Se abre en Safari; Nyx no envía nada."
+            "value": "Un proyecto de ciencia ciudadana. Observaciones como la tuya permitieron a los científicos estimar que el cielo nocturno se volvió entre un 7 y un 10 por ciento más brillante al año de 2011 a 2022. Se abre en Safari; Nyx no envía nada."
           }
         }
       }
@@ -3225,19 +3225,19 @@
         }
       }
     },
-    "A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.": {
+    "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back."
+            "value": "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una paleta roja reduce el deslumbramiento. Baja también el brillo de la pantalla. El botón de la luna arriba de cada pestaña y el control del Centro de control también la activan. El modo de campo, desde \"Estoy aquí esta noche\" de un parque, la activa y atenúa la pantalla mientras está abierto, y luego restaura ambos."
+            "value": "Una paleta roja reduce el deslumbramiento. Baja también el brillo de la pantalla. El botón de la linterna arriba de cada pestaña y el control del Centro de control también la activan. El modo de campo, desde \"Estoy aquí esta noche\" de un parque, la activa y atenúa la pantalla mientras está abierto, y luego restaura ambos."
           }
         }
       }
@@ -4395,23 +4395,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otra forma de verlo"
-          }
-        }
-      }
-    },
-    "Answer checked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Answer checked"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Respuesta comprobada"
           }
         }
       }
@@ -5763,36 +5746,19 @@
         }
       }
     },
-    "Checked against the records": {
+    "Checking the numbers against the records": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Checked against the records"
+            "value": "Checking the numbers against the records"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comprobada con los registros"
-          }
-        }
-      }
-    },
-    "Checking the answer against the records": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Checking the answer against the records"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comprobando la respuesta con los registros"
+            "value": "Comprobando las cifras con los registros"
           }
         }
       }
@@ -9667,6 +9633,23 @@
         }
       }
     },
+    "Flashlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flashlight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linterna"
+          }
+        }
+      }
+    },
     "Follow": {
       "extractionState": "manual",
       "localizations": {
@@ -10657,19 +10640,19 @@
         }
       }
     },
-    "Here (Class %lld, estimated)": {
+    "Here (Class %lld, estimated)": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Here (Class %lld, estimated)"
+            "value": "Here (Class %lld, estimated)"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aquí (clase %lld, estimada)"
+            "value": "Aquí (clase %lld, estimada)"
           }
         }
       }
@@ -15914,6 +15897,40 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Numbers checked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numbers checked"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cifras comprobadas"
+          }
+        }
+      }
+    },
+    "Numbers checked against the records": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numbers checked against the records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cifras comprobadas con los registros"
           }
         }
       }
@@ -23628,19 +23645,19 @@
         }
       }
     },
-    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service.": {
+    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service."
+            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El inventario del NPS incluido contiene 63 parques nacionales. Las clases Bortle son estimaciones conservadoras, no mediciones con instrumentos. Las designaciones Dark Sky son certificaciones International Dark Sky Park a julio de 2026, verificadas con la lista del NPS; un parque certificado después aún no está marcado. Las coordenadas de observación son aproximadas, no indicaciones de ruta. Datos de parques: National Park Service."
+            "value": "El inventario del NPS incluido contiene 63 parques nacionales. Las clases Bortle son estimaciones conservadoras, no mediciones con instrumentos. Las designaciones Dark Sky son certificaciones International Dark Sky Park a julio de 2026, verificadas con la lista del NPS; un parque certificado después aún no está marcado. Las coordenadas de observación son aproximadas, no indicaciones de ruta. Los dibujos del cielo (el cielo de esta noche, la figura de Bortle y la comparación con una ciudad) muestran estrellas en una noche sin luna hasta la magnitud más débil que la escala de Bortle de 2001 da a cada clase, cerca de 7.3 en la clase 2 y 4.5 en la clase 8; sus estrellas más débiles están colocadas como ilustración, no tomadas de un catálogo. Datos de parques: National Park Service."
           }
         }
       }
@@ -26263,6 +26280,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Visible toda la noche; punto más alto: aprox. %1$@, en el %2$@."
+          }
+        }
+      }
+    },
+    "Up through all of true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up through all of true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre el horizonte durante toda la oscuridad total."
           }
         }
       }

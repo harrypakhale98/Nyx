@@ -97,6 +97,9 @@ struct RootView:View {
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") || lampCover>0 ? nil : NyxMotion.spring,value:palette.nightVision)
         .overlay { Color.black.opacity(lampCover).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
         .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on) } }
+        // One soft tap at the turn, on every path (the lamp writes the setting under its cover), however
+        // many switches are loaded: each visited tab's toolbar and onboarding have one.
+        .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
         .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
@@ -251,7 +254,7 @@ struct RootView:View {
         case "nps-key": Form { Section { NPSKeyField() } header:{ Text("Advanced") } }.readableForm().navigationTitle("Your privacy").navigationBarTitleDisplayMode(.inline)
         case "data": AboutDataView()
         // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:
-        // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky.
+        // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky (here and on the park page).
         case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
         // Where to stay for one park (`-nyx-park`; `-nyx-state live` loads campgrounds), and From home

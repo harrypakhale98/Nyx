@@ -15,7 +15,7 @@ struct SettingsView:View {
         Form {
             Section("In the dark") {
                 Toggle("Night vision",isOn:$nightVision).tint(palette.controlTint)
-                Text("A red palette reduces glare. Lower the screen brightness too. The moon button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
+                Text("A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.").font(.caption).foregroundStyle(palette.muted)
                 Toggle(isOn:$brighterRed) {
                     VStack(alignment:.leading,spacing:4) {
                         Text("Brighter red")
@@ -181,7 +181,7 @@ struct AboutDataView:View {
             block("How sure the forecast is","For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same dark window. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself uses Open-Meteo's best-match forecast; on a tie, closer model agreement ranks first. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score.")
             block("Usual clouds","Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.") { licenseLink }
             block("Smoke and haze","Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Copernicus Atmosphere Monitoring Service (CAMS) through Open-Meteo, CC BY 4.0, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy.") { openMeteoLink;licenseLink }
-            block("Parks and sky glow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. Park data: National Park Service.")
+            block("Parks and sky glow","The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service.")
             block("Night lights from space","Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.")
             block("Step-free viewing","Step-free notes come from each park's accessibility pages on nps.gov, retrieved October 5, 2026. A spot is marked only where an official page says so, and each note shows the sentence it rests on and a link to the page, which opens in Safari. Spots without an official statement show nothing. Night access, gates and seasonal closures are not covered. Conditions change; check with the park.")
             block("Getting there","Access notes for parks a car cannot simply reach, by boat, plane or a limited road, come from each park's Getting there and directions pages on nps.gov, retrieved October 6, 2026. The trip planner leaves out parks reached only by boat or plane unless you include them. Schedules and seasons change; check with the park.")
@@ -324,6 +324,8 @@ struct OnboardingView:View {
     @Environment(PlanModel.self) private var model
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @State private var page=DebugScenario.onboardingPage
+    /// The fade above the page dots grows with the text, so a large line fades out rather than being sliced.
+    @ScaledMetric(relativeTo:.body) private var fade=24.0
     let finish:()->Void
     private let titles:[LocalizedStringKey]=["Where and when\nthe sky is darkest","A darker sky.\nA clearer plan.","Made for dark eyes"]
     private var messages:[LocalizedStringKey] {[
@@ -345,8 +347,10 @@ struct OnboardingView:View {
                             if index==2 { redToggle }
                         }.padding(.horizontal,28).padding(.vertical,index==1 || typeSize.isAccessibilitySize ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
+                    // Copy taller than the page shows its scroll indicator once, so "more below" is never only a fade.
+                    .scrollIndicatorsFlash(onAppear:true)
                     // Copy that runs past the controls fades out instead of being cut mid-line.
-                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:24) } }
+                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:fade) } }
                     .tag(index)
                 }
             }.tabViewStyle(.page(indexDisplayMode:.never))
@@ -360,16 +364,15 @@ struct OnboardingView:View {
             }.padding(.bottom,28)
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
     }
-    /// At accessibility sizes the Moon steps back, so the whole headline and the start of the
-    /// message sit above the page dots.
-    private var moonSize:CGFloat { typeSize.isAccessibilitySize ? 96 : 170 }
-    private var moonPadding:CGFloat { typeSize.isAccessibilitySize ? 8 : 24 }
+    private let moonSize:CGFloat=170
+    /// At accessibility sizes the decorative Moon is left out, so the headline and the first lines
+    /// of the message sit above the page dots rather than behind the fade.
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
-        case 0: OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding)
+        case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,24) }
         case 1: ScoreAnatomy(active:page==1)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
-        default: OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,moonPadding)
+        default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,24) }
         }
     }
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.
@@ -380,7 +383,7 @@ struct OnboardingView:View {
         .tint(palette.controlTint)
         .padding(.horizontal,20).padding(.vertical,12).frame(maxWidth:340,minHeight:56)
         .background(Capsule().fill(palette.panel)).overlay(Capsule().stroke(palette.line,lineWidth:0.5))
-        .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
+        // The soft tap of the turn comes once, from RootView, whichever switch changed it.
         .accessibilityHint("Turns the screen red. You can change it any time.")
     }
 }
