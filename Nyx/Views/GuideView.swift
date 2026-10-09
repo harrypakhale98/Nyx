@@ -69,7 +69,7 @@ struct GuideView:View {
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else {
                     let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }
-                    GuideRecords(all:all,cited:citedFirst(count:all.count),lit:lit,othersOpen:$othersOpen)
+                    GuideRecords(all:all,citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
                 }
             }.padding(24).readableColumn() }
             .scrollDismissesKeyboard(.interactively)
@@ -77,7 +77,8 @@ struct GuideView:View {
             .onChange(of:lit) { _,index in
                 guard let index else { return }
                 // A folded record opens first, then scrolls into view once it is laid out.
-                if let cited=citedFirst(count:Int.max), !cited.contains(index), !othersOpen {
+                let count=shown.count+guide.lookedUp.count
+                if let order=checkedCitations.flatMap({ GuideRecords.order(count:count,citations:$0) }), order.folded.contains(index), !othersOpen {
                     othersOpen=true
                     Task { @MainActor in
                         try? await Task.sleep(for:.milliseconds(80))
@@ -126,12 +127,10 @@ struct GuideView:View {
                           lookedUp:found.enumerated().map { (records.count+$0.offset,$0.element) },checked:checked)
     }
     #endif
-    /// The cited records' indices, once a planning answer is checked and cites any; nil while it
-    /// streams, before a question, in Learn and when nothing is cited, where the records stay one list.
-    private func citedFirst(count:Int)->Set<Int>? {
-        guard mode.isPlanning, guide.checked, !guide.loading else { return nil }
-        let cited=Set(guide.citations.filter { $0>=0 && $0<count })
-        return cited.isEmpty ? nil : cited
+    /// A checked planning answer's citations; nil while it streams, before a question and in Learn,
+    /// where the records stay one list.
+    private var checkedCitations:[Int]? {
+        mode.isPlanning && guide.checked && !guide.loading ? guide.citations : nil
     }
     /// Planning gets tools that call the engine; explainers reason over their records only.
     private var tools:NightLookup? { mode.isPlanning ? lookup : nil }
@@ -177,13 +176,14 @@ private extension GuideMode { var isPlanning:Bool { if case .planning = self { t
 
 /// The records under an answer, each under its own number and id, so chips and the model's
 /// citations find them wherever they sit. Once a planning answer is checked (`cited` is set), the
-/// records it cites come first and the rest fold under "N other records", a native disclosure;
+/// records it cites come first and the rest fold under "N other records", a disclosure;
 /// otherwise one list in the order the model saw them.
 struct GuideRecords: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     let all:[GuideRecord]
-    var cited:Set<Int>?=nil
+    /// A checked answer's citations (record indices); nil keeps one list.
+    var citations:[Int]?=nil
     var lit:Int?=nil
     @Binding var othersOpen:Bool
     var body: some View {
@@ -198,8 +198,8 @@ struct GuideRecords: View {
                 Text(GuideRecordRow.sharedCaption(shared)).font(.caption).foregroundStyle(palette.muted)
                     .fixedSize(horizontal:false,vertical:true).padding(.bottom,8)
             }
-            if let cited {
-                let first=rows.filter { cited.contains($0.offset) }, others=rows.filter { !cited.contains($0.offset) }
+            if let order=citations.flatMap({ GuideRecords.order(count:all.count,citations:$0) }) {
+                let first=order.cited.map { rows[$0] }, others=order.folded.map { rows[$0] }
                 recordRows(first,nights:nights,shared:shared)
                 if !others.isEmpty {
                     Divider().overlay(palette.line)
@@ -209,14 +209,21 @@ struct GuideRecords: View {
                         Text("\(others.count) other records").font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
                             .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
                     }
-                    // The system's own disclosure, so VoiceOver says expanded and collapsed; its chevron
-                    // keeps the system's colour beside the amber words.
-                    .tint(palette.accent).padding(.horizontal,8)
+                    .disclosureGroupStyle(RecordsDisclosureStyle()).padding(.horizontal,8)
                 }
             } else {
                 recordRows(rows,nights:nights,shared:shared)
             }
         }
+    }
+    /// Which records lead and which fold, in the order the model saw them: the cited ones that exist
+    /// first, the rest after. Nil when no citation names a record, so the records stay one list;
+    /// `folded` is empty when every record is cited, and no disclosure is drawn.
+    nonisolated static func order(count:Int,citations:[Int])->(cited:[Int],folded:[Int])? {
+        let cited=Set(citations.filter { $0>=0 && $0<count })
+        guard !cited.isEmpty else { return nil }
+        let indices=Array(0..<max(0,count))
+        return (indices.filter { cited.contains($0) },indices.filter { !cited.contains($0) })
     }
     private func recordRows(_ rows:[(offset:Int,element:GuideRecord)],nights:[Night?],shared:String?)->some View {
         ForEach(Array(rows.enumerated()),id:\.element.offset) { position,item in
@@ -230,6 +237,33 @@ struct GuideRecords: View {
     private func night(_ record:GuideRecord)->Night? {
         guard record.score != nil, let park=record.park, let night=record.night else { return nil }
         return model.night(park,on:night)
+    }
+}
+/// The folded records' disclosure: the words and a chevron in the accent (the system's chevron stays
+/// white beside amber words outside a List, and pure white on black is off the palette). One button
+/// that says whether it is expanded or collapsed, as the system's own disclosure does; the rows appear
+/// without a custom animation.
+private struct RecordsDisclosureStyle: DisclosureGroupStyle {
+    func makeBody(configuration:Configuration)->some View { RecordsDisclosure(configuration:configuration) }
+}
+private struct RecordsDisclosure: View {
+    @Environment(\.nyx) private var palette
+    let configuration:DisclosureGroupStyleConfiguration
+    var body: some View {
+        VStack(alignment:.leading,spacing:0) {
+            Button { configuration.isExpanded.toggle() } label:{
+                HStack(spacing:8) {
+                    configuration.label
+                    Image(systemName:"chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent)
+                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(configuration.isExpanded ? Text("Expanded") : Text("Collapsed"))
+            if configuration.isExpanded { configuration.content }
+        }
     }
 }
 /// The answer as it arrives: the constellation loader until the first checked words, the words
@@ -520,7 +554,7 @@ struct FlowLayout: Layout {
     let model=PlanModel()
     let texts=model.parks.prefix(5).map { park in "\(park.shortName); tonight; score 80/100 Excellent" }+["Starting park: Arches. Distances are straight-line estimates."]
     ScrollView {
-        GuideRecords(all:texts.map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) },cited:[3],othersOpen:$open).padding(24)
+        GuideRecords(all:texts.map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) },citations:[3],othersOpen:$open).padding(24)
     }.background(.black).environment(model).preferredColorScheme(.dark)
 }
 #Preview("Ask Nyx AX5") { NavigationStack { GuideView(mode:.planning) }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct NyxPalette {
+nonisolated struct NyxPalette: Equatable, Sendable {
     let nightVision: Bool
     let highContrast: Bool
     /// The person chose the brighter red (Settings › In the dark, or field mode's options).

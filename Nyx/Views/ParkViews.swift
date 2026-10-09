@@ -245,6 +245,8 @@ struct ParkDetailView: View {
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @State private var persistenceError=false
     @State private var scrubbing=false
+    /// A finger holds the sky arc: the page holds still, the Moon keeps its relief.
+    @State private var holdingArc=false
     @State private var width=0.0
     @State private var chapter=ParkChapter.tonight
     /// Chapter positions, kept out of observation so scrolling never re-evaluates the page.
@@ -297,8 +299,10 @@ struct ParkDetailView: View {
                 if wide {
                     HStack(alignment:.top,spacing:0) {
                         ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding(24) }
-                            .scrollDisabled(scrubbing).frame(width:WideLayout.leadingWidth(width))
+                            .scrollDisabled(scrubbing || holdingArc).frame(width:WideLayout.leadingWidth(width))
+                        // The sky arc lives here, so its held finger holds this column still too.
                         ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding(24) }
+                            .scrollDisabled(scrubbing || holdingArc)
                     }
                 } else {
                     ScrollView {
@@ -308,11 +312,12 @@ struct ParkDetailView: View {
                             placeChapter.modifier(ChapterTop(chapter:.place,report:report))
                         }.padding(24).readableColumn()
                     }
-                    .scrollDisabled(scrubbing)
+                    .scrollDisabled(scrubbing || holdingArc)
                     .safeAreaBar(edge:.top) { if showsIndex { index(proxy) } }
                 }
             }
             .onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+            .onPreferenceChange(ArcHoldingKey.self) { holdingArc=$0 }
             // The Moon hero drops its relief while the river or the Moon is scrubbed.
             .environment(\.moonRelief,!scrubbing)
             .task {

@@ -193,7 +193,7 @@ final class NyxUITests:XCTestCase {
         // On the picture, a third of the way across and 60 pt down; then up and to the right, the way
         // a page scroll would carry it.
         let from=arc.coordinate(withNormalizedOffset:.zero).withOffset(CGVector(dx:before.width*0.3,dy:60))
-        from.press(forDuration:1.5,thenDragTo:from.withOffset(CGVector(dx:before.width*0.5,dy:-140)),withVelocity:.slow,thenHoldForDuration:0.3)
+        from.press(forDuration:0.5,thenDragTo:from.withOffset(CGVector(dx:before.width*0.5,dy:-140)),withVelocity:.slow,thenHoldForDuration:0.3)
         sleep(1)
         XCTAssertEqual(arc.frame.minY,before.minY,accuracy:1,"The page scrolled under a held finger")
         // A plain swipe over the same spot scrolls at once.

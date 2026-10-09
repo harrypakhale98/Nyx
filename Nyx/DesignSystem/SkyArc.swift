@@ -1,5 +1,11 @@
 import SwiftUI
 
+/// True while a finger holds the sky arc's picture, so the page holds still under it. Separate from
+/// `RiverScrubbingKey`, which also flattens the Moon hero's relief while the Moon itself is scrubbed.
+struct ArcHoldingKey:PreferenceKey {
+    static let defaultValue=false
+    static func reduce(value:inout Bool,nextValue:()->Bool) { value = value || nextValue() }
+}
 /// The night as a picture: the sky deepens from dusk through each twilight to true darkness
 /// and back, continuously from the Sun's real altitude. The Sun and Moon trace their
 /// paths above a horizon line, moonlight washes over the dark hours it spoils, and a marker
@@ -41,6 +47,8 @@ struct SkyArc: View {
     /// True while a sighted finger holds the picture. UIKit's recognizer reports its end, its
     /// cancellation and its failure alike, and each ends the touch.
     @State private var holding=false
+    /// The "True darkness" label's width as the drawing sets it, for the hairline's gap.
+    @State private var darknessLabelWidth=0.0
     private var touchEnabled:Bool { voiceOver || DebugScenario.isEnabled("arc-touch") }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
@@ -51,14 +59,17 @@ struct SkyArc: View {
     }
     private var chart: some View {
         VStack(alignment:.leading,spacing:14) {
-            Canvas { context,size in draw(in:&context,size:size) } symbols: {
-                // Added as light, so an unlit Moon near new vanishes into a bright twilight as it does
-                // in the sky, instead of punching a black disc in it; opaque under Increase Contrast.
-                MoonView(geometry:AstronomyEngine().moon(for:night).geometry).blendMode(palette.highContrast ? .normal : .plusLighter)
-                    .frame(width:moonSize,height:moonSize).tag("moon")
-            }
+            // Its own equatable view, so a sliding finger redraws the hairline and caption alone,
+            // never the sky beneath them.
+            SkyArcPicture(night:night,palette:palette,access:access,moonSize:moonSize).equatable()
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
+            // The "True darkness" label's width at the drawing's own text size, so the hairline parts
+            // only where its words are.
+            .background {
+                Text("True darkness").font(.caption2).fixedSize().hidden()
+                    .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ darknessLabelWidth=$0 }
+            }
             .task(id:chartWidth) { if DebugScenario.isEnabled("arc-touch") || restsFinger, !voiceOver, chartWidth>0 { touch(at:chartWidth*0.55,quiet:true) } }
             // Sighted touch reads the picture only, never the legend or the times below it, and steps
             // aside for the VoiceOver path's gesture over the whole element.
@@ -94,8 +105,9 @@ struct SkyArc: View {
             // the picture, the finger still reads the hour above it (the chart spans the full width).
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance:0).updating($touching) { _,state,_ in state=true }.onChanged { touch(at:$0.location.x) },including:touchEnabled ? .all : .subviews)
-            // A held finger holds the park page still, as the river's scrub does.
-            .preference(key:RiverScrubbingKey.self,value:holding)
+            // A held finger holds the park page still, as the river's scrub does, without the Moon
+            // hero dropping its relief as it does for a scrub.
+            .preference(key:ArcHoldingKey.self,value:holding)
             .onChange(of:touching) { _,down in if !down { endTouch() } }
             .onChange(of:holding) { _,down in if !down { endTouch() } }
             .onChange(of:scenePhase) { _,phase in if phase != .active { endTouch() } }
@@ -118,6 +130,112 @@ struct SkyArc: View {
     private var spokenSummary:String {
         let darkness=night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
         return String(localized:"Sunset \(night.park.time(night.sky.sunset)).")+" "+darkness+" "+String(localized:"Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)).")
+    }
+    /// Where the finger rests: a hairline through the arc and the time and sky beside it, for anyone
+    /// who explores by touch with some sight. VoiceOver hears the same line when the finger rests.
+    @ViewBuilder private var finger:some View {
+        if let i=touchColumn, touchColumns.indices.contains(i), chartWidth>0 {
+            let x=(Double(i)+0.5)*chartWidth/Double(ArcTouch.columnCount)
+            let caption=ArcTouch.caption(touchColumns[i],night:night), width=chartWidth
+            let ground=chartHeight-22, label=labelRow(at:x)
+            ZStack(alignment:.topLeading) {
+                // Through the sky and the amber bar, then again below the "True darkness" label, never
+                // through its words.
+                Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:label.map { $0.lowerBound } ?? ground)
+                    .offset(x:x-palette.stroke/2)
+                if let label {
+                    Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:max(0,ground-label.upperBound))
+                        .offset(x:x-palette.stroke/2,y:label.upperBound)
+                }
+                // Short captions hug the finger; at large text sizes a long one wraps to two lines
+                    // inside the chart (6 pt from each edge) instead of being cut at both ends.
+                Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).multilineTextAlignment(.center)
+                    .padding(.horizontal,8).padding(.vertical,3)
+                    .background(RoundedRectangle(cornerRadius:10).fill(palette.panel)).overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5*palette.stroke))
+                    .padding(.horizontal,6)
+                    .fixedSize(horizontal:false,vertical:true)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                    .alignmentGuide(.leading) { d in -min(max(x-d.width/2,0),width-d.width) }
+                    .offset(y:6)
+            }
+            .frame(width:chartWidth,height:chartHeight,alignment:.topLeading)
+            .allowsHitTesting(false).accessibilityHidden(true)
+        }
+    }
+    /// The rows the "True darkness" label takes under the amber bar, when the drawing names it and
+    /// the finger at `x` stands over its words (as `draw` places them: centred on the bar, 9 pt under
+    /// the horizon). Elsewhere over the bar the hairline runs unbroken to the hours.
+    private func labelRow(at x:Double)->ClosedRange<Double>? {
+        guard let darkStart=night.sky.darkStart, let darkEnd=night.sky.darkEnd, darkEnd>darkStart, chartWidth>0 else { return nil }
+        let (start,end)=window, duration=end.timeIntervalSince(start)
+        guard duration>0 else { return nil }
+        let a=max(0,darkStart.timeIntervalSince(start)/duration*chartWidth), b=min(chartWidth,darkEnd.timeIntervalSince(start)/duration*chartWidth)
+        guard b-a>70, abs(x-(a+b)/2)<=darknessLabelWidth/2+4 else { return nil }
+        let barY=(chartHeight-22)*0.74+9
+        return (barY+3)...(barY+19)
+    }
+    /// A finger at `x` on the arc: the hum follows it, moments crossed click, and resting 0.4 s
+    /// says the time and the sky. `quiet` (DEBUG captures) draws the finger only.
+    /// `held`: from the sighted hold.
+    private func touch(at x:Double,quiet:Bool=false,held:Bool=false) {
+        guard touchEnabled || touching || holding || held || quiet, chartWidth>0 else { return }
+        let fresh=touchColumns.isEmpty
+        if fresh { touchColumns=ArcTouch.columns(night:night,window:window) }
+        let sample=ArcTouch.sample(x:x,width:chartWidth,columns:touchColumns,night:night,tonight:isTonight)
+        guard sample.column != touchColumn else { return }
+        let previous=touchColumn
+        touchColumn=sample.column
+        if quiet { return }
+        if fresh { MoonHaptics.shared.beginArcTouch(strength:sample.strength) }
+        let crossed=previous.map { ArcTouch.crossed(touchColumns,from:$0,to:sample.column) } ?? sample.crossing.map { [$0] } ?? []
+        MoonHaptics.shared.followArcTouch(strength:sample.strength,crossings:crossed)
+        restTask?.cancel()
+        // Spoken only for VoiceOver; a sighted finger reads the same words in the caption.
+        guard voiceOver else { return }
+        let spoken=sample.spoken
+        restTask=Task {
+            try? await Task.sleep(for:.milliseconds(400))
+            if !Task.isCancelled { NightListener.announce(spoken,priority:.low) }
+        }
+    }
+    private func endTouch() {
+        holding=false
+        restTask?.cancel(); restTask=nil
+        MoonHaptics.shared.endArcTouch()
+        touchColumn=nil
+        touchColumns=[]
+    }
+
+    @ViewBuilder private var legend:some View {
+        Label("Sun",systemImage:"sun.max").foregroundStyle(palette.accent)
+        Label("Moon",systemImage:"moon")
+        Label { Text("Milky Way core") } icon:{ SkyGlyph(.core,color:palette.muted).frame(width:16,height:16) }
+    }
+    private func timeLabel(_ title:LocalizedStringKey,time:Date?)->some View {
+        VStack(alignment:.leading,spacing:4) { Text(title).font(.caption).foregroundStyle(palette.muted); Text(night.park.time(time)).font(.system(.title3,design:.serif)) }
+    }
+}
+/// The sky arc's picture: twilight, moonlight, stars, the Milky Way's core, the Sun's and Moon's
+/// paths, the ridge, the amber bar and the hours. Equatable on what it draws (the park's night, the
+/// palette, the accessibility settings and the Moon's size), so the finger's overlay above it can
+/// redraw on every column step without repainting the sky.
+private struct SkyArcPicture: View, Equatable {
+    let night: Night
+    let palette: NyxPalette
+    let access: NyxAccess
+    let moonSize: Double
+    nonisolated static func ==(a:SkyArcPicture,b:SkyArcPicture)->Bool {
+        // A park's night is drawn from its sky alone, which its park and evening fix.
+        a.night.park.id==b.night.park.id && a.night.id==b.night.id && a.palette==b.palette && a.access==b.access && a.moonSize==b.moonSize
+    }
+    private var window:(start:Date,end:Date) { ArcTouch.window(night) }
+    var body: some View {
+        Canvas { context,size in draw(in:&context,size:size) } symbols: {
+            // Added as light, so an unlit Moon near new vanishes into a bright twilight as it does
+            // in the sky, instead of punching a black disc in it; opaque under Increase Contrast.
+            MoonView(geometry:AstronomyEngine().moon(for:night).geometry).blendMode(palette.highContrast ? .normal : .plusLighter)
+                .frame(width:moonSize,height:moonSize).tag("moon")
+        }
     }
     /// Sky colour for a solar altitude: dusk blue, nebula violet at civil twilight,
     /// deep indigo at nautical, void black from astronomical twilight on.
@@ -312,88 +430,6 @@ struct SkyArc: View {
         }
     }
 
-    /// Where the finger rests: a hairline through the arc and the time and sky beside it, for anyone
-    /// who explores by touch with some sight. VoiceOver hears the same line when the finger rests.
-    @ViewBuilder private var finger:some View {
-        if let i=touchColumn, touchColumns.indices.contains(i), chartWidth>0 {
-            let x=(Double(i)+0.5)*chartWidth/Double(ArcTouch.columnCount)
-            let caption=ArcTouch.caption(touchColumns[i],night:night), width=chartWidth
-            let ground=chartHeight-22, label=labelRow(at:x)
-            ZStack(alignment:.topLeading) {
-                // Through the sky and the amber bar, then again below the "True darkness" label, never
-                // through its words.
-                Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:label.map { $0.lowerBound } ?? ground)
-                    .offset(x:x-palette.stroke/2)
-                if let label {
-                    Rectangle().fill(palette.ink.opacity(0.85)).frame(width:palette.stroke,height:max(0,ground-label.upperBound))
-                        .offset(x:x-palette.stroke/2,y:label.upperBound)
-                }
-                // Short captions hug the finger; at large text sizes a long one wraps to two lines
-                    // inside the chart (6 pt from each edge) instead of being cut at both ends.
-                Text(caption).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(palette.ink).multilineTextAlignment(.center)
-                    .padding(.horizontal,8).padding(.vertical,3)
-                    .background(RoundedRectangle(cornerRadius:10).fill(palette.panel)).overlay(RoundedRectangle(cornerRadius:10).stroke(palette.line,lineWidth:0.5*palette.stroke))
-                    .padding(.horizontal,6)
-                    .fixedSize(horizontal:false,vertical:true)
-                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
-                    .alignmentGuide(.leading) { d in -min(max(x-d.width/2,0),width-d.width) }
-                    .offset(y:6)
-            }
-            .frame(width:chartWidth,height:chartHeight,alignment:.topLeading)
-            .allowsHitTesting(false).accessibilityHidden(true)
-        }
-    }
-    /// The rows the "True darkness" label takes under the amber bar, when the drawing names it and
-    /// the finger at `x` stands over the bar (as `draw` places them: the bar 9 pt under the horizon).
-    private func labelRow(at x:Double)->ClosedRange<Double>? {
-        guard let darkStart=night.sky.darkStart, let darkEnd=night.sky.darkEnd, darkEnd>darkStart, chartWidth>0 else { return nil }
-        let (start,end)=window, duration=end.timeIntervalSince(start)
-        guard duration>0 else { return nil }
-        let a=max(0,darkStart.timeIntervalSince(start)/duration*chartWidth), b=min(chartWidth,darkEnd.timeIntervalSince(start)/duration*chartWidth)
-        guard b-a>70, x>=a, x<=b else { return nil }
-        let barY=(chartHeight-22)*0.74+9
-        return (barY+3)...(barY+19)
-    }
-    /// A finger at `x` on the arc: the hum follows it, moments crossed click, and resting 0.4 s
-    /// says the time and the sky. `quiet` (DEBUG captures) draws the finger only.
-    /// `held`: from the sighted hold.
-    private func touch(at x:Double,quiet:Bool=false,held:Bool=false) {
-        guard touchEnabled || touching || holding || held || quiet, chartWidth>0 else { return }
-        let fresh=touchColumns.isEmpty
-        if fresh { touchColumns=ArcTouch.columns(night:night,window:window) }
-        let sample=ArcTouch.sample(x:x,width:chartWidth,columns:touchColumns,night:night,tonight:isTonight)
-        guard sample.column != touchColumn else { return }
-        let previous=touchColumn
-        touchColumn=sample.column
-        if quiet { return }
-        if fresh { MoonHaptics.shared.beginArcTouch(strength:sample.strength) }
-        let crossed=previous.map { ArcTouch.crossed(touchColumns,from:$0,to:sample.column) } ?? sample.crossing.map { [$0] } ?? []
-        MoonHaptics.shared.followArcTouch(strength:sample.strength,crossings:crossed)
-        restTask?.cancel()
-        // Spoken only for VoiceOver; a sighted finger reads the same words in the caption.
-        guard voiceOver else { return }
-        let spoken=sample.spoken
-        restTask=Task {
-            try? await Task.sleep(for:.milliseconds(400))
-            if !Task.isCancelled { NightListener.announce(spoken,priority:.low) }
-        }
-    }
-    private func endTouch() {
-        holding=false
-        restTask?.cancel(); restTask=nil
-        MoonHaptics.shared.endArcTouch()
-        touchColumn=nil
-        touchColumns=[]
-    }
-
-    @ViewBuilder private var legend:some View {
-        Label("Sun",systemImage:"sun.max").foregroundStyle(palette.accent)
-        Label("Moon",systemImage:"moon")
-        Label { Text("Milky Way core") } icon:{ SkyGlyph(.core,color:palette.muted).frame(width:16,height:16) }
-    }
-    private func timeLabel(_ title:LocalizedStringKey,time:Date?)->some View {
-        VStack(alignment:.leading,spacing:4) { Text(title).font(.caption).foregroundStyle(palette.muted); Text(night.park.time(time)).font(.system(.title3,design:.serif)) }
-    }
 }
 /// Touch and hold the sky arc's picture, then slide: UIKit's long press (0.3 s, 10 pt of slack).
 /// It hands over where the finger is the moment the hold succeeds, so the hairline appears under a
