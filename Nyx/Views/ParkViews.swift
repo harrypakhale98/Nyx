@@ -442,9 +442,10 @@ struct ParkDetailView: View {
             }
             AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
             // The dial opens at the bottom; let the lines below tuck into that space.
+            let range=CelestialGauge.modelRange(outlook,basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(unavailable:!model.beyondForecast(night)),
                            revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
-                           range:CelestialGauge.modelRange(outlook,basis:night.basis))
+                           range:range)
                 .frame(maxWidth:.infinity)
                 .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
                 .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
@@ -456,6 +457,8 @@ struct ParkDetailView: View {
                 Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(align)
                     .accessibilityLabel(night.typicalClouds ?? caption).accessibilityHidden(night.typicalClouds == nil)
             }
+            // The dial's range mark in words (the gauge speaks it).
+            if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(align).accessibilityHidden(true) }
             if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true).padding(.horizontal,large ? 0 : 12) }
             if let window=model.clearWindow(night) {
                 // At accessibility sizes the glyph would take a column of its own: the words alone.
@@ -532,8 +535,10 @@ struct ParkDetailView: View {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:"Moonlight")
                 MoonHero(night:night) { delta in step(delta) }
-                Text("Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.").font(.caption).foregroundStyle(palette.muted).frame(maxWidth:.infinity)
-                    .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                if let line=night.sky.moonBelowLine {
+                    Text(line).font(.caption).foregroundStyle(palette.muted).frame(maxWidth:.infinity)
+                        .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                }
             }
         }.id("moon")
         Panel { VStack(alignment:.leading,spacing:16) {
@@ -567,7 +572,8 @@ struct ParkDetailView: View {
     @ViewBuilder private var placeChapter: some View {
         chapterHeading(.place,detail:eyebrow)
         // Sky glow: what city light takes (an illustration), where this park's comes from, and what anyone can do.
-        SkyGlowPanel(park:park).id("glow")
+        // DEBUG `-nyx-glow-compare city` opens the comparison on the city's sky for captures; nil in Release.
+        SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here).id("glow")
         Panel { ViewingSpots(park:park) }.id("spots")
         // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
         WhereToStayPanel(park:park).id("stay")
@@ -777,8 +783,8 @@ struct ScoreBreakdownView: View {
     }
     private var moonFact:String {
         let lit=String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit.")
-        guard night.sky.darkHours>0 else { return lit }
-        return lit+" "+String(localized:"Below the horizon for \(Int((night.sky.moonBelowFraction*100).rounded()))% of true darkness.")
+        guard let line=night.sky.moonBelowLine else { return lit }
+        return lit+" "+line
     }
     /// Model agreement, the cloud layer and the air, each one sentence with a quiet symbol, so the
     /// context reads as a step below the fact the score was computed from.
@@ -922,3 +928,12 @@ struct AlertsBusyNote: View {
     }
 }
 #Preview("Alerts busy") { if let park=try? ParkData.load().first { AlertsBusyNote(park:park).padding(24).background(Color.black).preferredColorScheme(.dark) } }
+extension SkyConditions {
+    /// How much of true darkness the Moon spends below the horizon, in words: "Up through all of
+    /// true darkness." rather than a bare 0%; nil on a night without true darkness.
+    var moonBelowLine:String? {
+        guard darkHours>0 else { return nil }
+        let percent=Int((moonBelowFraction*100).rounded())
+        return percent==0 ? String(localized:"Up through all of true darkness.") : String(localized:"Below the horizon for \(percent)% of true darkness.")
+    }
+}

@@ -58,6 +58,8 @@ struct CityLightFigure: View {
             .accessibilityElement()
             .accessibilityLabel(String(localized:"Illustration: this park's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
             .accessibilityAddTraits(.isImage)
+            // Which sky is drawn now, so a swipe back to the picture after switching hears the change.
+            .accessibilityValue(selection == .city ? cityLabel : hereFull)
             picker
             Text("An illustration: the same sky drawn at this park's estimated class and at a city's.")
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -73,7 +75,9 @@ struct CityLightFigure: View {
     /// short enough for a phone's width at standard sizes (the menu takes over where they are not). The segmented control's
     /// bridge ignores a per-segment accessibility label (checked by a UI test), so VoiceOver hears the
     /// short ones; the figure's own label, the caption and the estimate row below say "estimated".
-    private var hereFull: String { String(localized:"Here (Class \(park.bortleEstimate), estimated)") }
+    /// The class number is held to its word (a no-break space), so an accessibility-size menu label
+    /// never leaves "3," alone on a line.
+    private var hereFull: String { String(localized:"Here (Class\u{00A0}\(park.bortleEstimate), estimated)") }
     private var hereShort: String { String(localized:"Here · Class \(park.bortleEstimate)") }
     private var cityLabel: String { String(localized:"From a city (Class 8)") }
     private var cityShort: String { String(localized:"City · Class 8") }

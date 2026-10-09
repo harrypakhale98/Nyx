@@ -270,6 +270,21 @@ import Testing
         var split = a; split.modelSpread = 40
         #expect(NightPlanner.better(agreed, split) && !NightPlanner.better(split, agreed))
     }
+    /// A park's usual clouds can cap a whole month at one score (Arches at 73 in October 2026). The
+    /// new Moon must still outrank a gibbous Moon, though late October's true darkness is longer:
+    /// ties look at the uncapped sum of parts before the length of the night.
+    @Test func aCappedTieGoesToTheDarkerNightNotTheLongerOne() throws {
+        let arch = try park("arch")
+        let newSky = engine.conditions(for: arch, on: try evening(arch, "2026-10-08"))
+        let gibbousSky = engine.conditions(for: arch, on: try evening(arch, "2026-10-31"))
+        #expect(gibbousSky.darkHours > newSky.darkHours + 1.0/60)
+        #expect(newSky.moon.illumination < 0.1 && gibbousSky.moon.illumination > 0.5)
+        let newMoon = Night(park: arch, sky: newSky, score: DarknessScore(value: 73, moonPoints: 39.5, cloudPoints: 14, bortlePoints: 17.5, lengthPoints: 11, basis: .usual), cloudCover: nil, forecastUpdated: nil)
+        let gibbous = Night(park: arch, sky: gibbousSky, score: DarknessScore(value: 73, moonPoints: 21, cloudPoints: 14, bortlePoints: 17.5, lengthPoints: 12, basis: .usual), cloudCover: nil, forecastUpdated: nil)
+        #expect(NightPlanner.better(newMoon, gibbous) && !NightPlanner.better(gibbous, newMoon))
+        #expect(NightPlanner.ranked([gibbous, newMoon]).first?.id == newMoon.id)
+        #expect(NightPlanner.best([gibbous, newMoon])?.id == newMoon.id)
+    }
     /// Parks sorted by "Darkest tonight" follow `NightPlanner.better` exactly, never alphabetical order on a tie.
     @Test func parksListBreaksTiesByGlow() throws {
         let model = PlanModel()

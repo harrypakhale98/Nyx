@@ -107,7 +107,7 @@ struct GuideView:View {
             guard !Task.isCancelled else { return }
             answeredID=requestID
             // Said once, at the end: nothing is announced while the answer streams.
-            AccessibilityNotification.Announcement(guide.error ?? String(localized:"Answer checked")).post()
+            AccessibilityNotification.Announcement(guide.error ?? String(localized:"Numbers checked")).post()
         }
     }
     #if DEBUG
@@ -115,7 +115,9 @@ struct GuideView:View {
     /// and what's up at Arches) and sample words built from those records' own figures, as they
     /// look mid-stream (muted) or checked. DEBUG only; the model is never imitated in a build.
     private func showFixture(checked:Bool) {
-        let today=TripDay(model.today).iso
+        // The park's own tonight, as a question about tonight reaches the tools: never the device's
+        // calendar day, which can be a day past the park's night and would date the lookups wrongly.
+        let today="tonight"
         let best=lookup.bestNights(park:"Arches",from:today,nights:30,limit:3)
         let tonight=lookup.whatsUp(park:"Arches",on:today).prefix(1)
         let found=best+tonight
@@ -176,7 +178,7 @@ struct GuideView:View {
 private extension GuideMode { var isPlanning:Bool { if case .planning = self { true } else { false } } }
 
 /// The answer as it arrives: the constellation loader until the first checked words, the words
-/// muted while they stream, then starlight with "Checked against the records" and one chip per
+/// muted while they stream, then starlight with "Numbers checked against the records" and one chip per
 /// cited record. It reads the guide's streaming text itself, so only this view redraws with each
 /// new part, never the records.
 private struct GuideAnswerBlock: View {
@@ -207,12 +209,14 @@ private struct GuideAnswerBlock: View {
         HStack(alignment:.center,spacing:6) {
             if guide.checked { Image(systemName:"checkmark.seal").foregroundStyle(palette.accent) }
             else { ProgressView().controlSize(.mini).tint(palette.muted) }
-            Text(guide.checked ? "Checked against the records" : "Checking the answer against the records")
+            // "Numbers": the check confirms each cited record exists and every figure appears in the
+            // records, not which night a figure belongs to, so the line claims no more than that.
+            Text(guide.checked ? "Numbers checked against the records" : "Checking the numbers against the records")
                 .fixedSize(horizontal:false,vertical:true)
         }
         .font(.caption).foregroundStyle(palette.muted)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(guide.checked ? Text("Checked against the records") : Text("Checking the answer against the records"))
+        .accessibilityLabel(guide.checked ? Text("Numbers checked against the records") : Text("Checking the numbers against the records"))
     }
     /// One chip per cited record: "1 · Arches, Fri, Oct 9". A tap finds the record below.
     private var citationChips:some View {
