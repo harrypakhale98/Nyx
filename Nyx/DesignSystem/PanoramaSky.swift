@@ -2,7 +2,8 @@ import SwiftUI
 
 /// The sky over a park at one moment in altitude and azimuth (degrees): RealSky's bright-star
 /// catalogue, a seeded field of fainter stars (denser along the Milky Way), the galactic plane,
-/// the planets, the Moon, a shower's radiant and NASA's light domes. Kept per park and five-minute
+/// the planets, the Moon, a shower's radiant, NASA's light domes, and the IAU's names and the
+/// constellation figures (`SkyLore`) for what is above the horizon. Kept per park and five-minute
 /// slot, so the full-screen sky can turn to face any direction, and the Bortle figure can redraw
 /// it at any class, without working out the astronomy again.
 nonisolated struct HorizonSky: Sendable {
@@ -26,6 +27,11 @@ nonisolated struct HorizonSky: Sendable {
     let moonWaxing: Bool
     let domes: [Dome]
     let sunAltitude: Double
+    /// The IAU's names for the brightest stars (brighter than magnitude 1.6) above the horizon,
+    /// brightest first: the few the full-screen sky may label.
+    var named: [Mark]=[]
+    /// Constellation stick figures' lines with both stars above the horizon.
+    var figures: [(Star, Star)]=[]
     /// The Sun at least 12° down: the Milky Way and light domes are drawn only then.
     var dark: Bool { sunAltitude < -12 }
 }
@@ -34,6 +40,10 @@ nonisolated struct HorizonSky: Sendable {
     private var cache:[String:HorizonSky]=[:]
     private var recent:[String]=[]
     private let capacity=48
+    /// The star names and figures matched to the catalogue, once per process.
+    nonisolated static let lore=SkyLore.load(catalogue:SkyProjection.catalogue.map { (ra:$0.ra,dec:$0.dec,mag:$0.mag) })
+    /// Only stars brighter than this are named on the iPhone's sky: about twenty across the year.
+    nonisolated static let namedMagnitude=1.6
     /// Galactic longitude and latitude (radians) to right ascension and declination (J2000).
     nonisolated static func equatorial(l:Double,b:Double)->(ra:Double,dec:Double) {
         let rad=Double.pi/180, poleRA=192.85948*rad, poleDec=27.12825*rad, nodeL=122.93192*rad
@@ -104,8 +114,27 @@ nonisolated struct HorizonSky: Sendable {
             guard amount>=0.01 else { return nil }
             return .init(bearing:source.bearing,intensity:min(1,(amount/4).squareRoot()),halfWidth:10+20*source.share)
         }
+        // Names and figures from the catalogue rows SkyLore matched, only above the horizon.
+        let catalogue=SkyProjection.catalogue, lore=Self.lore
+        var placed:[Int:HorizonSky.Star]=[:]
+        func place(_ row:Int)->HorizonSky.Star? {
+            if let known=placed[row] { return known }
+            guard catalogue.indices.contains(row) else { return nil }
+            let star=catalogue[row], h=horizontal(star.ra,star.dec)
+            let result=HorizonSky.Star(altitude:h.altitude,azimuth:h.azimuth,magnitude:star.mag,colorIndex:star.bv,seed:0)
+            placed[row]=result
+            return result
+        }
+        let named=lore.stars.filter { $0.magnitude<Self.namedMagnitude }.compactMap { star -> HorizonSky.Mark? in
+            guard let p=place(star.row), p.altitude>0 else { return nil }
+            return HorizonSky.Mark(altitude:p.altitude,azimuth:p.azimuth,name:star.name,magnitude:p.magnitude)
+        }.sorted { $0.magnitude<$1.magnitude }
+        let figures=lore.lines.compactMap { line -> (HorizonSky.Star,HorizonSky.Star)? in
+            guard let a=place(line.0), let b=place(line.1), a.altitude>0, b.altitude>0 else { return nil }
+            return (a,b)
+        }
         let sky=HorizonSky(id:key,moment:slot,stars:stars,dust:dust,galaxy:segments,core:core,planets:planets,radiant:radiant,moon:moon,
-                           moonIllumination:phase.illumination,moonWaxing:phase.waxing,domes:domes,sunAltitude:sun)
+                           moonIllumination:phase.illumination,moonWaxing:phase.waxing,domes:domes,sunAltitude:sun,named:named,figures:figures)
         cache[key]=sky
         recent.append(key)
         if recent.count>capacity { cache[recent.removeFirst()]=nil }
@@ -180,6 +209,9 @@ nonisolated struct PanoramaOptions: Equatable, Sendable {
     /// the light domes are drawn whole at any value. An illustration of the order stars arrive in,
     /// not of its timing: real adaptation takes 20 to 30 minutes.
     var adaptation: Double=1
+    /// Where names may start, in points from the top: below a header floating over the sky.
+    /// Figures fade out above it, so no hairline runs through the header's words.
+    var labelTop: Double=0
 }
 /// Altitude and azimuth to a point on the view: a stereographic projection around the centre.
 nonisolated struct SkyFrame: Sendable {
@@ -209,20 +241,21 @@ struct PanoramaCanvas: View {
     let sky: HorizonSky
     var options: PanoramaOptions
     var body: some View {
-        let ink=palette.ink
-        Canvas { context,size in PanoramaCanvas.draw(sky:sky,options:options,ink:ink,in:&context,size:size) }
+        let ink=palette.ink, highContrast=palette.highContrast, stroke=palette.stroke
+        Canvas { context,size in PanoramaCanvas.draw(sky:sky,options:options,ink:ink,highContrast:highContrast,stroke:stroke,in:&context,size:size) }
             .background(Color.black)
             .accessibilityIgnoresInvertColors()
     }
-    static func draw(sky:HorizonSky,options:PanoramaOptions,ink:Color,in context:inout GraphicsContext,size:CGSize) {
+    /// `highContrast` and `stroke` (Bold Text) set the figures' hairlines; nothing else depends on them.
+    static func draw(sky:HorizonSky,options:PanoramaOptions,ink:Color,highContrast:Bool=false,stroke:Double=1,in context:inout GraphicsContext,size:CGSize) {
         let frame=SkyFrame(options:options,size:size)
         let bortle=options.bortle
         // Twilight and moonlight wash out faint stars, as light pollution does.
         let twilight=max(0,min(1,(sky.sunAltitude+18)/12))
         let moonWash=options.showsMoon ? (sky.moon.map { max(0,min(1,$0.altitude/25)) } ?? 0)*sky.moonIllumination : 0
-        var limit=(bortle.map(BortleScale.limitingMagnitude) ?? 6.6)-2.2*moonWash-4*twilight
+        let skyLimit=PanoramaCanvas.skyLimit(sky:sky,options:options)
         let adaptation=max(0,min(1,options.adaptation))
-        limit=PanoramaCanvas.adaptedLimit(limit,adaptation:adaptation)
+        let limit=PanoramaCanvas.adaptedLimit(skyLimit,adaptation:adaptation)
         let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)*(1-0.85*moonWash)*PanoramaCanvas.milkyWayGathered(adaptation)
         let horizonY=frame.point(0,options.facing)?.y ?? size.height*0.8
         // The sky itself: near black, lifted by twilight, moonlight and city light toward the horizon.
@@ -278,6 +311,29 @@ struct PanoramaCanvas: View {
                 context.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[ink.opacity(0.2*milkyWay),ink.opacity(0)]),center:p,startRadius:0,endRadius:r))
             }
         }
+        // Constellation figures, only on the labelled sky: hairlines that stop short of their stars,
+        // each line only as visible as its fainter star, and all of them last as eyes adapt.
+        let arrived=PanoramaCanvas.figuresArrived(limit:limit,skyLimit:skyLimit)
+        if options.labels, arrived>0.01 { context.drawLayer { context in
+            let width=0.6*stroke, strength=(highContrast ? 0.3 : 0.16)*arrived
+            if options.labelTop>0 {
+                let top=options.labelTop
+                context.clipToLayer { mask in
+                    mask.fill(Path(CGRect(origin:.zero,size:size)),with:.linearGradient(Gradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:1)]),startPoint:CGPoint(x:0,y:top*0.7),endPoint:CGPoint(x:0,y:top+24)))
+                }
+            }
+            for (a,b) in sky.figures {
+                let fade=min(1,max(0,limit-max(a.magnitude,b.magnitude)))
+                guard fade>0.01, let p=frame.point(a.altitude,a.azimuth), let q=frame.point(b.altitude,b.azimuth), frame.visible(p,margin:200) || frame.visible(q,margin:200) else { continue }
+                let length=hypot(q.x-p.x,q.y-p.y)
+                guard length>12, length<size.height else { continue }
+                let ux=(q.x-p.x)/length, uy=(q.y-p.y)/length
+                var line=Path()
+                line.move(to:CGPoint(x:p.x+ux*4,y:p.y+uy*4))
+                line.addLine(to:CGPoint(x:q.x-ux*4,y:q.y-uy*4))
+                context.stroke(line,with:.color(ink.opacity(strength*fade)),style:StrokeStyle(lineWidth:width,lineCap:.round))
+            }
+        } }
         // Faint stars, as far as the sky's limiting magnitude reaches; dimmer as they near it.
         // A brighter sky also lowers every star's contrast against it.
         let contrast=1-0.07*((bortle ?? 3)-1)
@@ -342,12 +398,12 @@ struct PanoramaCanvas: View {
         }
         // Names, brightest first, never over one another.
         var taken:[CGRect]=[]
-        func label(_ name:String,at p:CGPoint,gap:Double) {
-            let text=context.resolve(Text(name).font(.system(.footnote,design:.serif)).foregroundStyle(ink.opacity(0.92)))
+        func label(_ name:String,at p:CGPoint,gap:Double,opacity:Double=0.92) {
+            let text=context.resolve(Text(name).font(.system(.footnote,design:.serif)).foregroundStyle(ink.opacity(opacity)))
             let s=text.measure(in:size)
             for spot in [CGPoint(x:p.x,y:p.y-gap),CGPoint(x:p.x,y:p.y+gap),CGPoint(x:p.x+gap/2+s.width/2+4,y:p.y)] {
                 let rect=CGRect(x:spot.x-s.width/2,y:spot.y-s.height/2,width:s.width,height:s.height).insetBy(dx:-3,dy:-1)
-                guard rect.minX>=4, rect.maxX<=size.width-4, rect.minY>=4, rect.maxY<=horizonY, !taken.contains(where:{ $0.intersects(rect) }) else { continue }
+                guard rect.minX>=4, rect.maxX<=size.width-4, rect.minY>=max(4,options.labelTop), rect.maxY<=horizonY, !taken.contains(where:{ $0.intersects(rect) }) else { continue }
                 taken.append(rect)
                 context.drawLayer { layer in layer.addFilter(.shadow(color:.black,radius:3)); layer.draw(text,at:spot) }
                 return
@@ -357,6 +413,31 @@ struct PanoramaCanvas: View {
         for planet in sky.planets.sorted(by:{ $0.magnitude<$1.magnitude }) { if let p=frame.point(planet.altitude,planet.azimuth), frame.visible(p) { label(planet.name,at:p,gap:14) } }
         if milkyWay>0.15, let core=sky.core, let p=frame.point(core.altitude,core.azimuth), frame.visible(p) { label(String(localized:"Milky Way core"),at:p,gap:frame.scale*0.12) }
         if let radiant=sky.radiant, sky.dark, let p=frame.point(radiant.altitude,radiant.azimuth), frame.visible(p) { label(radiant.name,at:p,gap:24) }
+        // Then the brightest named stars, quieter than the planets, each as it arrives.
+        for star in labelledStars(sky:sky,options:options,size:size) where star.magnitude<limit {
+            guard let p=frame.point(star.altitude,star.azimuth) else { continue }
+            label(star.name,at:p,gap:13,opacity:0.7*min(1,limit-star.magnitude))
+        }
+    }
+    /// The faintest star the sky shows once eyes have adapted: the Bortle class's limit, less what
+    /// twilight and moonlight wash out.
+    nonisolated static func skyLimit(sky:HorizonSky,options:PanoramaOptions)->Double {
+        let twilight=max(0,min(1,(sky.sunAltitude+18)/12))
+        let moonWash=options.showsMoon ? (sky.moon.map { max(0,min(1,$0.altitude/25)) } ?? 0)*sky.moonIllumination : 0
+        return (options.bortle.map(BortleScale.limitingMagnitude) ?? 6.6)-2.2*moonWash-4*twilight
+    }
+    /// At most this many star names on the sky at once.
+    nonisolated static let starLabels=6
+    /// The named stars the view may label: the brightest six in view, above the horizon.
+    nonisolated static func labelledStars(sky:HorizonSky,options:PanoramaOptions,size:CGSize)->[HorizonSky.Mark] {
+        let frame=SkyFrame(options:options,size:size)
+        return Array(sky.named.filter { $0.altitude>0 && frame.point($0.altitude,$0.azimuth).map { frame.visible($0,margin:-8) && $0.y>options.labelTop } == true }.prefix(starLabels))
+    }
+    /// How far the figures have arrived, 0…1: they wait until the adapting eye reaches within 1.5
+    /// magnitudes of the sky's own limit, so they come in last, with the faintest stars.
+    nonisolated static func figuresArrived(limit:Double,skyLimit:Double)->Double {
+        let t=max(0,min(1,(limit-(skyLimit-1.5))/1.5))
+        return t*t*(3-2*t)
     }
     /// The limiting magnitude while eyes adapt: at 0 nothing fainter than magnitude −1.5 (no star
     /// at all), rising to the sky's own limit at 1, so the brightest stars arrive first.
@@ -376,7 +457,8 @@ struct PanoramaCanvas: View {
             : Color(red:1+0.25*warmth,green:1+0.1*warmth,blue:1).mix(with:ink,by:0.35)
     }
     /// What is up and where, for VoiceOver: "Facing south at 11:40 PM. Jupiter, high in the southeast. …"
-    static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?)->String {
+    /// `size` is the view's, for which named stars are in view (as `labelledStars`).
+    static func summary(sky:HorizonSky,facing:Double,park:Park,bortle:Double?,size:CGSize=CGSize(width:390,height:800),labelTop:Double=0)->String {
         var lines=[String(localized:"Facing \(Compass.name(facing)), \(park.time(sky.moment)).")]
         if sky.sunAltitude > -6 { lines.append(String(localized:"The Sun is barely down; the sky is still bright.")) }
         else if !sky.dark { lines.append(String(localized:"The sky is still in twilight.")) }
@@ -390,6 +472,10 @@ struct PanoramaCanvas: View {
         let milkyWay=(bortle.map(BortleScale.milkyWay) ?? 0.85)*(sky.dark ? 1 : 0)
         if milkyWay>0.15, let core=sky.core { lines.append(String(localized:"The Milky Way's core, \(place((core.altitude,core.azimuth))).")) }
         if let radiant=sky.radiant, sky.dark { lines.append("\(radiant.name), \(place((radiant.altitude,radiant.azimuth))).") }
+        let view=PanoramaOptions(facing:facing,bortle:bortle,labelTop:labelTop)
+        for star in labelledStars(sky:sky,options:view,size:size) where star.magnitude<skyLimit(sky:sky,options:view) {
+            lines.append(String(localized:"\(star.name), a bright star, \(place((star.altitude,star.azimuth)))."))
+        }
         if sky.dark, !sky.domes.isEmpty {
             let toward=sky.domes.sorted { $0.intensity>$1.intensity }.prefix(3).map { Compass.name($0.bearing) }
             lines.append(String(localized:"Town light glows on the horizon toward the \(Array(Set(toward)).sorted().formatted(.list(type:.and))).")) 

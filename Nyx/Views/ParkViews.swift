@@ -365,7 +365,10 @@ struct ParkDetailView: View {
         .onAppear { KeepThisNight.container=context.container }
         // Handoff to another device, and the park Siri sees on screen.
         .parkHandoff(park,night:night.id)
-        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id)).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id))
+            // Under the full-screen sky the page's own stars and dial rest, so the turning sky has the frames.
+            .environment(\.skyResting,showsSky)
+            .navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }.modifier(SkyFullBleed(enabled:!wide))
             .sheet(isPresented:$breakdown) { NavigationStack { ScoreBreakdownView(night:night,isTonight:isTonight) }.nyxPresentation().presentationDetents([.large]) }
             // Wide iPad: the breakdown stays beside the page and follows the river's night.
@@ -379,7 +382,7 @@ struct ParkDetailView: View {
             // DEBUG captures (`-nyx-inspector`): the breakdown open beside the page where it has room.
             .task { if DebugScenario.isEnabled("inspector") { try? await Task.sleep(for:.seconds(1)); if inspectorRoom { inspector=true } } }
             .modifier(ReportsVisiblePark(parkID:park.id))
-            .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation() }
+            .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             .task { await model.refresh([park],programs:true) }

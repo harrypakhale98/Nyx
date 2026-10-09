@@ -307,6 +307,10 @@ targets:
       - path: Nyx/Services/SkyDome.swift
       - path: Nyx/DesignSystem/Moon.metal
       - path: Nyx/Resources/stars.json
+      # Star names and figures, shared with Tonight's sky on iPhone and iPad.
+      - path: Nyx/Services/SkyLore.swift
+      - path: Nyx/Resources/star-names.json
+      - path: Nyx/Resources/constellations.json
       - path: Nyx/Resources/parks.json
       - path: Nyx/Resources/sky-events.json
       - path: Nyx/Resources/Assets.xcassets

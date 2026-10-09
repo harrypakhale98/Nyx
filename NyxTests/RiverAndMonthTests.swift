@@ -177,4 +177,43 @@ import SwiftUI
         let keys=[-1,0,1].map { CalendarView.pageKey(jotr,$0) }+[CalendarView.pageKey(deva,0)]
         #expect(Set(keys).count==4)
     }
+
+    // MARK: Turning the sky
+
+    /// The direction buttons turn the short way round, across north if that is shorter.
+    @Test func directionButtonsTurnTheShortWay() {
+        #expect(SkyTurn.shortestTurn(from:350,to:10)==370)
+        #expect(SkyTurn.shortestTurn(from:10,to:350)==(-10))
+        // Exactly opposite: half a circle, one way or the other, never more.
+        #expect(abs(SkyTurn.shortestTurn(from:90,to:270)-90)==180)
+        #expect(SkyTurn.shortestTurn(from:180,to:180)==180)
+        // Facing is unwrapped: after two turns round, a button still turns less than half a circle.
+        for facing in stride(from:-800.0,through:800,by:37) { for target in [0.0,90,180,270] {
+            let turned=SkyTurn.shortestTurn(from:facing,to:target)
+            #expect(abs(turned-facing)<=180+1e-9)
+            #expect(Compass.name(turned)==Compass.name(target))
+        } }
+    }
+    /// A fling coasts on by the distance the finger was predicted to travel, at most 120°, and
+    /// the sky keeps following the finger (a fling to the left turns toward the right).
+    @Test func aFlingCoastsAtMostAThirdOfACircle() {
+        #expect(SkyTurn.coastTarget(facing:180,predicted:-100,translation:-60,degreesPerPoint:0.2)==188)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:100,translation:60,degreesPerPoint:0.2)==172)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:-5000,translation:-60,degreesPerPoint:0.2)==300)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:5000,translation:60,degreesPerPoint:0.2)==60)
+        // No fling (the finger stopped before lifting), no coast.
+        #expect(SkyTurn.coastTarget(facing:123,predicted:-60,translation:-60,degreesPerPoint:0.2)==123)
+        #expect(SkyTurn.coastTarget(facing:123,predicted:.infinity,translation:0,degreesPerPoint:0.2)==123)
+        #expect(SkyTurn.maximumCoast==120)
+    }
+    /// A turn in flight can be read where it has got to, so a finger catches it in place.
+    @Test func aTurnInFlightIsReadWhereItIs() {
+        let start=Date(timeIntervalSince1970:0)
+        let turn=SkyTurn.Motion(from:100,to:200,velocity:4,start:start)
+        #expect(turn.position(at:start)==100)
+        let early=turn.position(at:start.addingTimeInterval(0.1)), late=turn.position(at:start.addingTimeInterval(3))
+        #expect(early>100 && early<200)
+        #expect(abs(late-200)<0.5)
+        #expect(SkyTurn.Motion(from:100,to:200,velocity:0,start:start).position(at:start.addingTimeInterval(0.1))<early)
+    }
 }
