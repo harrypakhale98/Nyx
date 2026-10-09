@@ -52,13 +52,48 @@ import Testing
         #expect(!CelestialGauge.alreadyRevealed(revealedOnce:false,countedScore:nil,score:97))
         #expect(CelestialGauge.alreadyRevealed(revealedOnce:true,countedScore:nil,score:97))
     }
-    @Test func aCancelledCountEndsOnTheWholeAnswer() {
+    typealias Face=CelestialGauge.Face
+    @Test func everyPlanButTheCountEndsOnTheWholeAnswer() {
         for score in [0,23,59,60,74,75,89,90,97,100] {
-            let end=CelestialGauge.interrupted(score:score)
-            #expect(end.settled)
-            #expect(end.shown==score)
-            #expect(end.arc==Double(score))
+            for plan:Plan in [.instant,.sweep,.settle] { #expect(CelestialGauge.face(after:plan,score:score) == .answer(score)) }
+            #expect(CelestialGauge.face(after:.hold,score:score) == .empty)
+            #expect(CelestialGauge.face(after:.odometer,score:score) == .empty)
+            #expect(Face.answer(score).settled && Face.answer(score).shown==score && Face.answer(score).arc==Double(score))
         }
+    }
+    @Test func aCountCutShortWithNothingAfterItEndsOnTheWholeAnswer() {
+        // Counting 97, at 51: the dial scrolls away and no reveal follows.
+        let midCount=Face(arc:53,shown:51,settled:false)
+        #expect(CelestialGauge.cancelled(midCount,score:97,generation:4,mine:4) == .answer(97))
+    }
+    /// SwiftUI cancels the old count and starts the next reveal at once; the old count's cleanup
+    /// can run on either side of it. Cached 81 overtaken by a computed 97, both orders.
+    @Test func anOvertakenCountEndsOnTheNewScoreWithItsWordInEitherOrder() {
+        let midCount=Face(arc:53,shown:51,settled:false)
+        let sweep=plan(revealed:CelestialGauge.alreadyRevealed(revealedOnce:false,countedScore:81,score:97))
+        #expect(sweep == .sweep)
+        // The cleanup first, while the old count is still the latest (generation 4)…
+        var face=CelestialGauge.cancelled(midCount,score:81,generation:4,mine:4)
+        // …then the new reveal (generation 5) writes its own answer.
+        face=CelestialGauge.face(after:sweep,score:97)
+        #expect(face == .answer(97))
+        // The new reveal first, then the old count's cleanup: it must not write 81 back.
+        face=CelestialGauge.face(after:sweep,score:97)
+        face=CelestialGauge.cancelled(face,score:81,generation:5,mine:4)
+        #expect(face == .answer(97))
+        #expect(face.settled && face.shown==97)
+    }
+    @Test func aHoldAfterACountLeavesTheDialEmptyInEitherOrder() {
+        // The same score, held mid-count (another tab): the dial waits empty, word and all.
+        let midCount=Face(arc:53,shown:51,settled:false)
+        let held=plan(held:true,revealed:CelestialGauge.alreadyRevealed(revealedOnce:false,countedScore:nil,score:97))
+        #expect(held == .hold)
+        var face=CelestialGauge.cancelled(midCount,score:97,generation:4,mine:4)
+        face=CelestialGauge.face(after:held,score:97)
+        #expect(face == .empty)
+        face=CelestialGauge.face(after:held,score:97)
+        face=CelestialGauge.cancelled(face,score:97,generation:5,mine:4)
+        #expect(face == .empty)
     }
 
     // MARK: Session memory
@@ -87,29 +122,33 @@ import Testing
 
     // MARK: Model range
 
-    @Test func theRangeAlwaysHoldsTheScore() {
-        let models:[ClosedRange<Int>]=[70...90,80...95,60...70,95...99,0...3,40...41]
-        for m in models {
-            for score in stride(from:0,through:100,by:7) {
-                if let range=CelestialGauge.modelRange(score:score,models:m,basis:.forecast) {
-                    #expect(range.contains(score))
-                    #expect(range.lowerBound>=0 && range.upperBound<=100)
-                }
-            }
-        }
+    func outlook(_ range:ClosedRange<Int>?,cloud:(Double,Double)?=(10,60))->NightOutlook {
+        NightOutlook(agreement:cloud.map { ModelAgreement(low:$0.0,high:$0.1) },scoreRange:range)
+    }
+    @Test func theDialDrawsTheOutlooksOwnRange() {
+        // The outlook already holds the score (`PlanModel.outlook`); the dial draws it unchanged,
+        // so the dial, the time river and VoiceOver give one range.
+        #expect(CelestialGauge.modelRange(outlook(70...84),basis:.forecast)==70...84)
+        #expect(CelestialGauge.modelRange(outlook(60...90,cloud:(10,40)),basis:.forecast)==60...90)
     }
     @Test func aSpreadOfFourOrLessIsNotDrawn() {
-        #expect(CelestialGauge.modelRange(score:80,models:78...82,basis:.forecast)==nil)
-        #expect(CelestialGauge.modelRange(score:80,models:80...80,basis:.forecast)==nil)
-        #expect(CelestialGauge.modelRange(score:80,models:77...82,basis:.forecast)==77...82)
-        // The score just outside the models widens the range past the threshold.
-        #expect(CelestialGauge.modelRange(score:85,models:80...82,basis:.forecast)==80...85)
+        #expect(CelestialGauge.modelRange(outlook(78...82),basis:.forecast)==nil)
+        #expect(CelestialGauge.modelRange(outlook(80...80),basis:.forecast)==nil)
+        #expect(CelestialGauge.modelRange(outlook(77...82),basis:.forecast)==77...82)
+    }
+    @Test func modelsThatAgreeDrawNoRange() {
+        // The river and the Clouds tile say "Forecast models agree" at 15 points of cloud or less;
+        // the dial must not then show a 13-point spread of scores.
+        #expect(CelestialGauge.modelRange(outlook(78...91,cloud:(0,15)),basis:.forecast)==nil)
+        #expect(CelestialGauge.modelRange(outlook(78...91,cloud:(0,16)),basis:.forecast)==78...91)
+        #expect(CelestialGauge.modelRange(outlook(78...91,cloud:nil),basis:.forecast)==nil)
     }
     @Test func onlyAFullForecastShowsTheRange() {
-        #expect(CelestialGauge.modelRange(score:80,models:60...90,basis:.usual)==nil)
-        #expect(CelestialGauge.modelRange(score:80,models:60...90,basis:.blended(weight:0.6,leadDays:5))==nil)
-        #expect(CelestialGauge.modelRange(score:80,models:nil,basis:.forecast)==nil)
-        #expect(CelestialGauge.modelRange(score:80,models:60...90,basis:.forecast)==60...90)
+        #expect(CelestialGauge.modelRange(outlook(60...90),basis:.usual)==nil)
+        #expect(CelestialGauge.modelRange(outlook(60...90),basis:.blended(weight:0.6,leadDays:5))==nil)
+        #expect(CelestialGauge.modelRange(outlook(nil),basis:.forecast)==nil)
+        #expect(CelestialGauge.modelRange(nil,basis:.forecast)==nil)
+        #expect(CelestialGauge.modelRange(outlook(60...90),basis:.forecast)==60...90)
     }
 
     // MARK: The rim

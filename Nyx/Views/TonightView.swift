@@ -11,8 +11,9 @@ struct TonightView: View {
     @State private var refreshed=0
     /// The subtle double tap: Tonight's answer is a night a reminder would announce.
     @State private var found=0
-    /// The hero's score has settled (landed, or shown at once): the double tap waits for it.
-    @State private var heroSettled=false
+    /// The park, night and score the hero dial last settled on (`ScoreReveals.key`): the double tap
+    /// waits until it is the hero's own, so a new park or ranking waits for its dial too.
+    @State private var heroSettledKey:String?
     @Environment(\.openURL) private var openURL
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.scenePhase) private var scenePhase
@@ -36,6 +37,7 @@ struct TonightView: View {
         let best=self.best
         let empty=best.isEmpty || DebugScenario.state=="empty"
         let worthy=worthyNight(best.first,empty:empty)
+        let heroReady=best.first.map { heroSettledKey==revealKey($0) } ?? false
         ScrollView {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
@@ -92,7 +94,7 @@ struct TonightView: View {
             .sensoryFeedback(.selection,trigger:refreshed)
             .sensoryFeedback(.impact(weight:.light,intensity:0.8),trigger:found)
             // The double tap is the reveal's last beat, after the landing and any 70/90 pulses.
-            .task(id:heroSettled ? worthy : nil) { await feelFound(heroSettled ? worthy : nil) }
+            .task(id:heroReady ? worthy : nil) { await feelFound(heroReady ? worthy : nil) }
             .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
@@ -198,8 +200,8 @@ struct TonightView: View {
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
             let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
-                           revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
-                           range:CelestialGauge.modelRange(score:night.score.value,models:model.outlook(night)?.scoreRange,basis:night.basis)) { heroSettled=true }
+                           revealKey:revealKey(park),
+                           range:CelestialGauge.modelRange(model.outlook(night),basis:night.basis)) { heroSettledKey=$0 }
                 .frame(height:typeSize.isAccessibilitySize ? nil : wide ? 300 : 240)
                 .modifier(DepthParallax(depth:0.08))
             // Only the exceptions (no forecast yet, an early look); a full forecast is the norm and goes unsaid.
@@ -218,6 +220,11 @@ struct TonightView: View {
             nudge(park:park,tonight:night)
             fieldOffer(best:park)
         }.frame(maxWidth:.infinity)
+    }
+    /// The hero dial's reveal key for a park tonight.
+    private func revealKey(_ park:Park)->String {
+        let night=model.night(park)
+        return ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value)
     }
     /// Tonight's answer when a reminder would announce it (`NotificationScheduler.worthAReminder`),
     /// as "park-day"; nil otherwise, and until a starting point is chosen.

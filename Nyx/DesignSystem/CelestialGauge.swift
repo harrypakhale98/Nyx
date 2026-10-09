@@ -45,9 +45,10 @@ struct CelestialGauge: View {
     var range: ClosedRange<Int>?=nil
     /// The milestone and landing ticks. Off for an example dial, so the real answer owns them.
     var haptics=true
-    /// Called when the score has settled: after the landing, at once without motion, and after
-    /// each later sweep. Tonight's subtle double tap waits for it.
-    var onSettled: (()->Void)?=nil
+    /// Called with the `revealKey` the dial has settled on: after the landing, at once without
+    /// motion, after each later sweep, and when a settled dial is handed a new key for the score it
+    /// already shows. Tonight's subtle double tap waits for its own park and night to arrive here.
+    var onSettled: ((String?)->Void)?=nil
     /// Where the arc has reached, 0…100.
     @State private var arc=0.0
     /// The numeral shown.
@@ -68,6 +69,8 @@ struct CelestialGauge: View {
     @State private var generation=0
     /// Where an iPad's pointer rests over the dial: the glint on the glass follows it, like light on a real instrument.
     @State private var pointer: CGPoint?
+    /// VoiceOver's sentence, built once per score and range rather than on every frame of the count.
+    @State private var spoken=SpokenLabel()
     /// Whether any of the dial shows in its scroll view; the ambient stars rest while it is scrolled away.
     @State private var onScreen=true
     /// The dial's side, measured.
@@ -119,6 +122,8 @@ struct CelestialGauge: View {
         .accessibilityInputLabels([Text("Score"),Text("Darkness score")])
         .task(id:RevealTrigger(score:score,held:held)) { await reveal() }
         .onDisappear { if !revealedOnce { countedScore=nil } }
+        // Another park or night with the score already on the dial: nothing moves, but it has settled.
+        .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone) { _,_ in haptics }
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
@@ -128,10 +133,12 @@ struct CelestialGauge: View {
     /// The label is the settled answer from the first frame (VoiceOver never hears the count),
     /// with the models' range when the dial draws it.
     private var accessibilityText: String {
-        let basis=spokenBasis ?? (hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count."))
-        let label=String(localized:"Darkness score \(score) out of 100. \(ScoreBand.band(score).label). \(basis)")
-        guard let range else { return label }
-        return label+" "+String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")
+        spoken.text(for:SpokenLabel.Inputs(score:score,hasForecast:hasForecast,basis:spokenBasis,range:range)) { inputs in
+            let basis=inputs.basis ?? (inputs.hasForecast ? String(localized:"Includes cloud forecast.") : String(localized:"No full cloud forecast; usual clouds count."))
+            let label=String(localized:"Darkness score \(inputs.score) out of 100. \(ScoreBand.band(inputs.score).label). \(basis)")
+            guard let range=inputs.range else { return label }
+            return label+" "+String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")
+        }
     }
     // MARK: The count-up
 
@@ -169,49 +176,73 @@ struct CelestialGauge: View {
     nonisolated static func alreadyRevealed(revealedOnce:Bool,countedScore:Int?,score:Int)->Bool {
         revealedOnce || countedScore.map { $0 != score } == true
     }
-    /// What the dial shows when a count-up ends early (cancelled, or overtaken): the full score
-    /// with its word, never a counting numeral beside a band. Returns (arc, numeral, word shown).
-    nonisolated static func interrupted(score:Int)->(arc:Double,shown:Int,settled:Bool) { (Double(score),score,true) }
+    /// The part of the dial a reveal decides: where the arc is, the numeral, and whether the word shows.
+    nonisolated struct Face: Equatable, Sendable {
+        var arc: Double
+        var shown: Int
+        var settled: Bool
+        static let empty=Face(arc:0,shown:0,settled:false)
+        static func answer(_ score:Int)->Face { Face(arc:Double(score),shown:score,settled:true) }
+    }
+    /// Where each plan leaves the dial: the whole answer, or empty while held. The odometer starts empty.
+    nonisolated static func face(after plan:RevealPlan,score:Int)->Face {
+        switch plan {
+        case .hold, .odometer: .empty
+        case .instant, .sweep, .settle: .answer(score)
+        }
+    }
+    /// What a cancelled count-up leaves behind. SwiftUI cancels the old task when the score or the
+    /// hold changes and starts the next reveal at once, so the old count's cleanup can run before or
+    /// after the new reveal has written the dial. If no reveal came after it (`generation == mine`,
+    /// the dial left the screen), it ends on the whole answer, so the word is never left hidden
+    /// beside a number. If one did, it leaves that reveal's dial alone, never writing an old score.
+    nonisolated static func cancelled(_ face:Face,score:Int,generation:Int,mine:Int)->Face {
+        generation==mine ? .answer(score) : face
+    }
+    private var face: Face {
+        get { Face(arc:arc,shown:shown,settled:settled) }
+        nonmutating set { arc=newValue.arc; shown=newValue.shown; settled=newValue.settled }
+    }
     private func reveal() async {
         generation+=1
         let mine=generation, key=revealKey
         let plan=Self.plan(seen:key.map { ScoreReveals.seen.contains($0) } ?? false,held:held,reduceMotion:reduceMotion,export:export,
                            alreadyRevealed:Self.alreadyRevealed(revealedOnce:revealedOnce,countedScore:countedScore,score:score))
+        let end=Self.face(after:plan,score:score)
         switch plan {
         case .instant:
-            arc=Double(score); shown=score; waiting=false; settled=true; rangeShown=true
-            onSettled?()
+            face=end; waiting=false; rangeShown=true
+            onSettled?(key)
         case .hold:
-            arc=0; shown=0; waiting=true; settled=false; rangeShown=false; countedScore=nil
+            face=end; waiting=true; rangeShown=false; countedScore=nil
         case .sweep:
             let landing = !revealedOnce
             withAnimation(NyxMotion.spring) {
-                arc=Double(score); shown=score; waiting=false; settled=true
+                face=end; waiting=false
                 if landing { landed+=1 }
             }
             revealedOnce=true
             ScoreReveals.note(key,plan:.sweep,landed:true)
-            onSettled?(); showRange()
+            onSettled?(key); showRange()
         case .settle:
-            withAnimation(.spring(duration:Self.settleDuration)) { arc=Double(score); shown=score; waiting=false; settled=true; landed+=1 }
+            withAnimation(.spring(duration:Self.settleDuration)) { face=end; waiting=false; landed+=1 }
             revealedOnce=true
-            onSettled?(); showRange()
+            onSettled?(key); showRange()
         case .odometer:
             await count(key:key,generation:mine)
         }
     }
     private func count(key:String?,generation mine:Int) async {
         countedScore=score
-        arc=0; shown=0; waiting=false; settled=false; rangeShown=false
+        face=Self.face(after:.odometer,score:score); waiting=false; rangeShown=false
         let interval=LaunchSignposts.begin("Score reveal"), began=Date.now
         var finished=false
         defer {
             if !finished {
                 LaunchSignposts.end(interval)
                 ScoreReveals.note(key,plan:.odometer,landed:false)
-                // Cut short with nothing after it (the dial left the screen): the whole answer, so the
-                // word can never be left hidden. A reveal that follows decides again.
-                if generation==mine { let end=Self.interrupted(score:score); arc=end.arc; shown=end.shown; settled=end.settled }
+                // Cut short: the whole answer if nothing followed, otherwise the next reveal's dial.
+                face=Self.cancelled(face,score:score,generation:generation,mine:mine)
             }
         }
         let clock=ContinuousClock(), start=clock.now, total=Self.duration(score:score)
@@ -229,23 +260,24 @@ struct CelestialGauge: View {
         finished=true
         LaunchSignposts.end(interval); LaunchSignposts.firstLanding(countStarted:began)
         // The final digit, the word and the light tick in one transaction.
-        withAnimation(NyxMotion.spring) { arc=Double(score); shown=score; settled=true; landed+=1 }
+        withAnimation(NyxMotion.spring) { face = .answer(score); landed+=1 }
         revealedOnce=true
         ScoreReveals.note(key,plan:.odometer,landed:true)
-        onSettled?(); showRange()
+        onSettled?(key); showRange()
     }
     /// Uncertainty comes last: the model range fades in a beat after the word.
     private func showRange() {
         withAnimation(NyxMotion.spring.delay(0.3)) { rangeShown=true }
     }
-    /// The forecast models' range to draw around a score: only on a night whose clouds are a full
-    /// forecast, widened to hold the score itself (the score's own forecast can sit just outside the
-    /// three models' averages), and only when it spans more than 4 points, below which a band would
+    /// The forecast models' range to draw around a score (`NightOutlook.scoreRange`, which already
+    /// holds the score): only on a night whose clouds are a full forecast, only when the models do
+    /// not agree (where the time river and the Clouds tile say "Forecast models agree", the dial
+    /// never shows a spread), and only when it spans more than 4 points, below which a band would
     /// read as noise around the tip.
-    nonisolated static func modelRange(score:Int,models:ClosedRange<Int>?,basis:CloudBasis)->ClosedRange<Int>? {
-        guard basis == .forecast, let models else { return nil }
-        let low=max(0,min(models.lowerBound,score)), high=min(100,max(models.upperBound,score))
-        return high-low>4 ? low...high : nil
+    nonisolated static func modelRange(_ outlook:NightOutlook?,basis:CloudBasis)->ClosedRange<Int>? {
+        guard basis == .forecast, let outlook, let agreement=outlook.agreement, agreement.band != .agree,
+              let models=outlook.scoreRange, models.upperBound-models.lowerBound>4 else { return nil }
+        return models
     }
     // MARK: Parts
 
@@ -410,6 +442,15 @@ private struct ModelRangeBand: View {
                     layer.stroke(path,with:.color(palette.accent.opacity(0.6*glow)),style:StrokeStyle(lineWidth:max(6,9*k),lineCap:.round))
                 }
                 context.stroke(path,with:.color(palette.accent.opacity(0.35*glow)),style:StrokeStyle(lineWidth:2,lineCap:.round))
+                // A short tick at each end, so the band reads as a measured span (where the cloudiest
+                // and clearest models would put the score), not as more glow, even beside a high score.
+                let r=radius+6*k, half=max(3,5*k)
+                var ends=Path()
+                for end in [from,to] {
+                    ends.move(to:CGPoint(x:center.x+cos(end.radians)*(r-half),y:center.y+sin(end.radians)*(r-half)))
+                    ends.addLine(to:CGPoint(x:center.x+cos(end.radians)*(r+half),y:center.y+sin(end.radians)*(r+half)))
+                }
+                context.stroke(ends,with:.color(palette.accent.opacity(0.4+0.4*glow)),style:StrokeStyle(lineWidth:1.2,lineCap:.round))
             }
         }
         .allowsHitTesting(false)
@@ -447,6 +488,17 @@ nonisolated struct DialRing:Shape {
     static func note(_ key:String?,plan:CelestialGauge.RevealPlan,landed:Bool) {
         guard let key, plan == .odometer, landed else { return }
         seen.insert(key)
+    }
+}
+/// VoiceOver's sentence for the dial, kept until its inputs change. A plain reference held in
+/// `@State`, so remembering it never invalidates the view.
+@MainActor private final class SpokenLabel {
+    struct Inputs: Equatable { let score: Int; let hasForecast: Bool; let basis: String?; let range: ClosedRange<Int>? }
+    private var inputs: Inputs?
+    private var cached=""
+    func text(for new:Inputs,_ build:(Inputs)->String)->String {
+        if new != inputs { inputs=new; cached=build(new) }
+        return cached
     }
 }
 /// What restarts a reveal: a new score, or the hold lifting or falling.

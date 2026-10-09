@@ -270,7 +270,30 @@ struct ForecastDetailTests {
         #expect(scored.score.value==engine.score(sky:scored.sky,bortle:park.bortleEstimate,cloudCover:20).value)
         #expect(outlook.scoreRange==engine.score(sky:scored.sky,bortle:park.bortleEstimate,cloudCover:60).value...engine.score(sky:scored.sky,bortle:park.bortleEstimate,cloudCover:0).value)
         #expect(outlook.agreement?.band == .disagree)
+        #expect(outlook.scoreRange?.contains(scored.score.value)==true)
         model.forecasts[park.id]=nil
         #expect(model.outlook(model.night(park,on:night.id))?.agreement==nil)
+    }
+    /// The best-match clouds can sit outside the three models' averages; the range beside a score
+    /// is widened to hold it, once, so the dial, the river and the chart give the same range.
+    @MainActor @Test func theOutlooksRangeAlwaysHoldsTheScore() async throws {
+        let park=try #require(try ParkData.load().first { $0.id=="jotr" })
+        let model=PlanModel(weather:WeatherService(transport:RoutedHTTP(),persist:false),parkStore:ParkStore(transport:RoutedHTTP(),persist:false),detail:ForecastDetailService(transport:RoutedHTTP(),persist:false))
+        let night=model.night(park,on:park.date(model.tonight(park),addingDays:2))
+        let window=night.sky.cloudWindow
+        let first=(floor(window.start.timeIntervalSince1970/3600)-1)*3600
+        let times=(0..<30).map { first+Double($0)*3600 }
+        let engine=ScoreEngine()
+        for bestMatch in [0.0,20,45,90] {
+            model.forecasts[park.id]=Forecast(updated:.now,times:times,clouds:times.map { _ in bestMatch })
+            model.details[park.id]=ForecastDetail(models:HourlySeries(updated:.now,times:times,values:[
+                "cloud_cover_gfs_seamless":times.map { _ in 10 },"cloud_cover_ecmwf_ifs025":times.map { _ in 30 },"cloud_cover_icon_seamless":times.map { _ in 60 }]))
+            let scored=model.night(park,on:night.id)
+            let range=try #require(model.outlook(scored)?.scoreRange)
+            let clearest=engine.score(sky:scored.sky,bortle:park.bortleEstimate,cloudCover:10).value
+            let cloudiest=engine.score(sky:scored.sky,bortle:park.bortleEstimate,cloudCover:60).value
+            #expect(range.contains(scored.score.value))
+            #expect(range==min(clearest,cloudiest,scored.score.value)...max(clearest,cloudiest,scored.score.value))
+        }
     }
 }

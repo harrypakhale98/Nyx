@@ -196,7 +196,8 @@ nonisolated struct NightOutlook: Sendable, Equatable {
     /// Metres, mean. A haze hint only: weather-model visibility is coarse.
     var visibility: Double?
     var aerosol: Double?
-    /// The score with the clearest and the cloudiest model in place of the best-match clouds.
+    /// The score with the clearest and the cloudiest model in place of the best-match clouds,
+    /// widened to hold the night's own score (`PlanModel.outlook`).
     var scoreRange: ClosedRange<Int>?
     var clarity: AirClarity? { aerosol.map(AirClarity.band) }
     var dewLikely: Bool { dewMargin.map { $0<=2 } ?? false }
