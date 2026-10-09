@@ -46,6 +46,27 @@ final class NyxUITests:XCTestCase {
     }
     /// At accessibility text sizes Parks searches from a field in the page (the bar's field draws
     /// nothing at AX5 on iOS 27). Typing in it narrows the list.
+    /// The Sky glow comparison: the segments read "Here · Class 2" and "City · Class 8" for VoiceOver as
+    /// on screen (the bridge to the segmented control ignores per-segment accessibility labels, so the
+    /// figure's own label carries "estimated"). Choosing the city's sky selects that segment.
+    func testCityLightSegmentsSpeakAsShown() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","light","-nyx-park","deva","-nyx-state","offline","-nyx-reduce-motion"]
+        app.launch()
+        let picker=app.segmentedControls.firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout:15),"No segmented control on the Sky glow panel")
+        let labels=picker.buttons.allElementsBoundByIndex.map(\.label)
+        XCTAssertEqual(labels.count,2,"Segments: \(labels)")
+        XCTAssertTrue(labels.first?.hasPrefix("Here · Class ") == true,"Segments: \(labels)")
+        XCTAssertEqual(labels.last,"City · Class 8","Segments: \(labels)")
+        let figure=app.images.matching(NSPredicate(format:"label BEGINSWITH 'Illustration: this park'")).firstMatch
+        XCTAssertTrue(figure.exists,"The figure does not name the park's estimated class")
+        XCTAssertTrue(figure.label.contains("estimated Class"),figure.label)
+        let city=picker.buttons["City · Class 8"]
+        city.tap()
+        XCTAssertTrue(city.isSelected,"The city's segment is not selected after a tap")
+    }
     func testAccessibilitySizeSearch() {
         continueAfterFailure=false
         let app=XCUIApplication()
