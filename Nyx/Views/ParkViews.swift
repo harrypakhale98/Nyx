@@ -836,14 +836,20 @@ struct ScoreBreakdownView: View {
 #Preview("Detail") { let m=PlanModel();if let p=m.home { NavigationStack { ParkDetailView(park:p) }.environment(m).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) } }
 
 /// iOS 27: the navigation bar recedes as the park's page scrolls down, so its sky runs edge to edge;
-/// it returns on the way back up. The tab bar follows the root's own rule (`RootView`), which keeps
-/// it in place under VoiceOver, Switch Control and accessibility sizes. iOS 26 keeps the standard bar.
+/// it returns on the way back up. Like the tab bar (`RootView`), it stays in place under VoiceOver,
+/// Switch Control and accessibility sizes, where a bar that moves costs someone their place.
+/// iOS 26 keeps the standard bar.
 private struct SkyFullBleed: ViewModifier {
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
+    @Environment(\.dynamicTypeSize) private var typeSize
     /// Off in two columns, where the night's column stays put beside the scrolling detail and bars
     /// receding over one column would read as a glitch.
     var enabled=true
+    /// Same view either way, so turning VoiceOver on mid-page keeps the page where it is.
+    private var recedes:Bool { !voiceOver && !switchControl && !typeSize.isAccessibilitySize && !DebugScenario.isEnabled("ax5") }
     @ViewBuilder func body(content:Content)->some View {
-        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(.onScrollDown,for:.navigationBar) } else { content }
+        if #available(iOS 27.0,*), enabled { content.toolbarMinimizationBehavior(recedes ? .onScrollDown : .never,for:.navigationBar) } else { content }
     }
 }
 #Preview("Access note • boat, limited road, none") {

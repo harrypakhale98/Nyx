@@ -45,13 +45,20 @@ final class AccessibilityAuditTests:XCTestCase {
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
-            let before=app.tabBars.firstMatch.frame
+            let before=Self.tabButtonsSpan(app)
             app.swipeUp(velocity:.slow)
             sleep(2)
-            let after=app.tabBars.firstMatch.frame
+            let after=Self.tabButtonsSpan(app)
             print("MINIMISED|\(state)|before \(before)|after \(after)")
+            // The bar's own frame keeps the window's width when it minimises; its tabs do not. A bar that
+            // no longer shrinks fails here rather than being audited at full size.
+            XCTAssertLessThan(after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
             let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
-            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
+            // The two rows built as one line with a stacked fallback (`ViewThatFits`): the audit's text-size
+            // probe swaps their layout under it, so their texts alone may read as clipped in this pass.
+            let swapRows=["startingPoint","fromHome"].map { app.descendants(matching:.any)[$0] }.filter(\.exists).map(\.frame)
+            print("SWAPROWS|\(state)|\(swapRows)")
+            failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised",swapRows:swapRows)
             app.terminate()
         }
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
@@ -70,8 +77,14 @@ final class AccessibilityAuditTests:XCTestCase {
         }
         XCTAssertTrue(failures.isEmpty,"Accessibility audit issues:\n"+failures.joined(separator:"\n"))
     }
+    /// The span of the tab bar's buttons that can be tapped now: the whole bar at rest, one tab (and a
+    /// followed night's strip) when minimised.
+    private static func tabButtonsSpan(_ app:XCUIApplication)->CGRect {
+        app.tabBars.firstMatch.buttons.allElementsBoundByIndex.filter { $0.exists && $0.isHittable && !$0.frame.isEmpty }
+            .reduce(CGRect.null) { $0.union($1.frame) }
+    }
     /// Audits the screen the app shows now; returns the findings that are not known false positives.
-    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String) throws->[String] {
+    private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,swapRows:[CGRect]=[]) throws->[String] {
         var failures:[String]=[]
         let window=app.frame
         // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
@@ -86,7 +99,7 @@ final class AccessibilityAuditTests:XCTestCase {
             let label=issue.element?.label ?? ""
             let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
             print(line)
-            if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar) { return true }
+            if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar,swapRows:swapRows) { return true }
             if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
             failures.append(line)
             return true // collect everything; fail once at the end with the full list
@@ -112,7 +125,7 @@ final class AccessibilityAuditTests:XCTestCase {
         ("parks",""),
     ]
     /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
-    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect)->Bool {
+    private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect,swapRows:[CGRect]=[])->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
         // scrolling through that band is dimmed by design, whatever the app's colours.
         // On iPad the tab bar floats at the top of the window and the edge effect runs below it (to about 84 pt).
@@ -183,7 +196,8 @@ final class AccessibilityAuditTests:XCTestCase {
             // (`ViewThatFits`: the starting point, From home tonight); the audit's own text-size probe swaps
             // the layout under it and reports the one-line texts as clipped. They render in full at every
             // size (captures at default and AX5, 2026-10-08); the default and AX5 passes still audit clipping.
-            let probeSwap=pass=="minimised" && !barControl
+            // Only texts inside those two rows: a truncation anywhere else on Tonight still fails.
+            let probeSwap=pass=="minimised" && !barControl && swapRows.contains { $0.insetBy(dx:-1,dy:-1).contains(frame) }
             return !visible || probeSwap || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.

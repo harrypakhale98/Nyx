@@ -8307,23 +8307,6 @@
         }
       }
     },
-    "Each park uses its own local date. Scores without a full forecast can change when one arrives.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Each park uses its own local date. Scores without a full forecast can change when one arrives."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cada parque usa su propia fecha local. Los índices sin pronóstico completo pueden cambiar cuando llegue uno."
-          }
-        }
-      }
-    },
     "Each star is a night at its park. Brighter stars, darker skies.": {
       "extractionState": "manual",
       "localizations": {

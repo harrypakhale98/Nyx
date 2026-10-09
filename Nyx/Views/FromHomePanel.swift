@@ -27,7 +27,7 @@ struct FromHomePanel: View {
         .padding(20)
         .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
         .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
-        .accessibilityElement(children:.contain)
+        .accessibilityElement(children:.contain).accessibilityIdentifier("fromHome")
         // Worked out off the main thread, once per place and night.
         .task(id:key) {
             let origin=origin, now=now
