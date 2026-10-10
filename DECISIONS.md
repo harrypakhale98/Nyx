@@ -1341,3 +1341,9 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 - The calendar's ringed nights (Oct 13–17) are described as the best five-night stretch, with Oct 10 under cloud: on the engine's epoch the new moon is Oct 10, so those nights are 3 to 7 days after it, a waxing crescent, not new-moon nights.
 - `capture_store.py es` now exits with a message instead of capturing: the 1.2 list writes size-neutral names in a new order, while `make_store_frames.swift es` reads the 1.1 Spanish sources, so a Spanish run would have fed stale frames silently until the native review.
 - The App Preview's shot 3 route (`-nyx-chapter moon`) is marked a known issue in the script and its fix added to step 14's recording to-do, so the recording session meets the cut "Wake me" panel before it records, not during.
+
+## Award round two — 2026-10-09 (close)
+- The accessibility audit can open a screen in its own fixture state (`ask:answered`; night vision then comes from `-nyx-night-vision`), because Ask Nyx's checked answer, cited chips and folded records exist only in that state and had never been audited.
+- Tonight's sky (`sky`) and Ask Nyx's checked answer (`ask:answered`) join the every-screen passes in both palettes: both are round-two screens, and both pass with no exemption.
+- Ask Nyx's "Numbers checked against the records" line is marked as text (`isStaticText`), as the What's up rows are: a merged one-line caption with no trait was taken for a 14 pt target. Fixed at the root, no exemption.
+- Round two closed with a device check for the dial's sweep (number with needle, word only inside its band) and the large-text river stepper added to `INPUT_NEEDED.md` step 9, the one round-two lane without one.

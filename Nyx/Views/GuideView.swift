@@ -306,6 +306,8 @@ private struct GuideAnswerBlock: View {
         .font(.caption).foregroundStyle(palette.muted)
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(guide.checked ? Text("Numbers checked against the records") : Text("Checking the numbers against the records"))
+        // Text to read, not a control: one caption line tall, it would otherwise be taken for a too-small target.
+        .accessibilityAddTraits(.isStaticText)
     }
     /// One chip per cited record: "1 · Arches, Fri, Oct 9". A tap finds the record below.
     private var citationChips:some View {
