@@ -57,3 +57,7 @@ Slot: **Apple Vision Pro, 3840 × 2160**. Captured natively on the Nyx Vision Pr
 - The week frame's footnote ("Hollow nights have no full cloud forecast yet.") runs under the screen's bottom edge, as it scrolls on the watch.
 - iPad field mode keeps its single column on the left of the screen, as the app lays it out.
 - Scores, forecasts, ranges and alerts are live as of October 10, 2026, about 2:20 to 3:00 AM Pacific.
+
+## Product page header (optional)
+
+`Header/header-3840x1646.png`: a 21:9 crop of the Vision Pro immersive sky over a park horizon (raw/vision/01-immersive-core.png, rows 250–1895), no alpha. Upload under Product Page Information → Header and Search Results → Header. The search results asset is left empty.
