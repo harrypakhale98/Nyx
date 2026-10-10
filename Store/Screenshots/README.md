@@ -1,5 +1,7 @@
 # App Store screenshots: Nyx 1.1 (raw)
 
+**Superseded for English iPhone:** `Scripts/capture_store.py` now writes raw iPhone captures to `Store/1.2 v10/raw/` (build 10, 1206×2622, `NN-name.png`). The Spanish captures here (`es/`) stay until the native review.
+
 Native-resolution captures, no alpha channel, captured 2026-10-06; the iPhone (English) and Vision Pro sets were retaken in full that evening (about 8:50 PM Pacific) for build 1.1 (7), Spanish frames 01, 04, 06, 08, 09, 10 earlier that evening. Every iPhone frame uses the `live` scenario (real Open-Meteo forecasts and NPS alerts at capture time, scored by the shipping engine) except the journal, which is illustrative DEBUG seed data with no personal photos. Status bars are 9:41; `-nyx-reduce-motion` gives settled artwork. Every frame was looked at and critiqued (see `PHASE_STATUS.md`).
 
 - `NN-name-6.9.png`: iPhone 18 Pro Max, iOS 27.0, 1320×2868. `6.5-inch/`: 1284×2778 (scaled to width 1284, 6 px trimmed top and bottom).

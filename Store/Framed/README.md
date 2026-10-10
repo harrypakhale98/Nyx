@@ -1,5 +1,7 @@
 # Captioned App Store screenshots: Nyx 1.1
 
+**Superseded for English iPhone:** `Scripts/make_store_frames.swift` now writes the English set to `Store/1.2 v10/iPhone/` (build 10). The Spanish frames here (`es/`) follow the 1.1 order until the native review.
+
 Ten frames per language built from `Store/Screenshots` by `swift Scripts/make_store_frames.swift` (English) and `swift Scripts/make_store_frames.swift es` (Spanish), run from the repo root. Each puts an eyebrow and a short serif caption over the full, uncropped screen on a starfield; field mode and "Where to look" use signal red. Flattened, no alpha.
 
 - `6.9-inch/` 1320×2868 (App Store Connect's required iPhone slot) and `6.5-inch/` 1284×2778.

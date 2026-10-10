@@ -1,6 +1,6 @@
 # Nyx — App Preview video: storyboard and specs
 
-One 26-second preview for the iPhone 6.9-inch slot, staged from the DEBUG launch arguments in `README.md` ("Screenshot scenarios"). Autoplay is muted on the App Store, so the story is carried by the pictures and six-word captions.
+One 28-second preview for the iPhone 6.9-inch slot, staged from the DEBUG launch arguments in `README.md` ("Screenshot scenarios"). Autoplay is muted on the App Store, so the story is carried by the pictures and six-word captions.
 
 ## Apple's rules (verified 2026-10-06)
 
@@ -37,20 +37,21 @@ Sources: App Store Connect Help, [App preview specifications](https://developer.
 
 **Cadence.** Record each shot separately, 6 to 10 seconds, then cut. Hold each caption at least 2.5 seconds. Dissolves of 0.3 s between shots. No flashes. End the video on the Moon and the name.
 
-## Storyboard (26 s, 6 shots)
+## Storyboard (28 s, 7 shots)
 
-Revised 2026-10-07 (ST-4, DX-19). The order follows the product page's hero order: the real sky in colour, the river mid-scrub with the Moon changing shape, the Moon at size, field mode, the calendar. The "models disagree" shot is dropped (hard to read with the sound off), field mode gets four full seconds, and the video ends on the night, not on privacy. Privacy belongs in the description and the label.
+Revised 2026-10-07 (ST-4, DX-19). The order follows the product page's hero order: the real sky in colour, the river mid-scrub with the Moon changing shape, the Moon at size, field mode, the calendar, then what a city's light takes (added 2026-10-09: the park's sky against the same sky at a city's class, the Social Impact story in one gesture). The "models disagree" shot is dropped (hard to read with the sound off), field mode gets four full seconds, and the video ends on the night, not on privacy. Privacy belongs in the description and the label.
 
 | # | Time | What happens | Caption (≤6 words) | Launch arguments |
 |---|---|---|---|---|
 | 1 | 0.0 to 4.0 s | Cold open on the real sky in colour over the park, then Tonight's first line: the darkest park and its score counting up. | `The darkest park. The darkest night.` (6) | `-nyx-screen sky -nyx-state live` cut to a plain Debug launch with no `-nyx-screen`, recorded after one warm launch (onboarding done, forecasts cached). The `tonight` route loads its forecasts after the first frame, so its dial starts on one park and jumps to another (34 to 97) mid-count; a warm launch reads the caches first and counts once from 0 to the hero score. |
-| 2 | 4.0 to 10.0 s | The thirty-night time river, scrubbed mid-way: the Moon above the selected night changes shape night by night, the best nights glow, the half-filled and hollow nights show where the forecast thins out. Perform the drag during the recording; haptics do not appear in video. Poster frame here, at about 7 s, with the Moon half lit. | `Scrub the month. Watch the Moon.` (6) | `-nyx-screen detail -nyx-state live` (scroll until the river fills the lower half) |
-| 3 | 10.0 to 14.0 s | The Moon at size: the shader Moon filling most of the width, lit at that night's phase, its terminator slowly crossing the craters as the night steps on. | `The Moon, as the park sees it.` (6) | Needs a capture route: no DEBUG screen shows the Moon at full width yet (`MoonView` appears at 70 pt in Moonlight). Ask for a `-nyx-screen moon` route, or use the onboarding Moon (`-nyx-screen onboarding -nyx-onboarding-page 0`) if it reads at size. |
-| 4 | 14.0 to 18.0 s | Field mode: the screen turns red, the countdown to true darkness runs, the eye clock fills. | `Red light for dark-adapted eyes.` (5) | `-nyx-screen field -nyx-state adapting -nyx-field-minutes 14` |
-| 5 | 18.0 to 22.0 s | The calendar: a month of nights as tiny skies, the best stretch ringed, the month sliding to the next. | `Choose the night worth the drive.` (6) | `-nyx-screen calendar -nyx-state live` (route name may change with the Plan tab; check `RootView`) |
-| 6 | 22.0 to 26.0 s | End card: the Moon on black, then the name. | `Where. When. Then look up.` (5), then "Nyx" | Edited in post: the Moon from shot 3 over void black, the serif name beneath. No app UI on the card. |
+| 2 | 4.0 to 9.0 s | The thirty-night time river, scrubbed mid-way: the Moon above the selected night changes shape night by night, the best nights glow, the half-filled and hollow nights show where the forecast thins out. Perform the drag during the recording; haptics do not appear in video. Poster frame here, at about 7 s, with the Moon half lit. | `Scrub the month. Watch the Moon.` (6) | `-nyx-screen detail -nyx-state live` (scroll until the river fills the lower half) |
+| 3 | 9.0 to 13.0 s | The Moon at size: the shader Moon filling most of the width, lit at that night's phase, its terminator slowly crossing the craters as the night steps on. | `The Moon, as the park sees it.` (6) | `-nyx-screen detail -nyx-chapter moon` (the park page scrolled to the Moon at size in The sky chapter; before recording, check that the panel above it is not cut under the chapter bar, as noted in `Store/1.1 v8/README.md`) |
+| 4 | 13.0 to 17.0 s | Field mode: the screen turns red, the countdown to true darkness runs, the eye clock fills. | `Red light for dark-adapted eyes.` (5) | `-nyx-screen field -nyx-state adapting -nyx-field-minutes 14` |
+| 5 | 17.0 to 21.0 s | The calendar: a month of nights as tiny skies, the best stretch ringed, the month sliding to the next. | `Choose the night worth the drive.` (6) | `-nyx-screen calendar -nyx-state live` (route name may change with the Plan tab; check `RootView`) |
+| 6 | 21.0 to 25.0 s | What a city's light takes: Death Valley's The place chapter opens on the park's own drawn sky; about 1 s in, tap "City · Class 8" and the class animates on the shared spring as the stars thin to a city's handful; hold on the city sky with "An illustration" in view. | `What a city's light takes.` (5) | `-nyx-screen detail -nyx-park deva -nyx-chapter place` (without `-nyx-reduce-motion`, so the switch animates) |
+| 7 | 25.0 to 28.0 s | End card: the Moon on black, then the name. | `Where. When. Then look up.` (5), then "Nyx" | Edited in post: the Moon from shot 3 over void black, the serif name beneath. No app UI on the card. |
 
-**Total 26.0 s**, inside Apple's 15 to 30 s with room to trim. If a caption is rejected, the pictures still carry the story.
+**Total 28.0 s** (4 + 5 + 4 + 4 + 4 + 4 + 3), inside Apple's 15 to 30 s. If a caption is rejected, the pictures still carry the story.
 
 ### Caption style
 
@@ -86,7 +87,7 @@ Final Cut, iMovie or Compressor with the same settings work as well. Check the l
 ## Checklist
 
 1. Capture in a Debug build on device or simulator with the arguments above; keep source files in a shared folder, not the repo.
-2. Edit to 26 s with the captions and the end card; export to the spec above.
-3. Review: no hands, no frame, no prices, no dates, no "new"; the status bar reads 9:41 with full battery; no personal journal content; the score numbers are the engine's own, from build 8 (score v2), never a build 7 capture.
+2. Edit to 28 s with the captions and the end card; export to the spec above.
+3. Review: no hands, no frame, no prices, no dates, no "new"; the status bar reads 9:41 with full battery; no personal journal content; the score numbers are the engine's own, from build 10, never an earlier capture.
 4. Upload in App Store Connect under the 6.9-inch iPhone slot; choose the poster frame near 7 s; allow up to 24 hours for processing.
 5. Reuse segments of the preview as the In-App Event videos (`in-app-events.md`, 30 s cap) and as the Webby, iF and Core77 case-study clip (`award-entries.md`).

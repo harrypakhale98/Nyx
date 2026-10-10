@@ -1,6 +1,6 @@
 // Builds 1080×1350 (4:5) social images from the App Store screenshots.
 // Usage: swift Scripts/make_social.swift  (run from the repo root)
-// The sources are the 1.2 App Store frames in `Store/1.1 v8/iPhone` (1206×2622), which already carry
+// The sources are the 1.2 App Store frames in `Store/1.2 v10/iPhone/6.3-inch` (1206×2622), which already carry
 // their eyebrow, caption and starfield (`Scripts/make_store_frames.swift`). A framed source is drawn
 // whole across the card's width from the top, cut at 4:5 with the bottom fading into the night, so
 // its caption is the card's headline. A raw capture (`framed: false`) gets this script's own eyebrow,
@@ -14,18 +14,22 @@ struct Card {
     let headline: String
     let cropTop: CGFloat  // fraction of the capture hidden above the frame
     var framed = false    // an App Store frame that already carries its own caption
+    var scale: CGFloat = 1  // framed only: the frame's width as a share of the card's, so more of its screen fits
 }
 
 // Framed sources: the eyebrow and headline below are the frames' own captions, for reference.
 let cards = [
-    Card(source: "Store/1.1 v8/iPhone/01-tonight.png", output: "01-tonight.png",
-         eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?", cropTop: 0, framed: true),
-    Card(source: "Store/1.1 v8/iPhone/02-score.png", output: "02-score.png",
-         eyebrow: "THE DARKNESS SCORE", headline: "One number,\nand its reasons.", cropTop: 0, framed: true),
-    Card(source: "Store/1.1 v8/iPhone/07-plan.png", output: "03-calendar.png",
-         eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive.", cropTop: 0, framed: true),
-    Card(source: "Store/1.1 v8/iPhone/08-parks-map.png", output: "04-parks.png",
-         eyebrow: "EVERY PARK TONIGHT", headline: "63 parks,\ndarkest first.", cropTop: 0, framed: true),
+    Card(source: "Store/1.2 v10/iPhone/6.3-inch/01-tonights-sky.png", output: "01-sky.png",
+         eyebrow: "TONIGHT'S SKY", headline: "The night sky,\nbefore you go.", cropTop: 0, framed: true),
+    Card(source: "Store/1.2 v10/iPhone/6.3-inch/02-tonight.png", output: "02-tonight.png",
+         eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?", cropTop: 0, framed: true,
+         scale: 0.9),  // the whole dial and its band word
+    Card(source: "Store/1.2 v10/iPhone/6.3-inch/07-calendar.png", output: "03-calendar.png",
+         eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive.", cropTop: 0, framed: true,
+         scale: 0.72),  // the month's nights, not only its header
+    Card(source: "Store/1.2 v10/iPhone/6.3-inch/08-city-light.png", output: "04-city-light.png",
+         eyebrow: "WHAT CITY LIGHT TAKES", headline: "See the stars\na city would hide.", cropTop: 0, framed: true,
+         scale: 0.8),  // smaller, so the Here / City switch and "An illustration" stay on the card
 ]
 
 let W: CGFloat = 1080, H: CGFloat = 1350
@@ -62,12 +66,23 @@ for (index, card) in cards.enumerated() {
 
     if card.framed {
         // The store frame across the full width, top-aligned: its caption and the top of its screen.
-        let height = CGFloat(shotCG.height) * W / CGFloat(shotCG.width)
+        let width = W * card.scale, left = (W - width) / 2
+        let height = CGFloat(shotCG.height) * width / CGFloat(shotCG.width)
         ctx.setFillColor(NSColor.black.cgColor); ctx.fill(CGRect(x: 0, y: 0, width: W, height: H))
+        if card.scale < 1 {
+            // Stars in the margins beside a smaller frame, so its edges never read as a box.
+            var rng = LCG(s: UInt64(42 + index * 7))
+            for _ in 0..<120 {
+                let x = rng.next() * W, y = rng.next() * H, r = 0.6 + rng.next() * 1.4
+                guard x < left || x > left + width else { continue }
+                ctx.setFillColor(starlight.withAlphaComponent(0.12 + rng.next() * 0.45).cgColor)
+                ctx.fillEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
+            }
+        }
         ctx.saveGState()
-        ctx.translateBy(x: 0, y: height); ctx.scaleBy(x: 1, y: -1)
+        ctx.translateBy(x: left, y: height); ctx.scaleBy(x: 1, y: -1)
         ctx.interpolationQuality = .high
-        ctx.draw(shotCG, in: CGRect(x: 0, y: 0, width: W, height: height))
+        ctx.draw(shotCG, in: CGRect(x: 0, y: 0, width: width, height: height))
         ctx.restoreGState()
     } else {
 

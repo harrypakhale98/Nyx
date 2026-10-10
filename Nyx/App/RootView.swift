@@ -87,7 +87,10 @@ struct RootView:View {
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.nyxReduceMotion,DebugScenario.isEnabled("reduce-motion")).environment(\.skyHome,model.home)
-        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
+        .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark)
+        // The DEBUG field routes draw field mode inside the root, so the root hides the status bar for them as
+        // presented field mode does (the root's own preference would otherwise win over the field view's).
+        .statusBarHidden(palette.nightVision || ["field","field-compass"].contains(DebugScenario.screen ?? ""))
         .modifier(DebugTypeSize())
         .modifier(DebugWindow()).modifier(DebugOpenParkWindow())
         // Field mode draws its own red; filtering it twice would darken it below legible contrast.

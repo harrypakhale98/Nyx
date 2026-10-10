@@ -117,7 +117,7 @@ xcodebuild archive -project Nyx.xcodeproj -scheme Nyx -configuration Release \
 
 Development signatures have get-task-allow enabled and need App Store distribution export or re-signing. Only Organizer validation and processing through the publisher's account establish distribution readiness. Real-device accessibility and performance review are release gates, not completed certifications ([AUDIT.md](AUDIT.md), [Research/performance.md](Research/performance.md)).
 
-`Scripts/capture_system_accessibility.py SIMULATOR_ID 26` captures real Simulator AX5 and contrast settings and restores the previous ones afterwards. `Scripts/capture_store.py` produces the store artwork (see `Store/Screenshots/README.md`).
+`Scripts/capture_system_accessibility.py SIMULATOR_ID 26` captures real Simulator AX5 and contrast settings and restores the previous ones afterwards. `Scripts/capture_store.py` and `Scripts/make_store_frames.swift` produce the iPhone store artwork (see `Store/1.2 v10/README.md`).
 
 `swift -O Scripts/build_moon_atlas.swift SOURCE_FOLDER Nyx/Resources/MoonRelief.xcassets/MoonAtlas.imageset/MoonAtlas.jpg` rebuilds the large Moon's 4096×3072 atlas (the LROC colour map above, local relief from LOLA elevation below) from two public-domain NASA SVS CGI Moon Kit files, `lroc_color_poles_4k.tif` and `ldem_16_uint.tif`; their URLs, the layout and the relief step that `Moon.metal` uses are in the script's header. The atlas lives in an app-only asset catalog, so widgets, the watch and Vision Pro keep the smaller `MoonMap.jpg`.
 

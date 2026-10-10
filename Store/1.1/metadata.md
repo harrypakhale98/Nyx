@@ -168,7 +168,7 @@ Spanish subtitle: `metadata-es.md`.
 - **Age rating:** answer the current questionnaire. Expected result 4+: no user-generated content feed, no unrestricted web access (links open in Safari), no social features, no gambling or mature themes. New question (September 2026), social media capabilities: **No**. Age assurance (Texas SB 2420) is handled in the app by Declared Age Range; see `SUBMISSION.md`.
 - **App Privacy:** Data Not Collected (`PRIVACY.md`).
 - **Review notes:** `SUBMISSION.md` § Review notes (paste from there).
-- **Screenshots:** `SUBMISSION.md` § Screenshots. Upload the build 8 set in `Store/1.1 v8/` (captured 2026-10-08); the build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
+- **Screenshots:** `SUBMISSION.md` § Screenshots. iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` (captured 2026-10-09, real sky first; order and captions in `Store/1.2 v10/README.md`). iPad, Apple Watch and Apple Vision Pro: the build 8 set in `Store/1.1 v8/` until their own recapture. The build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
 - **App Preview (optional):** `app-preview-script.md`.
 - **Accessibility Nutrition Labels:** declare only what the device pass confirms (`accessibility-nutrition-labels.md`).
 - **Creative assets (optional):** product page header (21:9) and search result asset (3:2) can wait for 1.2.

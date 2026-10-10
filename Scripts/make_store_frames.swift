@@ -1,6 +1,8 @@
-// Builds captioned App Store screenshots from the raw captures in Store/Screenshots.
+// Builds captioned App Store screenshots from raw iPhone captures.
 // Usage: swift Scripts/make_store_frames.swift [es]  (run from the repo root)
-// Writes Store/Framed/6.9-inch (1320×2868), 6.3-inch (1206×2622, the required slot) and 6.5-inch (1284×2778), flattened, no alpha.
+// English: reads Store/1.2 v10/raw (1206×2622 captures from Scripts/capture_store.py) and writes
+// Store/1.2 v10/iPhone/6.3-inch (1206×2622, the required slot), 6.9-inch (1320×2868) and 6.5-inch (1284×2778),
+// flattened, no alpha. The screen is drawn scaled inside every frame, so one 1206-wide capture serves all three.
 import AppKit
 
 struct Frame {
@@ -15,32 +17,33 @@ struct Frame {
 let signalRed = NSColor(srgbRed: 1, green: 0x45/255, blue: 0x3A/255, alpha: 1)
 // `swift Scripts/make_store_frames.swift es` builds the Spanish set from Store/Screenshots/es into Store/Framed/es.
 let spanish = CommandLine.arguments.dropFirst().first == "es"
-let sourceFolder = spanish ? "Store/Screenshots/es/" : "Store/Screenshots/"
-let outputFolder = spanish ? "Store/Framed/es/" : "Store/Framed/"
-// The 1.1 story, in order. Captions: calm, six words or fewer, no prices, no "new", no exclamation marks.
+let sourceFolder = spanish ? "Store/Screenshots/es/" : "Store/1.2 v10/raw/"
+let outputFolder = spanish ? "Store/Framed/es/" : "Store/1.2 v10/iPhone/"
+// The 1.2 story, real sky first, and only one dial among the first three frames. Captions: calm, six words or fewer, no prices, no "new", no exclamation marks.
 let english = [
-    Frame(source: "01-tonight-6.9.png", output: "01-tonight.png",
+    Frame(source: "01-sky.png", output: "01-tonights-sky.png",
+          eyebrow: "TONIGHT'S SKY", headline: "The night sky,\nbefore you go."),
+    Frame(source: "02-tonight.png", output: "02-tonight.png",
           eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?"),
-    Frame(source: "02-detail-6.9.png", output: "02-score.png",
-          eyebrow: "THE DARKNESS SCORE", headline: "One number,\nand its reasons."),
-    Frame(source: "03-whatsup-6.9.png", output: "03-whats-up.png",
+    Frame(source: "03-whatsup.png", output: "03-whats-up.png",
           eyebrow: "WHAT'S UP TONIGHT", headline: "The Milky Way,\nand when to look."),
-    Frame(source: "04-field-6.9.png", output: "04-field-mode.png",
+    Frame(source: "04-score.png", output: "04-score.png",
+          eyebrow: "THE DARKNESS SCORE", headline: "One number,\nand its reasons."),
+    Frame(source: "05-field.png", output: "05-field-mode.png",
           eyebrow: "FIELD MODE", headline: "Red light for\ndark-adapted eyes.", accent: signalRed),
-    Frame(source: "05-compass-6.9.png", output: "05-where-to-look.png",
+    Frame(source: "06-compass.png", output: "06-where-to-look.png",
           eyebrow: "WHERE TO LOOK", headline: "Point your iPhone.\nFind the core.", accent: signalRed),
-    Frame(source: "06-calendar-6.9.png", output: "06-calendar.png",
+    Frame(source: "07-calendar.png", output: "07-calendar.png",
           eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive."),
-    Frame(source: "07-trip-6.9.png", output: "07-trip.png",
-          eyebrow: "PLAN A TRIP", headline: "A park for every\nfree night."),
-    Frame(source: "08-journal-6.9.png", output: "08-constellation.png",
+    Frame(source: "08-city-light.png", output: "08-city-light.png",
+          eyebrow: "WHAT CITY LIGHT TAKES", headline: "See the stars\na city would hide."),
+    Frame(source: "09-parks-map.png", output: "09-parks-map.png",
+          eyebrow: "EVERY PARK TONIGHT", headline: "63 parks,\ndarkest first."),
+    Frame(source: "10-constellation.png", output: "10-constellation.png",
           eyebrow: "YOUR CONSTELLATION", headline: "Every night\nbecomes a star.",
-          subline: "No account. No tracking. Your journal stays on this iPhone."),
-    Frame(source: "09-listen-6.9.png", output: "09-listen.png",
-          eyebrow: "SOUND AND TOUCH", headline: "Hear the shape\nof the night."),
-    Frame(source: "10-every-sky-6.9.png", output: "10-every-sky.png",
-          eyebrow: "SKY GLOW AND ACCESS", headline: "City glow, named.\nStep-free spots, marked."),
+          subline: "Sample entries. Your journal stays on this iPhone."),
 ]
+// The Spanish list follows the 1.1 order and sources until the native review (not regenerated for 1.2).
 // Spanish (Mexico) store captions; wording from Store/1.1/metadata-es.md and the in-app glossary (native review pending).
 let spanishFrames = [
     Frame(source: "01-tonight-6.9.png", output: "01-tonight.png",
@@ -155,7 +158,7 @@ func render(_ frame: Frame, index: Int, width W: CGFloat, height H: CGFloat) -> 
 }
 
 // 6.3-inch: App Store Connect's required iPhone slot ("Dynamic Island, medium display") takes 1206×2622.
-for (folder, w, h) in [("6.9-inch", 1320.0, 2868.0), ("6.3-inch", 1206.0, 2622.0), ("6.5-inch", 1284.0, 2778.0)] {
+for (folder, w, h) in [("6.3-inch", 1206.0, 2622.0), ("6.9-inch", 1320.0, 2868.0), ("6.5-inch", 1284.0, 2778.0)] {
     let dir = URL(fileURLWithPath: outputFolder + folder, isDirectory: true)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     for (i, frame) in frames.enumerated() {

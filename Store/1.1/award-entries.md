@@ -26,7 +26,7 @@ Recommended spend this cycle: Webby Accessibility & Inclusion ($645 or $715) and
 - App Privacy label: Data Not Collected. Three public data services, each switchable; no analytics or third-party code (`PRIVACY.md`, `Scripts/verify_release.py`).
 - Apple's automated accessibility audit passes on every screen in both palettes in the simulator; contrast ratios are published (`Research/contrast.json`: red text on black 6.2:1). The physical-device pass is open and is said to be open (`AUDIT.md`).
 - Astronomy checked against the U.S. Naval Observatory: Moon rise and set within 3.7 minutes at mid-latitude parks and within a minute at the Alaska, Hawaiʻi, American Samoa and Virgin Islands checks; Sun within a minute (`Research/accuracy.md`, `NyxTests/usno-polar-tropical.json`).
-- More than 350 unit tests, passing on iOS 26.5 and iOS 27 (442 in 43 suites at build 10, verified 2026-10-09; recount at filing).
+- More than 350 unit tests, passing on iOS 26.5 and iOS 27 (484 in 49 suites at build 10, verified 2026-10-09; recount at filing).
 - Free, with no purchase or subscription.
 
 **Social impact (facts only, for Webby's statement fields, UX Design Awards and any later Anthem or Core77 entry):**
