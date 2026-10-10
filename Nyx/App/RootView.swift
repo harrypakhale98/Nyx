@@ -119,6 +119,7 @@ struct RootView:View {
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
             DebugFollowing.install(model)
+            DebugHeaderExport.runIfRequested(model)
             // `-nyx-journal-revisit`: leave the Journal after 5 s and come back a second later, so a
             // capture can show that the figures do not draw themselves again.
             if DebugScenario.isEnabled("journal-revisit") {
