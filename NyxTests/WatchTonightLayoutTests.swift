@@ -27,12 +27,16 @@ struct WatchTonightLayoutTests {
         #expect(Layout.choose(room: 0, words: 80, standardSize: false, accessibilitySize: false) == .fixed)
         #expect(Layout.choose(room: 150, words: 0, standardSize: false, accessibilitySize: false) == .fixed)
     }
-    @Test func eachWatchKeepsItsDefaultTextSizeAsDesigned() {
-        // Large is the 40 mm's default (162 points wide), Extra Large the Ultra's (205).
-        #expect(Layout.largestStandard(screenWidth: 162) == .large)
-        #expect(Layout.largestStandard(screenWidth: 205) == .xLarge)
-        #expect(DynamicTypeSize.xLarge > Layout.largestStandard(screenWidth: 162))
-        #expect(DynamicTypeSize.xxLarge > Layout.largestStandard(screenWidth: 205))
+    @Test(arguments: [
+        (197.0, DynamicTypeSize.large),   // 40 mm
+        (223.0, .large),                  // 42 mm
+        (224.0, .xLarge),                 // 44 mm, narrower than the 42 mm but one size larger
+        (248.0, .xLarge),                 // 46 mm
+        (257.0, .xLarge),                 // Ultra
+    ])
+    func eachWatchKeepsItsDefaultTextSizeAsDesigned(screenHeight: Double, defaultSize: DynamicTypeSize) {
+        // Each watch's default text size, read from the watchOS 27 simulators, is the largest standard one.
+        #expect(Layout.largestStandard(screenHeight: screenHeight) == defaultSize)
     }
     @Test func theScrollingDialIsNeverSmallerThanTheMinimum() {
         #expect(Layout.scrollingDial >= Layout.dialMinimum)

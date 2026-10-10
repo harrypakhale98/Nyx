@@ -195,7 +195,7 @@ struct TonightFace: View {
     /// The forecast models' range for the night on the dial, as the iPhone shows it.
     private var models: ClosedRange<Int>? { context?.modelRange(for: shown) }
     /// Up to this size the face is fixed as designed: the watch's default text size.
-    private var standardSizes: DynamicTypeSize { WatchTonightLayout.largestStandard(screenWidth: WKInterfaceDevice.current().screenBounds.width) }
+    private var standardSizes: DynamicTypeSize { WatchTonightLayout.largestStandard(screenHeight: WKInterfaceDevice.current().screenBounds.height) }
     private var measured: WatchTonightLayout {
         WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: typeSize <= standardSizes, accessibilitySize: typeSize.isAccessibilitySize)
     }
