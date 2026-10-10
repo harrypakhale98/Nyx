@@ -7,6 +7,8 @@ import WidgetKit
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
+/// `-nyx-watch-shift <hours>`: the app's minute moved that far ahead, to review moments of the night by day.
+/// `-nyx-watch-type large | xLarge | xxLarge` (or `-nyx-watch-xxxl`, `-nyx-watch-ax`): a text size the simulator cannot set.
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
     static var screen: String? {
@@ -24,6 +26,15 @@ enum WatchDebug {
         return 0
         #endif
     }
+    /// `-nyx-watch-shift <hours>`: how far the app's one clock (`\.watchNow`) runs ahead, so the
+    /// night's moments ("Truly dark now") can be reviewed by day. 0 in Release.
+    static var clockShift: TimeInterval {
+        #if DEBUG
+        return argument("-nyx-watch-shift").flatMap(Double.init).map { $0*3600 } ?? 0
+        #else
+        return 0
+        #endif
+    }
     /// `-nyx-watch-info` (with `-nyx-watch-screen dark`): the dark-adaptation info sheet open.
     static var showsInfo: Bool {
         #if DEBUG
@@ -35,12 +46,19 @@ enum WatchDebug {
     /// Screens that are Tonight itself (a page, or the dark-adaptation cover over it).
     static let homeScreens: Set<String> = ["tonight", "milestones", "week", "dark"]
     /// `-nyx-watch-ax`: the largest accessibility text size (the watch simulator cannot set it);
-    /// `-nyx-watch-xxxl`: the largest size short of the accessibility sizes.
+    /// `-nyx-watch-xxxl`: the largest size short of the accessibility sizes;
+    /// `-nyx-watch-type large | xLarge | xxLarge`: one of the sizes between.
     struct TypeSize: ViewModifier {
+        #if DEBUG
+        private static func size(_ name: String) -> DynamicTypeSize? {
+            ["large": .large, "xLarge": .xLarge, "xxLarge": .xxLarge][name]
+        }
+        #endif
         func body(content: Content) -> some View {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-nyx-watch-ax") { content.dynamicTypeSize(.accessibility5) }
             else if ProcessInfo.processInfo.arguments.contains("-nyx-watch-xxxl") { content.dynamicTypeSize(.xxxLarge) }
+            else if let size = WatchDebug.argument("-nyx-watch-type").flatMap(Self.size) { content.dynamicTypeSize(size) }
             else { content }
             #else
             content
