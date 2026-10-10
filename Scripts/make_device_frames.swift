@@ -1,9 +1,12 @@
 // Captioned App Store screenshots for iPad, Apple Vision Pro and Apple Watch, in the same design as
 // the iPhone frames (make_store_frames.swift): void black, a violet glow, seeded stars, an amber eyebrow,
 // a serif headline and the real capture as a floating screen. English only.
-// Usage: swift Scripts/make_device_frames.swift  (run from the repo root)
-// Reads Store/Screenshots/{iPad,Vision,Watch}; writes Store/Framed/iPad-13-inch (2064×2752),
-// Store/Framed/Vision-Pro (3840×2160) and Store/Framed/Watch-Ultra (422×514), flattened, no alpha.
+// Usage: swift Scripts/make_device_frames.swift ["Store/1.3 v11"]  (run from the repo root)
+// With no argument: reads Store/Screenshots/{iPad,Vision,Watch} and writes Store/Framed/iPad-13-inch
+// (2064×2752), Store/Framed/Vision-Pro (3840×2160) and Store/Framed/Watch-Ultra (422×514).
+// With a versioned set folder: reads its raw/{ipad,watch,vision} captures and writes its iPad,
+// Apple Watch and Apple Vision Pro folders in the same sizes, following that set's story (`sets`).
+// Every frame is flattened, no alpha.
 import AppKit
 
 let amber = NSColor(srgbRed: 1, green: 0xB4/255, blue: 0x54/255, alpha: 1)
@@ -21,11 +24,12 @@ struct Frame {
     var subline: String? = nil   // under the headline
     var footnote: String? = nil  // under the screen: what the scene is, for computed skies
     var red = false
+    var crop: CGRect? = nil      // part of the capture to show, in its pixels (top-left origin)
 }
 
 /// One canvas: its size and where the caption and screen sit, in pixels of that canvas.
 struct Layout {
-    let folder: String, source: String
+    var folder: String, source: String
     let width: CGFloat, height: CGFloat
     let eyebrowSize: CGFloat, eyebrowY: CGFloat, kern: CGFloat
     let headlineSize: CGFloat, headlineY: CGFloat, headlineHeight: CGFloat
@@ -45,7 +49,8 @@ struct LCG { var s: UInt64; mutating func next() -> CGFloat { s = s &* 636413622
 func render(_ frame: Frame, index: Int, _ L: Layout) -> Data? {
     let W = L.width, H = L.height
     guard let shot = NSImage(contentsOfFile: L.source + frame.source),
-          let shotCG = shot.cgImage(forProposedRect: nil, context: nil, hints: nil),
+          let full = shot.cgImage(forProposedRect: nil, context: nil, hints: nil),
+          let shotCG = frame.crop.map({ full.cropping(to: $0) }) ?? full,
           let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(W), pixelsHigh: Int(H), bitsPerSample: 8,
                                      samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
                                      bytesPerRow: 0, bitsPerPixel: 0),
@@ -154,6 +159,65 @@ let watch = (Layout(folder: "Watch-Ultra", source: "Store/Screenshots/Watch/", w
               Frame(source: "04-parks-ultra.png", output: "04-parks.png", eyebrow: "SAVED PARKS", headline: "Your parks,\nfrom your iPhone."),
               Frame(source: "05-dark-adaptation-ultra.png", output: "05-dark-adaptation.png", eyebrow: "FIELD MODE", headline: "Red light for\ndark-adapted eyes.", red: true),
               Frame(source: "06-tonight-night-vision-ultra.png", output: "06-night-vision.png", eyebrow: "NIGHT VISION", headline: "The whole watch,\nin red light.", red: true)])
+
+// Versioned sets: the folder names each device's frames, read from raw/<device>/ in that set.
+// 1.3 (11), from the iPhone build 10 story: the real sky first, one dial among the first three frames.
+let sets: [String: [(Layout, String, String, [Frame])]] = [
+    "Store/1.3 v11": [
+        (iPad.0, "iPad", "raw/ipad/", [
+            Frame(source: "01-sky.png", output: "01-tonights-sky.png", eyebrow: "TONIGHT'S SKY", headline: "The night sky,\nbefore you go."),
+            Frame(source: "02-tonight.png", output: "02-tonight.png", eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?"),
+            Frame(source: "03-light.png", output: "03-city-light.png", eyebrow: "WHAT CITY LIGHT TAKES", headline: "See the stars\na city would hide."),
+            Frame(source: "04-score.png", output: "04-score.png", eyebrow: "THE DARKNESS SCORE", headline: "One number,\nand its reasons."),
+            Frame(source: "05-field.png", output: "05-field-mode.png", eyebrow: "FIELD MODE", headline: "Red light for\ndark-adapted eyes.", red: true),
+            Frame(source: "06-plan.png", output: "06-plan.png", eyebrow: "BEST NIGHTS", headline: "Choose the night\nworth the drive."),
+            Frame(source: "07-map.png", output: "07-parks-map.png", eyebrow: "EVERY PARK TONIGHT", headline: "63 parks,\ndarkest first."),
+            Frame(source: "08-journal.png", output: "08-constellation.png", eyebrow: "YOUR CONSTELLATION", headline: "Every night\nbecomes a star.",
+                  subline: "Sample entries. Your journal stays on this iPad."),
+        ]),
+        (watch.0, "Apple Watch", "raw/watch/", [
+            Frame(source: "01-tonight.png", output: "01-tonight.png", eyebrow: "TONIGHT", headline: "Tonight's sky,\non your wrist."),
+            Frame(source: "02-week.png", output: "02-week.png", eyebrow: "NEXT SEVEN NIGHTS", headline: "The darkest night\nthis week."),
+            Frame(source: "03-models-range.png", output: "03-models-range.png", eyebrow: "FORECAST MODELS", headline: "When they differ,\nyou see the range."),
+            Frame(source: "04-dark-adaptation.png", output: "04-dark-adaptation.png", eyebrow: "DARK ADAPTATION", headline: "Give your eyes\nthirty minutes.", red: true),
+            Frame(source: "05-complications.png", output: "05-complications.png", eyebrow: "COMPLICATIONS", headline: "The whole night,\nat a glance."),
+            Frame(source: "06-red-light.png", output: "06-night-vision.png", eyebrow: "NIGHT VISION", headline: "The whole watch,\nin red light.", red: true),
+        ]),
+        (vision.0, "Apple Vision Pro", "raw/vision/", [
+            Frame(source: "01-immersive-core.png", output: "01-immersive-core.png", eyebrow: "STAND UNDER TONIGHT'S SKY", headline: "The Milky Way,\nwhere it really is.",
+                  footnote: "Joshua Tree, July 15, 2026, computed on device."),
+            Frame(source: "02-star-name.png", output: "02-star-name.png", eyebrow: "THE STARS", headline: "Tap a star\nfor its name.",
+                  footnote: "Antares in Scorpius, beside the Milky Way core."),
+            Frame(source: "03-window.png", output: "03-window.png", eyebrow: "NYX ON APPLE VISION PRO", headline: "The darkest night,\nplanned in your room.",
+                  footnote: "Joshua Tree on the night of October 9, 2026, with that night's cloud forecast."),
+            // The window's night panel, closer: the Moon's relief along the terminator.
+            Frame(source: "04-relief-moon.png", output: "04-relief-moon.png", eyebrow: "THE MOON, IN RELIEF", headline: "Craters along\nthe terminator.",
+                  footnote: "First quarter from Joshua Tree, October 18, 2026. Relief from NASA's Lunar Reconnaissance Orbiter.",
+                  crop: CGRect(x: 1535, y: 700, width: 1180, height: 664)),
+            Frame(source: "05-moon-on-table.png", output: "05-moon-on-table.png", eyebrow: "THE MOON ON YOUR TABLE", headline: "The Moon,\nin its true light.",
+                  footnote: "First quarter from Joshua Tree, October 18, 2026.",
+                  crop: CGRect(x: 1380, y: 1080, width: 1440, height: 810)),
+            Frame(source: "06-night-vision.png", output: "06-night-vision.png", eyebrow: "NIGHT VISION", headline: "The whole sky,\nin red light.",
+                  footnote: "Joshua Tree, July 15, 2026, computed on device.", red: true),
+        ]),
+    ],
+]
+
+if let set = CommandLine.arguments.dropFirst().first {
+    guard let devices = sets[set] else { print("no frame list for \(set); known: \(sets.keys.sorted())"); exit(1) }
+    for (base, folder, raw, frames) in devices {
+        var layout = base
+        layout.folder = folder; layout.source = set + "/" + raw
+        let dir = URL(fileURLWithPath: set + "/" + folder, isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        for (i, frame) in frames.enumerated() {
+            guard let png = render(frame, index: i, layout) else { print("failed \(frame.source)"); continue }
+            try png.write(to: dir.appendingPathComponent(frame.output))
+            print("wrote \(set)/\(folder)/\(frame.output)")
+        }
+    }
+    exit(0)
+}
 
 for (layout, frames) in [iPad, vision, watch] {
     let dir = URL(fileURLWithPath: "Store/Framed/" + layout.folder, isDirectory: true)

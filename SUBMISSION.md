@@ -85,14 +85,16 @@ App Review may ask for proof of permission to use third-party data. Before submi
 
 ## Screenshots
 
-**iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` (captured 2026-10-09; it shows build 10, so it serves 1.3 (10) unchanged).** `6.3-inch/` is required; `6.9-inch/` and `6.5-inch/` are optional. It supersedes the iPhone frames in `Store/1.1 v8/`, which show build 8. **iPad, Apple Watch and Apple Vision Pro: the build 8 sets in `Store/1.1 v8/`** until their own recapture. **Spanish frames wait for the native review.** Never upload the build 7 frames in `Store/Framed/`: they show scores from before score v2 (for example Joshua Tree 93 or 94, which the Bortle 3 cap now limits to 89) and copy that has since changed; showing them would contradict the app (Guideline 2.3). The owner's device pass (`INPUT_NEEDED.md` step 9) may still require a retake of any frame whose screen it changes. Reproduce the iPhone set with `python3 Scripts/capture_store.py SIM DERIVED en --out "Store/1.2 v10/raw"` on the iOS 27 iPhone 18 Pro simulator, then `swift Scripts/make_store_frames.swift`; the other devices with `swift Scripts/make_device_frames.swift`.
+**iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` (captured 2026-10-09; it shows build 10, so it serves 1.3 (10) unchanged).** `6.3-inch/` is required; `6.9-inch/` and `6.5-inch/` are optional. It supersedes the iPhone frames in `Store/1.1 v8/`, which show build 8. **iPad, Apple Watch and Apple Vision Pro: the sets in `Store/1.3 v11/`** (captured 2026-10-10 from the tree after the carry-forward commits; captions and contents in `Store/1.3 v11/README.md`). They show the watch's forecast models' range, the Vision Pro relief Moon and globe and the iPad city-light figure fix, which the uploaded 1.3 (10) lacks, so upload them with the next 1.3 build archived from this tree; if 1.3 (10) itself is submitted, keep the build 8 sets in `Store/1.1 v8/` for these three devices. **Spanish frames wait for the native review.** Never upload the build 7 frames in `Store/Framed/`: they show scores from before score v2 (for example Joshua Tree 93 or 94, which the Bortle 3 cap now limits to 89) and copy that has since changed; showing them would contradict the app (Guideline 2.3). The owner's device pass (`INPUT_NEEDED.md` step 9) may still require a retake of any frame whose screen it changes. Reproduce the iPhone set with `python3 Scripts/capture_store.py SIM DERIVED en --out "Store/1.2 v10/raw"` on the iOS 27 iPhone 18 Pro simulator, then `swift Scripts/make_store_frames.swift`; the other devices from the raw captures in `Store/1.3 v11/raw/` with `swift Scripts/make_device_frames.swift "Store/1.3 v11"` (routes for each frame in that folder's README).
 
 Slots (checked against Apple's [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) on 2026-10-06):
 
 - **iPhone**, required "Dynamic Island, medium display" 1206×2622: `Store/1.2 v10/iPhone/6.3-inch/`; optional 1320×2868 `6.9-inch/` and 1284×2778 `6.5-inch/`.
-- **iPad 13-inch**, 2064×2752 portrait: `Store/1.1 v8/iPad/`.
-- **Apple Watch**, 422×514: `Store/1.1 v8/Apple Watch/` (one size across localizations).
-- **Apple Vision Pro**, 3840×2160: `Store/1.1 v8/Apple Vision Pro/`.
+- **iPad 13-inch**, 2064×2752 portrait: `Store/1.3 v11/iPad/` (8 frames).
+- **Apple Watch**, 422×514: `Store/1.3 v11/Apple Watch/` (6 frames; one size across localizations).
+- **Apple Vision Pro**, 3840×2160: `Store/1.3 v11/Apple Vision Pro/` (6 frames).
+
+(The `Store/1.3 v11/` sets need the next 1.3 build; with 1.3 (10) use `Store/1.1 v8/` for these three devices, as above.)
 
 iPhone order (1.3 (10), real sky first; search results show only the first three, which hold one gauge): (1) Tonight's sky; (2) Tonight; (3) What's up tonight; (4) the score and its reasons; (5) field mode and (6) Where to look, in red; (7) the calendar; (8) what city light takes; (9) every park on the map; (10) the constellation (caption footnote "Sample entries"). Captions in `Store/1.2 v10/README.md`: calm, six words or fewer, no prices, no "new", no exclamation marks.
 
@@ -122,7 +124,7 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 1. Release or withdraw the approved 1.2 first (`INPUT_NEEDED.md` step 12), then + Version → **1.3** (iOS and visionOS); select build 10 (iOS, with the watch inside) and the visionOS build 10.
 2. Export compliance: No (above).
 3. TestFlight: install on iPhone (iOS 26 and 27 if possible), iPad, Apple Watch and Vision Pro; run the device pass; enable the public TestFlight link for the nomination.
-4. Version page: promotional text, description, keywords, subtitle, screenshots (iPhone `Store/1.2 v10/iPhone/`; iPad, Watch and Vision Pro `Store/1.1 v8/`), optional App Preview, **What's New in 1.3** (`Store/1.1/metadata.md`). The `Store/1.2 v10/` frames show build 10 and serve 1.3.
+4. Version page: promotional text, description, keywords, subtitle, screenshots (iPhone `Store/1.2 v10/iPhone/`; iPad, Watch and Vision Pro `Store/1.3 v11/` with the next 1.3 build, or `Store/1.1 v8/` with 1.3 (10)), optional App Preview, **What's New in 1.3** (`Store/1.1/metadata.md`). The `Store/1.2 v10/` frames show build 10 and serve 1.3.
 5. Pricing and Availability: US, Canada, Mexico; Mac availability off.
 6. App Privacy (Data Not Collected), Accessibility Nutrition Labels (only passed features), age rating (expected 4+; social media capabilities: No), review notes (above).
 7. Phased release (or manual) → Submit for Review. File the App Enhancements nomination for 1.3 (by Oct 16 for Nov 6–8) and attach the events once approved.
@@ -140,6 +142,6 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 | Storefronts and DSA trader status | OPEN: recommendation US, Canada, Mexico |
 | Open-Meteo, NPS, IMO emails | OPEN (owner) |
 | Build 10 archives (1.3) and `verify_release.py --require-key` | DONE 2026-10-09: iOS (with the Watch app) and visionOS uploaded as 1.3 (10), processing (`INPUT_NEEDED.md` #12); confirm the processed builds in App Store Connect. Build 8 (1.2) was uploaded 2026-10-08 and is approved |
-| Screenshots | iPhone DONE from build 10 (`Store/1.2 v10/`, 2026-10-09, all three sizes); iPad, Watch and Vision Pro from build 8 (`Store/1.1 v8/`) until their recapture; retake any frame whose screen the device pass changes |
+| Screenshots | iPhone DONE from build 10 (`Store/1.2 v10/`, 2026-10-09, all three sizes); iPad, Watch and Vision Pro DONE from the carry-forward tree (`Store/1.3 v11/`, 2026-10-10) for the next 1.3 build (`Store/1.1 v8/` with 1.3 (10)); retake any frame whose screen the device pass changes |
 | Physical device pass (accessibility, field mode at night, Watch, Vision Pro) | OPEN (`AUDIT.md`) |
 | Spanish native review | OPEN |

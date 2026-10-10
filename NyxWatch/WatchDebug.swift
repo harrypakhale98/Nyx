@@ -5,7 +5,8 @@ import WidgetKit
 /// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`
 /// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
-/// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show).
+/// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
+/// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
 /// States change who is followed, never a score: every night is computed by the real engine.
 enum WatchDebug {
     static var screen: String? {
@@ -157,6 +158,29 @@ private struct ComplicationReview: View {
         let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red)
         let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park), nightVision: red)
         let dark = NextDarkEntry(date: .now, park: park, moment: DarkMoment.next(at: park, now: .now), nightVision: red)
+        // Countdowns are drawn for this moment: a live `.currentDate` reference inside an app scroll view
+        // never finished its first layout on the watchOS 27 simulator (the widget extension counts down live).
+        if ProcessInfo.processInfo.arguments.contains("-nyx-watch-face") {
+            // `-nyx-watch-face`: the full-colour renders alone, unlabelled, circular ones clipped to
+            // their circles as on a face, for the store's complications frame.
+            VStack(spacing: 6) {
+                HStack(spacing: 16) {
+                    WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50).clipShape(Circle())
+                    NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark, now: .now).frame(width: 50, height: 50).clipShape(Circle())
+                }
+                WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry, clockTimes: true).frame(height: 56)
+                NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: dark, now: .now).frame(height: 56)
+                WatchComplicationView(previewFamily: .accessoryInline, entry: entry).frame(height: 20)
+            }
+            .environment(\.widgetRenderingMode, .fullColor)
+            .padding(.horizontal, 8)
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .toolbar(.hidden, for: .navigationBar)
+        } else {
+            review(entry: entry, moon: moon, dark: dark, red: red)
+        }
+    }
+    @ViewBuilder private func review(entry: WatchSkyEntry, moon: MoonEntry, dark: NextDarkEntry, red: Bool) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(ProcessInfo.processInfo.arguments.contains("-nyx-watch-tinted") ? [WidgetRenderingMode.accented] : [.fullColor, .accented], id: \.description) { mode in
@@ -165,19 +189,19 @@ private struct ComplicationReview: View {
                         HStack(spacing: 8) {
                             WatchComplicationView(previewFamily: .accessoryCircular, entry: entry).frame(width: 50, height: 50)
                             MoonComplicationView(previewFamily: .accessoryCircular, entry: moon).frame(width: 50, height: 50)
-                            NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark).frame(width: 50, height: 50)
+                            NextDarkComplicationView(previewFamily: .accessoryCircular, entry: dark, now: .now).frame(width: 50, height: 50)
                         }
                         HStack(spacing: 8) {
                             WatchComplicationView(previewFamily: .accessoryCorner, entry: entry).frame(width: 50, height: 50)
                             MoonComplicationView(previewFamily: .accessoryCorner, entry: moon).frame(width: 50, height: 50)
-                            NextDarkComplicationView(previewFamily: .accessoryCorner, entry: dark).frame(width: 50, height: 50)
+                            NextDarkComplicationView(previewFamily: .accessoryCorner, entry: dark, now: .now).frame(width: 50, height: 50)
                         }
-                        WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry).frame(height: 60)
+                        WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry, clockTimes: true).frame(height: 60)
                         MoonComplicationView(previewFamily: .accessoryRectangular, entry: moon).frame(height: 60)
-                        NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: dark).frame(height: 60)
+                        NextDarkComplicationView(previewFamily: .accessoryRectangular, entry: dark, now: .now).frame(height: 60)
                         WatchComplicationView(previewFamily: .accessoryInline, entry: entry).frame(height: 20)
                         MoonComplicationView(previewFamily: .accessoryInline, entry: moon).frame(height: 20)
-                        NextDarkComplicationView(previewFamily: .accessoryInline, entry: dark).frame(height: 20)
+                        NextDarkComplicationView(previewFamily: .accessoryInline, entry: dark, now: .now).frame(height: 20)
                     }
                     .environment(\.widgetRenderingMode, mode)
                 }

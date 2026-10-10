@@ -148,6 +148,8 @@ struct NextDarkComplicationView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     var previewFamily: WidgetFamily?
     let entry: NextDarkEntry
+    /// A fixed moment for countdowns, for views built in the app (the DEBUG review); nil in the widget, which counts down live.
+    var now: Date? = nil
     private var family: WidgetFamily { previewFamily ?? systemFamily }
     private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
     private var target: Date? { entry.moment.target(at: entry.date) }
@@ -209,7 +211,9 @@ struct NextDarkComplicationView: View {
         }
     }
     /// A self-updating relative time, "in 1 hr, 10 min".
-    private func reference(_ date: Date) -> Text { Text(.currentDate, format: .reference(to: date, allowedFields: [.hour, .minute])) }
+    private func reference(_ date: Date) -> Text {
+        now.map { Text(verbatim: inDuration(until: date, from: $0)) } ?? Text(.currentDate, format: .reference(to: date, allowedFields: [.hour, .minute]))
+    }
     @ViewBuilder private var headline: some View {
         switch entry.moment {
         case .darkNow: Text("Truly dark now")

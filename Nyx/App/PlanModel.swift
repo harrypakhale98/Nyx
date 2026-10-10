@@ -350,11 +350,32 @@ import CoreLocation
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         let paused=await detailService.pausedForLowData()
         if paused != detailPausedForLowData { detailPausedForLowData=paused }
+        #if DEBUG
+        exportWatchContext()
+        #endif
         guard network else { return }
         for park in parks {
             if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }
+    #if DEBUG
+    /// `-nyx-watch-export jotr,deva,…` (with `-nyx-state live` on a park page, which asks for forecast
+    /// detail): writes the context a paired iPhone would hand Apple Watch for those saved parks, the
+    /// models' ranges worked out by `SavedSkySync.modelRanges`, to the App Group as `watch-context.json`.
+    /// Store captures copy it into the watch simulator, which has no paired iPhone. Writes only a local file.
+    private func exportWatchContext() {
+        guard let list=DebugScenario.text("-nyx-watch-export"), detailWanted else { return }
+        let ids=list.split(separator:",").map(String.init).filter { park($0) != nil }
+        guard let home=ids.first,
+              let url=FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:SharedSettings.group)?.appendingPathComponent(WatchContextExport.file) else { return }
+        let closures=Dictionary(ids.compactMap { id in park(id).flatMap { closure($0) }.map { (id,$0) } },uniquingKeysWith:{ first,_ in first })
+        let context=WatchContext.make(savedParkIDs:ids,homeParkID:home,nightVision:false,forecasts:forecasts,details:details,closures:closures,
+                                      aboveInversion:Set(parks.filter { $0.aboveInversion == true }.map(\.id)),
+                                      ranges:SavedSkySync.modelRanges(self,ids:ids))
+        try? context.data?.write(to:url,options:.atomic)
+    }
+    private enum WatchContextExport { static let file="watch-context.json" }
+    #endif
     /// Alerts for every park arrive in one request (whichever screen asks first, at most every six
     /// hours), so the request never says which parks are near you; ranger programs follow only for
     /// the park whose page is open.

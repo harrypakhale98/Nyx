@@ -130,4 +130,22 @@ struct CityLightTests {
         #expect(!text.contains("La página de cada parque"))
         #expect(try spanish("Sources")=="Fuentes")
     }
+
+    // MARK: The figure's width
+
+    /// The figure's view reaches the horizon farther out than its widest frame, at both heights and
+    /// for every park's facing, so a wide iPad panel never shows the ground's ends as a slab: the
+    /// horizon at 110° either side of the view's centre (the ground's drawn ends) lies beyond the
+    /// frame's edge when the frame is `aspect` times as wide as it is high.
+    @Test @MainActor func figureNeverOutrunsItsHorizon() throws {
+        for height in [CityLightFigure.height,260.0] {
+            let size=CGSize(width:height*CityLightFigure.aspect,height:height)
+            for park in parks {
+                let options=BortleFigure.options(park,bortle:8)
+                let frame=SkyFrame(options:options,size:size)
+                let left=try #require(frame.point(0,options.facing-110)), right=try #require(frame.point(0,options.facing+110))
+                #expect(left.x < 0 && right.x > size.width, "\(park.id) at \(height) pt")
+            }
+        }
+    }
 }

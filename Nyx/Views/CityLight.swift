@@ -11,6 +11,7 @@ struct CityLightFigure: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @Environment(\.horizontalSizeClass) private var sizeClass
     let park: Park
     @State private var selection: Sky
     /// The class drawn: animates between the park's estimate and `cityClass`.
@@ -39,6 +40,12 @@ struct CityLightFigure: View {
     /// Only where the park's estimate is clearly darker than a city's (class 6 or lower).
     static func compares(_ park:Park)->Bool { Double(park.bortleEstimate)<=cityClass-2 }
     static let height=200.0
+    /// The figure is never wider than this many times its height. Its view (40° up, `BortleFigure.options`)
+    /// reaches the horizon only about 1.3 heights either side of the middle; a full-width iPad panel
+    /// showed the ground's ends as a black slab with the sky in a bowl between them.
+    static let aspect=2.2
+    /// Taller in a regular-width layout (iPad), so the capped figure keeps its presence in a wide panel.
+    private var figureHeight: Double { sizeClass == .regular ? 260 : Self.height }
     init(park:Park,selection:Sky = .here) {
         self.park=park
         _selection=State(initialValue:selection)
@@ -51,9 +58,11 @@ struct CityLightFigure: View {
                 if onScreen { GlowComparisonSky(sky:Self.sky(park),base:BortleFigure.options(park,bortle:drawnClass),bortle:drawnClass) }
                 else { Color.black }
             }
-            .frame(height:Self.height)
+            .frame(height:figureHeight)
             .clipShape(shape)
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .frame(maxWidth:figureHeight*Self.aspect)
+            .frame(maxWidth:.infinity)
             .onScrollVisibilityChange(threshold:0.01) { visible in if visible { onScreen=true } }
             .accessibilityElement()
             .accessibilityLabel(String(localized:"Illustration: this park's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
@@ -168,6 +177,9 @@ struct SkyGlowPanel: View {
 }
 #Preview("Sky glow · Denali (winter sky)") {
     if let p=try? ParkData.load().first(where:{$0.id=="dena"}) { NavigationStack { ScrollView { SkyGlowPanel(park:p).padding() }.background(.black) }.preferredColorScheme(.dark) }
+}
+#Preview("Sky glow · iPad width") {
+    if let p=try? ParkData.load().first(where:{$0.id=="deva"}) { NavigationStack { ScrollView { SkyGlowPanel(park:p,comparison:.city).padding() }.background(.black) }.environment(\.horizontalSizeClass,.regular).frame(width:1000,height:900).preferredColorScheme(.dark) }
 }
 #Preview("Sky glow · AX5") {
     if let p=try? ParkData.load().first(where:{$0.id=="deva"}) { NavigationStack { ScrollView { SkyGlowPanel(park:p).padding() }.background(.black) }.dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
