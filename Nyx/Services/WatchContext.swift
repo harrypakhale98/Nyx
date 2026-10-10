@@ -2,7 +2,7 @@ import Foundation
 
 /// What the iPhone tells Apple Watch, and nothing more: the saved parks, the starting park, the
 /// night-vision switch, the last cloud forecasts, the smoke and summit cloud-layer forecasts the
-/// score uses, and the parks' closures. The watch never touches the network; it computes the Sun,
+/// score uses, the parks' closures, and the forecast models' range where the iPhone's dial shows one. The watch never touches the network; it computes the Sun,
 /// the Moon and the score itself from these and the bundled parks.
 /// Sent as one property-list value (JSON data) through WatchConnectivity, device to device.
 nonisolated struct WatchContext: Codable, Sendable, Equatable {
@@ -10,7 +10,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// Bumped when the shape changes. Watch apps update on their own schedule, so a watch reads any
     /// context from `minimumVersion` on: fields added later are optional and unknown ones ignored.
     /// (Details and closures were added that way: a 1.2 watch reads a context without them, and an
-    /// older watch ignores them.)
+    /// older watch ignores them. So were the models' ranges, in 1.3.)
     static let currentVersion = 1
     static let minimumVersion = 1
     /// WatchConnectivity rejects large contexts; forecasts that would pass this are left out
@@ -27,34 +27,41 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let details: [String: CompactDetail]
     /// Each park's closure as Nyx words it beside the score, from the last park update.
     let closures: [String: String]
+    /// The forecast models' range of scores the iPhone's dial shows for a park's night
+    /// (`NightOutlook.dialRange`): park id → park-local day ("2026-10-10", `day(_:in:)`) →
+    /// [lowest, highest]. Two small numbers a night, and only for the nights that have one: the
+    /// watch cannot work it out itself, since the three models' clouds stay on the iPhone.
+    let ranges: [String: [String: [Int]]]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
     /// The smoke and summit layers in the shape `NightPlanner.night` reads, expanded once. Not sent.
     let forecastDetails: [String: ForecastDetail]
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
-    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures }
+    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures, ranges }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
         a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
+            && a.ranges == b.ranges
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast],
-         details: [String: CompactDetail] = [:], closures: [String: String] = [:]) {
+         details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:]) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
-        self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures
+        self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
     /// through a week ahead) and to the byte budget, saved parks first in their order. Each park's
-    /// clouds go first, then its smoke and summit layers; closures, which are short, come last
-    /// (the followed parks' first).
+    /// clouds go first, then its smoke and summit layers and its models' ranges (which mean
+    /// nothing without its clouds); closures, which are short, come last (the followed parks' first).
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
-                     now: Date = .now) -> WatchContext {
+                     ranges: [String: [String: ClosedRange<Int>]] = [:], now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
+        var sentRanges: [String: [String: [Int]]] = [:]
         let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
         let from = now.addingTimeInterval(-24*3600), to = now.addingTimeInterval(9*86400)
         // Park IDs and the envelope are small; each forecast is measured on its own.
@@ -73,6 +80,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             if let detail = details[id], let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: to), fits(small, id) {
                 compactDetails[id] = small
             }
+            if let nights = ranges[id]?.filter({ (0...100).contains($0.value.lowerBound) && $0.value.upperBound <= 100 }), !nights.isEmpty {
+                let pairs = nights.mapValues { [$0.lowerBound, $0.upperBound] }
+                if fits(pairs, id) { sentRanges[id] = pairs }
+            }
         }
         let followed = Set(ids)
         for (id, closure) in closures.sorted(by: { (followed.contains($0.key) ? 0 : 1, $0.key) < (followed.contains($1.key) ? 0 : 1, $1.key) }) {
@@ -80,7 +91,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             sentClosures[id] = closure
         }
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: compact,
-                            details: compactDetails, closures: sentClosures)
+                            details: compactDetails, closures: sentClosures, ranges: sentRanges)
     }
     var data: Data? { try? JSONEncoder().encode(self) }
     var dictionary: [String: Any] { data.map { [Self.key: $0] } ?? [:] }
@@ -94,7 +105,23 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     }
     /// The same context stamped at another moment, for comparing what it says rather than when.
     func sent(at date: Date) -> WatchContext {
-        WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details, closures: closures)
+        WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details,
+                     closures: closures, ranges: ranges)
+    }
+    /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
+    static func day(_ evening: Date, in park: Park) -> String {
+        let parts = park.calendar.dateComponents([.year, .month, .day], from: evening)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
+    /// The models' range to show beside the wrist's own score for this night, or nil. Shown only
+    /// as the iPhone shows it (a full forecast, a spread of more than 4 points) and only while it
+    /// still holds the score the watch worked out: a range that left the score out would
+    /// contradict the number above it, so it is dropped rather than stretched.
+    func modelRange(for night: Night) -> ClosedRange<Int>? {
+        guard night.basis == .forecast, let pair = ranges[night.park.id]?[Self.day(night.id, in: night.park)], pair.count == 2 else { return nil }
+        let low = pair[0], high = pair[1], score = night.score.value
+        guard 0 <= low, low <= score, score <= high, high <= 100, high-low > 4 else { return nil }
+        return low...high
     }
 }
 
@@ -111,6 +138,8 @@ nonisolated extension WatchContext {
         forecasts = ((try? container.decodeIfPresent([String: Lenient<CompactForecast>].self, forKey: .forecasts)) ?? [:]).compactMapValues(\.value)
         details = ((try? container.decodeIfPresent([String: Lenient<CompactDetail>].self, forKey: .details)) ?? [:]).compactMapValues(\.value)
         closures = (try? container.decodeIfPresent([String: String].self, forKey: .closures)) ?? [:]
+        // Absent from a 1.2 iPhone's context; a malformed one costs only the ranges.
+        ranges = (try? container.decodeIfPresent([String: [String: [Int]]].self, forKey: .ranges)) ?? [:]
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
 }

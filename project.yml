@@ -198,6 +198,8 @@ targets:
       - path: Nyx/Services/ForecastDetail.swift
       - path: Nyx/Services/SharedSettings.swift
       - path: Nyx/Services/WatchContext.swift
+      # DEBUG only (the whole file): the iPhone's forecast fixture, for the watch's models' range review route.
+      - path: Nyx/App/DebugForecasts.swift
       - path: Nyx/DesignSystem/MoonDisc.swift
       - path: Nyx/DesignSystem/MoonSymbol.swift
       - path: Nyx/Services/WristSky.swift

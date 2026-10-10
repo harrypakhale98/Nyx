@@ -205,6 +205,38 @@ nonisolated struct NightOutlook: Sendable, Equatable {
     var hazeHint: Double? { aerosol == nil ? visibility.flatMap { $0<10_000 ? $0 : nil } : nil }
     var isEmpty: Bool { self == NightOutlook() }
 }
+nonisolated extension NightOutlook {
+    /// One night's outlook from its park's forecast detail, with the models' range of scores: the
+    /// same caps as the score itself, smoke included. Agreement is kept only beside a score that
+    /// includes clouds, so the two never contradict each other. The range is widened to hold the
+    /// score itself: its best-match clouds can sit just outside the three models' averages, and a
+    /// range beside a score must never leave that score out. One rule for the iPhone's dial, time
+    /// river, chart and every spoken sentence (`PlanModel.outlook`), and for the range the iPhone
+    /// hands Apple Watch (`WatchContext.ranges`).
+    static func of(_ night: Night, detail: ForecastDetail, now: Date, scoring: any ScoreProviding) -> NightOutlook? {
+        let window=night.sky.cloudWindow
+        var outlook=detail.outlook(from:window.start,to:window.end,now:now)
+        // The smoke words describe the smoke the score counted, whatever the aerosol forecast's age.
+        outlook.aerosol=night.aerosol
+        if night.score.hasForecast, !night.upperCloudOnly, let agreement=outlook.agreement {
+            let aerosol=night.aerosol
+            let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.low,basis:.forecast,aerosol:aerosol).value
+            let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.high,basis:.forecast,aerosol:aerosol).value
+            let score=night.score.value
+            outlook.scoreRange=min(clearest,cloudiest,score)...max(clearest,cloudiest,score)
+        } else { outlook.agreement=nil }
+        return outlook.isEmpty ? nil : outlook
+    }
+    /// The models' range a dial draws around a score: only on a night whose clouds are a full
+    /// forecast, only when the models do not agree (where the time river and the Clouds tile say
+    /// "Forecast models agree", the dial never shows a spread), and only when it spans more than
+    /// 4 points, below which a band would read as noise around the tip.
+    func dialRange(basis: CloudBasis) -> ClosedRange<Int>? {
+        guard basis == .forecast, let agreement, agreement.band != .agree,
+              let models=scoreRange, models.upperBound-models.lowerBound>4 else { return nil }
+        return models
+    }
+}
 extension NightOutlook {
     static func temperature(_ celsius: Double) -> String {
         Measurement(value:celsius,unit:UnitTemperature.celsius).formatted(.measurement(width:.abbreviated,usage:.weather,numberFormatStyle:.number.precision(.fractionLength(0))))

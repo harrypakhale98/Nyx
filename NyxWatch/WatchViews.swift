@@ -183,13 +183,15 @@ struct TonightFace: View {
     /// The park's closure from the iPhone's last park update, worded as on the iPhone.
     private var closure: String? { context?.closures[night.park.id] }
     private var looking: Bool { engaged || offset != 0 }
+    /// The forecast models' range for the night on the dial, as the iPhone shows it.
+    private var models: ClosedRange<Int>? { context?.modelRange(for: shown) }
     var body: some View {
         if typeSize.isAccessibilitySize {
             ScrollView {
                 VStack(spacing: 6) {
                     gauge.frame(width: 112, height: 112)
                     Text(shown.score.band.label).font(.system(.headline, design: .serif))
-                    if looking { NightGlance(night: shown, isTonight: offset == 0) } else { NextMoment(night: night, now: now) }
+                    if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models) }
                     if let closure { ClosureLine(text: closure) }
                     ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                         Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
@@ -201,10 +203,10 @@ struct TonightFace: View {
                 // The gauge takes what the words leave: larger on Ultra, never crowding them on 42 mm.
                 gauge.frame(maxWidth: 150, minHeight: 0)
                 if looking {
-                    NightGlance(night: shown, isTonight: offset == 0).layoutPriority(1)
+                    NightGlance(night: shown, isTonight: offset == 0, models: models).layoutPriority(1)
                 } else {
-                    // "No cloud forecast" rides on the clock-time line, so the "now" line costs the gauge nothing.
-                    NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual).layoutPriority(1)
+                    // "No cloud forecast" or the models' range rides on the clock-time line, so neither costs the gauge anything.
+                    NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: models).layoutPriority(1)
                     if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
                         Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1).nonEssential()
                     }
@@ -216,7 +218,7 @@ struct TonightFace: View {
         }
     }
     private var gauge: some View {
-        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id))
+        WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models)
             .contentShape(Circle())
             .focusable(engaged)
             .focused($scrubbing)
@@ -260,22 +262,43 @@ struct ClosureLine: View {
     }
 }
 
-/// A night chosen with the Crown: which night, and its true darkness in park time.
+/// A night chosen with the Crown: which night, its true darkness in park time and, where the
+/// iPhone shows one, the forecast models' range of scores.
 struct NightGlance: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     let night: Night
     let isTonight: Bool
+    var models: ClosedRange<Int>? = nil
     var body: some View {
         VStack(spacing: 0) {
-            Group { if isTonight { Text("Tonight") } else { Text(night.park.dayLabel(night.id)) } }
-                .font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+            // The models' range rides on the day's line where it fits ("SAT, OCT 10 · MODELS 73–89"),
+            // so it costs the dial nothing; on its own line under the day where it does not. The
+            // dial speaks it, so VoiceOver hears only the day here.
+            let day = isTonight ? Text("Tonight") : Text(night.park.dayLabel(night.id))
+            ViewThatFits(in: .horizontal) {
+                if let models {
+                    let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
+                    if !typeSize.isAccessibilitySize {
+                        Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))").lineLimit(1).accessibilityLabel(day)
+                    }
+                    VStack(spacing: 0) {
+                        day.foregroundStyle(palette.accent)
+                        range.foregroundStyle(palette.muted).accessibilityHidden(true)
+                    }
+                } else {
+                    day.foregroundStyle(palette.accent)
+                }
+            }
+            .font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1)
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 Text("Dark \(night.park.time(start)) to \(night.park.time(end))").font(.system(.subheadline, design: .serif))
             } else {
                 Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             }
             if isTonight { Text("Turn the Crown to look ahead").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
-            else if !night.score.hasForecast { Text("No cloud forecast yet").font(.caption2).foregroundStyle(palette.muted).nonEssential() }
+            // An early look is named as the iPhone names it, never "no forecast" (`Night.basisLabel`).
+            else if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted).nonEssential() }
         }
         .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
@@ -300,6 +323,8 @@ struct NextMoment: View {
     let night: Night
     let now: Date
     var cloudsUnknown = false
+    /// Tonight's forecast models' range, when the iPhone shows one (never with `cloudsUnknown`).
+    var models: ClosedRange<Int>? = nil
     var body: some View {
         // At accessibility sizes every line wraps instead of shrinking or cutting off.
         let limit = typeSize.isAccessibilitySize ? nil : 1 as Int?
@@ -314,7 +339,12 @@ struct NextMoment: View {
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                         .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
-                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast") } else { Text("at \(night.park.time(next.date))") }
+                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast") }
+                        else if let models {
+                            // The dial speaks the range; VoiceOver hears only the time here.
+                            Text("at \(night.park.time(next.date)) · models \(models.lowerBound)–\(models.upperBound)")
+                                .accessibilityLabel(Text("at \(night.park.time(next.date))"))
+                        } else { Text("at \(night.park.time(next.date))") }
                     }
                     .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).minimumScaleFactor(0.8).nonEssential()
                 }
@@ -373,6 +403,10 @@ struct MilestonesPage: View {
                 Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.footnote)
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
+                }
+                if let models = context?.modelRange(for: night) {
+                    Text("Forecast models: \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).nonEssential()
+                        .accessibilityLabel(String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound)."))
                 }
                 if night.sky.darkHours > 0 {
                     Text("\(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))) of true darkness").font(.footnote)
@@ -586,6 +620,13 @@ private struct NyxTitle: ViewModifier {
 }
 #Preview("Night glance • Friday") {
     WatchPreviewHost(nightVision: true) { park, store in NightGlance(night: store.week(park, at: .now)[3], isTonight: false) }
+}
+#Preview("Night glance • models' range") {
+    // A range around the night's own score, as `WatchContext.modelRange` would hand it over.
+    WatchPreviewHost(nightVision: false) { park, store in
+        let night = store.week(park, at: .now)[1]
+        NightGlance(night: night, isTonight: false, models: max(0, night.score.value-12)...min(100, night.score.value+4))
+    }
 }
 #Preview("Milestones • Always-On") {
     WatchPreviewHost(nightVision: false) { park, store in MilestonesPage(night: store.tonight(park, at: .now), now: .now, context: nil) }

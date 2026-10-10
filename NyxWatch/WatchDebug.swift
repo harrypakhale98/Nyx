@@ -3,7 +3,7 @@ import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
 /// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`
-/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired`, `-nyx-watch-palette automatic | red | phone | standard`,
+/// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show).
 /// States change who is followed, never a score: every night is computed by the real engine.
@@ -83,6 +83,27 @@ enum WatchDebug {
             let closed = WatchContext(sent: .now, savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: [:],
                                       closures: ["jotr": "Keys View Road closed for repairs through November"])
             store.debugSet(context: closed, pinned: nil)
+        case "models":
+            // The forecast models' range, for review: the iPhone's own "disagree" forecast fixture
+            // (`DebugForecasts`, a different spread each night), its ranges worked out by the
+            // iPhone's rule (`NightOutlook.of`, `dialRange`) and handed over through
+            // `WatchContext.make`, as a paired iPhone would. The only watch fixture with clouds,
+            // because a range needs a forecast; it changes what the wrist is told, never the engine.
+            let now = Date.now, parks = synced.savedParkIDs.compactMap { store.park($0) }
+            guard let fixture = DebugForecasts(state: "disagree", parks: parks, now: now) else { break }
+            var ranges: [String: [String: ClosedRange<Int>]] = [:]
+            for park in parks {
+                guard let detail = fixture.details[park.id] else { continue }
+                for offset in 0..<7 {
+                    let evening = park.date(park.currentNight(at: now), addingDays: offset)
+                    let night = WatchSky.night(park, evening: evening, forecast: fixture.forecasts[park.id], detail: detail, now: now)
+                    if let range = NightOutlook.of(night, detail: detail, now: now, scoring: ScoreEngine())?.dialRange(basis: night.basis) {
+                        ranges[park.id, default: [:]][WatchContext.day(night.id, in: park)] = range
+                    }
+                }
+            }
+            store.debugSet(context: WatchContext.make(savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: fixture.forecasts,
+                                                      details: fixture.details, ranges: ranges, now: now), pinned: "jotr")
         case "expired":
             // A forecast the iPhone sent three days ago: too old to score, so the watch says so.
             let old = Date.now.addingTimeInterval(-3*86400)

@@ -12963,6 +12963,23 @@
         }
       }
     },
+    "Models %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models %lld–%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos %lld–%lld"
+          }
+        }
+      }
+    },
     "Models agree": {
       "extractionState": "manual",
       "localizations": {
@@ -29108,6 +29125,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@"
+          }
+        }
+      }
+    },
+    "at %@ · models %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "at %@ · models %lld–%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · modelos %lld–%lld"
           }
         }
       }
