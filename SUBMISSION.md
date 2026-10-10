@@ -141,7 +141,7 @@ Declare only what the device pass confirms (`Store/1.1/accessibility-nutrition-l
 | USPTO search for NYX | OPEN (owner) |
 | Storefronts and DSA trader status | OPEN: recommendation US, Canada, Mexico |
 | Open-Meteo, NPS, IMO emails | OPEN (owner) |
-| Build 10 archives (1.3) and `verify_release.py --require-key` | DONE 2026-10-09: iOS (with the Watch app) and visionOS uploaded as 1.3 (10), processing (`INPUT_NEEDED.md` #12); confirm the processed builds in App Store Connect. Build 8 (1.2) was uploaded 2026-10-08 and is approved. Build 11 (1.3): built and tested 2026-10-10 (zero warnings, 504 tests), not archived or uploaded; waits for the owner's word |
+| Build 10 archives (1.3) and `verify_release.py --require-key` | DONE 2026-10-09: iOS (with the Watch app) and visionOS uploaded as 1.3 (10), processing (`INPUT_NEEDED.md` #12); confirm the processed builds in App Store Connect. Build 8 (1.2) was uploaded 2026-10-08 and is approved. Build 11 (1.3): DONE 2026-10-10: archived (zero warnings), `verify_release.py --require-key` passed, iOS (with the Watch app) and visionOS uploaded as 1.3 (11), processing; select build 11 for the 1.3 submission |
 | Screenshots | iPhone DONE from build 10 (`Store/1.2 v10/`, 2026-10-09, all three sizes); iPad, Watch and Vision Pro DONE from the carry-forward tree (`Store/1.3 v11/`, 2026-10-10) for 1.3 (11) (`Store/1.1 v8/` with 1.3 (10)); retake any frame whose screen the device pass changes |
 | Physical device pass (accessibility, field mode at night, Watch, Vision Pro) | OPEN (`AUDIT.md`) |
 | Spanish native review | OPEN |
