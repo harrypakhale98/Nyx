@@ -12,15 +12,17 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     private var latest: WatchContext?
     private var lastSent: Data?
     private override init() { super.init() }
+    /// False where no watch can ever pair (iPad), so nothing is worked out for one.
+    static var isAvailable: Bool { WCSession.isSupported() }
 
     /// Called wherever the widget snapshot is written, and when night vision or the starting park
     /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch.
     func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast], details: [String: ForecastDetail],
-              closures: [String: String], aboveInversion: Set<String>) {
+              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]) {
         guard WCSession.isSupported() else { return }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts,
-                                        details: details, closures: closures, aboveInversion: aboveInversion)
+                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges)
         let session = WCSession.default
         lock.withLock { latest = context }
         if session.activationState == .activated { send(session) }
@@ -30,7 +32,7 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         guard session.isPaired, session.isWatchAppInstalled else { return }
         let context: WatchContext? = lock.withLock { latest }
         guard let context, let data = context.data else { return }
-        // The same parks, forecasts, smoke, closures and switch as last time: nothing to say.
+        // The same parks, forecasts, smoke, closures, ranges and switch as last time: nothing to say.
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         let comparable = try? encoder.encode(context.sent(at: .distantPast))

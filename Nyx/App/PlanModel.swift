@@ -188,23 +188,7 @@ import CoreLocation
         return outlook
     }
     private func deriveOutlook(_ night:Night)->NightOutlook? {
-        guard let detail=details[night.park.id] else { return nil }
-        let window=night.sky.cloudWindow
-        var outlook=detail.outlook(from:window.start,to:window.end,now:present)
-        // The smoke words describe the smoke the score counted, whatever the aerosol forecast's age.
-        outlook.aerosol=night.aerosol
-        if night.score.hasForecast, !night.upperCloudOnly, let agreement=outlook.agreement {
-            // The same caps as the score itself, smoke included.
-            let aerosol=night.aerosol
-            let clearest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.low,basis:.forecast,aerosol:aerosol).value
-            let cloudiest=scoring.score(sky:night.sky,bortle:night.park.bortleEstimate,cloud:agreement.high,basis:.forecast,aerosol:aerosol).value
-            // Widened to hold the score itself: its best-match clouds can sit just outside the three
-            // models' averages, and a range beside a score must never leave that score out. Done once
-            // here, so the dial, the time river, the chart and every spoken sentence give one range.
-            let score=night.score.value
-            outlook.scoreRange=min(clearest,cloudiest,score)...max(clearest,cloudiest,score)
-        } else { outlook.agreement=nil }
-        return outlook.isEmpty ? nil : outlook
+        details[night.park.id].flatMap { NightOutlook.of(night,detail:$0,now:present,scoring:scoring) }
     }
     /// The core, planets, a meteor shower and an eclipse for one night, worded for that night
     /// ("peak tonight" only on tonight). Kept per park and night: scrubbing recomputes nothing.

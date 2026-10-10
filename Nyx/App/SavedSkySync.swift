@@ -123,12 +123,29 @@ import WidgetKit
         await publish(model,ids.compactMap { model.park($0) })
     }
     /// Hands Apple Watch the saved parks (or, with the journal unavailable, the last snapshot's),
-    /// the starting park, clouds, smoke and summit layers, and closures. A no-op without a watch,
-    /// and when nothing changed since the last hand-over.
+    /// the starting park, clouds, smoke and summit layers, closures and the models' ranges. Nothing is
+    /// worked out where no watch can pair (iPad), and nothing is sent when nothing changed since the
+    /// last hand-over or no watch is paired.
     func pushWatch(_ model:PlanModel) {
-        guard let ids=parkIDs else { return }
+        guard let ids=parkIDs, WatchBridge.isAvailable else { return }
         WatchBridge.shared.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
-                                aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)))
+                                aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),
+                                ranges:Self.modelRanges(model,ids:ids+[model.homeID]))
+    }
+    /// The forecast models' range each followed park's dial shows for the week the watch shows
+    /// (tonight and six more), keyed by park-local day: only where the iPhone draws one, so only
+    /// for parks with forecast detail. Read from the model's outlook cache, which the park page
+    /// and the river fill anyway.
+    static func modelRanges(_ model:PlanModel,ids:[String])->[String:[String:ClosedRange<Int>]] {
+        var ranges:[String:[String:ClosedRange<Int>]]=[:]
+        for id in Set(ids) where model.forecasts[id] != nil && model.details[id] != nil {
+            guard let park=model.park(id) else { continue }
+            for offset in 0..<7 {
+                let night=model.night(park,on:park.date(model.tonight(park),addingDays:offset))
+                if let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis) { ranges[id,default:[:]][WatchContext.day(night.id,in:park)]=range }
+            }
+        }
+        return ranges
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
         let moonsDrawn=await renderWidgetMoons(model,parks)

@@ -12,6 +12,9 @@ struct WatchGauge: View {
     let night: Night
     /// The night's day ("Fri, Oct 9") when it is not tonight, read first by VoiceOver.
     var nightLabel: String? = nil
+    /// The forecast models' range the iPhone shows for this night (`WatchContext.modelRange`),
+    /// spoken with the score; the words under the dial are hidden from VoiceOver.
+    var models: ClosedRange<Int>? = nil
     @State private var shown = 0.0
     @State private var revealed = false
     var body: some View {
@@ -27,7 +30,16 @@ struct WatchGauge: View {
                         .font(.system(size: side*0.36, weight: .light, design: .serif)).tracking(-side*0.012)
                         .foregroundStyle(palette.accent).lineLimit(1).minimumScaleFactor(0.5)
                     if !typeSize.isAccessibilitySize {
-                        Text(night.score.band.label).font(.system(size: max(10, side*0.11), design: .serif)).lineLimit(1).minimumScaleFactor(0.7)
+                        // Never across the ticks at the arc's open ends: a little smaller if it must,
+                        // and on a dial too small for the word at all (a long glance in Spanish on a
+                        // small watch) the numeral stands alone; VoiceOver always says the band.
+                        let band = max(10, side*0.11)
+                        ViewThatFits(in: .horizontal) {
+                            Text(night.score.band.label).font(.system(size: band, design: .serif)).lineLimit(1)
+                            Text(night.score.band.label).font(.system(size: band*0.85, design: .serif)).lineLimit(1)
+                            Color.clear.frame(width: 1, height: 1)
+                        }
+                        .frame(maxWidth: Self.bandWidth(side: side))
                     }
                 }
                 .padding(.horizontal, side*0.16).offset(y: -side*0.045)
@@ -40,7 +52,7 @@ struct WatchGauge: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Darkness score")
-        .accessibilityValue("\(nightLabel.map { $0 + ", " } ?? "")\(score) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized: "Includes cloud forecast.")) \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.")
+        .accessibilityValue(spoken)
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: .milliseconds(120))
@@ -49,6 +61,21 @@ struct WatchGauge: View {
         }
         .sensoryFeedback(.selection, trigger: revealed) { _, new in new }
         .onChange(of: dimmed) { _, _ in shown = Double(score) }
+    }
+    /// How wide the band word may be and still clear the ticks at the arc's open ends: the span
+    /// between the end ticks' midpoints (at 140° and 40°, between radius − 10 and radius − 5), less
+    /// 1 pt each side. The word's foot sits level with those ticks.
+    nonisolated static func bandWidth(side: Double) -> Double {
+        let radius = side/2 - 10
+        return max(0, 2*cos(40 * .pi/180)*(radius-7.5) - 2)
+    }
+    /// The night, the score and its band, what the clouds rest on (with the models' range on a
+    /// night that has one, as the iPhone's dial says it), then the Moon.
+    private var spoken: String {
+        var clouds = night.basisCaption() ?? String(localized: "Includes cloud forecast.")
+        if let models { clouds += " " + String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound).") }
+        let day = nightLabel.map { $0 + ", " } ?? "", lit = Int((night.sky.moon.illumination*100).rounded())
+        return String(localized: "\(day)\(night.score.value) out of 100, \(night.score.band.label). \(clouds) \(night.sky.moon.name), \(lit) percent lit.")
     }
 }
 

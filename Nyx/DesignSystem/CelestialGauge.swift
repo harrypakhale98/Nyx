@@ -333,14 +333,9 @@ struct CelestialGauge: View {
         withAnimation(NyxMotion.spring.delay(0.3)) { rangeShown=true }
     }
     /// The forecast models' range to draw around a score (`NightOutlook.scoreRange`, which already
-    /// holds the score): only on a night whose clouds are a full forecast, only when the models do
-    /// not agree (where the time river and the Clouds tile say "Forecast models agree", the dial
-    /// never shows a spread), and only when it spans more than 4 points, below which a band would
-    /// read as noise around the tip.
+    /// holds the score), by the rule the watch's night view shares (`NightOutlook.dialRange`).
     nonisolated static func modelRange(_ outlook:NightOutlook?,basis:CloudBasis)->ClosedRange<Int>? {
-        guard basis == .forecast, let outlook, let agreement=outlook.agreement, agreement.band != .agree,
-              let models=outlook.scoreRange, models.upperBound-models.lowerBound>4 else { return nil }
-        return models
+        outlook?.dialRange(basis:basis)
     }
     // MARK: Parts
 
