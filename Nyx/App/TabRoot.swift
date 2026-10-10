@@ -33,9 +33,11 @@ struct SettingsSheet: View {
 }
 /// The night-vision switch as a toolbar toggle: a lamp, not a theme. The window dips to black, the
 /// red comes up under the cover and is revealed (`NightVisionLamp`, run by `RootView`), with one
-/// soft tap at the turn and the new state announced. Under Reduce Motion or Prefer Cross-Fade
-/// Transitions it writes the setting at once and the palette crossfades. VoiceOver hears a toggle
-/// with its state; Voice Control answers to "Night vision", "Red light" or "Flashlight".
+/// soft tap at the turn. Under Reduce Motion or Prefer Cross-Fade Transitions it writes the setting
+/// at once and the palette crossfades. VoiceOver hears a toggle with its state, said once: the
+/// switch's own value when VoiceOver is on it, "Night vision on" or "off" only when it was turned
+/// from elsewhere (Voice Control with VoiceOver running). Voice Control answers to "Night vision",
+/// "Red light" or "Flashlight".
 struct NightVisionToggle: View {
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(SceneCommands.self) private var commands:SceneCommands?
@@ -55,16 +57,19 @@ struct NightVisionToggle: View {
         // The soft tap at the turn comes once, from `RootView`: every tab's toolbar has its own switch.
     }
     private func turn(_ on:Bool) {
-        if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on); return }
+        // Read at the tap, before the lamp's cover could move VoiceOver anywhere.
+        let announce = !NightVisionLamp.voiceOverOnSwitch()
+        if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce); return }
         nightVision=on
-        NightVisionLamp.announce(on)
+        if announce { NightVisionLamp.announce(on) }
     }
 }
 /// The lamp's timing, shared by the toolbar switch and `RootView`: ~0.2 s down to black, the turn,
 /// then the reveal on the shared spring (~0.45 s to the eye). A second tap mid-way reverses from
 /// wherever the cover is, so no frame is ever brighter than the one before on the way into the red.
 enum NightVisionLamp {
-    struct Request: Equatable { let id:Int; let on:Bool }
+    /// One tap on the switch: the state asked for, and whether to say it (`voiceOverOnSwitch`).
+    struct Request: Equatable { let id:Int; let on:Bool; var announce=true }
     static let dim=0.2
     static let reveal=0.45
     /// Where the cover is between frames, as far as the lamp needs to know: a straight line from one
@@ -81,6 +86,14 @@ enum NightVisionLamp {
     }
     /// Seconds left to reach full cover from a cover already partly down (0 to 1).
     static func dimTime(from cover:Double)->Double { dim*(1-min(max(cover,0),1)) }
+    /// Whether VoiceOver is on the switch itself, which then speaks its own new value: an
+    /// announcement as well would say the state twice. The toolbar's switch is hosted by UIKit,
+    /// so the element VoiceOver is on is read there, by the switch's label.
+    @MainActor static func voiceOverOnSwitch()->Bool {
+        guard UIAccessibility.isVoiceOverRunning,
+              let element=UIAccessibility.focusedElement(using:UIAccessibility.AssistiveTechnologyIdentifier.notificationVoiceOver) as? NSObject else { return false }
+        return element.accessibilityLabel == String(localized:"Night vision")
+    }
     /// Said after the setting is written, politely, after anything VoiceOver is already saying.
     @MainActor static func announce(_ on:Bool) {
         NightListener.announce(on ? String(localized:"Night vision on") : String(localized:"Night vision off"),priority:.default)
