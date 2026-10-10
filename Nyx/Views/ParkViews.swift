@@ -328,9 +328,18 @@ struct ParkDetailView: View {
                 }
                 #if DEBUG
                 // DEBUG captures: `-nyx-chapter sky|place|moon|spots|programs` opens at that part of the page.
+                // The page grows above the target as What's up and its alarm rows arrive, so the scroll is
+                // repeated until that has settled (about 3 s); the Moon is centred, every other part at the top.
                 if let target=ProcessInfo.processInfo.arguments.firstIndex(of:"-nyx-chapter").flatMap({ ProcessInfo.processInfo.arguments.dropFirst($0+1).first }) {
+                    let id=ParkChapter(rawValue:target).map { AnyHashable($0) } ?? AnyHashable(target)
+                    let anchor:UnitPoint=target=="moon" ? .center : .top
                     try? await Task.sleep(for:.milliseconds(700))
-                    proxy.scrollTo(ParkChapter(rawValue:target).map { AnyHashable($0) } ?? AnyHashable(target),anchor:.top); return
+                    for _ in 0..<10 {
+                        guard !Task.isCancelled else { return }
+                        proxy.scrollTo(id,anchor:anchor)
+                        try? await Task.sleep(for:.milliseconds(250))
+                    }
+                    return
                 }
                 // DEBUG promo capture (`-nyx-demo-river`): the river in view, then a slow scrub along its
                 // thirty nights and back to the best one, as a finger would drag it. Never in Release.
