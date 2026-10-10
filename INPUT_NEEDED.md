@@ -101,7 +101,7 @@
 
 19. **Optional data reviews.** The Bortle review queue (only Saguaro changed, to 5): Biscayne, Cuyahoga Valley, Kobuk Valley, Mammoth Cave (an International Dark Sky Park computed near 2.9), Indiana Dunes, Hot Springs, Gateway Arch. Usual clouds could be rebuilt at viewing-spot coordinates with your Copernicus account (`Scripts/build_cloud_climate.py`).
 
-20. **Push `main`** when you are happy with it. Pushing deploys the website (`docs/`) to get-nyx.com through the Cloudflare Worker. **Before pushing, decide the website's version lines.** The landing page, Support and the press kit say the App Store has 1.1 and describe 1.2 as the next update (`docs/index.html`, `docs/support.html`, `docs/press/index.html`). That stays true only until you release 1.2 (step 12), so they were left unchanged on October 9. Once 1.2 is released, ask me to change them to say the App Store has 1.2 and 1.3 follows, then push.
+20. **Push `main` the day 1.3 is approved.** Pushing deploys the website (`docs/`) to get-nyx.com through the Cloudflare Worker. The site now describes Nyx 1.3 as the current version (the landing page with its "New in 1.3" section, Support and the press kit, with the 1.3 screens and press images), so push it on approval day, not before: until then the App Store still has 1.2.
 
 ## Done
 - Version 1.2 (8) approved by App Review (learned 2026-10-09, when App Store Connect refused a second 1.2 upload); release is step 12. Version 1.3 (10) archived, verified and uploaded 2026-10-09 (iOS with the Watch app, and visionOS).

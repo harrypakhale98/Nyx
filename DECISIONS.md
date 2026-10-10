@@ -1459,3 +1459,7 @@ Shell, compliance and Vision Pro clouds lanes (the park-page lane follows). Gate
 ## Product page header — 2026-10-10
 
 - The 1.3 product page header is drawn by the iPhone app's own Tonight's sky renderer (`PanoramaCanvas`, via the DEBUG-only `-nyx-export-header`: Death Valley, Jul 3, 2027, 12:55 AM, facing 184°) instead of cropped from the Vision Pro immersive sky: the header shows on the iOS product page, so it should be the sky an iPhone actually draws, matching the scene of the iPhone set's first frame (`01-tonights-sky.png`).
+
+## Website for 1.3 — 2026-10-10
+
+- The site describes Nyx 1.3 as the current version: every screen regenerated at the same names and sizes from the live captures (iPhone from `Store/1.2 v10/raw`, iPad, Apple Watch and Apple Vision Pro from `Store/1.3 v11/raw`; the light screen now shows the city sky selected, the Vision Pro Moon is the relief globe alone), a compact "New in 1.3" section of five cards on the landing page (the Moon in relief, the models' range on the dial and the watch, what city light takes, named stars, touch and hold the shape of the night), the scores and alt text matched to the new screens, Support and the press kit (version 1.3, what is new, the new captioned sets as web images) updated, sitemap dates moved. The landing page's watch frames now take their height from the screen: a stretched frame had cropped the sides of every watch screen. Checked in WebKit at phone and desktop widths, in both palettes. The push waits for 1.3's approval (`INPUT_NEEDED.md` step 20).

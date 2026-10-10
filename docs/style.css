@@ -120,8 +120,9 @@ section { position: relative; }
 .device img { width: 100%; height: 100%; object-fit: cover; border-radius: 12.4% / 5.8%; filter: var(--shot-filter); background: #000; }
 .device.tablet { aspect-ratio: 2064 / 2752; padding: 2.6%; border-radius: 6.5% / 4.9%; }
 .device.tablet img { border-radius: 4.4% / 3.3%; }
-.device.watch { aspect-ratio: 422 / 514; padding: 7%; border-radius: 30%; background: linear-gradient(150deg, #3a3c46, #121319 55%, #26282f); }
-.device.watch img { border-radius: 22%; }
+/* The watch frame takes its height from its screen, so the whole screen shows (a stretched frame had cropped its sides) */
+.device.watch { aspect-ratio: auto; padding: 7%; border-radius: 30%; background: linear-gradient(150deg, #3a3c46, #121319 55%, #26282f); }
+.device.watch img { display: block; height: auto; aspect-ratio: 422 / 514; border-radius: 22%; }
 .shot { margin: 0; }
 .shot figcaption { margin-top: 14px; font-size: 14px; color: var(--soft); text-align: center; }
 
@@ -212,6 +213,7 @@ html:has(#nv:checked) .scale li { border-color: var(--amber); }
 .tile .art { margin-top: auto; padding-top: 24px; display: flex; justify-content: center; gap: 16px; }
 .tile.ipad .device { width: min(78%, 360px); margin-bottom: -26%; }
 .tile.watch .art .device { width: min(42%, 200px); }
+.tile.watch .art { align-items: flex-start; }
 .tile.vision > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--shot-filter); }
 .tile.vision .over { position: relative; padding: clamp(24px, 4vw, 48px); background: linear-gradient(to top, rgba(0, 0, 0, .86), rgba(0, 0, 0, .5) 60%, transparent); max-width: none; }
 .tile.vision .over p { max-width: 560px; }
@@ -221,6 +223,9 @@ html:has(#nv:checked) .scale li { border-color: var(--amber); }
 .card { border: 1px solid var(--line); border-radius: 20px; background: var(--panel); padding: 24px; }
 .card .k { font-family: var(--serif); font-size: 22px; color: var(--ink); margin: 0 0 8px; line-height: 1.25; }
 .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+/* New in 1.3: five short cards in one row on wide screens */
+.cards.five { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.cards.five .card .k { font-size: 20px; }
 
 /* Privacy band */
 .privacy-band { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 80px); align-items: start; }
