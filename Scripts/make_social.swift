@@ -20,7 +20,8 @@ struct Card {
 // Framed sources: the eyebrow and headline below are the frames' own captions, for reference.
 let cards = [
     Card(source: "Store/1.2 v10/iPhone/6.3-inch/01-tonights-sky.png", output: "01-sky.png",
-         eyebrow: "TONIGHT'S SKY", headline: "The night sky,\nbefore you go.", cropTop: 0, framed: true),
+         eyebrow: "TONIGHT'S SKY", headline: "The night sky,\nbefore you go.", cropTop: 0, framed: true,
+         scale: 0.74),  // smaller, so the core, Antares and the southern horizon sit above the bottom fade
     Card(source: "Store/1.2 v10/iPhone/6.3-inch/02-tonight.png", output: "02-tonight.png",
          eyebrow: "TONIGHT", headline: "Where is the sky\ndarkest tonight?", cropTop: 0, framed: true,
          scale: 0.9),  // the whole dial and its band word
