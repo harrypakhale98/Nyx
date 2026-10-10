@@ -63,7 +63,8 @@ struct VisionEyebrow: View {
 /// The iPhone's two sizes of map (`MoonShading`): from 120 pt, as the night panel's Moon is, it
 /// draws on `MoonAtlas`, the 4096×2048 colour map with LOLA's relief casting crater shadows along
 /// the terminator (fading toward the limb and toward full Moon, in the shader). Smaller Moons, and
-/// the immersive sky's disc (`atlas: false`, re-rendered as the clock moves), keep `MoonMap`.
+/// the immersive sky's disc (`atlas: false`, 256 pixels, where the relief would not show), keep
+/// `MoonMap`: the atlas decodes to about 48 MB, the small map to about 2 MB.
 struct VisionMoon: View {
     let geometry: MoonGeometry
     var label: String?

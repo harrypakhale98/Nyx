@@ -157,13 +157,17 @@ nonisolated struct MoonView: Sendable, Equatable {
             shown = view
             shownNightVision = nightVision
             // Natural sunlight; the night side keeps a trace of earthshine, strongest around new
-            // moon, as on the window's disc. Night vision's red is the surface's tint below.
+            // moon, as on the window's disc. In night vision the sunlight itself is red: the
+            // material's specular and Fresnel sheen (present even at roughness 1) take the light's
+            // colour, not the base colour's, so under white light the limb and the full Moon's
+            // bright opposition patch would stay a neutral pink-white.
             let red = UIColor(red: 1, green: 0.27, blue: 0.23, alpha: 1)
-            sun.light = DirectionalLightComponent(color: UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
+            sun.light = DirectionalLightComponent(color: nightVision ? red : UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
             if var material {
                 // Night vision also tints the surface itself, as the window's filter tints its
                 // disc: the faint fill the system still gives the night side turns red with it,
-                // rather than staying grey beside a red day side.
+                // rather than staying grey beside a red day side. Red light on a red surface is
+                // still the one red.
                 material.baseColor = .init(tint: nightVision ? red : .white, texture: material.baseColor.texture)
                 material.emissiveColor = .init(color: nightVision ? red : UIColor(red: 0.75, green: 0.85, blue: 1, alpha: 1), texture: material.emissiveColor.texture)
                 material.emissiveIntensity = nightVision ? 0 : Float(0.03*(1-cos(view.geometry.phaseAngle))/2)
@@ -241,11 +245,12 @@ nonisolated struct MoonView: Sendable, Equatable {
     }
 }
 
-/// The globe's two textures, read from the app bundle when the volume opens and held only by the
-/// globe's material, so they go when the volume closes. Built by `Scripts/build_moon_globe.swift`
+/// The globe's two textures, read from the app bundle when the volume opens and held by the globe
+/// (its material, and `MoonGlobe.relief` for the normal map), so they go when the volume closes
+/// and its `MoonGlobe` is released. Built by `Scripts/build_moon_globe.swift`
 /// and stored already GPU-compressed (ASTC in KTX, with their mipmaps), so they load as they are,
 /// with nothing decoded or cached on the way: `MoonGlobeColour.ktx` (4096×2048 LROC colour, ASTC
-/// 6×6, about 5 MB) and `MoonGlobeNormal.ktx` (2048×1024 LOLA normals, ASTC 4×4, about 2.8 MB),
+/// 6×6, about 5 MB) and `MoonGlobeNormal.ktx` (2048×1024 LOLA normals, ASTC 4×4 with renormalised mips, about 2.8 MB),
 /// against some 53 MB as plain RGBA. If either is missing the globe keeps `MoonMap` and a smooth
 /// surface rather than failing.
 struct MoonGlobeTextures {
