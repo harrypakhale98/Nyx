@@ -59,9 +59,16 @@ struct VisionEyebrow: View {
 /// The Moon from the iPhone's shader (`Moon.metal`): NASA's lunar map on a lit sphere with the
 /// real phase, tilt, libration and earthshine. Night vision is the window's filter (or, in the
 /// sky, the material's tint), so the disc itself is always drawn in natural colour.
+///
+/// The iPhone's two sizes of map (`MoonShading`): from 120 pt, as the night panel's Moon is, it
+/// draws on `MoonAtlas`, the 4096×2048 colour map with LOLA's relief casting crater shadows along
+/// the terminator (fading toward the limb and toward full Moon, in the shader). Smaller Moons, and
+/// the immersive sky's disc (`atlas: false`, re-rendered as the clock moves), keep `MoonMap`.
 struct VisionMoon: View {
     let geometry: MoonGeometry
     var label: String?
+    /// False keeps the small map at any size (the immersive sky's 256-pixel disc).
+    var atlas = true
     var body: some View {
         GeometryReader { proxy in
             let side = min(proxy.size.width, proxy.size.height)
@@ -75,10 +82,15 @@ struct VisionMoon: View {
         .accessibilityIgnoresInvertColors()
     }
     private func shader(side: Double) -> Shader {
-        let i = geometry.phaseAngle, a = geometry.brightLimb
-        let earthshine = 0.09*(1-cos(i))/2
-        return ShaderLibrary.nyxMoon(.float2(CGSize(width: side, height: side)), .float4(sin(i) * -sin(a), sin(i)*cos(a), cos(i), earthshine),
-            .float4(cos(geometry.north), sin(geometry.north), geometry.librationLongitude, geometry.librationLatitude), .image(Image("MoonMap")))
+        let sun = MoonShading.sunDirection(geometry)
+        let earthshine = 0.09*(1-cos(geometry.phaseAngle))/2
+        let size = Shader.Argument.float2(CGSize(width: side, height: side))
+        let lighting = Shader.Argument.float4(sun.x, sun.y, sun.z, earthshine)
+        let frame = Shader.Argument.float4(cos(geometry.north), sin(geometry.north), geometry.librationLongitude, geometry.librationLatitude)
+        if atlas && MoonShading.usesAtlas(side: side) {
+            return ShaderLibrary.nyxMoonRelief(size, lighting, frame, .float(MoonShading.reliefStrength), .image(Image("MoonAtlas")))
+        }
+        return ShaderLibrary.nyxMoon(size, lighting, frame, .image(Image("MoonMap")))
     }
     static func describe(_ geometry: MoonGeometry) -> String {
         String(localized: "Moon, \(Int((geometry.illumination*100).rounded())) percent lit")
@@ -96,4 +108,15 @@ struct VisionMoon: View {
         }
     }
     .padding(40).glassBackgroundEffect()
+}
+
+/// The night panel's size (190 pt) on the atlas with relief, beside a 110 pt Moon on the small map.
+#Preview("Moon with relief, and a small Moon") {
+    HStack(alignment: .bottom, spacing: 32) {
+        ForEach([1.45, 1.75], id: \.self) { angle in
+            VisionMoon(geometry: MoonGeometry(phaseAngle: angle, brightLimb: 4.5, north: 0.2, librationLongitude: 0.05, librationLatitude: -0.04)).frame(width: 190, height: 190)
+        }
+        VisionMoon(geometry: MoonGeometry(phaseAngle: 1.6, brightLimb: 4.5, north: 0.2, librationLongitude: 0, librationLatitude: 0)).frame(width: 110, height: 110)
+    }
+    .padding(40).background(.black)
 }

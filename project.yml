@@ -306,6 +306,11 @@ targets:
       - path: Nyx/Services/WhatsUp.swift
       - path: Nyx/Services/SkyDome.swift
       - path: Nyx/DesignSystem/Moon.metal
+      # The Moon's shared size and relief rules, and the globe's grid (window Moon and Moon volume).
+      - path: Nyx/DesignSystem/MoonShading.swift
+      # The large Moon's atlas (colour and LOLA relief), for the window's Moon from 120 pt. The app
+      # only: the visionOS widget keeps the small MoonMap.
+      - path: Nyx/Resources/MoonRelief.xcassets
       - path: Nyx/Resources/stars.json
       # Star names and figures, shared with Tonight's sky on iPhone and iPad.
       - path: Nyx/Services/SkyLore.swift

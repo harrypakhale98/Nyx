@@ -840,7 +840,7 @@ import UIKit
             let renderer = ImageRenderer(content: Text("R↑").font(.system(size: 120, weight: .bold)).foregroundStyle(.white).frame(width: 256, height: 256).background(.blue))
             return renderer.cgImage
         }
-        let renderer = ImageRenderer(content: VisionMoon(geometry: geometry).frame(width: 256, height: 256))
+        let renderer = ImageRenderer(content: VisionMoon(geometry: geometry, atlas: false).frame(width: 256, height: 256))
         renderer.scale = 1
         return renderer.cgImage
     }

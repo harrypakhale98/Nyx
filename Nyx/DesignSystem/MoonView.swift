@@ -31,28 +31,25 @@ struct MoonView: View {
         .accessibilityLabel(label)
         .accessibilityIgnoresInvertColors()
     }
-    /// From this size the Moon draws on the atlas (and its relief); below it, never.
-    nonisolated static let atlasSide=120.0
+    /// From this size the Moon draws on the atlas (and its relief); below it, never. Shared with
+    /// the Vision Pro window (`MoonShading`).
+    nonisolated static let atlasSide=MoonShading.atlasSide
     /// Below this size the Moon gains its limb ring and a brighter earthshine.
     nonisolated static let smallSide=90.0
-    /// The terrain's slopes, exaggerated 2.5 times: at 280 pt one texel of relief is about a point,
-    /// and real slopes at that scale only show at the very edge of the terminator.
-    nonisolated static let reliefStrength=2.5
+    /// The terrain's slopes, exaggerated 2.5 times (`MoonShading.reliefStrength`).
+    nonisolated static let reliefStrength=MoonShading.reliefStrength
     private func shader(side:Double)->Shader {
         let sun=light
         let size=Shader.Argument.float2(CGSize(width:side,height:side))
         let lighting=Shader.Argument.float4(sun.x,sun.y,sun.z,Self.earthshine(geometry,side:side))
         let frame=Shader.Argument.float4(cos(geometry.north),sin(geometry.north),geometry.librationLongitude,geometry.librationLatitude)
-        if side>=Self.atlasSide {
+        if MoonShading.usesAtlas(side:side) {
             return ShaderLibrary.nyxMoonRelief(size,lighting,frame,.float(relief ? Self.reliefStrength : 0),.image(Image("MoonAtlas")))
         }
         return ShaderLibrary.nyxMoon(size,lighting,frame,.image(Image("MoonMap")))
     }
     /// The Sun's direction in screen space (x right, y up, z toward the viewer).
-    private var light:SIMD3<Double> {
-        let i=geometry.phaseAngle, a=geometry.brightLimb
-        return SIMD3(sin(i) * -sin(a), sin(i)*cos(a), cos(i))
-    }
+    private var light:SIMD3<Double> { MoonShading.sunDirection(geometry) }
     /// Earth as seen from the Moon is full when the Moon is new: the night side glows most then.
     /// The hero is physically scaled (0.09 of the albedo at most); under 90 pt the floor is lifted
     /// to 0.14, so a 20–60 pt Moon near new keeps a visible night side.
