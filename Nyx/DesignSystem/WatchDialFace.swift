@@ -117,11 +117,13 @@ nonisolated extension WatchDialFace.Line {
 nonisolated enum WatchTonightLayout: Equatable, Sendable {
     case fixed
     case scrolling
-    /// The largest of the standard sizes on a screen this wide (points): each watch's default
-    /// text size, Extra Large on the widest (the Ultra's 205) and Large on the others (the 40 mm's
-    /// 162). Up to it the face stays exactly as designed.
-    static func largestStandard(screenWidth: Double) -> DynamicTypeSize {
-        screenWidth >= 200 ? .xLarge : .large
+    /// The largest of the standard sizes on a screen this tall (points): each watch's default
+    /// text size. Up to it the face stays exactly as designed. Read from the watchOS 27 simulators:
+    /// Large on the 40 mm (197 tall) and the 42 mm (223), Extra Large on the 44 mm (224), the 46 mm
+    /// (248) and the Ultra (257). Height tells them apart where width cannot: the 44 mm is narrower
+    /// than the 42 mm (184 against 187 points) yet defaults one size larger.
+    static func largestStandard(screenHeight: Double) -> DynamicTypeSize {
+        screenHeight >= 224 ? .xLarge : .large
     }
     /// The smallest dial that still reads as the instrument: numeral, band word and Moon.
     static let dialMinimum = 80.0
