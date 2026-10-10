@@ -45,7 +45,7 @@ struct NightCell: View {
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
                 // Past nights fade their dot only; their text keeps full legibility.
                 let fade=isPast ? 0.35 : 1.0
-                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:0.45+Double(night.score.value)/200,stroke:palette.stroke)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent.opacity(fade),fillOpacity:palette.markOpacity(score:night.score.value),stroke:palette.stroke)
             }.frame(height:28*scale)
             // The ring and its soft halo (the stretch glows a little, like a dark sky does), behind the dot.
             .background { if highlighted && !isPast { ring } }

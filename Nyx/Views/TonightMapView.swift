@@ -64,7 +64,7 @@ struct TonightMapCanvas: View {
                     }
                 }
                 let shape=NightMark.mark(score:mark.score,hasForecast:mark.fill == .full,differentiate:access.differentiate)
-                shape.draw(in:&layer,center:p,radius:radius,fill:mark.fill,color:palette.accent,fillOpacity:mark.fillOpacity,lineWidth:1,stroke:palette.stroke,hollowBackground:palette.panel)
+                shape.draw(in:&layer,center:p,radius:radius,fill:mark.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:mark.score),lineWidth:1,stroke:palette.stroke,hollowBackground:palette.panel)
                 if mark.closure != nil { layer.stroke(Self.triangle(at:CGPoint(x:p.x+radius*0.8+4,y:p.y-radius*0.8-2),size:6),with:.color(palette.ink),lineWidth:1.1*palette.stroke) }
                 if mark.id==highlighted {
                     let ring=radius+5
@@ -397,7 +397,7 @@ private struct LegendGlyph: View {
             case .sizes:
                 for (i,score) in [40,70,95].enumerated() {
                     let r=TonightMap.radius(score:score)*0.75
-                    NightMark.mark(score:score,hasForecast:true,differentiate:access.differentiate).draw(in:&context,center:CGPoint(x:6+Double(i)*16,y:y),radius:r,fill:.full,color:palette.accent,fillOpacity:TonightMap.fillOpacity(score:score))
+                    NightMark.mark(score:score,hasForecast:true,differentiate:access.differentiate).draw(in:&context,center:CGPoint(x:6+Double(i)*16,y:y),radius:r,fill:.full,color:palette.accent,fillOpacity:palette.markOpacity(score:score))
                 }
             case .fills:
                 for (i,fill) in [NightFill.full,.half,.hollow].enumerated() {

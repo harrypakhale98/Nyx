@@ -126,7 +126,7 @@ struct WeekAcrossParksPanel: View {
                         let ring=12.5
                         context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.8*palette.stroke)
                     }
-                    NightMark.mark(night,differentiate:access.differentiate).draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200,stroke:palette.stroke)
+                    NightMark.mark(night,differentiate:access.differentiate).draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),stroke:palette.stroke)
                 }.frame(width:28,height:28).accessibilityHidden(true)
                 if let cloud=night.cloudCover,cloud>75 { Image(systemName:"cloud.fill").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true) }
                 else { Text("\(night.score.value)").font(.caption.monospacedDigit()).foregroundStyle(isBest ? palette.accent : palette.ink) }

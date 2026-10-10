@@ -76,6 +76,11 @@ struct ContentLaneTests {
         #expect(TonightMap.radius(score: 0) == 1.5 && TonightMap.radius(score: 100) == 9.5)
         #expect(abs(TonightMap.radius(score: 50)-(1.5+8*pow(0.5, 1.5)))<1e-12)
         #expect(TonightMap.fillOpacity(score: 0) == 0.45 && TonightMap.fillOpacity(score: 100) == 0.95)
+        // Drawn, the ramp is held at 3:1 (WCAG 1.4.11): from 50% in amber, from 70% through night vision's red.
+        let standard=NyxPalette(nightVision: false, highContrast: false), night=NyxPalette(nightVision: true, highContrast: false)
+        #expect(standard.markOpacity(score: 0) == 0.5 && standard.markOpacity(score: 38) == TonightMap.fillOpacity(score: 38))
+        #expect(night.markOpacity(score: 38) == 0.7 && night.markOpacity(score: 90) == TonightMap.fillOpacity(score: 90))
+        for s in stride(from: 0, through: 100, by: 5) { #expect(night.markOpacity(score: s) >= standard.markOpacity(score: s)) }
         for s in stride(from: 0, to: 100, by: 5) { #expect(TonightMap.radius(score: s+5)>TonightMap.radius(score: s)) }
         #expect(TonightMap.radius(score: 140) == TonightMap.radius(score: 100) && TonightMap.radius(score: -3) == TonightMap.radius(score: 0))
         // No forecast at all: every park's night rests on its usual clouds and is drawn hollow.

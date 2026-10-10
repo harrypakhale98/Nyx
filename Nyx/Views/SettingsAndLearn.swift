@@ -280,8 +280,11 @@ struct LearnView:View {
                 NavigationLink { EssayView(essay:essay) } label:{ Panel { HStack(alignment:.top,spacing:14) {
                     EssayIcon(essay:essay,size:24)
                     VStack(alignment:.leading,spacing:6) {
-                        Text(essay.title).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-                        Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                        // Each line takes the card's whole width, not the width its last wrap left: the system lifts a
+                        // lone last word onto the line before ("Watching a / meteor shower"), and a frame hugging that
+                        // line by a fraction of a point measured as clipped (iPad audit, 2026-10-09).
+                        Text(essay.title).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
+                        Text(essay.subtitle).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
                         Text("\(essay.minutes)-minute read").font(.caption).foregroundStyle(palette.ink.opacity(palette.nightVision ? 1 : 0.86))
                     }
                     Spacer(minLength:0)

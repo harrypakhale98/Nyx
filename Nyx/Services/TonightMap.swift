@@ -22,8 +22,6 @@ nonisolated struct TonightMap: Sendable {
         let label: String
         /// The dot's radius in points before any scale, the night cell's own curve.
         var radius: Double { TonightMap.radius(score:score) }
-        /// The dot's fill opacity, the night cell's own.
-        var fillOpacity: Double { TonightMap.fillOpacity(score:score) }
     }
     /// Geographic reading order: the lower 48 from west to east, then the insets in the order
     /// they sit on the map (Alaska, Hawaiʻi, American Samoa, the Virgin Islands), each west to east.
@@ -65,5 +63,5 @@ nonisolated struct TonightMap: Sendable {
     }
     /// The night cell's curve, so a 95 reads clearly larger than a 70.
     static func radius(score: Int) -> Double { 1.5+8*pow(Double(min(100,max(0,score)))/100,1.5) }
-    static func fillOpacity(score: Int) -> Double { 0.45+Double(min(100,max(0,score)))/200 }
+    static func fillOpacity(score: Int) -> Double { NyxPalette.markRamp(score:score) }
 }
