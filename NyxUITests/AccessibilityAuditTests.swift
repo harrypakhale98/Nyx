@@ -7,13 +7,14 @@ import AppIntents
 /// It complements, and never replaces, a VoiceOver pass on a real iPhone.
 ///
 /// Run one screen: `TEST_RUNNER_NYX_AUDIT_SCREENS=river xcodebuild test -only-testing:NyxUITests/AccessibilityAuditTests ...`
+/// A screen may name its fixture state after a colon (`ask:answered`); the palette still follows the pass.
 @MainActor
 final class AccessibilityAuditTests:XCTestCase {
     private var screens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
         return ["tonight","parks","parks-map","calendar","journal","learn","detail","breakdown","editor","entry",
                 "onboarding","settings","privacy","data","article","share","river","skyarc","whatsup",
-                "field","field-compass","alarm-explainer","light","listen","accessibility","trip","constellation","recap","icons","first-light"]
+                "field","field-compass","alarm-explainer","light","listen","accessibility","trip","constellation","recap","icons","first-light","sky","ask:answered"]
         // Not "live-activity": that DEBUG page redraws Lock Screen and Dynamic Island faces outside the
         // system containers that host, scale and tint them, so its findings do not transfer. Reviewed by screenshot.
     }
@@ -62,9 +63,14 @@ final class AccessibilityAuditTests:XCTestCase {
 
     private func audit(state:String,screens:[String],extra:[String]=[],pass:String="default") throws {
         var failures:[String]=[]
-        for screen in screens {
+        for spec in screens {
+            // "ask:answered" opens a screen in its own fixture state; night vision then comes from its flag.
+            let parts=spec.split(separator:":",maxSplits:1).map(String.init)
+            let screen=parts.first ?? spec
+            let fixture=parts.count>1 ? parts[1] : state
+            let palette=parts.count>1 && state=="night-vision" ? ["-nyx-night-vision"] : []
             let app=XCUIApplication()
-            app.launchArguments=["-nyx-screen",screen,"-nyx-state",state,"-nyx-reduce-motion"]+extra
+            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+extra
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
