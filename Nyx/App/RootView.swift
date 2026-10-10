@@ -99,7 +99,7 @@ struct RootView:View {
         // Focus, onboarding, Reduce Motion) crossfades on the shared spring.
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") || lampCover>0 ? nil : NyxMotion.spring,value:palette.nightVision)
         .overlay { Color.black.opacity(lampCover).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
-        .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on) } }
+        .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on,announce:request.announce) } }
         // One soft tap at the turn, on every path (the lamp writes the setting under its cover), however
         // many switches are loaded: each visited tab's toolbar and onboarding have one.
         .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
@@ -211,9 +211,10 @@ struct RootView:View {
         .nyxAccessibility()
     }
     /// The toolbar switch's lamp: down to black over the rest of ~0.2 s, the palette turned under the
-    /// cover with one soft tap and the state announced, then revealed on the shared spring. A tap that
-    /// lands mid-way starts again from wherever the cover is, toward the state now asked for.
-    private func runLamp(_ on:Bool) {
+    /// cover with one soft tap and the state announced (unless VoiceOver was on the switch, which says
+    /// its own value), then revealed on the shared spring. A tap that lands mid-way starts again from
+    /// wherever the cover is, toward the state now asked for.
+    private func runLamp(_ on:Bool,announce:Bool) {
         lampTask?.cancel()
         lampTask=Task { @MainActor in
             if on != nightVision {
@@ -224,7 +225,7 @@ struct RootView:View {
                 guard !Task.isCancelled else { return }
                 var quiet=Transaction(); quiet.disablesAnimations=true
                 withTransaction(quiet) { nightVision=on }
-                NightVisionLamp.announce(on)
+                if announce { NightVisionLamp.announce(on) }
             }
             let start=Date.now
             lampMotion=NightVisionLamp.Cover(from:lampMotion.value(at:start),to:0,start:start,duration:NightVisionLamp.reveal)
