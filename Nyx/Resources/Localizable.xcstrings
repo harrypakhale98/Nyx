@@ -29141,7 +29141,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "a las %1$@, luego %2$@"
+            "value": "a las %1$@, y luego %2$@ de duración"
           }
         }
       }

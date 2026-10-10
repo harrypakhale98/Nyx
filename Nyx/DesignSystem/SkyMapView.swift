@@ -151,7 +151,8 @@ struct SkyMapCanvas: View {
             // The insets' names under their frames, on one baseline, above the stars and figures. Each
             // steps down a point at a time (to 9 pt) until it fits its room before the next frame and
             // a line fits the band under the insets, so names never collide and descenders never clip.
-            let band=(SkyMap.aspect-SkyMap.insetBottom)*scale-4, nameTint=palette.muted.opacity(0.85)
+            // Names start 5 pt under the inset line (frame 3 pt outside it, then 2 pt), so the band keeps 1 pt spare.
+            let band=(SkyMap.aspect-SkyMap.insetBottom)*scale-6, nameTint=palette.muted.opacity(0.85)
             for room in SkyMap.nameRooms(width:scale) {
                 guard let rect=boxes[room.region] else { continue }
                 let label=SkyMap.inset(room.region).name
