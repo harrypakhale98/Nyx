@@ -30,6 +30,9 @@ struct RootView:View {
     @State private var launch:LaunchPark?
     /// First light's park, while the sky reveals itself over the app.
     @State private var firstLight:Park?
+    /// DEBUG promo capture (`-nyx-promo-hold 2`): Tonight's first count waits that many seconds after
+    /// launch, so a recording sees it from zero on a settled screen. Always false in Release.
+    @State private var promoHold=DebugScenario.number("-nyx-promo-hold") != nil
     /// The Tonight tab icon is today's real moon phase, drawn just after the first frame (the tab
     /// bar is still fading in) and again whenever Nyx returns.
     @State private var moonIcon=Image(systemName:"moon")
@@ -78,7 +81,7 @@ struct RootView:View {
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
                 // Tonight's first answer waits for the person: not behind onboarding (from the first
                 // frame, before the sheet rises) or first light. Swiping the sheet away releases it too.
-                .environment(\.nyxRevealHeld,(!onboarded && DebugScenario.screen == nil) || intro || firstLight != nil)
+                .environment(\.nyxRevealHeld,(!onboarded && DebugScenario.screen == nil) || intro || firstLight != nil || promoHold)
                 }
             }
         }
@@ -120,6 +123,8 @@ struct RootView:View {
             #if DEBUG
             DebugFollowing.install(model)
             DebugHeaderExport.runIfRequested(model)
+            DebugPromoExport.runIfRequested(model)
+            if let hold=DebugScenario.number("-nyx-promo-hold") { Task { try? await Task.sleep(for:.seconds(hold)); promoHold=false } }
             // `-nyx-journal-revisit`: leave the Journal after 5 s and come back a second later, so a
             // capture can show that the figures do not draw themselves again.
             if DebugScenario.isEnabled("journal-revisit") {

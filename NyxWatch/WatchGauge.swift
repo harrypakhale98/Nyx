@@ -53,7 +53,7 @@ struct WatchGauge: View {
         .accessibilityValue(spoken)
         .task(id: score) {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
-            try? await Task.sleep(for: .milliseconds(120))
+            try? await Task.sleep(for: WatchDebug.revealDelay)
             withAnimation(NyxMotion.spring) { shown = Double(score) }
             revealed = true
         }

@@ -18,3 +18,4 @@ Store/Social/*.mp4
 
 # iCloud Drive conflict copies (the repo lives in ~/Documents)
 /Nyx [0-9]*.xcodeproj/
+Store/Promo/*.mp4

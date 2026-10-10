@@ -35,6 +35,15 @@ enum WatchDebug {
         return 0
         #endif
     }
+    /// `-nyx-watch-hold <seconds>`: the dial's first sweep waits that long, so a recording sees it
+    /// start from an empty rim once the app is on screen. 0.12 s, as always, in Release.
+    static var revealDelay: Duration {
+        #if DEBUG
+        return .milliseconds(argument("-nyx-watch-hold").flatMap(Double.init).map { Int($0*1000) } ?? 120)
+        #else
+        return .milliseconds(120)
+        #endif
+    }
     /// `-nyx-watch-info` (with `-nyx-watch-screen dark`): the dark-adaptation info sheet open.
     static var showsInfo: Bool {
         #if DEBUG
