@@ -71,7 +71,11 @@ struct PlannerWindow: View {
         .task {
             if let body = VisionDebug.body { model.selectedBody = body }
             if VisionDebug.isEnabled("vision-no-lines") { model.constellations = false }
-            if VisionDebug.isEnabled("vision-moon") { openWindow(id: MoonVolume.id) }
+            if VisionDebug.isEnabled("vision-moon") {
+                openWindow(id: MoonVolume.id)
+                // DEBUG: `-nyx-vision-moon-only` closes the planner once the Moon is out, so the Moon stands alone in the room.
+                if VisionDebug.isEnabled("vision-moon-only") { try? await Task.sleep(for: .seconds(2)); dismissWindow(id: Self.id) }
+            }
             if VisionDebug.isEnabled("vision-widget-shots") { VisionWidgetShots.render() }
             if VisionDebug.isEnabled("vision-immersive") { await toggleSky() }
             // DEBUG: `-nyx-vision-skyonly` closes the window once the sky is open, for screenshots of the sky alone.
