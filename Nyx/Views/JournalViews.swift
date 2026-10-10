@@ -37,13 +37,16 @@ struct JournalView: View {
                 // One way into the year: at the top in recap season (December, early January), else under the constellation.
                 let season=recapSeason(nights)
                 if season { recapCard }
-                if wide {
+                if wide && !entries.isEmpty {
                     HStack(alignment:.top,spacing:28) {
                         YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(width:min(440,(width*0.4).rounded()))
                     }
+                } else if wide {
+                    // No nights yet: the constellation alone, centred, with its promise and the button inside.
+                    YourSkyPanel(nights:nights,record:recordAction) { _ in }.frame(maxWidth:760).frame(maxWidth:.infinity)
                 } else {
-                    YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }
+                    YourSkyPanel(nights:nights,record:recordAction) { id in opened=entries.first { $0.id==id } }
                     if !season && !nights.isEmpty { recapCard }
                     entryList
                 }
@@ -134,11 +137,13 @@ struct JournalView: View {
         }
     }
     @ViewBuilder private var entryList: some View {
-        if entries.isEmpty { if !model.journalUnavailable { Button("Record a night") { editing=true }.buttonStyle(.borderedProminent).foregroundStyle(Color.black).frame(maxWidth:.infinity) } }
-        else {
+        // An empty journal's button sits inside the constellation, under its promise (`YourSkyPanel`).
+        if !entries.isEmpty {
             LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
         }
     }
+    /// The empty constellation's "Record a night", never into a journal that could not open.
+    private var recordAction: (()->Void)? { entries.isEmpty && !model.journalUnavailable ? { editing=true } : nil }
     /// December (and the first days of January): the year's recap waits at the top of the journal.
     private func recapSeason(_ nights:[LoggedNight])->Bool {
         let now=model.today, calendar=Calendar.current

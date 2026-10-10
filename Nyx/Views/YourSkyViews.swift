@@ -1,4 +1,44 @@
 import SwiftUI
+import Accessibility
+
+/// The nights a constellation already holds, so a night just recorded can arrive as a star while
+/// everything else stays still. In memory only: `known` is seeded with every star the first time
+/// the journal is read after launch (by the watcher behind the tabs, or the constellation itself),
+/// so a cold launch never animates old stars. A star arrives only when exactly one night is new
+/// (`ReviewPrompt.isJournalMoment`); an import of many, a store loading or a deletion change
+/// `known` silently. The arrival waits in `pending` until the constellation is in front of the
+/// person: a night kept from field mode arrives on the next Journal visit, not unseen behind the tabs.
+@MainActor enum ConstellationArrivals {
+    static var known: Set<String>?
+    static var pending: String?
+    struct Step: Equatable, Sendable { let known: Set<String>; let arriving: String? }
+    /// Pure: what `ids` mean after `known`.
+    nonisolated static func step(known: Set<String>?, ids: Set<String>) -> Step {
+        guard let known else { return Step(known:ids,arriving:nil) }
+        let new=ids.subtracting(known)
+        guard new.count==1, ReviewPrompt.isJournalMoment(old:known.count,new:ids.count) else { return Step(known:ids,arriving:nil) }
+        return Step(known:ids,arriving:new.first)
+    }
+    /// The journal as it is now. A new arrival replaces one still waiting; a waiting star whose
+    /// night was deleted is forgotten.
+    static func note(_ ids: Set<String>) {
+        let step=step(known:known,ids:ids)
+        known=step.known
+        if let arriving=step.arriving { pending=arriving }
+        else if let waiting=pending, !ids.contains(waiting) { pending=nil }
+    }
+    /// The star to arrive among `ids`, if any, without changing anything (read while drawing).
+    static func waiting(in ids: Set<String>) -> String? {
+        if let pending, ids.contains(pending) { return pending }
+        return step(known:known,ids:ids).arriving
+    }
+    /// The star is drawn: it no longer waits.
+    static func landed(_ id: String) {
+        if pending==id { pending=nil }
+        known?.insert(id)
+    }
+}
+
 
 extension ConstellationLayout {
     /// The layout as a sky map: your stars, and one figure per season, oldest first.
@@ -23,31 +63,66 @@ struct YourSkyPanel: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     let nights: [LoggedNight]
+    /// Records a first night, offered inside the empty constellation beside its promise.
+    var record: (()->Void)? = nil
     let open: (UUID)->Void
+    /// The star arriving, kept here so its landing redraws the panel.
+    @State private var arrival: String?
+    @State private var onScreen=false
+    @State private var fieldOpen=FieldPresenter.isOpen
     var body: some View {
         let layout=ConstellationLayout(nights:nights,parks:model.parks)
         // A journal that could not open is not an empty one: no promise of a first star.
         let unavailable=nights.isEmpty && model.journalUnavailable
+        let ids=Set(nights.map(\.id.uuidString))
+        #if DEBUG
+        // `-nyx-star-arrive 0…1`: the newest night's arrival held at that frame.
+        let hold=DebugScenario.number("-nyx-star-arrive")
+        let arriving=hold != nil ? nights.max { $0.date<$1.date }?.id.uuidString : arrival ?? ConstellationArrivals.waiting(in:ids)
+        #else
+        let hold: Double?=nil
+        let arriving=arrival ?? ConstellationArrivals.waiting(in:ids)
+        #endif
         Panel { VStack(alignment:.leading,spacing:16) {
             HStack(alignment:.center) {
                 Eyebrow(text:"Your constellation")
                 Spacer(minLength:8)
                 if !nights.isEmpty { ConstellationShareButton(layout:layout,year:Calendar.current.component(.year,from:.now)) }
             }
-            SkyMapView(content:layout.content(parks:model.parks),summary:unavailable ? String(localized:"Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary) { id in
-                if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) }
-            }
+            SkyMapView(content:layout.content(parks:model.parks),summary:unavailable ? String(localized:"Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary,
+                       arriving:arriving,arrivalHold:hold,arrivalPaused:!onScreen || fieldOpen,drawInMemory:"journal",
+                       onSelect:{ id in if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) } },
+                       onArrived:{ id in arrived(id) })
             if unavailable {
                 Text("Your stars are drawn from your journal, which could not be opened.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else if nights.isEmpty {
                 Text("Your first night will be your first star").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text("Each night you record shines at its park on this map of the sky. Nights in the same season join into a figure of their own. Every entry stays on this iPhone.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                // The promise and the way to keep it, together.
+                if let record { Button("Record a night",action:record).buttonStyle(.borderedProminent).foregroundStyle(Color.black).padding(.top,4) }
             } else {
                 Text("Brighter stars mark darker skies. Each season's nights join into a figure. Tap a star to open its night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 Divider().overlay(palette.line)
                 SkiesSeenSection(seen:SkiesSeen(nights:nights,parks:model.parks))
             }
         } }
+        .onAppear { onScreen=true; catchArrival(ids) }
+        .onDisappear { onScreen=false }
+        .onChange(of:ids) { _,ids in catchArrival(ids) }
+        .onReceive(NotificationCenter.default.publisher(for:FieldPresenter.changed)) { _ in fieldOpen=FieldPresenter.isOpen }
+    }
+    private func catchArrival(_ ids: Set<String>) {
+        ConstellationArrivals.note(ids)
+        arrival=ConstellationArrivals.waiting(in:ids)
+    }
+    /// Drawn: VoiceOver hears it once, quietly, after whatever it is already saying.
+    private func arrived(_ id: String) {
+        ConstellationArrivals.landed(id)
+        arrival=nil
+        let park=nights.first { $0.id.uuidString==id }.flatMap { model.park($0.parkID)?.shortName }
+        var text=AttributedString(park.map { String(localized:"A new star at \($0).") } ?? String(localized:"A new star."))
+        text.accessibilitySpeechAnnouncementPriority = .low
+        AccessibilityNotification.Announcement(text).post()
     }
 }
 /// "7 of 63 national park skies", and where you saw your darkest sky in each. A count, not a game.

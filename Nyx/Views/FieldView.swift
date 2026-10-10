@@ -189,7 +189,8 @@ struct FieldNightPager: View {
     var body: some View {
         TimelineView(.periodic(from:.now,by:30)) { _ in
             let now=session.now
-            let ahead=session.night.upcoming(after:now), passed=session.night.milestones.filter { $0.date<=now }
+            // Each fact once: no card for the moment "Now" is already counting toward.
+            let ahead=session.night.cards(after:now,status:session.night.status(at:now)), passed=session.night.milestones.filter { $0.date<=now }
             ScrollView(.vertical) {
                 LazyVStack(alignment:.leading,spacing:44) {
                     VStack(alignment:.leading,spacing:20) {
@@ -238,7 +239,7 @@ struct FieldNightPager: View {
         }
         .frame(maxWidth:.infinity,alignment:.leading)
         .accessibilityElement(children:status.phase == .over ? .contain : .ignore)
-        .accessibilityLabel(status.spoken+" "+moonLine(now)))
+        .accessibilityLabel([status.spoken,darknessExplained(status),moonLine(now)].compactMap { $0 }.joined(separator:" ")))
     }
     private func card(_ milestone:FieldNight.Milestone,now:Date)->some View {
         let park=session.night.park
@@ -256,14 +257,23 @@ struct FieldNightPager: View {
         .accessibilityElement(children:.ignore)
         .accessibilityLabel("\(milestone.title), \(park.time(milestone.date)), \(String(localized:"in \(FieldNight.spokenSpan(milestone.date.timeIntervalSince(now)))")). \(milestone.detail)"))
     }
+    /// While waiting, the darkness card is not shown, so its explanation joins the spoken Now card.
+    private func darknessExplained(_ status:FieldNight.Status)->String? {
+        guard status.phase == .waiting else { return nil }
+        return session.night.milestones.first { $0.kind == .darkness && $0.date == status.target }?.detail
+    }
     private func earlier(_ passed:[FieldNight.Milestone])->some View {
         VStack(alignment:.leading,spacing:10) {
             Eyebrow(text:"Earlier tonight")
             ForEach(passed) { milestone in
-                HStack(alignment:.firstTextBaseline) {
-                    Text(milestone.title).fixedSize(horizontal:false,vertical:true)
-                    Spacer(minLength:8)
-                    Text(session.night.park.time(milestone.date)).monospacedDigit()
+                VStack(alignment:.leading,spacing:4) {
+                    HStack(alignment:.firstTextBaseline) {
+                        Text(milestone.title).fixedSize(horizontal:false,vertical:true)
+                        Spacer(minLength:8)
+                        Text(session.night.park.time(milestone.date)).monospacedDigit()
+                    }
+                    // True darkness never had a card of its own while "Now" counted toward it: what it means stays here.
+                    if milestone.kind == .darkness { Text(milestone.detail).font(.footnote).fixedSize(horizontal:false,vertical:true) }
                 }.font(.subheadline).foregroundStyle(palette.muted)
                 .accessibilityElement(children:.combine)
             }

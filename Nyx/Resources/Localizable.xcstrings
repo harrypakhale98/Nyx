@@ -3198,6 +3198,40 @@
         }
       }
     },
+    "A new star at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new star at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una estrella nueva en %@."
+          }
+        }
+      }
+    },
+    "A new star.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new star."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una estrella nueva."
+          }
+        }
+      }
+    },
     "A night outside": {
       "extractionState": "manual",
       "localizations": {
@@ -4215,23 +4249,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "También en el cielo esa noche. No forma parte del índice."
-          }
-        }
-      }
-    },
-    "Also: %@ (%@).": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Also: %@ (%@)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "También: %@ (%@)."
           }
         }
       }
@@ -10528,19 +10545,19 @@
         }
       }
     },
-    "Glow on the horizon: %@ (%@ of this park's light pollution).": {
+    "Glow on the horizon: %@. About %@ of the city light around this park lies in that direction.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Glow on the horizon: %@ (%@ of this park's light pollution)."
+            "value": "Glow on the horizon: %@. About %@ of the city light around this park lies in that direction."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Resplandor en el horizonte: %@ (%@ de la contaminación lumínica de este parque)."
+            "value": "Resplandor en el horizonte: %1$@. Cerca del %2$@ de la luz urbana alrededor de este parque está en esa dirección."
           }
         }
       }
@@ -24798,6 +24815,23 @@
         }
       }
     },
+    "Then %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Then %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luego, %@."
+          }
+        }
+      }
+    },
     "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched.": {
       "extractionState": "manual",
       "localizations": {
@@ -29095,6 +29129,23 @@
         }
       }
     },
+    "at %@, then %@ of it": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "at %@, then %@ of it"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a las %1$@, luego %2$@"
+          }
+        }
+      }
+    },
     "before dawn": {
       "extractionState": "manual",
       "localizations": {
@@ -30611,23 +30662,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "la noche después del máximo"
-          }
-        }
-      }
-    },
-    "then %@ of it": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "then %@ of it"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "y luego %@ de duración"
           }
         }
       }

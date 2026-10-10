@@ -52,8 +52,15 @@ struct SkyGlowTests {
         let lines=SkyGlow.domeLines([.init(bearing:102,share:0.452,city:"Las Vegas"),.init(bearing:271,share:0.094,city:nil)])
         #expect(lines.count==2)
         #expect(lines[0].contains("Las Vegas") && lines[0].contains(String(localized:"east")) && lines[0].contains("45"))
-        // No listed town near the light: say so plainly instead of guessing a name.
-        #expect(lines[1].contains(String(localized:"a town to the \(String(localized:"west"))")))
+        // Says what the number is: a direction's share of the modeled city light, not of the park's light pollution.
+        #expect(lines[0].contains("city light around this park"))
+        // No listed town near the light: say so plainly instead of guessing a name; its share follows it.
+        #expect(lines[1].contains(String(localized:"a town to the \(String(localized:"west"))")) && lines[1].contains("9%"))
+        // Three domes still read as two lines: the others in one sentence.
+        let three=SkyGlow.domeLines([.init(bearing:102,share:0.45,city:"Las Vegas"),.init(bearing:180,share:0.28,city:"Ridgecrest"),.init(bearing:271,share:0.09,city:"Visalia")])
+        #expect(three.count==2)
+        #expect(three[1].contains("Ridgecrest") && three[1].contains("28%") && three[1].contains("Visalia") && three[1].contains("9%"))
+        #expect((lines+three).allSatisfy { !$0.contains("light pollution") })
         // One town matched to two sectors is named once.
         let acadia=SkyGlow.namedDomes([.init(bearing:132,share:0.35,city:"Bar Harbor"),.init(bearing:100,share:0.22,city:"Bar Harbor"),.init(bearing:263,share:0.2,city:nil)])
         #expect(acadia.count==2 && acadia[0].bearing==132 && acadia[1].city==nil)

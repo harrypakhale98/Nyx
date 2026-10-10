@@ -38,7 +38,7 @@ import simd
         #expect(night.next(after: early)?.kind == .darkness)
         let waiting = night.status(at: early)
         #expect(waiting.phase == .waiting && waiting.target == start && waiting.lead == "True darkness in")
-        #expect(waiting.trailing.hasPrefix("then ") && waiting.spoken.contains("14 minutes"))
+        #expect(waiting.trailing.hasPrefix("at ") && waiting.trailing.contains(", then ") && waiting.spoken.contains("14 minutes"))
         let dark = night.status(at: start.addingTimeInterval(3600))
         #expect(dark.phase == .dark && dark.target == end)
         #expect(night.status(at: end.addingTimeInterval(60)).phase == .dawn)
