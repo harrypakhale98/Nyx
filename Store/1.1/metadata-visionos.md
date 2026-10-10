@@ -81,11 +81,29 @@ Nyx for Apple Vision Pro asks for no permissions and has no login. Its only netw
 
 ## Screenshots
 
-`Store/1.1 v8/Apple Vision Pro/` (four, 3840×2160, captioned, captured from build 8 on 2026-10-08): the immersive core, a star's name card, the planner window with that day's cloud forecast, and the Moon on your table. Upload these, not the build 7 frames in `Store/Framed/Vision-Pro/`, which show a score labeled "moon and darkness only" that build 8 no longer shows.
+`Store/1.3 v11/Apple Vision Pro/` (six, 3840×2160, captioned, captured from build 11 on 2026-10-10) for 1.3; the build 8 set `Store/1.1 v8/Apple Vision Pro/` (four, captured 2026-10-08): the immersive core, a star's name card, the planner window with that day's cloud forecast, and the Moon on your table. Upload these, not the build 7 frames in `Store/Framed/Vision-Pro/`, which show a score labeled "moon and darkness only" that build 8 no longer shows.
 
 ## Support and marketing URLs
 
 Same as iPhone (`SUBMISSION.md`). The support and privacy pages cover Apple Vision Pro (privacy page dated October 8, 2026).
+
+---
+
+## What's New in 1.3 (≤4000)
+
+Paste on the visionOS 1.3 version page. Only changes in the `NyxVision` code since build 8 are named.
+
+```
+Nyx 1.3 for Apple Vision Pro.
+
+A Moon you could print. In the window, the large Moon now shows craters catching the light along the terminator, drawn from NASA's LOLA elevation data.
+
+The Moon on your table, in more detail. The globe carries NASA's 4K LROC color map and real relief from LOLA, so its shadow line crosses craters and mountains as the phase turns. In night vision the whole Moon turns red, sunlight included. A button takes you back to the planner.
+
+Tonight moves on by itself after the headset sleeps, and red light is brighter with Increase Contrast.
+
+Still no account, no ads, no tracking.
+```
 
 ---
 

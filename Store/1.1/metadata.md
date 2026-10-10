@@ -31,7 +31,7 @@ The description and What's New name features from main. Each row below was check
 - **Categories:** Travel (primary), Weather (secondary).
 - **Price:** Free. No subscriptions, advertising or in-app purchases (a standing condition of Open-Meteo's free, non-commercial terms).
 - **Copyright:** `2026 Hardik Pakhale`.
-- **Version / build:** 1.3 (10) (1.2 (8) is approved; App Store Connect closed the 1.2 train, so build 10 ships as 1.3). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
+- **Version / build:** 1.3 (11) (1.2 (8) is approved; App Store Connect closed the 1.2 train, so the award work ships as 1.3; build 11 replaces build 10). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
@@ -221,7 +221,7 @@ Spanish subtitle: `metadata-es.md`.
 - **Age rating:** answer the current questionnaire. Expected result 4+: no user-generated content feed, no unrestricted web access (links open in Safari), no social features, no gambling or mature themes. New question (September 2026), social media capabilities: **No**. Age assurance (Texas SB 2420) is handled in the app by Declared Age Range; see `SUBMISSION.md`.
 - **App Privacy:** Data Not Collected (`PRIVACY.md`).
 - **Review notes:** `SUBMISSION.md` § Review notes (paste from there).
-- **Screenshots:** `SUBMISSION.md` § Screenshots. iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` on the 1.3 page (captured 2026-10-09 from build 10, so valid for 1.3 (10); real sky first; order and captions in `Store/1.2 v10/README.md`). iPad, Apple Watch and Apple Vision Pro: the build 8 set in `Store/1.1 v8/` until their own recapture. The build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
+- **Screenshots:** iPhone: `Store/1.2 v10/iPhone/` (6.3-inch is the required size; 6.5-inch optional). iPad, Apple Watch and Apple Vision Pro: `Store/1.3 v11/` (captured 2026-10-10 from build 11). Order and captions in each folder's README.
 - **App Preview (optional):** `app-preview-script.md`.
 - **Accessibility Nutrition Labels:** declare only what the device pass confirms (`accessibility-nutrition-labels.md`).
 - **Creative assets (optional):** product page header (21:9) and search result asset (3:2) can wait for 1.2.

@@ -44,7 +44,7 @@ Add this sentence (shipped in build 8):
 
 - **Translation of park text:** `When Nyx runs in a language other than English, park alerts and ranger programs from the National Park Service have a Translate button. It opens Apple's translation sheet (Translation framework, translationPresentation), only when the person taps it. iOS may download an Apple language pack on first use; Nyx itself sends nothing for this.`
 
-Add this sentence only if the feature is in build 8 (integrator to confirm):
+Add this sentence (confirmed in build 11: the Directions row under the time river, and "Directions in Maps" on viewing spots):
 
 - **Maps hand-off:** `Viewing spots can open in Apple Maps when the person taps "Directions in Maps": the app hands the spot's public coordinates to Maps through a maps:// link. Nyx makes no request itself and uses no MapKit.`
 
