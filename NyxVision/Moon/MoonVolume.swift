@@ -4,7 +4,8 @@ import UIKit
 import simd
 
 /// "The Moon on your table": a volume holding the chosen night's Moon as a globe, NASA's lunar
-/// map lit by a single sunlight at the true phase angle, turned as it appears from the chosen
+/// map (the 4096×2048 LROC colour mosaic, with surface relief from LOLA elevation as a normal map)
+/// lit by a single sunlight at the true phase angle, turned as it appears from the chosen
 /// park at the Moon's best moment that night (bright limb, axis and libration from
 /// `AstronomyEngine.moonGeometry`). It works without leaving the room, which suits a short,
 /// seated look. A drag turns the globe; let go and it turns back to the face we always see.
@@ -119,6 +120,8 @@ nonisolated struct MoonView: Sendable, Equatable {
     let sphere = ModelEntity()
     private let sun = DirectionalLight()
     private var material: PhysicallyBasedMaterial?
+    /// LOLA's relief as a normal map, worn except near full Moon (`MoonShading.globeShowsRelief`).
+    private var relief: TextureResource?
     private var shown: MoonView?
     private var shownNightVision = false
     private var spin: Float = 0
@@ -127,7 +130,9 @@ nonisolated struct MoonView: Sendable, Equatable {
     static let radius: Float = 0.14
 
     func build() async {
-        if let image = UIImage(named: "MoonMap")?.cgImage, let texture = try? await TextureResource(image: image, options: .init(semantic: .color)) {
+        let textures = await MoonGlobeTextures.load()
+        relief = textures.relief
+        if let texture = textures.colour {
             var material = PhysicallyBasedMaterial()
             material.baseColor = .init(tint: .white, texture: .init(texture))
             material.roughness = .init(floatLiteral: 1)
@@ -151,13 +156,20 @@ nonisolated struct MoonView: Sendable, Equatable {
             let first = shown == nil
             shown = view
             shownNightVision = nightVision
-            // Natural light, or night vision's red; the night side keeps a trace of earthshine,
-            // strongest around new moon, as on the window's disc.
+            // Natural sunlight; the night side keeps a trace of earthshine, strongest around new
+            // moon, as on the window's disc. Night vision's red is the surface's tint below.
             let red = UIColor(red: 1, green: 0.27, blue: 0.23, alpha: 1)
-            sun.light = DirectionalLightComponent(color: nightVision ? red : UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
+            sun.light = DirectionalLightComponent(color: UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
             if var material {
+                // Night vision also tints the surface itself, as the window's filter tints its
+                // disc: the faint fill the system still gives the night side turns red with it,
+                // rather than staying grey beside a red day side.
+                material.baseColor = .init(tint: nightVision ? red : .white, texture: material.baseColor.texture)
                 material.emissiveColor = .init(color: nightVision ? red : UIColor(red: 0.75, green: 0.85, blue: 1, alpha: 1), texture: material.emissiveColor.texture)
                 material.emissiveIntensity = nightVision ? 0 : Float(0.03*(1-cos(view.geometry.phaseAngle))/2)
+                // Crater rims and shadows along the terminator; near full Moon the surface goes
+                // flat, as the real one does and as the window's disc fades its relief.
+                material.normal = .init(texture: MoonShading.globeShowsRelief(view.geometry) ? relief.map { .init($0) } : nil)
                 sphere.model?.materials = [material]
                 self.material = material
             }
@@ -193,19 +205,22 @@ nonisolated struct MoonView: Sendable, Equatable {
         if reduceMotion { sphere.transform = face } else { sphere.move(to: face, relativeTo: root, duration: 1.4, timingFunction: .easeInOut) }
     }
 
-    /// A globe whose texture coordinates follow the Moon shader's map lookup: longitude 0 (the
-    /// mean near side) toward +z, east toward +x, north up.
+    /// A globe whose texture coordinates follow the Moon shader's map lookup (`MoonGlobeGrid`):
+    /// longitude 0 (the mean near side) toward +z, east toward +x, north up. Tangents point east
+    /// and bitangents north, the normal map's red and green axes. 192 × 96 cells keep the limb
+    /// round at arm's length (a cell is 4.6 mm on the 14 cm radius).
     static func globeMesh() throws -> MeshResource {
-        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
-        let columns = 96, rows = 48
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], tangents: [SIMD3<Float>] = [], bitangents: [SIMD3<Float>] = []
+        var uvs: [SIMD2<Float>] = [], indices: [UInt32] = []
+        let columns = 192, rows = 96
         for i in 0...columns {
-            let lon = (Double(i)/Double(columns)-0.5)*2*Double.pi
             for j in 0...rows {
-                let lat = (Double(j)/Double(rows)-0.5)*Double.pi
-                let n = SIMD3<Float>(Float(cos(lat)*sin(lon)), Float(sin(lat)), Float(cos(lat)*cos(lon)))
-                positions.append(n*radius)
-                normals.append(n)
-                uvs.append([Float(i)/Float(columns), Float(j)/Float(rows)])
+                let vertex = MoonGlobeGrid.vertex(column: i, row: j, columns: columns, rows: rows)
+                positions.append(vertex.normal*radius)
+                normals.append(vertex.normal)
+                tangents.append(vertex.tangent)
+                bitangents.append(vertex.bitangent)
+                uvs.append(vertex.uv)
             }
         }
         for i in 0..<columns {
@@ -218,9 +233,36 @@ nonisolated struct MoonView: Sendable, Equatable {
         var descriptor = MeshDescriptor(name: "moon")
         descriptor.positions = MeshBuffers.Positions(positions)
         descriptor.normals = MeshBuffers.Normals(normals)
+        descriptor.tangents = MeshBuffers.Tangents(tangents)
+        descriptor.bitangents = MeshBuffers.Tangents(bitangents)
         descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
         descriptor.primitives = .triangles(indices)
         return try MeshResource.generate(from: [descriptor])
+    }
+}
+
+/// The globe's two textures, read from the app bundle when the volume opens and held only by the
+/// globe's material, so they go when the volume closes. Built by `Scripts/build_moon_globe.swift`
+/// and stored already GPU-compressed (ASTC in KTX, with their mipmaps), so they load as they are,
+/// with nothing decoded or cached on the way: `MoonGlobeColour.ktx` (4096×2048 LROC colour, ASTC
+/// 6×6, about 5 MB) and `MoonGlobeNormal.ktx` (2048×1024 LOLA normals, ASTC 4×4, about 2.8 MB),
+/// against some 53 MB as plain RGBA. If either is missing the globe keeps `MoonMap` and a smooth
+/// surface rather than failing.
+struct MoonGlobeTextures {
+    var colour: TextureResource?
+    var relief: TextureResource?
+    static func load() async -> MoonGlobeTextures {
+        var textures = MoonGlobeTextures()
+        if let url = Bundle.main.url(forResource: "MoonGlobeColour", withExtension: "ktx") {
+            textures.colour = try? await TextureResource(contentsOf: url, options: .init(semantic: .color))
+        }
+        if textures.colour == nil, let image = UIImage(named: "MoonMap")?.cgImage {
+            textures.colour = try? await TextureResource(image: image, options: .init(semantic: .color))
+        }
+        if let url = Bundle.main.url(forResource: "MoonGlobeNormal", withExtension: "ktx") {
+            textures.relief = try? await TextureResource(contentsOf: url, options: .init(semantic: .normal))
+        }
+        return textures
     }
 }
 
