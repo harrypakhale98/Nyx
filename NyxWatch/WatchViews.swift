@@ -267,30 +267,40 @@ struct ClosureLine: View {
 struct NightGlance: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.locale) private var locale
     let night: Night
     let isTonight: Bool
     var models: ClosedRange<Int>? = nil
     var body: some View {
         VStack(spacing: 0) {
-            // The models' range rides on the day's line where it fits ("SAT, OCT 10 · MODELS 73–89"),
-            // so it costs the dial nothing; on its own line under the day where it does not. The
-            // dial speaks it, so VoiceOver hears only the day here.
             let day = isTonight ? Text("Tonight") : Text(night.park.dayLabel(night.id))
-            ViewThatFits(in: .horizontal) {
-                if let models {
-                    let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
-                    if !typeSize.isAccessibilitySize {
-                        Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))").lineLimit(1).accessibilityLabel(day)
-                    }
-                    VStack(spacing: 0) {
-                        day.foregroundStyle(palette.accent)
-                        range.foregroundStyle(palette.muted).accessibilityHidden(true)
-                    }
-                } else {
-                    day.foregroundStyle(palette.accent)
+            let eyebrow = Font.caption2.weight(.semibold)
+            if let models, typeSize.isAccessibilitySize {
+                // In the scrolling accessibility layout a line costs the dial nothing: the range has its own.
+                day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+                Text("Models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
+            } else if let models {
+                // The models' range rides on the day's line where it fits whole ("SAT, OCT 10 · MODELS
+                // 73–89", letterspaced, then without the letterspacing, then "models" in lower case);
+                // where it does not, the day stands alone and the hairline on the dial's rim carries
+                // the range, so a ranged night never costs the dial a line (or its band word). Never
+                // shrunk or cut: a cut range would show a wrong number. The dial speaks it, so
+                // VoiceOver hears only the day here.
+                let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
+                ViewThatFits(in: .horizontal) {
+                    Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
+                        .font(eyebrow).textCase(.uppercase).tracking(1)
+                    Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
+                        .font(eyebrow).textCase(.uppercase)
+                    // Narrower still: the range in lower case and regular weight, the iPhone river's "models 73–89".
+                    let upper = (isTonight ? String(localized: "Tonight") : night.park.dayLabel(night.id)).uppercased(with: locale)
+                    Text("\(Text(verbatim: upper).font(eyebrow).foregroundStyle(palette.accent)) · \(Text("models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted))")
+                    day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
                 }
+                .lineLimit(1).accessibilityLabel(day)
+            } else {
+                day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
             }
-            .font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1)
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 Text("Dark \(night.park.time(start)) to \(night.park.time(end))").font(.system(.subheadline, design: .serif))
             } else {
@@ -339,14 +349,20 @@ struct NextMoment: View {
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                         .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
-                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast") }
+                        let at = Text("at \(night.park.time(next.date))")
+                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast").minimumScaleFactor(0.8) }
                         else if let models {
-                            // The dial speaks the range; VoiceOver hears only the time here.
-                            Text("at \(night.park.time(next.date)) · models \(models.lowerBound)–\(models.upperBound)")
-                                .accessibilityLabel(Text("at \(night.park.time(next.date))"))
-                        } else { Text("at \(night.park.time(next.date))") }
+                            // The range shares the line only whole, never shrunk or cut (a cut "models
+                            // 59–8…" would show a wrong number): where it does not fit, the time stands
+                            // alone and the hairline on the dial's rim carries the range. At accessibility
+                            // sizes the line wraps instead. The dial speaks the range; VoiceOver hears
+                            // only the time here.
+                            let full = Text("at \(night.park.time(next.date)) · models \(models.lowerBound)–\(models.upperBound)")
+                            if typeSize.isAccessibilitySize { full.accessibilityLabel(at) }
+                            else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(at) }
+                        } else { at.minimumScaleFactor(0.8) }
                     }
-                    .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).minimumScaleFactor(0.8).nonEssential()
+                    .font(.caption2).foregroundStyle(palette.muted).lineLimit(limit).nonEssential()
                 }
             } else if night.sky.darkHours == 0 {
                 Text(SkyConditions.noDarknessMessage(tonight: true)).font(.footnote)
@@ -404,9 +420,10 @@ struct MilestonesPage: View {
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
+                // No score stands on this page, so the line says what the range is of: under "Clouds
+                // from …" a bare "Forecast models: 59–89" read as cloud cover.
                 if let models = context?.modelRange(for: night) {
-                    Text("Forecast models: \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).nonEssential()
-                        .accessibilityLabel(String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound)."))
+                    Text("Forecast models put tonight's score between \(models.lowerBound) and \(models.upperBound).").font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
                 if night.sky.darkHours > 0 {
                     Text("\(Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))) of true darkness").font(.footnote)
@@ -628,6 +645,41 @@ private struct NyxTitle: ViewModifier {
         NightGlance(night: night, isTonight: false, models: max(0, night.score.value-12)...min(100, night.score.value+4))
     }
 }
+#if DEBUG
+#Preview("Tonight • models' range") {
+    ModelsPreview(nightVision: false) { week, context in TonightFace(night: week[0], week: week, now: .now, context: context) }
+}
+#Preview("Crown night • models' range • red") {
+    ModelsPreview(nightVision: true) { week, context in TonightFace(night: week[0], week: week, now: .now, context: context, startNight: 1) }
+}
+#Preview("Next moment • models' range") {
+    ModelsPreview(nightVision: false) { week, context in NextMoment(night: week[0], now: .now, models: context.modelRange(for: week[0])) }
+}
+#Preview("Next moment • models' range • xxxLarge") {
+    ModelsPreview(nightVision: false) { week, context in NextMoment(night: week[0], now: .now, models: context.modelRange(for: week[0])) }
+        .dynamicTypeSize(.xxxLarge)
+}
+#Preview("Milestones • models' range") {
+    ModelsPreview(nightVision: false) { week, context in MilestonesPage(night: week[0], now: .now, context: context) }
+}
+/// Previews of the models' range: Joshua Tree's week from the "disagree" forecast fixture, handed
+/// over as a paired iPhone would (`WatchDebug.modelsContext`).
+private struct ModelsPreview<Content: View>: View {
+    let nightVision: Bool
+    @ViewBuilder let content: ([Night], WatchContext) -> Content
+    var body: some View {
+        WatchPreviewHost(nightVision: nightVision) { park, store in
+            if let context = WatchDebug.modelsContext(savedParkIDs: [park.id], store: store) {
+                let week = (0..<7).map {
+                    WatchSky.night(park, evening: park.date(park.currentNight(at: .now), addingDays: $0), forecast: context.cloudForecasts[park.id],
+                                   detail: context.forecastDetails[park.id], now: .now)
+                }
+                content(week, context)
+            }
+        }
+    }
+}
+#endif
 #Preview("Milestones • Always-On") {
     WatchPreviewHost(nightVision: false) { park, store in MilestonesPage(night: store.tonight(park, at: .now), now: .now, context: nil) }
         .environment(\.isLuminanceReduced, true)

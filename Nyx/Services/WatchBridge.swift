@@ -11,25 +11,44 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     private let lock = NSLock()
     private var latest: WatchContext?
     private var lastSent: Data?
+    /// Set when `latest` left out the models' ranges because no watch with Nyx was known yet:
+    /// called on the main actor, instead of sending, once one is, to hand over a complete context.
+    private var complete: (@MainActor @Sendable () -> Void)?
     private override init() { super.init() }
     /// False where no watch can ever pair (iPad), so nothing is worked out for one.
     static var isAvailable: Bool { WCSession.isSupported() }
+    /// True only once the session is active with a paired watch that has Nyx on it. The models'
+    /// ranges are worked out only then: on an iPhone with no watch (most of them) the night-vision
+    /// switch and every publish cost nothing for one.
+    var hasWatchApp: Bool {
+        guard WCSession.isSupported() else { return false }
+        let session = WCSession.default
+        return session.activationState == .activated && session.isPaired && session.isWatchAppInstalled
+    }
 
     /// Called wherever the widget snapshot is written, and when night vision or the starting park
-    /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch.
+    /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch. `ranges` is nil when they
+    /// were not worked out (`hasWatchApp` was false); `complete` then hands over again, with them,
+    /// once a watch with Nyx turns out to be there.
     func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast], details: [String: ForecastDetail],
-              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]) {
+              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?,
+              complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts,
-                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges)
+                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:])
         let session = WCSession.default
-        lock.withLock { latest = context }
+        lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) }
         else { session.delegate = self; session.activate() }
     }
     private func send(_ session: WCSession) {
         guard session.isPaired, session.isWatchAppInstalled else { return }
+        // A context made before a watch was known lacks the ranges: make it again, complete, rather than send it.
+        if let complete: @MainActor @Sendable () -> Void = lock.withLock({ defer { self.complete = nil }; return self.complete }) {
+            Task { @MainActor in complete() }
+            return
+        }
         let context: WatchContext? = lock.withLock { latest }
         guard let context, let data = context.data else { return }
         // The same parks, forecasts, smoke, closures, ranges and switch as last time: nothing to say.

@@ -42,6 +42,7 @@
 		45626EDB75B5D793647BBEBD /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9005217AB3F5AE11FF5FE7E5 /* CloudClimate.swift */; };
 		457521DD78197DE21C2CE796 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0496C31EC5478AF4A4C90E /* MoonDisc.swift */; };
 		4F83D43656FA1ABA1181846D /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B8CFEEF4D0FA553056E4D4D /* parks.json */; };
+		512D229F85EBB46E64B34533 /* WatchDialFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115A1DAFC616DFF809ADB7F0 /* WatchDialFace.swift */; };
 		5601254E1A52A60E49349439 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02DA80F0AA104580F26A63 /* AstronomyEngine.swift */; };
 		5769DE7B649E910C42AE7539 /* NightVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6381DD05ED95379AD6F2E5F3 /* NightVisionIntent.swift */; };
 		59D3404A935B2CDA53D6982D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0216AB7D680D48E2BECFCF77 /* Localizable.xcstrings */; };
@@ -231,6 +232,7 @@
 		0C5FC0F768120358CF62DD01 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
 		0EC4079E4E4CADB5A3BA140C /* skyglow.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = skyglow.json; sourceTree = "<group>"; };
 		108FD5759687C9571D417768 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Moon.metal; sourceTree = "<group>"; };
+		115A1DAFC616DFF809ADB7F0 /* WatchDialFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDialFace.swift; sourceTree = "<group>"; };
 		13314E1FBCAF14A473AE0353 /* Campground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Campground.swift; sourceTree = "<group>"; };
 		177FBDD03996921F54CE5824 /* SkyGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyGlyph.swift; sourceTree = "<group>"; };
 		1C8D4F4BF7CFEFF14C466234 /* FieldActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldActivity.swift; sourceTree = "<group>"; };
@@ -448,14 +450,14 @@
 			isa = PBXGroup;
 			children = (
 				6A17ED8BAE018F61B73A02CA /* Config */,
-				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				572A8226324E98790B53E82D /* Nyx */,
+				7A5BE32B9081D66DE8C152A9 /* Nyx */,
 				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
 				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
 				EF9B82021F8DE7AC0904028C /* NyxVision */,
 				42D7B395980D760DC1253B27 /* NyxVision */,
-				1F193FB7B920E78B15671A7D /* NyxVisionWidgets */,
 				43C47EBF1BB944B92BEEE66D /* NyxVisionWidgets */,
+				1F193FB7B920E78B15671A7D /* NyxVisionWidgets */,
 				70AD1413C163EC0ADFA3A121 /* NyxWatch */,
 				7424D0904A06D62EF30443BC /* NyxWatchShared */,
 				8CF9EF626E715091D6C2E2C4 /* NyxWatchWidgets */,
@@ -534,6 +536,7 @@
 				177FBDD03996921F54CE5824 /* SkyGlyph.swift */,
 				6967BB7A4C4C54513C5F3A49 /* Starfield.swift */,
 				408EE72FA39C0BDE3FDA2FC3 /* TonightWidgetView.swift */,
+				115A1DAFC616DFF809ADB7F0 /* WatchDialFace.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -949,6 +952,7 @@
 				9E65115B2CD6361AB2847D76 /* SkyConditions.swift in Sources */,
 				A46F22AEA6C4CBF0ECD340BB /* Starfield.swift in Sources */,
 				B5BD25158E365A4FFF040E6E /* WatchContext.swift in Sources */,
+				512D229F85EBB46E64B34533 /* WatchDialFace.swift in Sources */,
 				DBCBDDF1E0419F473F1FD36F /* WhatsUp.swift in Sources */,
 				A0CA918C2E5EE43D6AFD43B2 /* WristSky.swift in Sources */,
 			);

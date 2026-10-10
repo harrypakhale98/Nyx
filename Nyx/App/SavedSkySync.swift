@@ -124,13 +124,19 @@ import WidgetKit
     }
     /// Hands Apple Watch the saved parks (or, with the journal unavailable, the last snapshot's),
     /// the starting park, clouds, smoke and summit layers, closures and the models' ranges. Nothing is
-    /// worked out where no watch can pair (iPad), and nothing is sent when nothing changed since the
-    /// last hand-over or no watch is paired.
-    func pushWatch(_ model:PlanModel) {
+    /// worked out where no watch can pair (iPad); the ranges, which score each followed park's week
+    /// again, only once a paired watch with Nyx is known (until then the bridge asks for them when
+    /// one is); nothing is sent when nothing changed since the last hand-over or no watch is paired.
+    /// `watchSeen`: the bridge has just seen a paired watch with Nyx, so the ranges are worked out
+    /// whatever the session reported a moment ago (and the bridge is never asked to call back again).
+    func pushWatch(_ model:PlanModel,watchSeen:Bool=false) {
         guard let ids=parkIDs, WatchBridge.isAvailable else { return }
-        WatchBridge.shared.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
-                                aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),
-                                ranges:Self.modelRanges(model,ids:ids+[model.homeID]))
+        let bridge=WatchBridge.shared, watch=watchSeen || bridge.hasWatchApp
+        let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:ids+[model.homeID]) : nil
+        var complete:(@MainActor @Sendable ()->Void)?=nil
+        if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
+        bridge.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
+                    aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,complete:complete)
     }
     /// The forecast models' range each followed park's dial shows for the week the watch shows
     /// (tonight and six more), keyed by park-local day: only where the iPhone draws one, so only

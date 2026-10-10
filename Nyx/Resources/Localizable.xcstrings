@@ -10181,6 +10181,23 @@
         }
       }
     },
+    "Forecast models put tonight's score between %lld and %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast models put tonight's score between %lld and %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos de pronóstico sitúan el índice de esta noche entre %lld y %lld."
+          }
+        }
+      }
+    },
     "Forecast models roughly agree: %@ cloud.": {
       "extractionState": "manual",
       "localizations": {
