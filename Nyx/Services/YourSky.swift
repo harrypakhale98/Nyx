@@ -44,6 +44,31 @@ nonisolated enum SkyMap {
         Inset(region:.samoa,frame:CGRect(x:0.39,y:insetBottom-0.05,width:0.05,height:0.05),longitudes:(-171)...(-169),latitudes:(-15)...(-13.5)),
         Inset(region:.virginIslands,frame:CGRect(x:0.88,y:insetBottom-0.06,width:0.06,height:0.06),longitudes:(-65.5)...(-64),latitudes:17.8...18.8),
     ]
+    /// Where an inset's name may go, in points: it starts at `x`, 1 pt inside its frame, and may
+    /// use `room` points from `minX`. Only the last (Virgin Is., at the right edge) starts left of
+    /// its frame when it needs to, so `minX` is below `x` for it alone; it ends at the canvas's
+    /// right edge (`atEdge`), wherever the map sits inside a wider canvas.
+    struct NameRoom: Sendable { let region: Region; let x: Double; let minX: Double; let room: Double; var atEdge=false }
+    /// The names' rooms on a whole map `width` points wide. A name runs to 6 pt before the next
+    /// frame (frames are drawn 3 pt outside the insets); the last ends at the canvas's right edge
+    /// and may reach back to the middle of the open sea between it and the inset before it, which
+    /// shares that gap. A name wider than its room steps its size down (`SkyMapCanvas`), so
+    /// Hawaiʻi never runs into Am. Samoa at large text sizes. Rooms never overlap.
+    static func nameRooms(width: Double) -> [NameRoom] {
+        let named=Array(insets.dropFirst())
+        func left(_ i: Int) -> Double { named[i].frame.minX*width-3 }
+        func right(_ i: Int) -> Double { named[i].frame.maxX*width+3 }
+        let last=named.count-1
+        return named.indices.map { i in
+            let x=left(i)+1
+            if i==last {
+                let minX=i>0 ? min(x,(right(i-1)+left(i))/2+3) : x
+                return NameRoom(region:named[i].region,x:x,minX:minX,room:width-1-minX,atEdge:true)
+            }
+            let end=i+1==last ? min(left(i+1)-6,(right(i)+left(i+1))/2-3) : left(i+1)-6
+            return NameRoom(region:named[i].region,x:x,minX:x,room:end-x)
+        }
+    }
     /// The inset a point on the canvas lies in (`lower48` outside every inset): where a mark's glow is kept.
     static func region(at point: CGPoint) -> Region {
         insets.dropFirst().first { $0.frame.insetBy(dx:-0.001,dy:-0.001).contains(point) }?.region ?? .lower48

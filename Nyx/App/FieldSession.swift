@@ -191,6 +191,15 @@ import WidgetKit
     /// Field mode is for a phone or iPad held up to the sky. On a Mac running the iPad app there is
     /// no sky to point at and no Lock Screen, so it is simply not offered.
     static var supported: Bool { !ProcessInfo.processInfo.isiOSAppOnMac }
+    /// Field mode covers the window. A constellation under it holds a new star until it closes.
+    private(set) static var isOpen=false
+    /// Posted when `isOpen` changes.
+    static let changed=Notification.Name("com.harrypakhale.nyx.fieldModeChanged")
+    static func setOpen(_ open: Bool) {
+        guard open != isOpen else { return }
+        isOpen=open
+        NotificationCenter.default.post(name:changed,object:nil)
+    }
     static func present(park: Park, model: PlanModel, from controller: UIViewController?) {
         guard supported, var top=controller else { return }
         while let next=top.presentedViewController { top=next }
@@ -222,6 +231,11 @@ final class FieldHostingController: UIHostingController<AnyView> {
         view.addGestureRecognizer(watcher)
     }
     @available(*, unavailable) required init?(coder: NSCoder) { nil }
+    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); FieldPresenter.setOpen(true) }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed || presentingViewController == nil { FieldPresenter.setOpen(false) }
+    }
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     func close(then: (()->Void)?=nil) {

@@ -105,6 +105,20 @@ nonisolated struct FieldNight: Sendable {
     func next(after now: Date) -> Milestone? { milestones.first { $0.date>now } }
     /// Milestones still ahead, earliest first.
     func upcoming(after now: Date) -> [Milestone] { milestones.filter { $0.date>now } }
+    /// The cards under "Now": milestones still ahead, without the one the Now card is already
+    /// counting toward (true darkness while waiting, its end while dark, sunrise at dawn), so field
+    /// mode says each fact once. Matched by kind and time: a different milestone at the same
+    /// moment (a shower at its best as darkness begins) keeps its card. The dropped milestone
+    /// still passes into "Earlier tonight" and still taps when it passes.
+    func cards(after now: Date, status: Status) -> [Milestone] {
+        let counted: Kind?=switch status.phase {
+        case .waiting: .darkness
+        case .dark: .dawn
+        case .dawn: .sunrise
+        case .noDarkness, .over: nil
+        }
+        return upcoming(after: now).filter { !($0.kind == counted && $0.date == status.target) }
+    }
     /// True once the night shown is over: after sunrise; under the polar night, once true darkness
     /// ends; under the midnight sun, at local noon.
     func isOver(at now: Date) -> Bool { Self.isOver(sky, at: now) }
@@ -119,7 +133,7 @@ nonisolated struct FieldNight: Sendable {
         /// "True darkness in", "True darkness for another".
         let lead: String
         let target: Date?
-        /// "then 7h 52m of it", "until 5:12 AM".
+        /// "at 7:39 PM, then 7h 52m of it", "until 5:12 AM".
         let trailing: String
         /// The whole line as one sentence, with the countdown said in words.
         let spoken: String
@@ -136,7 +150,8 @@ nonisolated struct FieldNight: Sendable {
             return Status(phase: .noDarkness, lead: lead, target: nil, trailing: trailing, spoken: [lead, trailing].joined(separator: " "))
         }
         if now<start {
-            let trailing=String(localized: "then \(Self.span(end.timeIntervalSince(start))) of it")
+            // The clock time too: the darkness card that showed it is not repeated under "Now".
+            let trailing=String(localized: "at \(park.time(start)), then \(Self.span(end.timeIntervalSince(start))) of it")
             return Status(phase: .waiting, lead: String(localized: "True darkness in"), target: start, trailing: trailing,
                 spoken: String(localized: "True darkness in \(Self.spokenSpan(start.timeIntervalSince(now))), at \(park.time(start)), then \(Self.spokenSpan(end.timeIntervalSince(start))) of it."))
         }

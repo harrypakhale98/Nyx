@@ -11,12 +11,17 @@ import UserNotifications
 /// so 1.3 asks again on its own good moments rather than never.
 @MainActor enum ReviewPrompt {
     static let askedKey="reviewAskedVersion"
+    /// A beat after the moment, so the prompt never lands on a closing sheet.
+    static let momentDelay=1.5
+    /// Longer after a journal entry: the new star arrives 0.35 s after the editor drops and settles
+    /// over 1.6 s (`StarArrival`), and the prompt must not land on the moment it follows.
+    static let journalDelay=2.6
     /// Great nights opened, counted per version ("reviewGreatNights-1.2").
     static func greatNightsKey(version:String)->String { "reviewGreatNights-\(version)" }
     /// The version this build would ask for.
     static var version:String { Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "" }
     /// A night was opened; Excellent (75) or better counts toward this version's third.
-    static func noteNightViewed(score:Int,defaults:UserDefaults = .standard,version:String=ReviewPrompt.version,ask:@MainActor (UserDefaults)->Void=request) {
+    static func noteNightViewed(score:Int,defaults:UserDefaults = .standard,version:String=ReviewPrompt.version,ask:@MainActor (UserDefaults)->Void={ request(defaults:$0) }) {
         guard score>=75 else { return }
         let key=greatNightsKey(version:version)
         let count=defaults.integer(forKey:key)+1
@@ -25,7 +30,7 @@ import UserNotifications
     }
     /// The journal grew by one entry (not a store loading or an import of many). Asks when this
     /// version has not asked yet; `request` keeps the once-per-version rule.
-    static func noteJournalEntry(old:Int,new:Int,defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void=request) {
+    static func noteJournalEntry(old:Int,new:Int,defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void={ request(defaults:$0,delay:journalDelay) }) {
         guard isJournalMoment(old:old,new:new) else { return }
         ask(defaults)
     }
@@ -35,7 +40,7 @@ import UserNotifications
     /// same `request` and the second call finds the version claimed. This path is kept for a park
     /// opened in its own iPad window, where no watcher runs. At dawn inside field mode both are
     /// refused (`inField`), and nothing is recorded, so a later moment can still ask.
-    static func noteFieldNightKept(defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void=request) { ask(defaults) }
+    static func noteFieldNightKept(defaults:UserDefaults = .standard,ask:@MainActor (UserDefaults)->Void={ request(defaults:$0) }) { ask(defaults) }
     /// Pure: whether to ask now. Once per version, never in the dark.
     nonisolated static func shouldAsk(askedVersion:String?,version:String,nightVision:Bool,inField:Bool)->Bool {
         !version.isEmpty && askedVersion != version && !nightVision && !inField
@@ -57,12 +62,12 @@ import UserNotifications
             return chain
         }
     }
-    static func request(defaults:UserDefaults) {
+    static func request(defaults:UserDefaults,delay:Double=momentDelay) {
         guard DebugScenario.screen == nil,
               let scene=UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where:{ $0.activationState == .foregroundActive }),
               claim(defaults:defaults,version:version,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),inField:inField(presented(in:scene))) else { return }
         // A beat after the moment itself, so the prompt never lands on top of a closing sheet.
-        Task { try? await Task.sleep(for:.seconds(1.5)); AppStore.requestReview(in:scene) }
+        Task { try? await Task.sleep(for:.seconds(delay)); AppStore.requestReview(in:scene) }
     }
 }
 
@@ -90,6 +95,10 @@ struct MomentsWatcher: View {
                 }
             }
             .onChange(of:journal.count) { old,new in ReviewPrompt.noteJournalEntry(old:old,new:new) }
+            // Seeds the constellation's known stars at launch and catches a night recorded while the
+            // Journal is not in view, so it arrives as a star on the next visit.
+            .onAppear { ConstellationArrivals.note(Set(journal.map(\.id.uuidString))) }
+            .onChange(of:Set(journal.map(\.id.uuidString))) { _,ids in ConstellationArrivals.note(ids) }
             .sheet(isPresented:$offering) { explainer.nyxPresentation() }
     }
     private var explainer:some View { RemindersExplainer { granted in notificationsEnabled=granted } }

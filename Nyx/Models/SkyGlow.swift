@@ -101,13 +101,19 @@ nonisolated struct SkyGlow: Sendable {
             return seen.insert(city).inserted
         }
     }
-    /// "Glow on the horizon: Las Vegas, east (45% of this park's light pollution)." then "Also: …" lines.
+    /// "Glow on the horizon: Las Vegas, east. About 45% of the city light around this park lies in
+    /// that direction." then, for the other domes, one sentence: "Then Ridgecrest, south (28%), and
+    /// Visalia, west (9%)." At most two lines. The share is a 30° sector's part of the modeled city
+    /// light within 300 km (Research/skyglow.md, step 7), not a share of the park's light pollution,
+    /// which the data cannot measure; the wording says only what the number is.
     static func domeLines(_ domes: [Dome]) -> [String] {
-        namedDomes(domes).enumerated().map { index,dome in
-            let share=dome.share.formatted(.percent.precision(.fractionLength(0)))
-            return index==0 ? String(localized:"Glow on the horizon: \(place(dome)) (\(share) of this park's light pollution).")
-                : String(localized:"Also: \(place(dome)) (\(share)).")
-        }
+        let named=namedDomes(domes)
+        guard let first=named.first else { return [] }
+        func share(_ dome: Dome) -> String { dome.share.formatted(.percent.precision(.fractionLength(0))) }
+        var lines=[String(localized:"Glow on the horizon: \(place(first)). About \(share(first)) of the city light around this park lies in that direction.")]
+        let rest=named.dropFirst().map { "\(place($0)) (\(share($0)))" }
+        if !rest.isEmpty { lines.append(String(localized:"Then \(rest.formatted(.list(type:.and))).")) }
+        return lines
     }
 
     // MARK: Over time

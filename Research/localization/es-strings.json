@@ -1824,5 +1824,10 @@
   "Collapsed": "Contraído",
   "Each park has an IANA time zone. A night runs from local noon to the following local noon, and \"tonight\" moves on to the coming evening once the Sun rises. Times shown on detail belong to that park, including changes for daylight saving time. The stars behind each screen are the real sky over that park in the middle of the night's darkness, from the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); they show where the stars are, not whether clouds will hide them. Star names come from the IAU Working Group on Star Names (IAU WGSN); the constellation figures are drawn for Nyx between catalogue stars.": "Cada parque tiene una zona horaria IANA. Una noche va del mediodía local al mediodía local siguiente, y “esta noche” pasa a la tarde siguiente cuando sale el Sol. Las horas que se muestran en el detalle son las del parque, incluidos los cambios de horario de verano. Las estrellas detrás de cada pantalla son el cielo real sobre ese parque a mitad de la oscuridad de la noche, según el Yale Bright Star Catalogue (Hoffleit y Warren, vía NASA HEASARC); muestran dónde están las estrellas, no si las nubes las ocultarán. Los nombres de las estrellas provienen del Grupo de Trabajo sobre Nombres de Estrellas de la UAI (IAU WGSN); las figuras de las constelaciones están trazadas para Nyx entre estrellas del catálogo.",
   "%@, a bright star, %@.": "%1$@, una estrella brillante, %2$@.",
-  "Outdoors, this takes about 30 minutes.": "Al aire libre, esto tarda unos 30 minutos."
+  "Outdoors, this takes about 30 minutes.": "Al aire libre, esto tarda unos 30 minutos.",
+  "A new star at %@.": "Una estrella nueva en %@.",
+  "A new star.": "Una estrella nueva.",
+  "at %@, then %@ of it": "a las %1$@, luego %2$@",
+  "Glow on the horizon: %@. About %@ of the city light around this park lies in that direction.": "Resplandor en el horizonte: %1$@. Cerca del %2$@ de la luz urbana alrededor de este parque está en esa dirección.",
+  "Then %@.": "Luego, %@."
 }

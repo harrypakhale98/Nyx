@@ -116,6 +116,11 @@ struct RootView:View {
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
             DebugFollowing.install(model)
+            // `-nyx-journal-revisit`: leave the Journal after 5 s and come back a second later, so a
+            // capture can show that the figures do not draw themselves again.
+            if DebugScenario.isEnabled("journal-revisit") {
+                Task { try? await Task.sleep(for:.seconds(5)); commands.tab=0; try? await Task.sleep(for:.seconds(1)); commands.tab=SceneCommands.tabIndex("journal") ?? 3 }
+            }
             if DebugScenario.state=="populated" {
                 // Illustrative sessions so store captures show a lived-in journal, written in the capture's language
                 // (sample text only; DEBUG never adds catalog keys).
@@ -127,6 +132,11 @@ struct RootView:View {
                 context.insert(JournalEntry(date:.now-81*day,parkID:"deva",observedBortle:2,notes:es ? "Viento tibio desde las dunas. El núcleo galáctico colgaba bajo en el sur." : "Warm wind off the dunes. The galactic core hung low in the south."))
                 context.insert(SavedPark(parkID:model.homeID))
                 try? context.save()
+                // `-nyx-star-new 4`: one more night recorded that many seconds in, as a save from the editor
+                // would, so the real arrival path (watcher, constellation, spring) can be captured mid-flight.
+                if let delay=DebugScenario.number("-nyx-star-new") {
+                    Task { try? await Task.sleep(for:.seconds(delay)); context.insert(JournalEntry(date:.now-10*day,parkID:"arch",observedBortle:2,notes:"")); try? context.save() }
+                }
             }
             #endif
             intro = !onboarded && DebugScenario.screen == nil
@@ -255,7 +265,7 @@ struct RootView:View {
         case "data": AboutDataView()
         // The Sky glow panel (what city light takes, light pollution, Protect this sky) and viewing spots for one park:
         // `-nyx-park deva | grca | sequ`; `-nyx-glow-compare city` opens the illustration on the city's sky (here and on the park page).
-        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
+        case "light": if let park=model.home { NavigationStack { ScrollView { VStack(spacing:26) { SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here); Panel { ViewingSpots(park:park) } }.padding(24) }.defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? .top).background(NightBackground(park:park,night:model.tonight(park))).navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline) } }
         case "article": EssayView(essay:Essay(rawValue:DebugScenario.state ?? "") ?? .darkness)
         // Where to stay for one park (`-nyx-park`; `-nyx-state live` loads campgrounds), and From home
         // tonight for the starting point (`-nyx-place "Chicago, IL"`, `-nyx-date`).
