@@ -3,11 +3,11 @@
 //   MoonGlobeColour.ktx  4096×2048, the LRO Camera colour mosaic as it is (the colour band of MoonAtlas),
 //                        ASTC 6×6 sRGB with mipmaps (about 5 MB on disk and in GPU memory)
 //   MoonGlobeNormal.ktx  2048×1024, a tangent-space normal map baked from LOLA elevation,
-//                        ASTC 4×4 with mipmaps (about 2.8 MB)
+//                        ASTC 4×4 with renormalised mipmaps (about 2.8 MB)
 // As plain RGBA with mipmaps the pair would take some 53 MB of texture memory; visionOS cannot
 // compress at run time (`TextureResource.Compression.astc` is unavailable there), so the script
 // compresses them with Xcode's TextureConverter (xcrun TextureConverter), from a lossless
-// intermediate (PNG for both) kept in a temporary folder.
+// intermediate (PNG for every image and level) kept in a temporary folder.
 // Both are equirectangular, longitude 0 at the centre, north up: the layout `Moon.metal` samples and
 // `MoonGlobeGrid` maps onto the globe.
 //
@@ -29,10 +29,16 @@
 // The normal map is written as RGB, not TextureConverter's normal-map mode (which keeps only X and
 // Y), because RealityKit's material reads all three channels.
 //
+// Its mipmaps are built here rather than by TextureConverter: each level sums the full-size unit
+// normals under its texel and renormalises the sum. Plain averaging (TextureConverter's own mips)
+// shortens the vectors, so the relief would flatten and darken as the globe is seen from farther
+// away. The colour map keeps TextureConverter's mips, which are right for colour.
+//
 // Usage: swift -O Scripts/build_moon_globe.swift <source folder> <output folder>
 import CoreGraphics
 import Foundation
 import ImageIO
+import simd
 import UniformTypeIdentifiers
 
 let args = CommandLine.arguments
@@ -107,7 +113,7 @@ let height = resample(across, width: hw, height: sh, to: hh, horizontal: false)
 
 // Slopes and normals. Rows run north to south; longitude wraps, latitude stops at the poles.
 let texel = 2 * Double.pi / Double(hw)
-var pixels = [UInt8](repeating: 0, count: hw * hh * 4)
+var normals = [SIMD3<Double>](repeating: [0, 0, 1], count: hw * hh)
 var steepest = 0.0
 for y in 0..<hh {
     let latitude = (0.5 - (Double(y) + 0.5) / Double(hh)) * Double.pi
@@ -119,37 +125,62 @@ for y in 0..<hh {
         let gEast = east / (moonRadius * Double(2) * texel * width) * strength
         let gNorth = north / (moonRadius * Double(down - up) * texel) * strength
         steepest = max(steepest, atan(hypot(gEast, gNorth)) * 180 / Double.pi)
-        let length = sqrt(gEast * gEast + gNorth * gNorth + 1)
-        let n = (-gEast / length, -gNorth / length, 1 / length)
-        let o = (y * hw + x) * 4
-        pixels[o] = UInt8(((n.0 * 0.5 + 0.5) * 255).rounded())
-        pixels[o + 1] = UInt8(((n.1 * 0.5 + 0.5) * 255).rounded())
-        pixels[o + 2] = UInt8(((n.2 * 0.5 + 0.5) * 255).rounded())
-        pixels[o + 3] = 255
+        normals[y * hw + x] = simd_normalize(SIMD3(-gEast, -gNorth, 1))
     }
 }
 print(String(format: "normals: steepest exaggerated slope %.0f°", steepest))
-// Written byte for byte, untagged, so no colour management touches the vectors.
-guard let provider = CGDataProvider(data: Data(pixels) as CFData),
-      let normalImage = CGImage(width: hw, height: hh, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: hw * 4,
-                                space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
-                                provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-else { print("cannot build normals"); exit(1) }
-write(normalImage, "MoonGlobeNormal.png", .png)
 
-// GPU compression, with a full mip chain that wraps across the seam.
-func compress(_ input: String, _ output: String, _ options: [String]) {
+// One PNG per mip level, 2048×1024 down to 2×1 (each level half the width and height of the one
+// before, as --build_mips asks). `sums` holds, per texel, the sum of the full-size unit normals it
+// covers; each level is that sum renormalised.
+func writeNormals(_ sums: [SIMD3<Double>], width: Int, height: Int, _ name: String) {
+    var pixels = [UInt8](repeating: 255, count: width * height * 4)
+    for i in 0..<(width * height) {
+        let n = simd_normalize(sums[i])
+        pixels[i * 4] = UInt8(((n.x * 0.5 + 0.5) * 255).rounded())
+        pixels[i * 4 + 1] = UInt8(((n.y * 0.5 + 0.5) * 255).rounded())
+        pixels[i * 4 + 2] = UInt8(((n.z * 0.5 + 0.5) * 255).rounded())
+    }
+    // Written byte for byte, untagged, so no colour management touches the vectors.
+    guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+          let image = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                              space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
+                              provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+    else { print("cannot build normals"); exit(1) }
+    write(image, name, .png)
+}
+var levels: [String] = []
+var sums = normals, lw = hw, lh = hh
+while true {
+    let name = "MoonGlobeNormal-\(levels.count).png"
+    writeNormals(sums, width: lw, height: lh, name)
+    levels.append(name)
+    guard lh > 1 else { break }
+    let nw = lw / 2, nh = lh / 2
+    var next = [SIMD3<Double>](repeating: .zero, count: nw * nh)
+    for y in 0..<nh {
+        for x in 0..<nw {
+            next[y * nw + x] = sums[2 * y * lw + 2 * x] + sums[2 * y * lw + 2 * x + 1]
+                + sums[(2 * y + 1) * lw + 2 * x] + sums[(2 * y + 1) * lw + 2 * x + 1]
+        }
+    }
+    sums = next; lw = nw; lh = nh
+}
+
+// GPU compression. The colour map's mip chain is TextureConverter's, wrapping across the seam;
+// the normal map's is the one built above.
+func compress(_ inputs: [String], _ output: String, _ options: [String]) {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
     process.arguments = ["TextureConverter"] + options + ["--compression_quality=Highest", "--wrap_mode=Repeat",
-        "--output=\(finalFolder.appendingPathComponent(output).path)", outFolder.appendingPathComponent(input).path]
+        "--output=\(finalFolder.appendingPathComponent(output).path)"] + inputs.map { outFolder.appendingPathComponent($0).path }
     process.standardOutput = FileHandle.nullDevice
     do { try process.run() } catch { print("cannot run TextureConverter: \(error)"); exit(1) }
     process.waitUntilExit()
-    guard process.terminationStatus == 0 else { print("TextureConverter failed on \(input)"); exit(1) }
+    guard process.terminationStatus == 0 else { print("TextureConverter failed on \(output)"); exit(1) }
     let bytes = (try? FileManager.default.attributesOfItem(atPath: finalFolder.appendingPathComponent(output).path)[.size] as? Int) ?? 0
     print("wrote \(finalFolder.appendingPathComponent(output).path) (\(bytes / 1024) KB)")
 }
-compress("MoonGlobeColour.png", "MoonGlobeColour.ktx", ["--compression_format=ASTC6x6", "--srgb_format", "--gamma_in=sRGB", "--gamma_out=sRGB"])
-compress("MoonGlobeNormal.png", "MoonGlobeNormal.ktx", ["--compression_format=ASTC4x4"])
+compress(["MoonGlobeColour.png"], "MoonGlobeColour.ktx", ["--compression_format=ASTC6x6", "--srgb_format", "--gamma_in=sRGB", "--gamma_out=sRGB"])
+compress(levels, "MoonGlobeNormal.ktx", ["--compression_format=ASTC4x4", "--build_mips"])
 try? FileManager.default.removeItem(at: outFolder)
