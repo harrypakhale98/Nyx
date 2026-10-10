@@ -62,6 +62,7 @@ extension ConstellationLayout {
 struct YourSkyPanel: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
+    @Environment(SceneCommands.self) private var commands: SceneCommands?
     let nights: [LoggedNight]
     /// Records a first night, offered inside the empty constellation beside its promise.
     var record: (()->Void)? = nil
@@ -69,7 +70,8 @@ struct YourSkyPanel: View {
     /// The star arriving, kept here so its landing redraws the panel.
     @State private var arrival: String?
     @State private var onScreen=false
-    @State private var fieldOpen=FieldPresenter.isOpen
+    /// Field mode covering this window (never another iPad window's) holds the star until it closes.
+    @State private var fieldOpen=false
     var body: some View {
         let layout=ConstellationLayout(nights:nights,parks:model.parks)
         // A journal that could not open is not an empty one: no promise of a first star.
@@ -106,10 +108,10 @@ struct YourSkyPanel: View {
                 SkiesSeenSection(seen:SkiesSeen(nights:nights,parks:model.parks))
             }
         } }
-        .onAppear { onScreen=true; catchArrival(ids) }
+        .onAppear { fieldOpen=FieldPresenter.isOpen(in:commands?.windowScene); onScreen=true; catchArrival(ids) }
         .onDisappear { onScreen=false }
         .onChange(of:ids) { _,ids in catchArrival(ids) }
-        .onReceive(NotificationCenter.default.publisher(for:FieldPresenter.changed)) { _ in fieldOpen=FieldPresenter.isOpen }
+        .onReceive(NotificationCenter.default.publisher(for:FieldPresenter.changed)) { _ in fieldOpen=FieldPresenter.isOpen(in:commands?.windowScene) }
     }
     private func catchArrival(_ ids: Set<String>) {
         ConstellationArrivals.note(ids)

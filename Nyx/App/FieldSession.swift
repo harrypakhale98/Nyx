@@ -191,13 +191,23 @@ import WidgetKit
     /// Field mode is for a phone or iPad held up to the sky. On a Mac running the iPad app there is
     /// no sky to point at and no Lock Screen, so it is simply not offered.
     static var supported: Bool { !ProcessInfo.processInfo.isiOSAppOnMac }
-    /// Field mode covers the window. A constellation under it holds a new star until it closes.
-    private(set) static var isOpen=false
-    /// Posted when `isOpen` changes.
+    /// Field mode covers one window. A constellation under it holds a new star until it closes;
+    /// another iPad window's is never held. Each open host is held weakly and counts only while it
+    /// stands in a connected window, so a window closed with field mode open never leaves a stale flag.
+    private static var hosts: [WeakHost]=[]
+    private final class WeakHost { weak var host: FieldHostingController?; init(_ host: FieldHostingController) { self.host=host } }
+    /// Posted when field mode opens or closes in any window.
     static let changed=Notification.Name("com.harrypakhale.nyx.fieldModeChanged")
-    static func setOpen(_ open: Bool) {
-        guard open != isOpen else { return }
-        isOpen=open
+    /// Whether field mode covers this scene's window (any window, before the scene is known).
+    static func isOpen(in scene: UIWindowScene?) -> Bool {
+        hosts.contains { box in
+            guard let shown=box.host?.viewIfLoaded?.window?.windowScene else { return false }
+            return scene == nil || shown === scene
+        }
+    }
+    static func setOpen(_ open: Bool, host: FieldHostingController) {
+        hosts.removeAll { $0.host == nil || $0.host === host }
+        if open { hosts.append(WeakHost(host)) }
         NotificationCenter.default.post(name:changed,object:nil)
     }
     static func present(park: Park, model: PlanModel, from controller: UIViewController?) {
@@ -231,10 +241,10 @@ final class FieldHostingController: UIHostingController<AnyView> {
         view.addGestureRecognizer(watcher)
     }
     @available(*, unavailable) required init?(coder: NSCoder) { nil }
-    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); FieldPresenter.setOpen(true) }
+    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); FieldPresenter.setOpen(true,host:self) }
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        if isBeingDismissed || presentingViewController == nil { FieldPresenter.setOpen(false) }
+        if isBeingDismissed || presentingViewController == nil { FieldPresenter.setOpen(false,host:self) }
     }
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }

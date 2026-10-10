@@ -228,7 +228,6 @@
   "Almost no moonlight": "Casi sin luz de luna",
   "Almost no moonlight tonight.": "Casi sin luz de luna esta noche.",
   "Also in the sky this night. Not part of the score.": "También en el cielo esa noche. No forma parte del índice.",
-  "Also: %@ (%@).": "También: %@ (%@).",
   "Am. Samoa": "Samoa Am.",
   "American Samoa": "Samoa Americana",
   "Among the brightest national parks": "Entre los parques nacionales más iluminados",
@@ -613,7 +612,6 @@
   "Full moon": "Luna llena",
   "Getting there": "Cómo llegar",
   "Getting there: %@": "Cómo llegar: %@",
-  "Glow on the horizon: %@ (%@ of this park's light pollution).": "Resplandor en el horizonte: %@ (%@ de la contaminación lumínica de este parque).",
   "Good": "Buena",
   "Gusts to %@": "Ráfagas de %@",
   "Half lit, half dark: the balance point.": "Mitad luz, mitad sombra: el punto de equilibrio.",
@@ -1790,7 +1788,6 @@
   "southwest": "suroeste",
   "straight line, back-to-back nights": "en línea recta, entre noches seguidas",
   "the night after the peak": "la noche después del máximo",
-  "then %@ of it": "y luego %@ de duración",
   "tonight": "esta noche",
   "top": "arriba",
   "typically: %@": "lo habitual: %@",
@@ -1827,7 +1824,7 @@
   "Outdoors, this takes about 30 minutes.": "Al aire libre, esto tarda unos 30 minutos.",
   "A new star at %@.": "Una estrella nueva en %@.",
   "A new star.": "Una estrella nueva.",
-  "at %@, then %@ of it": "a las %1$@, luego %2$@",
+  "at %@, then %@ of it": "a las %1$@, y luego %2$@ de duración",
   "Glow on the horizon: %@. About %@ of the city light around this park lies in that direction.": "Resplandor en el horizonte: %1$@. Cerca del %2$@ de la luz urbana alrededor de este parque está en esa dirección.",
   "Then %@.": "Luego, %@."
 }
