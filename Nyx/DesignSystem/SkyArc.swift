@@ -88,9 +88,14 @@ struct SkyArc: View {
                 HStack(spacing:16) { legend;Spacer() }
                 VStack(alignment:.leading,spacing:8) { legend }
             }.font(.caption).foregroundStyle(palette.muted)
-            // VoiceOver's hint already explains direct touch, where "touch and hold" would be wrong.
-            Text(voiceOver ? (access.differentiate ? "Moonlit hours are lighter and hatched." : "Moonlit hours are lighter.")
-                 : (access.differentiate ? "Moonlit hours are lighter and hatched. Touch and hold to read any hour." : "Moonlit hours are lighter. Touch and hold to read any hour.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            // One sentence to a line, so neither leaves a word or two alone on a line of its own; at
+            // larger sizes each wraps within itself. VoiceOver's hint already explains direct touch,
+            // where "touch and hold" would be wrong.
+            VStack(alignment:.leading,spacing:2) {
+                Text(access.differentiate ? "Moonlit hours are lighter and hatched." : "Moonlit hours are lighter.")
+                if !voiceOver { Text("Touch and hold to read any hour.") }
+            }.font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            .accessibilityElement(children:.combine)
             if night.sky.darkHours==0 {
                 Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.ink)
             } else {
