@@ -592,6 +592,7 @@
   "Forecast included · conditions may change": "Con pronóstico · las condiciones pueden cambiar",
   "Forecast models agree.": "Los modelos de pronóstico coinciden.",
   "Forecast models disagree; the score could be %lld to %lld.": "Los modelos de pronóstico discrepan; el índice podría ir de %lld a %lld.",
+  "Forecast models put tonight's score between %lld and %lld.": "Los modelos de pronóstico sitúan el índice de esta noche entre %lld y %lld.",
   "Forecast models roughly agree: %@ cloud.": "Los modelos de pronóstico casi coinciden: %@ de nubes.",
   "Forecast models roughly agree; the score could be %lld to %lld.": "Los modelos de pronóstico casi coinciden; el índice podría ir de %lld a %lld.",
   "Forecast models: %lld to %lld.": "Modelos de pronóstico: de %lld a %lld.",

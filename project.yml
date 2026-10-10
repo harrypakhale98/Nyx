@@ -210,6 +210,8 @@ targets:
       - path: Nyx/Services/WhatsUp.swift
       - path: Nyx/Resources/sky-events.json
       - path: Nyx/DesignSystem/MotionTilt.swift
+      # The dial face's geometry (numeral and band word clear of the ticks), shared with the tests.
+      - path: Nyx/DesignSystem/WatchDialFace.swift
       - path: Nyx/Resources/stars.json
       - path: Nyx/Resources/parks.json
       - path: Nyx/Resources/Localizable.xcstrings

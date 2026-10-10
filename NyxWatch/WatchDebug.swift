@@ -33,11 +33,14 @@ enum WatchDebug {
     }
     /// Screens that are Tonight itself (a page, or the dark-adaptation cover over it).
     static let homeScreens: Set<String> = ["tonight", "milestones", "week", "dark"]
-    /// `-nyx-watch-ax`: the largest accessibility text size (the watch simulator cannot set it).
+    /// `-nyx-watch-ax`: the largest accessibility text size (the watch simulator cannot set it);
+    /// `-nyx-watch-xxxl`: the largest size short of the accessibility sizes.
     struct TypeSize: ViewModifier {
         func body(content: Content) -> some View {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-nyx-watch-ax") { content.dynamicTypeSize(.accessibility5) } else { content }
+            if ProcessInfo.processInfo.arguments.contains("-nyx-watch-ax") { content.dynamicTypeSize(.accessibility5) }
+            else if ProcessInfo.processInfo.arguments.contains("-nyx-watch-xxxl") { content.dynamicTypeSize(.xxxLarge) }
+            else { content }
             #else
             content
             #endif
@@ -89,21 +92,8 @@ enum WatchDebug {
             // iPhone's rule (`NightOutlook.of`, `dialRange`) and handed over through
             // `WatchContext.make`, as a paired iPhone would. The only watch fixture with clouds,
             // because a range needs a forecast; it changes what the wrist is told, never the engine.
-            let now = Date.now, parks = synced.savedParkIDs.compactMap { store.park($0) }
-            guard let fixture = DebugForecasts(state: "disagree", parks: parks, now: now) else { break }
-            var ranges: [String: [String: ClosedRange<Int>]] = [:]
-            for park in parks {
-                guard let detail = fixture.details[park.id] else { continue }
-                for offset in 0..<7 {
-                    let evening = park.date(park.currentNight(at: now), addingDays: offset)
-                    let night = WatchSky.night(park, evening: evening, forecast: fixture.forecasts[park.id], detail: detail, now: now)
-                    if let range = NightOutlook.of(night, detail: detail, now: now, scoring: ScoreEngine())?.dialRange(basis: night.basis) {
-                        ranges[park.id, default: [:]][WatchContext.day(night.id, in: park)] = range
-                    }
-                }
-            }
-            store.debugSet(context: WatchContext.make(savedParkIDs: synced.savedParkIDs, homeParkID: "jotr", nightVision: true, forecasts: fixture.forecasts,
-                                                      details: fixture.details, ranges: ranges, now: now), pinned: "jotr")
+            guard let context = modelsContext(savedParkIDs: synced.savedParkIDs, store: store) else { break }
+            store.debugSet(context: context, pinned: "jotr")
         case "expired":
             // A forecast the iPhone sent three days ago: too old to score, so the watch says so.
             let old = Date.now.addingTimeInterval(-3*86400)
@@ -116,6 +106,25 @@ enum WatchDebug {
         if let minutes = argument("-nyx-watch-adaptation").flatMap(Double.init) {
             store.debugSet(adaptation: AdaptationClock(start: .now.addingTimeInterval(-minutes*60)))
         }
+    }
+    /// The context a paired iPhone would hand over for the "disagree" forecast fixture, ranges and
+    /// all (the `models` state, and the previews of every place the range shows).
+    static func modelsContext(savedParkIDs: [String], store: WatchStore, now: Date = .now) -> WatchContext? {
+        let parks = savedParkIDs.compactMap { store.park($0) }
+        guard let fixture = DebugForecasts(state: "disagree", parks: parks, now: now) else { return nil }
+        var ranges: [String: [String: ClosedRange<Int>]] = [:]
+        for park in parks {
+            guard let detail = fixture.details[park.id] else { continue }
+            for offset in 0..<7 {
+                let evening = park.date(park.currentNight(at: now), addingDays: offset)
+                let night = WatchSky.night(park, evening: evening, forecast: fixture.forecasts[park.id], detail: detail, now: now)
+                if let range = NightOutlook.of(night, detail: detail, now: now, scoring: ScoreEngine())?.dialRange(basis: night.basis) {
+                    ranges[park.id, default: [:]][WatchContext.day(night.id, in: park)] = range
+                }
+            }
+        }
+        return WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: savedParkIDs.first ?? "jotr", nightVision: true, forecasts: fixture.forecasts,
+                                 details: fixture.details, ranges: ranges, now: now)
     }
     @MainActor @ViewBuilder static func view(_ screen: String) -> some View {
         switch screen {
