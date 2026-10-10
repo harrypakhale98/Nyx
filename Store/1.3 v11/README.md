@@ -54,7 +54,6 @@ Slot: **Apple Vision Pro, 3840 × 2160**. Captured natively on the Nyx Vision Pr
 ## Notes
 
 - **Retakes and fixes.** The first iPad city-light capture showed the figure's ground as a black slab with the sky in a bowl between its ends: on a full-width iPad panel the figure was far wider than its view reaches the horizon. The figure is now capped at 2.2 times its height and is 260 pt tall in regular width (`CityLightFigure.aspect`, logged in `DECISIONS.md`), and the frame was retaken. The first iPad status bar override used 9:41 AM, which contradicted "Fri, Oct 9" on screen; all iPad frames were retaken with the real clock. The Vision Pro relief frame was cropped twice more, first to bring the Moon forward, then to drop the cut-off park list and the window's edge. The Moon volume was retaken alone (`-nyx-vision-moon-only`): with the planner behind it, the window's text showed through the globe.
-- **Moon glyph on the watch.** The Moon complication draws its phase with SF Symbols, which fill the unlit part, so on a black face tonight's 0% new Moon reads as a bright disc. The complications frame leaves the Moon complication out; the score card's small grey disc is the same glyph. Flagged as a follow-up, not fixed here.
 - The week frame's footnote ("Hollow nights have no full cloud forecast yet.") runs under the screen's bottom edge, as it scrolls on the watch.
 - iPad field mode keeps its single column on the left of the screen, as the app lays it out.
 - Scores, forecasts, ranges and alerts are live as of October 10, 2026, about 2:20 to 3:00 AM Pacific.
