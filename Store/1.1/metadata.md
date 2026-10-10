@@ -1,6 +1,6 @@
-# Nyx 1.2 — App Store metadata (update)
+# Nyx 1.3 — App Store metadata (update)
 
-Paste-ready copy for App Store Connect. Nyx 1.1 is live; **version 1.2** is the update, so What's New is required (below). Voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives, nothing says "only", "first" or "best".
+Paste-ready copy for App Store Connect. Nyx 1.1 is live and **version 1.2 (8) is approved** (released when the owner chooses); **version 1.3 (10)** is the next update, uploaded on 2026-10-09, so What's New is required (below). Voice: calm, precise, plain, honest about uncertainty. No exclamation marks, no marketing adjectives, nothing says "only", "first" or "best".
 
 Character counts were verified with a script on 2026-10-07 (`len()` of the text between the fences; App Store Connect may count a line break as two characters, so each field keeps a margin). Apple's limits: name 30, subtitle 30, promotional text 170, description 4,000, keywords 100.
 
@@ -31,14 +31,67 @@ The description and What's New name features from main. Each row below was check
 - **Categories:** Travel (primary), Weather (secondary).
 - **Price:** Free. No subscriptions, advertising or in-app purchases (a standing condition of Open-Meteo's free, non-commercial terms).
 - **Copyright:** `2026 Hardik Pakhale`.
-- **Version / build:** 1.2 (10). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
+- **Version / build:** 1.3 (10) (1.2 (8) is approved; App Store Connect closed the 1.2 train, so build 10 ships as 1.3). **Phased release** (seven days, pausable), as in `SUBMISSION.md`; release the version by hand after approval, once the offline check on the App Store build passes (checklist steps 7 and 8).
 - **Platforms:** iPhone, iPad, Apple Watch (inside the iOS build), Apple Vision Pro (its own build and version page: `metadata-visionos.md`).
 
 ---
 
-## What's New in 1.2 (≤4000)
+## What's New in 1.3 (≤4000)
 
-Nyx 1.1 is live (App Store ID 6818817800, released October 7, 2026), so 1.2 is an update and App Store Connect asks for What's New. Paste one of these.
+Paste one of these on the 1.3 version page. It describes what changed since build 8, the approved 1.2: the October 8 team review and the October 9 award panel and round two (`DECISIONS.md`, `PHASE_STATUS.md`). If 1.2 is never released, 1.3 also carries everything in 1.2's text below; then paste 1.2's short text first (without its last sentence) and this full text after it (about 3,300 characters together; 1.2's full text and this one come to about 4,520, over the limit). Each claim was checked against the code on main on 2026-10-09 (table below).
+
+**Full (2,804 characters; 2,822 if each line break counts twice):**
+
+```
+Nyx 1.3 looks more closely at the sky itself, and at how the app tells you what it knows.
+
+A Moon you could print. On the large Moons, craters now catch the light along the terminator, drawn from NASA's LOLA elevation data, and a small Moon near new keeps a faint edge instead of reading as a hole. The share card leads with the night: the Moon, the score, the park, the date and the reason. It is always sent in full color, even from night vision.
+
+An honest dial. The score counts up with no word beside it, and the band word arrives only when the number lands in its band, so the two never disagree. When the forecast models disagree, the dial draws their range and says it in words. The four parts of a score's breakdown now always add up to the score it names.
+
+Tonight's sky, named. The full-screen sky arrives as your eyes would adapt, brightest stars first, then names up to six of the brightest stars in view and draws faint constellation figures. Fling it and it coasts to a stop. On a night without true darkness, the sky behind the app shows that night's twilight, with no stars under the midnight sun.
+
+What city light takes. A park's Sky glow panel can switch its own sky to the same sky seen from a city, as an illustration. The line naming the towns on its horizon now says how much of the city light around the park lies in each direction. The essay "A sky worth protecting" quotes its sources and links to Globe at Night.
+
+Under your finger. Touch and hold the shape of the night on a park's page to read any hour; on iPhone, feel it hum through the night under your finger. With VoiceOver, double-tap it and slide a finger to feel the same night. The time river's loupe shows the night and score under your finger, and Plan's month follows your finger as you swipe. A Directions row opens Maps at a step-free viewing spot first, where the park has one.
+
+Tonight, in order. The answer comes first, then other skies within reach, then your starting point. The tab bar shrinks as you scroll. The night vision switch is now a flashlight, and the screen dips to black before it turns red.
+
+A followed night follows the forecast. Its Live Activity updates the score and any closure, and says when the score is old.
+
+Also new: a night you record arrives in your journal's constellation as a new star; field mode says each fact once; outlines and marks grow heavier with Bold Text and Increase Contrast; Assistive Access gains a Red light switch; pull to refresh says what happened; widgets and Apple Watch show closures for any park; watch complications open their own park and night. On devices with Apple Intelligence, Ask Nyx shows only words whose numbers appear in its records, lists each lookup as it happens and shows the records it cites first.
+
+Still no account, no ads, no tracking.
+```
+
+**Short (493 characters):**
+
+```
+A Moon with craters along its terminator, from NASA elevation data, and a share card that leads with the night. An honest dial: the band word arrives only with its number, and the forecast models' range is drawn when they disagree. Tonight's sky names its brightest stars and coasts when flung. Switch a park's sky to the same sky from a city. Touch and hold the shape of the night to read any hour. A followed night's Live Activity follows the forecast. Still no account, no ads, no tracking.
+```
+
+| Claim | Where it is on main, 2026-10-09 |
+|---|---|
+| Crater relief from LOLA on large Moons; faint edge on small Moons | `Moon.metal` (`nyxMoonRelief`), `MoonView.swift`, `MoonRelief.xcassets` |
+| Share card leads with the night, always in full color | `ShareCard.swift` ("Shares a full-color image.") |
+| Band word only with its number; models' range on the dial in words | `CelestialGauge.swift` ("Forecast models: …") |
+| Breakdown parts add up to the sum | `DarknessScore.displayedParts` (`SkyConditions.swift`), `ScoreReadout.swift` |
+| Eyes-adapting sky, up to six star names, constellation figures, coasting | `TonightSkyView.swift` ("As your eyes adapt"), `SkyLore.swift`, `PanoramaSky.swift` |
+| Twilight sky on nights without true darkness, no stars under the midnight sun | `RealSky.swift` (`Visibility(sunAltitude:)`) |
+| City-sky switch; light-dome share by direction; essay sources and Globe at Night | `CityLight.swift` ("City · Class 8"), `SkyGlow.swift` ("Glow on the horizon"), `learn/darkness.md` |
+| Touch and hold the sky arc; VoiceOver direct touch | `SkyArc.swift` ("Touch and hold to read any hour", `accessibilityDirectTouch`), `ArcTouch.swift` |
+| River loupe, paging month, Directions row | `TimeRiver.swift`, `CalendarView.swift`, `NightActions.swift` ("Directions to …") |
+| Tonight's order, shrinking tab bar, flashlight lamp | `TonightView.swift`, `RootView.swift` (`tabBarMinimizeBehavior`), `TabRoot.swift` |
+| Live Activity follows the forecast ("as of") | `FieldActivity.swift`, `FieldServices.swift` |
+| New star in the constellation; field mode once; heavier strokes; Red light in Assistive Access | `YourSkyViews.swift` ("A new star at …"), `FieldNight.swift`, `NyxTheme.swift` (`stroke`), `AssistiveAccessViews.swift` |
+| Pull to refresh; closures on widgets and watch; complications open their night | `TonightView.swift`, `SavedSkySync.swift`, `WatchViews.swift` (`WatchLink`) |
+| Ask Nyx's checked words, lookups, cited records first | `GuideView.swift` ("Numbers checked against the records", "other records") |
+
+## What's New in 1.2 (≤4000) — the approved 1.2 copy
+
+This is the 1.2 text kept for the record; 1.2 (build 8) is approved, and App Store Connect holds whatever was pasted at its submission. One clause is restored to its October 8 wording: on October 9 The place's sentence gained "where the park's sky can be switched to the same sky under a city's glow, with the towns lighting its horizon", which describes build 10 (now 1.3), not build 8. Do not paste this on the 1.3 page except as described above.
+
+Nyx 1.1 is live (App Store ID 6818817800, released October 7, 2026), so 1.2 is an update and App Store Connect asks for What's New.
 
 **Full (about 1,900 characters):**
 
@@ -49,7 +102,7 @@ A more honest score. Clouds, smoke and city light now cap a night's score instea
 
 Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip. Start from your city, not only from a park. Follow a night and its countdown appears on your Lock Screen at dusk by itself. Add any night to Calendar, and keep it in your journal at dawn.
 
-Park pages in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, where the park's sky can be switched to the same sky under a city's glow, with the towns lighting its horizon, viewing spots, campgrounds and ranger programs.
+Park pages in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with sky glow, viewing spots, campgrounds and ranger programs.
 
 For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, photo descriptions in your journal, and better VoiceOver throughout.
 
@@ -168,7 +221,7 @@ Spanish subtitle: `metadata-es.md`.
 - **Age rating:** answer the current questionnaire. Expected result 4+: no user-generated content feed, no unrestricted web access (links open in Safari), no social features, no gambling or mature themes. New question (September 2026), social media capabilities: **No**. Age assurance (Texas SB 2420) is handled in the app by Declared Age Range; see `SUBMISSION.md`.
 - **App Privacy:** Data Not Collected (`PRIVACY.md`).
 - **Review notes:** `SUBMISSION.md` § Review notes (paste from there).
-- **Screenshots:** `SUBMISSION.md` § Screenshots. iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` (captured 2026-10-09, real sky first; order and captions in `Store/1.2 v10/README.md`). iPad, Apple Watch and Apple Vision Pro: the build 8 set in `Store/1.1 v8/` until their own recapture. The build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
+- **Screenshots:** `SUBMISSION.md` § Screenshots. iPhone: upload the build 10 set in `Store/1.2 v10/iPhone/` on the 1.3 page (captured 2026-10-09 from build 10, so valid for 1.3 (10); real sky first; order and captions in `Store/1.2 v10/README.md`). iPad, Apple Watch and Apple Vision Pro: the build 8 set in `Store/1.1 v8/` until their own recapture. The build 7 frames in `Store/Framed/` show scores computed before score v2 (for example Joshua Tree 93).
 - **App Preview (optional):** `app-preview-script.md`.
 - **Accessibility Nutrition Labels:** declare only what the device pass confirms (`accessibility-nutrition-labels.md`).
 - **Creative assets (optional):** product page header (21:9) and search result asset (3:2) can wait for 1.2.

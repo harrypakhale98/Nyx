@@ -1,5 +1,7 @@
 # App Store screenshots: Nyx 1.2 (10), iPhone
 
+**This set serves version 1.3 (10).** It was captured for 1.2 (10); App Store Connect then closed the 1.2 train (1.2 (8) is approved), so build 10 ships as 1.3. The screens show build 10 and need no change; the folder keeps its name.
+
 English, iPhone only. File order is upload order. Every frame is flattened (no alpha) and exactly its slot's size. This set supersedes the iPhone frames in `Store/1.1 v8/`; the iPad, Apple Watch and Apple Vision Pro frames stay in `Store/1.1 v8/` until their own recapture, and the Spanish frames wait for the native review.
 
 The screens come from the build 10 source (`c979be2`, plus this commit's DEBUG-only change that hides the status bar on the field-mode capture routes, as presented field mode does), Debug build, on the iOS 27 simulator, captured October 9, 2026 in the evening (Pacific). They use live data (`-nyx-state live`: real Open-Meteo forecasts and NPS alerts at capture time, scored by the shipping engine). The one exception is the journal, which uses the DEBUG seed (`-nyx-state populated`, sample entries, no personal photos); its caption says "Sample entries". Every launch adds `-nyx-reduce-motion`, so no reveal, count or dial is mid-flight. The status bar shows 9:41 with a full battery; field mode and Where to look have none, as on a device.

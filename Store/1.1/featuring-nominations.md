@@ -1,6 +1,6 @@
 # Nyx — App Store featuring nominations (paste-ready)
 
-Updated 2026-10-08: **Nyx 1.1 is live** (released October 7, 2026, App Store ID 6818817800), so the nomination for the big update is **App Enhancements for 1.2**, then **one New Content nomination** for the Geminids event. (If you already filed an App Launch nomination for 1.1, keep it and add this one for 1.2.) The type cannot be changed after submission.
+Updated 2026-10-09: **Nyx 1.1 is live** (released October 7, 2026, App Store ID 6818817800) and **1.2 (8) is approved** (released when the owner chooses). The next update is **1.3 (10)**, uploaded on October 9, so the nomination is **App Enhancements for 1.3**, then **one New Content nomination** for the Geminids event. App Enhancements is the right type whether or not 1.2 is released first, since 1.1 is already live. (If you already filed an App Launch nomination for 1.1, keep it and add this one for 1.3.) The type cannot be changed after submission.
 
 Where: App Store Connect → Apps → Nyx → Featuring → Nominations → Create nomination. Role: Account Holder, Admin, App Manager or Marketing.
 
@@ -22,11 +22,11 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 | Supplemental materials | Up to 5 URLs. |
 | Helpful details | Accessibility, inclusivity, priority, unique aspects. |
 
-**Lead time.** App Store Connect asks for at least **3 weeks** before the publish date (Apple's developer page says at least 2 weeks and recommends up to 3 months). Use 3 weeks as the floor. Nominations can be edited after submission except for the type and related apps. Keep every claim true on the publish date: if a feature is not in the 1.2 build that is released, delete its sentence.
+**Lead time.** App Store Connect asks for at least **3 weeks** before the publish date (Apple's developer page says at least 2 weeks and recommends up to 3 months). Use 3 weeks as the floor. Nominations can be edited after submission except for the type and related apps. Keep every claim true on the publish date: if a feature is not in the 1.3 build that is released, delete its sentence.
 
 ---
 
-## Nomination 1 — App Enhancements (Nyx 1.2)
+## Nomination 1 — App Enhancements (Nyx 1.3)
 
 - **Nomination name:** `Nyx: which park, which night`
 - **Type:** App Enhancements
@@ -36,18 +36,26 @@ Sources: App Store Connect Help, [Nominate your app for featuring](https://devel
 - **Localizations:** English (add Spanish only after review).
 - **In-App Events:** the November new-moon weekend event, once approved.
 
-**Description (short):** leads with what 1.2 changes, from What's New in `metadata.md`. The journal's photo descriptions are left out: they work only on iOS 27 with Apple Intelligence. "Follow this night" is in: its Live Activity fixes are in build 10, the build submitted.
+**Description (short):** leads with what 1.3 changes, from What's New in 1.3 in `metadata.md`. If 1.2 is released first (`INPUT_NEEDED.md` step 12), file the 1.3 text alone. If 1.2 is skipped, 1.3 carries everything in 1.2 as well: add the "What 1.2 brought" paragraphs below after its second paragraph. The journal's photo descriptions and Ask Nyx are left out: they work only with Apple Intelligence. "Follow this night" is in: its Live Activity fixes are in build 10, the build submitted.
 
 ```
-Nyx 1.2 is a large update to a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?
+Nyx 1.3 is an update to a free dark-sky planner for the 63 US national parks. It answers one question: where should I go, and on which night, for the darkest sky?
 
-A more honest score. Clouds, smoke and city light now cap a night's score instead of only subtracting from it, so an overcast desert night no longer reads Good, and a park beside a city can no longer read Pristine. Beyond the forecast, nights use each park's usual clouds for that month and say so. The park page says what limits tonight and shows the best clear window.
+A Moon you could print: craters catch the light along the terminator, from NASA's LOLA elevation data, and the share card leads with the night, always in full color. An honest dial: the band word arrives only when the number lands in its band, and when the forecast models disagree the dial draws their range and says it in words.
 
-Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip, starting from your city or from a park. Follow a night and its countdown appears on your Lock Screen at dusk. Park pages come in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, where the park's sky can be switched to the same sky under a city's glow, with the towns lighting its horizon, viewing spots, campgrounds and ranger programs.
-
-For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, and better VoiceOver throughout. On Apple Watch, a dark-adaptation clock; on Apple Vision Pro, named stars and constellations; on iPad, parks in their own windows.
+Tonight's sky, named: the full-screen sky arrives as eyes adapt, brightest stars first, names the brightest stars in view and draws faint constellation figures. Each park's Sky glow panel can switch its sky to the same sky seen from a city. Touch and hold the shape of the night to read any hour and feel it under your finger, or with VoiceOver, double-tap and slide. A followed night's Live Activity follows the forecast and any closure.
 
 The astronomy runs on the device and works offline. There is no account, advertising or tracking; the App Privacy label reads Data Not Collected. One independent developer made it.
+```
+
+**What 1.2 brought** (add only if 1.2 is skipped):
+
+```
+A more honest score. Clouds, smoke and city light now cap a night's score instead of only subtracting from it, so an overcast desert night no longer reads Good, and a park beside a city can no longer read Pristine. Beyond the forecast, nights use each park's usual clouds for that month and say so. The park page says what limits tonight and shows the best clear window.
+
+Plan your nights. A new Plan tab holds the month for one park and My free nights for a trip, starting from your city or from a park. Follow a night and its countdown appears on your Lock Screen at dusk. Park pages come in three parts: Tonight; The sky, with the Moon at full size and tonight's sky full screen; and The place, with the towns lighting its horizon, viewing spots, campgrounds and ranger programs.
+
+For more people. Assistive Access, a brighter red for color-blind eyes, Feel tonight through the Taptic Engine, where to look by sound with AirPods, and better VoiceOver throughout. On Apple Watch, a dark-adaptation clock; on Apple Vision Pro, named stars and constellations; on iPad, parks in their own windows.
 ```
 
 **Description (long), add after the short text:**
@@ -103,6 +111,6 @@ The Geminids peak on December 14, and in 2026 a thin crescent Moon sets in the e
 ## Submission order
 
 1. By Oct 16: enable the public TestFlight link, publish `docs/` (landing page, press kit, case study), then file Nomination 1.
-2. Submit the November new-moon and Geminids In-App Events once the 1.2 build is approved; attach them.
+2. Submit the November new-moon and Geminids In-App Events now that 1.2 (8) is approved (check that each event's deep link opens as described in the version the store will carry on its date); attach them.
 3. By Nov 20: file Nomination 2.
 4. Never send the same nomination twice; edit instead. Keep the final text of each nomination here.
