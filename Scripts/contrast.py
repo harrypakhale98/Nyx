@@ -56,6 +56,16 @@ lines={'palette':'Lines (graphical objects)',
        'nightRed70OnBlack':round(contrast(tuple(.7*c for c in STANDARD),(0,0,0)),2)}
 assert min(v for k,v in lines.items() if k!='palette')>=3
 rows.append(lines)
+# A night's filled mark (NyxPalette.markOpacity): the score's ramp held at 3:1 on black and the panel, amber from
+# 50% and night vision's white-then-red from 70% (a poor night's mark is smaller, never fainter than that).
+AMBER=(1,.706,.329); PANEL=(.043,.063,.149); NIGHT_PANEL=tuple(panelGrey*c for c in STANDARD)
+marks={'palette':'Night marks (graphical objects)',
+       'amber50OnBlack':round(contrast(tuple(.5*c for c in AMBER),(0,0,0)),2),
+       'amber50OnPanel':round(contrast(tuple(.5*c+.5*b for c,b in zip(AMBER,PANEL)),PANEL),2),
+       'nightRed70OnBlack':round(contrast(tuple(.7*c for c in STANDARD),(0,0,0)),2),
+       'nightRed70OnPanel':round(contrast(tuple(.7*c+.3*b for c,b in zip(STANDARD,NIGHT_PANEL)),NIGHT_PANEL),2)}
+assert min(v for k,v in marks.items() if k!='palette')>=3, marks
+rows.append(marks)
 # The twilight lift behind a night without true darkness (RealSky.liftColor, at its brightest at the bottom of the
 # screen): muted captions keep 4.5:1 over it by default. Under Increase Contrast the lift is off (plain black).
 LIFT=(.078,.106,.227)

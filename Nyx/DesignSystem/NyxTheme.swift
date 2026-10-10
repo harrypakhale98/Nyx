@@ -25,6 +25,12 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for
     /// graphical objects): starlight at 40%, and at 70% through night vision's red, which dims it.
     var line: Color { ink.opacity(nightVision ? 0.7 : highContrast ? 0.6 : 0.4) }
+    /// A night's filled mark grows fuller with its score (45% at 0 to 95% at 100); its size says the score too.
+    static func markRamp(score:Int)->Double { 0.45+Double(min(100,max(0,score)))/200 }
+    /// The ramp held at 3:1 against black and the panel (WCAG 1.4.11), as `line` is: amber from 50%, and
+    /// from 70% through night vision's red, which dims it. A poor night's mark stays smaller, never fainter
+    /// than a graphic may be (`Scripts/contrast.py`, "Night marks").
+    func markOpacity(score:Int)->Double { max(nightVision ? 0.7 : 0.5,Self.markRamp(score:score)) }
 }
 private struct MotionOverrideKey: EnvironmentKey { static let defaultValue=false }
 private struct PaletteKey: EnvironmentKey { static let defaultValue=NyxPalette(nightVision:false,highContrast:false) }

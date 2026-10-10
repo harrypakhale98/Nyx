@@ -39,7 +39,7 @@ struct WeekStrip: View {
                 let center=CGPoint(x:pitch/2+CGFloat(index)*pitch,y:size.height/2)
                 let radius=(1.3+3.6*pow(Double(night.score.value)/100,1.5))*scale
                 let mark=NightMark.mark(night,differentiate:access.differentiate)
-                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:0.45+Double(night.score.value)/200,lineWidth:0.8*scale,stroke:palette.stroke)
+                mark.draw(in:&context,center:center,radius:radius,fill:night.basis.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:night.score.value),lineWidth:0.8*scale,stroke:palette.stroke)
                 if night.id==best.id {
                     let ring=pitch/2
                     context.stroke(Path(ellipseIn:CGRect(x:center.x-ring,y:center.y-ring,width:2*ring,height:2*ring)),with:.color(palette.accent.opacity(0.75)),lineWidth:0.7*scale*palette.stroke)

@@ -48,6 +48,13 @@
     "nightRed70OnBlack": 3.36
   },
   {
+    "palette": "Night marks (graphical objects)",
+    "amber50OnBlack": 3.41,
+    "amber50OnPanel": 3.41,
+    "nightRed70OnBlack": 3.36,
+    "nightRed70OnPanel": 3.36
+  },
+  {
     "palette": "Twilight lift",
     "primaryOnLift": 14.92,
     "secondaryOnLift": 8.24,
