@@ -1,4 +1,5 @@
 import SwiftUI
+import WatchKit
 
 /// Red at night: at a dark site the wrist is the screen, and red light keeps the eyes adapted.
 /// Automatic (the default) wears Nyx's standard colours by day and turns red at civil dusk.
@@ -14,7 +15,7 @@ struct WatchRootView: View {
         // The app's one clock, read once a minute: Automatic turns red at civil dusk with the app
         // open, and every page below reads the same minute (`\.watchNow`).
         TimelineView(.everyMinute) { timeline in
-            let now = max(timeline.date, woke)
+            let now = max(timeline.date, woke).addingTimeInterval(WatchDebug.clockShift)
             content(now: now).environment(\.watchNow, now)
         }
         .onChange(of: scenePhase) { _, phase in
@@ -154,8 +155,11 @@ struct MilestoneTap: ViewModifier {
     }
 }
 
-/// One glance: the gauge first, then what happens next. Scrolls only at accessibility sizes,
-/// where the gauge keeps its size and the words flow below it. Tap the dial, then turn the
+/// One glance: the gauge first, then what happens next. At the standard text sizes (the watch's
+/// default and below) the face is fixed and the gauge takes what the words leave. At accessibility sizes it scrolls, the gauge
+/// keeps its size and the words flow below it. At the large sizes in between, every line stays
+/// whole and the face scrolls only where the words would leave the gauge too small to read
+/// (`WatchTonightLayout`), as on the 40 mm watch in Spanish. Tap the dial, then turn the
 /// Digital Crown to step through the week: the score and the Moon change night by night, with a
 /// detent tap for each. VoiceOver adjusts the same nights by swiping up or down on the dial.
 struct TonightFace: View {
@@ -171,6 +175,11 @@ struct TonightFace: View {
     /// Opened on a later night, it holds the Crown already, so the night shown stays until let go.
     @State private var engaged: Bool
     @FocusState private var scrubbing: Bool
+    /// The face's height and the tallest the words under the dial can be this week with every
+    /// line whole, at the large text sizes; the layout held while the dial has the Crown.
+    @State private var room = 0.0
+    @State private var wordsHeight = 0.0
+    @State private var held: WatchTonightLayout?
     init(night: Night, week: [Night], now: Date, context: WatchContext?, startNight: Int = WatchDebug.initialNight) {
         self.night = night
         self.week = week
@@ -185,37 +194,86 @@ struct TonightFace: View {
     private var looking: Bool { engaged || offset != 0 }
     /// The forecast models' range for the night on the dial, as the iPhone shows it.
     private var models: ClosedRange<Int>? { context?.modelRange(for: shown) }
+    /// Up to this size the face is fixed as designed: the watch's default text size.
+    private var standardSizes: DynamicTypeSize { WatchTonightLayout.largestStandard(screenWidth: WKInterfaceDevice.current().screenBounds.width) }
+    private var measured: WatchTonightLayout {
+        WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: typeSize <= standardSizes, accessibilitySize: typeSize.isAccessibilitySize)
+    }
     var body: some View {
         if typeSize.isAccessibilitySize {
-            ScrollView {
-                VStack(spacing: 6) {
-                    gauge.frame(width: 112, height: 112)
-                    Text(shown.score.band.label).font(.system(.headline, design: .serif))
-                    if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models) }
-                    if let closure { ClosureLine(text: closure) }
-                    ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
-                        Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
-                    }
-                }.frame(maxWidth: .infinity)
-            }
+            scrolling
+        } else if typeSize <= standardSizes {
+            fixed(wraps: false)
         } else {
-            VStack(spacing: 3) {
-                // The gauge takes what the words leave: larger on Ultra, never crowding them on 42 mm.
-                gauge.frame(maxWidth: 150, minHeight: 0)
-                if looking {
-                    NightGlance(night: shown, isTonight: offset == 0, models: models).layoutPriority(1)
-                } else {
-                    // "No cloud forecast" or the models' range rides on the clock-time line, so neither costs the gauge anything.
-                    NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: models).layoutPriority(1)
-                    if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
-                        Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1).nonEssential()
-                    }
+            Group {
+                switch held ?? measured {
+                case .fixed: fixed(wraps: true)
+                case .scrolling: scrolling
                 }
-                // A closure stands beside the score on every surface; here it costs the gauge one line.
-                if let closure { ClosureLine(text: closure, lines: 1).layoutPriority(1) }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onGeometryChange(for: Double.self) { $0.size.height } action: { room = $0 }
+            .background {
+                // The words as the fixed face would set them, measured unseen at the face's width:
+                // tonight's, and each night's the Crown can turn to, so the choice never depends on
+                // which layout or night is showing, and tapping the dial never changes the layout
+                // (which would take the Crown away from it).
+                ZStack {
+                    VStack(spacing: WatchTonightLayout.spacing) { words(wraps: true, looking: false, shown: night) }
+                    ForEach(week.indices, id: \.self) { index in
+                        VStack(spacing: WatchTonightLayout.spacing) { words(wraps: true, looking: true, shown: week[index], isTonight: index == 0) }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: Double.self) { $0.size.height } action: { wordsHeight = $0 }
+                .hidden()
+                .accessibilityHidden(true)
+            }
+            .onChange(of: engaged) { _, on in held = on ? measured : nil }
         }
+    }
+    private var scrolling: some View {
+        ScrollView {
+            VStack(spacing: 6) {
+                // Smaller at the large sizes, so the words under it start on the first screen.
+                let side = typeSize.isAccessibilitySize ? 112 : WatchTonightLayout.scrollingDial
+                gauge.frame(width: side, height: side)
+                // At accessibility sizes the band word leaves the dial for this line.
+                if typeSize.isAccessibilitySize { Text(shown.score.band.label).font(.system(.headline, design: .serif)) }
+                if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
+                if let closure { ClosureLine(text: closure) }
+                ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
+                    Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
+                }
+            }.frame(maxWidth: .infinity)
+        }
+    }
+    /// `wraps`: every line whole, wrapped rather than shrunk or cut (the large sizes).
+    private func fixed(wraps: Bool) -> some View {
+        VStack(spacing: WatchTonightLayout.spacing) {
+            // The gauge takes what the words leave: larger on Ultra, never crowding them on 42 mm.
+            gauge.frame(maxWidth: 150, minHeight: 0)
+            words(wraps: wraps, looking: looking, shown: shown, isTonight: offset == 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    /// What sits under the dial: the next moment of tonight, or the night the Crown turned to.
+    @ViewBuilder private func words(wraps: Bool, looking: Bool, shown: Night, isTonight: Bool = true) -> some View {
+        let lines: Int? = wraps ? nil : 1
+        if looking {
+            NightGlance(night: shown, isTonight: isTonight, models: context?.modelRange(for: shown)).layoutPriority(1)
+        } else {
+            // "No cloud forecast" or the models' range rides on the clock-time line, so neither costs the gauge anything.
+            NextMoment(night: night, now: now, cloudsUnknown: night.basis == .usual, models: context?.modelRange(for: shown), wraps: wraps).layoutPriority(1)
+            if NightMilestone.next(after: now, in: night.sky) == nil, let note = WatchSky.forecastNote(night, context: context, short: true) {
+                Text(note).font(.caption2).foregroundStyle(palette.faint).lineLimit(lines).minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: wraps).layoutPriority(1).nonEssential()
+            }
+        }
+        // A closure stands beside the score on every surface; here it costs the gauge one line
+        // (at the large sizes, the lines it needs).
+        if let closure { ClosureLine(text: closure, lines: lines).layoutPriority(1) }
     }
     private var gauge: some View {
         WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models)
@@ -335,9 +393,10 @@ struct NextMoment: View {
     var cloudsUnknown = false
     /// Tonight's forecast models' range, when the iPhone shows one (never with `cloudsUnknown`).
     var models: ClosedRange<Int>? = nil
+    /// Every line whole, wrapped rather than shrunk or cut off (always at accessibility sizes).
+    var wraps = false
     var body: some View {
-        // At accessibility sizes every line wraps instead of shrinking or cutting off.
-        let limit = typeSize.isAccessibilitySize ? nil : 1 as Int?
+        let limit = typeSize.isAccessibilitySize || wraps ? nil : 1 as Int?
         Group {
             if let next = NightMilestone.next(after: now, in: night.sky) {
                 VStack(spacing: 0) {
@@ -635,6 +694,11 @@ private struct NyxTitle: ViewModifier {
     WatchPreviewHost(nightVision: true) { park, store in TonightFace(night: store.tonight(park, at: .now), week: store.week(park, at: .now), now: .now, context: nil) }
         .dynamicTypeSize(.accessibility5)
 }
+#Preview("Tonight • xxxLarge") {
+    // Fixed where the dial keeps its minimum under whole lines, scrolling where it cannot (`WatchTonightLayout`).
+    WatchPreviewHost(nightVision: false) { park, store in TonightFace(night: store.tonight(park, at: .now), week: store.week(park, at: .now), now: .now, context: nil) }
+        .dynamicTypeSize(.xxxLarge)
+}
 #Preview("Night glance • Friday") {
     WatchPreviewHost(nightVision: true) { park, store in NightGlance(night: store.week(park, at: .now)[3], isTonight: false) }
 }
@@ -651,6 +715,10 @@ private struct NyxTitle: ViewModifier {
 }
 #Preview("Crown night • models' range • red") {
     ModelsPreview(nightVision: true) { week, context in TonightFace(night: week[0], week: week, now: .now, context: context, startNight: 1) }
+}
+#Preview("Crown night • models' range • xxxLarge") {
+    ModelsPreview(nightVision: false) { week, context in TonightFace(night: week[0], week: week, now: .now, context: context, startNight: 6) }
+        .dynamicTypeSize(.xxxLarge)
 }
 #Preview("Next moment • models' range") {
     ModelsPreview(nightVision: false) { week, context in NextMoment(night: week[0], now: .now, models: context.modelRange(for: week[0])) }

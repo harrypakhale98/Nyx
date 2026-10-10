@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -107,3 +108,33 @@ nonisolated extension WatchDialFace.Line {
     }
 }
 #endif
+
+/// Which layout Apple Watch's Tonight face takes. At the standard text sizes (each watch's
+/// default and below, `largestStandard`) the face never scrolls: the dial takes what the words
+/// leave, as it always has. At accessibility sizes it always scrolls. In between, the words keep every line whole (wrapped, never shrunk or cut)
+/// and the face stays fixed only while the dial keeps at least `dialMinimum` points; otherwise it
+/// scrolls, so a large text size on the smallest watch never collapses the instrument.
+nonisolated enum WatchTonightLayout: Equatable, Sendable {
+    case fixed
+    case scrolling
+    /// The largest of the standard sizes on a screen this wide (points): each watch's default
+    /// text size, Extra Large on the widest (the Ultra's 205) and Large on the others (the 40 mm's
+    /// 162). Up to it the face stays exactly as designed.
+    static func largestStandard(screenWidth: Double) -> DynamicTypeSize {
+        screenWidth >= 200 ? .xLarge : .large
+    }
+    /// The smallest dial that still reads as the instrument: numeral, band word and Moon.
+    static let dialMinimum = 80.0
+    /// The dial of the scrolling face at the large sizes: the instrument whole, with the first
+    /// words under it on the first screen of the smallest watch.
+    static let scrollingDial = 96.0
+    /// The gap between the dial and the words under it.
+    static let spacing = 3.0
+    /// `room`: the face's height; `words`: the height of the words under the dial with every line
+    /// whole. Either still 0 means not yet measured, and the face stays fixed until it is.
+    static func choose(room: Double, words: Double, standardSize: Bool, accessibilitySize: Bool) -> Self {
+        if accessibilitySize { return .scrolling }
+        if standardSize || room <= 0 || words <= 0 { return .fixed }
+        return room - words - spacing >= dialMinimum ? .fixed : .scrolling
+    }
+}
