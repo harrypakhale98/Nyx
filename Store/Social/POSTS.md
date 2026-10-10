@@ -101,7 +101,7 @@ Replace `[link]` with the App Store link: `https://apps.apple.com/us/app/nyx-dar
 1. Nyx's full-screen sky over Death Valley for Saturday, July 3, at 12:55 AM, facing south. Headline: "The night sky, before you go." The Milky Way rises from the southern horizon with its core labelled; Altair and Antares are named, and faint lines trace their constellations.
 2. Nyx's Tonight screen for Friday, October 9. Headline: "Where is the sky darkest tonight?" Death Valley is the darkest park within 200 miles, with a Darkness Score of 97, Pristine, on an amber dial.
 3. Nyx's Plan tab for Joshua Tree, October 2026. Headline: "Choose the night worth the drive." Each night is a dot sized by its score, with the score beneath; the best five-night stretch, October 13 to 17, is ringed, with scores of 88 and 89, and October 10 shows a cloud.
-4. Nyx's Sky glow panel for Death Valley. Headline: "See the stars a city would hide." A drawn sky full of stars and the Milky Way, a switch between "Here, Class 2" and "City, Class 8", and the note "An illustration: the same sky drawn at this park's estimated class and at a city's." Below: Bortle estimate, Class 2 of 9.
+4. Nyx's Sky glow panel for Death Valley. Headline: "See the stars a city would hide." The same drawn sky as a city would show it: a few bright stars over an orange glow on the horizon, with "City, Class 8" selected on a switch beside "Here, Class 2", and the note "An illustration: the same sky drawn at this park's estimated class and at a city's." Below: Bortle estimate, Class 2 of 9.
 
 ## Notes
 

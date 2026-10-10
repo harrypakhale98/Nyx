@@ -47,8 +47,9 @@ shots=[
  # Beyond the forecast, so the header's score says it uses the park's usual clouds.
  ('compass',['-nyx-screen','field-compass','-nyx-state','live','-nyx-date','2027-07-03','-nyx-field-minutes','225']),
  ('calendar',['-nyx-screen','calendar','-nyx-state','live']),
- # The Place chapter at Death Valley: the park's own sky, the 'City · Class 8' switch and 'An illustration'.
- ('city-light',['-nyx-screen','light','-nyx-state','live','-nyx-park','deva']),
+ # The Place chapter at Death Valley with the city's sky selected ('City · Class 8'), so the frame shows what
+ # 'See the stars a city would hide.' claims: the same sky with a city's glow, and 'An illustration' under it.
+ ('city-light',['-nyx-screen','light','-nyx-state','live','-nyx-park','deva','-nyx-glow-compare','city']),
  ('parks-map',['-nyx-screen','parks','-nyx-state','live','-nyx-parks-map']),
  ('constellation',['-nyx-screen','journal','-nyx-state','populated']),
 ]
