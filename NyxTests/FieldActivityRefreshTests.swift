@@ -57,6 +57,26 @@ import Testing
         #expect(attributes.scoreDay(planned) == wednesday)
     }
 
+    /// A score worked out in the small hours of the night's own day, still more than 18 hours before
+    /// sunset (a June night at Joshua Tree, sunset near 8 PM), names its time in park time, never
+    /// today's weekday; one from the evening before still names its day.
+    @Test func oldScoreFromTheSameDayNamesItsTime() throws {
+        let jotr=try park("jotr")
+        let sky=engine.conditions(for: jotr, on: jotr.evening(try #require(try? Date("2027-06-20T20:00:00Z", strategy: .iso8601))))
+        let attributes=FieldActivityAttributes(night: FieldNight(park: jotr, sky: sky), score: 94, band: "Pristine", closure: nil)
+        let heading=attributes.state(at: FieldActivityAttributes.followStart(sky), nightVision: false, heading: true)
+        var calendar=Calendar(identifier: .gregorian)
+        calendar.timeZone=attributes.timeZone
+        let early=calendar.startOfDay(for: attributes.dusk).addingTimeInterval(70*60)
+        try #require(attributes.dusk.timeIntervalSince(early)>FieldActivityAttributes.scoreAgeLimit)
+        let same=scored(heading, 88, "Excellent", nil, at: early)
+        let plain={ (text: String) in text.replacingOccurrences(of: "\u{202F}", with: " ") }
+        #expect(plain(attributes.scoreLine(same)) == "88 · Excellent as of 1:10 AM")
+        #expect(plain(attributes.spokenScore(same)) == "Darkness score 88, Excellent, as of 1:10 AM.")
+        let evening=scored(heading, 88, "Excellent", nil, at: early.addingTimeInterval(-3*3600))
+        #expect(attributes.scoreLine(evening) == "88 · Excellent as of Sat")
+    }
+
     /// The closure follows the state: posted after following, it appears; lifted, it goes.
     @Test func closureFollowsTheState() throws {
         let (_, _, attributes, heading)=try followed()

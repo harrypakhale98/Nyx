@@ -266,8 +266,18 @@ private struct RecordsDisclosure: View {
         }
     }
 }
+/// A vertical line down the middle of its frame, inset at both ends: the streaming answer's
+/// dashed margin rule.
+nonisolated private struct StreamingRule: Shape {
+    func path(in rect:CGRect)->Path {
+        var path=Path()
+        path.move(to:CGPoint(x:rect.midX,y:rect.minY+4))
+        path.addLine(to:CGPoint(x:rect.midX,y:max(rect.minY+4,rect.maxY-4)))
+        return path
+    }
+}
 /// The answer as it arrives: the constellation loader until the first checked words, the words
-/// muted while they stream, then starlight with "Numbers checked against the records" and one chip per
+/// muted beside a dashed margin rule while they stream, then starlight with "Numbers checked against the records" and one chip per
 /// cited record. It reads the guide's streaming text itself, so only this view redraws with each
 /// new part, never the records.
 private struct GuideAnswerBlock: View {
@@ -282,9 +292,18 @@ private struct GuideAnswerBlock: View {
         if !guide.text.isEmpty {
             // Muted while it streams, each part already checked against the records; starlight
             // once the whole answer has passed. VoiceOver reads it only then, and no live region
-            // speaks the words as they come.
+            // speaks the words as they come. A dashed rule in the margin marks the words as still
+            // arriving by shape as well, for night vision (where muted and starlight are the same
+            // red) and Differentiate Without Color: dashes are Nyx's mark for "not yet final". It
+            // sits outside the text, so nothing reflows when it goes.
             Text(guide.text).font(.system(.body,design:.serif)).lineSpacing(6).foregroundStyle(guide.checked ? palette.ink : palette.muted)
                 .fixedSize(horizontal:false,vertical:true).textSelection(.enabled)
+                .overlay(alignment:.leading) {
+                    if !guide.checked {
+                        StreamingRule().stroke(palette.line,style:StrokeStyle(lineWidth:1.5*palette.stroke,lineCap:.round,dash:[2,5]))
+                            .frame(width:2).offset(x:-12).transition(.opacity).accessibilityHidden(true)
+                    }
+                }
                 .accessibilityHidden(!guide.checked)
                 .animation(systemReduceMotion ? nil : NyxMotion.spring,value:guide.checked)
             if guide.checked || guide.loading { status }

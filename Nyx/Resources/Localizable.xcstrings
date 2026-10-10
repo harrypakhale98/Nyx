@@ -11579,6 +11579,23 @@
         }
       }
     },
+    "Its score from the small hours of the same day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its score from the small hours of the same day"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su índice de la madrugada del mismo día"
+          }
+        }
+      }
+    },
     "Its score from three days before, until Nyx refreshes it": {
       "extractionState": "manual",
       "localizations": {
@@ -13643,23 +13660,6 @@
         }
       }
     },
-    "Moonlit hours are lighter and hatched. Touch and hold to read any hour.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moonlit hours are lighter and hatched. Touch and hold to read any hour."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las horas con Luna se ven más claras y rayadas. Mantén presionado para leer cualquier hora."
-          }
-        }
-      }
-    },
     "Moonlit hours are lighter.": {
       "extractionState": "manual",
       "localizations": {
@@ -13673,23 +13673,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las horas con Luna se ven más claras."
-          }
-        }
-      }
-    },
-    "Moonlit hours are lighter. Touch and hold to read any hour.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moonlit hours are lighter. Touch and hold to read any hour."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las horas con Luna se ven más claras. Mantén presionado para leer cualquier hora."
           }
         }
       }
@@ -25621,6 +25604,23 @@
         }
       }
     },
+    "Touch and hold to read any hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touch and hold to read any hour."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantén presionado para leer cualquier hora."
+          }
+        }
+      }
+    },
     "Toward": {
       "extractionState": "manual",
       "localizations": {
@@ -29846,6 +29846,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "minutos"
+          }
+        }
+      }
+    },
+    "models %lld–%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "models %lld–%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "modelos %lld–%lld"
           }
         }
       }

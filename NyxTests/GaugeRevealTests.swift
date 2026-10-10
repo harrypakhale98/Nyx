@@ -136,6 +136,32 @@ import Testing
         #expect(CelestialGauge.modelRange(outlook(80...80),basis:.forecast)==nil)
         #expect(CelestialGauge.modelRange(outlook(77...82),basis:.forecast)==77...82)
     }
+    @Test func theRangesEndsStayOnTheTrackAndClearOfTheStar() {
+        let cap=0.5, clear=4.0
+        // Far from the star and the ends: the ticks sit at the range's own scores.
+        #expect(ModelRangeBand.tickAngles(60...90,score:75,cap:cap,clearance:clear)==[ModelRangeBand.angle(60),ModelRangeBand.angle(90)])
+        // At 100 the upper tick is held inside the end of the track, as is the span's round end.
+        let top=ModelRangeBand.tickAngles(80...100,score:88,cap:cap,clearance:clear)
+        #expect(top.count==2 && top[1]==ModelRangeBand.angle(100)-cap)
+        #expect(ModelRangeBand.spanAngles(80...100,cap:2).to==ModelRangeBand.angle(100)-2)
+        #expect(ModelRangeBand.spanAngles(0...20,cap:2).from==ModelRangeBand.angle(0)+2)
+        // Two points from the star (98 against 100): the upper tick would sit under its glow, and
+        // the track has no room beyond it, so the star stands for that end.
+        let near=ModelRangeBand.tickAngles(90...100,score:98,cap:cap,clearance:6)
+        #expect(near==[ModelRangeBand.angle(90)])
+        // One point from the star with room beyond: the tick moves outward, just clear of it.
+        let moved=ModelRangeBand.tickAngles(70...91,score:90,cap:cap,clearance:clear)
+        #expect(moved[1]==ModelRangeBand.angle(90)+clear)
+        // Every drawn tick is on the track and clear of the star.
+        for score in stride(from:0.0,through:100,by:0.5) {
+            for range in [0...100,max(0,Int(score)-8)...min(100,Int(score)+8),Int(score)...Int(score)] {
+                for tick in ModelRangeBand.tickAngles(range,score:score,cap:cap,clearance:clear) {
+                    #expect(tick>=ModelRangeBand.angle(0)+cap-0.0001 && tick<=ModelRangeBand.angle(100)-cap+0.0001)
+                    #expect(abs(tick-ModelRangeBand.angle(score))>=clear-0.0001)
+                }
+            }
+        }
+    }
     @Test func modelsThatAgreeDrawNoRange() {
         // The river and the Clouds tile say "Forecast models agree" at 15 points of cloud or less;
         // the dial must not then show a 13-point spread of scores.

@@ -82,21 +82,38 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
         guard let at=state.scoredAt ?? (state.score == nil && state.heading == true ? state.updated : nil) else { return nil }
         return dusk.timeIntervalSince(at)>Self.scoreAgeLimit ? at : nil
     }
-    /// "94 · Pristine", or "94 · Pristine as of Wed" when the score is old. Park time.
+    /// "94 · Pristine", or "94 · Pristine as of Wed" when the score is old. Park time. A score worked
+    /// out in the small hours of the night's own day names its time instead ("as of 1:10 AM"), as
+    /// naming the weekday would name today.
     func scoreLine(_ state: ContentState) -> String {
         guard let day=scoreDay(state) else { return "\(score(state)) · \(band(state))" }
+        if sameParkDay(day) { return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(time))") }
         return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(weekday(.abbreviated)))")
     }
     /// What a state's face shows of its night, for deciding whether a refresh changes anything:
     /// the score line (score, band and the "as of" day in park time) and the closure.
     func shows(_ state: ContentState) -> [String?] { [scoreLine(state), closure(state)] }
-    /// What VoiceOver hears for the score: "Darkness score 94, Pristine, as of Wednesday."
+    /// What VoiceOver hears for the score: "Darkness score 94, Pristine, as of Wednesday.", or
+    /// "…, as of 1:10 AM." on the night's own day.
     func spokenScore(_ state: ContentState) -> String {
         guard let day=scoreDay(state) else { return String(localized: "Darkness score \(score(state)), \(band(state)).") }
+        if sameParkDay(day) { return String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(time)).") }
         return String(localized: "Darkness score \(score(state)), \(band(state)), as of \(day.formatted(weekday(.wide))).")
+    }
+    /// Whether a moment falls on the park's calendar day of the night's dusk.
+    private func sameParkDay(_ date: Date) -> Bool {
+        var calendar=Calendar(identifier: .gregorian)
+        calendar.timeZone=timeZone
+        return calendar.isDate(date, inSameDayAs: dusk)
     }
     private func weekday(_ width: Date.FormatStyle.Symbol.Weekday) -> Date.FormatStyle {
         var style=Date.FormatStyle().weekday(width)
+        style.timeZone=timeZone
+        return style
+    }
+    /// "1:10 AM" in park time.
+    private var time: Date.FormatStyle {
+        var style=Date.FormatStyle(date: .omitted, time: .shortened)
         style.timeZone=timeZone
         return style
     }

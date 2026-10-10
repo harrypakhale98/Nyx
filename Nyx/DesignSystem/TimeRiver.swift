@@ -191,12 +191,13 @@ struct TimeRiver: View {
         }.accessibilityHidden(true)
     }
     /// "No cloud forecast yet", "Early look", "Cloud forecast · models range 62–88", then a shower or
-    /// an eclipse. At accessibility sizes each part takes a line of its own (`separator: "\n"`), so
-    /// a range never breaks across lines.
+    /// an eclipse. At accessibility sizes each part takes a line of its own (`separator: "\n"`) and
+    /// the range is the shorter "models 62–88", which fits one line at AX5 on a 6.3-inch iPhone, so
+    /// it is read as one phrase (`lineCaptionView`).
     func caption(_ night:Night,separator:String=" · ")->String {
         var parts=[night.basisLabel ?? String(localized:"Cloud forecast")]
         if let outlook=outlooks[night.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
-            parts.append(String(localized:"models range \(range.lowerBound)–\(range.upperBound)"))
+            parts.append(separator == "\n" ? String(localized:"models \(range.lowerBound)–\(range.upperBound)") : String(localized:"models range \(range.lowerBound)–\(range.upperBound)"))
         }
         if let marker=markers[night.id] { parts.append(marker.name) }
         return parts.joined(separator:separator)
@@ -300,9 +301,7 @@ struct TimeRiver: View {
                 }
                 .buttonStyle(.bordered).tint(palette.accent).font(.subheadline.weight(.medium))
             }
-            if let current {
-                Text(Self.lineCaption(caption(current,separator:"\n"))).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
-            }
+            if let current { lineCaptionView(caption(current,separator:"\n")) }
         }
     }
     /// The AX stepper's capsule: amber-brown on the panel (in night vision a dark red, the red ink at
@@ -316,6 +315,20 @@ struct TimeRiver: View {
     private func bestLabel(_ title:LocalizedStringKey)->some View {
         Text(title).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
             .frame(maxWidth:.infinity,minHeight:44,alignment:.leading)
+    }
+    /// The large-text caption, a part to a line: each part on one line whenever it fits, so a phrase
+    /// such as "models 55–83" is never split; a part too long for the width wraps within itself,
+    /// with its figures kept to the word before them (`lineCaption`).
+    private func lineCaptionView(_ text:String)->some View {
+        VStack(alignment:.leading,spacing:0) {
+            ForEach(Array(text.components(separatedBy:"\n").enumerated()),id:\.offset) { _,line in
+                ViewThatFits(in:.horizontal) {
+                    Text(verbatim:line).lineLimit(1)
+                    Text(verbatim:Self.lineCaption(line)).fixedSize(horizontal:false,vertical:true)
+                }
+            }
+        }
+        .font(.caption).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading).accessibilityHidden(true)
     }
     /// A caption a part to a line, with each number kept to the word before it ("range 55–83"), so a
     /// line that must wrap never leaves the figures on their own.

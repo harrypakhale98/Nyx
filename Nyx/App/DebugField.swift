@@ -103,11 +103,21 @@ struct FieldActivityReview: View {
         Eyebrow(text: "Its score from three days before, until Nyx refreshes it")
         face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: lower, band: band, closure: early.closure, at: old), isStale: false) }
         face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(red, score: lower, band: band, closure: early.closure, at: old), isStale: false) }
+        // Worked out ten minutes after midnight on the night's own day, more than 18 hours before
+        // sunset: the face names the time, not today.
+        let small=Self.smallHours(early)
+        Eyebrow(text: "Its score from the small hours of the same day")
+        face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: lower, band: band, closure: early.closure, at: small), isStale: false) }
         Eyebrow(text: "The closure lifted since it was followed")
         face { FieldActivityLockView(attributes: early, state: FieldActivityAttributes.rescored(heading, score: night.score.value, band: night.score.band.label, closure: nil, at: Date.now), isStale: false) }
     }
     private func face<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content().background(Color.black.opacity(0.88), in: RoundedRectangle(cornerRadius: 22))
+    }
+    private static func smallHours(_ attributes: FieldActivityAttributes) -> Date {
+        var calendar=Calendar(identifier: .gregorian)
+        calendar.timeZone=attributes.timeZone
+        return calendar.startOfDay(for: attributes.dusk).addingTimeInterval(10*60)
     }
     private static func red(_ state: FieldActivityAttributes.ContentState) -> FieldActivityAttributes.ContentState {
         var state=state

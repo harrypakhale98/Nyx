@@ -382,7 +382,7 @@ struct CelestialGauge: View {
         return ZStack {
             // The models' range sits under the arc; a hairline outside it where glows are dimmed or red.
             if let range {
-                ModelRangeBand(range:range,palette:palette,glow:access.glow,hairline:palette.highContrast || palette.nightVision || access.reduceHighlighting)
+                ModelRangeBand(range:range,score:displayed,palette:palette,glow:access.glow,hairline:palette.highContrast || palette.nightVision || access.reduceHighlighting)
                     .opacity(rangeVisible ? 1 : 0)
             }
             DialFace(value:displayed,hasForecast:hasForecast,palette:palette,glow:access.glow)
@@ -519,38 +519,71 @@ private struct DialFace: View, Animatable {
 /// the clearest's: a soft amber glow riding the rim beside the arc, in the language of the time
 /// river's model glow. Under Increase Contrast, night vision and Reduce Highlighting it is a 1.5 pt hairline
 /// just outside the track with a small tick at each end, so it never reads as more arc. No
-/// dashes: on this dial dashes mean "no full forecast".
-private struct ModelRangeBand: View {
+/// dashes: on this dial dashes mean "no full forecast". Near either end of the dial the span and
+/// its ticks are held on the track, and a tick never sits under the leading star (`tickAngles`).
+struct ModelRangeBand: View {
     let range: ClosedRange<Int>
+    /// Where the leading star is (the score as drawn).
+    let score: Double
     let palette: NyxPalette
     let glow: Double
     let hairline: Bool
+    /// The dial's angle for a score: 140° at 0, 400° at 100.
+    nonisolated static func angle(_ score:Double)->Double { 140+260*score/100 }
+    /// The span's ends in degrees, held inside the track by `cap` degrees (a round cap's reach), so
+    /// a range ending at 0 or 100 never runs past the end of the dial.
+    nonisolated static func spanAngles(_ range:ClosedRange<Int>,cap:Double)->(from:Double,to:Double) {
+        let low=angle(0)+cap, high=angle(100)-cap
+        let from=min(max(angle(Double(range.lowerBound)),low),high), to=min(max(angle(Double(range.upperBound)),low),high)
+        return (from,max(from,to))
+    }
+    /// The end ticks in degrees. Each is held on the track (`cap` degrees inside either end), and one
+    /// that would fall within `clearance` degrees of the leading star moves outward, away from the
+    /// span, just clear of it (by at most the clearance, about a point and a half of score on
+    /// Tonight's dial). Where the track has no room left beyond the star, the star is at that end
+    /// of the range and stands for it, and that tick is left out.
+    nonisolated static func tickAngles(_ range:ClosedRange<Int>,score:Double,cap:Double,clearance:Double)->[Double] {
+        let low=angle(0)+cap, high=angle(100)-cap, tip=angle(min(max(score,0),100))
+        var ticks:[Double]=[]
+        for (value,outward) in [(range.lowerBound,-1.0),(range.upperBound,1.0)] {
+            var tick=min(max(angle(Double(value)),low),high)
+            if abs(tick-tip)<clearance { tick=tip+outward*clearance }
+            if tick>=low-0.0001 && tick<=high+0.0001 { ticks.append(tick) }
+        }
+        return ticks
+    }
     var body: some View {
         Canvas { context,size in
             let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
             let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
-            let from=Angle.degrees(140+260*Double(range.lowerBound)/100), to=Angle.degrees(140+260*Double(range.upperBound)/100)
+            let degrees=180/Double.pi
+            // A tick is a short line with a round cap; the star is 3.2 pt with a 10 pt glow.
+            let tickCap=(1.2*palette.stroke)/2/radius*degrees, clearance=8/radius*degrees
+            let ticks=Self.tickAngles(range,score:score,cap:tickCap,clearance:clearance).map { Angle.degrees($0) }
             if hairline {
                 let r=radius+7*k
-                var path=Path(); path.addArc(center:center,radius:r,startAngle:from,endAngle:to,clockwise:false)
-                for end in [from,to] {
+                let span=Self.spanAngles(range,cap:0)
+                var path=Path(); path.addArc(center:center,radius:r,startAngle:.degrees(span.from),endAngle:.degrees(span.to),clockwise:false)
+                for end in ticks {
                     path.move(to:CGPoint(x:center.x+cos(end.radians)*(r-3.5),y:center.y+sin(end.radians)*(r-3.5)))
                     path.addLine(to:CGPoint(x:center.x+cos(end.radians)*(r+3.5),y:center.y+sin(end.radians)*(r+3.5)))
                 }
                 context.stroke(path,with:.color(palette.accent),style:StrokeStyle(lineWidth:1.5*palette.stroke,lineCap:.butt))
             } else {
                 // Riding the rim just outside the track, so the part below the score shows beside the lit arc.
-                var path=Path(); path.addArc(center:center,radius:radius+6*k,startAngle:from,endAngle:to,clockwise:false)
+                // Its round ends stay on the track at 0 and 100.
+                let width=max(6,9*k), span=Self.spanAngles(range,cap:width/2/(radius+6*k)*degrees)
+                var path=Path(); path.addArc(center:center,radius:radius+6*k,startAngle:.degrees(span.from),endAngle:.degrees(span.to),clockwise:false)
                 context.drawLayer { layer in
                     layer.addFilter(.blur(radius:3+2*k))
-                    layer.stroke(path,with:.color(palette.accent.opacity(0.6*glow)),style:StrokeStyle(lineWidth:max(6,9*k),lineCap:.round))
+                    layer.stroke(path,with:.color(palette.accent.opacity(0.6*glow)),style:StrokeStyle(lineWidth:width,lineCap:.round))
                 }
                 context.stroke(path,with:.color(palette.accent.opacity(0.35*glow)),style:StrokeStyle(lineWidth:2,lineCap:.round))
                 // A short tick at each end, so the band reads as a measured span (where the cloudiest
                 // and clearest models would put the score), not as more glow, even beside a high score.
                 let r=radius+6*k, half=max(3,5*k)
                 var ends=Path()
-                for end in [from,to] {
+                for end in ticks {
                     ends.move(to:CGPoint(x:center.x+cos(end.radians)*(r-half),y:center.y+sin(end.radians)*(r-half)))
                     ends.addLine(to:CGPoint(x:center.x+cos(end.radians)*(r+half),y:center.y+sin(end.radians)*(r+half)))
                 }
@@ -634,6 +667,8 @@ extension EnvironmentValues {
 /// `-nyx-state scrub`: 97 counts up, then a new score every 110 ms, as a finger scrubbing the
 /// river past one night a detent, down across two bands and back.
 /// `-nyx-gauge-frame pad | park`: the iPad hero's 300 pt framing, or the park page's (no height).
+/// `-nyx-state range -nyx-gauge-range 90-100 -nyx-gauge-score 98`: a settled score with the models'
+/// range around it, for the ends near the top of the dial.
 struct DebugGaugeSweep: View {
     @State private var score=81
     @State private var shown=true
@@ -641,7 +676,7 @@ struct DebugGaugeSweep: View {
         VStack {
             if shown {
                 let framing=DebugScenario.text("-nyx-gauge-frame")
-                CelestialGauge(score:score,revealKey:ScoreReveals.key(parkID:"debug",night:"2026-10-09",score:score),range:nil)
+                CelestialGauge(score:score,revealKey:ScoreReveals.key(parkID:"debug",night:"2026-10-09",score:score),range:Self.range)
                     .frame(height:framing == "park" ? nil : framing == "pad" ? 300 : 240).frame(maxWidth:.infinity).padding(.horizontal,24)
             }
         }
@@ -658,6 +693,8 @@ struct DebugGaugeSweep: View {
                 for next in [95,93,90,88,85,83,80,77,74,71,68,66,69,73,78,84,89,91,94] {
                     score=next; try? await Task.sleep(for:.milliseconds(110))
                 }
+            case "range":
+                score=Int(DebugScenario.text("-nyx-gauge-score") ?? "") ?? 98
             case "settle":
                 ScoreReveals.seen.insert(ScoreReveals.key(parkID:"debug",night:"2026-10-09",score:94))
                 shown=false; score=94
@@ -666,6 +703,12 @@ struct DebugGaugeSweep: View {
                 try? await Task.sleep(for:.seconds(0.5)); score=97
             }
         }
+    }
+    private static var range: ClosedRange<Int>? {
+        guard DebugScenario.state == "range" else { return nil }
+        let ends=(DebugScenario.text("-nyx-gauge-range") ?? "90-100").split(separator:"-").compactMap { Int($0) }
+        guard ends.count == 2, ends[0] <= ends[1] else { return nil }
+        return ends[0]...ends[1]
     }
 }
 #endif
