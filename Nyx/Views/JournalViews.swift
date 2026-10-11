@@ -353,7 +353,7 @@ struct JournalEditorView:View {
         Form {
             Section("The night") {
                 DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
-                Picker("Park",selection:$editor.parkID) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+                ParkMenuRow(parkID:$editor.parkID)
                 Stepper(value:$editor.observedBortle,in:1...9) {
                     Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
                 }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
@@ -503,3 +503,36 @@ struct JournalUnavailableBanner:View {
 }
 #Preview("Journal unavailable") { JournalUnavailableBanner().padding(24).background(Color.black).preferredColorScheme(.dark) }
 #Preview("Journal unavailable, device full") { JournalUnavailableBanner(needsSpace:true).padding(24).background(Color.black).preferredColorScheme(.dark) }
+/// The editor's park row: the system menu and picker, with a label that keeps the park's whole name.
+/// The stock menu picker's value is one line, so a long name is cut at large text sizes
+/// ("Black…nison" at AX5); here the name sits beside "Park" while it fits and wraps under it when not.
+private struct ParkMenuRow:View {
+    @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
+    @Binding var parkID:String
+    private var name:String { model.park(parkID)?.shortName ?? "" }
+    var body:some View {
+        Menu {
+            Picker("Park",selection:$parkID) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+        } label:{
+            TitleValueLayout(spacing:12) {
+                Text("Park").foregroundStyle(palette.ink)
+                HStack(alignment:.firstTextBaseline,spacing:6) {
+                    Text(name).foregroundStyle(palette.accent).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                    Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(palette.accent)
+                }
+            }
+            .frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
+        }
+        .accessibilityLabel("Park").accessibilityValue(name)
+    }
+}
+#Preview("Park row, short and long") {
+    @Previewable @State var short="jotr"
+    @Previewable @State var long="blca"
+    Form { ParkMenuRow(parkID:$short); ParkMenuRow(parkID:$long) }.environment(PlanModel()).preferredColorScheme(.dark)
+}
+#Preview("Park row, AX5") {
+    @Previewable @State var long="blca"
+    Form { ParkMenuRow(parkID:$long) }.environment(PlanModel()).environment(\.dynamicTypeSize,.accessibility5).preferredColorScheme(.dark)
+}

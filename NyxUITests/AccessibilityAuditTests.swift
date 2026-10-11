@@ -22,7 +22,7 @@ final class AccessibilityAuditTests:XCTestCase {
     /// The screens people live in, for the heavier passes.
     private var keyScreens:[String] {
         if let only=ProcessInfo.processInfo.environment["NYX_AUDIT_SCREENS"], !only.isEmpty { return only.components(separatedBy:",") }
-        return ["tonight","parks","parks-map","detail","plan","journal","settings","field","river"]
+        return ["tonight","parks","parks-map","detail","plan","journal","settings","field","river","editor"]
     }
 
     func testEveryScreenPassesTheAudit() throws { try audit(state:"offline",screens:screens) }
@@ -73,7 +73,10 @@ final class AccessibilityAuditTests:XCTestCase {
             let fixture=parts.count>1 ? parts[1] : state
             let palette=parts.count>1 && state=="night-vision" ? ["-nyx-night-vision"] : []
             let app=XCUIApplication()
-            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+extra
+            // The editor opens on the starting park, which the simulator keeps from earlier runs: pin the longest
+            // park name, so the row is audited at its widest every time.
+            let pinned=screen=="editor" ? ["-homePark","blca"] : []
+            app.launchArguments=["-nyx-screen",screen,"-nyx-state",fixture,"-nyx-reduce-motion"]+palette+pinned+extra
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
@@ -264,7 +267,9 @@ final class AccessibilityAuditTests:XCTestCase {
             // glyphs in the audit's own colour count (onboarding's "Skip", 18.6:1 in its capture, the same). So on iPad a
             // text's or a button's finding is measured once more in its own capture, and stands unless its glyphs reach
             // 4.5:1 there (`measuredTextContrast`).
-            guard UIDevice.current.userInterfaceIdiom == .pad, let element=issue.element, let ratio=measuredTextContrast(element) else { return false }
+            // iPhone too (2026-10-10): the darkness essay's second paragraph, starlight on black, failed in both palettes
+            // while measuring 18.6:1 in its own capture; the still, seeded stars behind the column misled the colour count.
+            guard let element=issue.element, let ratio=measuredTextContrast(element) else { return false }
             print("AUDITMEASURED|\(screen)|'\(element.label)'|\(String(format:"%.2f",ratio)):1")
             return ratio>=4.5
         case .textClipped:
