@@ -11,7 +11,7 @@ extension ParkDetailView {
     }
     /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan.
     var eyebrow:String {
-        let state=park.state.replacingOccurrences(of:",",with:" · ")
+        let state=park.region.replacingOccurrences(of:",",with:" · ")
         return park.darkSkyDesignated ? String(localized:"\(state) · International Dark Sky Park") : state
     }
     /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.

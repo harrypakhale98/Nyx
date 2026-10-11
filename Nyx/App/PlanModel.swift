@@ -151,7 +151,7 @@ import CoreLocation
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
         // (A registered default: anyone who chose Name keeps it.)
         UserDefaults.standard.register(defaults:["parksByScore":true])
-        homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
+        homeID=UserDefaults.standard.string(forKey:"homePark") ?? Park.defaultID
         homePlace=UserDefaults.standard.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
         startChosen=UserDefaults.standard.object(forKey:"startChosen") as? Bool ?? (UserDefaults.standard.string(forKey:"homePark") != nil)
         radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
@@ -448,7 +448,7 @@ import CoreLocation
     /// One park's update as the screens read it: its alerts from the shared request, ranked, and
     /// its programs if its page has asked for them.
     private func rebuild(_ park:Park) {
-        guard let cache=alertsCache, let alerts=cache.alerts[park.apiCode] else { return }
+        guard let cache=alertsCache, let code=park.nps, let alerts=cache.alerts[code] else { return }
         let today=park.isoDay(Date.now), shown=programs[park.id]
         enrichments[park.id]=ParkEnrichment(updated:cache.updated,alerts:AlertRanking.ranked(alerts),programs:(shown?.programs ?? []).filter { $0.date>=today },description:nil,programsUpdated:shown?.updated)
     }

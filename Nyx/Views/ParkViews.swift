@@ -55,13 +55,13 @@ struct ParkRow: View {
         if let summary=WeekStrip.summary(week) { items.append(.init(label:String(localized:"This week"),value:summary,high:false)) }
         if stepFree { items.append(.init(label:String(localized:"Step-free viewing"),value:String(localized:"Yes"),high:false)) }
         if !night.park.drivable { items.append(.init(label:String(localized:"Getting there"),value:String(localized:"No road access"),high:false)) }
-        items.append(.init(label:String(localized:"State"),value:night.park.state.replacingOccurrences(of:",",with:", "),high:false))
+        items.append(.init(label:String(localized:"State"),value:night.park.region.replacingOccurrences(of:",",with:", "),high:false))
         return items
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-            Text("\(night.park.state.replacingOccurrences(of:",",with:" · "))\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
+            Text("\(night.park.region.replacingOccurrences(of:",",with:" · "))\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
             if stepFree { Label("Step-free viewing",systemImage:"figure.roll").font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if !night.park.drivable { Label("No road access",systemImage:"ferry").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if week.count>1 { WeekStrip(nights:week).padding(.top,4) }

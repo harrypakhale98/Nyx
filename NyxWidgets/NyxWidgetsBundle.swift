@@ -22,7 +22,7 @@ struct TonightProvider:AppIntentTimelineProvider {
     }
     /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
     static var sample:SavedSkySnapshot? {
-        (try? ParkData.load().first(where:{ $0.id=="jotr" })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
+        (try? ParkData.load().first(where:{ $0.id==Park.defaultID })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
     }
     /// The month's calendar is drawn in the large, extra-large and (iOS 27, iPad) portrait extra-large widgets.
     static func large(_ family:WidgetFamily)->Bool {

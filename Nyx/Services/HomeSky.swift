@@ -38,8 +38,8 @@ nonisolated struct HomeSky: Sendable {
 
     init(origin: Origin, now: Date, engine: AstronomyEngine = AstronomyEngine(), table: SkyEvents = .shared) {
         self.origin=origin
-        let place=origin.park ?? Park(id: "home", apiCode: "home", name: origin.name, state: origin.state, latitude: origin.latitude, longitude: origin.longitude,
-                                      timeZoneID: origin.timeZone.identifier, hemisphere: origin.latitude<0 ? "south" : "north", darkSkyDesignated: false,
+        let place=origin.park ?? Park(id: "home", nps: nil, name: origin.name, countryCode: "US", region: origin.state, kind: .custom, curated: false,
+                                      latitude: origin.latitude, longitude: origin.longitude, timeZoneID: origin.timeZone.identifier, darkSkyDesignated: false,
                                       bortleEstimate: Self.assumedBortle, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
         self.place=place
         let sky=engine.conditions(for: place, on: place.evening(place.currentNight(at: now)))
@@ -87,7 +87,7 @@ nonisolated struct HomeSky: Sendable {
                           timeZone: timeZone(state: place.state, latitude: place.latitude, longitude: place.longitude), source: .place)
         }
         guard let park else { return nil }
-        return Origin(name: park.shortName, state: park.state, latitude: park.latitude, longitude: park.longitude, timeZone: park.timeZone, source: .park, park: park)
+        return Origin(name: park.shortName, state: park.region, latitude: park.latitude, longitude: park.longitude, timeZone: park.timeZone, source: .park, park: park)
     }
     /// A US place's time zone from its state, with the split states divided by rough longitude
     /// and latitude lines that put every one of the bundled places on the right side. Nyx has no

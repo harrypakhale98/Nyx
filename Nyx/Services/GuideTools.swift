@@ -86,7 +86,7 @@ nonisolated struct NightLookup: Sendable {
         return ranked.map { park, miles in
             let night=tonight[park.id]
             let basis=night.map(Self.basis) ?? ""
-            return String(localized: "\(park.shortName), \(park.state); \(Int(miles.rounded())) miles straight-line from \(origin.label); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
+            return String(localized: "\(park.shortName), \(park.region); \(Int(miles.rounded())) miles straight-line from \(origin.label); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
 }

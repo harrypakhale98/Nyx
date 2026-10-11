@@ -103,7 +103,7 @@ struct AddJournalEntryIntent: AppIntent {
         if let coordinate=location?.coordinate, let parks=try? ParkData.load(),
            let near=parks.min(by: { $0.distanceMeters(latitude: coordinate.latitude, longitude: coordinate.longitude) < $1.distanceMeters(latitude: coordinate.latitude, longitude: coordinate.longitude) }),
            near.distanceMeters(latitude: coordinate.latitude, longitude: coordinate.longitude) < 50_000 { return near.id }
-        return home ?? "jotr"
+        return home ?? Park.defaultID
     }
     /// Entries newest first, as the descriptor selects and limits them.
     static func entities(_ descriptor: FetchDescriptor<JournalEntry>, photos: Bool = false) async throws -> [JournalEntryEntity] {

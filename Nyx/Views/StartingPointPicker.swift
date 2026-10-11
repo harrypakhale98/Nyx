@@ -37,7 +37,7 @@ struct StartingPointPicker: View {
             }
             if !parks.isEmpty {
                 Section("National parks") {
-                    ForEach(parks) { park in row(title:park.shortName,detail:park.state.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
+                    ForEach(parks) { park in row(title:park.shortName,detail:park.region.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
                 }.listRowBackground(palette.panel)
             } else if places.isEmpty {
                 Section { Text("No city, town or park by that name. Try a nearby larger city.").font(.subheadline).foregroundStyle(palette.muted) }.listRowBackground(palette.panel)

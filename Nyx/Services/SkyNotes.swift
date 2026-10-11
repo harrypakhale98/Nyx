@@ -91,7 +91,7 @@ nonisolated enum SkyNotes {
     /// The eight Alaska parks, about August 20 to April 20, when nights are dark enough. Static:
     /// Nyx does not forecast aurora (that would need another service).
     static func aurora(park: Park, evening: Date) -> String? {
-        guard park.state == "AK" else { return nil }
+        guard park.region == "AK" else { return nil }
         let parts = park.calendar.dateComponents([.month, .day], from: evening)
         let key = (parts.month ?? 1)*100+(parts.day ?? 1)
         guard key >= 820 || key <= 420 else { return nil }

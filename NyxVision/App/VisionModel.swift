@@ -189,7 +189,7 @@ nonisolated struct SkyMoment: Sendable {
     var park: Park? { parks.first { $0.id == selectedID } }
     /// Where the chosen park is remembered between launches (this headset's UserDefaults only).
     nonisolated static let parkKey = "visionSelectedPark"
-    nonisolated static let defaultPark = "jotr"
+    nonisolated static let defaultPark = Park.defaultID
     /// The park chosen last time if it is still one of `parks`, else Joshua Tree.
     nonisolated static func rememberedPark(in parks: [Park], defaults: UserDefaults = .standard) -> String {
         guard let stored = defaults.string(forKey: parkKey), parks.contains(where: { $0.id == stored }) else { return defaultPark }

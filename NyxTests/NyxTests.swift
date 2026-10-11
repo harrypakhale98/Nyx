@@ -22,7 +22,7 @@ struct NyxTests {
         let parks=try ParkData.load()
         #expect(parks.count==63); #expect(Set(parks.map(\.id)).count==63)
         #expect(parks.filter { $0.latitude<0 }.count==1)
-        #expect(parks.filter { $0.state.contains("AK") }.count==8)
+        #expect(parks.filter { $0.region.contains("AK") }.count==8)
         for p in parks {
             #expect((-90...90).contains(p.latitude)); #expect((-180...180).contains(p.longitude))
             #expect(TimeZone(identifier:p.timeZoneID) != nil); #expect(!p.description.isEmpty)

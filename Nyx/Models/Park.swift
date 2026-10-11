@@ -1,15 +1,27 @@
 import Foundation
 import Synchronization
 
-nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
+/// A place Nyx scores: today the 63 US national parks, later any catalogue place or a spot someone
+/// saves (`Research/global-plan.md`, G1). `Park` stays as the name most code uses during the move.
+typealias Park = Place
+
+nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
+    /// Stable for the 63 parks (`jotr`, …) so saved parks, journal entries, intents, Spotlight and links
+    /// survive. New kinds of place are namespaced: `wd:Q123456` (a Wikidata item), `pin:<uuid>` (a saved spot).
     let id: String
-    let apiCode: String
+    /// The National Park Service's code where the NPS runs the place (alerts, programs, campgrounds); nil elsewhere.
+    let nps: String?
     let name: String
-    let state: String
+    /// ISO 3166-1 alpha-2.
+    let countryCode: String
+    /// The first-level region as people write it there: a US state's postal code (several for a park across states, "CA,NV").
+    let region: String
+    let kind: Kind
+    /// Hand-checked: viewing spots, access notes and the Bortle estimate come from a person, not a grid.
+    let curated: Bool
     let latitude: Double
     let longitude: Double
     let timeZoneID: String
-    let hemisphere: String
     let darkSkyDesignated: Bool
     let bortleEstimate: Int
     let description: String
@@ -21,6 +33,13 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
     /// True for a viewing summit above the trade-wind inversion (Haleakalā): low cloud there lies
     /// below the observer, so the score counts mid and high cloud when the layer forecast has them.
     var aboveInversion: Bool?
+    nonisolated enum Kind: String, Codable, Hashable, Sendable {
+        case nationalPark, darkSkyPark, reserve, sanctuary, community, custom
+    }
+    /// The catalogue's place when nothing else chooses one: no saved park, no starting point, no night under way.
+    static let defaultID = "jotr"
+    /// South of the equator the Milky Way's core rides high and the Moon is seen turned over.
+    var southern: Bool { latitude < 0 }
     nonisolated struct Access: Codable, Hashable, Sendable {
         let note: String
         /// False when the night sky here needs a boat or a plane from the road network you drove on.
@@ -45,11 +64,11 @@ nonisolated struct Park: Codable, Identifiable, Hashable, Sendable {
         guard !needle.isEmpty else { return true }
         return searchTerms.contains { $0.contains(needle) }
     }
-    /// The name, state and aliases, folded once per park and kept.
+    /// The name, region and aliases, folded once per park and kept.
     private var searchTerms: [String] {
-        let key = id+"|"+name+"|"+state
+        let key = id+"|"+name+"|"+region
         if let kept = Self.foldedTerms.withLock({ $0[key] }) { return kept }
-        let terms = ([name, state] + (Self.aliases[id] ?? [])).map(Self.folded)
+        let terms = ([name, region] + (Self.aliases[id] ?? [])).map(Self.folded)
         Self.foldedTerms.withLock { $0[key] = terms }
         return terms
     }
@@ -200,6 +219,46 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
     static func place(_ text: String?) -> String? {
         guard let text=text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
         return text
+    }
+}
+nonisolated extension Place {
+    fileprivate enum CodingKeys: String, CodingKey {
+        case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
+             bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion
+        // Before G1 (1.4.1 and earlier): kept so a shared snapshot written by an older build still reads.
+        case apiCode, state
+    }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        nps = try c.decodeIfPresent(String.self, forKey: .nps) ?? c.decodeIfPresent(String.self, forKey: .apiCode)
+        name = try c.decode(String.self, forKey: .name)
+        countryCode = try c.decodeIfPresent(String.self, forKey: .countryCode) ?? "US"
+        region = try c.decodeIfPresent(String.self, forKey: .region) ?? c.decode(String.self, forKey: .state)
+        kind = try c.decodeIfPresent(Kind.self, forKey: .kind) ?? .nationalPark
+        curated = try c.decodeIfPresent(Bool.self, forKey: .curated) ?? true
+        latitude = try c.decode(Double.self, forKey: .latitude)
+        longitude = try c.decode(Double.self, forKey: .longitude)
+        timeZoneID = try c.decode(String.self, forKey: .timeZoneID)
+        darkSkyDesignated = try c.decode(Bool.self, forKey: .darkSkyDesignated)
+        bortleEstimate = try c.decode(Int.self, forKey: .bortleEstimate)
+        description = try c.decode(String.self, forKey: .description)
+        sourceURL = try c.decode(String.self, forKey: .sourceURL)
+        sourceNote = try c.decode(String.self, forKey: .sourceNote)
+        viewingSpots = try c.decode([ViewingSpot].self, forKey: .viewingSpots)
+        access = try c.decodeIfPresent(Access.self, forKey: .access)
+        aboveInversion = try c.decodeIfPresent(Bool.self, forKey: .aboveInversion)
+    }
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id); try c.encodeIfPresent(nps, forKey: .nps); try c.encode(name, forKey: .name)
+        try c.encode(countryCode, forKey: .countryCode); try c.encode(region, forKey: .region); try c.encode(kind, forKey: .kind)
+        try c.encode(curated, forKey: .curated); try c.encode(latitude, forKey: .latitude); try c.encode(longitude, forKey: .longitude)
+        try c.encode(timeZoneID, forKey: .timeZoneID); try c.encode(darkSkyDesignated, forKey: .darkSkyDesignated)
+        try c.encode(bortleEstimate, forKey: .bortleEstimate); try c.encode(description, forKey: .description)
+        try c.encode(sourceURL, forKey: .sourceURL); try c.encode(sourceNote, forKey: .sourceNote)
+        try c.encode(viewingSpots, forKey: .viewingSpots); try c.encodeIfPresent(access, forKey: .access)
+        try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion)
     }
 }
 nonisolated enum ParkData {

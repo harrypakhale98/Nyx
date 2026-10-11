@@ -631,7 +631,7 @@ struct ParksList: View {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.wristName).font(.system(.body, design: .serif)).lineLimit(2)
-                    Text(park.state.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+                    Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 2)
                 if store.pinned == park.id { Image(systemName: "pin.fill").font(.caption2).accessibilityLabel("On Tonight") }
@@ -668,7 +668,7 @@ struct ParkChooser: View {
         Button { store.pin(park) } label: {
             VStack(alignment: .leading, spacing: 1) {
                 Text(park.wristName).font(.system(.body, design: .serif))
-                Text(park.state.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+                Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
             }
         }
     }

@@ -114,7 +114,7 @@ private struct CampgroundRow: View {
 /// Pages "Where to stay" opens in Safari at a tap (SwiftUI `Link`), never fetched by Nyx. Reservation
 /// links come from the NPS data and are kept only on `Campground.reservationHosts`.
 enum StayLink {
-    static func planYourVisit(_ park:Park)->URL? { page(host:"www.nps.gov",path:"/\(park.apiCode)/planyourvisit/index.htm") }
+    static func planYourVisit(_ park:Park)->URL? { park.nps.flatMap { page(host:"www.nps.gov",path:"/\($0)/planyourvisit/index.htm") } }
     /// The federal booking site's home, for the reservation hosts' list (`verify_release.py`).
     static let recreationGov=page(host:"www.recreation.gov")
     private static func page(host:String,path:String="")->URL? {

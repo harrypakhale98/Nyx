@@ -59,7 +59,7 @@ struct SpanishAndAccessTests {
         }
         for park in parks {
             guard let access=park.access else { #expect(park.drivable); continue }
-            #expect(access.sourceURL.hasPrefix("https://www.nps.gov/\(park.apiCode)/"),"\(park.id)")
+            #expect(access.sourceURL.hasPrefix("https://www.nps.gov/\(park.nps ?? "")/"),"\(park.id)")
             #expect(access.note.count<=120 && !access.note.contains("!"),"\(park.id)")
             #expect(try spanish("access.\(park.id)") != "<missing>","\(park.id)")
         }

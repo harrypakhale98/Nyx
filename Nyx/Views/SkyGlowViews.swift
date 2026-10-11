@@ -219,7 +219,7 @@ enum BrowserLink {
     static let openMeteo=page(host:"open-meteo.com")
     static let creativeCommonsBY=page(host:"creativecommons.org",path:"/licenses/by/4.0/")
     /// The park's current conditions and alerts on nps.gov, for when Nyx's own alerts are unavailable.
-    static func parkConditions(_ park:Park)->URL? { page(host:"www.nps.gov",path:"/\(park.apiCode)/planyourvisit/conditions.htm") }
+    static func parkConditions(_ park:Park)->URL? { park.nps.flatMap { page(host:"www.nps.gov",path:"/\($0)/planyourvisit/conditions.htm") } }
     private static func page(host:String,path:String="")->URL? {
         var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path
         return components.url

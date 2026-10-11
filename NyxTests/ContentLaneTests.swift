@@ -151,7 +151,7 @@ struct ContentLaneTests {
         let call=try #require(calls.first)
         #expect(call.headers["X-Api-Key"] == "TESTKEY" && !call.url.absoluteString.contains("TESTKEY") && !call.constrained)
         let codes=URLComponents(url: call.url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "parkCode" }?.value?.split(separator: ",") ?? []
-        #expect(Set(codes.map(String.init)) == Set(parks.map(\.apiCode)) && codes.count == 62)
+        #expect(Set(codes.map(String.init)) == Set(parks.compactMap(\.nps)) && codes.count == 62)
         #expect(first?.list(try park("jotr")).count == 2 && first?.campgrounds["cave"]?.isEmpty == true)
         // Within the week: the cache, no request (even when forced within ten minutes).
         clock.now+=6*86_400
@@ -197,7 +197,7 @@ struct ContentLaneTests {
     @Test func homeTimeZonesFollowTheMap() throws {
         func offsets(_ zone: TimeZone) throws -> [Int] { [zone.secondsFromGMT(for: try Self.date("2026-01-15")), zone.secondsFromGMT(for: try Self.date("2026-07-15"))] }
         for park in parks {
-            let zone=HomeSky.timeZone(state: String(park.state.prefix(2)), latitude: park.latitude, longitude: park.longitude)
+            let zone=HomeSky.timeZone(state: String(park.region.prefix(2)), latitude: park.latitude, longitude: park.longitude)
             #expect(try offsets(zone) == offsets(park.timeZone), "\(park.id)")
         }
         let expected: [String: String]=["El Paso, TX": "America/Denver", "Pensacola, FL": "America/Chicago", "Tallahassee, FL": "America/New_York",
@@ -246,7 +246,7 @@ struct ContentLaneTests {
             for iso in ["2026-03-20", "2026-06-21", "2026-12-21"] {
                 let tropic=try home(lat, lon, zone, iso)
                 #expect(tropic.hasDarkness && tropic.sky.darkHours>7.5 && tropic.sky.darkHours<12, "\(lat) \(iso)")
-                #expect(tropic.place.hemisphere == (lat<0 ? "south" : "north"))
+                #expect(tropic.place.southern == (lat<0))
             }
         }
     }

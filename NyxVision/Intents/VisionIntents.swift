@@ -17,7 +17,7 @@ struct ParkEntity: AppEntity {
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: "\(name)", subtitle: state.isEmpty ? nil : "\(state)", image: .init(systemName: darkSky ? "moon.stars" : "mountain.2"))
     }
-    init(_ park: Park) { id = park.id; name = park.shortName; state = park.state; darkSky = park.darkSkyDesignated }
+    init(_ park: Park) { id = park.id; name = park.shortName; state = park.region; darkSky = park.darkSkyDesignated }
 }
 struct ParkQuery: EntityStringQuery {
     func entities(for identifiers: [String]) async throws -> [ParkEntity] { try ParkData.load().filter { identifiers.contains($0.id) }.map(ParkEntity.init) }

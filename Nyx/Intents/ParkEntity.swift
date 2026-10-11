@@ -31,7 +31,7 @@ struct ParkEntity:IndexedEntity {
     @ComputedProperty(title:"Bortle class")
     var bortleClass:Int { bortle }
     init(id:String,name:String) { self.id=id; self.name=name }
-    init(_ park:Park) { id=park.id; name=park.shortName; state=park.state; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate }
+    init(_ park:Park) { id=park.id; name=park.shortName; state=park.region; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate }
     /// Shared with `SpotlightIndexer`'s items, so the entity and the item describe the park alike.
     var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle) }
     static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0)->CSSearchableItemAttributeSet {

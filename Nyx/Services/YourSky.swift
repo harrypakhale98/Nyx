@@ -74,7 +74,7 @@ nonisolated enum SkyMap {
         insets.dropFirst().first { $0.frame.insetBy(dx:-0.001,dy:-0.001).contains(point) }?.region ?? .lower48
     }
     static func region(_ park: Park) -> Region {
-        switch park.state { case "AK": .alaska; case "HI": .hawaii; case "AS": .samoa; case "VI": .virginIslands; default: .lower48 }
+        switch park.region { case "AK": .alaska; case "HI": .hawaii; case "AS": .samoa; case "VI": .virginIslands; default: .lower48 }
     }
     static func inset(_ region: Region) -> Inset { insets.first { $0.region==region } ?? insets[0] }
     /// A park's place on the canvas. Each region is fitted into its frame with its true aspect

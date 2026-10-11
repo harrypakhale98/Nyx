@@ -9,7 +9,7 @@ enum IntentPark {
             guard let park=library.first(where:{ $0.id==entity.id }) else { throw NyxIntentError.parkNotFound }
             return park
         }
-        for id in [inProgress, home, "jotr"].compactMap({ $0 }) { if let park=library.first(where:{ $0.id==id }) { return park } }
+        for id in [inProgress, home, Park.defaultID].compactMap({ $0 }) { if let park=library.first(where:{ $0.id==id }) { return park } }
         guard let first=library.first else { throw NyxIntentError.parkNotFound }
         return first
     }

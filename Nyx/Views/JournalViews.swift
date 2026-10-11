@@ -263,7 +263,7 @@ struct JournalThumbnail:View {
     /// The person picked a date, so appearing again never replaces it.
     private(set) var dateChosen=false
     @ObservationIgnored private var settled=false
-    var parkID="jotr"
+    var parkID=Park.defaultID
     var observedBortle=3
     var notes=""
     var photos:[Data]=[] { didSet { descriptions=Self.aligned(descriptions,to:photos.count) } }

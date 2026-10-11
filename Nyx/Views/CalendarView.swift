@@ -268,7 +268,7 @@ struct CalendarView: View {
     /// (data, not a slogan), and the name itself the menu that changes it.
     @ViewBuilder private func heading(_ park:Park)->some View {
         VStack(alignment:.leading,spacing:6) {
-            let states=park.state.replacingOccurrences(of:",",with:" · ")
+            let states=park.region.replacingOccurrences(of:",",with:" · ")
             Eyebrow(text:park.darkSkyDesignated ? "\(states) · International Dark Sky Park" : LocalizedStringKey(states))
             Menu {
                 Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }

@@ -46,7 +46,7 @@ struct WristInk {
 nonisolated enum WatchTimeline {
     /// Joshua Tree tonight, with its usual clouds: the gallery's sky and the redacted placeholder's shape.
     static var sample: SavedSkySnapshot? {
-        (try? ParkData.load().first(where: { $0.id == "jotr" })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
+        (try? ParkData.load().first(where: { $0.id == Park.defaultID })).map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }
     }
     static func sky(_ park: Park, evening: Date, cache: inout [String: SkyConditions]) -> SkyConditions {
         let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"

@@ -69,7 +69,7 @@ struct DataLaneTests {
         #expect(!(call.url.absoluteString.contains("TESTKEY")) && query(call.url, "api_key") == nil)
         #expect(query(call.url, "limit") == "500")
         let codes=Set(query(call.url, "parkCode")?.split(separator: ",").map(String.init) ?? [])
-        #expect(codes == Set(parks.map(\.apiCode)))
+        #expect(codes == Set(parks.compactMap(\.nps)))
         let cache=try #require(update.cache)
         #expect(cache.alerts["deva"]?.map(\.id) == ["a1"])
         #expect(cache.alerts["acad"]?.map(\.id) == ["a4"] && cache.alerts["ever"]?.map(\.id) == ["a4"])
