@@ -158,7 +158,7 @@ struct JournalView: View {
                 VStack(alignment:.leading,spacing:4) {
                     Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
                     // Written on this iPhone when the system model is available; Nyx's own words otherwise.
-                    Text(OnDeviceGuide.available ? "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text(OnDeviceGuide.speaksYourLanguage ? "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 Spacer(minLength:0)
                 Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)

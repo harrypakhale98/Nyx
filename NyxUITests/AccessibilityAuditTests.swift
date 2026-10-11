@@ -45,15 +45,18 @@ final class AccessibilityAuditTests:XCTestCase {
             app.launchArguments=["-nyx-screen","tonight","-nyx-state",state,"-nyx-reduce-motion","-nyx-following"]
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
-            sleep(2)
-            let before=Self.tabButtonsSpan(app)
-            app.swipeUp(velocity:.slow)
-            sleep(2)
-            let after=Self.tabButtonsSpan(app)
+            let before=Self.span(app,timeout:10) { !$0.isNull }
+            // A slow simulator may miss the first swipe's scroll: each swipe gets about five seconds
+            // to minimise the bar, and up to three swipes are tried before the bar counts as unchanged.
+            var after=before
+            for _ in 0..<3 where after.isNull || after.width>=before.width {
+                app.swipeUp(velocity:.slow)
+                after=Self.span(app,timeout:5) { !$0.isNull && $0.width<before.width }
+            }
             print("MINIMISED|\(state)|before \(before)|after \(after)")
             // The bar's own frame keeps the window's width when it minimises; its tabs do not. A bar that
             // no longer shrinks fails here rather than being audited at full size.
-            XCTAssertLessThan(after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
+            XCTAssertLessThan(after.isNull ? .infinity : after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
             let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
             failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
             app.terminate()
@@ -84,6 +87,19 @@ final class AccessibilityAuditTests:XCTestCase {
     private static func tabButtonsSpan(_ app:XCUIApplication)->CGRect {
         app.tabBars.firstMatch.buttons.allElementsBoundByIndex.filter { $0.exists && $0.isHittable && !$0.frame.isEmpty }
             .reduce(CGRect.null) { $0.union($1.frame) }
+    }
+    /// The tab buttons' span once it meets `done` and holds still for one more look (so a bar caught
+    /// mid-animation is not measured), or the last span seen when `timeout` runs out.
+    private static func span(_ app:XCUIApplication,timeout:TimeInterval,until done:(CGRect)->Bool)->CGRect {
+        let deadline=Date.now.addingTimeInterval(timeout)
+        var last=tabButtonsSpan(app)
+        while Date.now<deadline {
+            Thread.sleep(forTimeInterval:0.3)
+            let now=tabButtonsSpan(app)
+            if done(now), now == last { return now }
+            last=now
+        }
+        return last
     }
     /// Audits the screen the app shows now; returns the findings that are not known false positives.
     /// When every finding is about an element that no longer exists by the time it is reported (no

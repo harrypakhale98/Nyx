@@ -22,13 +22,18 @@ struct MoonWidgetView: View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.colorSchemeContrast) private var contrast
     var previewFamily: WidgetFamily?=nil
     private var family: WidgetFamily { previewFamily ?? systemFamily }
     let entry: MoonEntry
     private var tinted: Bool { renderingMode != .fullColor }
-    private var nightVision: Bool { entry.nightVision && !tinted }
-    private var ink: Color { tinted ? .white : nightVision ? Color(red:1,green:0.27,blue:0.23) : Color(red:0.961,green:0.945,blue:0.902) }
-    private var muted: Color { ink.opacity(tinted ? 0.62 : nightVision ? 0.9 : 0.7) }
+    /// The app's night look: its red (brighter by choice or under Increase Contrast) and contrast.
+    private var look: NightLook { NightLook(contrast: contrast, nightVision: entry.nightVision && !tinted) }
+    private var nightVision: Bool { look.nightVision }
+    private var ink: Color { tinted ? .white : look.ink }
+    private var muted: Color { tinted ? ink.opacity(0.62) : look.muted }
+    /// How much is lit, in the reader's own percent style ("42 %" where that is the custom).
+    private var percent: String { (Double(entry.moon.percent)/100).formatted(.percent.precision(.fractionLength(0))) }
     private var southern: Bool { (entry.park?.latitude ?? 1)<0 }
     var body: some View {
         content.foregroundStyle(ink)
@@ -39,13 +44,13 @@ struct MoonWidgetView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryInline:
-            Label { Text(verbatim: "\(entry.moon.phase.name) · \(entry.moon.percent)%") } icon: { symbol }
+            Label { Text(verbatim: "\(entry.moon.phase.name) · \(percent)") } icon: { symbol }
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
                 VStack(spacing: 1) {
                     symbol.font(.title3).widgetAccentable()
-                    Text(verbatim: "\(entry.moon.percent)%").font(.caption2.weight(.medium)).monospacedDigit()
+                    Text(verbatim: percent).font(.caption2.weight(.medium)).monospacedDigit()
                 }
             }.dynamicTypeSize(.small ... .xxxLarge)
         default:
@@ -71,11 +76,11 @@ struct MoonWidgetView: View {
     @ViewBuilder private var disc: some View {
         if let park=entry.park, let night=entry.night, let url=SharedSettings.moonImage(park: park.id, night: night), let image=UIImage(contentsOfFile: url.path) {
             Image(uiImage: image).resizable().widgetAccentedRenderingMode(.accentedDesaturated).scaledToFit()
-                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled: nightVision))
+                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled: nightVision, red: look.red))
         } else {
             MoonDisc(illumination: entry.moon.phase.illumination, waxing: entry.moon.phase.waxing, southern: southern)
-                .environment(\.nyx, NyxPalette(nightVision: nightVision, highContrast: false))
-                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled: nightVision))
+                .environment(\.nyx, look.palette)
+                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled: nightVision, red: look.red))
         }
     }
     private var litLine: String {

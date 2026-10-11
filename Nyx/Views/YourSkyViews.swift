@@ -271,7 +271,7 @@ struct YearRecapView: View {
         .task(id:year) {
             let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
             reflection=nil
-            guard recap.nights>0, OnDeviceGuide.available, DebugScenario.screen == nil else { return }
+            guard recap.nights>0, OnDeviceGuide.speaksYourLanguage, DebugScenario.screen == nil else { return }
             reflecting=true
             reflection=await OnDeviceGuide.yearReflection(facts:recap.facts,notes:yearNights.map(\.notes).filter { !$0.isEmpty })
             reflecting=false

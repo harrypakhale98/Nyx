@@ -393,7 +393,8 @@ struct ParkDetailView: View {
             .modifier(ReportsVisiblePark(parkID:park.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
-            .task { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
+            // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it).
+            .task(id:riverStart) { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             .task { await model.refresh([park],programs:true) }
             .refreshable { await model.refresh([park],force:true,programs:true) }
     }

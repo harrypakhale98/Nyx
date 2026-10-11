@@ -27,6 +27,8 @@ import WidgetKit
     /// DEBUG only: shifts "now" so a screenshot can show a moment in the night.
     @ObservationIgnored private let offset: TimeInterval
     @ObservationIgnored private var prior: (nightVision: Bool, brightness: CGFloat?, idle: Bool)?
+    /// Set by `end()`: a cover closed during its own presentation must not begin afterwards.
+    @ObservationIgnored private var ended=false
     @ObservationIgnored private var observers: [NSObjectProtocol]=[]
     @ObservationIgnored private var ticker: Task<Void,Never>?
     @ObservationIgnored private var idleWatch: Task<Void,Never>?
@@ -66,7 +68,7 @@ import WidgetKit
     func real(_ date: Date) -> Date { date.addingTimeInterval(-offset) }
 
     func begin() {
-        guard changesPhone, prior == nil else { return }
+        guard changesPhone, prior == nil, !ended else { return }
         let defaults=SharedSettings.defaults
         prior=(defaults.bool(forKey: "nightVision"), screen?.brightness, UIApplication.shared.isIdleTimerDisabled)
         setNightVision(true)
@@ -85,11 +87,21 @@ import WidgetKit
         ]
         FieldSession.applyThermalState()
         if UserDefaults.standard.object(forKey: "fieldLiveActivity") as? Bool ?? true { follow(true) }
-        ticker=Task { [weak self] in await self?.run() }
+        // Both loops hold the session only while they act, never across a sleep, so a session whose
+        // window went away is released rather than kept alive by its own clock.
+        ticker=Task { [weak self] in
+            while !Task.isCancelled {
+                guard let step=self?.upcoming() else { return }
+                try? await Task.sleep(for: .seconds(step.wait))
+                guard !Task.isCancelled, let self else { return }
+                await self.pass(step.next)
+            }
+        }
         idleWatch=Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(30))
-                self?.checkIdle()
+                guard !Task.isCancelled, let self else { return }
+                self.checkIdle()
             }
         }
     }
@@ -108,6 +120,7 @@ import WidgetKit
         FieldMotion.shared.rest(PowerState.serious(ProcessInfo.processInfo.thermalState))
     }
     func end() {
+        ended=true
         ticker?.cancel(); ticker=nil
         idleWatch?.cancel(); idleWatch=nil
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
@@ -166,20 +179,20 @@ import WidgetKit
         if let reset=adaptation.returned(at: now) { self.reset=reset }
         Task { await FieldActivities.refresh(nightVision: true, now: now) }
     }
-    /// Sleeps until each milestone, then marks it: a tick, a spoken line, a Live Activity update.
-    private func run() async {
-        while !Task.isCancelled {
-            guard let next=night.next(after: now) else { return }
-            let wait=min(max(1, next.date.timeIntervalSince(now)), 300)
-            try? await Task.sleep(for: .seconds(wait))
-            guard !Task.isCancelled, now>=next.date else { continue }
-            // Milestones that passed while Nyx was away are not announced late.
-            guard now.timeIntervalSince(next.date)<90 else { continue }
-            milestonesPassed+=1
-            if next.kind == .darkness { darknessBegan+=1 }
-            AccessibilityNotification.Announcement("\(next.title). \(next.detail)").post()
-            if changesPhone { await FieldActivities.refresh(nightVision: true, now: now) }
-        }
+    /// The ticker sleeps until each milestone (five minutes at most, then looks again), then marks it.
+    private func upcoming() -> (next: FieldNight.Milestone, wait: TimeInterval)? {
+        guard let next=night.next(after: now) else { return nil }
+        return (next, min(max(1, next.date.timeIntervalSince(now)), 300))
+    }
+    /// A milestone reached: a tick, a spoken line, a Live Activity update.
+    private func pass(_ next: FieldNight.Milestone) async {
+        guard now>=next.date else { return }
+        // Milestones that passed while Nyx was away are not announced late.
+        guard now.timeIntervalSince(next.date)<90 else { return }
+        milestonesPassed+=1
+        if next.kind == .darkness { darknessBegan+=1 }
+        AccessibilityNotification.Announcement("\(next.title). \(next.detail)").post()
+        if changesPhone { await FieldActivities.refresh(nightVision: true, now: now) }
     }
 }
 
@@ -229,11 +242,20 @@ import WidgetKit
         top.present(host, animated: true) { session.begin() }
     }
 }
+/// Field mode's window cover. The session ends (brightness, auto-lock and night vision put back)
+/// whenever the cover goes for good: closed, taken down with what it was shown over, its iPad
+/// window closed, or released. A sheet over field mode, the Lock Screen or leaving the app is not
+/// an ending: the cover stays presented and the night carries on.
 final class FieldHostingController: UIHostingController<AnyView> {
     let parkID: String
     var onClose: (()->Void)?
     var onTouch: (()->Void)?
+    private var sceneObserver: NSObjectProtocol?
     init(parkID: String) { self.parkID=parkID; super.init(rootView: AnyView(EmptyView())) }
+    isolated deinit {
+        if let sceneObserver { NotificationCenter.default.removeObserver(sceneObserver) }
+        if let onClose { onClose(); FieldPresenter.setOpen(false,host:self) }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Watches touches without taking any: every control works exactly as before.
@@ -241,10 +263,28 @@ final class FieldHostingController: UIHostingController<AnyView> {
         view.addGestureRecognizer(watcher)
     }
     @available(*, unavailable) required init?(coder: NSCoder) { nil }
-    override func viewDidAppear(_ animated: Bool) { super.viewDidAppear(animated); FieldPresenter.setOpen(true,host:self) }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        FieldPresenter.setOpen(true,host:self)
+        watchScene()
+    }
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        if isBeingDismissed || presentingViewController == nil { FieldPresenter.setOpen(false,host:self) }
+        // Something shown over field mode leaves it presented (and its presenter set): not an ending.
+        if isBeingDismissed || presentingViewController == nil { finish() }
+    }
+    /// Closing an iPad window disconnects its scene without dismissing anything in it.
+    private func watchScene() {
+        guard sceneObserver == nil, let scene=view.window?.windowScene else { return }
+        sceneObserver=NotificationCenter.default.addObserver(forName: UIScene.didDisconnectNotification, object: scene, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.finish() }
+        }
+    }
+    /// The session ends once, however field mode ended.
+    private func finish() {
+        if let sceneObserver { NotificationCenter.default.removeObserver(sceneObserver); self.sceneObserver=nil }
+        onClose?(); onClose=nil
+        FieldPresenter.setOpen(false,host:self)
     }
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }

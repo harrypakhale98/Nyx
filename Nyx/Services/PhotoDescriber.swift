@@ -5,7 +5,8 @@ import FoundationModels
 /// "Suggest a description" for a journal photo: on iOS 27, where the on-device model is ready and
 /// can see images, one plain line the person reads, edits or ignores. It is never saved by itself,
 /// it says it was suggested on this iPhone, and it is told not to name sky facts it cannot know
-/// from a photo (stars, planets, how dark it was). Without the model the button simply isn't there.
+/// from a photo (stars, planets, how dark it was). It writes in the person's language, and without
+/// the model, or where the model does not speak that language, the button simply isn't there.
 enum PhotoDescriber {
     static var available: Bool {
         guard !DebugScenario.isEnabled("no-ai") else { return false }
@@ -36,10 +37,10 @@ enum PhotoDescriber {
 private enum VisionDescriber {
     static var available: Bool {
         let model=SystemLanguageModel.default
-        return model.availability == .available && model.capabilities.contains(.vision)
+        return model.availability == .available && model.capabilities.contains(.vision) && model.supportsLocale(.current)
     }
     static func describe(_ image: CGImage) async -> String? {
-        let session=LanguageModelSession(model: SystemLanguageModel.default, instructions: "You write alt text for a person's own night-sky journal photo, for someone who cannot see it. One plain sentence under 20 words. Describe only what is visible: the land, the light, any people or things. Never name stars, planets, constellations or places, never guess dates, the weather or how dark the sky was. No exclamation marks.")
+        let session=LanguageModelSession(model: SystemLanguageModel.default, instructions: "You write alt text for a person's own night-sky journal photo, for someone who cannot see it. One plain sentence under 20 words. Describe only what is visible: the land, the light, any people or things. Never name stars, planets, constellations or places, never guess dates, the weather or how dark the sky was. Write in \(OnDeviceGuide.yourLanguage). No exclamation marks.")
         let options=GenerationOptions(temperature: 0.2, maximumResponseTokens: 60)
         do {
             return try await session.respond(options: options) {

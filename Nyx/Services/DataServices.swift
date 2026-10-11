@@ -489,7 +489,8 @@ nonisolated final class CachePreload: @unchecked Sendable {
     static func start() -> CachePreload {
         let preload=CachePreload()
         preload.group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        // The main thread waits on this at launch, so it runs at the waiting thread's own priority.
+        DispatchQueue.global(qos: .userInteractive).async {
             preload.read()
             preload.group.leave()
         }

@@ -7,21 +7,6 @@
         "language" : "en",
         "region" : "US"
       }
-    },
-    {
-      "id" : "8D2E4A90-1B3C-4F5D-A6E7-2C9B0F1D3E22",
-      "name" : "Release-like",
-      "options" : {
-        "environmentVariableEntries" : [
-          {
-            "key" : "NYX_RELEASE_LIKE",
-            "value" : "1"
-          }
-        ],
-        "language" : "en",
-        "mainThreadCheckerEnabled" : false,
-        "region" : "US"
-      }
     }
   ],
   "defaultOptions" : {

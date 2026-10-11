@@ -7,6 +7,7 @@ struct NightDetail: View {
     @Environment(VisionModel.self) private var model
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .largeTitle) private var numeral = 108
     @ScaledMetric(relativeTo: .largeTitle) private var moonSide = 190
     var body: some View {
@@ -66,7 +67,8 @@ struct NightDetail: View {
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: 380, alignment: .leading)
-        .animation(VisionMotion.spring, value: plan.score.value)
+        // A new score rolls in on the shared spring; under Reduce Motion it simply changes.
+        .animation(reduceMotion ? nil : VisionMotion.spring, value: plan.score.value)
     }
     /// The binding cap, when the four parts add up to more than the score.
     private func limitLine(_ plan: NightPlan) -> String? {

@@ -15,7 +15,7 @@ import SwiftUI
         }
         .defaultSize(width: 1180, height: 760)
         // One Moon: a single window, so asking again brings the same globe back rather than a second.
-        // Not restored at launch: it follows the planner's park, and Nyx keeps nothing between launches.
+        // Not restored at launch: it follows the planner's park (the one choice remembered between launches).
         Window(Text("The Moon on your table"), id: MoonVolume.id) {
             MoonVolume().environment(model)
         }

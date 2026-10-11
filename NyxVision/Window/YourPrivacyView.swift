@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Your privacy on Vision Pro: what leaves the headset (one optional request, the parks' cloud
-/// forecast), its switch, and that nothing else does. The switch is the same preference the
+/// Your privacy on Vision Pro: what leaves the headset (the parks' optional cloud forecast, with
+/// Haleakalā's summit cloud layers), its switch, and that nothing else does. The switch is the same preference the
 /// transport checks before any connection (`SafeHTTP`), so off means no request at all.
 struct YourPrivacyView: View {
     @Environment(VisionModel.self) private var model
@@ -26,7 +26,7 @@ struct YourPrivacyView: View {
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityElement(children: .combine)
-                    Text("One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address.")
+                    Text("Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Text(status).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 } header: {

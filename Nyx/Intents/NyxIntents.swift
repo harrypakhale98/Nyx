@@ -39,8 +39,11 @@ struct DarknessIntent:AppIntent {
         guard let selected=try ParkData.load().first(where:{$0.id==park.id}) else { throw NyxIntentError.parkNotFound }
         // Saved parks share their forecast with the widget; the app's own cache may be newer.
         let shared=SharedSettings.read()
+        var voiceOnly=false
+        if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
+        // The park's closure from the app's last park update, said before the score.
         let answer=DarknessAnswer(park:selected,forecast:BestNightSearch.forecasts(for:[selected],shared:shared)[selected.id],
-                                  detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],now:.now)
+                                  detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],closure:shared?.closures[selected.id],now:.now,voiceOnly:voiceOnly)
         return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night))
     }
 }
@@ -48,20 +51,38 @@ struct DarknessIntent:AppIntent {
 nonisolated struct DarknessAnswer:Sendable {
     let night:Night
     let dialog:String
-    init(park:Park,forecast:Forecast?,detail:ForecastDetail?,now:Date) {
+    /// `closure` is the park's closure as Nyx words it beside the score; `voiceOnly` (iOS 27, no
+    /// screen in view) keeps the closure, the score and the one caveat that matters.
+    init(park:Park,forecast:Forecast?,detail:ForecastDetail?,closure:String?=nil,now:Date,voiceOnly:Bool=false) {
         let sky=AstronomyEngine().conditions(for:park,on:park.currentNight(at:now))
         night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now)
-        let score=night.score
-        if sky.darkHours==0 { dialog=String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        else if let caption=night.basisCaption() { dialog=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-        else { dialog=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
+        dialog=Self.dialog(night,closure:closure,voiceOnly:voiceOnly)
     }
+    /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
+    static func dialog(_ night:Night,closure:String?,voiceOnly:Bool)->String {
+        let park=night.park, score=night.score
+        let body:String
+        if night.sky.darkHours==0 { body=String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
+        else if voiceOnly {
+            let basis=score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+            let tonight=String(localized:"Tonight")
+            body=String(localized:"\(tonight) at \(park.shortName): \(score.value), \(score.band.label).")+basis
+        }
+        else if let caption=night.basisCaption() { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
+        else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
+        guard let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty else { return body }
+        return sentence(String(localized:"Closure alert: \(closure)"))+" "+body
+    }
+    /// An NPS headline usually ends without a full stop; one is added so the score reads as its own sentence.
+    static func sentence(_ text:String)->String { text.last.map { ".!?…".contains($0) } == true ? text : text+"." }
 }
 /// Siri's card for tonight's score: the score on a still dial (Siri shows a snapshot, so nothing
 /// counts up), the Moon as it is tonight, and what the clouds rest on.
 struct DarknessSnippetView:View {
     let night:Night
-    private let palette=NyxPalette(nightVision:false,highContrast:false)
+    @Environment(\.colorSchemeContrast) private var contrast
+    /// The app's night look, so a night-vision evening is not lit up by a white card.
+    private var palette:NyxPalette { NightLook(contrast:contrast).palette }
     var body:some View {
         HStack(alignment:.center,spacing:18) {
             StaticScoreDial(score:night.score.value,hasForecast:night.score.hasForecast,palette:palette).frame(width:118,height:118)
@@ -80,7 +101,9 @@ struct DarknessSnippetView:View {
         }
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,Color(red:0.043,green:0.063,blue:0.149)],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .environment(\.nyx,palette)
+        .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.score.band.label). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))

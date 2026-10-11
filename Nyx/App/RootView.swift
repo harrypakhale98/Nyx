@@ -194,6 +194,11 @@ struct RootView:View {
             // A followed night on the Lock Screen changes colour with the app.
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:on) } }
         }
+        // Widgets and a followed night draw their red from the same choice (`NightLook`).
+        .onChange(of:brighterRed) { _,_ in
+            WidgetCenter.shared.reloadAllTimelines()
+            if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
+        }
         // The watch falls back to the starting park when nothing is saved: tell it when that changes.
         .onChange(of:model.homeID) { _,_ in model.savedSync.pushWatch(model) }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }

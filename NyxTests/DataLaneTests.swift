@@ -134,11 +134,12 @@ struct DataLaneTests {
     /// A park page opened while Tonight's alerts request is still on its way still gets its programs,
     /// and the alerts request is never repeated by the waiter.
     @Test func waitersDecideAgainAfterTheRequestEnds() async throws {
-        let tomorrow=Date.now.addingTimeInterval(86400).formatted(.iso8601.year().month().day().dateSeparator(.dash))
+        // A fixed afternoon at the park (15 Oct 2026, 1 PM in Joshua Tree), so "tomorrow" never depends on the day the tests run.
+        let now=Date(timeIntervalSince1970: 1_792_094_400), tomorrow="2026-10-16"
         let http=HeaderHTTP(["/api/v1/alerts":["{\"data\":[]}"],
                              "/api/v1/events":["{\"total\":\"1\",\"data\":[{\"id\":\"s\",\"title\":\"Star party\",\"datestart\":\"\(tomorrow)\",\"description\":\"\"}]}"]])
         await http.set(delay: .milliseconds(200))
-        let store=ParkStore(transport: http, persist: false), jotr=try park("jotr")
+        let store=ParkStore(transport: http, persist: false, clock: { now }), jotr=try park("jotr")
         async let tonight=store.alerts(for: parks, key: "k", network: true, force: false)
         try await Task.sleep(for: .milliseconds(50))
         async let detail=store.alerts(for: parks, key: "k", network: true, force: false)

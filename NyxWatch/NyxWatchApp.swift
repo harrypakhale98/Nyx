@@ -9,7 +9,8 @@ import UserNotifications
     }
     var body: some Scene {
         WindowGroup { WatchRootView().environment(store) }
-            // The iPhone sent a new context while Nyx was not running: take it, refresh the face.
+            // The iPhone sent a new context while Nyx was not running: take it, store it and refresh
+            // the face before the wake ends (`receivePending` returns only once all three are done).
             .backgroundTask(.watchConnectivity) { await store.receivePending() }
     }
 }

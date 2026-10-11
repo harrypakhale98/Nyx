@@ -144,7 +144,9 @@ struct BestNightSnippetView: View {
     let nights: Int
     /// Whether this night is followed on the Lock Screen; nil where following is not offered.
     var following: Bool?=nil
-    private let palette=NyxPalette(nightVision:false,highContrast:false)
+    @Environment(\.colorSchemeContrast) private var contrast
+    /// The app's night look, so a night-vision evening is not lit up by a white card.
+    private var palette: NyxPalette { NightLook(contrast:contrast).palette }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(alignment:.top) {
@@ -188,7 +190,9 @@ struct BestNightSnippetView: View {
         }
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,Color(red:0.043,green:0.063,blue:0.149)],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .environment(\.nyx,palette)
+        .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
     }
 }

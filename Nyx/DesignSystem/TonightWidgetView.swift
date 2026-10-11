@@ -94,6 +94,7 @@ struct TonightWidgetView:View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.colorSchemeContrast) private var contrast
     var previewFamily:WidgetFamily?=nil
     private var family:WidgetFamily { previewFamily ?? systemFamily }
     let entry:TonightEntry
@@ -101,11 +102,13 @@ struct TonightWidgetView:View {
     /// its luminance. There, Nyx speaks in white and opacity only (amber and red would read as
     /// mid-grey) and leaves the night-vision red to the system.
     private var tinted:Bool { renderingMode != .fullColor }
-    private var nightVision:Bool { entry.nightVision && !tinted }
-    private var ink:Color { tinted ? .white : nightVision ? Color(red:1,green:0.27,blue:0.23) : Color(red:0.961,green:0.945,blue:0.902) }
-    private var accent:Color { tinted || nightVision ? ink : Color(red:1,green:0.706,blue:0.329) }
-    private var muted:Color { ink.opacity(tinted ? 0.62 : nightVision ? 0.9 : 0.7) }
-    private var palette:NyxPalette { NyxPalette(nightVision:nightVision,highContrast:false) }
+    /// The app's night look: its red (brighter by choice or under Increase Contrast) and contrast.
+    private var look:NightLook { NightLook(contrast:contrast,nightVision:entry.nightVision && !tinted) }
+    private var nightVision:Bool { look.nightVision }
+    private var ink:Color { tinted ? .white : look.ink }
+    private var accent:Color { tinted ? ink : look.accent }
+    private var muted:Color { tinted ? ink.opacity(0.62) : look.muted }
+    private var palette:NyxPalette { look.palette }
     var body:some View {
         content.foregroundStyle(ink)
             .containerBackground(for:.widget) { WidgetSky(seed:entry.night?.park.id ?? "nyx",ink:ink,night:entry.night) }
@@ -245,10 +248,10 @@ struct TonightWidgetView:View {
     @ViewBuilder private func moon(_ night:Night)->some View {
         if let image=moonImage(night) {
             Image(uiImage:image).resizable().widgetAccentedRenderingMode(.accentedDesaturated).scaledToFit()
-                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled:nightVision))
+                .accessibilityIgnoresInvertColors().modifier(NightVisionFilter(enabled:nightVision,red:look.red))
         } else {
             MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
-                .environment(\.nyx,palette).modifier(NightVisionFilter(enabled:nightVision))
+                .environment(\.nyx,palette).modifier(NightVisionFilter(enabled:nightVision,red:look.red))
         }
     }
     private func moonImage(_ night:Night)->UIImage? {

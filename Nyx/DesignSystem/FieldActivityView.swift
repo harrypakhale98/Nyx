@@ -9,10 +9,15 @@ import WidgetKit
 /// of them next.
 struct FieldActivityColors {
     let nightVision: Bool
-    var ink: Color { nightVision ? Color(red:1,green:0.27,blue:0.23) : Color(red:0.961,green:0.945,blue:0.902) }
-    var accent: Color { nightVision ? Color(red:1,green:0.27,blue:0.23) : Color(red:1,green:0.706,blue:0.329) }
+    /// The app's night look: the red it chose (brighter by choice or under Increase Contrast).
+    let look: NightLook
+    init(nightVision: Bool, contrast: ColorSchemeContrast = .standard) {
+        self.nightVision=nightVision; look=NightLook(contrast:contrast,nightVision:nightVision)
+    }
+    var ink: Color { look.ink }
+    var accent: Color { look.accent }
     /// Night vision keeps full red for secondary text: red is already dim, and any less fails contrast at caption sizes.
-    var muted: Color { nightVision ? ink : ink.opacity(0.7) }
+    var muted: Color { nightVision ? ink : ink.opacity(look.highContrast ? 0.9 : 0.7) }
     var track: Color { ink.opacity(0.22) }
 }
 
@@ -20,7 +25,8 @@ struct FieldActivityLockView: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
     let isStale: Bool
-    private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision) }
+    @Environment(\.colorSchemeContrast) private var contrast
+    private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision,contrast:contrast) }
     /// "Heading out": followed ahead, before true darkness. Sunset, true darkness and the closure.
     private var heading: Bool { state.heading == true && !isStale && !state.finished }
     var body: some View {
@@ -137,8 +143,9 @@ struct FieldActivitySmallView: View {
     let attributes: FieldActivityAttributes
     let state: FieldActivityAttributes.ContentState
     let isStale: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
     var body: some View {
-        let colors=FieldActivityColors(nightVision:state.nightVision)
+        let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
         let mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale)
         VStack(alignment:.leading,spacing:2) {
             Label { Text(mark.title).lineLimit(1).minimumScaleFactor(0.7) } icon:{ Image(systemName:mark.symbol).accessibilityHidden(true) }
@@ -197,12 +204,13 @@ struct FieldActivityMark {
 struct FieldActivitySymbol: View {
     let mark: FieldActivityMark
     let nightVision: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
     init(attributes:FieldActivityAttributes,state:FieldActivityAttributes.ContentState,isStale:Bool) {
         mark=FieldActivityMark(attributes:attributes,state:state,isStale:isStale); nightVision=state.nightVision
     }
     var body: some View {
         Image(systemName:mark.symbol)
-            .foregroundStyle(FieldActivityColors(nightVision:nightVision).accent)
+            .foregroundStyle(FieldActivityColors(nightVision:nightVision,contrast:contrast).accent)
             .accessibilityLabel(mark.title)
     }
 }
@@ -218,8 +226,9 @@ struct FieldActivityCountdown: View {
     var maxWidth: CGFloat = 56
     /// The compact island, which follows `isDynamicIslandLimitedInWidth` on iOS 27.
     var compact = true
+    @Environment(\.colorSchemeContrast) private var contrast
     var body: some View {
-        let colors=FieldActivityColors(nightVision:state.nightVision)
+        let colors=FieldActivityColors(nightVision:state.nightVision,contrast:contrast)
         Group {
             if compact, #available(iOS 27.0, *) {
                 FieldActivityAdaptiveCountdown(attributes:attributes,state:state,isStale:isStale)

@@ -1,3 +1,4 @@
+import AlarmKit
 import SwiftUI
 import SwiftData
 
@@ -382,7 +383,11 @@ struct FieldAlarmRows: View {
                 if FieldAlarms.access == .denied, let url=URL(string:UIApplication.openSettingsURLString) { Button("Open Settings") { openURL(url) }.font(.caption).frame(minHeight:44).contentShape(Rectangle()) }
             }
         }
-        .task { refresh() }
+        .task {
+            refresh()
+            // An alarm that rings, is stopped or is removed in Clock changes its row while it is open.
+            for await _ in AlarmManager.shared.alarmUpdates { refresh() }
+        }
         .sheet(item:$pending) { option in
             PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {
                 pending=nil

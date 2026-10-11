@@ -150,7 +150,7 @@ struct GuideView:View {
                 .padding(.vertical,8)
             Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.accent) }
                 .buttonStyle(.plain).frame(minWidth:44,minHeight:44)
-                .disabled(question.trimmingCharacters(in:.whitespaces).isEmpty || guide.loading || records.isEmpty)
+                .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || records.isEmpty)
                 .accessibilityLabel("Ask").accessibilityInputLabels([Text("Ask"),Text("Send")])
         }
         .padding(.leading,18).padding(.trailing,6)

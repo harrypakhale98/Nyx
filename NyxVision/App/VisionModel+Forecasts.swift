@@ -1,22 +1,28 @@
 import Foundation
 
-/// Cloud forecasts on Vision Pro: the one network request this app makes (approved 2026-10-07).
+/// Cloud forecasts on Vision Pro: the only network requests this app makes (approved 2026-10-07).
 /// The same client as the iPhone (`WeatherService`): all 63 parks' public viewing-spot coordinates
 /// in one request to api.open-meteo.com (two, 50 and 13 parks), clouds only, kept in this
 /// headset's Application Support so the last forecast is there offline. A park's forecast is asked
 /// for again only once it is six hours old, however often the window asks; a refused request
-/// waits (`HostBackoff`). With the switch off nothing is requested and the cached forecast keeps
-/// fading toward the usual clouds, as on the iPhone.
+/// waits (`HostBackoff`). Alongside it, Haleakalā's summit cloud layers (`SummitLayerService`):
+/// one small request at most every twelve hours, so that park scores from mid and high cloud as
+/// on the iPhone. With the switch off nothing is requested and the cached forecast keeps fading
+/// toward the usual clouds, as on the iPhone.
 extension VisionModel {
     /// Reads the cache, and with `network` (and the switch on) refreshes what is six hours old.
     func refreshForecasts(network: Bool = true) async {
         #if DEBUG
         // Screenshot routes never touch the network: a fixed forecast (`-nyx-vision-clouds 60`),
         // or the cache alone when the date is pinned (`-nyx-date`).
+        // No summit layers there: the fixture's cover is the cover every park counts.
         if let cover = VisionDebug.clouds { forecasts = Self.fixture(parks: parks, cover: cover, issued: now); return }
         #endif
-        let live = VisionDebug.date == nil
-        let fresh = await weather.forecasts(for: parks, network: network && live && forecastsOn, force: false)
+        let live = VisionDebug.date == nil, asking = network && live && forecastsOn
+        let fresh = await weather.forecasts(for: parks, network: asking, force: false)
+        // Asked after the forecast, so layers fetched with it are never the older of the two
+        // (the score sets aside layers more than twelve hours older than the forecast).
+        let layers = await summits.layers(for: parks, network: asking)
         // Only ever newer: a failed or switched-off request never takes a forecast away.
         var merged = forecasts, changed = false
         for park in parks {
@@ -24,6 +30,11 @@ extension VisionModel {
             merged[park.id] = forecast; changed = true
         }
         if changed { forecasts = merged }
+        var mergedLayers = summitLayers, layersChanged = false
+        for (id, series) in layers where series.updated > (mergedLayers[id]?.updated ?? .distantPast) {
+            mergedLayers[id] = series; layersChanged = true
+        }
+        if layersChanged { summitLayers = mergedLayers }
     }
     /// Asks while the window is open: at once, then every half hour (each park only once its
     /// forecast is six hours old, so in practice every six hours).
@@ -41,16 +52,19 @@ extension VisionModel {
     func beyondForecast(_ night: Night) -> Bool { NightPlanner.beyondForecast(night, forecast: forecasts[night.park.id], now: now) }
     /// The words under the score for a night's clouds, as the iPhone says them: nothing extra with
     /// a forecast but its average; "Early look: …" days ahead; "No cloud forecast yet. …" beyond.
+    /// Over Haleakalā's summit, when its layers count, the iPhone's line on why only mid and high cloud.
     func cloudCaption(_ night: Night) -> String {
+        let summit = night.upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : ""
         switch night.basis {
         case .forecast:
             let cover = night.cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover across the dark window.") } ?? ""
             let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
-            return [cover, issued].filter { !$0.isEmpty }.joined(separator: " ")
+            return [cover, summit, issued].filter { !$0.isEmpty }.joined(separator: " ")
         case .blended, .usual:
             let unavailable = !beyondForecast(night)
             let caption = night.basisCaption(unavailable: unavailable, typical: true) ?? ""
-            return unavailable && !forecastsOn ? caption+" "+String(localized: "Cloud forecasts are off in Your privacy.") : caption
+            let off = unavailable && !forecastsOn ? String(localized: "Cloud forecasts are off in Your privacy.") : ""
+            return [caption, summit, off].filter { !$0.isEmpty }.joined(separator: " ")
         }
     }
 

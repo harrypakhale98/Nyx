@@ -3,8 +3,9 @@ import Synchronization
 
 // The guarded transport and the cloud forecast client, shared by Nyx on iPhone and iPad (with the
 // widgets, which read the cache) and by Nyx on Vision Pro. Park updates, forecast detail and the
-// smoke forecast stay in DataServices.swift, which Vision Pro does not compile: its only request
-// is this file's cloud forecast, to api.open-meteo.com, behind its own switch.
+// smoke forecast stay in DataServices.swift, which Vision Pro does not compile: its only requests
+// are this file's cloud forecast and Haleakalā's summit cloud layers (`SummitLayerService`), both
+// to api.open-meteo.com, behind one switch.
 
 /// The cloud forecast's switch in Your privacy (on unless turned off), read by the transport
 /// before any request to the forecast host.
@@ -316,5 +317,116 @@ actor WeatherService: WeatherProviding {
             guard response.hourly.time.count == response.hourly.cloud_cover.count, !response.hourly.time.isEmpty else { return nil }
             return (park, Forecast(updated: now, times: response.hourly.time, clouds: response.hourly.cloud_cover))
         }
+    }
+}
+/// The cloud layers over a summit that sits above the trade-wind inversion (`Park.aboveInversion`,
+/// Haleakalā alone), for Nyx on Vision Pro, which has no forecast detail service: the iPhone scores
+/// that park from mid and high cloud (`NightPlanner.night`), and these two layers let Vision Pro
+/// score it the same way. One small request, at most every twelve hours, carrying only the
+/// summit's public viewing-spot coordinates: same host, same switch, same guarded transport and
+/// backoff as the cloud forecast. Seven days ahead plus yesterday, as the iPhone's layer forecast,
+/// so nights past its reach fall back to total cloud on both. Kept on disk beside the forecast; a
+/// failed request keeps the last layers, and without any the score counts total cloud as before.
+/// The iPhone never asks for these: its layers come with forecast detail (DataServices.swift).
+actor SummitLayerService {
+    static let keys=["cloud_cover_mid","cloud_cover_high"]
+    /// The iPhone's layer freshness (`ForecastDetailService.freshFor`). The score uses layers no
+    /// more than `NightPlanner.layerLag` (also twelve hours) older than the total-cloud forecast,
+    /// so asking whenever they reach this age keeps them in use beside each new forecast.
+    static let freshFor: TimeInterval=12*3600
+    private let transport: any HTTPTransport
+    private let persist: Bool
+    private let backoff: HostBackoff
+    private let clock: @Sendable () -> Date
+    private var memory: [String: HourlySeries] = [:]
+    /// Parks whose cache file has been looked for, found or not, so no file is read twice.
+    private var loaded=Set<String>()
+    /// A request already under way; later callers wait for it instead of asking again.
+    private var running: Task<Void, Never>?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock
+        self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+    }
+    /// The cached layers for the summits among `parks`, and with `network` a refresh of those
+    /// twelve hours old. Parks below the inversion are never asked about.
+    func layers(for parks: [Park], network: Bool) async -> [String: HourlySeries] {
+        let summits=parks.filter { $0.aboveInversion == true }
+        for park in summits { load(park.id) }
+        // A cancelled caller stops waiting and returns what is kept; the request finishes and stores itself.
+        if let running { _=await SharedRequest.value(of: running) }
+        else if network {
+            let now=clock()
+            let due=summits.filter { park in (memory[park.id].map { now.timeIntervalSince($0.updated) } ?? .infinity) >= Self.freshFor }
+            if !due.isEmpty, backoff.allows(WeatherService.host, now: now) {
+                let task=Task {
+                    self.keep(await self.fetch(due))
+                    self.running=nil
+                }
+                running=task
+                _=await SharedRequest.value(of: task)
+            }
+        }
+        var result: [String: HourlySeries] = [:]
+        for park in summits { if let series=memory[park.id] { result[park.id]=series } }
+        return result
+    }
+    private func load(_ id: String) {
+        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(HourlySeries.self, name: "summit-\(id)") else { return }
+        memory[id]=cached
+    }
+    private func keep(_ fetched: [(String, HourlySeries)]) {
+        for (id, series) in fetched where memory[id].map({ $0.updated < series.updated }) ?? true {
+            memory[id]=series
+            if persist { CacheDirectory.write(series, name: "summit-\(id)") }
+        }
+    }
+    /// `hourly=cloud_cover_mid,cloud_cover_high&forecast_days=7&past_days=1&timeformat=unixtime&timezone=GMT`
+    /// at each summit's `forecastPoint`.
+    static func url(for parks: [Park]) -> URL? {
+        guard !parks.isEmpty else { return nil }
+        var parts=URLComponents()
+        parts.scheme="https"; parts.host="api.open-meteo.com"; parts.path="/v1/forecast"
+        parts.queryItems=[URLQueryItem(name: "latitude", value: parks.map { String($0.forecastPoint.latitude) }.joined(separator: ",")),
+            URLQueryItem(name: "longitude", value: parks.map { String($0.forecastPoint.longitude) }.joined(separator: ",")),
+            URLQueryItem(name: "hourly", value: keys.joined(separator: ",")), URLQueryItem(name: "forecast_days", value: "7"), URLQueryItem(name: "past_days", value: "1"),
+            URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        return parts.url
+    }
+    /// Empty when the request failed or its answer could not be read whole.
+    private func fetch(_ parks: [Park]) async -> [(String, HourlySeries)] {
+        guard let url=Self.url(for: parks) else { return [] }
+        let data: Data
+        // Low Data Mode is allowed, as for the cloud forecast: on Vision Pro these layers are the score's clouds.
+        do { data=try await transport.get(url, headers: [:], constrained: true) } catch {
+            backoff.record(error, host: WeatherService.host, now: clock())
+            return []
+        }
+        struct Response: Decodable { let hourly: [String: [Double?]] }
+        // One coordinate returns an object; several return an array in request order.
+        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+        guard decoded.count == parks.count else { return [] }
+        let now=clock()
+        return zip(parks, decoded).compactMap { park, response in
+            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
+            var values: [String: [Double?]] = [:]
+            for key in Self.keys {
+                guard let series=response.hourly[key], series.count == times.count else { return nil }
+                values[key]=series
+            }
+            return (park.id, HourlySeries(updated: now, times: times, values: values))
+        }
+    }
+}
+nonisolated extension HourlySeries {
+    /// Mid and high cloud combined hour by hour as the score combines their averages (random
+    /// overlap), as a cloud forecast issued when the layers were: what the sky over a summit above
+    /// the inversion draws. Nil without both layers for every hour.
+    var upperCloud: Forecast? {
+        guard let mid=values["cloud_cover_mid"], let high=values["cloud_cover_high"], mid.count == times.count, high.count == times.count else { return nil }
+        let clouds=zip(mid, high).map { m, h -> Double? in
+            guard let m, let h, (0...100).contains(m), (0...100).contains(h) else { return nil }
+            return 100*(1-(1-m/100)*(1-h/100))
+        }
+        return Forecast(updated: updated, times: times, clouds: clouds)
     }
 }

@@ -3,12 +3,14 @@ import simd
 
 /// One park on one night, computed on device: the sky, the night as the iPhone scores it
 /// (`NightPlanner.night`: the cloud forecast where it reaches, eased toward the park's usual clouds
-/// days ahead, the usual clouds alone beyond it) and what's up.
+/// days ahead, the usual clouds alone beyond it; mid and high cloud only over Haleakalā's summit
+/// when its layer forecast covers the night) and what's up. Smoke is not counted on Vision Pro.
 nonisolated struct NightPlan: Sendable {
     let park: Park
     let sky: SkyConditions
     let night: Night
-    /// The park's last cloud forecast, for the immersive sky's hour-by-hour clouds.
+    /// The park's last cloud forecast, for the immersive sky's hour-by-hour clouds: over a summit
+    /// scored from mid and high cloud, those layers combined (low cloud lies below the observer).
     let forecast: Forecast?
     var score: DarknessScore { night.score }
     let whatsUp: WhatsUp
@@ -18,12 +20,14 @@ nonisolated struct NightPlan: Sendable {
     /// horizon's −0.833° means it never rises that night.
     let moonAltitude: Double
     var span: DateInterval { SkyDome.span(for: sky) }
-    init(park: Park, night: Date, isTonight: Bool, forecast: Forecast?, now: Date) {
+    /// `layers`: the summit's mid and high cloud (`SummitLayerService`), for parks above the inversion.
+    init(park: Park, night: Date, isTonight: Bool, forecast: Forecast?, layers: HourlySeries?, now: Date) {
         let engine = AstronomyEngine()
         self.park = park
-        self.forecast = forecast
         sky = engine.conditions(for: park, on: night)
-        self.night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: nil, now: now)
+        let scored = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
+        self.night = scored
+        self.forecast = scored.upperCloudOnly ? layers?.upperCloud ?? forecast : forecast
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
@@ -100,7 +104,14 @@ nonisolated struct SkyMoment: Sendable {
 /// The app's state, shared by the window and the immersive sky.
 @Observable final class VisionModel {
     let parks: [Park]
-    var selectedID: String? { didSet { if selectedID != oldValue { refresh(resetTime: true) } } }
+    var selectedID: String? {
+        didSet {
+            guard selectedID != oldValue else { return }
+            refresh(resetTime: true)
+            // Remembered for the next launch; a pinned clock (previews, DEBUG captures) leaves it alone.
+            if !pinned, let selectedID { UserDefaults.standard.set(selectedID, forKey: Self.parkKey) }
+        }
+    }
     /// Nights after tonight (park-local), so stepping moves every park together.
     var nightOffset = 0 { didSet { if nightOffset != oldValue, !keepingNight { refresh(resetTime: true); refreshList() } } }
     /// Position in the night's span, sunset (0) to sunrise (1).
@@ -123,6 +134,9 @@ nonisolated struct SkyMoment: Sendable {
     /// The last cloud forecast for each park, from this headset's cache or Open-Meteo
     /// (`VisionModel+Forecasts.swift`). A change rescores the night and the list.
     var forecasts: [String: Forecast] = [:] { didSet { refresh(resetTime: false); refreshList() } }
+    /// Mid and high cloud over the summits above the inversion (Haleakalā), from this headset's
+    /// cache or Open-Meteo (`SummitLayerService`). A change rescores the night and the list.
+    var summitLayers: [String: HourlySeries] = [:] { didSet { refresh(resetTime: false); refreshList() } }
     /// "Cloud forecasts (Open-Meteo)" in Your privacy: on unless turned off. The transport reads
     /// the same preference before any request (`SafeHTTP`), so off means no request at all.
     var forecastsOn = CloudForecastSwitch.isOn() {
@@ -133,6 +147,7 @@ nonisolated struct SkyMoment: Sendable {
         }
     }
     let weather: any WeatherProviding
+    let summits: SummitLayerService
     private var sweep: Task<Void, Never>?
     private var planTask: Task<Void, Never>?
     private var listTask: Task<Void, Never>?
@@ -147,13 +162,15 @@ nonisolated struct SkyMoment: Sendable {
     /// A clock fixed by the caller (previews) or by DEBUG's `-nyx-date` never moves.
     private let pinned: Bool
 
-    init(now: Date? = nil, parks: [Park]? = nil, weather: (any WeatherProviding)? = nil) {
+    init(now: Date? = nil, parks: [Park]? = nil, weather: (any WeatherProviding)? = nil, summits: SummitLayerService? = nil) {
         self.now = now ?? VisionDebug.date ?? .now
         pinned = now != nil || VisionDebug.date != nil
         self.parks = (parks ?? (try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         self.weather = weather ?? WeatherService()
+        self.summits = summits ?? SummitLayerService()
         nightVision = VisionDebug.isEnabled("night-vision")
-        selectedID = VisionDebug.park ?? "jotr"
+        // The park chosen last time; previews and DEBUG captures (a pinned clock) always open Joshua Tree.
+        selectedID = VisionDebug.park ?? (pinned ? Self.defaultPark : Self.rememberedPark(in: self.parks))
         nightOffset = VisionDebug.nightOffset ?? 0
         refresh(resetTime: true)
         refreshList()
@@ -161,6 +178,16 @@ nonisolated struct SkyMoment: Sendable {
         Task { await refreshForecasts(network: false) }
     }
     var park: Park? { parks.first { $0.id == selectedID } }
+    /// Where the chosen park is remembered between launches (this headset's UserDefaults only).
+    nonisolated static let parkKey = "visionSelectedPark"
+    nonisolated static let defaultPark = "jotr"
+    /// The park chosen last time if it is still one of `parks`, else Joshua Tree.
+    nonisolated static func rememberedPark(in parks: [Park], defaults: UserDefaults = .standard) -> String {
+        guard let stored = defaults.string(forKey: parkKey), parks.contains(where: { $0.id == stored }) else { return defaultPark }
+        return stored
+    }
+    /// The forecast detail Vision Pro has for a night: a summit's cloud layers, nothing else.
+    nonisolated static func detail(_ layers: HourlySeries?) -> ForecastDetail? { layers.map { ForecastDetail(layers: $0) } }
     func night(for park: Park) -> Date { park.date(park.currentNight(at: now), addingDays: nightOffset) }
     var moment: Date? { plan.map { SkyDome.moment(fraction, in: $0.span) } }
     private func updateSkyMoment() {
@@ -201,10 +228,10 @@ nonisolated struct SkyMoment: Sendable {
     /// Recomputes the chosen night off the main thread; the sky opens at the middle of true darkness.
     private func refresh(resetTime: Bool) {
         guard let park else { plan = nil; return }
-        let night = night(for: park), tonight = nightOffset == 0, forecast = forecasts[park.id], now = now
+        let night = night(for: park), tonight = nightOffset == 0, forecast = forecasts[park.id], layers = summitLayers[park.id], now = now
         planTask?.cancel()
         planTask = Task {
-            let plan = await Task.detached(priority: .userInitiated) { NightPlan(park: park, night: night, isTonight: tonight, forecast: forecast, now: now) }.value
+            let plan = await Task.detached(priority: .userInitiated) { NightPlan(park: park, night: night, isTonight: tonight, forecast: forecast, layers: layers, now: now) }.value
             guard !Task.isCancelled else { return }
             self.plan = plan
             if resetTime, let fraction = VisionDebug.time { self.fraction = fraction }
@@ -212,7 +239,7 @@ nonisolated struct SkyMoment: Sendable {
         }
     }
     private func refreshList() {
-        let parks = parks, offset = nightOffset, now = now, forecasts = forecasts
+        let parks = parks, offset = nightOffset, now = now, forecasts = forecasts, layers = summitLayers
         listTask?.cancel()
         listTask = Task {
             let nights = await Task.detached(priority: .utility) {
@@ -220,7 +247,7 @@ nonisolated struct SkyMoment: Sendable {
                 var result: [String: Night] = [:]
                 for park in parks {
                     let night = park.date(park.currentNight(at: now), addingDays: offset)
-                    result[park.id] = NightPlanner.night(park: park, sky: engine.conditions(for: park, on: night), forecast: forecasts[park.id], detail: nil, now: now)
+                    result[park.id] = NightPlanner.night(park: park, sky: engine.conditions(for: park, on: night), forecast: forecasts[park.id], detail: VisionModel.detail(layers[park.id]), now: now)
                 }
                 return result
             }.value
@@ -265,7 +292,7 @@ nonisolated struct SkyMoment: Sendable {
     // MARK: Turning the sky by hand
 
     /// Constellation figures in the immersive sky (the window's toggle). On by default; not
-    /// stored, since Nyx on Vision Pro keeps nothing between launches.
+    /// stored: of the planner's choices, Nyx on Vision Pro remembers only the park.
     var constellations = true
     private var chase: Task<Void, Never>?
     private var chaseGoal = 0.0

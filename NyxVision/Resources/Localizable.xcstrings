@@ -868,6 +868,23 @@
         }
       }
     },
+    "Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds only, from api.open-meteo.com: the forecast for all the parks at most every six hours while Nyx is open, and the cloud layers above Haleakalā's summit at most every twelve hours. The service receives network information such as your IP address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo nubes, desde api.open-meteo.com: el pronóstico de todos los parques como máximo cada seis horas mientras Nyx está abierto, y las capas de nubes sobre la cumbre de Haleakalā como máximo cada doce horas. El servicio recibe información de red, como tu dirección IP."
+          }
+        }
+      }
+    },
     "Cloudy in all three forecast models.": {
       "extractionState": "manual",
       "localizations": {
@@ -2721,23 +2738,6 @@
         }
       }
     },
-    "One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "One request to api.open-meteo.com for all the parks at once, at most every six hours while Nyx is open, for clouds only. The service receives network information such as your IP address."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una solicitud a api.open-meteo.com para todos los parques a la vez, como máximo cada seis horas mientras Nyx está abierto, solo de nubes. El servicio recibe información de red, como tu dirección IP."
-          }
-        }
-      }
-    },
     "Open planner": {
       "extractionState": "manual",
       "localizations": {
@@ -3958,6 +3958,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "El cielo: %@"
+          }
+        }
+      }
+    },
+    "The summit sits above most low cloud, so the score counts mid and high cloud only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The summit sits above most low cloud, so the score counts mid and high cloud only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La cumbre queda por encima de casi toda la nube baja, así que el índice solo cuenta las nubes medias y altas."
           }
         }
       }

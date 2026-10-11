@@ -43,13 +43,14 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
         return Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600)))
     }
     /// The parks this complication weighs: the watch app's choice, or the one park set, with the
-    /// clouds the iPhone last sent for it.
+    /// clouds and the closure the iPhone last sent for it.
     static func snapshot(for configuration: TonightParkIntent) -> SavedSkySnapshot? {
         guard let id = configuration.park?.id, id != WristParkEntity.darkestID,
               let park = WristParkQuery.allParks().first(where: { $0.id == id }) else { return SharedSettings.read() }
         let context = WatchSky.readContext()
-        let forecast = context?.cloudForecasts[id], detail = context?.forecastDetails[id]
-        return SavedSkySnapshot(parks: [park], forecasts: forecast.map { [id: $0] } ?? [:], details: detail.map { [id: $0] } ?? [:])
+        let forecast = context?.cloudForecasts[id], detail = context?.forecastDetails[id], closure = context?.closures[id]
+        return SavedSkySnapshot(parks: [park], forecasts: forecast.map { [id: $0] } ?? [:], details: detail.map { [id: $0] } ?? [:],
+                                closures: closure.map { [id: $0] } ?? [:])
     }
 }
 
@@ -190,7 +191,10 @@ struct DuskProvider: RelevanceEntriesProvider {
         }
         let evening = configuration.evening ?? park.currentNight(at: now)
         let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: now)
-        return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now)))
+        // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
+        let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : WatchSky.readContext()?.closures[id]
+        return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
+                                              closure: closure))
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]
@@ -242,6 +246,20 @@ struct RedLightIntent: SetValueIntent {
 #Preview("Tonight • rectangular", as: .accessoryRectangular) { TonightComplication() } timeline: {
     var cache: [String: SkyConditions] = [:]
     WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+}
+#Preview("Tonight • closure, rectangular", as: .accessoryRectangular) { TonightComplication() } timeline: {
+    let entry = closedSample
+    entry
+    WatchSkyEntry(date: entry.date, night: entry.night, next: entry.next, nightVision: false, closure: "Keys View Road and the Geology Tour Road closed for repairs through November")
+}
+#Preview("Tonight • closure, circular", as: .accessoryCircular) { TonightComplication() } timeline: { closedSample }
+#Preview("Tonight • closure, corner", as: .accessoryCorner) { TonightComplication() } timeline: { closedSample }
+#Preview("Tonight • closure, inline", as: .accessoryInline) { TonightComplication() } timeline: { closedSample }
+/// Joshua Tree tonight with an illustrative closure, for the previews.
+private var closedSample: WatchSkyEntry {
+    var cache: [String: SkyConditions] = [:]
+    let entry = WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+    return WatchSkyEntry(date: entry.date, night: entry.night, next: entry.next, nightVision: entry.nightVision, closure: "Keys View Road closed at night")
 }
 #Preview("Moon • circular", as: .accessoryCircular) { MoonComplication() } timeline: {
     MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: false)

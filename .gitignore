@@ -11,6 +11,9 @@ build/
 # Secrets (NPS key; see README "Optional NPS key")
 Config/Secrets.xcconfig
 
+# Python bytecode (the scripts share Scripts/simulators.py)
+__pycache__/
+
 # Large local artifacts
 *.trace/
 Store/Social/*.mp4

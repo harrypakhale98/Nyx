@@ -9,6 +9,8 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     let nightVision: Bool
     /// Smart Stack ranking, kept as plain values so the entry stays Sendable.
     var rank: (score: Float, duration: TimeInterval)?
+    /// The shown park's closure from the iPhone's last park update, worded as on the iPhone.
+    var closure: String? = nil
     var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
 }
 
@@ -25,8 +27,8 @@ nonisolated struct WristLook: Sendable {
 
 /// Colours every Nyx complication shares. In full colour they follow the palette; in the tinted
 /// (accented) and vibrant face modes there are no opacity levels, because the system maps
-/// luminance itself and stacked opacities turn to mud: everything is one ink, and only the score
-/// and its gauge join the accent group.
+/// luminance itself and stacked opacities turn to mud: everything is one ink, and only the score,
+/// its gauge and a park's closure join the accent group.
 struct WristInk {
     let nightVision: Bool
     let mode: WidgetRenderingMode
@@ -63,7 +65,8 @@ nonisolated enum WatchTimeline {
     static func entry(at date: Date, snapshot: SavedSkySnapshot?, look: WristLook, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
         let best = best(at: date, snapshot: snapshot, cache: &cache)
         let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
-        return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) })
+        return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) },
+                             closure: best.flatMap { snapshot?.closures[$0.park.id] })
     }
     /// Moments a complication must redraw at besides the hour: Automatic changing colour at the
     /// snapshot's parks over the next day.
@@ -94,6 +97,10 @@ nonisolated enum WatchTimeline {
         return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, look: look, cache: &cache) }
     }
     /// From 45 minutes before sunset to the end of true darkness: when a stargazer wants Nyx on the wrist.
+    /// Deliberately not `NightPlanner.duskWindow` (the iPhone's: 90 minutes before sunset to an hour
+    /// into true darkness). Both share `NightPlanner.worthSurfacing`, so they agree on which nights;
+    /// only the hours differ, because the iPhone is for setting out and the wrist stays useful at the
+    /// park all night (DECISIONS.md, team review 2026-10-08, score consistency).
     static func duskWindow(sky: SkyConditions) -> DateInterval? {
         guard let begin = sky.sunset ?? sky.darkStart else { return nil }
         let start = begin.addingTimeInterval(-45*60)
@@ -106,6 +113,17 @@ nonisolated enum WatchTimeline {
         guard NightPlanner.worthSurfacing(night), let window = duskWindow(sky: night.sky), window.contains(date) else { return (0, 0) }
         return (Float(night.score.value)/100, window.end.timeIntervalSince(date))
     }
+}
+
+/// A park's closure on the wrist, in the iPhone's words: the line every surface must show beside
+/// the score. Pure, so it can move wherever a test target can reach it.
+nonisolated enum WristClosure {
+    static let symbol = "exclamationmark.triangle.fill"
+    /// Spoken after the score, as on the iPhone and the watch's Tonight: "Closure alert: …".
+    static func spoken(_ closure: String) -> String { String(localized: "Closure alert: \(closure)") }
+    /// The inline complication's line, "94 · Closure alert": one short line has no room for the
+    /// closure's own words, which the rectangular complication, the spoken label and a tap give.
+    static func inline(score: Int) -> String { String(localized: "\(score) · \(String(localized: "Closure alert"))") }
 }
 
 /// "True darkness in 1 hr, 10 min". In a complication (`now` nil) the time updates itself; in the
@@ -164,7 +182,8 @@ struct WatchComplicationView: View {
         // The system's open ring echoes the app's celestial gauge; the Moon sits in its opening.
         Gauge(value: Double(night.score.value), in: 0...100) {
             // Coloured explicitly: the label otherwise renders white, the one bright thing on a red face.
-            MoonSymbol(night: night).foregroundStyle(muted)
+            // A closure takes the Moon's place, in the accent: it stands beside the score on every surface.
+            if entry.closure != nil { Image(systemName: WristClosure.symbol).foregroundStyle(accent) } else { MoonSymbol(night: night).foregroundStyle(muted) }
         } currentValueLabel: {
             Text(night.score.value, format: .number).font(.system(.title3, design: .serif)).widgetAccentable()
         }
@@ -174,25 +193,47 @@ struct WatchComplicationView: View {
         // The numeral once, in the corner; the curved gauge alone carries the fill, without end labels.
         Text(night.score.value, format: .number).font(.system(.title2, design: .serif)).foregroundStyle(accent).widgetAccentable()
             .widgetLabel {
-                Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
+                // A closure takes the curved label from the gauge: the numeral stays, the warning is read first.
+                if entry.closure != nil {
+                    Text("\(Image(systemName: WristClosure.symbol)) \(Text("Closure alert"))").foregroundStyle(accent).widgetAccentable()
+                } else {
+                    Gauge(value: Double(night.score.value), in: 0...100) { Text(night.score.band.label) }.tint(accent).widgetAccentable()
+                }
             }
     }
     private func inline(_ night: Night) -> some View {
         // Inline is one short line: the next moment's clock time reads at a glance and never goes stale.
+        // A closure outranks it.
         Group {
-            if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.time(next.date))") }
+            if entry.closure != nil { Text("\(Image(systemName: WristClosure.symbol)) \(WristClosure.inline(score: night.score.value))") }
+            else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.time(next.date))") }
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.wristName)") }
         }.foregroundStyle(ink)
     }
+    /// How much of a closure the rectangular complication has room for.
+    private enum ClosureFit { case whole(String), alert, mark }
     /// Park, score and band, then the next moment; at large text sizes the moment line drops first.
+    /// A closure comes before the moment and is never cut: its own words wrapped whole, else
+    /// "Closure alert", else the warning mark beside the numeral (the spoken label always has it all).
     private func rectangular(_ night: Night) -> some View {
-        ViewThatFits(in: .vertical) {
-            rectangular(night, showsNext: true)
-            rectangular(night, showsNext: false)
+        Group {
+            if let closure = entry.closure {
+                ViewThatFits(in: .vertical) {
+                    rectangular(night, closure: .whole(closure), showsNext: true)
+                    rectangular(night, closure: .whole(closure), showsNext: false)
+                    rectangular(night, closure: .alert, showsNext: false)
+                    rectangular(night, closure: .mark, showsNext: false)
+                }
+            } else {
+                ViewThatFits(in: .vertical) {
+                    rectangular(night, closure: nil, showsNext: true)
+                    rectangular(night, closure: nil, showsNext: false)
+                }
+            }
         }
         .foregroundStyle(ink).frame(maxWidth: .infinity, alignment: .leading)
     }
-    private func rectangular(_ night: Night, showsNext: Bool) -> some View {
+    private func rectangular(_ night: Night, closure: ClosureFit?, showsNext: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 MoonSymbol(night: night).font(.caption2).foregroundStyle(muted)
@@ -200,8 +241,15 @@ struct WatchComplicationView: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).font(.system(.title2, design: .serif).weight(.light)).foregroundStyle(accent).widgetAccentable()
+                if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(accent).widgetAccentable() }
                 Text(night.bandWithBasis)
                     .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            // Measured at full height, so a closure that would need cutting gives way to a shorter form instead.
+            switch closure {
+            case .whole(let text): closureLine(Text(text))
+            case .alert: closureLine(Text("Closure alert"))
+            case .mark, nil: EmptyView()
             }
             if showsNext, let next = entry.next {
                 Group {
@@ -210,6 +258,11 @@ struct WatchComplicationView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    private func closureLine(_ text: Text) -> some View {
+        Label { text } icon: { Image(systemName: WristClosure.symbol) }
+            .font(.caption2.weight(.medium)).foregroundStyle(accent).widgetAccentable()
+            .fixedSize(horizontal: false, vertical: true)
     }
     private var empty: some View {
         Group {
@@ -227,6 +280,8 @@ struct WatchComplicationView: View {
     }
     private func summary(_ night: Night) -> String {
         var text = String(localized: "\(night.park.wristName), \(night.score.value) out of 100, \(night.score.band.label).")
+        // The closure is spoken in every family, right after the score it stands beside.
+        if let closure = entry.closure { text += " " + WristClosure.spoken(closure) }
         if let caption = night.basisCaption() { text += " " + caption }
         if let next = entry.next { text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).") }
         return text

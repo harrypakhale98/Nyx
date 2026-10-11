@@ -77,12 +77,13 @@ struct ServiceTests {
     }
     @Test func closuresSurviveFailureAndEventsFilter() async throws {
         let p=try park()
-        let tomorrow=Date.now.addingTimeInterval(86400).formatted(.iso8601.year().month().day().dateSeparator(.dash))
+        // A fixed afternoon at the park (15 Oct 2026, 1 PM in Joshua Tree), so "tomorrow" never depends on the day the tests run.
+        let now=Date(timeIntervalSince1970:1_792_094_400), tomorrow="2026-10-16"
         let http=StubHTTP([
             "/api/v1/alerts":"{\"total\":\"1\",\"data\":[{\"id\":\"closed\",\"title\":\"Road closed\",\"description\":\"Storm damage\",\"category\":\"Park Closure\",\"parkCode\":\"jotr\"}]}",
             "/api/v1/events":"{\"total\":\"2\",\"data\":[{\"id\":\"stars\",\"title\":\"Astronomy evening\",\"datestart\":\"\(tomorrow)\",\"description\":\"<p>Bring a red light</p>\"},{\"id\":\"hike\",\"title\":\"Morning hike\",\"datestart\":\"\(tomorrow)\",\"description\":\"Walk\"}]}"
         ])
-        let store=ParkStore(transport:http,persist:false)
+        let store=ParkStore(transport:http,persist:false,clock:{ now })
         let first=await store.alerts(for:[p],key:"test",network:true,force:true)
         #expect(first.cache?.alerts["jotr"]?.first?.title == "Road closed")
         let programs=await store.programs(for:p,key:"test",network:true,force:true)
@@ -121,11 +122,12 @@ struct ServiceTests {
     /// NPS caps a page of events at 50 whatever pageSize asks for, so pages are counted in fifties.
     @Test func eventsArePagedInFifties() async throws {
         let p=try park()
-        let tomorrow=Date.now.addingTimeInterval(86400).formatted(.iso8601.year().month().day().dateSeparator(.dash))
+        // A fixed afternoon at the park, so "tomorrow" never depends on the day the tests run.
+        let now=Date(timeIntervalSince1970:1_792_094_400), tomorrow="2026-10-16"
         let event={ (id:String,title:String) in "{\"id\":\"\(id)\",\"title\":\"\(title)\",\"datestart\":\"\(tomorrow)\",\"description\":\"\"}" }
         let page=(0..<50).map { event("e\($0)","Morning hike") }.joined(separator:",")
         let http=StubHTTP(["/api/v1/alerts":"{\"data\":[]}","/api/v1/events":"{\"total\":\"51\",\"data\":[\(page)]}"])
-        _=await ParkStore(transport:http,persist:false).programs(for:p,key:"test",network:true,force:true)
+        _=await ParkStore(transport:http,persist:false,clock:{ now }).programs(for:p,key:"test",network:true,force:true)
         let events=await http.urls.filter { $0.path=="/api/v1/events" }
         #expect(events.count==2)
         #expect(events.allSatisfy { $0.query?.contains("pageSize=50") == true })

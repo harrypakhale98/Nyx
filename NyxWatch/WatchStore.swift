@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import Synchronization
 import UserNotifications
 import WatchConnectivity
 import WidgetKit
@@ -25,7 +26,8 @@ import WidgetKit
         #if DEBUG
         WatchDebug.apply(to: self)
         #endif
-        receiver.onContext = { [weak self] context in Task { @MainActor in self?.apply(context) } }
+        // Awaited by the receiver, so a background wake knows when the context is stored and the face reloaded.
+        receiver.onContext = { [weak self] context in await self?.apply(context) }
         receiver.activate()
     }
     func apply(_ context: WatchContext) {
@@ -86,10 +88,16 @@ import WidgetKit
         WidgetCenter.shared.invalidateConfigurationRecommendations()
         ControlCenter.shared.reloadControls(ofKind: WatchSky.redLightKind)
     }
-    /// For a WatchConnectivity background wake: wait (briefly) for whatever the iPhone queued.
+    /// For a WatchConnectivity background wake: wait (briefly, ten seconds at most) until the session
+    /// is up, nothing more is queued, and every context it handed over is stored and published, so
+    /// the system never ends the wake before the complications have been asked to reload.
     func receivePending() async {
+        guard WCSession.isSupported() else { return }
         receiver.activate()
-        for _ in 0..<20 where WCSession.default.hasContentPending { try? await Task.sleep(for: .milliseconds(500)) }
+        for _ in 0..<20 {
+            guard receiver.isSettling || WCSession.default.hasContentPending else { return }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
     }
     #if DEBUG
     func debugSet(context: WatchContext?, pinned: String?) {
@@ -101,25 +109,38 @@ import WidgetKit
 }
 
 /// Listens for the iPhone's context. WatchConnectivity calls back on its own queue, so this
-/// object holds no state beyond the callback and forwards everything to the main actor.
+/// object holds only the callback and a count of what is still on its way to the main actor.
 nonisolated final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked Sendable {
-    var onContext: (@Sendable (WatchContext) -> Void)?
+    var onContext: (@Sendable (WatchContext) async -> Void)?
+    /// Whether activation has finished (and handed over the context it found), and how many
+    /// contexts were received but are not yet stored and published.
+    private let state = Mutex((activated: false, applying: 0))
+    /// True until activation has finished and every received context has been applied.
+    var isSettling: Bool { state.withLock { !$0.activated || $0.applying > 0 } }
     func activate() {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
+        // Already activated means this receiver's delegate call has come or is on its way; it alone marks activation finished.
         guard session.activationState != .activated else { return }
         session.delegate = self
         session.activate()
     }
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
-        guard state == .activated else { return }
-        receive(session.receivedApplicationContext)
+        // Counted before activation reads as finished, so a background wake never sees a gap between the two.
+        if state == .activated { receive(session.receivedApplicationContext) }
+        self.state.withLock { $0.activated = true }
     }
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) { receive(applicationContext) }
     /// Complication transfers carry the same context, sent when a Nyx complication is on the face.
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) { receive(userInfo) }
+    /// Counted here, synchronously on WatchConnectivity's queue, so `hasContentPending` turning
+    /// false never runs ahead of the context it delivered.
     private func receive(_ dictionary: [String: Any]) {
-        guard let context = WatchContext(dictionary: dictionary) else { return }
-        onContext?(context)
+        guard let context = WatchContext(dictionary: dictionary), let onContext else { return }
+        state.withLock { $0.applying += 1 }
+        Task {
+            await onContext(context)
+            self.state.withLock { $0.applying -= 1 }
+        }
     }
 }

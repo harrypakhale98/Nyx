@@ -259,7 +259,8 @@ enum FieldAlarmError: Error { case unsupported }
 @MainActor enum FieldAlarms {
     /// Not on a Mac running the iPad app, where alarms were never designed or tried.
     static var supported: Bool { if #available(iOS 26.1, *) { !ProcessInfo.processInfo.isiOSAppOnMac } else { false } }
-    static let tint=Color(red:1,green:0.27,blue:0.23)
+    /// Night vision's red as the app draws it, brighter by choice or under Increase Contrast, read when the alarm is set.
+    static var tint: Color { NightLook(contrast:UIAccessibility.isDarkerSystemColorsEnabled ? .increased : .standard).red.color }
     private static let ledgerKey="fieldAlarms"
     enum Access { case allowed, notAsked, denied }
     static var access: Access {

@@ -361,7 +361,17 @@ struct OnboardingView:View {
                 HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
                     .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
                     .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
-                    .accessibilityElement().accessibilityLabel("Introduction, page \(page+1) of 3")
+                    // Swipe up or down with VoiceOver to turn the page, as the dots suggest.
+                    .accessibilityElement().accessibilityLabel("Introduction").accessibilityValue("Page \(page+1) of 3")
+                    .accessibilityAdjustableAction { direction in
+                        let next=switch direction {
+                        case .increment: min(page+1,2)
+                        case .decrement: max(page-1,0)
+                        @unknown default: page
+                        }
+                        guard next != page else { return }
+                        withAnimation(reduceMotion ? nil : NyxMotion.spring) { page=next }
+                    }
                 Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
                     .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
             }.padding(.bottom,28)

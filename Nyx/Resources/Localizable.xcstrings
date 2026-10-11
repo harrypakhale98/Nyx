@@ -11487,19 +11487,19 @@
         }
       }
     },
-    "Introduction, page %lld of 3": {
+    "Introduction": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Introduction, page %lld of 3"
+            "value": "Introduction"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Introducción, página %lld de 3"
+            "value": "Introducción"
           }
         }
       }
@@ -17806,6 +17806,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Al aire libre, esto tarda unos 30 minutos."
+          }
+        }
+      }
+    },
+    "Page %lld of 3": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page %lld of 3"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Página %lld de 3"
           }
         }
       }

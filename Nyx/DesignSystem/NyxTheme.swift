@@ -179,6 +179,40 @@ nonisolated enum NightTint: String, Sendable, CaseIterable {
     /// The setting's key in the shared defaults (the widgets and Control Center read the same suite).
     static let key="brighterRed"
 }
+/// One night look for what Nyx draws outside its own windows: the widgets, the Live Activity, the
+/// alarm and Siri's cards. Night vision and the brighter-red choice come from the shared suite,
+/// where the app, Control Center and field mode write them; Increase Contrast comes from the view
+/// that draws, since an extension has no app root to read it once. Where nothing filters the
+/// surface red (a widget, the Live Activity), `ink` and `accent` are the red itself; where Nyx
+/// draws a whole card (Siri), `palette` with `NightVisionFilter` reddens it as the app does.
+nonisolated struct NightLook: Equatable, Sendable {
+    let nightVision: Bool
+    let brighterRed: Bool
+    let highContrast: Bool
+    /// The night-vision switch's key in the shared defaults.
+    static let nightVisionKey="nightVision"
+    /// Starlight and moon-amber, gamma-encoded sRGB, as in `NyxPalette`.
+    static let starlight=SIMD3<Double>(0.961,0.945,0.902), amber=SIMD3<Double>(1,0.706,0.329)
+    init(nightVision: Bool, brighterRed: Bool=false, highContrast: Bool=false) {
+        self.nightVision=nightVision; self.brighterRed=brighterRed; self.highContrast=highContrast
+    }
+    /// From the shared settings. `nightVision` stands in for the stored switch on a surface that
+    /// carries its own (a widget's entry, a Live Activity's state).
+    init(defaults: UserDefaults=SharedSettings.defaults, contrast: ColorSchemeContrast = .standard, nightVision: Bool?=nil) {
+        self.init(nightVision:nightVision ?? defaults.bool(forKey:Self.nightVisionKey),brighterRed:defaults.bool(forKey:NightTint.key),highContrast:contrast == .increased)
+    }
+    var palette: NyxPalette { NyxPalette(nightVision:nightVision,highContrast:highContrast,brighterRed:brighterRed) }
+    /// The brighter red by choice or under Increase Contrast, as in the app.
+    var red: NightTint { palette.red }
+    var inkRGB: SIMD3<Double> { nightVision ? red.rgb : Self.starlight }
+    var accentRGB: SIMD3<Double> { nightVision ? red.rgb : Self.amber }
+    var ink: Color { Color(red:inkRGB.x,green:inkRGB.y,blue:inkRGB.z) }
+    var accent: Color { Color(red:accentRGB.x,green:accentRGB.y,blue:accentRGB.z) }
+    /// Secondary text. Night vision's red is already dim, so it stays near full, and full under
+    /// Increase Contrast; starlight is held at 90% there, as in the app.
+    var mutedOpacity: Double { nightVision ? (highContrast ? 1 : 0.9) : highContrast ? 0.9 : 0.7 }
+    var muted: Color { ink.opacity(mutedOpacity) }
+}
 /// How text contrast holds up for the commonest colour-vision deficiencies: Machado, Oliveira and
 /// Fernandes (2009) full-severity matrices, applied in linear RGB, then WCAG 2 contrast. Mirrors
 /// `Scripts/contrast.py`, so `Research/contrast.json` and the unit tests agree.
