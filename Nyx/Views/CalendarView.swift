@@ -268,10 +268,9 @@ struct CalendarView: View {
     /// (data, not a slogan), and the name itself the menu that changes it.
     @ViewBuilder private func heading(_ park:Park)->some View {
         VStack(alignment:.leading,spacing:6) {
-            let states=park.state.replacingOccurrences(of:",",with:" · ")
-            Eyebrow(text:park.darkSkyDesignated ? "\(states) · International Dark Sky Park" : LocalizedStringKey(states))
+            Eyebrow(text:"\(park.placeEyebrow)")
             Menu {
-                Picker("Park",selection:Binding(get:{park.id},set:{parkID=$0})) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+                PlacePickerOptions(title:"Park",selection:Binding(get:{park.id},set:{parkID=$0}))
             } label: {
                 HStack(alignment:.firstTextBaseline,spacing:10) {
                     Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
@@ -327,7 +326,7 @@ struct CalendarView: View {
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)
-                .accessibilityLabel("\(park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption(typical:true) ?? String(localized:"Forecast included"))\(model.events(night).marker(park:park).map { ". "+$0.name } ?? "")")
+                .accessibilityLabel(night.spokenSummary(.calendar(event:model.events(night).marker(park:park)?.name)))
                 .accessibilityHint(data.inWindow.contains(night.id) ? data.stretch.kind.spokenHint : String(localized:"Opens the score breakdown."))
                 .accessibilityAction(named:"Open this night") { chosen=night;peeking=true }
                 .contextMenu {

@@ -36,9 +36,9 @@ struct PluralTests {
     /// The count is not the first argument: the string's other arguments keep their places.
     @Test func countsAfterOtherArguments() {
         let today="Today", zion="Zion"
-        check([("\(today) · \(1) parks tonight","Today · 1 park tonight")],"en")
+        check([("\(today) · \(1) places tonight","Today · 1 place tonight")],"en")
         check([
-            ("\(today) · \(7) parks tonight","Today · 7 parques esta noche"),
+            ("\(today) · \(7) places tonight","Today · 7 lugares esta noche"),
             ("\(1) nights at \(zion)","1 noche en Zion"),
             ("Add \(2) nights at \(zion) to Calendar","Agregar 2 noches en Zion a Calendario"),
         ],"es")
@@ -48,15 +48,19 @@ struct PluralTests {
         check([
             ("\(1) nights under the stars at \(1) national parks","1 night under the stars at 1 national park"),
             ("\(12) nights under the stars at \(3) national parks","12 nights under the stars at 3 national parks"),
-            ("Your constellation: \(1) nights at \(1) parks across \(1) seasons, each a star at its park on a map of the United States.",
-             "Your constellation: 1 night at 1 park across 1 season, each a star at its park on a map of the United States."),
+            ("Your constellation: \(1) nights at \(1) parks across \(1) seasons, each a star at its park on a map of the lower 48 states.",
+             "Your constellation: 1 night at 1 park across 1 season, each a star at its park on a map of the lower 48 states."),
+            ("\(1) nights under the stars at \(1) places","1 night under the stars at 1 place"),
+            ("\(1) places","1 place"),
             ("\(1) nights, at most \(7)","1 night, at most 7"),
         ],"en")
         check([
             ("\(1) nights under the stars at \(3) national parks","1 noche bajo las estrellas en 3 parques nacionales"),
             ("\(5) nights under the stars at \(1) national parks","5 noches bajo las estrellas en 1 parque nacional"),
-            ("Your constellation: \(8) nights at \(2) parks across \(3) seasons, each a star at its park on a map of the United States.",
-             "Tu constelación: 8 noches en 2 parques a lo largo de 3 estaciones, cada una como una estrella en su parque sobre un mapa de Estados Unidos."),
+            ("Your constellation: \(8) nights at \(2) parks across \(3) seasons, each a star at its park on a map of the lower 48 states.",
+             "Tu constelación: 8 noches en 2 parques a lo largo de 3 estaciones, cada una como una estrella en su parque sobre un mapa de los 48 estados contiguos."),
+            ("\(5) nights under the stars at \(1) places","5 noches bajo las estrellas en 1 lugar"),
+            ("\(1) places","1 lugar"), ("\(4) places","4 lugares"),
             ("\(3) nights, at most \(7)","3 noches, como máximo 7"),
         ],"es")
     }

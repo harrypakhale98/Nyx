@@ -25,6 +25,13 @@ import UserNotifications
         // Journal entries from Siri (`AddJournalEntryIntent`) go to the same store as the windows, and
         // are refused when that store is only the stand-in in memory.
         JournalAccess.configure(container:opened.container,unavailable:model.journalUnavailable)
+        // Control Center's night vision can launch Nyx in the background (`LiveActivityIntent`), before any
+        // window: the hook is in place from launch so a followed night's Live Activity follows the switch.
+        if DebugScenario.screen == nil { NightVisionFollowers.install(model) }
+        // The world's starting places (about 31,000) are decoded and indexed off the main thread before the first search.
+        StartingPlaces.prepare()
+        // A watch's "Update from iPhone" can wake Nyx in the background too: listen from launch.
+        model.savedSync.listenToWatch(model)
         _model=State(initialValue:model)
         LaunchSignposts.end(planner)
         #if DEBUG

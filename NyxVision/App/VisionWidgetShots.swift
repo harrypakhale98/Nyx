@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// DEBUG `-nyx-vision-widget-shots`: renders the widget's faces (small, medium, simplified) for
+/// DEBUG `-nyx-vision-widget-shots`: renders the widget's faces (small, medium, large, simplified) for
 /// tonight and a week on into the app's tmp folder, since the simulator cannot place a widget
 /// from the command line. Nothing in Release.
 enum VisionWidgetShots {
@@ -14,6 +14,8 @@ enum VisionWidgetShots {
             ("medium", MoonWidgetFace(facts: MoonFacts(at: now), family: .systemMedium), CGSize(width: 364, height: 170)),
             ("simplified", MoonWidgetFace(facts: MoonFacts(at: now), family: .systemSmall, simplified: true), CGSize(width: 170, height: 170)),
             ("medium-week", MoonWidgetFace(facts: MoonFacts(at: now.addingTimeInterval(7*86400)), family: .systemMedium), CGSize(width: 364, height: 170)),
+            ("large", MoonWidgetFace(facts: MoonFacts(at: now), family: .systemLarge), CGSize(width: 364, height: 382)),
+            ("large-simplified", MoonWidgetFace(facts: MoonFacts(at: now), family: .systemLarge, simplified: true), CGSize(width: 364, height: 382)),
         ]
         for (name, face, size) in faces {
             let view = face.padding(16).frame(width: size.width, height: size.height)

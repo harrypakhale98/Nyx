@@ -72,7 +72,8 @@ nonisolated struct TripPlan: Sendable {
 /// gap (weekends only) are independent, since you go home in between. The plan maximises the total
 /// value; ties go to the darker measured skies and longer true darkness (`NightPlanner.better`'s
 /// order), then the shorter total distance driven, then the park whose id sorts first, so the
-/// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps.
+/// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps;
+/// with the world catalogue the candidates are the places in range, at most `maxCandidates`.
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
 ///
 /// **Honest comparison.** Every night is scored by `NightPlanner.night`, so every score counts
@@ -95,10 +96,24 @@ nonisolated enum TripPlanner {
         }
         return days
     }
-    /// Parks within `radiusMiles` of the starting point, as the crow flies, sorted by id. With
+    /// Parks within `radiusMeters` of the starting point, as the crow flies, sorted by id. With
     /// `drivableOnly`, parks whose sky needs a boat or a plane (`Park.drivable`) are left out.
-    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMiles: Double, drivableOnly: Bool = false) -> [Park] {
-        parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMiles*1609.344 }.sorted { $0.id<$1.id }
+    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMeters: Double, drivableOnly: Bool = false) -> [Park] {
+        parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMeters }.sorted { $0.id<$1.id }
+    }
+    /// The most places one plan weighs. The assignment is nights × places², so with the world
+    /// catalogue a wide radius is limited first: 14 × 120 × 120 is about 200,000 steps, as fast as
+    /// the 63 parks ever were.
+    static let maxCandidates = 120
+    /// `candidates` cut to `limit`, when there are more: the darkest skies first (the lower Bortle
+    /// class, a dark-sky designation, then nearer), so a plan still weighs every truly dark place in
+    /// range; returned sorted by id, as `candidates` are. Under the limit, unchanged.
+    static func limited(_ candidates: [Park], latitude: Double, longitude: Double, limit: Int = maxCandidates) -> [Park] {
+        guard candidates.count>limit else { return candidates }
+        func key(_ park: Park) -> (Int, Int, Double, String) {
+            (park.bortleEstimate, park.darkSkyDesignated ? 0 : 1, park.distanceMeters(latitude:latitude,longitude:longitude), park.id)
+        }
+        return Array(candidates.sorted { key($0)<key($1) }.prefix(max(0,limit))).sorted { $0.id<$1.id }
     }
     /// Every candidate's night for every day, `[day][park]`, scored as `PlanModel.night` scores it.
     /// Pure and off the main actor: astronomy, the cached forecasts and nothing else.
@@ -192,7 +207,7 @@ nonisolated enum TripPlanner {
         var lines=[String(localized:"A dark-sky trip, planned with Nyx")]
         for stop in plan.stops {
             let park=stop.night.park
-            var line=String(localized:"\(park.dayLabel(stop.night.id)): \(park.shortName), \(stop.night.score.value) out of 100, \(stop.night.bandWithBasis). \(stop.reason).")
+            var line=stop.night.spokenSummary(.tripLine(reason:stop.reason))
             if let hop=stop.hopMeters, hop>1000 { line+=" "+String(localized:"\(distance(hop)) from the night before.") }
             if let closure=stop.closure { line+=" "+String(localized:"Closure alert: \(closure)") }
             if let access=park.accessNote { line+=" "+access }
@@ -222,7 +237,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         guard stay.count>1 else { self.init(stop:first); return }
         let park=first.night.park
         let opening=CalendarDraft(night:first.night,closure:first.closure), closing=CalendarDraft(night:last.night,closure:last.closure)
-        var lines=stay.map { stop in String(localized:"\(park.dayLabel(stop.night.id)): darkness score \(stop.night.score.value) out of 100 (\(stop.night.bandWithBasis)). \(stop.reason).") }
+        var lines=stay.map { stop in stop.night.spokenSummary(.stayNote(reason:stop.reason)) }
         if let closure=stay.compactMap(\.closure).first { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
         lines.append(String(localized:"Scores are estimates. Check closures and the forecast before you go."))
         self.init(title:opening.title,start:opening.start,end:max(opening.start.addingTimeInterval(3600),closing.end),timeZone:park.timeZone,location:park.name,notes:lines.joined(separator:"\n"),url:opening.url)
@@ -238,10 +253,7 @@ nonisolated struct CalendarDraft: Sendable, Equatable {
         end=max(start.addingTimeInterval(3600),sky.darkEnd ?? sky.sunrise ?? sky.cloudWindow.end)
         timeZone=park.timeZone
         location=park.name
-        var lines=[night.score.hasForecast
-                   ? String(localized:"Darkness score \(night.score.value) out of 100 (\(night.score.band.label)), with the cloud forecast as Nyx last saw it.")
-                   : String(localized:"Darkness score \(night.score.value) out of 100 (\(night.score.band.label)).")+" "+(night.basisCaption(typical:true) ?? ""),
-                   TripPlanner.reason(night)+"."]
+        var lines=[night.spokenSummary(.eventNote),TripPlanner.reason(night)+"."]
         if sky.darkHours==0 { lines.append(SkyConditions.noDarknessMessage(tonight:false)) }
         if let closure { lines.append(String(localized:"The last park update listed a closure: \(closure)")) }
         lines.append(String(localized:"Scores are estimates. Check closures and the forecast before you go."))

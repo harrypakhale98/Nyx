@@ -43,6 +43,19 @@ final class NyxUITests:XCTestCase {
         app.typeKey("f",modifierFlags:.command)
         XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout:5))
         XCTAssertTrue(app.keyboards.firstMatch.exists || (app.searchFields.firstMatch.value(forKey:"hasKeyboardFocus") as? Bool ?? false),"⌘F did not focus search")
+        // ⌘N records a night (not the system's New Window, which Nyx keeps on ⌘⇧N); ⌘, opens Settings.
+        app.typeKey(XCUIKeyboardKey.escape.rawValue,modifierFlags:[])
+        let parksBars=app.navigationBars.matching(identifier:"Parks").count
+        app.typeKey("n",modifierFlags:.command)
+        let editor=app.navigationBars["Record a night"]
+        XCTAssertTrue(editor.waitForExistence(timeout:5),"⌘N did not open Record a night")
+        // A new window would open on Tonight beside this one.
+        XCTAssertFalse(app.navigationBars["Tonight"].exists,"⌘N opened a window")
+        XCTAssertEqual(app.navigationBars.matching(identifier:"Parks").count,parksBars)
+        editor.buttons["Cancel"].tap()
+        XCTAssertTrue(editor.waitForNonExistence(timeout:5))
+        app.typeKey(",",modifierFlags:.command)
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout:5),"⌘, did not open Settings")
     }
     /// The Sky glow comparison: the segments read "Here · Class 2" and "City · Class 8" for VoiceOver as
     /// on screen (the bridge to the segmented control ignores per-segment accessibility labels, so the
@@ -210,7 +223,9 @@ final class NyxUITests:XCTestCase {
         app.launch()
         let others=app.buttons.matching(NSPredicate(format:"label ENDSWITH %@","other records")).firstMatch
         XCTAssertTrue(others.waitForExistence(timeout:20),"No folded records")
-        XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 8")).firstMatch.exists,"The cited record is not shown")
+        // The fixture cites the first record it looked up, numbered after the records Nyx sends, whose
+        // count follows the date's nights and parks: any record shown before the disclosure opens is it.
+        XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label MATCHES %@","Record [0-9]+.*")).firstMatch.exists,"The cited record is not shown")
         XCTAssertFalse(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 1,")).firstMatch.exists,"An uncited record is not folded")
         others.tap()
         XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH %@","Record 1")).firstMatch.waitForExistence(timeout:5),"The disclosure did not open")

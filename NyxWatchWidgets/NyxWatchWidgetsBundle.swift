@@ -4,7 +4,7 @@ import SwiftUI
 import WidgetKit
 
 @main struct NyxWatchWidgetsBundle: WidgetBundle {
-    var body: some Widget { TonightComplication(); MoonComplication(); NextDarkComplication(); DuskWidget(); RedLightControl() }
+    var body: some Widget { TonightComplication(); MoonComplication(); NextDarkComplication(); AdaptationComplication(); DuskWidget(); RedLightControl(); AdaptationControl() }
 }
 
 /// Complications and Smart Stack: tonight's score at a park, the Moon, and the next moment of the
@@ -76,13 +76,14 @@ struct WristParkEntity: AppEntity {
 }
 struct WristParkQuery: EntityQuery {
     static func allParks() -> [Park] { ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending } }
+    /// The saved parks, and the saved spots and world catalogue places the iPhone sent with them.
     static func savedParks() -> [Park] {
-        let parks = allParks()
-        return (WatchSky.readContext()?.savedParkIDs ?? []).compactMap { id in parks.first { $0.id == id } }
+        let parks = allParks(), context = WatchSky.readContext()
+        return (context?.savedParkIDs ?? []).compactMap { id in WatchSky.place(id, in: parks, context: context) }
     }
     func entities(for identifiers: [String]) async throws -> [WristParkEntity] {
-        let parks = Self.allParks()
-        return identifiers.compactMap { id in id == WristParkEntity.darkestID ? .darkest : parks.first { $0.id == id }.map(WristParkEntity.init) }
+        let parks = Self.allParks(), context = WatchSky.readContext()
+        return identifiers.compactMap { id in id == WristParkEntity.darkestID ? .darkest : WatchSky.place(id, in: parks, context: context).map(WristParkEntity.init) }
     }
     /// Darkest saved park, then the saved parks, then every park.
     func suggestedEntities() async throws -> [WristParkEntity] {
@@ -186,7 +187,7 @@ struct DuskProvider: RelevanceEntriesProvider {
         let snapshot = SharedSettings.read()
         let parks = snapshot?.parks ?? []
         let look = WristLook.current
-        guard let id = configuration.park, let park = parks.first(where: { $0.id == id }) ?? (try? ParkData.load())?.first(where: { $0.id == id }) else {
+        guard let id = configuration.park, let park = parks.first(where: { $0.id == id }) ?? WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: WatchSky.readContext()) else {
             return DuskEntry(entry: WatchSkyEntry(date: now, night: nil, next: nil, nightVision: look.nightVision(park: nil, at: now)))
         }
         let evening = configuration.evening ?? park.currentNight(at: now)
@@ -194,7 +195,7 @@ struct DuskProvider: RelevanceEntriesProvider {
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
         let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : WatchSky.readContext()?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
-                                              closure: closure))
+                                              closure: closure, cloudsOld: WatchTimeline.isOld(snapshot?.forecasts[park.id]?.updated, at: now)))
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]

@@ -65,12 +65,14 @@ struct CityLightFigure: View {
             .frame(maxWidth:.infinity)
             .onScrollVisibilityChange(threshold:0.01) { visible in if visible { onScreen=true } }
             .accessibilityElement()
-            .accessibilityLabel(String(localized:"Illustration: this park's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
+            .accessibilityLabel(park.isSavedSpot
+                ? String(localized:"Illustration: this spot's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain.")
+                : String(localized:"Illustration: this park's sky at its estimated Class \(park.bortleEstimate), and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."))
             .accessibilityAddTraits(.isImage)
             // Which sky is drawn now, so a swipe back to the picture after switching hears the change.
             .accessibilityValue(selection == .city ? cityLabel : hereFull)
             picker
-            Text("An illustration: the same sky drawn at this park's estimated class and at a city's.")
+            Text(park.isSavedSpot ? "An illustration: the same sky drawn at this spot's estimated class and at a city's." : "An illustration: the same sky drawn at this park's estimated class and at a city's.")
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 .accessibilityHidden(true)
         }

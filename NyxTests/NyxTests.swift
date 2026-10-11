@@ -20,13 +20,16 @@ struct NyxTests {
     }
     @Test func inventory() throws {
         let parks=try ParkData.load()
-        #expect(parks.count==63); #expect(Set(parks.map(\.id)).count==63)
-        #expect(parks.filter { $0.latitude<0 }.count==1)
-        #expect(parks.filter { $0.state.contains("AK") }.count==8)
+        #expect(Set(parks.map(\.id)).count==parks.count)
+        // The curated US catalogue has 63 national parks: one south of the equator, eight in Alaska.
+        let us=parks.filter { $0.curated && $0.countryCode=="US" && $0.kind == .nationalPark }
+        #expect(us.count==63)
+        #expect(us.filter { $0.latitude<0 }.count==1)
+        #expect(us.filter { $0.region.contains("AK") }.count==8)
         for p in parks {
             #expect((-90...90).contains(p.latitude)); #expect((-180...180).contains(p.longitude))
             #expect(TimeZone(identifier:p.timeZoneID) != nil); #expect(!p.description.isEmpty)
-            #expect((1...9).contains(p.bortleEstimate)); #expect(p.sourceURL.hasPrefix("https://www.nps.gov/"))
+            #expect((1...9).contains(p.bortleEstimate)); #expect(p.nps == nil || p.sourceURL.hasPrefix("https://www.nps.gov/"))
         }
     }
     @Test func nightInProgressRunsUntilSunrise() throws {

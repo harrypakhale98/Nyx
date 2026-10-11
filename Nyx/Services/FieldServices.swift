@@ -250,6 +250,18 @@ extension FieldActivityAttributes {
     }
 }
 
+/// The app's side of the Control Center switch, whose intent runs in Nyx's process (a Live
+/// Activity intent): a followed night's Live Activity changes colour and the watch hears the
+/// switch at once, with no window open. What `RootView` does for its own switch.
+extension NightVisionFollowers {
+    static func install(_ model: PlanModel) {
+        changed={ [weak model] on in
+            if let model { model.savedSync.pushWatch(model) }
+            await FieldActivities.refresh(nightVision: on)
+        }
+    }
+}
+
 // MARK: Alarms
 
 /// Wake-ups for the night, through AlarmKit: they ring through Silent and Focus, which a

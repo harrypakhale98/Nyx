@@ -43,18 +43,24 @@ private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Query private var saved: [SavedPark]
+    /// Saved spots (G3) are saved places too: the model resolves their `pin:` ids from these.
+    @Query private var spots: [SavedSpot]
     @AppStorage("notificationsEnabled") private var reminders=false
     var body: some View {
         Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
             .task { await update() }
             .onChange(of: saved.map(\.parkID)) { _, _ in Task { await update() } }
+            .onChange(of: SavedSpotsFeed.signature(spots)) { _, _ in Task { await update() } }
             .onChange(of: reminders) { _, enabled in Task { if enabled { await update() } else { await NotificationScheduler().remove() } } }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { model.tick(); Task { await update() } }
                 if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
             }
     }
-    private func update() async { await model.savedSync.update(model, parkIDs: saved.map(\.parkID)) }
+    private func update() async {
+        model.setSpots(spots)
+        await model.savedSync.update(model, parkIDs: saved.map(\.parkID))
+    }
 }
 /// The three choices: the guidance's limit for a home screen.
 struct AssistiveHome: View {
@@ -79,15 +85,23 @@ struct AssistiveHome: View {
 /// The one park for tonight.
 struct AssistiveTonight: View {
     @Environment(PlanModel.self) private var model
-    /// The darkest park within the radius of the starting point (the first run's choice, or the
-    /// example park until one is chosen).
-    static func best(_ model: PlanModel) -> Park? { model.ranked(model.nearby(latitude: nil, longitude: nil)).first }
+    /// The darkest place within the radius of the starting point (the first run's choice, or the
+    /// example park until one is chosen), weighed as Tonight weighs it (`TonightReach`): from a US
+    /// starting point with only US places in range, the national parks; anywhere else, every place in range.
+    static func best(_ model: PlanModel) -> Park? {
+        let parks=model.nearby(latitude: nil, longitude: nil)
+        guard !model.catalog.isEmpty, let from=model.origin else { return model.ranked(parks).first }
+        let all=model.places(near: from.latitude, longitude: from.longitude, radiusMeters: model.radiusMeters)
+        let chosen=TonightReach.candidates(parks: parks, places: all, originInUS: USOutline.contains(latitude: from.latitude, longitude: from.longitude))
+        let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: from.latitude, longitude: from.longitude) : chosen
+        return model.ranked(pool).first
+    }
     var body: some View {
         ScrollView {
             if let park=Self.best(model) {
                 AssistiveParkCard(park: park, reminder: true).padding(20)
             } else {
-                Text("No national park is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).padding(20)
+                Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).padding(20)
             }
         }
         .navigationTitle("Tonight")
@@ -169,5 +183,5 @@ struct AssistiveParkCard: View {
     }
 }
 
-#Preview("Assistive Access", traits: .assistiveAccess) { AssistiveAccessRoot().environment(PlanModel()).modelContainer(for: [SavedPark.self, JournalEntry.self], inMemory: true) }
+#Preview("Assistive Access", traits: .assistiveAccess) { AssistiveAccessRoot().environment(PlanModel()).modelContainer(for: [SavedPark.self, JournalEntry.self, SavedSpot.self], inMemory: true) }
 #Preview("Tonight card") { let m=PlanModel(); if let p=m.home { ScrollView { AssistiveParkCard(park: p, reminder: true).padding() }.environment(m).modelContainer(for: [SavedPark.self, JournalEntry.self], inMemory: true).background(.black).preferredColorScheme(.dark) } }

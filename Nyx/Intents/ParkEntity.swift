@@ -2,21 +2,39 @@ import AppIntents
 import CoreSpotlight
 import Foundation
 
-/// A national park, for Siri, Shortcuts, Spotlight, and the widgets' and controls' park choice.
-/// Shared by the app and the widget extension. Indexed (iOS 18+), so Spotlight's semantic search
+/// A place: a curated park, a world catalogue place or a saved spot, for Siri, Shortcuts, Spotlight,
+/// and the widgets' and controls' park choice. Shared by the app and the widget extension. Indexed (iOS 18+), so Spotlight's semantic search
 /// finds "dark sky park in Utah" and a tap opens the park through `OpenParkIntent`; its state,
 /// Dark Sky designation and Bortle class are entity properties (iOS 26), so Shortcuts can filter
-/// on them ("National parks where Dark Sky designation is International Dark Sky Park").
+/// on them ("Places where Dark Sky designation is International Dark Sky Park").
 struct ParkEntity:IndexedEntity {
-    static let typeDisplayRepresentation=TypeDisplayRepresentation(name:"National park")
+    static let typeDisplayRepresentation=TypeDisplayRepresentation(name:"Place")
     static let defaultQuery=ParkQuery()
     let id:String
     let name:String
     var state:String=""
     var darkSky=false
     var bortle=0
+    /// A place from the world catalogue (`wd:`, G4): its ISO country code, so Siri and Spotlight can
+    /// say where it is ("Catalonia, Spain"). Empty for the curated parks and saved spots.
+    var country:String=""
+    /// Whether "national park" describes it (a Dark Sky community or reserve abroad is not one).
+    var nationalPark=true
+    /// A catalogue place's English name when the app shows it in another language, so Spotlight finds either.
+    var englishName=""
+    /// A spot the person saved (`pin:`), rather than a catalogue park.
+    var isSpot:Bool { id.hasPrefix(ParkLibrary.spotPrefix) }
     var displayRepresentation:DisplayRepresentation {
-        DisplayRepresentation(title:"\(name)",subtitle:state.isEmpty ? nil : "\(state)",image:.init(systemName:darkSky ? "moon.stars" : "mountain.2"))
+        if isSpot { return DisplayRepresentation(title:"\(name)",subtitle:"Your spot",image:.init(systemName:"mappin.and.ellipse")) }
+        let place=Self.locality(state:state,country:country)
+        return DisplayRepresentation(title:"\(name)",subtitle:place.isEmpty ? nil : "\(place)",image:.init(systemName:darkSky ? "moon.stars" : "mountain.2"))
+    }
+    /// "CA" for a curated park, as before; "Catalonia, Spain" for a place abroad, the country in the reader's language.
+    static func locality(state:String,country:String)->String {
+        guard !country.isEmpty else { return state }
+        let name=Locale.current.localizedString(forRegionCode:country) ?? country
+        let region=state.replacingOccurrences(of:",",with:" · ")
+        return region.isEmpty || region==name ? name : "\(region), \(name)"
     }
     /// The state or states, also Spotlight's state field.
     @ComputedProperty(title:"State",indexingKey:\.stateOrProvince)
@@ -31,31 +49,114 @@ struct ParkEntity:IndexedEntity {
     @ComputedProperty(title:"Bortle class")
     var bortleClass:Int { bortle }
     init(id:String,name:String) { self.id=id; self.name=name }
-    init(_ park:Park) { id=park.id; name=park.shortName; state=park.state; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate }
+    init(_ park:Park) {
+        id=park.id; name=park.shortName; state=park.region; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate
+        if park.isCatalogPlace { country=park.countryCode; nationalPark=park.kind == .nationalPark; englishName=park.englishName.map(Park.shortened) ?? "" }
+    }
     /// Shared with `SpotlightIndexer`'s items, so the entity and the item describe the park alike.
-    var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle) }
-    static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0)->CSSearchableItemAttributeSet {
+    var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle,country:country,nationalPark:nationalPark,englishName:englishName) }
+    static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0,country:String="",nationalPark:Bool=true,englishName:String="")->CSSearchableItemAttributeSet {
         let attributes=CSSearchableItemAttributeSet(contentType:.text)
+        let place=locality(state:state,country:country)
         attributes.title=name
         attributes.displayName=name
-        attributes.contentDescription=String(localized:"Plan a dark-sky night at \(name), \(state).")
-        attributes.keywords=["stars","stargazing","national park","night sky","Milky Way",name,state]+(darkSky ? ["dark sky park"] : [])+(bortle>0 ? ["Bortle \(bortle)"] : [])
+        attributes.contentDescription=String(localized:"Plan a dark-sky night at \(name), \(place).")
+        let countryName=country.isEmpty ? [] : [Locale.current.localizedString(forRegionCode:country) ?? country]
+        // The English words stay beside the reader's own, so a search in either finds the place.
+        let english:[String]=["stars","stargazing"]+(nationalPark ? ["national park"] : [])+["night sky","Milky Way"]+(darkSky ? ["dark sky park"] : [])
+        var local:[String]=[String(localized:"stars"),String(localized:"stargazing")]
+        if nationalPark { local.append(String(localized:"national park")) }
+        local+=[String(localized:"night sky"),String(localized:"Milky Way")]
+        if darkSky { local.append(String(localized:"dark sky park")) }
+        var words:[String]=[]
+        for word in english+local+[name,englishName,state]+countryName where !word.isEmpty && !words.contains(word) { words.append(word) }
+        attributes.keywords=words+(bortle>0 ? ["Bortle \(bortle)"] : [])
         return attributes
     }
 }
 struct ParkQuery:EntityStringQuery {
-    func entities(for identifiers:[String]) async throws -> [ParkEntity] { try ParkData.load().filter{identifiers.contains($0.id)}.map(ParkEntity.init) }
-    /// Saved parks first (the ones people ask about), then the rest by name.
-    func suggestedEntities() async throws -> [ParkEntity] {
-        let saved=Set(SharedSettings.read()?.parks.map(\.id) ?? [])
-        return try ParkData.load().sorted { (saved.contains($0.id) ? 0 : 1, $0.shortName)<(saved.contains($1.id) ? 0 : 1, $1.shortName) }.map(ParkEntity.init)
+    /// Parks, followed places and any world catalogue place by its `wd:` id, in the order asked.
+    func entities(for identifiers:[String]) async throws -> [ParkEntity] {
+        let snapshot=SharedSettings.read(), library=try ParkLibrary.places(snapshot:snapshot)
+        var seen=Set<String>()
+        return identifiers.filter { seen.insert($0).inserted }
+            .compactMap { id in library.first { $0.id==id } ?? ParkLibrary.place(id,snapshot:snapshot) }.map(ParkEntity.init)
     }
-    func entities(matching string:String) async throws -> [ParkEntity] { try ParkData.load().filter{$0.matches(string)}.map(ParkEntity.init) }
+    /// Saved spots first, then followed places abroad and saved parks (the ones people ask about), then
+    /// the rest of the 63 by name. Never the whole world: a list of 3,400 helps no one choose.
+    func suggestedEntities() async throws -> [ParkEntity] { try ParkLibrary.suggested().map(ParkEntity.init) }
+    /// The parks and followed places that match, then the world catalogue's best matches (`ParkLibrary.search`).
+    func entities(matching string:String) async throws -> [ParkEntity] {
+        let known=try ParkLibrary.places().filter { $0.matches(string) }
+        let ids=Set(known.map(\.id))
+        return (known+ParkLibrary.search(string).filter { !ids.contains($0.id) }).map(ParkEntity.init)
+    }
+}
+/// The places Siri, Shortcuts and the widgets can name: the bundled parks, then the places the person
+/// follows that are not among them (saved spots, and world catalogue places), as the app last wrote
+/// them to the App Group's snapshot (`SavedSkySnapshot.parks` carries each one whole). Curated ids
+/// resolve exactly as before; a place no longer followed leaves the snapshot, and these lists, at the
+/// app's next update. Any catalogue place resolves by its `wd:` id and is found by search, in the app
+/// (which bundles `catalog.json`); the widget extension bundles no catalogue and knows only the followed ones.
+nonisolated enum ParkLibrary {
+    static let spotPrefix="pin:"
+    /// The followed spots in a snapshot, in its order.
+    static func spots(in snapshot:SavedSkySnapshot?)->[Park] { (snapshot?.parks ?? []).filter { $0.id.hasPrefix(spotPrefix) } }
+    /// The followed places that are not bundled parks: spots first, then catalogue places, each in the snapshot's order.
+    static func followed(in snapshot:SavedSkySnapshot?)->[Park] {
+        spots(in:snapshot)+(snapshot?.parks ?? []).filter(\.isCatalogPlace)
+    }
+    static func places(snapshot:SavedSkySnapshot?=SharedSettings.read(),bundle:Bundle = .main) throws -> [Park] {
+        let parks=try ParkData.load(bundle:bundle)
+        let known=Set(parks.map(\.id))
+        return parks+followed(in:snapshot).filter { !known.contains($0.id) }
+    }
+    /// One place by id: a park, a followed place, or (in the app) any world catalogue place.
+    static func place(_ id:String,snapshot:SavedSkySnapshot?=SharedSettings.read()) -> Park? {
+        if id.hasPrefix(spotPrefix) { return spots(in:snapshot).first { $0.id==id } }
+        if id.hasPrefix(Park.catalogPrefix) { return snapshot?.parks.first { $0.id==id } ?? catalog().first { $0.id==id } }
+        return (try? ParkData.load())?.first { $0.id==id }
+    }
+    /// Spots first, then followed places abroad, then saved parks, then every other park by name: the
+    /// order a park choice offers them.
+    static func suggested(snapshot:SavedSkySnapshot?=SharedSettings.read(),bundle:Bundle = .main) throws -> [Park] {
+        let saved=Set(snapshot?.parks.map(\.id) ?? [])
+        let parks=try ParkData.load(bundle:bundle).sorted { (saved.contains($0.id) ? 0 : 1, $0.shortName)<(saved.contains($1.id) ? 0 : 1, $1.shortName) }
+        let known=Set(parks.map(\.id))
+        return followed(in:snapshot).filter { !known.contains($0.id) }+parks
+    }
+    /// The world catalogue in this bundle (`CatalogData`, decoded once per process and shared with the
+    /// app's model); empty where it is not bundled (the widget extension).
+    static func catalog(bundle:Bundle = .main)->[Park] { (try? CatalogData.load(bundle:bundle)) ?? [] }
+    /// The catalogue places whose name, region or country matches, folded as the park list folds it
+    /// ("Albanya" finds Albanyà): the whole name first, then a name or word that begins with it, then
+    /// the rest; by name within each. At most `limit`.
+    static func search(_ text:String,limit:Int=25,bundle:Bundle = .main)->[Park] {
+        let needle=Park.folded(text)
+        guard !needle.isEmpty, limit>0 else { return [] }
+        var countries:[String:String]=[:]
+        func country(_ code:String)->String {
+            if let kept=countries[code] { return kept }
+            let folded=Park.folded(Locale.current.localizedString(forRegionCode:code) ?? code)
+            countries[code]=folded
+            return folded
+        }
+        let ranked:[(Park,Int)]=catalog(bundle:bundle).compactMap { place in
+            // Local and English names rank alike (a German "Eifel" or "Nationalpark Eifel" is found by either).
+            let names=place.searchNames.map(Park.folded)
+            if names.contains(needle) { return (place,0) }
+            if names.contains(where: { $0.hasPrefix(needle) }) { return (place,1) }
+            if names.contains(where: { $0.contains(" "+needle) }) { return (place,2) }
+            if place.matches(folded:needle) || country(place.countryCode).contains(needle) { return (place,3) }
+            return nil
+        }
+        return ranked.sorted { ($0.1,$0.0.name,$0.0.id)<($1.1,$1.0.name,$1.0.id) }.prefix(limit).map(\.0)
+    }
 }
 /// Opens a park in Nyx: a Spotlight result, a snippet's "Open in Nyx", or Shortcuts.
 struct OpenParkIntent:OpenIntent {
     static let title:LocalizedStringResource="Open park"
-    static let description=IntentDescription("Opens a national park in Nyx: its darkness score, Moon, sky and closures.")
+    static let description=IntentDescription("Opens a park or dark-sky place in Nyx: its darkness score, Moon and sky, and closures where Nyx can check them.")
     @Parameter(title:"Park") var target:ParkEntity
     init() {}
     init(target:ParkEntity) { self.target=target }

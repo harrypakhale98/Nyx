@@ -274,7 +274,7 @@ actor ParkStore: ParkProviding {
         var alerts: [String: [ParkAlert]] = [:], oldest: Date?
         for park in parks {
             guard let old=CacheDirectory.read(ParkEnrichment.self, name: "park-\(park.id)") else { continue }
-            alerts[park.apiCode]=old.alerts
+            if let code=park.nps { alerts[code]=old.alerts }
             oldest=min(oldest ?? old.updated, old.updated)
         }
         return oldest.map { ParkAlertsCache(updated: $0, alerts: alerts) }
@@ -292,7 +292,7 @@ actor ParkStore: ParkProviding {
         }
         guard Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: false) }
         guard backoff.allows(Self.host, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: true) }
-        let codes=Array(Set(parks.map(\.apiCode))).sorted(), ids=parks.map(\.id)
+        let codes=Array(Set(parks.compactMap(\.nps))).sorted(), ids=parks.map(\.id)
         let task=Task { () -> Bool in
             let ok=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
             self.alertsTask=nil
@@ -337,7 +337,7 @@ actor ParkStore: ParkProviding {
         guard network, Self.usable(key) else { return campgroundCache }
         while let running=campgroundsTask { await running.value }
         guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return campgroundCache }
-        let codes=Array(Set(parks.map(\.apiCode))).sorted()
+        let codes=Array(Set(parks.compactMap(\.nps))).sorted()
         let task=Task {
             await self.fetchCampgrounds(codes: codes, key: key)
             self.campgroundsTask=nil
@@ -435,10 +435,12 @@ actor ParkStore: ParkProviding {
         struct Time: Decodable { let timestart: String?; let timeend: String? }
         struct Event: Decodable { let id: String; let title: String; let datestart: String; let description: String; let tags: [String]?; let dates: [String]?; let times: [Time]?; let location: String? }
         struct Page: Decodable { let data: [Event]; let total: String? }
+        // Ranger programs are the National Park Service's: a place it does not run has none to ask for.
+        guard let code=park.nps else { return }
         let today=park.isoDay(clock())
         func page(_ number: Int) async -> Page? {
             // Events page with pageSize, which the server caps at 50 whatever is asked for.
-            await get(Page.self, url("events", [("parkCode", park.apiCode), ("dateStart", today), ("pageSize", String(Self.eventsPage)), ("pageNumber", String(number))]), key: key)
+            await get(Page.self, url("events", [("parkCode", code), ("dateStart", today), ("pageSize", String(Self.eventsPage)), ("pageNumber", String(number))]), key: key)
         }
         guard let first=await page(1) else { return }
         var events=first.data
@@ -513,14 +515,15 @@ nonisolated final class CachePreload: @unchecked Sendable {
         }
     }
     /// The parks within the chosen radius of the starting point, as `PlanModel` reads them from
-    /// the same settings (a place's coordinates, else the starting park's; 200 miles unless chosen).
-    static func homeArea(_ parks: [Park], defaults: UserDefaults = .standard) -> [Park] {
+    /// the same settings (a place's coordinates, else the starting park's; the locale's standard
+    /// reach unless chosen, `SearchRadius`).
+    static func homeArea(_ parks: [Park], defaults: UserDefaults = .standard, locale: Locale = .current) -> [Park] {
         struct Place: Decodable { let latitude: Double; let longitude: Double }
         let place=defaults.data(forKey: "homePlace").flatMap { try? JSONDecoder().decode(Place.self, from: $0) }
-        let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? "jotr") } ?? parks.first
+        let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? Park.defaultID) } ?? parks.first
         guard let latitude=place?.latitude ?? home?.latitude, let longitude=place?.longitude ?? home?.longitude else { return [] }
-        let miles=defaults.object(forKey: "radiusMiles") as? Double ?? 200
-        return parks.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=miles*1609.344 }
+        let reach=SearchRadius.meters(defaults, locale: locale)
+        return parks.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=reach }
     }
     /// Waits for the reads to finish (they began at launch, so usually they already have).
     func wait() -> Contents {

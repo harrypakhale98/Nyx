@@ -14,6 +14,11 @@ import WidgetKit
     private(set) var pinned: String?
     /// The dark-adaptation clock, if one is running; it survives relaunches for one night.
     private(set) var adaptation: AdaptationClock?
+    /// The reminders' permission as the last start found it, so a clock started from Siri or the
+    /// control (while the first-time question may still be up) reaches the open screen.
+    private(set) var reminderStatus: UNAuthorizationStatus?
+    /// "Update from iPhone": the last request and its answer, shown beside an old forecast.
+    private(set) var ask: IPhoneAsk?
     @ObservationIgnored private var skies: [String: SkyConditions] = [:]
     @ObservationIgnored private let receiver = WatchReceiver()
 
@@ -37,7 +42,31 @@ import WidgetKit
         WatchSky.save(context)
         publish()
     }
-    func park(_ id: String?) -> Park? { id.flatMap { id in parks.first { $0.id == id } } }
+    /// Asks Nyx on iPhone, when it can be reached, to refresh and hand over the context again
+    /// (`WatchRequest` on the iPhone). The answer comes at once; the context follows by the usual
+    /// path. The watch itself still makes no network request.
+    func askIPhone(at now: Date = .now) {
+        guard ask?.state != .asking else { return }
+        guard WCSession.isSupported(), WCSession.default.activationState == .activated else { ask = IPhoneAsk(.unreachable, at: now); return }
+        let session = WCSession.default
+        guard session.isReachable else {
+            ask = IPhoneAsk(session.iOSDeviceNeedsUnlockAfterRebootForReachability ? .locked : .unreachable, at: now)
+            return
+        }
+        ask = IPhoneAsk(.asking, at: now)
+        session.sendMessage(IPhoneAsk.message, replyHandler: { @Sendable reply in
+            let state = IPhoneAsk.state(reply: reply[IPhoneAsk.replyKey] as? String)
+            Task { @MainActor in self.answered(state) }
+        }, errorHandler: { @Sendable _ in
+            Task { @MainActor in self.answered(.unreachable) }
+        })
+    }
+    private func answered(_ state: IPhoneAsk.State) {
+        guard ask?.state == .asking else { return }
+        ask = IPhoneAsk(state, at: .now)
+    }
+    /// A bundled park, or a place the iPhone sent (a saved spot or a followed world catalogue place).
+    func park(_ id: String?) -> Park? { id.flatMap { WatchSky.place($0, in: parks, context: context) } }
     /// Red or not at `now`: Automatic follows the Sun at the park on Tonight.
     func nightVision(at now: Date) -> Bool { WatchSky.nightVision(palette, context: context, park: featured(at: now), at: now) }
     /// The Control Center control writes the palette from another process: read it again on return.
@@ -52,7 +81,9 @@ import WidgetKit
         let clock = AdaptationClock(start: now)
         adaptation = clock
         WatchSky.adaptationStart = now
-        return await AdaptationReminders.schedule(clock, now: now)
+        let status = await AdaptationReminders.schedule(clock, now: now)
+        reminderStatus = status
+        return status
     }
     func stopAdaptation() {
         adaptation = nil
@@ -105,6 +136,7 @@ import WidgetKit
         self.pinned = pinned
     }
     func debugSet(adaptation: AdaptationClock?) { self.adaptation = adaptation }
+    func debugSet(ask: IPhoneAsk?) { self.ask = ask }
     #endif
 }
 

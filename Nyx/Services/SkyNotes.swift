@@ -88,14 +88,24 @@ nonisolated enum SkyNotes {
 
     // MARK: Aurora
 
-    /// The eight Alaska parks, about August 20 to April 20, when nights are dark enough. Static:
-    /// Nyx does not forecast aurora (that would need another service).
-    static func aurora(park: Park, evening: Date) -> String? {
-        guard park.state == "AK" else { return nil }
-        let parts = park.calendar.dateComponents([.month, .day], from: evening)
-        let key = (parts.month ?? 1)*100+(parts.day ?? 1)
-        guard key >= 820 || key <= 420 else { return nil }
-        return String(localized: "Aurora season here runs from late August to mid-April. When it shows, it also brightens the sky. Nyx does not forecast aurora.")
+    /// Where aurora reaches, by geomagnetic latitude (`Geomagnetic.AuroraReach`), in either
+    /// hemisphere, on nights when the Sun gets at least 12° below the horizon (for Alaska, about
+    /// late August to mid-April). Static: Nyx does not forecast aurora (that would need another service).
+    static func aurora(park: Park, evening: Date, engine: AstronomyEngine = AstronomyEngine()) -> String? {
+        let reach = Geomagnetic.auroraReach(park)
+        guard reach != .none, lowestSun(park: park, evening: evening, engine: engine) <= -12 else { return nil }
+        let poleward = park.southern ? String(localized: "south") : String(localized: "north")
+        switch reach {
+        case .often: return String(localized: "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.")
+        case .active: return String(localized: "Aurora reaches here on active nights, usually low toward the \(poleward). When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.")
+        case .storms: return String(localized: "Aurora reaches here only during strong solar storms, low toward the \(poleward). It depends on the Sun's activity, and Nyx does not forecast aurora.")
+        case .none: return nil
+        }
+    }
+    /// The Sun's altitude at solar midnight, degrees: |φ + δ| − 90, with δ the Sun's declination at the night's middle.
+    static func lowestSun(park: Park, evening: Date, engine: AstronomyEngine = AstronomyEngine()) -> Double {
+        let dec = engine.equatorial(of: .sun, at: evening.addingTimeInterval(12*3600)).dec*180/Double.pi
+        return abs(park.latitude+dec)-90
     }
 
     // MARK: Satellites

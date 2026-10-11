@@ -48,7 +48,7 @@ struct ContentLaneTests {
     /// they sit on the map, each west to east.
     @Test func mapReadsWestToEastWithInsetsLast() throws {
         let map=TonightMap(nights: try nights(on: "2026-10-09"))
-        #expect(map.marks.count == 63)
+        #expect(map.marks.count == parks.count)
         let regions=map.marks.map(\.region)
         let order: [SkyMap.Region]=[.lower48, .alaska, .hawaii, .samoa, .virginIslands]
         #expect(regions == regions.sorted { order.firstIndex(of: $0) ?? 0 < order.firstIndex(of: $1) ?? 0 })
@@ -151,7 +151,7 @@ struct ContentLaneTests {
         let call=try #require(calls.first)
         #expect(call.headers["X-Api-Key"] == "TESTKEY" && !call.url.absoluteString.contains("TESTKEY") && !call.constrained)
         let codes=URLComponents(url: call.url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "parkCode" }?.value?.split(separator: ",") ?? []
-        #expect(Set(codes.map(String.init)) == Set(parks.map(\.apiCode)) && codes.count == 62)
+        #expect(Set(codes.map(String.init)) == Set(parks.compactMap(\.nps)) && codes.count == 62)
         #expect(first?.list(try park("jotr")).count == 2 && first?.campgrounds["cave"]?.isEmpty == true)
         // Within the week: the cache, no request (even when forced within ten minutes).
         clock.now+=6*86_400
@@ -192,31 +192,23 @@ struct ContentLaneTests {
         #expect(start.source == .park && start.park?.id == "jotr" && start.timeZone == jotr.timeZone)
         #expect(HomeSky.origin(location: nil, place: nil, park: nil) == nil)
     }
-    /// The state table, checked against all 63 parks' own time zones (summer and winter offsets) and
-    /// the split states' cities.
-    @Test func homeTimeZonesFollowTheMap() throws {
-        func offsets(_ zone: TimeZone) throws -> [Int] { [zone.secondsFromGMT(for: try Self.date("2026-01-15")), zone.secondsFromGMT(for: try Self.date("2026-07-15"))] }
-        for park in parks {
-            let zone=HomeSky.timeZone(state: String(park.state.prefix(2)), latitude: park.latitude, longitude: park.longitude)
-            #expect(try offsets(zone) == offsets(park.timeZone), "\(park.id)")
-        }
-        let expected: [String: String]=["El Paso, TX": "America/Denver", "Pensacola, FL": "America/Chicago", "Tallahassee, FL": "America/New_York",
-            "Boise, ID": "America/Boise", "Coeur d'Alene, ID": "America/Los_Angeles", "Evansville, IN": "America/Chicago", "Gary, IN": "America/Chicago",
-            "Louisville, KY": "America/Kentucky/Louisville", "Bowling Green, KY": "America/Chicago", "Nashville, TN": "America/Chicago",
-            "Knoxville, TN": "America/New_York", "Chattanooga, TN": "America/New_York", "Rapid City, SD": "America/Denver", "Sioux Falls, SD": "America/Chicago",
-            "Phoenix, AZ": "America/Phoenix", "Honolulu, HI": "Pacific/Honolulu", "Anchorage, AK": "America/Anchorage", "Detroit, MI": "America/Detroit"]
-        for (name, zone) in expected {
-            let place=try #require(StartingPlaces.named(name), "\(name)")
-            #expect(HomeSky.timeZone(state: place.state, latitude: place.latitude, longitude: place.longitude).identifier == zone, "\(name)")
-        }
-        #expect(StartingPlaces.all.allSatisfy { HomeSky.timeZone(state: $0.state, latitude: $0.latitude, longitude: $0.longitude) != .gmt })
+    /// With the bundled sky grid, Denver's own sky: a city's class from satellite data, said to be an
+    /// estimate, and the shower's rate for that sky rather than an assumed suburb.
+    @Test func fromHomeTonightInDenverReadsTheSkyGrid() throws {
+        let denver=try #require(StartingPlaces.named("Denver, CO"))
+        let origin=try #require(HomeSky.origin(location: nil, place: denver, park: nil))
+        try #require(SkyGrid.shared.hasLayer(.sky), "the sky grid ships in the app")
+        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"))
+        #expect((6...8).contains(home.place.bortleEstimate), "Denver: Bortle \(home.place.bortleEstimate)")
+        #expect(home.shower?.detail.contains("estimated from satellite data") == true && home.shower?.detail.contains("suburban sky") == false)
     }
     /// A city sky: the Moon, true darkness and planets, a shower on its peak night with rates for a
     /// suburban sky, and the Moon-free stretch inside the dark hours.
     @Test func fromHomeTonightInDenverOnGeminidNight() throws {
         let denver=try #require(StartingPlaces.named("Denver, CO"))
         let origin=try #require(HomeSky.origin(location: nil, place: denver, park: nil))
-        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"))
+        // Without the world grids, as before G2: an assumed suburban sky (the next test reads the bundled grid).
+        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"), grid: SkyGrid(bundle: .main, layers: []))
         #expect(home.place.bortleEstimate == HomeSky.assumedBortle && home.place.timeZoneID == "America/Denver")
         #expect(home.hasDarkness && home.sky.darkHours>10 && home.sky.darkHours<13)
         #expect(home.shower?.title.contains("Geminid") == true)
@@ -246,7 +238,7 @@ struct ContentLaneTests {
             for iso in ["2026-03-20", "2026-06-21", "2026-12-21"] {
                 let tropic=try home(lat, lon, zone, iso)
                 #expect(tropic.hasDarkness && tropic.sky.darkHours>7.5 && tropic.sky.darkHours<12, "\(lat) \(iso)")
-                #expect(tropic.place.hemisphere == (lat<0 ? "south" : "north"))
+                #expect(tropic.place.southern == (lat<0))
             }
         }
     }

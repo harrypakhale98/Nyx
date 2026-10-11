@@ -10,6 +10,8 @@ struct RootView:View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
     @Query private var saved:[SavedPark]
+    /// The person's own spots (G3), handed to the model before anything resolves a saved `pin:` id.
+    @Query private var spots:[SavedSpot]
     @Environment(\.modelContext) private var context
     @AppStorage("onboardingComplete") private var onboarded=false
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
@@ -116,9 +118,13 @@ struct RootView:View {
         // "Keep this night" needs the journal's store.
         .onAppear { KeepThisNight.container=context.container }
         .task {
+            // First: links, reminders and the saved-place update below resolve spots through the model.
+            model.setSpots(spots)
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
             NotificationRouter.shared.connect { route in openReminder(route) }
+            // Control Center's night-vision switch reaches the Live Activity and the watch from Nyx's process.
+            if DebugScenario.screen == nil { NightVisionFollowers.install(model) }
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
             DebugFollowing.install(model)
@@ -203,6 +209,8 @@ struct RootView:View {
         .onChange(of:model.homeID) { _,_ in model.savedSync.pushWatch(model) }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
+        // A spot saved, renamed or deleted: the model first, then the widget, the watch and reminders follow.
+        .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); Task { await updateSaved() } }
         .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
@@ -265,6 +273,12 @@ struct RootView:View {
         #if DEBUG
         switch screen {
         case "detail": if let park=model.home { ParkDetailView(park:park) }
+        // G3 captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
+        case "save-spot": NavigationStack { SaveSpotView(source: DebugScenario.state == "coordinates" ? .coordinates : .here) }
+        case "spot":
+            let spot=Place(spotID:"pin:00000000-0000-4000-8000-0000000000aa",name:"Pullout off Pinto Basin Road",latitude:33.92,longitude:-115.93,
+                           timeZoneID:"America/Los_Angeles",countryCode:"US",region:"California")
+            ParkDetailView(park:spot).onAppear { model.setSpots(places:[spot]) }
         case "breakdown": if let park=model.home { ScoreBreakdownView(night:model.night(park)).task { await model.refreshForecasts(watching:[park]) } }
         case "editor": JournalEditorView()
         case "entry": JournalDetailView(entry:JournalEntry(date:.now,parkID:model.homeID,notes:"The Milky Way stretched above the ridge. A quiet hour under the stars."))
@@ -371,6 +385,7 @@ struct RootView:View {
     /// The widget, the watch, Siri's park list and reminders follow the saved parks; the work is
     /// the model's (`SavedSkySync`), once per process however many windows are open.
     private func updateSaved() async {
+        model.setSpots(spots)
         await model.savedSync.update(model,parkIDs:saved.map(\.parkID))
     }
 }
@@ -401,7 +416,7 @@ private struct ParkSheet:View {
         .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)).nyxPresentation().nyxAccessibility()
     }
 }
-#Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true) }
+#Preview("Tab shell") { RootView().environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self,SavedSpot.self],inMemory:true) }
 
 /// The moment first light shows in DEBUG scenarios: two hours into true darkness tonight.
 enum FirstLightDebug {
@@ -422,9 +437,14 @@ private struct DebugWindow: ViewModifier {
 /// DEBUG captures: `-nyx-ax5` and `-nyx-bold`, on the root and on the full-screen sky (a cover does not inherit them).
 struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
+        #if DEBUG
         // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
         let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
         if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
+        #else
+        // Release: both switches are always off, so the app's root is never type-erased.
+        content
+        #endif
     }
 }
 /// The `assistive*` capture routes: the Assistive Access scene's palette (high contrast) and its own

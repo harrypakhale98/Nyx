@@ -18,6 +18,9 @@ struct StartingPointPicker: View {
     let choose:(Choice)->Void
     @State private var search=DebugScenario.place ?? ""
     @FocusState private var searchFocused:Bool
+    /// "Save a spot", open from here: empty, or with the town whose row asked for it.
+    @State private var savingSpot:SpotRequest?
+    struct SpotRequest: Identifiable { let id=UUID(); var place:StartingPlace? }
     var body: some View {
         let places=StartingPlaces.search(search,limit:12)
         let parks=model.parks.filter { search.isEmpty || $0.matches(search) }
@@ -29,24 +32,36 @@ struct StartingPointPicker: View {
                 Section { Button { dismiss(); nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:44,alignment:.leading) }.accessibilityLabel("Use my location") }.listRowBackground(palette.panel)
             }
             if search.isEmpty {
-                Section { Text("Search for your city or town, such as Chicago or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
+                Section { Text("Search for your city or town, such as Paris or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
             } else if !places.isEmpty {
                 Section("Cities and towns") {
-                    ForEach(places) { place in row(title:place.name,detail:StartingPlaces.stateNames[place.state] ?? place.state,selected:place==selectedPlace) { choose(.place(place)); dismiss() } }
+                    ForEach(places) { place in
+                        row(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() }
+                            // A town can be kept as a spot of its own too: scored and followed like a park.
+                            .contextMenu { Button("Save as a spot",systemImage:"mappin.and.ellipse") { savingSpot=SpotRequest(place:place) } }
+                            .accessibilityAction(named:Text("Save as a spot")) { savingSpot=SpotRequest(place:place) }
+                    }
                 }.listRowBackground(palette.panel)
             }
             if !parks.isEmpty {
-                Section("National parks") {
-                    ForEach(parks) { park in row(title:park.shortName,detail:park.state.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
+                Section("US national parks") {
+                    ForEach(parks) { park in row(title:park.shortName,detail:park.region.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
                 }.listRowBackground(palette.panel)
             } else if places.isEmpty {
                 Section { Text("No city, town or park by that name. Try a nearby larger city.").font(.subheadline).foregroundStyle(palette.muted) }.listRowBackground(palette.panel)
             }
+            // A place of the person's own, kept beside the parks (G3): from here, from coordinates or a town.
+            Section {
+                Button { savingSpot=SpotRequest(place:nil) } label:{ Label("Save a spot of your own",systemImage:"mappin.and.ellipse").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
+                    .foregroundStyle(palette.accent)
+            } footer:{ Text("A backyard, a pullout or a field you know, scored night by night like the parks. It stays on this iPhone.").foregroundStyle(palette.muted) }
+            .listRowBackground(palette.panel)
         }
         .nightForm()
         .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"City, town or park",enabled:!typeSize.isAccessibilitySize))
         .navigationTitle("Starting point").navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
+        .sheet(item:$savingSpot) { request in SaveSpotView(source:request.place == nil ? .here : .place,place:request.place,search:request.place == nil ? search : "").nyxPresentation() }
     }
     private func row(title:String,detail:String,selected:Bool,action:@escaping ()->Void)->some View {
         Button(action:action) {

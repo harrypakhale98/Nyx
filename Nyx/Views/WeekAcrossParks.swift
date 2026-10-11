@@ -146,10 +146,10 @@ struct WeekAcrossParksPanel: View {
 }
 #Preview("Week across parks") {
     let model=PlanModel()
-    let parks=model.ranked(model.nearby(latitude:nil,longitude:nil,radiusMiles:500))
+    let parks=model.ranked(model.nearby(latitude:nil,longitude:nil,radiusMeters:SearchRadius.wider()))
     NavigationStack {
         ScrollView {
-            WeekAcrossParksPanel(week:.make(parks.map { model.nights($0,from:model.tonight($0),count:7) }),reach:"within 500 mi of Joshua Tree").padding(24)
+            WeekAcrossParksPanel(week:.make(parks.map { model.nights($0,from:model.tonight($0),count:7) }),reach:"within \(SearchRadius.label(SearchRadius.wider())) of Joshua Tree").padding(24)
         }.background(Color.black)
     }.environment(model).preferredColorScheme(.dark)
 }

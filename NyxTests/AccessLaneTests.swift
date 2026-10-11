@@ -74,7 +74,7 @@ import Accessibility
         let zion=try park("zion"), tonight=try night(zion,"2026-10-10")
         let plain=ParkRow.spokenLabel(night:tonight,closure:nil)
         #expect(plain.hasPrefix(zion.shortName+". Darkness score \(tonight.score.value), \(tonight.score.band.label)."))
-        #expect(!plain.contains("Closure") && !plain.contains("  ") && !plain.contains(zion.state))
+        #expect(!plain.contains("Closure") && !plain.contains("  ") && !plain.contains(zion.region))
         let closed=ParkRow.spokenLabel(night:tonight,closure:"Kolob Canyons Road closed")
         #expect(closed.hasSuffix("Closure alert: Kolob Canyons Road closed"))
         let more=ParkRow.moreContent(night:tonight,closure:"Kolob Canyons Road closed",week:[tonight],stepFree:true)

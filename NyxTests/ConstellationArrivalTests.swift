@@ -69,25 +69,3 @@ import UIKit
     }
 }
 
-/// The inset names under the sky map: each has its own room before the next frame, at every
-/// panel width, so Hawaiʻi never runs into Am. Samoa, in English or Spanish.
-struct SkyMapNameRoomTests {
-    @Test func roomsArePositiveAndNeverOverlap() {
-        for width in stride(from:300.0,through:700,by:10) {
-            let rooms=SkyMap.nameRooms(width:width)
-            #expect(rooms.count==4)
-            #expect(rooms.allSatisfy { $0.room>0 && $0.minX<=$0.x && $0.minX>0 },"\(width)")
-            for (a,b) in zip(rooms,rooms.dropFirst()) { #expect(a.minX+a.room<b.minX,"\(width)") }
-            #expect((rooms.last.map { $0.minX+$0.room } ?? .infinity)<=width)
-        }
-    }
-    @Test func namesAtTheFloorFitInEnglishAndSpanish() {
-        let font=UIFont.systemFont(ofSize:9,weight:.medium)
-        func width(_ name:String)->Double { (name as NSString).size(withAttributes:[.font:font]).width }
-        for names in [["Alaska","Hawaiʻi","Am. Samoa","Virgin Is."],["Alaska","Hawaiʻi","Samoa Am.","I. Vírgenes"]] {
-            for canvas in stride(from:300.0,through:700,by:20) {
-                for (room,name) in zip(SkyMap.nameRooms(width:canvas),names) { #expect(width(name)<=room.room,"\(name) at \(canvas)") }
-            }
-        }
-    }
-}

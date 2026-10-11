@@ -1,9 +1,30 @@
 import Foundation
+import Synchronization
 import Observation
 import CoreLocation
 
 @MainActor @Observable final class PlanModel {
+    /// The catalogue: the bundled places, the same for everyone. Saved spots are never in it (`spots`).
     let parks: [Park]
+    /// Each park's place in `parks` (the first, should an id repeat), for `park(_:)`.
+    private let parkIndex: [String:Int]
+    /// The places the person saved themselves (`SavedSpot`, G3), scored, forecast and followed like
+    /// parks. Set from the store by `setSpots`; `park(_:)` finds them by their `pin:` id.
+    private(set) var spots: [Park] = []
+    @ObservationIgnored private var spotIndex: [String:Int] = [:]
+    /// Every place Nyx scores here: the catalogue, then the saved spots.
+    var places: [Park] { parks+spots }
+    /// The world catalogue (`catalog.json`, G4): national parks worldwide and certified dark-sky places,
+    /// never one of the 63 curated parks. Empty until `prepareCatalog` has read it off the main thread
+    /// (it starts at launch); screens simply show more once it is ready, and never wait for it.
+    private(set) var catalog: [Park] = []
+    /// The catalogue's lookup, spatial index, search terms and forecast regions, built with it.
+    @ObservationIgnored private var placeCatalog=PlaceCatalog.empty
+    @ObservationIgnored private var catalogTask: Task<Void,Never>?
+    /// True once the catalogue has been read (even if it came back empty).
+    @ObservationIgnored private(set) var catalogIsReady=false
+    /// The curated parks' folded search terms, made on the first search.
+    @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
     let loadError: Bool
     private let astronomy: any AstronomyProviding
     private let scoring: any ScoreProviding
@@ -11,18 +32,31 @@ import CoreLocation
     private let parkStore: any ParkProviding
     private let detailService: any DetailProviding
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
-    var forecasts: [String:Forecast] = [:] { didSet { outlookCache=[:] } }
+    var forecasts: [String:Forecast] = [:] { didSet { forecastsChanged() } }
     /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
     /// With "Smoke and haze" off in Your privacy, the air-quality host's data is not used at all:
     /// no aerosol series is kept here, so no score, caveat or snapshot counts cached smoke.
     var details: [String:ForecastDetail] = [:] {
         didSet {
             if !smokeEnabled, details.values.contains(where:{ $0.air != nil }) { details=Self.withoutAir(details) }
-            outlookCache=[:]
+            forecastsChanged()
         }
     }
+    /// Everything worked out from the forecasts and their detail is let go when either changes.
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:] }
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
+    /// Nights already scored, by park and evening: the park list and a month ask for the same
+    /// nights many times a pass. A night is a pure function of its park, sky, forecast, detail and
+    /// scoring; "now" enters only as whether the model spread is recent (`HourlySeries.usable`),
+    /// kept beside each night and checked on every read. Cleared whenever forecasts or detail change.
+    @ObservationIgnored private var nightMemo: [String:[Date:(recent:Bool,night:Night)]] = [:]
+    /// Each park's tonight for the moment it was judged from (`today`), with its evening.
+    @ObservationIgnored private var tonightMemo: [String:(at:Date,park:Park,night:Date,evening:Date)] = [:]
+    /// Journal entries' scores, by entry, night and park (`loggedNights`). The score never reads
+    /// "now", so only a change of forecasts or detail clears them.
+    @ObservationIgnored private var journalScores: [JournalScoreKey:Int?] = [:]
+    nonisolated private struct JournalScoreKey: Hashable, Sendable { let id:UUID; let date:Date; let park:String }
     /// What's up each night. Astronomy only, so never invalidated by a forecast.
     @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
     @ObservationIgnored private var eventCache: [SkyKey:WhatsUp.Events] = [:]
@@ -66,9 +100,13 @@ import CoreLocation
     /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
     /// asks, and its answer is labelled an example. Anyone who chose a park before has.
     var startChosen: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(startChosen,forKey:"startChosen") } } }
-    var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
+    /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
+    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters) } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
+    /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
+    /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
+    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
     var smokeEnabled: Bool {
         didSet {
             if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") }
@@ -110,35 +148,48 @@ import CoreLocation
     /// (at its sunrise or local noon), so open screens move on without constant redraws.
     private(set) var clock=Date.now
     func tick(_ now:Date = .now) {
-        guard parks.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
+        // A saved spot far from every park (another continent) turns its night over at its own sunrise.
+        guard (places+viewedCatalog).contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
         clock=now
         trimPastNights()
     }
+    /// Catalogue places whose night has been asked for: their nights turn over at their own sunrise,
+    /// on any continent, so `tick` watches them as it watches the curated parks and the spots.
+    private var viewedCatalog:[Park] { tonightMemo.values.map(\.park).filter(\.isCatalogPlace) }
     /// Once a night turns over, the kept astronomy, outlooks and what's-up of nights that have
     /// passed are let go (a screen that shows one again simply works it out again).
     private func trimPastNights() {
-        let tonights=Dictionary(parks.map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
+        let tonights=Dictionary((places+viewedCatalog).map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
         func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
         for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
         for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
+        for (id,nights) in nightMemo { nightMemo[id]=nights.filter { current(id,$0.key) } }
         skyCache=skyCache.filter { current($0.key.park,$0.key.night) }
         eventCache=eventCache.filter { current($0.key.park,$0.key.night) }
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
          detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
-        do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
+        let loaded:[Park]
+        do { loaded=try ParkData.load(); loadError=false } catch { loaded=[]; loadError=true }
+        parks=loaded
+        parkIndex=Dictionary(loaded.indices.map { (loaded[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
         // (A registered default: anyone who chose Name keeps it.)
         UserDefaults.standard.register(defaults:["parksByScore":true])
-        homeID=UserDefaults.standard.string(forKey:"homePark") ?? "jotr"
+        homeID=UserDefaults.standard.string(forKey:"homePark") ?? Park.defaultID
         homePlace=UserDefaults.standard.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
         startChosen=UserDefaults.standard.object(forKey:"startChosen") as? Bool ?? (UserDefaults.standard.string(forKey:"homePark") != nil)
-        radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
+        // A radius kept in miles before G1 is written once as metres, exactly.
+        if DebugScenario.screen == nil { SearchRadius.migrate() }
+        radiusMeters=SearchRadius.meters()
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
+        spotForecastsEnabled=SpotForecast.isOn()
         smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
+        // The world catalogue is read in the background from the first moment; nothing waits for it.
+        prepareCatalog()
         // The last forecasts and park updates are read by the services, off the main actor, while
         // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
         if DebugScenario.screen == nil {
@@ -166,17 +217,143 @@ import CoreLocation
         if let park=DebugScenario.park { homeID=park }
         #endif
     }
-    var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
+    var home: Park? { park(homeID) ?? parks.first }
     /// The park-local night in progress (or about to begin) right now.
-    func tonight(_ park:Park)->Date { park.currentNight(at:today) }
-    func park(_ id:String)->Park? { parks.first { $0.id==id } }
+    func tonight(_ park:Park)->Date { tonightEntry(park).night }
+    /// Tonight and its evening, worked out once per park for each moment `today` stands at (it
+    /// moves only when some park's night turns over). Reads `today` every time, as before.
+    private func tonightEntry(_ park:Park)->(night:Date,evening:Date) {
+        let at=today
+        if let kept=tonightMemo[park.id], kept.at==at, kept.park==park { return (kept.night,kept.evening) }
+        let night=park.currentNight(at:at), evening=park.evening(night)
+        tonightMemo[park.id]=(at,park,night,evening)
+        return (night,evening)
+    }
+    /// A curated park by its id, a world catalogue place by its `wd:` id (once the catalogue is read),
+    /// or a saved spot by its `pin:` id. Curated ids read neither, so screens that show only parks do
+    /// not redraw when a spot is saved or the catalogue arrives.
+    func park(_ id:String)->Park? {
+        if let index=parkIndex[id] { return parks[index] }
+        if id.hasPrefix(Park.catalogPrefix) {
+            // Read so a screen showing a catalogue place redraws once the catalogue is ready.
+            _=catalog.isEmpty
+            return placeCatalog.place(id)
+        }
+        guard id.hasPrefix(SavedSpots.prefix) else { return nil }
+        return spotIndex[id].flatMap { spots.indices.contains($0) ? spots[$0] : nil }
+    }
+    // MARK: The world catalogue (G4)
+
+    /// Starts reading the world catalogue off the main thread, once: decoding about 3,400 places,
+    /// their 1° spatial index, search terms and forecast regions. Called at launch; safe to call again.
+    func prepareCatalog() {
+        guard catalogTask == nil else { return }
+        let curated=Set(parks.map(\.id))
+        catalogTask=Task { [weak self] in
+            let built=await Task.detached(priority:.userInitiated) { PlaceCatalog.bundled(excluding:curated) }.value
+            self?.install(built)
+        }
+    }
+    /// Waits until the catalogue is ready (at once if it is). Paths that resolve saved `wd:` ids for
+    /// the widgets, the watch and reminders wait here, so a followed catalogue place is never dropped.
+    func catalogReady() async {
+        prepareCatalog()
+        await catalogTask?.value
+    }
+    private func install(_ built:PlaceCatalog) {
+        placeCatalog=built
+        catalogIsReady=true
+        catalog=built.places
+        // A journal entry at a catalogue place read before the catalogue was there is scored again.
+        journalScores=[:]
+    }
+    /// Curated parks, catalogue places and saved spots within `radiusMeters` (great-circle) of a point,
+    /// nearest first (ties by id). The catalogue is found through its 1° buckets, so a radius looks at
+    /// a few dozen cells, never all 3,400 places. Without the catalogue yet, the parks and spots.
+    func places(near latitude:Double,longitude:Double,radiusMeters:Double)->[Park] {
+        _=catalog.isEmpty
+        guard latitude.isFinite, longitude.isFinite, radiusMeters>=0 else { return [] }
+        let local=(parks+spots).filter { $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMeters }
+        var seen=Set<String>()
+        return (local+placeCatalog.nearby(latitude:latitude,longitude:longitude,radiusMeters:radiusMeters))
+            .filter { seen.insert($0.id).inserted }
+            .map { ($0,$0.distanceMeters(latitude:latitude,longitude:longitude)) }
+            .sorted { ($0.1,$0.0.id)<($1.1,$1.0.id) }.map(\.0)
+    }
+    /// Curated parks and catalogue places whose name, region or country (in the reader's language)
+    /// matches `query`, folded as the park list folds it ("Iguazu" finds Iguazú). Ranked: the whole
+    /// name, a name that begins with it, a word of the name that does, the name containing it, then
+    /// region or country the same way; on a tie a curated park first, then by name. Empty for an empty query.
+    func searchPlaces(_ query:String,limit:Int=50)->[Park] {
+        _=catalog.isEmpty
+        let needle=Park.folded(query)
+        guard !needle.isEmpty, limit>0 else { return [] }
+        if curatedTerms == nil { curatedTerms=parks.map { PlaceCatalog.Terms($0) } }
+        let curated=zip(parks,curatedTerms ?? []).compactMap { park,terms in terms.rank(needle).map { (park,$0) } }
+        let found=curated+placeCatalog.search(needle)
+        return found.sorted { a,b in
+            if a.1 != b.1 { return a.1<b.1 }
+            if a.0.curated != b.0.curated { return a.0.curated }
+            return (a.0.name,a.0.id)<(b.0.name,b.0.id)
+        }.prefix(limit).map(\.0)
+    }
+    /// Forecasts for these places, as `refreshForecasts(watching:)`: the curated parks' request as it
+    /// always was, saved spots' rounded request, and for catalogue places their whole 10° tiles
+    /// (`CatalogForecast.Regions`), never a place alone and never the device's position.
+    func refreshForecasts(for places:[Park],force:Bool=false) async { await refreshForecasts(watching:places,force:force) }
+    /// The trip planner's candidates: every place within the radius (curated parks, catalogue places,
+    /// saved spots), at most `TripPlanner.maxCandidates` of them (`TripPlanner.limited`), sorted by id.
+    func tripCandidates(latitude:Double,longitude:Double,radiusMeters:Double,drivableOnly:Bool=false)->[Park] {
+        TripPlanner.limited(TripPlanner.candidates(places(near:latitude,longitude:longitude,radiusMeters:radiusMeters),latitude:latitude,longitude:longitude,
+                                                   radiusMeters:radiusMeters,drivableOnly:drivableOnly),latitude:latitude,longitude:longitude)
+    }
+    /// The saved spots, from the store (call it whenever they change). A spot new to this launch
+    /// gets its cached forecast at once; a spot deleted is forgotten here, along with its forecast.
+    func setSpots(_ records:[SavedSpot]) { setSpots(places:records.sorted { $0.createdAt<$1.createdAt }.map { Place(spot:$0) }) }
+    func setSpots(places:[Park]) {
+        guard places != spots else { return }
+        let before=Set(spots.map(\.id)), now=Set(places.map(\.id))
+        spots=places
+        spotIndex=Dictionary(places.indices.map { (places[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        for id in before.subtracting(now) {
+            forecasts[id]=nil; staleForecasts.remove(id)
+            conditions[id]=nil; tonightMemo[id]=nil
+        }
+        let added=places.filter { !before.contains($0.id) }
+        guard !added.isEmpty, DebugScenario.screen == nil else { return }
+        let weather=self.weather
+        Task { [weak self] in
+            await self?.hydration?.value
+            let cached=await weather.spotForecasts(for:added,network:false,force:false)
+            guard let self else { return }
+            for (id,forecast) in cached where self.spotIndex[id] != nil && self.forecasts[id] == nil { self.forecasts[id]=forecast }
+        }
+    }
     func night(_ park:Park,on date:Date?=nil)->Night {
-        let evening=park.evening(date ?? tonight(park))
+        let evening=date.map(park.evening) ?? tonightEntry(park).evening
+        // Read on every call, kept or not, so a screen still redraws when either changes (the memo is not observed).
+        let forecast=forecasts[park.id], detail=details[park.id], now=present
+        let recent=detail?.models?.usable(now:now) == true
+        if let kept=nightMemo[park.id]?[evening], kept.recent==recent, kept.night.park==park { return kept.night }
         let sky:SkyConditions
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
         }
-        return NightPlanner.night(park:park,sky:sky,forecast:forecasts[park.id],detail:details[park.id],now:present,scoring:scoring)
+        let night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now,scoring:scoring)
+        nightMemo[park.id,default:[:]][evening]=(recent,night)
+        return night
+    }
+    /// A journal entry's score at its park, kept per entry, night and park (`loggedNights`). Nil
+    /// for a park Nyx does not know. Reads the forecasts and detail as `night(_:on:)` would.
+    func journalScore(id:UUID,date:Date,parkID:String)->Int? {
+        let key=JournalScoreKey(id:id,date:date,park:parkID)
+        if let kept=journalScores[key] {
+            if kept != nil { _=forecasts[parkID]; _=details[parkID] }
+            return kept
+        }
+        let score=park(parkID).map { night($0,on:date).score.value }
+        journalScores[key]=score
+        return score
     }
     /// What the forecast says around the score for one night: model agreement (with the score the
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
@@ -269,10 +446,10 @@ import CoreLocation
     /// forecast that failed (`NightPlanner.beyondForecast`).
     func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:present) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
-    func nearby(latitude:Double?,longitude:Double?,radiusMiles:Double?=nil)->[Park] {
+    func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {
         guard let origin else { return [] }
-        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, miles=radiusMiles ?? self.radiusMiles
-        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=miles*1609.344 }
+        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, reach=radiusMeters ?? self.radiusMeters
+        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=reach }
     }
     /// Where distances are measured from without "Near me": the chosen place, else the starting park.
     var origin:(latitude:Double,longitude:Double)? { homePlace.map { ($0.latitude,$0.longitude) } ?? home.map { ($0.latitude,$0.longitude) } }
@@ -284,8 +461,16 @@ import CoreLocation
     /// (the sky behind the app, the calendar's first park, the widget before anything is saved).
     func choose(_ place:StartingPlace) {
         homePlace=place; startChosen=true
-        if let nearest=Self.nearestPark(to:place,in:parks) { homeID=nearest.id }
+        let curated=Self.nearestPark(to:place,in:parks)
+        if let curated { homeID=curated.id }
+        // Far from every curated park (abroad), the nearest world catalogue place is the home park
+        // instead. Within reach of one, the curated park stays, as before the catalogue.
+        guard curated.map({ place.distanceMeters(to:$0)>Self.curatedReach }) ?? true else { return }
+        let local=Self.nearestPark(to:place,in:placeCatalog.nearby(latitude:place.latitude,longitude:place.longitude,radiusMeters:2*Self.curatedReach))
+        if let local, curated.map({ place.distanceMeters(to:local)<place.distanceMeters(to:$0) }) ?? true { homeID=local.id }
     }
+    /// How far a starting place may be from the nearest curated park and still take it as its home park.
+    nonisolated static let curatedReach:Double=500_000
     /// The park closest to a place, straight-line.
     nonisolated static func nearestPark(to place:StartingPlace,in parks:[Park])->Park? {
         parks.min { place.distanceMeters(to:$0)<place.distanceMeters(to:$1) }
@@ -331,7 +516,9 @@ import CoreLocation
         if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
     }
     /// Always asks for all 63 parks, never only those near the device: it costs the same request,
-    /// and a list of nearby parks would tell the forecast service roughly where you are.
+    /// and a list of nearby parks would tell the forecast service roughly where you are. Saved spots
+    /// follow in a separate request with rounded coordinates, behind their own switch as well. World
+    /// catalogue places among `parks` are asked for by their whole 10° tiles (`CatalogForecast`).
     func refreshForecasts(watching parks:[Park],force:Bool=false) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
         if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil; details[park.id]=nil }; return }
@@ -342,8 +529,30 @@ import CoreLocation
         #endif
         await hydration?.value
         let network=weatherEnabled && live
-        let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
+        var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        // Saved spots in a request of their own, rounded to 0.1°, never mixed into the parks' (`SpotForecast`).
+        let spots=self.spots
+        if !spots.isEmpty {
+            let spotNetwork=network && spotForecastsEnabled
+            let ofSpots=await weather.spotForecasts(for:spots,network:spotNetwork,force:force)
+            for spot in spots where spotIndex[spot.id] != nil && forecasts[spot.id]?.updated != ofSpots[spot.id]?.updated { forecasts[spot.id]=ofSpots[spot.id] }
+            if spotNetwork { fresh.merge(ofSpots) { park,_ in park } }
+        }
+        // World catalogue places by whole tiles (`CatalogForecast.Regions`), the same switch and host
+        // as the parks: never one place alone, never the device's position.
+        var askedCatalog=Set<String>()
+        if parks.contains(where:\.isCatalogPlace) {
+            await catalogReady()
+            let requests=placeCatalog.regions.plan(wanted:parks)
+            askedCatalog=Set(requests.joined().map(\.id))
+            let ofCatalog=await weather.catalogForecasts(requests,network:network,force:force)
+            // One assignment for the whole tile, so the kept nights are let go once, not once a place.
+            var updated=forecasts, changed=false
+            for (id,forecast) in ofCatalog where updated[id]?.updated != forecast.updated { updated[id]=forecast; changed=true }
+            if changed { forecasts=updated }
+            if network { fresh.merge(ofCatalog) { park,_ in park } }
+        }
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
         if !smokeEnabled { await detailService.forgetAir() }
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
@@ -354,7 +563,9 @@ import CoreLocation
         exportWatchContext()
         #endif
         guard network else { return }
-        for park in parks {
+        // A spot whose forecasts are switched off is not "stale": it was never asked about.
+        // Nor is a catalogue place beyond this refresh's budget (`CatalogForecast.maxPointsPerRefresh`).
+        for park in parks where (spotForecastsEnabled || !park.isSavedSpot) && (!park.isCatalogPlace || askedCatalog.contains(park.id)) {
             if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }
@@ -402,7 +613,7 @@ import CoreLocation
     /// One park's update as the screens read it: its alerts from the shared request, ranked, and
     /// its programs if its page has asked for them.
     private func rebuild(_ park:Park) {
-        guard let cache=alertsCache, let alerts=cache.alerts[park.apiCode] else { return }
+        guard let cache=alertsCache, let code=park.nps, let alerts=cache.alerts[code] else { return }
         let today=park.isoDay(Date.now), shown=programs[park.id]
         enrichments[park.id]=ParkEnrichment(updated:cache.updated,alerts:AlertRanking.ranked(alerts),programs:(shown?.programs ?? []).filter { $0.date>=today },description:nil,programsUpdated:shown?.updated)
     }
@@ -435,6 +646,96 @@ import CoreLocation
         guard let data=enrichments[park.id], closure(park) == nil, !data.alerts.contains(where:{ $0.kind == .danger }) else { return nil }
         if data.alerts.isEmpty { return [String(localized:"No alerts listed"),String(localized:"confirm access before you go")] }
         return [String(localized:"No closures listed"),String(localized:"check alerts before you go")]
+    }
+}
+/// The world catalogue as the planner reads it, built once off the main thread (`prepareCatalog`):
+/// the places in file order, a lookup by id, a spatial index of 1° cells, folded search terms and
+/// the forecast regions (`CatalogForecast.Regions`).
+nonisolated struct PlaceCatalog: Sendable {
+    let places: [Park]
+    let regions: CatalogForecast.Regions
+    private let byID: [String: Int]
+    private let cells: [Cell: [Int]]
+    private let terms: [Terms]
+    static let empty=PlaceCatalog([])
+    /// The bundled catalogue without the curated parks, built once per process (about 60 ms on a
+    /// recent Mac: 20 to decode, 40 to fold the search terms) and kept: every model shares it.
+    static func bundled(excluding curated: Set<String>) -> PlaceCatalog {
+        if let kept=store.withLock({ $0 }), kept.excluded == curated { return kept.catalog }
+        let built=PlaceCatalog(((try? CatalogData.load()) ?? []).filter { !curated.contains($0.id) })
+        // A failed read (no file) is not kept, so a later model tries again.
+        if !built.places.isEmpty { store.withLock { $0=(curated,built) } }
+        return built
+    }
+    private static let store=Mutex<(excluded: Set<String>, catalog: PlaceCatalog)?>(nil)
+    /// One degree of latitude and longitude: rows −90…89, columns −180…179.
+    nonisolated struct Cell: Hashable, Sendable {
+        let row: Int
+        let column: Int
+        init(row: Int, column: Int) { self.row=row; self.column=Cell.wrap(column) }
+        init(latitude: Double, longitude: Double) {
+            self.init(row: min(89, max(-90, Int(latitude.rounded(.down)))), column: Int(longitude.rounded(.down)))
+        }
+        static func wrap(_ column: Int) -> Int { ((column+180)%360+360)%360-180 }
+    }
+    init(_ places: [Park], locale: Locale = .current) {
+        var seen=Set<String>()
+        let unique=places.filter { $0.latitude.isFinite && $0.longitude.isFinite && seen.insert($0.id).inserted }
+        self.places=unique
+        byID=Dictionary(unique.indices.map { (unique[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        var cells: [Cell: [Int]]=[:]
+        for (index,place) in unique.enumerated() { cells[Cell(latitude: place.latitude, longitude: place.longitude),default:[]].append(index) }
+        self.cells=cells
+        terms=unique.map { Terms($0, locale: locale) }
+        regions=CatalogForecast.Regions(unique)
+    }
+    func place(_ id: String) -> Park? { byID[id].map { places[$0] } }
+    /// The places within `radiusMeters` (great-circle) of a point, in file order: only the 1° cells the
+    /// circle can reach are read (every column near a pole or for a radius past a quarter of the Earth).
+    func nearby(latitude: Double, longitude: Double, radiusMeters: Double) -> [Park] {
+        guard !places.isEmpty, latitude.isFinite, longitude.isFinite, radiusMeters.isFinite, radiusMeters>=0 else { return [] }
+        let angle=radiusMeters/6_371_008.8, degrees=angle*180 / .pi+1e-6
+        let rows=Int(max(-90, latitude-degrees).rounded(.down))...Int(min(89.999_999, latitude+degrees).rounded(.down))
+        let ratio=sin(min(angle, .pi/2))/cos(latitude * .pi/180)
+        let columns: [Int]
+        if angle >= .pi/2 || latitude+degrees >= 90 || latitude-degrees <= -90 || !(ratio<1) {
+            columns=Array(-180...179)
+        } else {
+            let span=asin(ratio)*180 / .pi+1e-6
+            let low=Int((longitude-span).rounded(.down)), high=Int((longitude+span).rounded(.down))
+            columns=high-low >= 359 ? Array(-180...179) : Array(Set((low...high).map(Cell.wrap)))
+        }
+        var found: [Int]=[]
+        for row in rows { for column in columns { if let indices=cells[Cell(row: row, column: column)] { found += indices } } }
+        return found.sorted().map { places[$0] }.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=radiusMeters }
+    }
+    /// Every place matching an already folded query, with its rank (`Terms.rank`).
+    func search(_ needle: String) -> [(Park, Int)] {
+        guard !needle.isEmpty else { return [] }
+        return zip(places, terms).compactMap { place, terms in terms.rank(needle).map { (place,$0) } }
+    }
+    /// A place's name (and short name and aliases), region and country (in the reader's language), folded once.
+    /// A place shown in the app's language is found by its English name and region too (`Place.searchNames`).
+    nonisolated struct Terms: Sendable {
+        let names: [String]
+        let others: [String]
+        init(_ place: Park, locale: Locale = .current) {
+            names=Array(Set(place.searchNames+(Park.aliases[place.id] ?? [])).map(Park.folded).filter { !$0.isEmpty }).sorted()
+            let country=place.countryCode.isEmpty ? nil : locale.localizedString(forRegionCode: place.countryCode)
+            others=(place.searchRegions+(country.map { [$0] } ?? [])).map(Park.folded).filter { !$0.isEmpty }
+        }
+        /// 0 the whole name, 1 a name beginning with the query, 2 a word of the name beginning with it,
+        /// 3 the name containing it; 4 to 7 the same for the region or country; nil for no match.
+        func rank(_ needle: String) -> Int? {
+            func tier(_ terms: [String]) -> Int? {
+                if terms.contains(needle) { return 0 }
+                if terms.contains(where: { $0.hasPrefix(needle) }) { return 1 }
+                if terms.contains(where: { $0.contains(" "+needle) }) { return 2 }
+                if terms.contains(where: { $0.contains(needle) }) { return 3 }
+                return nil
+            }
+            return tier(names) ?? tier(others).map { $0+4 }
+        }
     }
 }
 @MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {

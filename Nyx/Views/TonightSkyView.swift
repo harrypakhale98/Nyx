@@ -411,7 +411,7 @@ struct BortleFigure: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @State private var level=Double(DebugScenario.number("-nyx-bortle") ?? 3)
-    private static let fallback:Park?=(try? ParkData.load())?.first { $0.id=="jotr" }
+    private static let fallback:Park?=(try? ParkData.load())?.first { $0.id==Park.defaultID }
     private var park: Park? { home ?? Self.fallback }
     /// A summer night near new moon (July 15, 2026), with the Milky Way's core in the south.
     static let summer=Date(timeIntervalSince1970:1_784_116_800)
@@ -432,7 +432,7 @@ struct BortleFigure: View {
     private var shownClass: Int { Int(level.rounded()) }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
-            Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(.uppercase).kerning(1.6)
+            Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(Lettering.spaced ? .uppercase : nil).kerning(1.6)
             if let park {
                 PanoramaCanvas(sky:Self.sky(park),options:Self.options(park,bortle:level))
                     .frame(height:260)

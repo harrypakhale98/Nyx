@@ -67,38 +67,34 @@ struct FieldActivityFace: View {
     }
 }
 
-/// A field-mode alarm's own Live Activity, shown while it is snoozed. Calm: a title and the time left.
+/// A field-mode alarm's own Live Activity, shown while it is snoozed (or paused, or ringing).
+/// Calm: the title, what the alarm is doing at which park, and the time. In the red the alarm
+/// was set with; its small family on Apple Watch's Smart Stack and CarPlay.
 struct FieldAlarmLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for:AlarmAttributes<FieldAlarmMetadata>.self) { context in
-            HStack {
-                VStack(alignment:.leading,spacing:4) {
-                    Text(context.attributes.presentation.alert.title).font(.system(.headline,design:.serif))
-                    if let park=context.attributes.metadata?.parkName { Text(park).font(.caption) }
-                }
-                Spacer()
-                countdown(context.state).font(.system(.title2,design:.serif)).monospacedDigit()
-            }
-            .foregroundStyle(context.attributes.tintColor).padding(16).activityBackgroundTint(Color.black.opacity(0.88))
+            FieldAlarmFace(attributes:context.attributes,state:context.state).activityBackgroundTint(Color.black.opacity(0.88))
         } dynamicIsland: { context in
-            DynamicIsland {
+            let tint=context.attributes.tintColor, status=FieldAlarmStatus(context.state.mode)
+            let presentation=context.attributes.presentation
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Text(context.attributes.presentation.alert.title).font(.subheadline).lineLimit(2).foregroundStyle(context.attributes.tintColor)
+                    Text(presentation.alert.title).font(.subheadline).lineLimit(2).foregroundStyle(tint)
                         .dynamicIsland(verticalPlacement:.belowIfTooWide)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    countdown(context.state).monospacedDigit().frame(maxWidth:90,alignment:.trailing).foregroundStyle(context.attributes.tintColor)
+                    FieldAlarmClock(status:status).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth:90,alignment:.trailing).foregroundStyle(tint)
                 }
-            } compactLeading: { alarmSymbol.foregroundStyle(context.attributes.tintColor) }
-              compactTrailing: { countdown(context.state).monospacedDigit().frame(maxWidth:52).foregroundStyle(context.attributes.tintColor) }
-              minimal: { alarmSymbol.foregroundStyle(context.attributes.tintColor) }
-              .keylineTint(context.attributes.tintColor)
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text(status.line(presentation,park:context.attributes.metadata?.parkName)).font(.caption2).lineLimit(1).foregroundStyle(tint)
+                }
+            } compactLeading: { Image(systemName:status.symbol).accessibilityLabel(status.word(presentation)).foregroundStyle(tint) }
+              compactTrailing: { FieldAlarmClock(status:status,compact:true).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth:52).foregroundStyle(tint) }
+              minimal: { Image(systemName:status.symbol).accessibilityLabel(status.word(presentation)).foregroundStyle(tint) }
+              .keylineTint(tint)
         }
-    }
-    private var alarmSymbol: some View { Image(systemName:"alarm").accessibilityLabel("Alarm") }
-    @ViewBuilder private func countdown(_ state:AlarmPresentationState)->some View {
-        if case .countdown(let countdown)=state.mode { Text(timerInterval:Date.now...max(Date.now,countdown.fireDate),countsDown:true) }
-        else { alarmSymbol }
+        // Apple Watch's Smart Stack and CarPlay draw the small family; without it they compose one from the island.
+        .supplementalActivityFamilies([.small])
     }
 }
 

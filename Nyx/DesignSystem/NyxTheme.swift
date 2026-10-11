@@ -16,8 +16,12 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// Night vision's red is lifted under Increase Contrast or by choice, so it stays above 4.5:1
     /// for protan and deutan eyes too (`NightTint`).
     var red: NightTint { highContrast || brighterRed ? .brighter : .standard }
-    var ink: Color { nightVision ? .white : Color(red:0.961,green:0.945,blue:0.902) }
-    var accent: Color { nightVision ? ink : Color(red:1,green:0.706,blue:0.329) }
+    /// Starlight and moon-amber, gamma-encoded sRGB: the one copy the app's palette and `NightLook`
+    /// (widgets, the Live Activity, Siri's cards) both draw from.
+    static let starlightRGB=SIMD3<Double>(0.961,0.945,0.902), amberRGB=SIMD3<Double>(1,0.706,0.329)
+    static let starlight=Color(red:starlightRGB.x,green:starlightRGB.y,blue:starlightRGB.z), amber=Color(red:amberRGB.x,green:amberRGB.y,blue:amberRGB.z)
+    var ink: Color { nightVision ? .white : Self.starlight }
+    var accent: Color { nightVision ? ink : Self.amber }
     // Filled tracks must remain distinct from the white system thumb after the red filter.
     var controlTint:Color { nightVision ? Color(white:0.22) : Color(red:0.65,green:0.35,blue:0.10) }
     var muted: Color { ink.opacity(nightVision ? 0.96 : highContrast ? 0.9 : 0.72) }
@@ -25,6 +29,9 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     /// Hairlines, tracks and outlines reach 3:1 against black and the panel (WCAG 1.4.11 for
     /// graphical objects): starlight at 40%, and at 70% through night vision's red, which dims it.
     var line: Color { ink.opacity(nightVision ? 0.7 : highContrast ? 0.6 : 0.4) }
+    /// Siri's cards: black at the top to the panel, under every snippet Nyx draws.
+    var snippetGradient: Gradient { Gradient(colors:[.black,panel]) }
+    var snippetBackground: LinearGradient { LinearGradient(gradient:snippetGradient,startPoint:.top,endPoint:.bottom) }
     /// A night's filled mark grows fuller with its score (45% at 0 to 95% at 100); its size says the score too.
     static func markRamp(score:Int)->Double { 0.45+Double(min(100,max(0,score)))/200 }
     /// The ramp held at 3:1 against black and the panel (WCAG 1.4.11), as `line` is: amber from 50%, and
@@ -86,11 +93,16 @@ struct Panel<Content: View>: View {
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
     }
 }
+/// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read
+/// as broken words, so spaced labels set solid when the app speaks Japanese.
+nonisolated enum Lettering {
+    static let spaced = !(Bundle.main.preferredLocalizations.first ?? "en").hasPrefix("ja")
+}
 struct Eyebrow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
-    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
+    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.4).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
 }
 struct NightBackground: View {
     @Environment(\.skyHome) private var home
@@ -191,8 +203,8 @@ nonisolated struct NightLook: Equatable, Sendable {
     let highContrast: Bool
     /// The night-vision switch's key in the shared defaults.
     static let nightVisionKey="nightVision"
-    /// Starlight and moon-amber, gamma-encoded sRGB, as in `NyxPalette`.
-    static let starlight=SIMD3<Double>(0.961,0.945,0.902), amber=SIMD3<Double>(1,0.706,0.329)
+    /// Starlight and moon-amber, gamma-encoded sRGB, from `NyxPalette`.
+    static let starlight=NyxPalette.starlightRGB, amber=NyxPalette.amberRGB
     init(nightVision: Bool, brighterRed: Bool=false, highContrast: Bool=false) {
         self.nightVision=nightVision; self.brighterRed=brighterRed; self.highContrast=highContrast
     }

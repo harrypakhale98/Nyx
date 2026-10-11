@@ -108,6 +108,7 @@ nonisolated struct SkyMoment: Sendable {
         didSet {
             guard selectedID != oldValue else { return }
             refresh(resetTime: true)
+            refreshAhead()
             // Remembered for the next launch; a pinned clock (previews, DEBUG captures) leaves it alone.
             if !pinned, let selectedID { UserDefaults.standard.set(selectedID, forKey: Self.parkKey) }
         }
@@ -131,12 +132,18 @@ nonisolated struct SkyMoment: Sendable {
     var plannerOpen: Bool { plannerWindows > 0 }
     /// Every park's night for the list, scored as `plan` is.
     private(set) var listNights: [String: Night] = [:]
+    /// The darkest of the chosen park's next 14 nights, scored as `plan` is (`NightsAhead`). It
+    /// may still be the previous park's for a moment after a change: check its `park`.
+    private(set) var ahead: NightsAhead?
+    /// A park, or its sky, asked for by Siri or Shortcuts (`VisionIntents.swift`), for the planner
+    /// window to act on once it is active.
+    var intentRequest: VisionIntentRequest?
     /// The last cloud forecast for each park, from this headset's cache or Open-Meteo
-    /// (`VisionModel+Forecasts.swift`). A change rescores the night and the list.
-    var forecasts: [String: Forecast] = [:] { didSet { refresh(resetTime: false); refreshList() } }
+    /// (`VisionModel+Forecasts.swift`). A change rescores the night, the list and the nights ahead.
+    var forecasts: [String: Forecast] = [:] { didSet { refresh(resetTime: false); refreshList(); refreshAhead() } }
     /// Mid and high cloud over the summits above the inversion (Haleakalā), from this headset's
-    /// cache or Open-Meteo (`SummitLayerService`). A change rescores the night and the list.
-    var summitLayers: [String: HourlySeries] = [:] { didSet { refresh(resetTime: false); refreshList() } }
+    /// cache or Open-Meteo (`SummitLayerService`). A change rescores the night, the list and the nights ahead.
+    var summitLayers: [String: HourlySeries] = [:] { didSet { refresh(resetTime: false); refreshList(); refreshAhead() } }
     /// "Cloud forecasts (Open-Meteo)" in Your privacy: on unless turned off. The transport reads
     /// the same preference before any request (`SafeHTTP`), so off means no request at all.
     var forecastsOn = CloudForecastSwitch.isOn() {
@@ -151,6 +158,7 @@ nonisolated struct SkyMoment: Sendable {
     private var sweep: Task<Void, Never>?
     private var planTask: Task<Void, Never>?
     private var listTask: Task<Void, Never>?
+    private var aheadTask: Task<Void, Never>?
     /// The moment "tonight" is judged from. Moved on only when some park's night turns over (its
     /// sunrise, or local noon in polar night), as on the iPhone (`PlanModel.tick`): Vision Pro
     /// keeps an app suspended for days, and a launch-time clock would leave Tonight, Back to
@@ -174,13 +182,14 @@ nonisolated struct SkyMoment: Sendable {
         nightOffset = VisionDebug.nightOffset ?? 0
         refresh(resetTime: true)
         refreshList()
+        refreshAhead()
         // The cached forecasts first, read off the main thread; the window asks for fresh ones.
         Task { await refreshForecasts(network: false) }
     }
     var park: Park? { parks.first { $0.id == selectedID } }
     /// Where the chosen park is remembered between launches (this headset's UserDefaults only).
     nonisolated static let parkKey = "visionSelectedPark"
-    nonisolated static let defaultPark = "jotr"
+    nonisolated static let defaultPark = Park.defaultID
     /// The park chosen last time if it is still one of `parks`, else Joshua Tree.
     nonisolated static func rememberedPark(in parks: [Park], defaults: UserDefaults = .standard) -> String {
         guard let stored = defaults.string(forKey: parkKey), parks.contains(where: { $0.id == stored }) else { return defaultPark }
@@ -215,6 +224,7 @@ nonisolated struct SkyMoment: Sendable {
         }
         refresh(resetTime: newNight)
         refreshList()
+        refreshAhead()
     }
     /// While a window is in use: the clock checked at once and every minute, so a night turning
     /// over at the chosen park's sunrise reaches the window within the minute.
@@ -255,6 +265,26 @@ nonisolated struct SkyMoment: Sendable {
             listNights = nights
         }
     }
+    /// The chosen park's darkest nights from tonight on, off the main thread. Stepping between
+    /// nights leaves it alone: it always looks ahead from tonight.
+    private func refreshAhead() {
+        guard let park else { ahead = nil; return }
+        let now = now, forecasts = forecasts, layers = summitLayers
+        aheadTask?.cancel()
+        aheadTask = Task {
+            let ahead = await Task.detached(priority: .utility) {
+                NightsAhead(park: park, planner: NightPlanner(forecasts: forecasts, details: layers.compactMapValues { VisionModel.detail($0) }), now: now)
+            }.value
+            guard !Task.isCancelled else { return }
+            self.ahead = ahead
+        }
+    }
+    /// Opens a park (or keeps the chosen one, for `nil`) on tonight, for Siri and Shortcuts.
+    func openTonight(_ parkID: String?) {
+        if let parkID, parks.contains(where: { $0.id == parkID }) { selectedID = parkID }
+        nightOffset = 0
+    }
+
     /// The fastest the immersive sky may turn during a sweep, in degrees a second. The real sky
     /// turns 15° an hour; a whole sky wheeling faster than this around someone standing in it is
     /// uncomfortable.

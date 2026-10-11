@@ -69,7 +69,7 @@ struct DataLaneTests {
         #expect(!(call.url.absoluteString.contains("TESTKEY")) && query(call.url, "api_key") == nil)
         #expect(query(call.url, "limit") == "500")
         let codes=Set(query(call.url, "parkCode")?.split(separator: ",").map(String.init) ?? [])
-        #expect(codes == Set(parks.map(\.apiCode)))
+        #expect(codes == Set(parks.compactMap(\.nps)))
         let cache=try #require(update.cache)
         #expect(cache.alerts["deva"]?.map(\.id) == ["a1"])
         #expect(cache.alerts["acad"]?.map(\.id) == ["a4"] && cache.alerts["ever"]?.map(\.id) == ["a4"])
@@ -336,7 +336,7 @@ struct DataLaneTests {
     /// Export, then import into another device's journal: everything arrives once, and importing
     /// again adds nothing.
     @MainActor @Test func journalRoundTrips() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         let entry=JournalEntry(date: Date(timeIntervalSince1970: 1790899200), parkID: "jotr", observedBortle: 2, notes: "Saturn's rings.")
         phone.insert(entry); try phone.save()
@@ -363,7 +363,7 @@ struct DataLaneTests {
     /// Two different entries from one night in one archive both arrive; importing the archive again
     /// adds nothing, and an entry already here under another id (same park, moment and words) is not doubled.
     @MainActor @Test func importKeepsEveryEntryOfANight() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let night=Date(timeIntervalSince1970: 1790899200)
         let archive=JournalArchive(manifest: .init(format: 1, exported: night, entries: [
             .init(id: UUID(), date: night, parkID: "jotr", observedBortle: 2, notes: "Saturn first.", photos: []),
@@ -382,7 +382,7 @@ struct DataLaneTests {
     /// A damaged or unknown archive is refused before anything is inserted, and a photo that is
     /// missing or is not an image is left out of an otherwise sound entry.
     @MainActor @Test func malformedArchivesInsertNothing() throws {
-        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let context=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         func package(_ json: String, photos: [String: Data] = [:]) -> FileWrapper {
             let folder=FileWrapper(directoryWithFileWrappers: [:])
@@ -394,7 +394,7 @@ struct DataLaneTests {
         }
         let id=UUID().uuidString
         let entry="{\"id\":\"\(id)\",\"date\":\"2026-10-01T04:00:00Z\",\"parkID\":\"jotr\",\"observedBortle\":2,\"notes\":\"Clear.\",\"photos\":[{\"file\":\"a.jpg\"},{\"file\":\"b.jpg\"},{\"file\":\"gone.jpg\"}]}"
-        #expect(throws: JournalArchive.ArchiveError.newerFormat) { try JournalArchive(wrapper: package("{\"format\":2,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}")) }
+        #expect(throws: JournalArchive.ArchiveError.newerFormat) { try JournalArchive(wrapper: package("{\"format\":3,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}")) }
         #expect(throws: JournalArchive.ArchiveError.unreadable) { try JournalArchive(wrapper: package("{\"format\":0,\"exported\":\"2026-10-01T04:00:00Z\",\"entries\":[\(entry)]}")) }
         #expect(throws: (any Error).self) { try JournalArchive(wrapper: package("{\"format\":1,\"entries\":[\(entry)")) }
         #expect(throws: JournalArchive.ArchiveError.unreadable) { try JournalArchive(wrapper: FileWrapper(regularFileWithContents: Data())) }
@@ -436,7 +436,7 @@ struct DataLaneTests {
     /// When the store on disk could not open, Siri and Shortcuts refuse plainly: nothing is written
     /// to the stand-in in memory, which would be gone on the next launch.
     @MainActor @Test func failedStoreRefusesJournalIntents() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let standIn=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let before=(JournalAccess.container, JournalAccess.unavailable)
         defer { JournalAccess.configure(container: before.0, unavailable: before.1) }
@@ -469,7 +469,7 @@ struct DataLaneTests {
     /// The journal's export is gathered on a background context and an import's thumbnails are
     /// drawn before the inserts, as the Journal tab does off the main thread: same archive, same cards.
     @MainActor @Test func journalArchiveWorkHappensOffTheMainThread() async throws {
-        let schema=Schema(versionedSchema: NyxSchemaV1.self)
+        let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
         let photo=try #require(UIGraphicsImageRenderer(size: CGSize(width: 40, height: 30)).image { context in
             UIColor.orange.setFill(); context.fill(CGRect(x: 0, y: 0, width: 40, height: 30))

@@ -79,7 +79,7 @@ struct ScoreReadout: View {
     private func title(_ part:Part)->some View {
         // Two words may wrap ("Horas oscuras"); one long word shrinks a little rather than break ("Resplandor").
         let oneWord = !part.title.contains(" ")
-        return Text(part.title).font(.caption2.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 0.8).textCase(typeSize.isAccessibilitySize ? nil : .uppercase)
+        return Text(part.title).font(.caption2.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 0.8).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase)
             .foregroundStyle(palette.muted).lineLimit(typeSize.isAccessibilitySize ? nil : oneWord ? 1 : 2).minimumScaleFactor(0.7).allowsTightening(true).fixedSize(horizontal:false,vertical:true)
     }
     private func meter(_ part:Part)->some View {

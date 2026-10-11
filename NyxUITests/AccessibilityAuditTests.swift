@@ -126,7 +126,7 @@ final class AccessibilityAuditTests:XCTestCase {
         let footField=footInput.map { CGRect(x:0,y:$0.frame.minY-28,width:window.width,height:window.height-$0.frame.minY+28) } ?? .null
         // The bars each pass measured against, so a finding near an edge can be read in context.
         print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
-        try app.performAccessibilityAudit { issue in
+        do { try app.performAccessibilityAudit { issue in
             let frame=issue.element?.frame ?? .null
             let label=issue.element?.label ?? ""
             let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
@@ -136,6 +136,12 @@ final class AccessibilityAuditTests:XCTestCase {
             failures.append(line)
             if issue.element==nil { unresolved+=1 }
             return true // collect everything; fail once at the end with the full list
+        } } catch let error as NSError where retry && error.domain=="com.apple.xcode.xctest.accessibilityAudit" && error.code == -56 {
+            // "Audit failed to complete in time": the audit itself gave up (seen late in long runs on a busy Mac),
+            // which says nothing about the screen. Once more after a pause; a second timeout fails.
+            print("AUDITTIMEOUT|\(pass)|\(state)|\(screen)")
+            sleep(3)
+            return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false)
         }
         if retry, !failures.isEmpty, unresolved==failures.count {
             print("AUDITRETRY|\(pass)|\(state)|\(screen)|\(failures.count) findings without an element")

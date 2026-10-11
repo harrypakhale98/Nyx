@@ -12,4 +12,4 @@ Clouds are the least certain part. Up to about three days ahead, Nyx uses the cl
 
 The bands are simple: 90 and above is Pristine, 75 Excellent, 60 Good, 40 Fair, and anything lower is Poor.
 
-Some things the score cannot know. It does not know whether the road to your viewing spot is open; Nyx shows the park's alerts beside the score, but they can be hours old. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the southern sky. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush.
+Some things the score cannot know. It does not know whether the road to your viewing spot is open: at the U.S. national parks Nyx shows the Park Service's alerts beside the score, but they can be hours old, and elsewhere it has none. It cannot see a lit parking lot, a lantern in a campground or a ridge that hides the part of the sky you came for. And it cannot know your eyes: how long they have had to adapt, or how much a bright screen has undone. A Good night you plan well can be better than an Excellent one you rush.

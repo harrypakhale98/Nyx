@@ -15,7 +15,8 @@ struct ParkHandoffActivity: ViewModifier {
             activity.userInfo=handoff.userInfo
             activity.requiredUserInfoKeys=["park"]
             activity.targetContentIdentifier=park.id
-            activity.isEligibleForHandoff=true
+            // A saved spot lives on this iPhone only: another device could not open it, so it is not offered.
+            activity.isEligibleForHandoff = !park.isSavedSpot
             activity.isEligibleForSearch=false
             activity.isEligibleForPrediction=false
             activity.appEntityIdentifier=EntityIdentifier(for:ParkEntity.self,identifier:park.id)

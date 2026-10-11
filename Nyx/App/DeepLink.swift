@@ -1,8 +1,8 @@
 import Foundation
 
 /// Every `nyx://` link Nyx answers: widgets, Spotlight, the field Live Activity, calendar events
-/// it drafted, and App Store In-App Events. Parsing is pure, so each form is tested; park ids are
-/// checked against the bundled parks by whoever opens the link.
+/// it drafted, and App Store In-App Events. Parsing is pure, so each form is tested; place ids are
+/// checked against the catalogue by whoever opens the link.
 nonisolated enum DeepLink: Equatable, Sendable {
     /// `nyx://park/<id>`
     case park(String)
@@ -20,10 +20,7 @@ nonisolated enum DeepLink: Equatable, Sendable {
         let path=url.pathComponents.filter { $0 != "/" }
         let query=URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems ?? []
         func item(_ name: String) -> String? { query.first { $0.name==name }?.value?.trimmingCharacters(in:.whitespaces) }
-        func parkID(_ raw: String?) -> String? {
-            guard let raw=raw?.lowercased(), (2...8).contains(raw.count), raw.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
-            return raw
-        }
+        func parkID(_ raw: String?) -> String? { raw.flatMap(Self.placeID) }
         switch host {
         case "park": guard let id=parkID(path.first) else { return nil }; self = .park(id)
         case "tonight": self = .tonight
@@ -37,6 +34,28 @@ nonisolated enum DeepLink: Equatable, Sendable {
             let parts=month.split(separator:"-")
             guard parts.count==2, parts[0].count==4, let y=Int(parts[0]), let m=Int(parts[1]), (1...12).contains(m), (1900...2200).contains(y) else { return nil }
             self = .calendar(park:id,year:y,month:m)
+        default: return nil
+        }
+    }
+    /// A place id from a link, in its stored form, or nil for anything else: a park's letters
+    /// (`jotr`, any case), a Wikidata item (`wd:Q123456`) or a saved spot (`pin:` and a UUID,
+    /// stored lowercase). The colon may arrive percent-encoded (`wd%3AQ123456`).
+    static func placeID(_ raw: String) -> String? {
+        let raw=raw.contains("%") ? (raw.removingPercentEncoding ?? raw) : raw
+        let parts=raw.split(separator:":",maxSplits:1,omittingEmptySubsequences:false)
+        if parts.count==1 {
+            guard (2...8).contains(raw.count), raw.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
+            return raw.lowercased()
+        }
+        let rest=parts[1]
+        switch parts[0].lowercased() {
+        case "wd":
+            let digits=rest.dropFirst()
+            guard rest.first?.lowercased()=="q", (1...12).contains(digits.count), digits.first != "0", digits.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+            return "wd:Q\(digits)"
+        case "pin":
+            guard rest.count==36, let uuid=UUID(uuidString:String(rest)) else { return nil }
+            return "pin:\(uuid.uuidString.lowercased())"
         default: return nil
         }
     }

@@ -42,7 +42,11 @@ struct LightPollution: View {
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
                     .accessibilityElement(children:.ignore).speechLabel(String(localized:"Bortle estimate, class \(park.bortleEstimate) of 9"))
-                Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
+                // A saved spot's class is the satellite grid's (or an assumed suburban sky), and says which;
+                // a world catalogue place's is the grid's at its one point.
+                if park.isSavedSpot { Text(park.sourceNote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                else if !park.curated { Text("Estimated from satellite data, not measured here. Conditions vary across the area.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                else { Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted) }
             }
             if let site {
                 let level=SkyGlow.shared.level(site.glow)
@@ -219,7 +223,7 @@ enum BrowserLink {
     static let openMeteo=page(host:"open-meteo.com")
     static let creativeCommonsBY=page(host:"creativecommons.org",path:"/licenses/by/4.0/")
     /// The park's current conditions and alerts on nps.gov, for when Nyx's own alerts are unavailable.
-    static func parkConditions(_ park:Park)->URL? { page(host:"www.nps.gov",path:"/\(park.apiCode)/planyourvisit/conditions.htm") }
+    static func parkConditions(_ park:Park)->URL? { park.nps.flatMap { page(host:"www.nps.gov",path:"/\($0)/planyourvisit/conditions.htm") } }
     private static func page(host:String,path:String="")->URL? {
         var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path
         return components.url

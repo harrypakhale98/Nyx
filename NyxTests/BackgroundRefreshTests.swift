@@ -71,7 +71,7 @@ struct BackgroundRefreshTests {
         // Launch reads the starting point as the model does: Joshua Tree and the parks within 200 miles.
         let defaults=try #require(UserDefaults(suiteName: "nyx-home-area"))
         defaults.removePersistentDomain(forName: "nyx-home-area")
-        let area=CachePreload.homeArea(fresh.parks, defaults: defaults).map(\.id)
+        let area=CachePreload.homeArea(fresh.parks, defaults: defaults, locale: Locale(identifier: "en_US")).map(\.id)
         #expect(area.contains("jotr") && !area.contains("acad"))
     }
 }

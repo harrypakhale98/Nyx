@@ -13,6 +13,180 @@ nonisolated enum CloudForecastSwitch {
     static let key = "weatherEnabled"
     static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
 }
+/// Saved spots' cloud forecasts (G3): their own switch in Your privacy, on unless turned off, and
+/// effective only while `CloudForecastSwitch` is on too. A saved spot is the one request that
+/// carries a place the person chose rather than a public park, so it carries less: the spot's
+/// coordinates rounded to 0.1° (about 11 km), clouds only, in a request of its own that never
+/// mixes spots with the parks. Never the device's location, unless the person saved it as a spot.
+/// Approved by the owner on 2026-10-11.
+nonisolated enum SpotForecast {
+    static let key = "spotForecastsEnabled"
+    static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
+    /// A point on the 0.1° grid, held as whole tenths of a degree so it is exact and compares exactly.
+    nonisolated struct Point: Hashable, Sendable {
+        let latitudeTenths: Int
+        let longitudeTenths: Int
+        /// The nearest grid point (halves away from zero); latitudes clamp to ±90°, longitudes wrap into −180…180°.
+        /// Nil for a coordinate that is not a number.
+        init?(latitude: Double, longitude: Double) {
+            guard latitude.isFinite, longitude.isFinite else { return nil }
+            latitudeTenths=min(900, max(-900, Int((latitude*10).rounded())))
+            var lon=Int((longitude*10).rounded()) % 3600
+            if lon > 1800 { lon -= 3600 } else if lon < -1800 { lon += 3600 }
+            longitudeTenths=lon
+        }
+        var latitude: Double { Double(latitudeTenths)/10 }
+        var longitude: Double { Double(longitudeTenths)/10 }
+        /// "37.1", "-0.5", "180.0": always one decimal, written from the tenths, never from a float.
+        static func text(_ tenths: Int) -> String { "\(tenths<0 ? "-" : "")\(abs(tenths)/10).\(abs(tenths)%10)" }
+    }
+    /// Each spot's grid point, and the distinct points in the order first seen: spots that round to
+    /// the same point are asked about once.
+    static func points(_ spots: [Park]) -> (points: [Point], byID: [String: Point]) {
+        var points: [Point]=[], seen=Set<Point>(), byID: [String: Point]=[:]
+        for spot in spots {
+            guard let point=Point(latitude: spot.latitude, longitude: spot.longitude) else { continue }
+            byID[spot.id]=point
+            if seen.insert(point).inserted { points.append(point) }
+        }
+        return (points, byID)
+    }
+    /// The parks' cloud request with only rounded points in it: the same host, hours and fields,
+    /// and nothing else (no name, no id, no zone).
+    static func url(for points: [Point]) -> URL? {
+        guard !points.isEmpty else { return nil }
+        var parts=URLComponents()
+        parts.scheme="https"; parts.host=WeatherService.host; parts.path="/v1/forecast"
+        parts.queryItems=[URLQueryItem(name: "latitude", value: points.map { Point.text($0.latitudeTenths) }.joined(separator: ",")),
+            URLQueryItem(name: "longitude", value: points.map { Point.text($0.longitudeTenths) }.joined(separator: ",")),
+            URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "forecast_days", value: "15"), URLQueryItem(name: "past_days", value: "1"),
+            URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        return parts.url
+    }
+    /// A place's forecast cache file: "weather-jotr" for a park, as always; "weather-pin-<uuid>" for a spot (no colon in a file name).
+    static func cacheName(_ id: String) -> String { "weather-"+id.replacingOccurrences(of: ":", with: "-") }
+}
+/// World catalogue places' cloud forecasts (G4; owner's decision D3, 2026-10-11). A catalogue
+/// place is never asked about alone: its forecast comes with every other catalogue place in the
+/// same 10° × 10° tile of latitude and longitude, so a request names a region about the size of a
+/// country, never the place being looked at, and never the device's position (only catalogue
+/// coordinates, which are public and the same in every copy of Nyx, are ever sent). Tiles too sparse
+/// to hide a place among others are asked about all together (`Regions`). A dense region is split into
+/// requests of at most `maxPointsPerRequest`, by Wikidata number rather than by position, so each part
+/// still spans the whole region. Same host, switch, hours and fields as the curated parks' request,
+/// which stays as it was.
+nonisolated enum CatalogForecast {
+    static let tileDegrees = 10.0
+    /// Owner's cap (D3): never more than 1,000 coordinates in one request.
+    static let maxPointsPerRequest = 1_000
+    /// At most this many catalogue points in one refresh: whole tiles, in the order their places were
+    /// asked for, until the next tile would pass it (the first tile always goes). A very wide radius in
+    /// a dense region then costs no more than about two requests' worth; places beyond it keep their
+    /// cached forecast or their usual clouds, labelled as such.
+    static let maxPointsPerRefresh = 2_000
+    /// A 10° cell: rows from the south pole, columns from the antimeridian.
+    nonisolated struct Tile: Hashable, Comparable, Sendable {
+        let row: Int
+        let column: Int
+        init(row: Int, column: Int) { self.row = row; self.column = column }
+        /// The tile holding a point; nil for a coordinate that is not a number. 90° N belongs to the
+        /// last row and 180° E to the first column (the same meridian as 180° W).
+        init?(latitude: Double, longitude: Double) {
+            guard latitude.isFinite, longitude.isFinite else { return nil }
+            let rows = Int(180/CatalogForecast.tileDegrees), columns = Int(360/CatalogForecast.tileDegrees)
+            row = min(rows-1, max(0, Int(((latitude+90)/CatalogForecast.tileDegrees).rounded(.down))))
+            var lon = (longitude+180).truncatingRemainder(dividingBy: 360)
+            if lon < 0 { lon += 360 }
+            column = min(columns-1, max(0, Int((lon/CatalogForecast.tileDegrees).rounded(.down))))
+        }
+        init?(_ place: Park) { self.init(latitude: place.latitude, longitude: place.longitude) }
+        static func < (a: Tile, b: Tile) -> Bool { (a.row, a.column) < (b.row, b.column) }
+        /// "-30,140": the tile's south-west corner in degrees, for tests and logs.
+        var corner: String { "\(row*Int(CatalogForecast.tileDegrees)-90),\(column*Int(CatalogForecast.tileDegrees)-180)" }
+    }
+    /// The number of a `wd:Q…` id, for a stable order inside a tile; ids that are not one sort last.
+    static func itemNumber(_ id: String) -> Int {
+        guard id.hasPrefix(Place.catalogPrefix + "Q") else { return .max }
+        return Int(id.dropFirst(Place.catalogPrefix.count + 1)) ?? .max
+    }
+    /// One tile's places as requests: every member, ordered by Wikidata number (then id), split into
+    /// as few near-equal parts as keep each within `maxPointsPerRequest`. Deterministic for the same members.
+    static func chunks(_ members: [Park], limit: Int = maxPointsPerRequest) -> [[Park]] {
+        var seen = Set<String>()
+        let ordered = members.filter { seen.insert($0.id).inserted }.sorted { (itemNumber($0.id), $0.id) < (itemNumber($1.id), $1.id) }
+        guard !ordered.isEmpty, limit > 0 else { return [] }
+        let parts = (ordered.count + limit - 1) / limit
+        let base = ordered.count / parts, extra = ordered.count % parts
+        var result: [[Park]] = [], start = 0
+        for part in 0..<parts {
+            let size = base + (part < extra ? 1 : 0)
+            result.append(Array(ordered[start..<start+size]))
+            start += size
+        }
+        return result
+    }
+    /// Below this many catalogue places a tile is too sparse to hide one among the others (a lone
+    /// island park would be named by its own tile): every such tile is asked about together, as one
+    /// region of the world's remote places (about 330 points today).
+    static let minimumPoints = 8
+    /// The fixed partition of the catalogue into what is requested together: each tile with at least
+    /// `minimumPoints` places on its own, and every sparser tile in one shared region. It depends only
+    /// on the bundled catalogue, never on the place viewed or where the person is.
+    nonisolated struct Regions: Sendable {
+        /// Each region's requests, whole and in order (`chunks`).
+        let requests: [[[Park]]]
+        /// The region of each tile that holds a catalogue place.
+        let regionOfTile: [Tile: Int]
+        static let empty = Regions([])
+        init(_ catalog: [Park], minimum: Int = CatalogForecast.minimumPoints) {
+            var byTile: [Tile: [Park]] = [:]
+            for place in catalog where place.isCatalogPlace { if let tile = Tile(place) { byTile[tile, default: []].append(place) } }
+            var requests: [[[Park]]] = [], regionOfTile: [Tile: Int] = [:], sparse: [Park] = [], sparseTiles: [Tile] = []
+            for tile in byTile.keys.sorted() {
+                let members = byTile[tile] ?? []
+                if members.count >= minimum {
+                    regionOfTile[tile] = requests.count
+                    requests.append(CatalogForecast.chunks(members))
+                } else { sparse += members; sparseTiles.append(tile) }
+            }
+            if !sparse.isEmpty {
+                for tile in sparseTiles { regionOfTile[tile] = requests.count }
+                requests.append(CatalogForecast.chunks(sparse))
+            }
+            self.requests = requests; self.regionOfTile = regionOfTile
+        }
+        /// The requests that cover `wanted`: for each catalogue place among them, in order, its whole
+        /// region, each region once, within `budget` points (the first region always goes). Curated
+        /// parks and saved spots among `wanted` are ignored: they have requests of their own.
+        func plan(wanted: [Park], budget: Int = CatalogForecast.maxPointsPerRefresh) -> [[Park]] {
+            var regions: [Int] = [], seen = Set<Int>()
+            for place in wanted where place.isCatalogPlace {
+                guard let tile = Tile(place), let region = regionOfTile[tile], seen.insert(region).inserted else { continue }
+                regions.append(region)
+            }
+            var planned: [[Park]] = [], points = 0
+            for region in regions {
+                let count = requests[region].reduce(0) { $0 + $1.count }
+                if !planned.isEmpty && points + count > budget { break }
+                planned += requests[region]
+                points += count
+            }
+            return planned
+        }
+    }
+    /// The curated parks' request with these catalogue places' public coordinates: the same host,
+    /// hours and fields, and nothing else (no name, id or zone).
+    static func url(for places: [Park]) -> URL? {
+        guard !places.isEmpty else { return nil }
+        var parts = URLComponents()
+        parts.scheme = "https"; parts.host = WeatherService.host; parts.path = "/v1/forecast"
+        parts.queryItems = [URLQueryItem(name: "latitude", value: places.map { String($0.latitude) }.joined(separator: ",")),
+            URLQueryItem(name: "longitude", value: places.map { String($0.longitude) }.joined(separator: ",")),
+            URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "forecast_days", value: "15"), URLQueryItem(name: "past_days", value: "1"),
+            URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        return parts.url
+    }
+}
 nonisolated protocol HTTPTransport: Sendable {
     func get(_ url: URL) async throws -> Data
     /// With request headers (the NPS key travels as `X-Api-Key`, never in the URL) and whether the
@@ -199,8 +373,17 @@ nonisolated protocol WeatherProviding: Sendable {
     func hydrate(_ parks: [Park]) async -> [String: Forecast]
     /// Forecasts already read at launch (`CachePreload`), so no file is read again.
     func seed(_ cached: [String: Forecast], parks: [Park]) async
+    /// Saved spots' clouds: cached, and with `network` refreshed in a request of their own
+    /// (`SpotForecast`). Services without spots answer with nothing.
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast]
+    /// World catalogue places' clouds, by whole tiles (`CatalogForecast.Regions.plan`): every member of
+    /// every request cached, and with `network` the requests that are due asked again. Services
+    /// without a catalogue answer with nothing.
+    func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast]
 }
 nonisolated extension WeatherProviding {
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
+    func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
     func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
         await forecasts(for: [park], network: network, force: force)[park.id]
     }
@@ -218,8 +401,15 @@ actor WeatherService: WeatherProviding {
     private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
     /// How many callers are still waiting on each request in flight.
     private var waiters: [Task<[String: Forecast], Never>: Int] = [:]
-    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
-        self.transport=transport; self.persist=persist; self.clock=clock
+    /// The saved spots' request under way, if any; later callers wait for it.
+    private var spotFlight: Task<[String: Forecast], Never>?
+    /// Catalogue tile requests under way, by their members; a caller asking for the same tile waits for it.
+    private var catalogFlight: [String: Task<[String: Forecast], Never>] = [:]
+    /// Where the spots' switch is read; tests use their own suite.
+    private let suite: String?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, suite: String? = nil,
+         clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock; self.suite=suite
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
     }
     func hydrate(_ parks: [Park]) async -> [String: Forecast] {
@@ -230,7 +420,7 @@ actor WeatherService: WeatherProviding {
         for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     private func load(_ id: String) {
-        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: "weather-\(id)") else { return }
+        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: SpotForecast.cacheName(id)) else { return }
         memory[id]=cached
     }
     /// Cached forecasts for every park, refreshed in as few requests as possible: Open-Meteo
@@ -276,10 +466,103 @@ actor WeatherService: WeatherProviding {
         }
         return result
     }
+    /// Saved spots' clouds (G3), kept and refreshed as the parks' are (six hours fresh, ten minutes
+    /// between forced refreshes, the same cache, backoff and guarded transport), but never in the
+    /// parks' request: one request of their own (two past fifty distinct points) carrying only each
+    /// spot's coordinates rounded to 0.1°, the same rounded point asked once. Asked only with
+    /// `network` and the spots' switch on (`SpotForecast`); otherwise the cached forecasts, or none,
+    /// and each night falls back to the usual clouds from the world grid, as for any place.
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool = false) async -> [String: Forecast] {
+        let now=clock()
+        var due: [Park]=[]
+        let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+        let allowed=network && SpotForecast.isOn(defaults) && backoff.allows(Self.host, now: now)
+        for spot in spots {
+            load(spot.id)
+            let age=memory[spot.id].map { now.timeIntervalSince($0.updated) } ?? .infinity
+            if allowed && (age>=6*3600 || (force && age>=600)) { due.append(spot) }
+        }
+        if !due.isEmpty {
+            let task: Task<[String: Forecast], Never>
+            if let running=spotFlight { task=running } else {
+                task=Task {
+                    let fetched=await self.fetchSpots(due)
+                    // Kept by the request itself, so a forecast that arrives after its caller stopped waiting still counts.
+                    self.keep(fetched)
+                    self.spotFlight=nil
+                    return fetched
+                }
+                spotFlight=task
+            }
+            _=await SharedRequest.value(of: task)
+        }
+        var result: [String: Forecast]=[:]
+        for spot in spots { if let kept=memory[spot.id] { result[spot.id]=kept } }
+        return result
+    }
+    /// World catalogue places' clouds (G4), by whole tiles: `requests` comes from
+    /// `CatalogForecast.Regions.plan`, each one every catalogue place of a 10° tile (or of the sparse
+    /// tiles together, or a part of a dense region), never a place alone. Cached and kept as the parks' are (six hours fresh, ten minutes
+    /// between forced refreshes, the same cache files by id, backoff and guarded transport). A request
+    /// is due when its freshest member is (they arrive together); due requests go one after another,
+    /// and the first that fails stops the rest. Returns every member's kept forecast.
+    func catalogForecasts(_ requests: [[Park]], network: Bool, force: Bool = false) async -> [String: Forecast] {
+        let now=clock()
+        var due: [[Park]]=[]
+        for request in requests {
+            for place in request { load(place.id) }
+            guard network, !request.isEmpty, request.count <= CatalogForecast.maxPointsPerRequest else { continue }
+            let age=request.compactMap { memory[$0.id].map { now.timeIntervalSince($0.updated) } }.min() ?? .infinity
+            if age>=6*3600 || (force && age>=600) { due.append(request) }
+        }
+        for request in due {
+            guard backoff.allows(Self.host, now: clock()) else { break }
+            let key=request.map(\.id).joined(separator: ",")
+            let task: Task<[String: Forecast], Never>
+            if let running=catalogFlight[key] { task=running } else {
+                task=Task {
+                    var fetched: [String: Forecast]=[:]
+                    for (place, forecast) in await self.fetch(request, url: CatalogForecast.url(for: request)) { fetched[place.id]=forecast }
+                    // Kept by the request itself, so a forecast that arrives after its caller stopped waiting still counts.
+                    self.keep(fetched)
+                    self.catalogFlight[key]=nil
+                    return fetched
+                }
+                catalogFlight[key]=task
+            }
+            // A cancelled caller stops waiting; a request that brought nothing (offline, refused) ends the round.
+            guard let fetched=await SharedRequest.value(of: task), !fetched.isEmpty else { break }
+        }
+        var result: [String: Forecast]=[:]
+        for request in requests { for place in request { if let kept=memory[place.id] { result[place.id]=kept } } }
+        return result
+    }
+    private func fetchSpots(_ spots: [Park]) async -> [String: Forecast] {
+        let grid=SpotForecast.points(spots)
+        var byPoint: [SpotForecast.Point: Forecast]=[:]
+        for start in stride(from: 0, to: grid.points.count, by: 50) {
+            let chunk=Array(grid.points[start..<min(grid.points.count, start+50)])
+            guard let url=SpotForecast.url(for: chunk) else { continue }
+            let data: Data
+            do { data=try await transport.get(url, headers: [:], constrained: true) } catch {
+                backoff.record(error, host: Self.host, now: clock())
+                break
+            }
+            struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
+            // One coordinate returns an object; several return an array in request order.
+            let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+            guard decoded.count == chunk.count else { continue }
+            let now=clock()
+            for (point, response) in zip(chunk, decoded) where response.hourly.time.count == response.hourly.cloud_cover.count && !response.hourly.time.isEmpty {
+                byPoint[point]=Forecast(updated: now, times: response.hourly.time, clouds: response.hourly.cloud_cover)
+            }
+        }
+        return grid.byID.compactMapValues { byPoint[$0] }
+    }
     private func keep(_ fetched: [String: Forecast]) {
         for (id, forecast) in fetched where memory[id].map({ $0.updated < forecast.updated }) ?? true {
             memory[id]=forecast
-            if persist { CacheDirectory.write(forecast, name: "weather-\(id)") }
+            if persist { CacheDirectory.write(forecast, name: SpotForecast.cacheName(id)) }
         }
     }
     /// One caller has stopped waiting. A finished request leaves `inFlight`; one nobody waits for
@@ -291,7 +574,8 @@ actor WeatherService: WeatherProviding {
         if !finished { task.cancel() }
         inFlight=inFlight.filter { $0.value != task }
     }
-    private func fetch(_ parks: [Park]) async -> [(Park, Forecast)] {
+    /// `given`: the catalogue's request for exactly these places (`CatalogForecast.url`); the parks' otherwise.
+    private func fetch(_ parks: [Park], url given: URL? = nil) async -> [(Park, Forecast)] {
         guard !parks.isEmpty else { return [] }
         var parts=URLComponents()
         parts.scheme="https"; parts.host="api.open-meteo.com"; parts.path="/v1/forecast"
@@ -302,7 +586,7 @@ actor WeatherService: WeatherProviding {
             URLQueryItem(name: "longitude", value: parks.map { String($0.forecastPoint.longitude) }.joined(separator: ",")),
             URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "forecast_days", value: "15"), URLQueryItem(name: "past_days", value: "1"),
             URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
-        guard let url=parts.url else { return [] }
+        guard let url=given ?? parts.url else { return [] }
         struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
         let data: Data
         do { data=try await transport.get(url, headers: [:], constrained: true) } catch {

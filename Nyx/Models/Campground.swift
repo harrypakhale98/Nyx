@@ -105,7 +105,7 @@ nonisolated struct CampgroundsCache: Codable, Sendable, Equatable {
     let campgrounds: [String: [Campground]]
     /// A park's campgrounds, reservable ones first, then by name.
     func list(_ park: Park) -> [Campground] {
-        (campgrounds[park.apiCode] ?? []).sorted { a, b in
+        (park.nps.flatMap { campgrounds[$0] } ?? []).sorted { a, b in
             let ra = (a.reservableSites ?? 0) > 0, rb = (b.reservableSites ?? 0) > 0
             return ra != rb ? ra : a.name.localizedStandardCompare(b.name) == .orderedAscending
         }

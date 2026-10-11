@@ -1,12 +1,15 @@
 import SwiftUI
 
-/// The Parks tab. In a wide iPad window the list stands beside the park (a split view); in a
-/// narrow window and on iPhone it is a stack. The chosen park carries across a resize: narrowing
+/// The Parks tab. In a wide window the list stands beside the park (a split view); in a narrower
+/// window, a regular-width one included, and on iPhone it is a stack. The window's width decides
+/// (`split`), never the device. The chosen park carries across a resize: narrowing
 /// the window keeps the park on screen, widening it keeps the park selected. The map of tonight
 /// takes the whole width everywhere, and a park opens over it as from a row.
 struct ParksTab: View {
     @Environment(PlanModel.self) private var model
-    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// The tab's own width, measured: it chooses the split (`split`).
+    @State private var width=0.0
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     /// The park beside the list, kept for the window (and restored with it).
     @SceneStorage("parksPark") private var selection: String?
@@ -18,9 +21,9 @@ struct ParksTab: View {
     private static var mapKey: String { DebugScenario.screen == nil ? "parksShowsMap" : DebugScenario.parksMap ? "parksShowsMap-route-map" : "parksShowsMap-route-list" }
     var body: some View {
         Group {
-            if sizeClass == .regular && !showsMap {
+            if split && !showsMap {
                 NavigationSplitView {
-                    ParksView(selection:$selection).toolbar { mapToggle }.tabRootToolbar().navigationSplitViewColumnWidth(min:330,ideal:390,max:460)
+                    ParksView(selection:$selection).modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar().navigationSplitViewColumnWidth(min:330,ideal:390,max:460)
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
@@ -33,12 +36,14 @@ struct ParksTab: View {
                     Group {
                         if showsMap {
                             ParksMapView { park in path.append(park) }
+                                .modifier(RefreshKey { await model.refresh(model.parks,force:true) })
                                 .navigationDestination(for:Park.self) { park in ParkDetailView(park:park) }
-                        } else { ParksView() }
+                        } else { ParksView().modifier(listRefresh) }
                     }.toolbar { mapToggle }.tabRootToolbar()
                 }
             }
         }
+        .measuringWidth($width)
         // The page never opens empty: the starting park until another is chosen.
         .onAppear {
             if selection == nil { selection=path.last?.id ?? model.home?.id }
@@ -46,20 +51,28 @@ struct ParksTab: View {
             // list a previous run left in the window's restored state.
             if DebugScenario.screen != nil { showsMap=DebugScenario.parksMap }
         }
-        .onChange(of:sizeClass) { old,new in
+        .onChange(of:split) { old,new in
             guard !showsMap else { return }
-            if new == .compact, old == .regular, let park=selection.flatMap({ model.park($0) }) { path=[park] }
-            else if new == .regular, let last=path.last { selection=last.id }
+            if old, !new, let park=selection.flatMap({ model.park($0) }) { path=[park] }
+            else if new, let last=path.last { selection=last.id }
         }
-        // On a wide iPad the list returns beside the park last opened from the map.
+        // In a wide window the list returns beside the park last opened from the map.
         .onChange(of:showsMap) { _,map in
-            guard sizeClass == .regular else { return }
+            guard split else { return }
             if !map, let last=path.last { selection=last.id }
             path.removeAll()
         }
         // ⌘F returns to the list.
         .onChange(of:commands?.searchRequest) { _,_ in path.removeAll(); showsMap=false }
     }
+    /// The list beside the park from the width where a page takes two columns (`WideLayout`, 900 pt,
+    /// 1180 at accessibility text sizes): narrower, the park beside a 390-point list would be cramped,
+    /// so an 11-inch iPad in portrait or a 700-point window keeps the list and pushes the park.
+    /// Unmeasured (0) is a stack, so the first measurement never pushes the chosen park.
+    nonisolated static func split(width:Double,largeText:Bool)->Bool { width>0 && WideLayout.columns(width:width,largeText:largeText)==2 }
+    private var split:Bool { Self.split(width:width,largeText:typeSize.isAccessibilitySize) }
+    /// ⌘R on the list: its own pull-to-refresh, which lives inside `ParksView`.
+    private var listRefresh:RefreshKey { RefreshKey { await model.refresh(model.parks,force:true,parkUpdates:false) } }
     /// List or map: one button that says what it shows next, with a light tick.
     private var mapToggle: some ToolbarContent {
         ToolbarItem(placement:.topBarTrailing) {

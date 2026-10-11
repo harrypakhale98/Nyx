@@ -1,14 +1,22 @@
+import AppIntents
 import SwiftUI
 
 /// Nyx for Apple Vision Pro: plan in a calm window, then stand under the sky you planned for, or
 /// set the night's Moon on the table. Everything is computed on device from bundled data; the one
 /// request is the parks' cloud forecast, behind its switch in Your privacy (`VisionModel+Forecasts`).
 @main struct NyxVisionApp: App {
-    @State private var model = VisionModel()
+    @State private var model: VisionModel
     /// The sky opens most of the way: the room stays at the edges, so nobody is dropped into
     /// darkness, and the Digital Crown opens the rest. DEBUG sky captures open it fully.
     static let opening = VisionDebug.isEnabled("vision-immersive") && !VisionDebug.isEnabled("vision-partial") ? 1.0 : 0.6
     @State private var style: any ImmersionStyle = .progressive(0.35...1, initialAmount: opening)
+    init() {
+        let model = VisionModel()
+        _model = State(initialValue: model)
+        // Siri and Shortcuts reach the same model, and through it the window (`VisionIntents.swift`).
+        AppDependencyManager.shared.add(dependency: model)
+        NyxVisionShortcuts.updateAppShortcutParameters()
+    }
     var body: some Scene {
         WindowGroup(id: PlannerWindow.id) {
             PlannerWindow().environment(model)

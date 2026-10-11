@@ -19,8 +19,8 @@ settings:
     TARGETED_DEVICE_FAMILY: "1,2"
     DEVELOPMENT_TEAM: DUHVN68KBA
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "1.3.1"
-    CURRENT_PROJECT_VERSION: "12"
+    MARKETING_VERSION: "1.4.1"
+    CURRENT_PROJECT_VERSION: "14"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -106,7 +106,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Dark
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find nearby national parks, notice when you are at one, and point the sky to true north. Your location never leaves this device.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 11 km, is used for its cloud forecast.
         # "Where to look by sound" in field mode: AirPods head motion turns the tone with your head (CMHeadphoneMotionManager).
         INFOPLIST_KEY_NSMotionUsageDescription: Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.
         CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
@@ -153,6 +153,9 @@ targets:
         group: Shared
       - path: Nyx/Services/DataServices.swift
         group: Shared
+      # The search radius the launch preload reads (CachePreload.homeArea), in metres since G1.
+      - path: Nyx/Services/SearchRadius.swift
+        group: Shared
       # The campground types `ParkStore` reads and caches (the widget never asks for them).
       - path: Nyx/Models/Campground.swift
         group: Shared
@@ -183,6 +186,8 @@ targets:
       - path: Nyx/Services/NightPlanner.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
@@ -240,6 +245,8 @@ targets:
       - path: Nyx/Services/NightPlanner.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
@@ -325,6 +332,8 @@ targets:
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
         group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
       - path: Nyx/Resources/skyglow.json
@@ -399,9 +408,16 @@ targets:
       # The phone's night rule (`NightPlanner.night`): the forecast where it reaches, usual clouds beyond.
       - path: Nyx/Services/NightPlanner.swift
         group: Shared
+      # The darkest of the next 14 nights and the week of Moons, shared and tested on the iPhone.
+      - path: Nyx/Services/NightsAhead.swift
+        group: Shared
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
       - path: Nyx/Services/CloudForecastClient.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
         group: Shared
@@ -446,7 +462,7 @@ targets:
       - path: Nyx/Models/ParkHandoff.swift
         group: Shared
     # Linked so the App Intents metadata step finds its framework instead of warning on every build
-    # ("Metadata extraction skipped"). The window has no intents of its own yet; linking costs nothing.
+    # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, open a park, stand under tonight's sky) live in NyxVision/Intents.
     dependencies:
       - sdk: AppIntents.framework
       - target: NyxVisionWidgets
@@ -477,6 +493,9 @@ targets:
     platform: visionOS
     sources:
       - path: NyxVisionWidgets
+      # The large face's week of Moons and next new moon, from the date alone.
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
       - path: Nyx/Models/SkyConditions.swift

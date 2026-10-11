@@ -5,16 +5,17 @@ import Testing
 /// The cloud forecast client the iPhone and Vision Pro share (CloudForecastClient.swift), the
 /// switch that keeps Vision Pro silent, and the immersive sky's forecast clouds (`SkyDome`).
 struct VisionCloudsTests {
-    /// Moving the client out of DataServices.swift changed nothing on the wire: all 63 parks in
-    /// two requests (50 and 13), each the exact query the iPhone has sent since 1.1 (7).
+    /// Moving the client out of DataServices.swift changed nothing on the wire: every park in
+    /// requests of up to 50 (two today), each the exact query the iPhone has sent since 1.1 (7).
     @Test func sharedClientSendsTheSameRequests() async throws {
         let parks=try ParkData.load()
-        #expect(parks.count == 63)
+        #expect(parks.count>50)
         let http=StubHTTP([:])
         _=await WeatherService(transport: http, persist: false).forecasts(for: parks, network: true, force: true)
         let urls=await http.urls
-        #expect(urls.count == 2)
-        for (url, chunk) in zip(urls, [Array(parks[0..<50]), Array(parks[50...])]) {
+        let chunks=stride(from: 0, to: parks.count, by: 50).map { Array(parks[$0..<min($0+50, parks.count)]) }
+        #expect(urls.count == chunks.count)
+        for (url, chunk) in zip(urls, chunks) {
             let latitudes=chunk.map { String($0.forecastPoint.latitude) }.joined(separator: ","), longitudes=chunk.map { String($0.forecastPoint.longitude) }.joined(separator: ",")
             #expect(url.absoluteString == "https://api.open-meteo.com/v1/forecast?latitude=\(latitudes)&longitude=\(longitudes)&hourly=cloud_cover&forecast_days=15&past_days=1&timeformat=unixtime&timezone=GMT")
         }

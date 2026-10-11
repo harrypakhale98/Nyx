@@ -22,17 +22,17 @@ struct TonightProvider:AppIntentTimelineProvider {
     }
     /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
     static var sample:SavedSkySnapshot? {
-        (try? ParkData.load().first(where:{ $0.id=="jotr" })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
+        (try? ParkData.load().first(where:{ $0.id==Park.defaultID })).map { SavedSkySnapshot(parks:[$0],forecasts:[:]) }
     }
     /// The month's calendar is drawn in the large, extra-large and (iOS 27, iPad) portrait extra-large widgets.
     static func large(_ family:WidgetFamily)->Bool {
         if #available(iOS 27.0,*), family == .systemExtraLargePortrait { return true }
         return family == .systemLarge || family == .systemExtraLarge
     }
-    /// The park a widget was set to follow, from the bundled library.
+    /// The park a widget was set to follow, from the bundled library, or a followed spot from the snapshot.
     static func park(_ entity:ParkEntity?)->Park? {
         guard let entity else { return nil }
-        return (try? ParkData.load())?.first { $0.id==entity.id }
+        return ParkLibrary.place(entity.id)
     }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
     /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
@@ -98,8 +98,7 @@ struct MoonProvider:AppIntentTimelineProvider {
     }
     /// The chosen park, else the first saved park, else Joshua Tree in the gallery's preview.
     static func park(_ entity:ParkEntity?)->Park? {
-        let library=(try? ParkData.load()) ?? []
-        if let entity { return library.first { $0.id==entity.id } }
+        if let entity { return ParkLibrary.place(entity.id) }
         return SharedSettings.read()?.parks.first
     }
 }
@@ -108,7 +107,7 @@ struct MoonWidget:Widget {
     var body:some WidgetConfiguration {
         AppIntentConfiguration(kind:"MoonWidget",intent:MoonWidgetIntent.self,provider:MoonProvider()) { entry in MoonWidgetView(entry:entry) }
             .configurationDisplayName("The Moon").description("Tonight's Moon: its phase, how much is lit, and when it rises or sets at your park.")
-            .supportedFamilies([.systemSmall,.accessoryCircular,.accessoryInline])
+            .supportedFamilies([.systemSmall,.accessoryCircular,.accessoryRectangular,.accessoryInline])
     }
 }
 
@@ -164,3 +163,22 @@ struct TonightControlProvider:AppIntentControlValueProvider {
 #Preview(as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.accessoryInline) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.systemSmall) { MoonWidget() } timeline:{ MoonEntry(date:.now,park:nil,nightVision:false) }
+#Preview(as:.accessoryRectangular) { MoonWidget() } timeline:{
+    MoonEntry(date:.now,park:TonightProvider.sample?.parks.first,nightVision:false)
+    MoonEntry(date:.now,park:nil,nightVision:false)
+}
+#if DEBUG
+extension TonightProvider {
+    /// Joshua Tree tonight with a closure (illustrative words), for the closure mark's previews.
+    static var closureSample:TonightEntry {
+        var builder=TonightTimeline(snapshot:sample,large:false)
+        var entry=builder.entry(at:.now)
+        entry.closure="Keys View Road closed at night"
+        return entry
+    }
+}
+#Preview("Closure",as:.systemSmall) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryCircular) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryInline) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#endif

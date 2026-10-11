@@ -3,7 +3,11 @@ import Foundation
 import Testing
 @testable import Nyx
 
-actor StubHTTP:HTTPTransport {
+extension StubHTTP: HTTPTransport {}
+
+// The conformance sits in an extension: declared on the actor itself, Swift's conformance-isolation
+// inference sometimes marked the actor `nonisolated` (an error) depending on which test files compiled with it.
+actor StubHTTP {
     var urls:[URL]=[]
     var fail=false
     var status:Int?

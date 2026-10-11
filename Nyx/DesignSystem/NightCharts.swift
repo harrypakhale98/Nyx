@@ -60,7 +60,7 @@ nonisolated struct NightChart: Sendable {
     static func summary(_ nights:[Night])->String {
         guard let best=NightPlanner.best(nights) else { return String(localized:"No nights available") }
         let estimates=nights.filter { $0.basis == .usual }.count
-        let first=String(localized:"Best night: \(best.park.dayLabel(best.id)), \(best.score.value) out of 100, \(best.score.band.label).")
+        let first=best.spokenSummary(.chartBest)
         let second=estimates==0 ? (nights.allSatisfy { $0.score.hasForecast } ? String(localized:"Every night includes a cloud forecast.") : String(localized:"Every night includes a cloud forecast; the later ones are an early look."))
             : estimates==nights.count ? String(localized:"No night has a cloud forecast yet; scores use each park's usual clouds.")
             : String(localized:"Nights without a cloud forecast yet: \(estimates) of \(nights.count).")

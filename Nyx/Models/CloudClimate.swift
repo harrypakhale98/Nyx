@@ -5,7 +5,8 @@ import Foundation
 /// Climate Change Service, CC BY 4.0). Where no forecast reaches, a night is scored with its park's
 /// usual cloud for the month, and a forecast more than three days ahead is eased toward it
 /// (`CloudBasis`), so a night nobody can forecast yet is neither assumed clear nor ignored. It is
-/// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look".
+/// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look". A place
+/// the file does not hold reads the world grid's usual clouds instead (`SkyGrid`, G2).
 nonisolated struct CloudClimate: Decodable, Sendable {
     struct Months: Decodable, Sendable {
         /// Mean cloud over the dark hours, percent, January first.
@@ -18,29 +19,47 @@ nonisolated struct CloudClimate: Decodable, Sendable {
         let month: Int
         let cloud: Double
         let clear: Double
+        /// True when the month comes from the world grid (`SkyGrid`), whose share of clear nights is
+        /// estimated from the month's cloud rather than counted night by night: its sentences say so.
+        var estimated = false
         /// "About 8 in 10 November nights here are mostly clear."
         func sentence(monthName: String) -> String {
             let tenths = Int((clear/10).rounded())
             switch tenths {
-            case ...0: return String(localized: "\(monthName) nights here are rarely clear.")
-            case 10...: return String(localized: "\(monthName) nights here are nearly always clear.")
+            case ...0: return estimated ? String(localized: "\(monthName) nights here are rarely clear, by an estimate.") : String(localized: "\(monthName) nights here are rarely clear.")
+            case 10...: return estimated ? String(localized: "\(monthName) nights here are nearly always clear, by an estimate.") : String(localized: "\(monthName) nights here are nearly always clear.")
             default: return String(localized: "About \(tenths) in 10 \(monthName) nights here are mostly clear.")
             }
         }
     }
+    private enum CodingKeys: String, CodingKey { case parks }
     let parks: [String: Months]
+    /// The world grid, for a place the per-park file does not hold (any place that is not one of
+    /// the 63 parks). nil keeps to the file alone: `load` and every hand-built climate, so a test's
+    /// empty climate still means no usual clouds at all.
+    var grid: SkyGrid? = nil
 
-    static let shared: CloudClimate = load() ?? CloudClimate(parks: [:])
+    /// The bundled per-park file, with the world grid behind it.
+    static let shared: CloudClimate = {
+        var climate = load() ?? CloudClimate(parks: [:])
+        climate.grid = .shared
+        return climate
+    }()
     static func load(_ bundle: Bundle = .main) -> CloudClimate? {
         guard let url = bundle.url(forResource: "cloud-climate", withExtension: "json"), let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(CloudClimate.self, from: data)
     }
-    /// The month of the night that begins on `evening`, at `park`.
+    /// The month of the night that begins on `evening`, at `park`. A park in the file keeps its
+    /// own ten years of ERA5 at its coordinates (the 63 parks never take the grid's value);
+    /// anywhere else, the grid's cell, marked `estimated`.
     func typical(_ park: Park, on evening: Date) -> Typical? {
         let month = park.calendar.component(.month, from: evening)
-        guard let entry = parks[park.id], entry.cloud.count == 12, entry.clear.count == 12,
-              let cloud = entry.cloud[month-1], let clear = entry.clear[month-1] else { return nil }
-        return Typical(month: month, cloud: Double(cloud), clear: Double(clear))
+        if let entry = parks[park.id] {
+            guard entry.cloud.count == 12, entry.clear.count == 12, let cloud = entry.cloud[month-1], let clear = entry.clear[month-1] else { return nil }
+            return Typical(month: month, cloud: Double(cloud), clear: Double(clear))
+        }
+        guard let cell = grid?.cloudNight(latitude: park.latitude, longitude: park.longitude, month: month) else { return nil }
+        return Typical(month: month, cloud: cell.mean, clear: cell.clear, estimated: true)
     }
     /// The plain line beside a night that has no cloud forecast; nil without data.
     func sentence(_ park: Park, on evening: Date) -> String? {
@@ -102,3 +121,83 @@ extension Night {
         }
     }
 }
+
+#if os(iOS)
+// Only the iPhone and iPad app and its widgets say a night's score as a sentence; the guard keeps
+// these keys out of the watch's and Vision Pro's string extraction.
+extension Night {
+    /// Every sentence that says a night's score ("Fri, Oct 9, 94 out of 100, Pristine. …") in one
+    /// place, so the surfaces cannot drift apart. Each style is its own String Catalog key.
+    nonisolated enum SpokenSummary: Sendable {
+        /// The time river: "Fri, Oct 9, 94 out of 100, Pristine." then the long caption with the
+        /// month's usual clouds, or "Forecast included".
+        case river
+        /// The calendar's list: as `river`, then the night's sky event, under its own key.
+        case calendar(event: String?)
+        /// The Tonight widget: the park, the score and band, then the short caption or "Cached forecast included".
+        case widget
+        /// The chart's summary: "Best night: Fri, Oct 9, 94 out of 100, Pristine."
+        case chartBest
+        /// One night of a stay: "Fri, Oct 9, 94 out of 100, Pristine, usual clouds".
+        case dayWithBasis
+        /// The score alone: "94 out of 100, Pristine, early look".
+        case scoreWithBasis
+        /// A shared trip, one line a night: "Fri, Oct 9: Arches, 94 out of 100, Pristine. New moon, …."
+        case tripLine(reason: String)
+        /// A stay's calendar notes, one line a night: "Fri, Oct 9: darkness score 94 out of 100 (Pristine). …."
+        case stayNote(reason: String)
+        /// A calendar event's first line, with what the clouds rest on.
+        case eventNote
+        /// Siri, tonight at the park (the intent puts any closure first). Voice-only keeps the one caveat that matters.
+        case siriTonight(voiceOnly: Bool)
+        /// Siri, the best of the next `count` nights.
+        case siriBest(count: Int, voiceOnly: Bool)
+        /// Siri's card, for VoiceOver: the score, the band and the Moon.
+        case snippet
+    }
+    nonisolated func spokenSummary(_ style: SpokenSummary) -> String {
+        switch style {
+        case .river:
+            let clouds=basisCaption(typical:true) ?? String(localized:"Forecast included")
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(clouds)")
+        case .calendar(let event):
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Forecast included"))\(event.map { ". "+$0 } ?? "")")
+        case .widget:
+            return String(localized:"\(park.shortName), \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Cached forecast included"))")
+        case .chartBest:
+            return String(localized:"Best night: \(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label).")
+        case .dayWithBasis:
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(bandWithBasis)")
+        case .scoreWithBasis:
+            return String(localized:"\(score.value) out of 100, \(bandWithBasis)")
+        case .tripLine(let reason):
+            return String(localized:"\(park.dayLabel(id)): \(park.shortName), \(score.value) out of 100, \(bandWithBasis). \(reason).")
+        case .stayNote(let reason):
+            return String(localized:"\(park.dayLabel(id)): darkness score \(score.value) out of 100 (\(bandWithBasis)). \(reason).")
+        case .eventNote:
+            return score.hasForecast
+                ? String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)), with the cloud forecast as Nyx last saw it.")
+                : String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)).")+" "+(basisCaption(typical:true) ?? "")
+        case .siriTonight(let voiceOnly):
+            if sky.darkHours==0 { return String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
+            if voiceOnly { return voiceAnswer(String(localized:"Tonight")) }
+            if let caption=basisCaption() { return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
+            return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.")
+        case .siriBest(let count,let voiceOnly):
+            let day=park.programDate(park.isoDay(id))
+            if voiceOnly { return voiceAnswer(day) }
+            if sky.darkHours==0 { return String(localized:"No true darkness at \(park.shortName) in the next \(count) nights. The best is \(day), \(score.value) out of 100.") }
+            let basis=basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
+            return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm park access before you go.")
+        case .snippet:
+            return String(localized:"\(park.shortName) tonight: \(score.value) out of 100, \(score.band.label). \(sky.moon.name), \(Int((sky.moon.illumination*100).rounded())) percent lit.")
+        }
+    }
+    /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full
+    /// forecast, the one caveat about the clouds.
+    private nonisolated func voiceAnswer(_ day: String) -> String {
+        let caveat=score.hasForecast ? "" : " "+(basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+        return String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label).")+caveat
+    }
+}
+#endif

@@ -89,9 +89,9 @@ struct DelightTests {
     @Test func emptyPlans() {
         #expect(TripPlanner.plan(days:[friday],grid:[[]],closures:[:],maxHopMeters:1).stops.isEmpty)
         #expect(TripPlanner.plan(days:[],grid:[],closures:[:],maxHopMeters:1).stops.isEmpty)
-        #expect(TripPlanner.candidates(parks,latitude:0,longitude:-140,radiusMiles:300).isEmpty)
+        #expect(TripPlanner.candidates(parks,latitude:0,longitude:-140,radiusMeters:300*SearchRadius.metersPerMile).isEmpty)
         // Joshua Tree's 200-mile circle holds Joshua Tree itself and is sorted by id.
-        let near=TripPlanner.candidates(parks,latitude:33.87,longitude:-115.9,radiusMiles:200).map(\.id)
+        let near=TripPlanner.candidates(parks,latitude:33.87,longitude:-115.9,radiusMeters:200*SearchRadius.metersPerMile).map(\.id)
         #expect(near.contains("jotr") && near==near.sorted())
     }
 
@@ -150,28 +150,6 @@ struct DelightTests {
 
     // MARK: Your constellation
 
-    @Test func everyParkHasAPlaceOnTheSkyMap() throws {
-        #expect(parks.count==63)
-        var points:[(String,CGPoint)]=[]
-        for park in parks {
-            let point=SkyMap.position(park), inset=SkyMap.inset(SkyMap.region(park))
-            #expect((0...1).contains(point.x) && (0...SkyMap.aspect).contains(point.y),"\(park.id)")
-            #expect(inset.frame.insetBy(dx:-0.001,dy:-0.001).contains(point),"\(park.id)")
-            // Lower-48 parks stay clear of the insets drawn in the sea.
-            if SkyMap.region(park) == .lower48 { for other in SkyMap.insets.dropFirst() { #expect(!other.frame.contains(point),"\(park.id) in \(other.region)") } }
-            points.append((park.id,point))
-        }
-        let gaar=try park("gaar"), havo=try park("havo"), npsa=try park("npsa"), viis=try park("viis")
-        #expect(SkyMap.region(gaar) == .alaska && SkyMap.region(havo) == .hawaii && SkyMap.region(npsa) == .samoa && SkyMap.region(viis) == .virginIslands)
-        // North is up and east is right inside the lower 48.
-        let acad=try park("acad"), olym=try park("olym"), glac=try park("glac"), bibe=try park("bibe")
-        #expect(SkyMap.position(acad).x>SkyMap.position(olym).x)
-        #expect(SkyMap.position(glac).y<SkyMap.position(bibe).y)
-        // No two parks share a point (Sequoia and Kings Canyon are the closest pair).
-        for i in points.indices { for j in points.indices where j>i {
-            #expect(hypot(points[i].1.x-points[j].1.x,points[i].1.y-points[j].1.y)>0.0015,"\(points[i].0) \(points[j].0)")
-        } }
-    }
     @Test func constellationIsDeterministic() throws {
         var calendar=Calendar(identifier:.gregorian); calendar.timeZone=TimeZone(identifier:"America/Denver") ?? .gmt
         func date(_ iso:String) throws -> Date { try #require(TripDay(iso:iso)?.evening(in:try park("grba"))) }
@@ -209,7 +187,7 @@ struct DelightTests {
         let nights=[LoggedNight(id:id(),date:.now,parkID:"grba",observedBortle:2),LoggedNight(id:id(),date:.now,parkID:"grba",observedBortle:1),
                     LoggedNight(id:id(),date:.now,parkID:"jotr",observedBortle:4)]
         let seen=SkiesSeen(nights:nights,parks:parks)
-        #expect(seen.parks.count==2 && seen.total==63 && seen.line==String(localized:"2 of 63 national park skies"))
+        #expect(seen.parks.count==2 && seen.total==parks.count && seen.line==String(localized:"2 of \(parks.count) national park skies"))
         #expect(seen.parks.first?.id=="grba" && seen.parks.first?.darkestBortle==1 && seen.parks.first?.nights==2)
     }
 

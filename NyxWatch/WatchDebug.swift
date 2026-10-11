@@ -2,11 +2,12 @@ import SwiftUI
 import WidgetKit
 
 /// Screenshot routes for the watch, DEBUG only (Release always starts on Tonight):
-/// `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`
+/// `-nyx-watch-screen tonight | milestones | whatsup | week | dark | parks | chooser | credits | complications`
 /// `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired | models`, `-nyx-watch-palette automatic | red | phone | standard`,
 /// `-nyx-watch-night 0…6` (Tonight turned to that night with the Crown), `-nyx-watch-adaptation <minutes>`
 /// (the adaptation clock started that long ago), `-nyx-watch-info` (the dark-adaptation info sheet), `-nyx-watch-aod` (Always-On, which the simulator cannot show),
 /// `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame).
+/// `-nyx-watch-ask asking | asked | resending | unreachable | locked`: "Update from iPhone" as if just answered (with `expired` or `unsynced`).
 /// `-nyx-watch-shift <hours>`: the app's minute moved that far ahead, to review moments of the night by day.
 /// `-nyx-watch-type large | xLarge | xxLarge` (or `-nyx-watch-xxxl`, `-nyx-watch-ax`): a text size the simulator cannot set.
 /// States change who is followed, never a score: every night is computed by the real engine.
@@ -18,7 +19,7 @@ enum WatchDebug {
         return nil
         #endif
     }
-    static var initialPage: Int { ["milestones": 1, "week": 2][screen ?? ""] ?? 0 }
+    static var initialPage: Int { ["milestones": 1, "whatsup": 2, "week": 3][screen ?? ""] ?? 0 }
     static var initialNight: Int {
         #if DEBUG
         return argument("-nyx-watch-night").flatMap(Int.init).map { min(6, max(0, $0)) } ?? 0
@@ -53,7 +54,7 @@ enum WatchDebug {
         #endif
     }
     /// Screens that are Tonight itself (a page, or the dark-adaptation cover over it).
-    static let homeScreens: Set<String> = ["tonight", "milestones", "week", "dark"]
+    static let homeScreens: Set<String> = ["tonight", "milestones", "whatsup", "week", "dark"]
     /// `-nyx-watch-ax`: the largest accessibility text size (the watch simulator cannot set it);
     /// `-nyx-watch-xxxl`: the largest size short of the accessibility sizes;
     /// `-nyx-watch-type large | xLarge | xxLarge`: one of the sizes between.
@@ -131,6 +132,8 @@ enum WatchDebug {
             store.debugSet(context: WatchContext(sent: old, savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: true, forecasts: compact), pinned: nil)
         default: break
         }
+        let asks: [String: IPhoneAsk.State] = ["asking": .asking, "asked": .asked, "resending": .resending, "unreachable": .unreachable, "locked": .locked]
+        if let state = argument("-nyx-watch-ask").flatMap({ asks[$0] }) { store.debugSet(ask: IPhoneAsk(state, at: .now)) }
         if let minutes = argument("-nyx-watch-adaptation").flatMap(Double.init) {
             store.debugSet(adaptation: AdaptationClock(start: .now.addingTimeInterval(-minutes*60)))
         }
@@ -182,7 +185,8 @@ private struct ComplicationReview: View {
     var body: some View {
         let night = store.tonight(park, at: .now)
         let red = store.nightVision(at: .now)
-        let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red, closure: store.context?.closures[park.id])
+        let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red, closure: store.context?.closures[park.id],
+                                  cloudsOld: WatchTimeline.isOld(store.context?.forecasts[park.id]?.updated, at: .now))
         let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park), nightVision: red)
         let dark = NextDarkEntry(date: .now, park: park, moment: DarkMoment.next(at: park, now: .now), nightVision: red)
         // Countdowns are drawn for this moment: a live `.currentDate` reference inside an app scroll view

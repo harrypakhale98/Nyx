@@ -40,12 +40,19 @@ nonisolated enum WatchSky {
     }
     /// The parks Tonight and the complications weigh, in order: a park kept on the watch; else the
     /// parks saved on iPhone; else the iPhone's starting park. Empty until one of those exists.
+    /// Saved spots and world catalogue places arrive whole in the context (`WatchContext.places`); a
+    /// bundled park keeps its id.
     static func candidates(in parks: [Park], context: WatchContext?, pinned: String?) -> [Park] {
-        let byID = Dictionary(parks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let byID = Dictionary((parks + (context?.places ?? [])).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         if let pinned, let park = byID[pinned] { return [park] }
         let saved = (context?.savedParkIDs ?? []).compactMap { byID[$0] }
         if !saved.isEmpty { return saved }
         return context.flatMap { byID[$0.homeParkID] }.map { [$0] } ?? []
+    }
+    /// A place by id on the wrist: a bundled park, else a saved spot or catalogue place the iPhone
+    /// sent whole (`WatchContext.places`). Nil for an id neither knows.
+    static func place(_ id: String, in parks: [Park], context: WatchContext?) -> Park? {
+        parks.first { $0.id == id } ?? context?.places.first { $0.id == id }
     }
     /// One night at one park, scored on the watch from the bundled park, the astronomy engine and,
     /// when the iPhone sent them, the cached cloud forecast and the smoke and summit layers, by the
@@ -87,12 +94,33 @@ nonisolated struct WatchLink: Hashable, Sendable {
     }
     init?(_ url: URL) {
         guard url.scheme?.lowercased() == "nyx", url.host()?.lowercased() == "park",
-              let id = url.pathComponents.first(where: { $0 != "/" })?.lowercased(),
-              (2...8).contains(id.count), id.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
+              let raw = url.pathComponents.first(where: { $0 != "/" }), let id = Self.placeID(raw) else { return nil }
         parkID = id
         let date = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "date" }?.value
         let parts = date?.split(separator: "-").compactMap { Int($0) } ?? []
         day = parts.count == 3 ? DateComponents(year: parts[0], month: parts[1], day: parts[2]) : nil
+    }
+    /// A place id in its stored form, as the iPhone's links read it (`DeepLink.placeID`): a park's
+    /// letters (any case), a Wikidata item (`wd:Q123456`) or a saved spot (`pin:` and a UUID, lowercase).
+    static func placeID(_ raw: String) -> String? {
+        let raw = raw.contains("%") ? (raw.removingPercentEncoding ?? raw) : raw
+        let parts = raw.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
+        if parts.count == 1 {
+            guard (2...8).contains(raw.count), raw.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
+            return raw.lowercased()
+        }
+        let rest = parts[1]
+        switch parts[0].lowercased() {
+        case "wd":
+            let digits = rest.dropFirst()
+            guard rest.first?.lowercased() == "q", (1...12).contains(digits.count), digits.first != "0",
+                  digits.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+            return "wd:Q\(digits)"
+        case "pin":
+            guard rest.count == 36, let uuid = UUID(uuidString: String(rest)) else { return nil }
+            return "pin:\(uuid.uuidString.lowercased())"
+        default: return nil
+        }
     }
     var url: URL? {
         var components = URLComponents()

@@ -10,10 +10,11 @@ import SwiftUI
 @available(iOS 27.0,*)
 extension ParkQuery:IndexedEntityQuery {
     func reindexEntities(for identifiers:[String],indexDescription:CSSearchableIndexDescription) async throws {
-        try await SpotlightIndexer.index(ParkData.load().filter { identifiers.contains($0.id) })
+        try await SpotlightIndexer.reindex(identifiers)
     }
+    /// The curated parks and the world catalogue places Nyx keeps in Spotlight (`SpotlightIndexer`).
     func reindexAllEntities(indexDescription:CSSearchableIndexDescription) async throws {
-        try await SpotlightIndexer.index(ParkData.load())
+        try await SpotlightIndexer.reindexAll()
     }
 }
 /// What Siri and Shortcuts say when an intent cannot answer, in the same calm words as the app.
@@ -21,7 +22,7 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
     case parkNotFound, noParks, noNights, journalUnavailable
     var localizedStringResource:LocalizedStringResource {
         switch self {
-        case .parkNotFound: "That park could not be found in the bundled library."
+        case .parkNotFound: "That place could not be found in Nyx."
         case .noParks: "Choose a park, or save parks in Nyx to compare them."
         case .noNights: "Nyx could not find those nights."
         case .journalUnavailable: "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more."
@@ -32,11 +33,12 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
 /// on a still dial, the Moon, what the clouds rest on), and returns the score so Shortcuts can use it.
 struct DarknessIntent:AppIntent {
     static let title:LocalizedStringResource="Tonight's darkness score"
-    static let description=IntentDescription("Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.")
+    static let description=IntentDescription("Find the on-device darkness estimate for a park or dark-sky place. Returns the score, 0 to 100.")
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
-        guard let selected=try ParkData.load().first(where:{$0.id==park.id}) else { throw NyxIntentError.parkNotFound }
+        // A park or followed place, else any world catalogue place by its id (one found by search, not followed).
+        guard let selected=try ParkLibrary.places().first(where:{$0.id==park.id}) ?? ParkLibrary.place(park.id) else { throw NyxIntentError.parkNotFound }
         // Saved parks share their forecast with the widget; the app's own cache may be newer.
         let shared=SharedSettings.read()
         var voiceOnly=false
@@ -60,16 +62,10 @@ nonisolated struct DarknessAnswer:Sendable {
     }
     /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
     static func dialog(_ night:Night,closure:String?,voiceOnly:Bool)->String {
-        let park=night.park, score=night.score
-        let body:String
-        if night.sky.darkHours==0 { body=String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        else if voiceOnly {
-            let basis=score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
-            let tonight=String(localized:"Tonight")
-            body=String(localized:"\(tonight) at \(park.shortName): \(score.value), \(score.band.label).")+basis
-        }
-        else if let caption=night.basisCaption() { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-        else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
+        closureFirst(night.spokenSummary(.siriTonight(voiceOnly:voiceOnly)),closure:closure)
+    }
+    /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
+    static func closureFirst(_ body:String,closure:String?)->String {
         guard let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty else { return body }
         return sentence(String(localized:"Closure alert: \(closure)"))+" "+body
     }
@@ -87,7 +83,7 @@ struct DarknessSnippetView:View {
         HStack(alignment:.center,spacing:18) {
             StaticScoreDial(score:night.score.value,hasForecast:night.score.hasForecast,palette:palette).frame(width:118,height:118)
             VStack(alignment:.leading,spacing:6) {
-                Text("Tonight").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:8) {
@@ -101,12 +97,12 @@ struct DarknessSnippetView:View {
         }
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(palette.snippetBackground,in:RoundedRectangle(cornerRadius:22))
         .environment(\.nyx,palette)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.score.band.label). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))
+        .accessibilityLabel(night.spokenSummary(.snippet))
     }
 }
 /// The celestial gauge's arc and numeral, drawn once: for snapshots (Siri) where nothing animates.
@@ -134,11 +130,19 @@ struct StaticScoreDial:View {
     let model=PlanModel()
     if let park=model.home { DarknessSnippetView(night:model.night(park)).padding() }
 }
+/// Nine of the ten App Shortcuts an app may offer. Every phrase names Nyx; parks come from
+/// `ParkQuery.suggestedEntities`, refreshed by `updateAppShortcutParameters()` at launch and when saved parks change.
 struct NyxShortcuts:AppShortcutsProvider {
     static var appShortcuts:[AppShortcut] {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
         AppShortcut(intent:FindBestNightIntent(),phrases:["Find the best night at \(\.$park) with \(.applicationName)","When is the darkest night at \(\.$park) in \(.applicationName)","Find the best night for stars with \(.applicationName)"],shortTitle:"Best night",systemImageName:"calendar")
-        AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
+        AppShortcut(intent:DarkTonightIntent(),phrases:["When is it dark tonight in \(.applicationName)","When is it dark at \(\.$park) in \(.applicationName)","When does true darkness start at \(\.$park) in \(.applicationName)"],shortTitle:"Dark hours",systemImageName:"moon.haze")
+        AppShortcut(intent:WhatsUpTonightIntent(),phrases:["What's up tonight in \(.applicationName)","What's up tonight at \(\.$park) in \(.applicationName)","What can I see tonight at \(\.$park) with \(.applicationName)"],shortTitle:"What's up",systemImageName:"sparkles")
+        // A park is optional: without one, field mode opens at the last park used in the field, else the starting park.
+        AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)","Start field mode in \(.applicationName)","I'm stargazing with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
+        AppShortcut(intent:FollowNightIntent(),phrases:["Follow tonight in \(.applicationName)","Follow tonight at \(\.$park) in \(.applicationName)","Put tonight on my Lock Screen with \(.applicationName)"],shortTitle:"Follow tonight",systemImageName:"lock.rectangle")
+        AppShortcut(intent:UnfollowNightIntent(),phrases:["Stop following the night in \(.applicationName)","Stop following \(\.$park) in \(.applicationName)"],shortTitle:"Stop following",systemImageName:"moon.stars")
+        AppShortcut(intent:NightVisionOnIntent(),phrases:["Turn on night vision in \(.applicationName)","Turn on \(.applicationName) night vision"],shortTitle:"Night vision",systemImageName:"flashlight.on.circle.fill")
         AppShortcut(intent:AddJournalEntryIntent(),phrases:["Add to my \(.applicationName) journal","Record a night in \(.applicationName)"],shortTitle:"Record a night",systemImageName:"book.closed")
     }
 }
