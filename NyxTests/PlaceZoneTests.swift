@@ -42,14 +42,16 @@ struct PlaceZoneTests {
 
     /// Every bundled place carries the zone the old table gave it: US behaviour is unchanged.
     @Test func storedZonesMatchTheOldTable() throws {
-        #expect(places.count>=1000)
+        // The US rows, from the Census list: the world rows carry GeoNames' own zones.
+        let us=places.filter { $0.countryCode=="US" }
+        #expect(us.count>=1000)
         var matched=0
-        for place in places {
+        for place in us {
             let old=Self.oldZone(state: place.state, latitude: place.latitude, longitude: place.longitude)
             #expect(place.timeZoneID == old, "\(place.label)")
             if place.timeZoneID == old { matched+=1 }
         }
-        #expect(matched == places.count)
+        #expect(matched == us.count)
     }
     /// The oracle itself, checked against every US park's own zone (winter and summer offsets).
     @Test func theOldTableAgreesWithTheParks() throws {
@@ -65,7 +67,7 @@ struct PlaceZoneTests {
         for place in places {
             #expect(place.timeZoneID.flatMap(TimeZone.init(identifier:)) != nil, "\(place.label)")
             #expect(place.timeZone.identifier == place.timeZoneID, "\(place.label)")
-            #expect(place.countryCode.count == 2 && !place.state.isEmpty && !place.regionName.isEmpty, "\(place.label)")
+            #expect(place.countryCode.count == 2 && (place.countryCode != "US" || !place.state.isEmpty) && !place.regionName.isEmpty, "\(place.label)")
             #expect((-90...90).contains(place.latitude) && (-180...180).contains(place.longitude), "\(place.label)")
         }
     }

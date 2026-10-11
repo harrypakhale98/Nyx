@@ -40,8 +40,9 @@ nonisolated enum WatchSky {
     }
     /// The parks Tonight and the complications weigh, in order: a park kept on the watch; else the
     /// parks saved on iPhone; else the iPhone's starting park. Empty until one of those exists.
+    /// Saved spots arrive whole in the context (`WatchContext.places`); a bundled park keeps its id.
     static func candidates(in parks: [Park], context: WatchContext?, pinned: String?) -> [Park] {
-        let byID = Dictionary(parks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let byID = Dictionary((parks + (context?.places ?? [])).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         if let pinned, let park = byID[pinned] { return [park] }
         let saved = (context?.savedParkIDs ?? []).compactMap { byID[$0] }
         if !saved.isEmpty { return saved }

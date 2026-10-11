@@ -13,6 +13,59 @@ nonisolated enum CloudForecastSwitch {
     static let key = "weatherEnabled"
     static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
 }
+/// Saved spots' cloud forecasts (G3): their own switch in Your privacy, on unless turned off, and
+/// effective only while `CloudForecastSwitch` is on too. A saved spot is the one request that
+/// carries a place the person chose rather than a public park, so it carries less: the spot's
+/// coordinates rounded to 0.1° (about 11 km), clouds only, in a request of its own that never
+/// mixes spots with the parks. Never the device's location, unless the person saved it as a spot.
+/// Approved by the owner on 2026-10-11.
+nonisolated enum SpotForecast {
+    static let key = "spotForecastsEnabled"
+    static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
+    /// A point on the 0.1° grid, held as whole tenths of a degree so it is exact and compares exactly.
+    nonisolated struct Point: Hashable, Sendable {
+        let latitudeTenths: Int
+        let longitudeTenths: Int
+        /// The nearest grid point (halves away from zero); latitudes clamp to ±90°, longitudes wrap into −180…180°.
+        /// Nil for a coordinate that is not a number.
+        init?(latitude: Double, longitude: Double) {
+            guard latitude.isFinite, longitude.isFinite else { return nil }
+            latitudeTenths=min(900, max(-900, Int((latitude*10).rounded())))
+            var lon=Int((longitude*10).rounded()) % 3600
+            if lon > 1800 { lon -= 3600 } else if lon < -1800 { lon += 3600 }
+            longitudeTenths=lon
+        }
+        var latitude: Double { Double(latitudeTenths)/10 }
+        var longitude: Double { Double(longitudeTenths)/10 }
+        /// "37.1", "-0.5", "180.0": always one decimal, written from the tenths, never from a float.
+        static func text(_ tenths: Int) -> String { "\(tenths<0 ? "-" : "")\(abs(tenths)/10).\(abs(tenths)%10)" }
+    }
+    /// Each spot's grid point, and the distinct points in the order first seen: spots that round to
+    /// the same point are asked about once.
+    static func points(_ spots: [Park]) -> (points: [Point], byID: [String: Point]) {
+        var points: [Point]=[], seen=Set<Point>(), byID: [String: Point]=[:]
+        for spot in spots {
+            guard let point=Point(latitude: spot.latitude, longitude: spot.longitude) else { continue }
+            byID[spot.id]=point
+            if seen.insert(point).inserted { points.append(point) }
+        }
+        return (points, byID)
+    }
+    /// The parks' cloud request with only rounded points in it: the same host, hours and fields,
+    /// and nothing else (no name, no id, no zone).
+    static func url(for points: [Point]) -> URL? {
+        guard !points.isEmpty else { return nil }
+        var parts=URLComponents()
+        parts.scheme="https"; parts.host=WeatherService.host; parts.path="/v1/forecast"
+        parts.queryItems=[URLQueryItem(name: "latitude", value: points.map { Point.text($0.latitudeTenths) }.joined(separator: ",")),
+            URLQueryItem(name: "longitude", value: points.map { Point.text($0.longitudeTenths) }.joined(separator: ",")),
+            URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "forecast_days", value: "15"), URLQueryItem(name: "past_days", value: "1"),
+            URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        return parts.url
+    }
+    /// A place's forecast cache file: "weather-jotr" for a park, as always; "weather-pin-<uuid>" for a spot (no colon in a file name).
+    static func cacheName(_ id: String) -> String { "weather-"+id.replacingOccurrences(of: ":", with: "-") }
+}
 nonisolated protocol HTTPTransport: Sendable {
     func get(_ url: URL) async throws -> Data
     /// With request headers (the NPS key travels as `X-Api-Key`, never in the URL) and whether the
@@ -199,8 +252,12 @@ nonisolated protocol WeatherProviding: Sendable {
     func hydrate(_ parks: [Park]) async -> [String: Forecast]
     /// Forecasts already read at launch (`CachePreload`), so no file is read again.
     func seed(_ cached: [String: Forecast], parks: [Park]) async
+    /// Saved spots' clouds: cached, and with `network` refreshed in a request of their own
+    /// (`SpotForecast`). Services without spots answer with nothing.
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast]
 }
 nonisolated extension WeatherProviding {
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool) async -> [String: Forecast] { [:] }
     func forecast(for park: Park, network: Bool, force: Bool = false) async -> Forecast? {
         await forecasts(for: [park], network: network, force: force)[park.id]
     }
@@ -218,8 +275,13 @@ actor WeatherService: WeatherProviding {
     private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
     /// How many callers are still waiting on each request in flight.
     private var waiters: [Task<[String: Forecast], Never>: Int] = [:]
-    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
-        self.transport=transport; self.persist=persist; self.clock=clock
+    /// The saved spots' request under way, if any; later callers wait for it.
+    private var spotFlight: Task<[String: Forecast], Never>?
+    /// Where the spots' switch is read; tests use their own suite.
+    private let suite: String?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, suite: String? = nil,
+         clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock; self.suite=suite
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
     }
     func hydrate(_ parks: [Park]) async -> [String: Forecast] {
@@ -230,7 +292,7 @@ actor WeatherService: WeatherProviding {
         for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
     }
     private func load(_ id: String) {
-        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: "weather-\(id)") else { return }
+        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(Forecast.self, name: SpotForecast.cacheName(id)) else { return }
         memory[id]=cached
     }
     /// Cached forecasts for every park, refreshed in as few requests as possible: Open-Meteo
@@ -276,10 +338,66 @@ actor WeatherService: WeatherProviding {
         }
         return result
     }
+    /// Saved spots' clouds (G3), kept and refreshed as the parks' are (six hours fresh, ten minutes
+    /// between forced refreshes, the same cache, backoff and guarded transport), but never in the
+    /// parks' request: one request of their own (two past fifty distinct points) carrying only each
+    /// spot's coordinates rounded to 0.1°, the same rounded point asked once. Asked only with
+    /// `network` and the spots' switch on (`SpotForecast`); otherwise the cached forecasts, or none,
+    /// and each night falls back to the usual clouds from the world grid, as for any place.
+    func spotForecasts(for spots: [Park], network: Bool, force: Bool = false) async -> [String: Forecast] {
+        let now=clock()
+        var due: [Park]=[]
+        let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+        let allowed=network && SpotForecast.isOn(defaults) && backoff.allows(Self.host, now: now)
+        for spot in spots {
+            load(spot.id)
+            let age=memory[spot.id].map { now.timeIntervalSince($0.updated) } ?? .infinity
+            if allowed && (age>=6*3600 || (force && age>=600)) { due.append(spot) }
+        }
+        if !due.isEmpty {
+            let task: Task<[String: Forecast], Never>
+            if let running=spotFlight { task=running } else {
+                task=Task {
+                    let fetched=await self.fetchSpots(due)
+                    // Kept by the request itself, so a forecast that arrives after its caller stopped waiting still counts.
+                    self.keep(fetched)
+                    self.spotFlight=nil
+                    return fetched
+                }
+                spotFlight=task
+            }
+            _=await SharedRequest.value(of: task)
+        }
+        var result: [String: Forecast]=[:]
+        for spot in spots { if let kept=memory[spot.id] { result[spot.id]=kept } }
+        return result
+    }
+    private func fetchSpots(_ spots: [Park]) async -> [String: Forecast] {
+        let grid=SpotForecast.points(spots)
+        var byPoint: [SpotForecast.Point: Forecast]=[:]
+        for start in stride(from: 0, to: grid.points.count, by: 50) {
+            let chunk=Array(grid.points[start..<min(grid.points.count, start+50)])
+            guard let url=SpotForecast.url(for: chunk) else { continue }
+            let data: Data
+            do { data=try await transport.get(url, headers: [:], constrained: true) } catch {
+                backoff.record(error, host: Self.host, now: clock())
+                break
+            }
+            struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
+            // One coordinate returns an object; several return an array in request order.
+            let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+            guard decoded.count == chunk.count else { continue }
+            let now=clock()
+            for (point, response) in zip(chunk, decoded) where response.hourly.time.count == response.hourly.cloud_cover.count && !response.hourly.time.isEmpty {
+                byPoint[point]=Forecast(updated: now, times: response.hourly.time, clouds: response.hourly.cloud_cover)
+            }
+        }
+        return grid.byID.compactMapValues { byPoint[$0] }
+    }
     private func keep(_ fetched: [String: Forecast]) {
         for (id, forecast) in fetched where memory[id].map({ $0.updated < forecast.updated }) ?? true {
             memory[id]=forecast
-            if persist { CacheDirectory.write(forecast, name: "weather-\(id)") }
+            if persist { CacheDirectory.write(forecast, name: SpotForecast.cacheName(id)) }
         }
     }
     /// One caller has stopped waiting. A finished request leaves `inFlight`; one nobody waits for

@@ -12,9 +12,14 @@ extension UTType {
 /// a journal to a new phone or an iPad never involves a server. Importing merges: an entry already
 /// on the device (the same id, or the same park, moment and words) is never duplicated, and two
 /// different entries from one night are both kept.
+///
+/// Format 2 adds the saved spots (G3), so a journal moved to a new device keeps the places its
+/// entries were written at. A journal with no spots is still written as format 1, byte for byte as
+/// before, so a version without spots can open it; every format-1 archive still imports.
 nonisolated struct JournalArchive: Sendable, Equatable {
     static let fileExtension="nyxjournal"
-    static let format=1
+    /// The newest format this version reads and writes.
+    static let format=2
     nonisolated struct Photo: Codable, Sendable, Equatable { let file: String; let altText: String? }
     nonisolated struct Entry: Codable, Sendable, Equatable {
         let id: UUID
@@ -24,10 +29,25 @@ nonisolated struct JournalArchive: Sendable, Equatable {
         let notes: String
         let photos: [Photo]
     }
+    /// A saved spot: where it is, as the person saved it, and whether it was followed (bookmarked).
+    nonisolated struct Spot: Codable, Sendable, Equatable {
+        let id: String
+        let name: String
+        let latitude: Double
+        let longitude: Double
+        let timeZoneID: String
+        let countryCode: String
+        let region: String
+        let created: Date
+        let note: String?
+        let saved: Bool
+    }
     nonisolated struct Manifest: Codable, Sendable, Equatable {
         let format: Int
         let exported: Date
         let entries: [Entry]
+        /// Format 2 on; absent (nil) in format 1.
+        var spots: [Spot]?=nil
     }
     nonisolated enum ArchiveError: Error { case unreadable, newerFormat }
     var manifest: Manifest
@@ -35,7 +55,8 @@ nonisolated struct JournalArchive: Sendable, Equatable {
     var photos: [String: Data]
 
     /// Reads every photo's data, so the journal view calls it from a background `ModelContext`.
-    static func make(from entries: [JournalEntry], now: Date = .now) -> JournalArchive {
+    /// `spots` nil reads the saved spots from the entries' own context.
+    static func make(from entries: [JournalEntry], spots: [Spot]?=nil, now: Date = .now) -> JournalArchive {
         var photos: [String: Data]=[:]
         // Whole seconds, as the ISO 8601 dates in entries.json keep them.
         func second(_ date: Date) -> Date { Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded(.down)) }
@@ -47,7 +68,19 @@ nonisolated struct JournalArchive: Sendable, Equatable {
                       return Photo(file: file, altText: photo.altText)
                   })
         }
-        return JournalArchive(manifest: Manifest(format: format, exported: second(now), entries: items), photos: photos)
+        let places=(spots ?? entries.first?.modelContext.map(Self.spots(in:)) ?? []).sorted { ($0.created,$0.id)<($1.created,$1.id) }
+        // Without spots, exactly what format 1 wrote.
+        let manifest=places.isEmpty ? Manifest(format: 1, exported: second(now), entries: items)
+            : Manifest(format: format, exported: second(now), entries: items, spots: places.map { $0.wholeSeconds })
+        return JournalArchive(manifest: manifest, photos: photos)
+    }
+    /// Every saved spot in a store, with whether it is followed.
+    static func spots(in context: ModelContext) -> [Spot] {
+        let followed=Set(((try? context.fetch(FetchDescriptor<SavedPark>())) ?? []).map(\.parkID))
+        return ((try? context.fetch(FetchDescriptor<SavedSpot>())) ?? []).map { spot in
+            Spot(id: spot.id, name: spot.name, latitude: spot.latitude, longitude: spot.longitude, timeZoneID: spot.timeZoneID,
+                 countryCode: spot.countryCode, region: spot.region, created: spot.createdAt, note: spot.note, saved: followed.contains(spot.id))
+        }
     }
     func fileWrapper() throws -> FileWrapper {
         let encoder=JSONEncoder()
@@ -98,12 +131,26 @@ nonisolated struct JournalArchive: Sendable, Equatable {
     /// were already there. Only entries already on the device count: two different entries from the
     /// same night in one archive are both added. Nothing existing is changed, and a failed save
     /// leaves nothing behind. A photo whose file is missing or is not an image is left out.
-    /// Thumbnails not supplied are drawn here.
+    /// Thumbnails not supplied are drawn here. Saved spots (format 2) arrive first: one not on the
+    /// device yet is added, and followed if it was; one already here (the same id) is left as it
+    /// is. Spots are not counted.
     @MainActor func merge(into context: ModelContext, thumbnails: [UUID: Data]?=nil) throws -> (added: Int, skipped: Int) {
         let existing=try context.fetch(FetchDescriptor<JournalEntry>())
         var ids=Set(existing.map(\.id))
         let same=Set(existing.map { Sameness($0.parkID, $0.date, $0.notes) })
         var added=0, skipped=0
+        let spotIDs=Set(try context.fetch(FetchDescriptor<SavedSpot>()).map(\.id))
+        let followed=Set(try context.fetch(FetchDescriptor<SavedPark>()).map(\.parkID))
+        var seenSpots=Set<String>()
+        for spot in manifest.spots ?? [] {
+            // Only a well-formed spot id (`pin:<uuid>`), once, with real coordinates.
+            guard DeepLink.placeID(spot.id) == spot.id, spot.id.hasPrefix(SavedSpots.prefix), seenSpots.insert(spot.id).inserted, !spotIDs.contains(spot.id),
+                  (-90...90).contains(spot.latitude), (-180...180).contains(spot.longitude) else { continue }
+            let zone=TimeZone(identifier: spot.timeZoneID) != nil ? spot.timeZoneID : SavedSpots.solarZone(longitude: spot.longitude)
+            context.insert(SavedSpot(id: spot.id, name: spot.name, latitude: spot.latitude, longitude: spot.longitude, timeZoneID: zone,
+                                     countryCode: spot.countryCode, region: spot.region, createdAt: spot.created, note: spot.note))
+            if spot.saved, !followed.contains(spot.id) { context.insert(SavedPark(parkID: spot.id)) }
+        }
         for item in manifest.entries {
             // `ids` grows as entries are added, so an id repeated within the archive arrives once.
             guard !ids.contains(item.id), !same.contains(Sameness(item.parkID, item.date, item.notes)) else { skipped+=1; continue }
@@ -121,6 +168,13 @@ nonisolated struct JournalArchive: Sendable, Equatable {
         }
         do { try context.save() } catch { context.rollback(); throw error }
         return (added, skipped)
+    }
+}
+nonisolated extension JournalArchive.Spot {
+    /// The creation moment to the whole second, as entries.json keeps dates.
+    var wholeSeconds: JournalArchive.Spot {
+        JournalArchive.Spot(id: id, name: name, latitude: latitude, longitude: longitude, timeZoneID: timeZoneID, countryCode: countryCode,
+                            region: region, created: Date(timeIntervalSince1970: created.timeIntervalSince1970.rounded(.down)), note: note, saved: saved)
     }
 }
 /// Journals opened from another app arrive as copies in Documents/Inbox (Nyx does not open them in

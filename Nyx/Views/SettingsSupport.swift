@@ -50,6 +50,7 @@ struct CreditsView: View {
             Section("Parks and places") {
                 credit("Parks, alerts and ranger programs: the National Park Service.")
                 credit("Starting points and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.")
+                credit("Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.")
             }.listRowBackground(palette.panel)
             Section {
                 credit("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")

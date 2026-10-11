@@ -29,7 +29,7 @@ struct StartingPointPicker: View {
                 Section { Button { dismiss(); nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:44,alignment:.leading) }.accessibilityLabel("Use my location") }.listRowBackground(palette.panel)
             }
             if search.isEmpty {
-                Section { Text("Search for your city or town, such as Chicago or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
+                Section { Text("Search for your city or town, such as Paris or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
             } else if !places.isEmpty {
                 Section("Cities and towns") {
                     ForEach(places) { place in row(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() } }

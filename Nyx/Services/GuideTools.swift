@@ -72,7 +72,7 @@ nonisolated struct NightLookup: Sendable {
     /// Parks within a straight-line radius of a starting park or place, best tonight first. Never a
     /// drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
     func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
-        guard let origin=origin(named: name) else { return [String(localized: "No national park or city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.")] }
+        guard let origin=origin(named: name) else { return [String(localized: "No national park or city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 31,000 cities and towns around the world.")] }
         let radius=Self.toolRadius(asked, system)
         let near=parks.compactMap { park -> (Park, Double)? in
             let distance=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/system.meters

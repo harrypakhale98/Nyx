@@ -36,12 +36,12 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     /// were not worked out (`hasWatchApp` was false); `complete` then hands over again, with them,
     /// once a watch with Nyx turns out to be there.
     func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast], details: [String: ForecastDetail],
-              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?,
+              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
               complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts,
-                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:])
+                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places)
         let session = WCSession.default
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }

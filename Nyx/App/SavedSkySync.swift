@@ -146,7 +146,8 @@ import WidgetKit
         var complete:(@MainActor @Sendable ()->Void)?=nil
         if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
-                    aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,complete:complete)
+                    aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
+                    places:ids.compactMap { model.park($0) }.filter(\.isSavedSpot),complete:complete)
     }
     /// Answers Apple Watch's "Update from iPhone" with this model from now on (once per process).
     func listenToWatch(_ model:PlanModel) {

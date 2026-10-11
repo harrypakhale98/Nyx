@@ -3,9 +3,16 @@ import Observation
 import CoreLocation
 
 @MainActor @Observable final class PlanModel {
+    /// The catalogue: the bundled places, the same for everyone. Saved spots are never in it (`spots`).
     let parks: [Park]
     /// Each park's place in `parks` (the first, should an id repeat), for `park(_:)`.
     private let parkIndex: [String:Int]
+    /// The places the person saved themselves (`SavedSpot`, G3), scored, forecast and followed like
+    /// parks. Set from the store by `setSpots`; `park(_:)` finds them by their `pin:` id.
+    private(set) var spots: [Park] = []
+    @ObservationIgnored private var spotIndex: [String:Int] = [:]
+    /// Every place Nyx scores here: the catalogue, then the saved spots.
+    var places: [Park] { parks+spots }
     let loadError: Bool
     private let astronomy: any AstronomyProviding
     private let scoring: any ScoreProviding
@@ -85,6 +92,9 @@ import CoreLocation
     var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters) } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
+    /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
+    /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
+    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
     var smokeEnabled: Bool {
         didSet {
             if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") }
@@ -126,14 +136,15 @@ import CoreLocation
     /// (at its sunrise or local noon), so open screens move on without constant redraws.
     private(set) var clock=Date.now
     func tick(_ now:Date = .now) {
-        guard parks.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
+        // A saved spot far from every park (another continent) turns its night over at its own sunrise.
+        guard places.contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
         clock=now
         trimPastNights()
     }
     /// Once a night turns over, the kept astronomy, outlooks and what's-up of nights that have
     /// passed are let go (a screen that shows one again simply works it out again).
     private func trimPastNights() {
-        let tonights=Dictionary(parks.map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
+        let tonights=Dictionary(places.map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
         func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
         for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
         for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
@@ -160,6 +171,7 @@ import CoreLocation
         radiusMeters=SearchRadius.meters()
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
+        spotForecastsEnabled=SpotForecast.isOn()
         smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
         // The last forecasts and park updates are read by the services, off the main actor, while
         // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
@@ -200,7 +212,35 @@ import CoreLocation
         tonightMemo[park.id]=(at,park,night,evening)
         return (night,evening)
     }
-    func park(_ id:String)->Park? { parkIndex[id].map { parks[$0] } }
+    /// A catalogue park by its id, or a saved spot by its `pin:` id. Catalogue ids never read the
+    /// spots, so screens that show only parks do not redraw when a spot is saved.
+    func park(_ id:String)->Park? {
+        if let index=parkIndex[id] { return parks[index] }
+        guard id.hasPrefix(SavedSpots.prefix) else { return nil }
+        return spotIndex[id].flatMap { spots.indices.contains($0) ? spots[$0] : nil }
+    }
+    /// The saved spots, from the store (call it whenever they change). A spot new to this launch
+    /// gets its cached forecast at once; a spot deleted is forgotten here, along with its forecast.
+    func setSpots(_ records:[SavedSpot]) { setSpots(places:records.sorted { $0.createdAt<$1.createdAt }.map { Place(spot:$0) }) }
+    func setSpots(places:[Park]) {
+        guard places != spots else { return }
+        let before=Set(spots.map(\.id)), now=Set(places.map(\.id))
+        spots=places
+        spotIndex=Dictionary(places.indices.map { (places[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        for id in before.subtracting(now) {
+            forecasts[id]=nil; staleForecasts.remove(id)
+            conditions[id]=nil; tonightMemo[id]=nil
+        }
+        let added=places.filter { !before.contains($0.id) }
+        guard !added.isEmpty, DebugScenario.screen == nil else { return }
+        let weather=self.weather
+        Task { [weak self] in
+            await self?.hydration?.value
+            let cached=await weather.spotForecasts(for:added,network:false,force:false)
+            guard let self else { return }
+            for (id,forecast) in cached where self.spotIndex[id] != nil && self.forecasts[id] == nil { self.forecasts[id]=forecast }
+        }
+    }
     func night(_ park:Park,on date:Date?=nil)->Night {
         let evening=date.map(park.evening) ?? tonightEntry(park).evening
         // Read on every call, kept or not, so a screen still redraws when either changes (the memo is not observed).
@@ -380,7 +420,8 @@ import CoreLocation
         if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
     }
     /// Always asks for all 63 parks, never only those near the device: it costs the same request,
-    /// and a list of nearby parks would tell the forecast service roughly where you are.
+    /// and a list of nearby parks would tell the forecast service roughly where you are. Saved spots
+    /// follow in a separate request with rounded coordinates, behind their own switch as well.
     func refreshForecasts(watching parks:[Park],force:Bool=false) async {
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
         if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil; details[park.id]=nil }; return }
@@ -391,8 +432,16 @@ import CoreLocation
         #endif
         await hydration?.value
         let network=weatherEnabled && live
-        let fresh=await weather.forecasts(for:self.parks,network:network,force:force)
+        var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
         for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        // Saved spots in a request of their own, rounded to 0.1°, never mixed into the parks' (`SpotForecast`).
+        let spots=self.spots
+        if !spots.isEmpty {
+            let spotNetwork=network && spotForecastsEnabled
+            let ofSpots=await weather.spotForecasts(for:spots,network:spotNetwork,force:force)
+            for spot in spots where spotIndex[spot.id] != nil && forecasts[spot.id]?.updated != ofSpots[spot.id]?.updated { forecasts[spot.id]=ofSpots[spot.id] }
+            if spotNetwork { fresh.merge(ofSpots) { park,_ in park } }
+        }
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
         if !smokeEnabled { await detailService.forgetAir() }
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
@@ -403,7 +452,8 @@ import CoreLocation
         exportWatchContext()
         #endif
         guard network else { return }
-        for park in parks {
+        // A spot whose forecasts are switched off is not "stale": it was never asked about.
+        for park in parks where spotForecastsEnabled || !park.isSavedSpot {
             if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
         }
     }

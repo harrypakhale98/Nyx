@@ -26,7 +26,7 @@ import Testing
         #expect(StartingPlaces.search("").isEmpty && StartingPlaces.search("zzqx").isEmpty)
         #expect(StartingPlaces.named("Denver")?.label=="Denver, CO")
         #expect(StartingPlaces.named("Denver, CO")?.label=="Denver, CO")
-        #expect(StartingPlaces.named("") == nil && StartingPlaces.named("Atlantis") == nil)
+        #expect(StartingPlaces.named("") == nil && StartingPlaces.named("Brigadoon") == nil)
     }
     @Test func aPlaceStartsFromItsNearestPark() throws {
         let chicago=try #require(StartingPlaces.named("Chicago, IL"))
@@ -41,7 +41,7 @@ import Testing
         #expect(denver.contains { $0.hasPrefix("Rocky Mountain") })
         // A park's own name still wins: Mesa Verde is a park, not Mesa, Arizona.
         #expect(lookup.origin(named:"Mesa Verde")?.label=="Mesa Verde")
-        #expect(lookup.parksNear(park:"Atlantis",radius:300,system:.miles).first?.hasPrefix("No national park or city") == true)
+        #expect(lookup.parksNear(park:"Brigadoon",radius:300,system:.miles).first?.hasPrefix("No national park or city") == true)
     }
 
     // MARK: Tabs and links

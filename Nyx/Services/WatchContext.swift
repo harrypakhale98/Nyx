@@ -32,25 +32,30 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// [lowest, highest]. Two small numbers a night, and only for the nights that have one: the
     /// watch cannot work it out itself, since the three models' clouds stay on the iPhone.
     let ranges: [String: [String: [Int]]]
+    /// Saved spots among the saved parks (G3), whole: the watch's bundled parks cannot hold a place
+    /// the person saved. Empty from an iPhone without spots; a watch from before G3 ignores it and
+    /// simply leaves the spots out, as any id it does not know.
+    let places: [Place]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
     /// The smoke and summit layers in the shape `NightPlanner.night` reads, expanded once. Not sent.
     let forecastDetails: [String: ForecastDetail]
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
-    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures, ranges }
+    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures, ranges, places }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
         a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
-            && a.ranges == b.ranges
+            && a.ranges == b.ranges && a.places == b.places
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast],
-         details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:]) {
+         details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = []) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
+        self.places = places
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
@@ -59,7 +64,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// nothing without its clouds); closures, which are short, come last (the followed parks' first).
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
-                     ranges: [String: [String: ClosedRange<Int>]] = [:], now: Date = .now) -> WatchContext {
+                     ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
@@ -70,6 +75,13 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             guard let size = (try? JSONEncoder().encode(value))?.count, used + size + id.utf8.count + 4 <= byteBudget else { return false }
             used += size + id.utf8.count + 4
             return true
+        }
+        // A saved spot first: without its place the watch cannot show it at all, while a forecast
+        // left out only costs clouds. Only spots that are saved, in order, once.
+        var sentPlaces: [Place] = [], placed = Set<String>()
+        for place in places where ids.contains(place.id) && placed.insert(place.id).inserted {
+            guard fits(place, place.id) else { break }
+            sentPlaces.append(place)
         }
         for id in ids {
             guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
@@ -91,7 +103,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             sentClosures[id] = closure
         }
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: compact,
-                            details: compactDetails, closures: sentClosures, ranges: sentRanges)
+                            details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces)
     }
     var data: Data? { try? JSONEncoder().encode(self) }
     var dictionary: [String: Any] { data.map { [Self.key: $0] } ?? [:] }
@@ -106,7 +118,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The same context stamped at another moment, for comparing what it says rather than when.
     func sent(at date: Date) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details,
-                     closures: closures, ranges: ranges)
+                     closures: closures, ranges: ranges, places: places)
     }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
@@ -140,6 +152,8 @@ nonisolated extension WatchContext {
         closures = (try? container.decodeIfPresent([String: String].self, forKey: .closures)) ?? [:]
         // Absent from a 1.2 iPhone's context; a malformed one costs only the ranges.
         ranges = (try? container.decodeIfPresent([String: [String: [Int]]].self, forKey: .ranges)) ?? [:]
+        // Absent before G3; a spot that no longer decodes is left out, never the context.
+        places = ((try? container.decodeIfPresent([Lenient<Place>].self, forKey: .places)) ?? []).compactMap(\.value)
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
     }
 }
