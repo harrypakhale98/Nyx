@@ -6,11 +6,22 @@ import Foundation
 /// same engine as every park. No cloud forecast is asked for, so no request ever carries the
 /// person's coordinates; the panel says to check a local forecast instead.
 ///
-/// Nyx has no light-pollution model for arbitrary places (its sky-glow data is computed only for
-/// the parks and their viewing spots), so no sky brightness is claimed. Shower rates assume a
-/// suburban sky, Bortle 7, and say so.
+/// The bundled world grids (`SkyGrid`, read on this device) add what they hold for the starting
+/// point: the usual clouds for the month, and, when the sky layer is bundled, the sky's brightness
+/// as a Bortle class "estimated from satellite data", which also scores the night (on the usual
+/// clouds, never a forecast). Without the sky layer nothing about light is claimed: shower rates
+/// assume a suburban sky, Bortle 7, and say so, and the panel says Nyx has no light map for homes.
 nonisolated struct HomeSky: Sendable {
     enum Source: Sendable, Equatable { case device, place, park }
+    /// Where the starting point's light level comes from.
+    enum Light: Sendable, Equatable {
+        /// The park's own hand-checked Bortle estimate.
+        case park
+        /// The sky grid's modelled zenith brightness, mag/arcsec².
+        case satellite(magnitude: Double)
+        /// No light map here: `assumedBortle`.
+        case assumed
+    }
     struct Origin: Sendable {
         let name: String
         let state: String
@@ -37,25 +48,41 @@ nonisolated struct HomeSky: Sendable {
     let eclipse: WhatsUp.Item?
     /// The longest stretch of true darkness with the Moon down (nil when there is none, or no Moon to speak of).
     let moonFree: DateInterval?
+    let light: Light
+    /// The usual clouds for this month at a starting point that is not a park, from the cloud
+    /// grid (an estimate, never a forecast); nil for a park, at sea, or without the grid.
+    let usualClouds: CloudClimate.Typical?
+    /// Tonight scored on the usual clouds, only where the light is known (a park's estimate or the
+    /// sky grid): an assumed Bortle 7 never becomes a score.
+    let estimate: Night?
 
-    init(origin: Origin, now: Date, engine: AstronomyEngine = AstronomyEngine(), table: SkyEvents = .shared) {
+    init(origin: Origin, now: Date, engine: AstronomyEngine = AstronomyEngine(), table: SkyEvents = .shared, grid: SkyGrid = .shared) {
         self.origin=origin
+        let magnitude=origin.park == nil ? grid.skyBrightness(latitude: origin.latitude, longitude: origin.longitude) : nil
+        light=origin.park != nil ? .park : magnitude.map { .satellite(magnitude: $0) } ?? .assumed
         let place=origin.park ?? Park(id: "home", nps: nil, name: origin.name, countryCode: origin.countryCode, region: origin.state, kind: .custom, curated: false,
                                       latitude: origin.latitude, longitude: origin.longitude, timeZoneID: origin.timeZone.identifier, darkSkyDesignated: false,
-                                      bortleEstimate: Self.assumedBortle, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
+                                      bortleEstimate: magnitude.map(SkyGrid.bortle(fromMagnitude:)) ?? Self.assumedBortle,
+                                      description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
         self.place=place
         let sky=engine.conditions(for: place, on: place.evening(place.currentNight(at: now)))
         self.sky=sky
+        var climate=CloudClimate.shared
+        climate.grid=grid
+        usualClouds=origin.park == nil ? climate.typical(place, on: sky.evening) : nil
+        estimate=light == .assumed ? nil : NightPlanner.night(park: place, sky: sky, forecast: nil, detail: nil, now: now, climate: climate)
         let whatsUp=WhatsUp(park: place, sky: sky, isTonight: true, table: table)
         planets=whatsUp.planets
         eclipse=whatsUp.events.eclipse?.visible == nil ? nil : whatsUp.eclipse
         let showerNight=whatsUp.events.shower.flatMap { night in night.hourlyRate>=5 || (night.isPeakNight && WhatsUp.Events.isMajor(night.shower)) ? night : nil }
-        // A park keeps the park's own words; anywhere else the rate is for a suburban sky, and says so.
-        shower=origin.park != nil ? (showerNight == nil ? nil : whatsUp.shower) : showerNight.map { Self.showerItem($0, place: place, sky: sky) }
+        // A park keeps the park's own words; anywhere else the rate is for the grid's sky or, without
+        // one, a suburban sky, and says which.
+        let skyLight=self.light
+        shower=origin.park != nil ? (showerNight == nil ? nil : whatsUp.shower) : showerNight.map { Self.showerItem($0, place: place, sky: sky, light: skyLight) }
         moonFree=Self.moonFree(sky: sky, place: place, engine: engine)
     }
     /// What's up's shower row, worded for a home sky rather than a park's.
-    static func showerItem(_ night: SkyAlmanac.ShowerNight, place: Park, sky: SkyConditions) -> WhatsUp.Item {
+    static func showerItem(_ night: SkyAlmanac.ShowerNight, place: Park, sky: SkyConditions, light: Light = .assumed) -> WhatsUp.Item {
         let shower=night.shower, note=WhatsUp.peakNote(night, park: place, sky: sky, isTonight: true)
         let value: String, lead: String
         if let best=night.best {
@@ -67,7 +94,9 @@ nonisolated struct HomeSky: Sendable {
                 // The fallback sentence names a park; under city lights the next sentence already says why.
                 if reason != String(localized: "A weak return from this park; a rough guide.") { poor=" "+reason }
             }
-            lead=String(localized: "Best \(WhatsUp.whenPhrase(best, sky: sky, park: place)), \(moon).")+poor+" "+String(localized: "For one observer under a suburban sky; a rough guide. A darker yard shows more.")
+            let observer=light == .assumed ? String(localized: "For one observer under a suburban sky; a rough guide. A darker yard shows more.")
+                : String(localized: "For one observer under a Bortle \(place.bortleEstimate) sky, estimated from satellite data; a rough guide.")
+            lead=String(localized: "Best \(WhatsUp.whenPhrase(best, sky: sky, park: place)), \(moon).")+poor+" "+observer
         } else {
             value=String(localized: "No true darkness")
             lead=String(localized: "Without true darkness at this latitude, few meteors will show.")
@@ -113,6 +142,30 @@ nonisolated struct HomeSky: Sendable {
         return SkyConditions.noDarknessMessage(tonight: true)
     }
     var hasDarkness: Bool { sky.darkHours>0 }
+    /// "Usual clouds for November", the cloud row's title; nil without the grid's clouds.
+    var usualCloudsTitle: String? {
+        guard usualClouds != nil else { return nil }
+        var format=Date.FormatStyle().month(.wide)
+        format.timeZone=place.timeZone
+        return String(localized: "Usual clouds for \(sky.evening.formatted(format))")
+    }
+    /// "About 8 in 10 November nights here are mostly clear." (an estimate from the grid).
+    var usualCloudsLine: String? {
+        guard let usualClouds else { return nil }
+        var format=Date.FormatStyle().month(.wide)
+        format.timeZone=place.timeZone
+        return usualClouds.sentence(monthName: sky.evening.formatted(format))
+    }
+    /// The sky grid's class: "Bortle 4"; nil unless the light comes from the grid.
+    var skyClass: String? {
+        guard case .satellite=light else { return nil }
+        return String(localized: "Bortle \(place.bortleEstimate)")
+    }
+    /// "Rural to suburban transition. Estimated from satellite data. …"; nil unless from the grid.
+    var skyLine: String? {
+        guard case .satellite=light else { return nil }
+        return BortleScale.name(place.bortleEstimate)+". "+String(localized: "Estimated from satellite data. A light close by can make your own sky brighter.")
+    }
     /// How the Moon shares the dark hours, in one sentence.
     var moonlightLine: String? {
         guard hasDarkness else { return nil }
@@ -128,6 +181,8 @@ nonisolated struct HomeSky: Sendable {
         var parts=[String(localized: "Moon: \(moonPhase). \(moonTimes)."),
                    hasDarkness ? String(localized: "True darkness: \(darkness).") : darkness]
         if let moonlightLine { parts.append(moonlightLine) }
+        if let usualCloudsTitle, let usualCloudsLine { parts.append(usualCloudsTitle+". "+usualCloudsLine) }
+        if let skyClass, let skyLine { parts.append(String(localized: "Sky brightness: \(skyClass).")+" "+skyLine) }
         if let eclipse { parts.append(eclipse.spoken) }
         if let shower { parts.append(shower.spoken) }
         parts.append(planets.isEmpty ? String(localized: "No bright planets up in the dark hours.") : planets.map(\.spoken).joined(separator: " "))

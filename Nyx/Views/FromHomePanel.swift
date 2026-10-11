@@ -47,6 +47,19 @@ struct FromHomePanel: View {
             row(title:Text("True darkness"),value:sky.hasDarkness ? sky.darkness : String(localized:"None tonight"),detail:sky.hasDarkness ? sky.moonlightLine : sky.darkness) {
                 Image(systemName:"moon.stars").resizable().scaledToFit().foregroundStyle(palette.accent)
             }
+            // What the bundled world grids hold for this point (none for a park, nothing without them).
+            if let title=sky.usualCloudsTitle, let line=sky.usualCloudsLine {
+                Divider().overlay(palette.line)
+                row(title:Text(title),value:nil,detail:line) {
+                    Image(systemName:"cloud.moon").resizable().scaledToFit().foregroundStyle(palette.accent)
+                }
+            }
+            if let skyClass=sky.skyClass, let line=sky.skyLine {
+                Divider().overlay(palette.line)
+                row(title:Text("Sky brightness"),value:skyClass,detail:line) {
+                    Image(systemName:"light.max").resizable().scaledToFit().foregroundStyle(palette.accent)
+                }
+            }
             ForEach([sky.eclipse,sky.shower].compactMap { $0 }) { item in
                 Divider().overlay(palette.line)
                 row(title:Text(item.title),value:item.value,detail:item.detail,spoken:item.spoken) {
@@ -87,7 +100,7 @@ struct FromHomePanel: View {
     @ViewBuilder private func notes(_ sky:HomeSky)->some View {
         VStack(alignment:.leading,spacing:6) {
             Text("Check your local forecast for clouds. Nyx asks for none here, so your location stays on this device.")
-            if origin.source != .park {
+            if origin.source != .park, sky.light == .assumed {
                 Text("Nyx has no light map for homes. Streetlights hide faint stars; the Moon, the planets and the brightest stars still show.")
             }
             Text("Times are \(sky.place.timeZoneName).")

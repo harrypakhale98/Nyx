@@ -5,7 +5,8 @@ import Foundation
 /// Climate Change Service, CC BY 4.0). Where no forecast reaches, a night is scored with its park's
 /// usual cloud for the month, and a forecast more than three days ahead is eased toward it
 /// (`CloudBasis`), so a night nobody can forecast yet is neither assumed clear nor ignored. It is
-/// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look".
+/// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look". A place
+/// the file does not hold reads the world grid's usual clouds instead (`SkyGrid`, G2).
 nonisolated struct CloudClimate: Decodable, Sendable {
     struct Months: Decodable, Sendable {
         /// Mean cloud over the dark hours, percent, January first.
@@ -18,29 +19,47 @@ nonisolated struct CloudClimate: Decodable, Sendable {
         let month: Int
         let cloud: Double
         let clear: Double
+        /// True when the month comes from the world grid (`SkyGrid`), whose share of clear nights is
+        /// estimated from the month's cloud rather than counted night by night: its sentences say so.
+        var estimated = false
         /// "About 8 in 10 November nights here are mostly clear."
         func sentence(monthName: String) -> String {
             let tenths = Int((clear/10).rounded())
             switch tenths {
-            case ...0: return String(localized: "\(monthName) nights here are rarely clear.")
-            case 10...: return String(localized: "\(monthName) nights here are nearly always clear.")
+            case ...0: return estimated ? String(localized: "\(monthName) nights here are rarely clear, by an estimate.") : String(localized: "\(monthName) nights here are rarely clear.")
+            case 10...: return estimated ? String(localized: "\(monthName) nights here are nearly always clear, by an estimate.") : String(localized: "\(monthName) nights here are nearly always clear.")
             default: return String(localized: "About \(tenths) in 10 \(monthName) nights here are mostly clear.")
             }
         }
     }
+    private enum CodingKeys: String, CodingKey { case parks }
     let parks: [String: Months]
+    /// The world grid, for a place the per-park file does not hold (any place that is not one of
+    /// the 63 parks). nil keeps to the file alone: `load` and every hand-built climate, so a test's
+    /// empty climate still means no usual clouds at all.
+    var grid: SkyGrid? = nil
 
-    static let shared: CloudClimate = load() ?? CloudClimate(parks: [:])
+    /// The bundled per-park file, with the world grid behind it.
+    static let shared: CloudClimate = {
+        var climate = load() ?? CloudClimate(parks: [:])
+        climate.grid = .shared
+        return climate
+    }()
     static func load(_ bundle: Bundle = .main) -> CloudClimate? {
         guard let url = bundle.url(forResource: "cloud-climate", withExtension: "json"), let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(CloudClimate.self, from: data)
     }
-    /// The month of the night that begins on `evening`, at `park`.
+    /// The month of the night that begins on `evening`, at `park`. A park in the file keeps its
+    /// own ten years of ERA5 at its coordinates (the 63 parks never take the grid's value);
+    /// anywhere else, the grid's cell, marked `estimated`.
     func typical(_ park: Park, on evening: Date) -> Typical? {
         let month = park.calendar.component(.month, from: evening)
-        guard let entry = parks[park.id], entry.cloud.count == 12, entry.clear.count == 12,
-              let cloud = entry.cloud[month-1], let clear = entry.clear[month-1] else { return nil }
-        return Typical(month: month, cloud: Double(cloud), clear: Double(clear))
+        if let entry = parks[park.id] {
+            guard entry.cloud.count == 12, entry.clear.count == 12, let cloud = entry.cloud[month-1], let clear = entry.clear[month-1] else { return nil }
+            return Typical(month: month, cloud: Double(cloud), clear: Double(clear))
+        }
+        guard let cell = grid?.cloudNight(latitude: park.latitude, longitude: park.longitude, month: month) else { return nil }
+        return Typical(month: month, cloud: cell.mean, clear: cell.clear, estimated: true)
     }
     /// The plain line beside a night that has no cloud forecast; nil without data.
     func sentence(_ park: Park, on evening: Date) -> String? {

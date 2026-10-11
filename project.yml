@@ -187,6 +187,8 @@ targets:
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
         group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
       # Measured sky glow breaks ties between equal scores (`NightPlanner.glowRank`).
@@ -243,6 +245,8 @@ targets:
       - path: Nyx/Services/NightPlanner.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
@@ -328,6 +332,8 @@ targets:
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
         group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
       - path: Nyx/Resources/skyglow.json
@@ -410,6 +416,8 @@ targets:
       - path: Nyx/Services/CloudForecastClient.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
         group: Shared
