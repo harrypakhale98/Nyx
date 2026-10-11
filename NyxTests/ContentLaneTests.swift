@@ -192,12 +192,23 @@ struct ContentLaneTests {
         #expect(start.source == .park && start.park?.id == "jotr" && start.timeZone == jotr.timeZone)
         #expect(HomeSky.origin(location: nil, place: nil, park: nil) == nil)
     }
+    /// With the bundled sky grid, Denver's own sky: a city's class from satellite data, said to be an
+    /// estimate, and the shower's rate for that sky rather than an assumed suburb.
+    @Test func fromHomeTonightInDenverReadsTheSkyGrid() throws {
+        let denver=try #require(StartingPlaces.named("Denver, CO"))
+        let origin=try #require(HomeSky.origin(location: nil, place: denver, park: nil))
+        try #require(SkyGrid.shared.hasLayer(.sky), "the sky grid ships in the app")
+        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"))
+        #expect((6...8).contains(home.place.bortleEstimate), "Denver: Bortle \(home.place.bortleEstimate)")
+        #expect(home.shower?.detail.contains("estimated from satellite data") == true && home.shower?.detail.contains("suburban sky") == false)
+    }
     /// A city sky: the Moon, true darkness and planets, a shower on its peak night with rates for a
     /// suburban sky, and the Moon-free stretch inside the dark hours.
     @Test func fromHomeTonightInDenverOnGeminidNight() throws {
         let denver=try #require(StartingPlaces.named("Denver, CO"))
         let origin=try #require(HomeSky.origin(location: nil, place: denver, park: nil))
-        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"))
+        // Without the world grids, as before G2: an assumed suburban sky (the next test reads the bundled grid).
+        let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"), grid: SkyGrid(bundle: .main, layers: []))
         #expect(home.place.bortleEstimate == HomeSky.assumedBortle && home.place.timeZoneID == "America/Denver")
         #expect(home.hasDarkness && home.sky.darkHours>10 && home.sky.darkHours<13)
         #expect(home.shower?.title.contains("Geminid") == true)
