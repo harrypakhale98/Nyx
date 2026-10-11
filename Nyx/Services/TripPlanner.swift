@@ -95,10 +95,10 @@ nonisolated enum TripPlanner {
         }
         return days
     }
-    /// Parks within `radiusMiles` of the starting point, as the crow flies, sorted by id. With
+    /// Parks within `radiusMeters` of the starting point, as the crow flies, sorted by id. With
     /// `drivableOnly`, parks whose sky needs a boat or a plane (`Park.drivable`) are left out.
-    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMiles: Double, drivableOnly: Bool = false) -> [Park] {
-        parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMiles*1609.344 }.sorted { $0.id<$1.id }
+    static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMeters: Double, drivableOnly: Bool = false) -> [Park] {
+        parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMeters }.sorted { $0.id<$1.id }
     }
     /// Every candidate's night for every day, `[day][park]`, scored as `PlanModel.night` scores it.
     /// Pure and off the main actor: astronomy, the cached forecasts and nothing else.

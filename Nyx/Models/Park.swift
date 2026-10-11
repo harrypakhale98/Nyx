@@ -226,7 +226,7 @@ nonisolated extension Place {
         case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
              bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion
         // Before G1 (1.4.1 and earlier): kept so a shared snapshot written by an older build still reads.
-        case apiCode, state
+        case apiCode, state, hemisphere
     }
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -235,7 +235,8 @@ nonisolated extension Place {
         name = try c.decode(String.self, forKey: .name)
         countryCode = try c.decodeIfPresent(String.self, forKey: .countryCode) ?? "US"
         region = try c.decodeIfPresent(String.self, forKey: .region) ?? c.decode(String.self, forKey: .state)
-        kind = try c.decodeIfPresent(Kind.self, forKey: .kind) ?? .nationalPark
+        // A kind added by a later build reads as a place without a kind of its own, never as an unreadable park.
+        kind = c.contains(.kind) ? ((try? c.decode(Kind.self, forKey: .kind)) ?? .custom) : .nationalPark
         curated = try c.decodeIfPresent(Bool.self, forKey: .curated) ?? true
         latitude = try c.decode(Double.self, forKey: .latitude)
         longitude = try c.decode(Double.self, forKey: .longitude)
@@ -259,6 +260,9 @@ nonisolated extension Place {
         try c.encode(sourceURL, forKey: .sourceURL); try c.encode(sourceNote, forKey: .sourceNote)
         try c.encode(viewingSpots, forKey: .viewingSpots); try c.encodeIfPresent(access, forKey: .access)
         try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion)
+        // Written for a release or two so a build from before G1, installed again, still reads the shared snapshot.
+        try c.encodeIfPresent(nps, forKey: .apiCode); try c.encode(region, forKey: .state)
+        try c.encode(southern ? "south" : "north", forKey: .hemisphere)
     }
 }
 nonisolated enum ParkData {

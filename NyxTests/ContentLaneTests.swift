@@ -48,7 +48,7 @@ struct ContentLaneTests {
     /// they sit on the map, each west to east.
     @Test func mapReadsWestToEastWithInsetsLast() throws {
         let map=TonightMap(nights: try nights(on: "2026-10-09"))
-        #expect(map.marks.count == 63)
+        #expect(map.marks.count == parks.count)
         let regions=map.marks.map(\.region)
         let order: [SkyMap.Region]=[.lower48, .alaska, .hawaii, .samoa, .virginIslands]
         #expect(regions == regions.sorted { order.firstIndex(of: $0) ?? 0 < order.firstIndex(of: $1) ?? 0 })
@@ -191,25 +191,6 @@ struct ContentLaneTests {
         let start=try #require(HomeSky.origin(location: nil, place: nil, park: jotr))
         #expect(start.source == .park && start.park?.id == "jotr" && start.timeZone == jotr.timeZone)
         #expect(HomeSky.origin(location: nil, place: nil, park: nil) == nil)
-    }
-    /// The state table, checked against all 63 parks' own time zones (summer and winter offsets) and
-    /// the split states' cities.
-    @Test func homeTimeZonesFollowTheMap() throws {
-        func offsets(_ zone: TimeZone) throws -> [Int] { [zone.secondsFromGMT(for: try Self.date("2026-01-15")), zone.secondsFromGMT(for: try Self.date("2026-07-15"))] }
-        for park in parks {
-            let zone=HomeSky.timeZone(state: String(park.region.prefix(2)), latitude: park.latitude, longitude: park.longitude)
-            #expect(try offsets(zone) == offsets(park.timeZone), "\(park.id)")
-        }
-        let expected: [String: String]=["El Paso, TX": "America/Denver", "Pensacola, FL": "America/Chicago", "Tallahassee, FL": "America/New_York",
-            "Boise, ID": "America/Boise", "Coeur d'Alene, ID": "America/Los_Angeles", "Evansville, IN": "America/Chicago", "Gary, IN": "America/Chicago",
-            "Louisville, KY": "America/Kentucky/Louisville", "Bowling Green, KY": "America/Chicago", "Nashville, TN": "America/Chicago",
-            "Knoxville, TN": "America/New_York", "Chattanooga, TN": "America/New_York", "Rapid City, SD": "America/Denver", "Sioux Falls, SD": "America/Chicago",
-            "Phoenix, AZ": "America/Phoenix", "Honolulu, HI": "Pacific/Honolulu", "Anchorage, AK": "America/Anchorage", "Detroit, MI": "America/Detroit"]
-        for (name, zone) in expected {
-            let place=try #require(StartingPlaces.named(name), "\(name)")
-            #expect(HomeSky.timeZone(state: place.state, latitude: place.latitude, longitude: place.longitude).identifier == zone, "\(name)")
-        }
-        #expect(StartingPlaces.all.allSatisfy { HomeSky.timeZone(state: $0.state, latitude: $0.latitude, longitude: $0.longitude) != .gmt })
     }
     /// A city sky: the Moon, true darkness and planets, a shower on its peak night with rates for a
     /// suburban sky, and the Moon-free stretch inside the dark hours.

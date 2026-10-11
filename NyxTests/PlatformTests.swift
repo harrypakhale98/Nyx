@@ -183,7 +183,7 @@ import Testing
 
     @Test func spotlightItemsAreTheParkEntities() throws {
         let items = SpotlightIndexer.items(parks)
-        #expect(items.count == 63 && Set(items.map(\.uniqueIdentifier)) == Set(parks.map(\.id)))
+        #expect(items.count == parks.count && Set(items.map(\.uniqueIdentifier)) == Set(parks.map(\.id)))
         let jotr = try #require(items.first { $0.uniqueIdentifier == "jotr" })
         #expect(jotr.domainIdentifier == SpotlightIndexer.domain)
         #expect(jotr.attributeSet.title == "Joshua Tree" && jotr.attributeSet.keywords?.contains("dark sky park") == true)
@@ -197,7 +197,7 @@ import Testing
     }
     @Test func parkQueryFindsParksAndSuggestsAll() async throws {
         let query = ParkQuery()
-        #expect(try await query.suggestedEntities().count == 63)
+        #expect(try await query.suggestedEntities().count == parks.count)
         #expect(try await query.entities(matching: "joshua").map(\.id) == ["jotr"])
         #expect(try await query.entities(for: ["grca", "arch"]).map(\.id).sorted() == ["arch", "grca"])
     }
@@ -233,12 +233,12 @@ import Testing
         let sky = lookup.whatsUp(park: "Joshua Tree", on: "2026-12-13")
         #expect(sky.first?.contains("2026-12-13") == true && sky.contains { $0.contains("Geminids") })
         // Parks near Arches: straight-line miles only, within the radius, Canyonlands among them.
-        let near = lookup.parksNear(park: "Arches", radiusMiles: 150)
+        let near = lookup.parksNear(park: "Arches", radius: 150, system: .miles)
         #expect(near.contains { $0.hasPrefix("Canyonlands") } && near.allSatisfy { $0.contains("straight-line") })
         let miles = near.compactMap { $0.split(separator: ";").dropFirst().first?.split(separator: " ").first.flatMap { Int($0) } }
         #expect(miles.count == near.count && miles.allSatisfy { $0 <= 150 })
         // The starting park counts (0 miles); American Samoa has no other park within reach.
-        let samoa = lookup.parksNear(park: "American Samoa", radiusMiles: 100)
+        let samoa = lookup.parksNear(park: "American Samoa", radius: 100, system: .miles)
         #expect(samoa.count == 1 && samoa[0].contains("0 miles straight-line"))
     }
     @Test func ledgerNumbersToolRecordsAfterTheInjectedOnes() {

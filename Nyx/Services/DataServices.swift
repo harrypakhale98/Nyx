@@ -515,14 +515,15 @@ nonisolated final class CachePreload: @unchecked Sendable {
         }
     }
     /// The parks within the chosen radius of the starting point, as `PlanModel` reads them from
-    /// the same settings (a place's coordinates, else the starting park's; 200 miles unless chosen).
-    static func homeArea(_ parks: [Park], defaults: UserDefaults = .standard) -> [Park] {
+    /// the same settings (a place's coordinates, else the starting park's; the locale's standard
+    /// reach unless chosen, `SearchRadius`).
+    static func homeArea(_ parks: [Park], defaults: UserDefaults = .standard, locale: Locale = .current) -> [Park] {
         struct Place: Decodable { let latitude: Double; let longitude: Double }
         let place=defaults.data(forKey: "homePlace").flatMap { try? JSONDecoder().decode(Place.self, from: $0) }
         let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? Park.defaultID) } ?? parks.first
         guard let latitude=place?.latitude ?? home?.latitude, let longitude=place?.longitude ?? home?.longitude else { return [] }
-        let miles=defaults.object(forKey: "radiusMiles") as? Double ?? 200
-        return parks.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=miles*1609.344 }
+        let reach=SearchRadius.meters(defaults, locale: locale)
+        return parks.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=reach }
     }
     /// Waits for the reads to finish (they began at launch, so usually they already have).
     func wait() -> Contents {

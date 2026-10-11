@@ -18,6 +18,8 @@ nonisolated struct HomeSky: Sendable {
         let longitude: Double
         let timeZone: TimeZone
         let source: Source
+        /// The country the starting point is in: the place's own, else the device's region (no lookup is made).
+        var countryCode = Locale.current.region?.identifier ?? "US"
         /// The real park when the starting point is a park (its own Bortle estimate counts).
         var park: Park?
     }
@@ -38,7 +40,7 @@ nonisolated struct HomeSky: Sendable {
 
     init(origin: Origin, now: Date, engine: AstronomyEngine = AstronomyEngine(), table: SkyEvents = .shared) {
         self.origin=origin
-        let place=origin.park ?? Park(id: "home", nps: nil, name: origin.name, countryCode: "US", region: origin.state, kind: .custom, curated: false,
+        let place=origin.park ?? Park(id: "home", nps: nil, name: origin.name, countryCode: origin.countryCode, region: origin.state, kind: .custom, curated: false,
                                       latitude: origin.latitude, longitude: origin.longitude, timeZoneID: origin.timeZone.identifier, darkSkyDesignated: false,
                                       bortleEstimate: Self.assumedBortle, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
         self.place=place
@@ -83,49 +85,12 @@ nonisolated struct HomeSky: Sendable {
             return Origin(name: String(localized: "your location"), state: "", latitude: location.latitude, longitude: location.longitude, timeZone: .current, source: .device)
         }
         if let place {
-            return Origin(name: place.name, state: place.state, latitude: place.latitude, longitude: place.longitude,
-                          timeZone: timeZone(state: place.state, latitude: place.latitude, longitude: place.longitude), source: .place)
+            // The zone stored with the place (`places.json`); Nyx has no time-zone map, and asking a service would send the place.
+            return Origin(name: place.name, state: place.state, latitude: place.latitude, longitude: place.longitude, timeZone: place.timeZone, source: .place, countryCode: place.countryCode)
         }
         guard let park else { return nil }
-        return Origin(name: park.shortName, state: park.region, latitude: park.latitude, longitude: park.longitude, timeZone: park.timeZone, source: .park, park: park)
+        return Origin(name: park.shortName, state: park.region, latitude: park.latitude, longitude: park.longitude, timeZone: park.timeZone, source: .park, countryCode: park.countryCode, park: park)
     }
-    /// A US place's time zone from its state, with the split states divided by rough longitude
-    /// and latitude lines that put every one of the bundled places on the right side. Nyx has no
-    /// time-zone map, and asking a service would send the place.
-    static func timeZone(state: String, latitude: Double, longitude: Double) -> TimeZone {
-        let id: String
-        switch state {
-        case "HI": id="Pacific/Honolulu"
-        case "AK": id="America/Anchorage"
-        case "AZ": id="America/Phoenix"
-        case "CA", "WA", "NV": id="America/Los_Angeles"
-        // Malheur County keeps Mountain time.
-        case "OR": id=longitude > -117.25 && latitude < 44.5 ? "America/Boise" : "America/Los_Angeles"
-        // The panhandle north of the Salmon River keeps Pacific time.
-        case "ID": id=latitude > 45.6 ? "America/Los_Angeles" : "America/Boise"
-        case "CO", "MT", "NM", "UT", "WY": id="America/Denver"
-        // El Paso, and Guadalupe Mountains, which keeps Mountain time.
-        case "TX": id=longitude < -104.5 ? "America/Denver" : "America/Chicago"
-        case "KS": id=longitude < -101.5 ? "America/Denver" : "America/Chicago"
-        case "NE": id=longitude < -101.0 ? "America/Denver" : "America/Chicago"
-        case "SD": id=longitude < -100.5 ? "America/Denver" : "America/Chicago"
-        // Southwest North Dakota keeps Mountain time; the northwest (Williston) does not.
-        case "ND": id=longitude < -101.0 && latitude < 47.5 ? "America/Denver" : "America/Chicago"
-        case "FL": id=longitude < -85.0 && latitude > 29.6 ? "America/Chicago" : "America/New_York"
-        // The northwest corner (Gary) and the southwest corner (Evansville) keep Central time.
-        case "IN": id=longitude < -86.9 && (latitude > 40.9 || latitude < 38.6) ? "America/Chicago" : "America/Indiana/Indianapolis"
-        case "KY": id=longitude < -85.9 ? "America/Chicago" : "America/Kentucky/Louisville"
-        case "TN": id=longitude > -85.4 ? "America/New_York" : "America/Chicago"
-        // Four Upper Peninsula counties on the Wisconsin line keep Central time; Isle Royale does not.
-        case "MI": id=longitude < -87.6 && latitude > 45 && latitude < 46.6 ? "America/Chicago" : "America/Detroit"
-        case "AL", "AR", "IL", "IA", "LA", "MN", "MS", "MO", "OK", "WI": id="America/Chicago"
-        case "AS": id="Pacific/Pago_Pago"
-        case "VI", "PR": id="America/St_Thomas"
-        default: id="America/New_York"
-        }
-        return TimeZone(identifier: id) ?? .current
-    }
-
     // MARK: Words
 
     /// "Waxing crescent, 18% lit"

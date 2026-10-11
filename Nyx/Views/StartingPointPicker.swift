@@ -32,7 +32,7 @@ struct StartingPointPicker: View {
                 Section { Text("Search for your city or town, such as Chicago or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
             } else if !places.isEmpty {
                 Section("Cities and towns") {
-                    ForEach(places) { place in row(title:place.name,detail:StartingPlaces.stateNames[place.state] ?? place.state,selected:place==selectedPlace) { choose(.place(place)); dismiss() } }
+                    ForEach(places) { place in row(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() } }
                 }.listRowBackground(palette.panel)
             }
             if !parks.isEmpty {

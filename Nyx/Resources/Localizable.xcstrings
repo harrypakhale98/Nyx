@@ -1042,6 +1042,23 @@
         }
       }
     },
+    "%@, %@; %lld km straight-line from %@; tonight %lld/100 %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@; %lld km straight-line from %@; tonight %lld/100 %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@; a %lld km en línea recta de %@; esta noche %lld/100 %@"
+          }
+        }
+      }
+    },
     "%@, %@; %lld miles straight-line from %@; tonight %lld/100 %@": {
       "extractionState": "manual",
       "localizations": {
@@ -5029,19 +5046,53 @@
         }
       }
     },
-    "Aurora season here runs from late August to mid-April. When it shows, it also brightens the sky. Nyx does not forecast aurora.": {
+    "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aurora season here runs from late August to mid-April. When it shows, it also brightens the sky. Nyx does not forecast aurora."
+            "value": "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aquí la temporada de auroras va de finales de agosto a mediados de abril. Cuando aparece, también ilumina el cielo. Nyx no pronostica auroras."
+            "value": "Aquí la aurora se ve a menudo en las noches oscuras, a veces justo encima. Cuando aparece, también ilumina el cielo. Depende de la actividad del Sol, y Nyx no pronostica auroras."
+          }
+        }
+      }
+    },
+    "Aurora reaches here on active nights, usually low toward the %@. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora reaches here on active nights, usually low toward the %@. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí la aurora llega en las noches de actividad, casi siempre baja hacia el %@. Cuando aparece, también ilumina el cielo. Depende de la actividad del Sol, y Nyx no pronostica auroras."
+          }
+        }
+      }
+    },
+    "Aurora reaches here only during strong solar storms, low toward the %@. It depends on the Sun's activity, and Nyx does not forecast aurora.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora reaches here only during strong solar storms, low toward the %@. It depends on the Sun's activity, and Nyx does not forecast aurora."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí la aurora solo llega durante tormentas solares fuertes, baja hacia el %@. Depende de la actividad del Sol, y Nyx no pronostica auroras."
           }
         }
       }
@@ -15899,19 +15950,19 @@
         }
       }
     },
-    "No national park or US city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.": {
+    "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No national park or US city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns."
+            "value": "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ningún parque nacional ni ciudad de EE. UU. coincide con \"%@\". Nyx conoce los 63 parques nacionales y unas 1,000 ciudades y pueblos de EE. UU."
+            "value": "Ningún parque nacional ni ciudad coincide con \"%@\". Nyx conoce los 63 parques nacionales y unas 1,000 ciudades y pueblos de EE. UU."
           }
         }
       }
@@ -15946,6 +15997,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "No hay parques nacionales dentro de este radio. Amplíalo o empieza desde otro parque."
+          }
+        }
+      }
+    },
+    "No national parks within %lld km of %@, straight-line.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No national parks within %lld km of %@, straight-line."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay parques nacionales a menos de %lld km de %@, en línea recta."
           }
         }
       }
@@ -24140,19 +24208,19 @@
         }
       }
     },
-    "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score.": {
+    "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a park lies from Earth's magnetic pole (its geomagnetic latitude) and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora season in Alaska is a calendar note; Nyx does not forecast aurora. None of this changes the score."
+            "value": "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a park lies from Earth's magnetic pole (its geomagnetic latitude) and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante de la Vía Láctea se toma como la dirección de Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. La temporada de auroras en Alaska es una nota de calendario; Nyx no pronostica auroras. Nada de esto cambia el índice."
+            "value": "El centro brillante de la Vía Láctea se toma como la dirección de Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. Las notas de aurora dependen de lo lejos que está un parque del polo magnético de la Tierra (su latitud geomagnética) y solo aparecen en noches lo bastante oscuras para ver una; Nyx no pronostica auroras. Nada de esto cambia el índice."
           }
         }
       }
@@ -30120,6 +30188,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "una población al %@"
+          }
+        }
+      }
+    },
+    "about %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unos %@"
           }
         }
       }

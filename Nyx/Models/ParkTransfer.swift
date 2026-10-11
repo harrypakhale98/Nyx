@@ -28,7 +28,8 @@ nonisolated extension Park: Transferable {
         return url
     }
     static func transferred(id:String,catalog:[Park]=ParkCatalog.parks) throws -> Park {
-        let id=id.trimmingCharacters(in:.whitespacesAndNewlines).lowercased()
+        // Today's letter ids and the namespaced ones (`wd:Q42`, `pin:<uuid>`) read as a link would read them.
+        let trimmed=id.trimmingCharacters(in:.whitespacesAndNewlines), id=DeepLink.placeID(trimmed) ?? trimmed.lowercased()
         guard let park=catalog.first(where:{ $0.id==id }) else { throw ParkTransferError.unknownPark }
         return park
     }

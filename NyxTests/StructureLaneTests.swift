@@ -18,11 +18,11 @@ import Testing
 
     @Test func parksEyebrowSaysTheCatalogueCount() throws {
         let count=try parks().count
-        #expect(count==63)
-        #expect(ParksView.countLine(shown:count,of:count,narrowed:false)=="63 places to look up")
-        #expect(ParksView.countLine(shown:12,of:count,narrowed:true)=="12 of 63 parks")
-        #expect(ParksView.countLine(shown:1,of:count,narrowed:true)=="1 of 63 parks")
-        // A larger catalogue is said as it is, never as 63.
+        #expect(count>12)
+        #expect(ParksView.countLine(shown:count,of:count,narrowed:false)=="\(count) places to look up")
+        #expect(ParksView.countLine(shown:12,of:count,narrowed:true)=="12 of \(count) parks")
+        #expect(ParksView.countLine(shown:1,of:count,narrowed:true)=="1 of \(count) parks")
+        // A larger catalogue is said as it is, never as a fixed number.
         #expect(ParksView.countLine(shown:70,of:70,narrowed:false)=="70 places to look up")
         #expect(ParksView.countLine(shown:5,of:70,narrowed:true)=="5 of 70 parks")
     }
@@ -30,7 +30,7 @@ import Testing
     @Test func emptyConstellationNamesTheCatalogueCount() throws {
         let all=try parks()
         let empty=ConstellationLayout(nights:[],parks:all)
-        #expect(empty.summary(parks:all.count)=="Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star.")
+        #expect(empty.summary(parks:all.count)=="Your constellation. A map of the \(all.count) national parks drawn as faint stars. Your first night will be your first star.")
         #expect(empty.summary(parks:70).contains("A map of the 70 national parks"))
     }
 

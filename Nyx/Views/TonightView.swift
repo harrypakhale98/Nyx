@@ -83,7 +83,7 @@ struct TonightView: View {
                 } }.nyxPresentation().presentationDetents([.large])
             }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
-            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMiles)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMeters)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
             // A location found is a starting point chosen.
             .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
             // Back from the background: where you are may have changed, and so may the sky.
@@ -141,7 +141,7 @@ struct TonightView: View {
     /// Never "nearby" for a starting park or city; an example until a starting point is chosen.
     /// At accessibility sizes the two facts stack as two lines, with no "·" left dangling at a wrap.
     @ViewBuilder private func answerLine(_ park:Park)->some View {
-        let day=park.dayLabel(model.night(park).id), radius=Self.distance(model.radiusMiles)
+        let day=park.dayLabel(model.night(park).id), radius=SearchRadius.label(model.radiusMeters)
         if typeSize.isAccessibilitySize {
             VStack(spacing:4) {
                 Text(day)
@@ -151,25 +151,24 @@ struct TonightView: View {
         // The card below names where from ("From Joshua Tree", "Near me") and how it is measured.
         else { Text("\(day) · Darkest within \(radius)") }
     }
-    private static func distance(_ miles:Double)->String { Measurement(value:miles,unit:UnitLength.miles).formatted(.measurement(width:.abbreviated,usage:.road)) }
     /// A thin answer (fewer than three parks in reach, or a bright sky at the best of them) points to
-    /// the darkest park within 500 miles when it scores higher tonight. A tap widens the radius.
+    /// the darkest park within 500 miles (800 km) when it scores higher tonight. A tap widens the radius.
     @ViewBuilder private func farther(than best:Park?)->some View {
-        let wider=500.0
-        if model.radiusMiles<wider, candidates.count<3 || (best?.bortleEstimate ?? 9)>=5 {
+        let wider=SearchRadius.wider()
+        if model.radiusMeters<wider, candidates.count<3 || (best?.bortleEstimate ?? 9)>=5 {
             let inReach=Set(candidates.map(\.id)), bestScore=best.map { model.night($0).score.value } ?? -1
-            if let far=model.ranked(model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMiles:wider)).first(where:{ !inReach.contains($0.id) }),
+            if let far=model.ranked(model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMeters:wider)).first(where:{ !inReach.contains($0.id) }),
                model.night(far).score.value>bestScore {
-                Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMiles=wider } } label:{
+                Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMeters=wider } } label:{
                     HStack(spacing:8) {
                         Image(systemName:"scope").imageScale(.small).accessibilityHidden(true)
-                        Text("Darker within \(Self.distance(wider)): \(far.shortName), \(model.night(far).score.value) tonight").multilineTextAlignment(.leading)
+                        Text("Darker within \(SearchRadius.label(wider)): \(far.shortName), \(model.night(far).score.value) tonight").multilineTextAlignment(.leading)
                         Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
                     }
                     .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
                     .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
                 }.buttonStyle(.plain).frame(maxWidth:.infinity)
-                .accessibilityHint("Widens the radius to \(Self.distance(wider)).")
+                .accessibilityHint("Widens the radius to \(SearchRadius.label(wider)).")
             }
         }
     }
@@ -187,7 +186,7 @@ struct TonightView: View {
     }
     /// The next seven nights across the parks in reach (`WeekAcrossParks`), wide windows only.
     private var weekAcross: some View {
-        let radius=Self.distance(model.radiusMiles)
+        let radius=SearchRadius.label(model.radiusMeters)
         let reach=location.latitude != nil ? String(localized:"within \(radius) of you") : String(localized:"within \(radius) of \(model.originName)")
         return WeekAcrossParksPanel(week:.make(model.ranked(candidates).map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) }),reach:reach)
     }
@@ -417,13 +416,14 @@ struct TonightView: View {
         else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize().accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
     }
     /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
-    /// distances. A plain label, so "200 mi" sits on the row's text with no control inset of its own.
+    /// distances in the locale's unit (`SearchRadius`), and the current one too when it was set in the
+    /// other unit. A plain label, so "200 mi" sits on the row's text with no control inset of its own.
     private var radiusMenu:some View {
         @Bindable var model=model
-        let distance=Self.distance(model.radiusMiles)
+        let distance=SearchRadius.label(model.radiusMeters)
         return Menu {
-            Picker("Radius",selection:$model.radiusMiles) {
-                ForEach([100.0,200,500,1000],id:\.self) { miles in Text(Self.distance(miles)).tag(miles) }
+            Picker("Radius",selection:$model.radiusMeters) {
+                ForEach(SearchRadius.choices(SearchRadius.steps(),keeping:model.radiusMeters),id:\.self) { meters in Text(SearchRadius.label(meters)).tag(meters) }
             }.pickerStyle(.inline)
         } label:{
             HStack(spacing:4) {

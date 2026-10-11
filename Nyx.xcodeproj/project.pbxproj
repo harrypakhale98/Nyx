@@ -60,6 +60,7 @@
 		624E3F8E72FF10BBC1A0D68B /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */; };
 		67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8417DA2D50522530C270A095 /* RealSky.swift */; };
 		692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
+		6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E6518B28E70FF389F8A687 /* SearchRadius.swift */; };
 		6AC003053CD1F414C992EA97 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
 		6C2C5B0C4A6B492E9CC64511 /* MoonWidgetFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4F9FD3096BFB38EFD1C5C7 /* MoonWidgetFace.swift */; };
 		6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
@@ -249,6 +250,7 @@
 		4FA83F19CA3A305D8FD7A607 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = Moon.metal; path = Nyx/DesignSystem/Moon.metal; sourceTree = "<group>"; };
 		504FC2DA615C646B33B4F0E3 /* sky-events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "sky-events.json"; path = "Nyx/Resources/sky-events.json"; sourceTree = "<group>"; };
 		53D0C95B34F3513BFD765F3B /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		57E6518B28E70FF389F8A687 /* SearchRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchRadius.swift; path = Nyx/Services/SearchRadius.swift; sourceTree = "<group>"; };
 		595283380B56E24389ECC7ED /* MotionTilt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MotionTilt.swift; path = Nyx/DesignSystem/MotionTilt.swift; sourceTree = "<group>"; };
 		5C41B8315DF5E8ACB61DB077 /* WidgetParkIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetParkIntent.swift; path = Nyx/Intents/WidgetParkIntent.swift; sourceTree = "<group>"; };
 		5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristSky.swift; path = Nyx/Services/WristSky.swift; sourceTree = "<group>"; };
@@ -485,6 +487,7 @@
 				72998C6FAFE92D4C7CE0351B /* parks.json */,
 				8417DA2D50522530C270A095 /* RealSky.swift */,
 				E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */,
+				57E6518B28E70FF389F8A687 /* SearchRadius.swift */,
 				20EB09DA695F3C836EBD27CA /* SharedSettings.swift */,
 				504FC2DA615C646B33B4F0E3 /* sky-events.json */,
 				AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */,
@@ -942,6 +945,7 @@
 				3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */,
 				67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */,
 				6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */,
+				6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */,
 				1D536123B0A86756062C2086 /* SharedSettings.swift in Sources */,
 				48F2BA8F07944391BD20D1AA /* SkyAlmanac.swift in Sources */,
 				E3C54CD7BBCAF113F7B1388D /* SkyConditions.swift in Sources */,

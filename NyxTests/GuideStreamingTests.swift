@@ -50,7 +50,7 @@ import Testing
         #expect(lookup.whatsUpLookup(park: "Arches", on: "2026-10-09") == "What's up · Arches · Oct 9")
         #expect(lookup.whatsUpLookup(park: "Arches", on: "tonight") == "What's up · Arches · tonight")
         // Distances follow the device's units; the radius is straight-line, as the tool's is.
-        let near=lookup.parksNearLookup(park: "Joshua Tree", radiusMiles: 200)
+        let near=lookup.parksNearLookup(park: "Joshua Tree", radius: 200, system: .miles)
         let radius=Measurement(value: 200, unit: UnitLength.miles).formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0))))
         #expect(near == "Parks near · Joshua Tree · within \(radius)")
         // A name no park matches is shown as the model wrote it.

@@ -81,7 +81,8 @@ import CoreLocation
     /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
     /// asks, and its answer is labelled an example. Anyone who chose a park before has.
     var startChosen: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(startChosen,forKey:"startChosen") } } }
-    var radiusMiles: Double { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(radiusMiles,forKey:"radiusMiles") } } }
+    /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
+    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters) } } }
     var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
     var smokeEnabled: Bool {
@@ -154,7 +155,9 @@ import CoreLocation
         homeID=UserDefaults.standard.string(forKey:"homePark") ?? Park.defaultID
         homePlace=UserDefaults.standard.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
         startChosen=UserDefaults.standard.object(forKey:"startChosen") as? Bool ?? (UserDefaults.standard.string(forKey:"homePark") != nil)
-        radiusMiles=UserDefaults.standard.object(forKey:"radiusMiles") as? Double ?? 200
+        // A radius kept in miles before G1 is written once as metres, exactly.
+        if DebugScenario.screen == nil { SearchRadius.migrate() }
+        radiusMeters=SearchRadius.meters()
         weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
         npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
         smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
@@ -315,10 +318,10 @@ import CoreLocation
     /// forecast that failed (`NightPlanner.beyondForecast`).
     func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:present) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
-    func nearby(latitude:Double?,longitude:Double?,radiusMiles:Double?=nil)->[Park] {
+    func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {
         guard let origin else { return [] }
-        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, miles=radiusMiles ?? self.radiusMiles
-        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=miles*1609.344 }
+        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, reach=radiusMeters ?? self.radiusMeters
+        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=reach }
     }
     /// Where distances are measured from without "Near me": the chosen place, else the starting park.
     var origin:(latitude:Double,longitude:Double)? { homePlace.map { ($0.latitude,$0.longitude) } ?? home.map { ($0.latitude,$0.longitude) } }

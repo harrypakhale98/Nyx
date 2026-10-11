@@ -9,8 +9,7 @@ struct SkyGlowTests {
     let access=(try? AccessData.load()) ?? AccessData(spots:[])
 
     @Test func everyParkAndSpotHasItsSkyGlow() throws {
-        #expect(parks.count==63)
-        #expect(glow.parks.count==63)
+        #expect(!parks.isEmpty && glow.parks.count==parks.count)
         for park in parks {
             let site=try #require(glow.park(park.id),"\(park.id)")
             #expect(site.glow>0 && site.profile.count==36 && site.trend != nil)
@@ -80,7 +79,7 @@ struct SkyGlowTests {
     }
     @Test func stepFreeFilter() throws {
         let all=ParkFilter(), stepFree=ParkFilter(stepFreeOnly:true), both=ParkFilter(darkOnly:true,stepFreeOnly:true)
-        #expect(parks.filter { all.includes($0,access:access) }.count==63)
+        #expect(parks.filter { all.includes($0,access:access) }.count==parks.count)
         let kept=parks.filter { stepFree.includes($0,access:access) }
         #expect(!kept.isEmpty && kept.count<50)
         #expect(kept.allSatisfy { park in park.viewingSpots.contains { [.yes,.partial].contains(access.access(park:park.id,spot:$0.name)?.stepFree) } })

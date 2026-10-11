@@ -17,8 +17,9 @@ struct TripPlannerView: View {
     /// The chosen nights as seconds since 1970; 0 until chosen, which means from tonight for a week.
     @SceneStorage("tripFirst") private var firstStamp=0.0
     @SceneStorage("tripLast") private var lastStamp=0.0
-    @SceneStorage("tripRadius") private var radius=300.0
-    @SceneStorage("tripHop") private var maxHop=300.0
+    /// In metres, from the locale's round numbers (`SearchRadius`): 300 miles each, or 500 km.
+    @SceneStorage("tripRadiusMeters") private var radius=SearchRadius.tripStandard()
+    @SceneStorage("tripHopMeters") private var maxHop=SearchRadius.tripStandard()
     @SceneStorage("tripWeekends") private var weekendsOnly=false
     /// On by default: a plan that ends at a ferry dock at midnight is not a plan.
     @SceneStorage("tripDrivable") private var drivableOnly=true
@@ -104,10 +105,10 @@ struct TripPlannerView: View {
             #if DEBUG
             if let date=DebugScenario.date { firstStamp=date.timeIntervalSince1970; lastStamp=date.addingTimeInterval(6*86400).timeIntervalSince1970 }
             else if DebugScenario.screen != nil { firstStamp=0; lastStamp=0 }
-            if DebugScenario.screen != nil { radius=300; maxHop=300; weekendsOnly=false; drivableOnly=true }
+            if DebugScenario.screen != nil { radius=SearchRadius.tripStandard(); maxHop=radius; weekendsOnly=false; drivableOnly=true }
             if DebugScenario.state=="weekends" { weekendsOnly=true; lastStamp=first.addingTimeInterval(27*86400).timeIntervalSince1970 }
             // Boat and plane parks included, close in: `-nyx-park chis` shows the access notes in the plan.
-            if DebugScenario.state=="boats" { drivableOnly=false; radius=100 }
+            if DebugScenario.state=="boats" { drivableOnly=false; radius=SearchRadius.tripSteps()[0] }
             #endif
             // Location only if it was already allowed: the trip planner never asks for it.
             if DebugScenario.screen == nil, let fix=await OneShotLocation.current() { device=fix; useDevice=true }
@@ -120,7 +121,7 @@ struct TripPlannerView: View {
             guard !Task.isCancelled else { return }
             planning=true
             guard let point else { planning=false; return }
-            let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius,maxHopMiles:maxHop,drivableOnly:drivableOnly)
+            let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMeters:radius,maxHopMeters:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
             withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { plan=result }
             planning=false
@@ -160,8 +161,8 @@ struct TripPlannerView: View {
             Toggle(isOn:$weekendsOnly) { VStack(alignment:.leading,spacing:2) { Text("Weekends only"); Text("Friday and Saturday nights").font(.caption).foregroundStyle(palette.muted) } }.tint(palette.controlTint)
             Text("\(days.count) nights, at most \(TripPlanner.maxNights)").font(.caption).foregroundStyle(palette.muted)
             Divider().overlay(palette.line)
-            distancePicker(title:"Within",selection:$radius,values:[100,200,300,500,1000],note:"as the crow flies")
-            distancePicker(title:"Farthest between nights",selection:$maxHop,values:[100,200,300,500],note:"straight line, back-to-back nights")
+            distancePicker(title:"Within",selection:$radius,values:SearchRadius.tripSteps(),note:"as the crow flies")
+            distancePicker(title:"Farthest between nights",selection:$maxHop,values:SearchRadius.hopSteps(),note:"straight line, back-to-back nights")
             Toggle(isOn:$drivableOnly) { VStack(alignment:.leading,spacing:2) { Text("Parks you can drive to"); Text("Leaves out parks reached only by boat or plane").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) } }.tint(palette.controlTint)
         }
     }
@@ -173,7 +174,7 @@ struct TripPlannerView: View {
     }
     private func menu(title:LocalizedStringKey,selection:Binding<Double>,values:[Double])->some View {
         Picker(title,selection:selection) {
-            ForEach(values,id:\.self) { miles in Text(Measurement(value:miles,unit:UnitLength.miles),format:.measurement(width:.abbreviated,usage:.road)).tag(miles) }
+            ForEach(SearchRadius.choices(values,keeping:selection.wrappedValue),id:\.self) { meters in Text(SearchRadius.label(meters)).tag(meters) }
         }.pickerStyle(.menu).fixedSize()
     }
     @ViewBuilder private var results:some View {
@@ -207,7 +208,7 @@ struct TripPlannerView: View {
     /// An empty plan only because the drive-to filter left out the boat-and-plane parks in reach.
     private var onlyByBoatOrPlane:Bool {
         guard drivableOnly, let point else { return false }
-        return !TripPlanner.candidates(model.parks,latitude:point.latitude,longitude:point.longitude,radiusMiles:radius).isEmpty
+        return !TripPlanner.candidates(model.parks,latitude:point.latitude,longitude:point.longitude,radiusMeters:radius).isEmpty
     }
     private func hero(_ best:TripStop)->some View {
         let park=best.night.park
@@ -240,7 +241,7 @@ struct TripPlannerView: View {
         let edges=zip(plan.stops,plan.stops.dropFirst()).compactMap { a,b in
             b.hopMeters.flatMap { $0>1000 ? (SkyMap.position(a.night.park),SkyMap.position(b.night.park)) : nil }
         }
-        let nearby=TripPlanner.candidates(model.parks,latitude:plan.stops[0].night.park.latitude,longitude:plan.stops[0].night.park.longitude,radiusMiles:radius,drivableOnly:drivableOnly).map(SkyMap.position)
+        let nearby=TripPlanner.candidates(model.parks,latitude:plan.stops[0].night.park.latitude,longitude:plan.stops[0].night.park.longitude,radiusMeters:radius,drivableOnly:drivableOnly).map(SkyMap.position)
         return SkyMapContent(stars:stars,figures:edges.isEmpty ? [] : [edges],viewport:SkyMapContent.viewport(around:points+nearby),showsInsets:false,outlineRegions:Set(plan.stops.map { SkyMap.region($0.night.park) }))
     }
     private func routeSummary(_ plan:TripPlan)->String {

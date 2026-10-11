@@ -114,7 +114,7 @@ import SwiftUI
         let url=try #require(Bundle.main.url(forResource:"parks",withExtension:"json"))
         let fresh=try JSONDecoder().decode([Park].self,from:Data(contentsOf:url))
         let first=try ParkData.load(), second=try ParkData.load()
-        #expect(first==fresh && second==fresh && first.count==63)
+        #expect(first==fresh && second==fresh && !first.isEmpty)
         // Another bundle is still read from that bundle: this one has no parks file.
         #expect(throws:(any Error).self) { try ParkData.load(bundle:Bundle(for:BundleMarker.self)) }
     }

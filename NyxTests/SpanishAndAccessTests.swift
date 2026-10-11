@@ -69,17 +69,17 @@ struct SpanishAndAccessTests {
     }
     @Test func tripPlannerCanLeaveOutBoatParks() {
         // From Ventura: Channel Islands is in reach as the crow flies, but only by boat.
-        let all=TripPlanner.candidates(parks,latitude:34.28,longitude:-119.29,radiusMiles:250).map(\.id)
-        let drive=TripPlanner.candidates(parks,latitude:34.28,longitude:-119.29,radiusMiles:250,drivableOnly:true).map(\.id)
+        let all=TripPlanner.candidates(parks,latitude:34.28,longitude:-119.29,radiusMeters:250*SearchRadius.metersPerMile).map(\.id)
+        let drive=TripPlanner.candidates(parks,latitude:34.28,longitude:-119.29,radiusMeters:250*SearchRadius.metersPerMile,drivableOnly:true).map(\.id)
         #expect(all.contains("chis") && !drive.contains("chis"))
         #expect(drive.contains("jotr") && drive==drive.sorted())
         // From Key West, Dry Tortugas is left out and Everglades stays.
-        let keys=TripPlanner.candidates(parks,latitude:24.56,longitude:-81.78,radiusMiles:150,drivableOnly:true).map(\.id)
+        let keys=TripPlanner.candidates(parks,latitude:24.56,longitude:-81.78,radiusMeters:150*SearchRadius.metersPerMile,drivableOnly:true).map(\.id)
         #expect(!keys.contains("drto") && keys.contains("ever"))
     }
     @Test func guideRecordsCarryTheAccessNote() throws {
         let lookup=NightLookup(parks:parks,forecasts:[:],now:Date(timeIntervalSince1970:1_791_000_000))
-        let records=lookup.parksNear(park:"Channel Islands",radiusMiles:50)
+        let records=lookup.parksNear(park:"Channel Islands",radius:50,system:.miles)
         #expect(records.first { $0.hasPrefix("Channel Islands") }?.contains("getting there:")==true)
     }
 

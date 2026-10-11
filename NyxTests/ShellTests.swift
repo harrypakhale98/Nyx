@@ -36,12 +36,12 @@ import Testing
     }
     @Test func askNyxStartsFromACity() throws {
         let lookup=NightLookup(parks:parks,forecasts:[:],now:Date(timeIntervalSince1970:1791403200))
-        let denver=lookup.parksNear(park:"Denver",radiusMiles:100)
+        let denver=lookup.parksNear(park:"Denver",radius:100,system:.miles)
         #expect(!denver.isEmpty && denver.allSatisfy { $0.contains("from Denver, CO") })
         #expect(denver.contains { $0.hasPrefix("Rocky Mountain") })
         // A park's own name still wins: Mesa Verde is a park, not Mesa, Arizona.
         #expect(lookup.origin(named:"Mesa Verde")?.label=="Mesa Verde")
-        #expect(lookup.parksNear(park:"Atlantis",radiusMiles:300).first?.hasPrefix("No national park or US city") == true)
+        #expect(lookup.parksNear(park:"Atlantis",radius:300,system:.miles).first?.hasPrefix("No national park or city") == true)
     }
 
     // MARK: Tabs and links

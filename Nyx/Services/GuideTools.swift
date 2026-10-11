@@ -61,34 +61,41 @@ nonisolated struct NightLookup: Sendable {
         let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: now), table: table)
         return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
     }
-    /// Where "near" is measured from: a park by its exact name, then a US city or town from the
-    /// bundled Census list ("Denver", "Denver, CO"), then any park the app's search finds.
+    /// Where "near" is measured from: a park by its exact name, then a city or town from the
+    /// bundled list ("Denver", "Denver, CO"), then any park the app's search finds.
     func origin(named name: String) -> (label: String, latitude: Double, longitude: Double)? {
         let folded=Park.folded(name)
         if let park=parks.first(where: { Park.folded($0.shortName)==folded || Park.folded($0.name)==folded }) { return (park.shortName, park.latitude, park.longitude) }
         if let place=StartingPlaces.named(name, in: places) { return (place.label, place.latitude, place.longitude) }
         return park(named: name).map { ($0.shortName, $0.latitude, $0.longitude) }
     }
-    /// Parks within a straight-line radius of a starting park or place, best tonight first. Never a drive time.
-    func parksNear(park name: String, radiusMiles: Int, limit: Int = 6) -> [String] {
-        guard let origin=origin(named: name) else { return [String(localized: "No national park or US city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.")] }
-        let radius=Double(min(1500, max(10, radiusMiles)))
+    /// Parks within a straight-line radius of a starting park or place, best tonight first. Never a
+    /// drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
+    func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
+        guard let origin=origin(named: name) else { return [String(localized: "No national park or city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.")] }
+        let radius=Self.toolRadius(asked, system)
         let near=parks.compactMap { park -> (Park, Double)? in
-            let miles=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/1609.344
-            return miles<=radius ? (park, miles) : nil
+            let distance=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/system.meters
+            return distance<=radius ? (park, distance) : nil
         }
         let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: now), now: now)) }, uniquingKeysWith: { a, _ in a })
         let ranked=near.sorted { a, b in
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }
             return NightPlanner.better(x, y)
         }.prefix(limit)
-        guard !ranked.isEmpty else { return [String(localized: "No national parks within \(Int(radius)) miles of \(origin.label), straight-line.")] }
-        return ranked.map { park, miles in
-            let night=tonight[park.id]
-            let basis=night.map(Self.basis) ?? ""
-            return String(localized: "\(park.shortName), \(park.region); \(Int(miles.rounded())) miles straight-line from \(origin.label); tonight \(night?.score.value ?? 0)/100 \(night?.score.band.label ?? "")")+(basis.isEmpty ? "" : "; "+basis)+access(park)
+        guard !ranked.isEmpty else {
+            return [system == .miles ? String(localized: "No national parks within \(Int(radius)) miles of \(origin.label), straight-line.")
+                                     : String(localized: "No national parks within \(Int(radius)) km of \(origin.label), straight-line.")]
+        }
+        return ranked.map { park, distance in
+            let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
+            let line=system == .miles ? String(localized: "\(park.shortName), \(park.region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
+                                      : String(localized: "\(park.shortName), \(park.region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
+            return line+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
+    /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.
+    static func toolRadius(_ asked: Int, _ system: SearchRadius.System) -> Double { Double(min(system == .miles ? 1500 : 2500, max(10, asked))) }
 }
 
 /// Numbers every record the model sees, injected or looked up, so a citation can be checked, and
@@ -158,12 +165,10 @@ nonisolated extension NightLookup {
         guard let date=lookupDay(day, at: park(named: name)) else { return String(localized: "What's up · \(place) · tonight") }
         return String(localized: "What's up · \(place) · \(date)")
     }
-    /// "Parks near · Joshua Tree · within 200 mi", in the device's units, straight-line as the tool is.
-    func parksNearLookup(park name: String, radiusMiles: Int) -> String {
+    /// "Parks near · Joshua Tree · within 200 mi", in the tool's unit, straight-line as the tool is.
+    func parksNearLookup(park name: String, radius asked: Int, system: SearchRadius.System = .init()) -> String {
         let place=origin(named: name)?.label ?? lookupName(name)
-        let radius=Measurement(value: Double(min(1500, max(10, radiusMiles))), unit: UnitLength.miles)
-            .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0))))
-        return String(localized: "Parks near · \(place) · within \(radius)")
+        return String(localized: "Parks near · \(place) · within \(SearchRadius.format(Self.toolRadius(asked, system), system))")
     }
 }
 
@@ -202,17 +207,21 @@ nonisolated struct WhatsUpTool: Tool {
 }
 nonisolated struct ParksNearTool: Tool {
     let name="parksNear"
-    let description="National parks within a straight-line radius of a starting park or US city, with tonight's score. Distances are straight-line miles, never drive times."
+    /// Miles where the person's roads are signed in miles, kilometres elsewhere (`SearchRadius`).
+    var description: String {
+        "National parks within a straight-line radius of a starting park or city, with tonight's score. The radius and distances are straight-line \(system == .miles ? "miles" : "kilometers"), never drive times."
+    }
     @Generable struct Arguments {
-        @Guide(description: "The starting national park, or a US city or town such as Denver")
+        @Guide(description: "The starting national park, or a city or town such as Denver")
         var park: String
-        @Guide(description: "Straight-line radius in miles", .range(10...1500))
-        var radiusMiles: Int
+        @Guide(description: "Straight-line radius, in the unit the tool's description names", .range(10...2500))
+        var radius: Int
     }
     let ledger: GuideLedger
+    var system=SearchRadius.System()
     @concurrent func call(arguments: Arguments) async throws -> String {
         guard let lookup=ledger.lookup else { return "" }
-        return ledger.add(lookup.parksNear(park: arguments.park, radiusMiles: arguments.radiusMiles),
-                          lookup: lookup.parksNearLookup(park: arguments.park, radiusMiles: arguments.radiusMiles))
+        return ledger.add(lookup.parksNear(park: arguments.park, radius: arguments.radius, system: system),
+                          lookup: lookup.parksNearLookup(park: arguments.park, radius: arguments.radius, system: system))
     }
 }

@@ -153,6 +153,9 @@ targets:
         group: Shared
       - path: Nyx/Services/DataServices.swift
         group: Shared
+      # The search radius the launch preload reads (CachePreload.homeArea), in metres since G1.
+      - path: Nyx/Services/SearchRadius.swift
+        group: Shared
       # The campground types `ParkStore` reads and caches (the widget never asks for them).
       - path: Nyx/Models/Campground.swift
         group: Shared
