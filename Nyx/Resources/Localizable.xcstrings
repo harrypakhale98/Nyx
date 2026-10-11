@@ -409,6 +409,23 @@
         }
       }
     },
+    "%@ nights here are nearly always clear, by an estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are nearly always clear, by an estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí casi siempre están despejadas, según una estimación."
+          }
+        }
+      }
+    },
     "%@ nights here are nearly always clear.": {
       "extractionState": "manual",
       "localizations": {
@@ -422,6 +439,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las noches de %@ aquí casi siempre están despejadas."
+          }
+        }
+      }
+    },
+    "%@ nights here are rarely clear, by an estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are rarely clear, by an estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí rara vez están despejadas, según una estimación."
           }
         }
       }
@@ -3164,6 +3198,23 @@
         }
       }
     },
+    "A dark area": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A dark area"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una zona oscura"
+          }
+        }
+      }
+    },
     "A dark night at a park Nyx follows.": {
       "extractionState": "manual",
       "localizations": {
@@ -5144,6 +5195,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otoño de %@"
+          }
+        }
+      }
+    },
+    "Away from the parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Away from the parks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lejos de los parques"
           }
         }
       }
@@ -9260,6 +9328,23 @@
         }
       }
     },
+    "Estimated from satellite data. A light close by can make your own sky brighter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated from satellite data. A light close by can make your own sky brighter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimado con datos satelitales. Una luz cercana puede hacer que tu propio cielo sea más brillante."
+          }
+        }
+      }
+    },
     "Evening": {
       "extractionState": "manual",
       "localizations": {
@@ -10460,6 +10545,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siguiendo. Dejar de seguir"
+          }
+        }
+      }
+    },
+    "For a place that is not one of the parks, such as your starting city, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The parks keep their own values. Generated using Copernicus Climate Change Service information [2015–2024].": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For a place that is not one of the parks, such as your starting city, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The parks keep their own values. Generated using Copernicus Climate Change Service information [2015–2024]."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para un lugar que no es uno de los parques, como tu ciudad de partida, Nyx lee dos cuadrículas que vienen con la app. El brillo del cielo sale de las mismas luces nocturnas de la NASA de 2025, sumadas en 300 km alrededor de cada punto y contrastadas con 77 mediciones publicadas, de sitios oscuros a centros de ciudad: por lo general con menos de media magnitud de diferencia, y menos en lugares oscuros. Se muestra como una estimación, con su clase Bortle. Las nubes habituales salen de los mismos diez años de ERA5, promediadas sobre la noche de cada mes en una cuadrícula de un cuarto de grado; la frecuencia de noches mayormente despejadas se estima a partir de ese promedio, por eso dice \"unas\". Los parques conservan sus propios valores. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]."
+          }
+        }
+      }
+    },
+    "For one observer under a Bortle %lld sky, estimated from satellite data; a rough guide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For one observer under a Bortle %lld sky, estimated from satellite data; a rough guide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para una persona bajo un cielo de Bortle %lld, estimado con datos satelitales; una guía aproximada."
           }
         }
       }
@@ -22321,6 +22440,40 @@
         }
       }
     },
+    "Sky brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky brightness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brillo del cielo"
+          }
+        }
+      }
+    },
+    "Sky brightness: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky brightness: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brillo del cielo: %@."
+          }
+        }
+      }
+    },
     "Sky drawn": {
       "extractionState": "manual",
       "localizations": {
@@ -28047,6 +28200,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nubes habituales"
+          }
+        }
+      }
+    },
+    "Usual clouds for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usual clouds for %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes habituales en %@"
           }
         }
       }

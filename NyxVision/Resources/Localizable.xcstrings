@@ -35,6 +35,23 @@
         }
       }
     },
+    "%@ nights here are nearly always clear, by an estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are nearly always clear, by an estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí casi siempre están despejadas, según una estimación."
+          }
+        }
+      }
+    },
     "%@ nights here are nearly always clear.": {
       "extractionState": "manual",
       "localizations": {
@@ -48,6 +65,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las noches de %@ aquí casi siempre están despejadas."
+          }
+        }
+      }
+    },
+    "%@ nights here are rarely clear, by an estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ nights here are rarely clear, by an estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de %@ aquí rara vez están despejadas, según una estimación."
           }
         }
       }
@@ -473,6 +507,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Una Luna brillante oculta todos los meteoros salvo los más brillantes."
+          }
+        }
+      }
+    },
+    "A dark area": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A dark area"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una zona oscura"
           }
         }
       }
