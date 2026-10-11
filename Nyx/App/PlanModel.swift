@@ -93,6 +93,9 @@ import CoreLocation
     @ObservationIgnored let savedSync=SavedSkySync()
     /// When Tonight's candidates were last refreshed, for a refresh on return.
     @ObservationIgnored private(set) var lastRefresh: Date?
+    /// The parks' forecast was due but held back: the service asked Nyx to wait, or this iPhone's
+    /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line.
+    @ObservationIgnored private(set) var forecastsHeldBack=false
     var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
     /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
     /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
@@ -555,6 +558,7 @@ import CoreLocation
         }
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
         if !smokeEnabled { await detailService.forgetAir() }
+        forecastsHeldBack=network ? await weather.heldBack() : false
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         let paused=await detailService.pausedForLowData()

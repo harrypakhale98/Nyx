@@ -157,7 +157,7 @@ struct PrivacyView:View {
                 Toggle("Park alerts and programs",isOn:$model.npsEnabled).tint(palette.controlTint)
                 Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Nothing is asked about any other place. Ranger programs are requested only for a park whose page you open. Campgrounds for all \(model.parks.count) parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
             }
-            Section { NPSKeyField() } header:{ Text("Advanced") }
+            Section { NPSKeyField();ForecastRequestsToday() } header:{ Text("Advanced") }
             Section("Measured on this iPhone") {
                 Text("iOS reports how Nyx performs, including how bright its screen was, through MetricKit about once a day. Nyx keeps only the last screen brightness, to show here and in About the data. It is never sent anywhere.")
                 if let reading=LuminanceProof.current { Text(reading.sentence) }
@@ -230,6 +230,26 @@ struct AboutDataLink:View {
     }
 }
 #Preview("Privacy AX5") { NavigationStack { PrivacyView() }.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+/// Your privacy → Advanced: how many forecast requests this iPhone sent today, and what Open-Meteo
+/// counts them as (`CallLedger`, kept on this iPhone and never sent). Quiet and closed by default.
+struct ForecastRequestsToday: View {
+    @Environment(\.nyx) private var palette
+    /// `-nyx-advanced` (DEBUG) opens it for screenshots.
+    @State private var expanded=DebugScenario.isEnabled("advanced")
+    var body: some View {
+        DisclosureGroup(isExpanded:$expanded) {
+            // Read when shown: the ledger is a small file's worth of entries.
+            let today=CallLedger.shared.today()
+            VStack(alignment:.leading,spacing:10) {
+                LabeledContent("Requests today") { Text(today.requests,format:.number).monospacedDigit() }
+                LabeledContent("Calls, as Open-Meteo counts them") { Text(Int(today.calls.rounded()),format:.number).monospacedDigit() }
+                Text("Counted on this iPhone since midnight and never sent anywhere. Open-Meteo counts each place in a request as one call. Its free service allows 10,000 calls a day from each network address, shared by every device on that network, so Nyx paces its requests and waits whenever the service asks.")
+                    .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }.padding(.top,6)
+        } label:{ Text("Forecast requests on this iPhone").frame(minHeight:44,alignment:.leading) }
+        .tint(palette.accent)
+    }
+}
 /// Your privacy → Advanced: an NPS key of the person's own, used instead of the key every install
 /// shares. Free from nps.gov; kept in the Keychain on this device; never shown again in full.
 struct NPSKeyField: View {

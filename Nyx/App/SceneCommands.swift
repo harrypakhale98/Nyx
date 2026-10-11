@@ -253,9 +253,7 @@ struct RefreshKey: ViewModifier {
         await perform()
         commands.refreshing=false
         guard let model else { withAnimation(.easeOut(duration:0.2)) { note=nil }; return }
-        let fetched=model.forecasts.contains { id,forecast in before[id] != forecast.updated }
-        let current=model.forecasts.values.contains { Date.now.timeIntervalSince($0.updated)<600 }
-        let line=RefreshOutcome.of(forecastsOn:model.weatherEnabled,fetched:fetched,current:current).line
+        let line=RefreshOutcome.of(model,before:before).line
         // Heard, politely, after anything VoiceOver is already saying; seen for a few seconds.
         if !quiet { NightListener.announce(line,priority:.low) }
         withAnimation(.easeOut(duration:0.2)) { note = .said(line) }
@@ -263,19 +261,42 @@ struct RefreshKey: ViewModifier {
         if note == .said(line) { withAnimation(.easeOut(duration:0.4)) { note=nil } }
     }
 }
-/// What a refresh found, in Tonight's words: new forecasts (or ones minutes old), or saved data and why.
+/// What a refresh found, in Tonight's words: new forecasts (or ones minutes old), a forecast too
+/// recent to ask about again (`ForecastReuse`), requests paused for a while, or saved data and why.
 nonisolated enum RefreshOutcome: Equatable {
     case updated, forecastsOff, unreachable
-    static func of(forecastsOn:Bool,fetched:Bool,current:Bool)->RefreshOutcome {
+    /// Not asked again: the newest forecast, from this time, is as new as the models allow.
+    case current(Date)
+    /// Paused: the service asked Nyx to wait, or this iPhone's request budget is spent. The newest forecast kept, if any.
+    case paused(Date?)
+    static func of(forecastsOn:Bool,fetched:Bool,current:Bool,newest:Date?=nil,heldBack:Bool=false,now:Date = .now)->RefreshOutcome {
         guard forecastsOn else { return .forecastsOff }
-        return fetched || current ? .updated : .unreachable
+        if fetched || current { return .updated }
+        if let newest, now.timeIntervalSince(newest)<ForecastReuse.cloudsForced { return .current(newest) }
+        if heldBack { return .paused(newest) }
+        return .unreachable
+    }
+    /// From the model after a refresh; `before` is when each forecast was issued before it began.
+    @MainActor static func of(_ model:PlanModel,before:[String:Date],now:Date = .now)->RefreshOutcome {
+        let fetched=model.forecasts.contains { id,forecast in before[id] != forecast.updated }
+        let current=model.forecasts.values.contains { now.timeIntervalSince($0.updated)<600 }
+        // The parks' own forecast: it is the one every refresh asks for.
+        let newest=model.parks.compactMap { model.forecasts[$0.id]?.updated }.max()
+        return of(forecastsOn:model.weatherEnabled,fetched:fetched,current:current,newest:newest,heldBack:model.forecastsHeldBack,now:now)
     }
     var line:String {
         switch self {
         case .updated: String(localized:"Updated")
         case .forecastsOff: String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.")
         case .unreachable: String(localized:"Could not reach the forecast. Showing saved data.")
+        case .current(let issued): String(localized:"Up to date. Forecast from \(Self.when(issued))")
+        case .paused(let issued?): String(localized:"Forecast requests are paused for a while. Showing the forecast from \(Self.when(issued))")
+        case .paused(nil): String(localized:"Forecast requests are paused for a while. Showing saved data.")
         }
+    }
+    /// "9:41 PM" today, "Fri 9:41 PM" on an earlier day, in this device's own time and format.
+    static func when(_ date:Date,now:Date = .now,calendar:Calendar = .current)->String {
+        calendar.isDate(date,inSameDayAs:now) ? date.formatted(date:.omitted,time:.shortened) : date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
 }
 /// ⌘R's note at the top of the page: the system spinner while it works, then one line. Solid

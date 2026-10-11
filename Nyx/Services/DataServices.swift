@@ -22,18 +22,25 @@ nonisolated protocol DetailProviding: Sendable {
 /// cold, dew, wind and visibility (seven days), and the aerosol forecast that warns of smoke.
 /// Like clouds, every park shares each request, so a refresh is three more requests (two chunks
 /// each for 63 parks), never one per park, and none of them hints at where someone is. Each part
-/// keeps its own twelve-hour freshness; a failed request keeps the last good part. Detail never
-/// uses a Low Data Mode network: it is context, and the score's clouds still arrive.
+/// keeps its own twelve-hour freshness (`ForecastReuse`); a failed request keeps the last good
+/// part. Requests to one host go one after the other, never side by side, within this device's
+/// budget (`CallBudget`). Detail never uses a Low Data Mode network: it is context, and the
+/// score's clouds still arrive.
 actor ForecastDetailService: DetailProviding {
     enum Kind: CaseIterable, Sendable {
         case models, layers, air
         var host: String { self == .air ? "air-quality-api.open-meteo.com" : "api.open-meteo.com" }
+        /// How soon pulling to refresh may ask again: three hours for the forecast models (ICON
+        /// runs every three), never sooner than twelve for smoke (CAMS runs twice a day).
+        var forced: TimeInterval { self == .air ? ForecastReuse.airForced : ForecastReuse.detailForced }
     }
     /// Detail is context for the week ahead; twice a day keeps it current at a quarter of the calls.
-    static let freshFor: TimeInterval=12*3600
+    static let freshFor: TimeInterval=ForecastReuse.detail
     private let transport: any HTTPTransport
     private let persist: Bool
     private let backoff: HostBackoff
+    private let ledger: CallLedger
+    private let budget: CallBudget
     private let clock: @Sendable () -> Date
     private var memory: [String: ForecastDetail] = [:]
     private var loaded=Set<String>()
@@ -45,9 +52,11 @@ actor ForecastDetailService: DetailProviding {
     private var airGeneration=0
     /// A refresh already under way; later callers wait for it instead of asking again.
     private var running: Task<Void, Never>?
-    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
-        self.transport=transport; self.persist=persist; self.clock=clock
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
+         budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+        self.ledger=ledger ?? (persist ? .shared : CallLedger(file: nil))
     }
     func hydrate(_ parks: [Park]) async -> [String: ForecastDetail] {
         for park in parks { load(park.id) }
@@ -87,18 +96,32 @@ actor ForecastDetailService: DetailProviding {
             var jobs: [(Kind, [Park])] = []
             for kind in Kind.allCases where (kind == .air ? smoke : weather) && backoff.allows(kind.host, now: now) {
                 let due=parks.filter { park in
-                    let age=Self.series(memory[park.id], kind).map { now.timeIntervalSince($0.updated) } ?? .infinity
-                    return age>=Self.freshFor || (force && age>=600)
+                    ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
                 }
                 for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
             }
             if !jobs.isEmpty {
                 let generation=airGeneration
+                // One host's requests one after the other (Open-Meteo serves one at a time per
+                // address and queues the rest); the two hosts side by side.
+                let byHost=Dictionary(grouping: jobs) { $0.0.host }.values.map { Array($0) }
                 let task=Task {
-                    let results=await withTaskGroup(of: (Kind, [(String, HourlySeries)]?).self) { group in
-                        for (kind, chunk) in jobs { group.addTask { (kind, await self.fetch(kind, chunk)) } }
+                    let results=await withTaskGroup(of: [(Kind, [(String, HourlySeries)]?)].self) { group in
+                        for queue in byHost {
+                            group.addTask {
+                                var done: [(Kind, [(String, HourlySeries)]?)] = []
+                                for (kind, chunk) in queue {
+                                    guard !Task.isCancelled else { break }
+                                    let fetched=await self.fetch(kind, chunk)
+                                    done.append((kind, fetched))
+                                    // A host that now asks Nyx to wait: the rest of its queue waits too.
+                                    if fetched?.isEmpty == true && !self.backoff.allows(kind.host, now: self.clock()) { break }
+                                }
+                                return done
+                            }
+                        }
                         var all: [(Kind, [(String, HourlySeries)]?)] = []
-                        for await result in group { all.append(result) }
+                        for await result in group { all+=result }
                         return all
                     }
                     self.store(results, airGeneration: generation)
@@ -154,10 +177,8 @@ actor ForecastDetailService: DetailProviding {
                                 URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
         guard let url=parts.url else { return [] }
         let data: Data
-        do { data=try await transport.get(url, headers: [:], constrained: false) } catch {
-            if Backoff.constrained(error) { return nil }
-            backoff.record(error, host: kind.host, now: clock())
-            return []
+        do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
+            return Backoff.constrained(error) ? nil : []
         }
         struct Response: Decodable { let hourly: [String: [Double?]] }
         // One coordinate returns an object; several return an array in request order.
@@ -380,6 +401,7 @@ actor ParkStore: ParkProviding {
         do {
             let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: true)
             refused=false
+            backoff.succeeded(Self.host)
             return try JSONDecoder().decode(type, from: data)
         } catch {
             if error is HTTPStatusError { refused=true }
@@ -394,6 +416,7 @@ actor ParkStore: ParkProviding {
         do {
             let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: constrained)
             refused=false
+            backoff.succeeded(Self.host)
             return data
         } catch {
             if Backoff.constrained(error) { return nil }

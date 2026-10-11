@@ -13629,6 +13629,41 @@
         }
       }
     },
+    "Calls, as Open-Meteo counts them": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufrufe, wie Open-Meteo sie zählt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calls, as Open-Meteo counts them"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llamadas, según las cuenta Open-Meteo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appels, selon le décompte d’Open-Meteo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open-Meteoが数える呼び出し数"
+          }
+        }
+      }
+    },
     "Campgrounds appear once Nyx reaches the National Park Service.": {
       "extractionState": "manual",
       "localizations": {
@@ -16640,6 +16675,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "数"
+          }
+        }
+      }
+    },
+    "Counted on this iPhone since midnight and never sent anywhere. Open-Meteo counts each place in a request as one call. Its free service allows 10,000 calls a day from each network address, shared by every device on that network, so Nyx paces its requests and waits whenever the service asks.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf diesem iPad seit Mitternacht gezählt und nirgendwohin gesendet. Open-Meteo zählt jeden Ort in einer Anfrage als einen Aufruf. Sein kostenloser Dienst erlaubt 10.000 Aufrufe pro Tag von jeder Netzwerkadresse, geteilt von allen Geräten in diesem Netzwerk. Deshalb verteilt Nyx seine Anfragen und wartet, wann immer der Dienst darum bittet."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf diesem iPhone seit Mitternacht gezählt und nirgendwohin gesendet. Open-Meteo zählt jeden Ort in einer Anfrage als einen Aufruf. Sein kostenloser Dienst erlaubt 10.000 Aufrufe pro Tag von jeder Netzwerkadresse, geteilt von allen Geräten in diesem Netzwerk. Deshalb verteilt Nyx seine Anfragen und wartet, wann immer der Dienst darum bittet."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Counted on this iPad since midnight and never sent anywhere. Open-Meteo counts each place in a request as one call. Its free service allows 10,000 calls a day from each network address, shared by every device on that network, so Nyx paces its requests and waits whenever the service asks."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Counted on this iPhone since midnight and never sent anywhere. Open-Meteo counts each place in a request as one call. Its free service allows 10,000 calls a day from each network address, shared by every device on that network, so Nyx paces its requests and waits whenever the service asks."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se cuentan en este iPad desde la medianoche y nunca se envían a ningún sitio. Open-Meteo cuenta cada lugar de una solicitud como una llamada. Su servicio gratuito permite 10,000 llamadas al día desde cada dirección de red, compartidas por todos los dispositivos de esa red, así que Nyx espacia sus solicitudes y espera siempre que el servicio se lo pide."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se cuentan en este iPhone desde la medianoche y nunca se envían a ningún sitio. Open-Meteo cuenta cada lugar de una solicitud como una llamada. Su servicio gratuito permite 10,000 llamadas al día desde cada dirección de red, compartidas por todos los dispositivos de esa red, así que Nyx espacia sus solicitudes y espera siempre que el servicio se lo pide."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Comptées sur cet iPad depuis minuit et jamais envoyées nulle part. Open-Meteo compte chaque lieu d’une requête comme un appel. Son service gratuit autorise 10 000 appels par jour depuis chaque adresse réseau, partagés par tous les appareils de ce réseau ; Nyx espace donc ses requêtes et attend chaque fois que le service le demande."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Comptées sur cet iPhone depuis minuit et jamais envoyées nulle part. Open-Meteo compte chaque lieu d’une requête comme un appel. Son service gratuit autorise 10 000 appels par jour depuis chaque adresse réseau, partagés par tous les appareils de ce réseau ; Nyx espace donc ses requêtes et attend chaque fois que le service le demande."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "このiPadで午前0時から数えたもので、どこにも送信されません。Open-Meteoは、1回のリクエストに含まれる場所ごとに1回の呼び出しとして数えます。無料サービスでは、ネットワークアドレスごとに1日10,000回まで呼び出せ、その上限は同じネットワーク上のすべてのデバイスで共有されます。そのためNyxはリクエストの間隔をあけ、サービスから求められたときは待ちます。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "このiPhoneで午前0時から数えたもので、どこにも送信されません。Open-Meteoは、1回のリクエストに含まれる場所ごとに1回の呼び出しとして数えます。無料サービスでは、ネットワークアドレスごとに1日10,000回まで呼び出せ、その上限は同じネットワーク上のすべてのデバイスで共有されます。そのためNyxはリクエストの間隔をあけ、サービスから求められたときは待ちます。"
+                }
+              }
+            }
           }
         }
       }
@@ -24020,6 +24150,171 @@
           "stringUnit": {
             "state": "translated",
             "value": "予報モデル：%lld–%lld"
+          }
+        }
+      }
+    },
+    "Forecast requests are paused for a while. Showing saved data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorhersageanfragen sind für eine Weile pausiert. Gespeicherte Daten werden angezeigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast requests are paused for a while. Showing saved data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las solicitudes de pronóstico están en pausa por un tiempo. Se muestran los datos guardados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les requêtes de prévision sont suspendues pour un moment. Données enregistrées affichées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報のリクエストをしばらく停止しています。保存済みのデータを表示しています。"
+          }
+        }
+      }
+    },
+    "Forecast requests are paused for a while. Showing the forecast from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorhersageanfragen sind für eine Weile pausiert. Stand der angezeigten Vorhersage: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast requests are paused for a while. Showing the forecast from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las solicitudes de pronóstico están en pausa por un tiempo. Se muestra el pronóstico de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les requêtes de prévision sont suspendues pour un moment. Prévision affichée : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報のリクエストをしばらく停止しています。%@時点の予報を表示しています。"
+          }
+        }
+      }
+    },
+    "Forecast requests on this iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vorhersageanfragen auf diesem iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vorhersageanfragen auf diesem iPhone"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Forecast requests on this iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Forecast requests on this iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Solicitudes de pronóstico en este iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Solicitudes de pronóstico en este iPhone"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Requêtes de prévision sur cet iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Requêtes de prévision sur cet iPhone"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "このiPadからの予報リクエスト"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "このiPhoneからの予報リクエスト"
+                }
+              }
+            }
           }
         }
       }
@@ -46101,6 +46396,41 @@
         }
       }
     },
+    "Requests today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfragen heute"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests today"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solicitudes de hoy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requêtes aujourd’hui"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日のリクエスト"
+          }
+        }
+      }
+    },
     "Reserve %@ on %@": {
       "extractionState": "manual",
       "localizations": {
@@ -62409,6 +62739,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "完全に暗い時間はずっと空にあります。"
+          }
+        }
+      }
+    },
+    "Up to date. Forecast from %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereits aktuell. Stand der Vorhersage: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up to date. Forecast from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya está al día. Pronóstico de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjà à jour. Prévision de %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新です。%@時点の予報"
           }
         }
       }

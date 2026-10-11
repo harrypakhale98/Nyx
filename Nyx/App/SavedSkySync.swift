@@ -1,6 +1,7 @@
 import BackgroundTasks
 import SwiftData
 import SwiftUI
+import WatchConnectivity
 import WidgetKit
 
 /// Brings the widget, the watch, Siri's park list and reminders in line with the saved parks. One
@@ -72,6 +73,9 @@ import WidgetKit
     /// made first, so a run cut short still leaves one.
     func backgroundRefresh(_ model:PlanModel) async {
         Self.scheduleRefresh()
+        // Nothing outside the app shows a forecast: no request at all (each parks request is 63 of
+        // Open-Meteo's counted calls). The next open refreshes as usual.
+        guard await Self.anythingOutsideTheApp() else { return }
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         model.tick()
         await Self.run(within:Self.backgroundBudget) {
@@ -79,6 +83,19 @@ import WidgetKit
             // A followed night's Live Activity catches up too: its next moment, or its end at dawn.
             if !Task.isCancelled { await Self.refreshFollowed(model) }
         }
+    }
+    /// Whether a background refresh has anyone to serve: reminders, a Nyx widget, a followed night's
+    /// Live Activity or the watch. Unsure counts as yes (a widget list that cannot be read, a watch
+    /// session not yet active), so a person who relies on one never misses a refresh.
+    static func anythingOutsideTheApp() async -> Bool {
+        if UserDefaults.standard.bool(forKey:"notificationsEnabled") { return true }
+        if !FieldActivities.Item.activities.isEmpty { return true }
+        if WCSession.isSupported() {
+            let session=WCSession.default
+            if session.activationState != .activated || (session.isPaired && session.isWatchAppInstalled) { return true }
+        }
+        guard let widgets=try? await WidgetCenter.shared.currentConfigurations() else { return true }
+        return !widgets.isEmpty
     }
     /// Brings followed nights' Live Activities up to date with what Nyx knows now: each night's
     /// score and band from the latest forecasts, and its park's closure line once alerts are read.

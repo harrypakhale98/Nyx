@@ -136,13 +136,10 @@ struct TonightView: View {
                 }
                 let before=model.forecasts.mapValues(\.updated)
                 await model.refresh(candidates,force:true)
-                // Said as it is: new forecasts (or ones minutes old), or saved data and why.
-                let fetched=model.forecasts.contains { id,forecast in before[id] != forecast.updated }
-                let current=model.forecasts.values.contains { Date.now.timeIntervalSince($0.updated)<600 }
-                let line: String
-                if model.weatherEnabled && (fetched || current) { refreshed+=1; line=String(localized:"Updated") }
-                else if !model.weatherEnabled { line=String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.") }
-                else { line=String(localized:"Could not reach the forecast. Showing saved data.") }
+                // Said as it is: new forecasts (or ones minutes old), one too recent to ask about again, or saved data and why.
+                let outcome=RefreshOutcome.of(model,before:before)
+                if outcome == .updated { refreshed+=1 }
+                let line=outcome.line
                 // The haptic is felt; this is heard, politely, after anything VoiceOver is already saying.
                 NightListener.announce(line,priority:.low)
             }
