@@ -16,36 +16,16 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     let nextNewMoon: Date
 
     init(at date: Date) {
-        let engine = AstronomyEngine(), phase = engine.moonPhase(at: date)
+        // The phase and its lit fraction as the large face's week computes them (`MoonWeek`).
+        let glance = MoonWeek.Glance(at: date)
         self.date = date
-        phaseName = phase.name
-        waxing = phase.waxing
-        // Elongation from the phase cycle; the phase angle is its supplement to within a few
-        // hundredths of a degree, so the lit fraction agrees with the planner's.
-        phaseAngle = Double.pi-2*Double.pi*(phase.fraction < 0.5 ? phase.fraction : 1-phase.fraction)
-        illumination = (1+cos(phaseAngle))/2
-        nextNewMoon = Self.newMoon(after: date)
+        phaseName = glance.phaseName
+        waxing = glance.waxing
+        phaseAngle = glance.phaseAngle
+        illumination = glance.illumination
+        nextNewMoon = MoonWeek.newMoon(after: date)
     }
     var percent: Int { Int((illumination*100).rounded()) }
-    /// The first new moon after `date`: the phase cycle wraps from 1 to 0 there. Found by
-    /// six-hour steps, then halving to under a minute.
-    static func newMoon(after date: Date) -> Date {
-        let engine = AstronomyEngine()
-        var before = date, previous = engine.moonPhase(at: date).fraction
-        for step in 1...130 {
-            let next = date.addingTimeInterval(Double(step)*6*3600), fraction = engine.moonPhase(at: next).fraction
-            if fraction < previous {
-                var low = before, high = next
-                while high.timeIntervalSince(low) > 30 {
-                    let middle = low.addingTimeInterval(high.timeIntervalSince(low)/2)
-                    if engine.moonPhase(at: middle).fraction > 0.5 { low = middle } else { high = middle }
-                }
-                return high
-            }
-            before = next; previous = fraction
-        }
-        return date.addingTimeInterval(AstronomyEngine.synodicDays*86400)
-    }
     /// "Moon, waxing crescent, 23 percent lit. Next new moon Tuesday, October 21."
     var spoken: String {
         String(localized: "Moon, \(phaseName.lowercased()), \(percent) percent lit. Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")
@@ -53,7 +33,8 @@ nonisolated struct MoonFacts: Sendable, Equatable {
 }
 
 /// The widget's faces. `simplified` is the far-away look (visionOS `levelOfDetail`): the Moon and
-/// its percentage, large.
+/// its percentage, large (and on the large face, the next new moon). The large face adds the
+/// next seven nights' Moons (`MoonWeek`), the new moon's night ringed in amber.
 struct MoonWidgetFace: View {
     let facts: MoonFacts
     let family: WidgetFamily
@@ -61,12 +42,19 @@ struct MoonWidgetFace: View {
     private static let ink = Color(red: 0.961, green: 0.945, blue: 0.902)
     private static let amber = Color(red: 1, green: 0.706, blue: 0.329)
     var body: some View {
+        // The large face's week, from the entry's date alone.
+        let week = family == .systemLarge && !simplified ? MoonWeek(at: facts.date) : nil
         Group {
             if simplified {
                 VStack(spacing: 10) {
-                    WidgetMoon(facts: facts).frame(maxWidth: 120, maxHeight: 120)
+                    WidgetMoon(facts: facts).frame(maxWidth: family == .systemLarge ? 200 : 120, maxHeight: family == .systemLarge ? 200 : 120)
                     Text("\(facts.percent)%").font(.system(size: 44, weight: .light, design: .serif)).monospacedDigit().foregroundStyle(Self.amber)
+                    if family == .systemLarge {
+                        Text("New moon \(facts.nextNewMoon.formatted(.dateTime.month(.abbreviated).day()))").font(.system(.title3, design: .serif)).foregroundStyle(Self.ink)
+                    }
                 }
+            } else if let week {
+                large(week)
             } else if family == .systemSmall {
                 VStack(alignment: .leading, spacing: 6) {
                     WidgetMoon(facts: facts).frame(width: 64, height: 64)
@@ -94,7 +82,52 @@ struct MoonWidgetFace: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(facts.spoken))
+        .accessibilityLabel(Text(week.map { facts.spoken+" "+Self.spokenWeek($0) } ?? facts.spoken))
+    }
+    /// Tonight's Moon above the week: each night's weekday, its Moon and how much is lit.
+    private func large(_ week: MoonWeek) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 18) {
+                WidgetMoon(facts: facts).frame(width: 112, height: 112)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Tonight's Moon").textCase(.uppercase).font(.caption2.weight(.semibold)).kerning(1.4).foregroundStyle(Self.ink.opacity(0.7))
+                    Text(facts.phaseName).font(.system(.title2, design: .serif)).foregroundStyle(Self.ink).lineLimit(2).minimumScaleFactor(0.85)
+                    Text("\(facts.percent)% lit").font(.headline).monospacedDigit().foregroundStyle(Self.amber)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Text("The next seven nights").textCase(.uppercase).font(.caption2.weight(.semibold)).kerning(1.4).foregroundStyle(Self.ink.opacity(0.7))
+            HStack(alignment: .top, spacing: 0) {
+                ForEach(Array(week.nights.enumerated()), id: \.element.id) { index, night in
+                    let newMoon = index == week.newMoonNight
+                    VStack(spacing: 5) {
+                        Text(night.date.formatted(.dateTime.weekday(.abbreviated))).font(.caption2.weight(.semibold))
+                            .foregroundStyle(newMoon ? Self.amber : Self.ink.opacity(0.75))
+                        WidgetMoon(glance: night, side: 64).frame(width: 30, height: 30)
+                            .padding(3)
+                            .overlay { if newMoon { Circle().stroke(Self.amber, lineWidth: 1.5) } }
+                        Text("\(night.percent)%").font(.caption2).monospacedDigit().foregroundStyle(Self.ink.opacity(0.75))
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .lineLimit(1).minimumScaleFactor(0.7)
+            // Seven columns hold their shape; the face's spoken label carries every night at any size.
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Next new moon").font(.caption).foregroundStyle(Self.ink.opacity(0.75))
+                Text(facts.nextNewMoon.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())).font(.system(.headline, design: .serif)).foregroundStyle(Self.ink)
+                Text("The darkest nights of the month come in the week around it.").font(.caption2).foregroundStyle(Self.ink.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+    /// "The next seven nights: Saturday, 48 percent lit; Sunday, 59 percent lit; …"
+    static func spokenWeek(_ week: MoonWeek) -> String {
+        let nights = week.nights.map { String(localized: "\($0.date.formatted(.dateTime.weekday(.wide))), \($0.percent) percent lit") }
+        return String(localized: "The next seven nights: \(nights.joined(separator: "; ")).")
     }
     /// Deep indigo to void black, Nyx's night.
     static var background: LinearGradient {
@@ -106,20 +139,26 @@ struct MoonWidgetFace: View {
 /// (a widget cannot run a shader as it draws). Textbook orientation: north up, lit on the right
 /// while waxing, as seen from the northern states. A phase symbol stands in if the render fails.
 struct WidgetMoon: View {
-    let facts: MoonFacts
+    let phaseAngle: Double
+    let waxing: Bool
+    let illumination: Double
+    /// The rendered image's side in points (drawn at 2×): 240 for the face's Moon, less for the week's small ones.
+    var side = 240.0
+    init(facts: MoonFacts) { phaseAngle = facts.phaseAngle; waxing = facts.waxing; illumination = facts.illumination }
+    init(glance: MoonWeek.Glance, side: Double) { phaseAngle = glance.phaseAngle; waxing = glance.waxing; illumination = glance.illumination; self.side = side }
     var body: some View {
         Group {
-            if let image = Self.render(facts) {
+            if let image = Self.render(phaseAngle: phaseAngle, waxing: waxing, side: side) {
                 Image(uiImage: image).resizable().scaledToFit()
             } else {
-                Image(systemName: Self.symbol(facts)).resizable().scaledToFit().foregroundStyle(.white)
+                Image(systemName: Self.symbol(illumination: illumination, waxing: waxing)).resizable().scaledToFit().foregroundStyle(.white)
             }
         }
         .accessibilityIgnoresInvertColors()
     }
-    static func render(_ facts: MoonFacts) -> UIImage? {
+    static func render(phaseAngle: Double, waxing: Bool, side: Double = 240) -> UIImage? {
         guard let map = UIImage(named: "MoonMap") else { return nil }
-        let side = 240.0, i = facts.phaseAngle, a = facts.waxing ? -Double.pi/2 : Double.pi/2
+        let i = phaseAngle, a = waxing ? -Double.pi/2 : Double.pi/2
         let earthshine = 0.09*(1-cos(i))/2
         let shader = ShaderLibrary.nyxMoon(.float2(CGSize(width: side, height: side)), .float4(sin(i) * -sin(a), sin(i)*cos(a), cos(i), earthshine),
                                            .float4(1, 0, 0, 0), .image(Image(uiImage: map)))
@@ -127,8 +166,7 @@ struct WidgetMoon: View {
         renderer.scale = 2
         return renderer.uiImage
     }
-    static func symbol(_ facts: MoonFacts) -> String {
-        let lit = facts.illumination, waxing = facts.waxing
+    static func symbol(illumination lit: Double, waxing: Bool) -> String {
         if lit < 0.03 { return "moonphase.new.moon" }
         if lit > 0.97 { return "moonphase.full.moon" }
         if abs(lit-0.5) < 0.06 { return waxing ? "moonphase.first.quarter" : "moonphase.last.quarter" }
@@ -144,6 +182,28 @@ struct WidgetMoon: View {
         MoonWidgetFace(facts: facts, family: .systemSmall, simplified: true).padding(16).frame(width: 170, height: 170).background(MoonWidgetFace.background, in: .rect(cornerRadius: 24))
     }
     .padding(40)
+}
+
+#Preview("Large face: tonight and the week") {
+    MoonWidgetFace(facts: MoonFacts(at: .now), family: .systemLarge).padding(16).frame(width: 364, height: 382)
+        .background(MoonWidgetFace.background, in: .rect(cornerRadius: 24)).padding(40)
+}
+
+#Preview("Large face: the new moon's week, and far away") {
+    // A week holding a new moon (ringed in amber), and the simplified look from across the room.
+    let date = MoonWeek.newMoon(after: .now).addingTimeInterval(-3*86400)
+    HStack(spacing: 30) {
+        MoonWidgetFace(facts: MoonFacts(at: date), family: .systemLarge).padding(16).frame(width: 364, height: 382)
+            .background(MoonWidgetFace.background, in: .rect(cornerRadius: 24))
+        MoonWidgetFace(facts: MoonFacts(at: date), family: .systemLarge, simplified: true).padding(16).frame(width: 364, height: 382)
+            .background(MoonWidgetFace.background, in: .rect(cornerRadius: 24))
+    }
+    .padding(40)
+}
+
+#Preview("Large face, accessibility size") {
+    MoonWidgetFace(facts: MoonFacts(at: .now), family: .systemLarge).padding(16).frame(width: 364, height: 382)
+        .background(MoonWidgetFace.background, in: .rect(cornerRadius: 24)).dynamicTypeSize(.accessibility2).padding(40)
 }
 
 #Preview("Widget faces, accessibility size") {

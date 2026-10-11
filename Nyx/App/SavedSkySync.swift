@@ -15,10 +15,16 @@ import WidgetKit
     private(set) var parkIDs:[String]?
     /// The palette the widget's Moon pictures are drawn in; the window keeps it current.
     var palette=NyxPalette(nightVision:false,highContrast:false)
+    /// Whether the watch's "Update from iPhone" is answered with this model yet (`listenToWatch`).
+    private var listening=false
+    /// The watch session is set up at launch, as WatchConnectivity asks, so a watch's request that
+    /// launched Nyx in the background is heard; it is answered once a run knows the model.
+    init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
 
     /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`).
     func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false) async {
         guard DebugScenario.screen == nil else { return }
+        listenToWatch(model)
         // When the store could not open, the windows read their saved parks from an empty stand-in.
         // That empty list must never reach the widget, the watch or reminders: the parks of the last
         // snapshot stay, and their forecasts keep being refreshed.
@@ -130,6 +136,10 @@ import WidgetKit
     /// `watchSeen`: the bridge has just seen a paired watch with Nyx, so the ranges are worked out
     /// whatever the session reported a moment ago (and the bridge is never asked to call back again).
     func pushWatch(_ model:PlanModel,watchSeen:Bool=false) {
+        listenToWatch(model)
+        // A background launch (Control Center's night vision, a watch's request) pushes before any
+        // update has run: the saved parks the widgets last had stand in, as in `answerWatch`.
+        if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         guard let ids=parkIDs, WatchBridge.isAvailable else { return }
         let bridge=WatchBridge.shared, watch=watchSeen || bridge.hasWatchApp
         let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:ids+[model.homeID]) : nil
@@ -137,6 +147,27 @@ import WidgetKit
         if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,complete:complete)
+    }
+    /// Answers Apple Watch's "Update from iPhone" with this model from now on (once per process).
+    func listenToWatch(_ model:PlanModel) {
+        guard !listening, DebugScenario.screen == nil, WatchBridge.isAvailable else { return }
+        listening=true
+        WatchBridge.shared.listen { [weak self, weak model] in
+            guard let self, let model else { return }
+            Task { await self.answerWatch(model) }
+        }
+    }
+    /// The watch asked for its context: the same run as opening Nyx (saved parks' clouds when
+    /// forecasts are on, then the widget, the watch and reminders), with the hand-over sent even if
+    /// unchanged (`WatchBridge` cleared its record). Woken in the background by the request, the
+    /// run asks iOS for time and keeps to `backgroundBudget`, as a background refresh does.
+    func answerWatch(_ model:PlanModel) async {
+        if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
+        let app=UIApplication.shared
+        guard app.applicationState == .background else { await update(model); return }
+        let task=app.beginBackgroundTask(withName:"Update Apple Watch",expirationHandler:nil)
+        await Self.run(within:Self.backgroundBudget) { await self.update(model,background:true) }
+        if task != .invalid { app.endBackgroundTask(task) }
     }
     /// The forecast models' range each followed park's dial shows for the week the watch shows
     /// (tonight and six more), keyed by park-local day: only where the iPhone draws one, so only

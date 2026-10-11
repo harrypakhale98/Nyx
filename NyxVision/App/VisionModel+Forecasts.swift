@@ -53,7 +53,9 @@ extension VisionModel {
     /// The words under the score for a night's clouds, as the iPhone says them: nothing extra with
     /// a forecast but its average; "Early look: …" days ahead; "No cloud forecast yet. …" beyond.
     /// Over Haleakalā's summit, when its layers count, the iPhone's line on why only mid and high cloud.
-    func cloudCaption(_ night: Night) -> String {
+    func cloudCaption(_ night: Night) -> String { Self.cloudCaption(night, forecast: forecasts[night.park.id], forecastsOn: forecastsOn, now: now) }
+    /// The same words from what the caller holds (Siri's answer reads the cache itself).
+    nonisolated static func cloudCaption(_ night: Night, forecast: Forecast?, forecastsOn: Bool, now: Date) -> String {
         let summit = night.upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : ""
         switch night.basis {
         case .forecast:
@@ -61,7 +63,7 @@ extension VisionModel {
             let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
             return [cover, summit, issued].filter { !$0.isEmpty }.joined(separator: " ")
         case .blended, .usual:
-            let unavailable = !beyondForecast(night)
+            let unavailable = !NightPlanner.beyondForecast(night, forecast: forecast, now: now)
             let caption = night.basisCaption(unavailable: unavailable, typical: true) ?? ""
             let off = unavailable && !forecastsOn ? String(localized: "Cloud forecasts are off in Your privacy.") : ""
             return [caption, summit, off].filter { !$0.isEmpty }.joined(separator: " ")

@@ -4,7 +4,7 @@ import SwiftUI
 import WidgetKit
 
 @main struct NyxWatchWidgetsBundle: WidgetBundle {
-    var body: some Widget { TonightComplication(); MoonComplication(); NextDarkComplication(); DuskWidget(); RedLightControl() }
+    var body: some Widget { TonightComplication(); MoonComplication(); NextDarkComplication(); AdaptationComplication(); DuskWidget(); RedLightControl(); AdaptationControl() }
 }
 
 /// Complications and Smart Stack: tonight's score at a park, the Moon, and the next moment of the
@@ -194,7 +194,7 @@ struct DuskProvider: RelevanceEntriesProvider {
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
         let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : WatchSky.readContext()?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
-                                              closure: closure))
+                                              closure: closure, cloudsOld: WatchTimeline.isOld(snapshot?.forecasts[park.id]?.updated, at: now)))
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]

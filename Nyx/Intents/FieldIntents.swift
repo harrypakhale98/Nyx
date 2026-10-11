@@ -3,17 +3,18 @@ import Foundation
 import WidgetKit
 
 /// "Start field mode at Joshua Tree" from Siri, Shortcuts or Spotlight. Opens the app on the field
-/// screen for tonight at that park.
+/// screen for tonight at that park. Without a park ("I'm stargazing"), the last park used in the
+/// field, else the starting park: the app's root view decides, as for the Control Center button.
 struct StartFieldModeIntent: AppIntent {
     static let title: LocalizedStringResource="Start field mode"
-    static let description=IntentDescription("Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look.")
+    static let description=IntentDescription("Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look. Without a park, it opens at the park you last used in the field, or your starting park.")
     static let supportedModes: IntentModes = .foreground
-    @Parameter(title:"Park") var park: ParkEntity
+    @Parameter(title:"Park",description:"Leave empty for the park you last used in the field, or your starting park.") var park: ParkEntity?
     static var parameterSummary: some ParameterSummary { Summary("Start field mode at \(\.$park)") }
     init() {}
-    init(park: ParkEntity) { self.park=park }
+    init(park: ParkEntity?) { self.park=park }
     func perform() async throws -> some IntentResult {
-        FieldModeRequest.post(parkID:park.id)
+        FieldModeRequest.post(parkID:park?.id)
         return .result()
     }
 }

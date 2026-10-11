@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// One park's night: the score and the Moon, the night's hours, what's up, and the sky at the
-/// moment on the ornament's clock, as text. That last list is the way to stand under the same sky
+/// One park's night: the score and the Moon, the night's hours, the darkest nights ahead, what's
+/// up, and the sky at the moment on the ornament's clock, as text. That last list is the way to stand under the same sky
 /// without the immersive space, and what VoiceOver reads.
 struct NightDetail: View {
     @Environment(VisionModel.self) private var model
@@ -16,6 +16,8 @@ struct NightDetail: View {
                 VStack(alignment: .leading, spacing: 34) {
                     header(plan)
                     facts(plan)
+                    // The darkest nights from tonight on: a tap brings one here.
+                    DarkestAhead(park: plan.park)
                     whatsUp(plan)
                     skyNow(plan, moment)
                     honesty(plan)

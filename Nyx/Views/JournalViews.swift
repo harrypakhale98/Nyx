@@ -25,13 +25,16 @@ struct JournalView: View {
     @State private var dropped:JournalPrefill?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    /// "Journals stay on each device" where a second device is likely: a window wider than any
+    /// iPhone (440 pt) or a regular-width one, by width rather than by device.
+    nonisolated static func mentionsOtherDevices(width:Double,regular:Bool)->Bool { regular || width>=480 }
     var body:some View {
         let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
                 if model.journalUnavailable { JournalUnavailableBanner(needsSpace:model.journalNeedsSpace) }
                 // A journal lives on the device it was written on; say so where a second device is likely.
-                if UIDevice.current.userInterfaceIdiom == .pad || sizeClass == .regular {
+                if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular) {
                     Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 // One way into the year: at the top in recap season (December, early January), else under the constellation.
@@ -269,6 +272,8 @@ struct JournalThumbnail:View {
     /// A description the on-device model suggested, per photo, until the person uses or dismisses it.
     var suggestions:[Int:String]=[:]
     var suggesting:Set<Int>=[]
+    /// Photos the last request found nothing to suggest for, so the person hears why the button did nothing.
+    var unsuggested:Set<Int>=[]
     var loadingPhotos=false
     var error:String?
     var saved=false
@@ -303,13 +308,21 @@ struct JournalThumbnail:View {
         descriptions.remove(at:index)
         photos.remove(at:index)
         suggestions=Dictionary(uniqueKeysWithValues:suggestions.compactMap { $0.key<index ? ($0.key,$0.value) : $0.key>index ? ($0.key-1,$0.value) : nil })
+        unsuggested=Set(unsuggested.compactMap { $0<index ? $0 : $0>index ? $0-1 : nil })
     }
     /// Asks the on-device model for a draft; it waits beside the field until used or dismissed.
     func suggest(_ index:Int) async {
         guard photos.indices.contains(index), !suggesting.contains(index) else { return }
         suggesting.insert(index); defer { suggesting.remove(index) }
         let data=photos[index]
-        if let line=await PhotoDescriber.suggest(data), photos.indices.contains(index), photos[index]==data { suggestions[index]=line }
+        unsuggested.remove(index)
+        let line=await PhotoDescriber.suggest(data)
+        guard photos.indices.contains(index), photos[index]==data else { return }
+        if let line { suggestions[index]=line }
+        else {
+            unsuggested.insert(index)
+            AccessibilityNotification.Announcement(String(localized:"Nothing to suggest for this photo. Describe it in your own words.")).post()
+        }
     }
     func useSuggestion(_ index:Int) {
         guard let line=suggestions[index], descriptions.indices.contains(index) else { return }
@@ -411,6 +424,9 @@ struct PhotoDescriptionRow:View {
                 .padding(12).frame(maxWidth:.infinity,alignment:.leading)
                 .background(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
                 .accessibilityElement(children:.contain)
+            }
+            if editor.unsuggested.contains(index) {
+                Text("Nothing to suggest for this photo. Describe it in your own words.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
             ViewThatFits(in:.horizontal) {
                 HStack(spacing:16) { actions }

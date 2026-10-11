@@ -122,24 +122,29 @@ struct TonightWidgetView:View {
     @ViewBuilder private var content:some View {
         if let night=entry.night {
             if family == .accessoryInline {
-                // Above the clock: "☾ 94 Joshua Tree", tonight's phase as the symbol.
-                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{ Image(systemName:night.sky.moon.symbolName) }
+                // Above the clock: "☾ 94 Joshua Tree", tonight's phase as the symbol; a closure takes
+                // the symbol's place ("⚠ 94 Joshua Tree"), and the spoken summary names it.
+                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{ Image(systemName:entry.closure == nil ? night.sky.moon.symbolName : "exclamationmark.triangle.fill") }
                     .summarized(summary(night))
             } else if family == .accessoryCircular {
                 // The Lock Screen ring echoes the app's celestial gauge.
-                // The Moon in the ring's opening is tonight's actual phase.
+                // The Moon in the ring's opening is tonight's actual phase, or the warning glyph when
+                // the park has a closure: the ring keeps the score, the summary says the rest.
                 Gauge(value:Double(night.score.value),in:0...100) {
-                    MoonSymbol(night:night)
+                    if entry.closure != nil { Image(systemName:"exclamationmark.triangle.fill").widgetAccentable() } else { MoonSymbol(night:night) }
                 } currentValueLabel: {
                     // Two digits inside a fixed ring: shrink rather than spill over the arc at large sizes.
                     Text("\(night.score.value)").font(.system(.title3,design:.serif)).minimumScaleFactor(0.6).widgetAccentable()
                 }.gaugeStyle(.accessoryCircular).dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .accessoryRectangular {
                 // Lock Screen dimensions are fixed: the score is the hero, the band beside it, and a
-                // smaller numeral when large text would not fit. The spoken summary stays complete.
+                // smaller numeral when large text would not fit. A closure adds "Closure alert" below;
+                // where three lines cannot fit, it takes the band's place beside the score (the band
+                // stays in the spoken summary). The score and the closure are never cut.
                 ViewThatFits(in:.vertical) {
                     lockHero(night,numeral:.title)
                     lockHero(night,numeral:.title3)
+                    if entry.closure != nil { lockHero(night,numeral:.title3,closureBesideScore:true) }
                 }.dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if portraitXL, let month=entry.month, !typeSize.isAccessibilitySize {
                 portraitContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
@@ -156,8 +161,10 @@ struct TonightWidgetView:View {
                     closureLine(.caption2)
                 }.summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
             } else {
+                // The small widget (and medium at accessibility sizes) marks a closure in a short
+                // line; the whole of it is in the spoken summary and on the park's page.
                 ViewThatFits(in:.vertical) {
-                    homeContent(night)
+                    homeContent(night,closureMark:true)
                     // Prefer full Dynamic Type; only a fixed widget footprint needs
                     // the compact fallback. The app's detail remains fully reflowing.
                     compactContent(night).dynamicTypeSize(.small ... .xxxLarge)
@@ -216,27 +223,41 @@ struct TonightWidgetView:View {
                 .frame(maxWidth:.infinity,alignment:.leading)
         }
     }
+    /// "⚠ Closure alert" in the accent: where the closure's own words do not fit (the small
+    /// widget and the Lock Screen), the mark that sends someone to the park's page before they drive.
+    @ViewBuilder private func closureMark(_ font:Font)->some View {
+        if entry.closure != nil {
+            Label { Text("Closure alert").lineLimit(1).minimumScaleFactor(0.75) } icon:{ Image(systemName:"exclamationmark.triangle.fill").accessibilityHidden(true) }
+                .font(font.weight(.medium)).foregroundStyle(accent).widgetAccentable()
+        }
+    }
     /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
     private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
-    /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it.
-    private func lockHero(_ night:Night,numeral:Font.TextStyle)->some View {
+    /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it,
+    /// then a closure's mark. `closureBesideScore` puts the mark in the band's place, for two lines.
+    private func lockHero(_ night:Night,numeral:Font.TextStyle,closureBesideScore:Bool=false)->some View {
         VStack(alignment:.leading,spacing:0) {
             Text(night.park.shortName).font(.headline).lineLimit(1)
             HStack(alignment:.firstTextBaseline,spacing:6) {
                 Text("\(night.score.value)").font(.system(numeral,design:.serif).weight(.light)).monospacedDigit().widgetAccentable()
-                Text(forecastLabel(night)).font(.caption).lineLimit(2).fixedSize(horizontal:false,vertical:true)
+                if closureBesideScore { closureMark(.caption) }
+                else { Text(forecastLabel(night)).font(.caption).lineLimit(2).fixedSize(horizontal:false,vertical:true) }
             }
+            if !closureBesideScore { closureMark(.caption) }
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
-    private func homeContent(_ night:Night)->some View {
+    /// `closureMark` puts "Closure alert" in the eyebrow's place (the small widget); the medium
+    /// widget shows the closure's own words below instead.
+    private func homeContent(_ night:Night,closureMark mark:Bool=false)->some View {
         VStack(alignment:.leading,spacing:4) {
             if !typeSize.isAccessibilitySize {
                 HStack(alignment:.center) {
-                    Text("Tonight's sky").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
+                    if mark && entry.closure != nil { closureMark(.caption2) }
+                    else { Text("Tonight's sky").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75) }
                     Spacer(minLength:4)
                     moon(night).frame(width:18,height:18)
                 }
-            }
+            } else if mark { closureMark(.caption2) }
             Text("\(night.score.value)").font(.system(size:48,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
             Text(night.park.shortName).font(.system(.caption,design:.serif)).fixedSize(horizontal:false,vertical:true)
             Text(forecastLabel(night)).font(.caption2).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
@@ -293,6 +314,7 @@ struct TonightWidgetView:View {
     }
     private func compactContent(_ night:Night)->some View {
         VStack(alignment:.leading,spacing:4) {
+            closureMark(.caption2)
             Text("\(night.score.value)").font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(accent)
             Text(night.park.shortName).font(.system(.caption2,design:.serif)).fixedSize(horizontal:false,vertical:true)
             Text(forecastLabel(night)).font(.caption2).fixedSize(horizontal:false,vertical:true)
@@ -445,10 +467,15 @@ struct TonightWidgetView:View {
             }.frame(height:15*scale)
         }.frame(maxWidth:.infinity).frame(height:28*scale)
     }
-    private func summary(_ night:Night)->String {
+    private func summary(_ night:Night)->String { Self.summary(night,entry:entry,family:family) }
+    /// What VoiceOver says for the widget: the park, its score and band, then any closure in full
+    /// in every family (the Lock Screen and the small widget show only its mark), then what the
+    /// larger families add.
+    static func summary(_ night:Night,entry:TonightEntry,family:WidgetFamily)->String {
         var tonight=String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Cached forecast included"))")
-        // The closure is spoken wherever it is shown (medium and larger).
-        if let closure=entry.closure, ![.accessoryInline,.accessoryCircular,.accessoryRectangular,.systemSmall].contains(family) { tonight+=" "+String(localized:"Closure alert: \(closure)") }
+        if let closure=entry.closure { tonight+=" "+String(localized:"Closure alert: \(closure)") }
+        var portraitXL=false
+        if #available(iOS 27.0,*) { portraitXL = family == .systemExtraLargePortrait }
         if family == .systemLarge || family == .systemExtraLarge || portraitXL, let month=entry.month, let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
             let count=month.nights.compactMap { $0 }.count
             let events=month.nights.compactMap { $0 }.filter { month.events[$0.id] != nil }
@@ -546,8 +573,15 @@ struct WidgetReviewView:View {
                         moonCard(.systemSmall,MoonEntry(date:moon.date,park:moon.park,nightVision:true),size:CGSize(width:126,height:126))
                         moonCard(.accessoryCircular,moon,size:CGSize(width:68,height:68))
                     }
+                    moonCard(.accessoryRectangular,moon,size:CGSize(width:160,height:72)).foregroundStyle(.white)
                 }
                 Text("A park's closure (illustrative text)").font(.caption)
+                HStack(spacing:24) {
+                    TonightWidgetView(previewFamily:.accessoryCircular,entry:with(entry,closure:sample)).frame(width:68,height:68)
+                    TonightWidgetView(previewFamily:.accessoryRectangular,entry:with(entry,closure:sample)).frame(width:160,height:72)
+                }.foregroundStyle(.white)
+                TonightWidgetView(previewFamily:.accessoryInline,entry:with(entry,closure:sample)).frame(height:22).foregroundStyle(.white)
+                card(.systemSmall,with(entry,closure:sample),height:158)
                 card(.systemMedium,with(entry,closure:sample),height:158)
                 card(.systemLarge,with(entry,closure:sample),height:338)
                 Text("Set to one park: no \"2 of 3\"").font(.caption)

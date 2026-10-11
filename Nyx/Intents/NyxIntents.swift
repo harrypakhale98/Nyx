@@ -70,6 +70,10 @@ nonisolated struct DarknessAnswer:Sendable {
         }
         else if let caption=night.basisCaption() { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
         else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
+        return closureFirst(body,closure:closure)
+    }
+    /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
+    static func closureFirst(_ body:String,closure:String?)->String {
         guard let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty else { return body }
         return sentence(String(localized:"Closure alert: \(closure)"))+" "+body
     }
@@ -134,11 +138,19 @@ struct StaticScoreDial:View {
     let model=PlanModel()
     if let park=model.home { DarknessSnippetView(night:model.night(park)).padding() }
 }
+/// Nine of the ten App Shortcuts an app may offer. Every phrase names Nyx; parks come from
+/// `ParkQuery.suggestedEntities`, refreshed by `updateAppShortcutParameters()` at launch and when saved parks change.
 struct NyxShortcuts:AppShortcutsProvider {
     static var appShortcuts:[AppShortcut] {
         AppShortcut(intent:DarknessIntent(),phrases:["What is the darkness score at \(\.$park) in \(.applicationName)","Check tonight's sky at \(\.$park) with \(.applicationName)"],shortTitle:"Tonight's sky",systemImageName:"moon.stars")
         AppShortcut(intent:FindBestNightIntent(),phrases:["Find the best night at \(\.$park) with \(.applicationName)","When is the darkest night at \(\.$park) in \(.applicationName)","Find the best night for stars with \(.applicationName)"],shortTitle:"Best night",systemImageName:"calendar")
-        AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
+        AppShortcut(intent:DarkTonightIntent(),phrases:["When is it dark tonight in \(.applicationName)","When is it dark at \(\.$park) in \(.applicationName)","When does true darkness start at \(\.$park) in \(.applicationName)"],shortTitle:"Dark hours",systemImageName:"moon.haze")
+        AppShortcut(intent:WhatsUpTonightIntent(),phrases:["What's up tonight in \(.applicationName)","What's up tonight at \(\.$park) in \(.applicationName)","What can I see tonight at \(\.$park) with \(.applicationName)"],shortTitle:"What's up",systemImageName:"sparkles")
+        // A park is optional: without one, field mode opens at the last park used in the field, else the starting park.
+        AppShortcut(intent:StartFieldModeIntent(),phrases:["Start field mode at \(\.$park) in \(.applicationName)","I'm stargazing at \(\.$park) with \(.applicationName)","Start field mode in \(.applicationName)","I'm stargazing with \(.applicationName)"],shortTitle:"Field mode",systemImageName:"scope")
+        AppShortcut(intent:FollowNightIntent(),phrases:["Follow tonight in \(.applicationName)","Follow tonight at \(\.$park) in \(.applicationName)","Put tonight on my Lock Screen with \(.applicationName)"],shortTitle:"Follow tonight",systemImageName:"lock.rectangle")
+        AppShortcut(intent:UnfollowNightIntent(),phrases:["Stop following the night in \(.applicationName)","Stop following \(\.$park) in \(.applicationName)"],shortTitle:"Stop following",systemImageName:"moon.stars")
+        AppShortcut(intent:NightVisionOnIntent(),phrases:["Turn on night vision in \(.applicationName)","Turn on \(.applicationName) night vision"],shortTitle:"Night vision",systemImageName:"flashlight.on.circle.fill")
         AppShortcut(intent:AddJournalEntryIntent(),phrases:["Add to my \(.applicationName) journal","Record a night in \(.applicationName)"],shortTitle:"Record a night",systemImageName:"book.closed")
     }
 }

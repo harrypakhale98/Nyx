@@ -108,7 +108,7 @@ struct MoonWidget:Widget {
     var body:some WidgetConfiguration {
         AppIntentConfiguration(kind:"MoonWidget",intent:MoonWidgetIntent.self,provider:MoonProvider()) { entry in MoonWidgetView(entry:entry) }
             .configurationDisplayName("The Moon").description("Tonight's Moon: its phase, how much is lit, and when it rises or sets at your park.")
-            .supportedFamilies([.systemSmall,.accessoryCircular,.accessoryInline])
+            .supportedFamilies([.systemSmall,.accessoryCircular,.accessoryRectangular,.accessoryInline])
     }
 }
 
@@ -164,3 +164,22 @@ struct TonightControlProvider:AppIntentControlValueProvider {
 #Preview(as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.accessoryInline) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }
 #Preview(as:.systemSmall) { MoonWidget() } timeline:{ MoonEntry(date:.now,park:nil,nightVision:false) }
+#Preview(as:.accessoryRectangular) { MoonWidget() } timeline:{
+    MoonEntry(date:.now,park:TonightProvider.sample?.parks.first,nightVision:false)
+    MoonEntry(date:.now,park:nil,nightVision:false)
+}
+#if DEBUG
+extension TonightProvider {
+    /// Joshua Tree tonight with a closure (illustrative words), for the closure mark's previews.
+    static var closureSample:TonightEntry {
+        var builder=TonightTimeline(snapshot:sample,large:false)
+        var entry=builder.entry(at:.now)
+        entry.closure="Keys View Road closed at night"
+        return entry
+    }
+}
+#Preview("Closure",as:.systemSmall) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryCircular) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#Preview("Closure",as:.accessoryInline) { TonightWidget() } timeline:{ TonightProvider.closureSample }
+#endif

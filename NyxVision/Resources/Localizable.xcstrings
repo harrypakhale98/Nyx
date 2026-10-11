@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        }
+      }
+    },
     "%@ from %@ to %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -154,6 +171,23 @@
         }
       }
     },
+    "%@, %lld percent lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld percent lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld por ciento iluminada"
+          }
+        }
+      }
+    },
     "%@, early look": {
       "extractionState": "manual",
       "localizations": {
@@ -218,6 +252,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, nubosidad habitual"
+          }
+        }
+      }
+    },
+    "%@: %lld out of 100, %@. %@ Confirm conditions and park access before traveling.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld out of 100, %@. %@ Confirm conditions and park access before traveling."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld de 100, %@. %@ Confirma las condiciones y el acceso al parque antes de viajar."
+          }
+        }
+      }
+    },
+    "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld out of 100, %@. Includes a cached cloud forecast. Confirm conditions and park access before traveling."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld de 100, %@. Incluye un pronóstico de nubes guardado. Confirma las condiciones y el acceso al parque antes de viajar."
           }
         }
       }
@@ -1072,6 +1140,23 @@
         }
       }
     },
+    "Darkest of the next 14 nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest of the next 14 nights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches más oscuras de las próximas 14"
+          }
+        }
+      }
+    },
     "Darkness score": {
       "extractionState": "manual",
       "localizations": {
@@ -1272,6 +1357,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Regular"
+          }
+        }
+      }
+    },
+    "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcula en el dispositivo el índice de oscuridad de un parque nacional. Devuelve el índice, de 0 a 100."
           }
         }
       }
@@ -1612,6 +1714,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cuarto menguante"
+          }
+        }
+      }
+    },
+    "Leave empty for the park chosen in Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty for the park chosen in Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para usar el parque elegido en Nyx."
           }
         }
       }
@@ -2330,6 +2449,23 @@
         }
       }
     },
+    "National park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parque nacional"
+          }
+        }
+      }
+    },
     "Nautical twilight": {
       "extractionState": "manual",
       "localizations": {
@@ -2568,6 +2704,23 @@
         }
       }
     },
+    "No true darkness in the next 14 nights at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness in the next 14 nights at this latitude."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En las próximas 14 noches no hay oscuridad total a esta latitud."
+          }
+        }
+      }
+    },
     "No true darkness on this night at this latitude.": {
       "extractionState": "manual",
       "localizations": {
@@ -2581,6 +2734,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esa noche no hay oscuridad total a esta latitud."
+          }
+        }
+      }
+    },
+    "No true darkness tonight at %@. The darkness score is %lld out of 100.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No true darkness tonight at %@. The darkness score is %lld out of 100."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche no hay oscuridad total en %@. El índice de oscuridad es %lld de 100."
           }
         }
       }
@@ -2738,6 +2908,23 @@
         }
       }
     },
+    "Open park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir parque"
+          }
+        }
+      }
+    },
     "Open planner": {
       "extractionState": "manual",
       "localizations": {
@@ -2751,6 +2938,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abrir el planificador"
+          }
+        }
+      }
+    },
+    "Opens a national park in Nyx for tonight: its darkness score, Moon and sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens a national park in Nyx for tonight: its darkness score, Moon and sky."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre un parque nacional en Nyx para esta noche: su índice de oscuridad, la Luna y el cielo."
           }
         }
       }
@@ -2819,6 +3023,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fuera del cielo nocturno"
+          }
+        }
+      }
+    },
+    "Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parque"
           }
         }
       }
@@ -3350,6 +3571,23 @@
         }
       }
     },
+    "Shows this night in the planner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows this night in the planner"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra esta noche en el planificador"
+          }
+        }
+      }
+    },
     "Sky glow": {
       "extractionState": "manual",
       "localizations": {
@@ -3469,6 +3707,23 @@
         }
       }
     },
+    "Stand under the sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand under the sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar en el cielo"
+          }
+        }
+      }
+    },
     "Stand under this sky": {
       "extractionState": "manual",
       "localizations": {
@@ -3482,6 +3737,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Entrar en este cielo"
+          }
+        }
+      }
+    },
+    "Stand under tonight's sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand under tonight's sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar en el cielo de esta noche"
           }
         }
       }
@@ -3584,6 +3856,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Te rodea con el cielo calculado de este parque a la hora del reloj bajo la ventana"
+          }
+        }
+      }
+    },
+    "Surrounds you with tonight's computed sky at a national park: the stars, the Moon and planets in their places for the park's own night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Surrounds you with tonight's computed sky at a national park: the stars, the Moon and planets in their places for the park's own night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te rodea con el cielo calculado de esta noche en un parque nacional: las estrellas, la Luna y los planetas en su lugar para la noche del propio parque."
+          }
+        }
+      }
+    },
+    "That park could not be found in the bundled library.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That park could not be found in the bundled library."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ese parque no se encontró en la biblioteca incluida."
           }
         }
       }
@@ -3860,6 +4166,40 @@
         }
       }
     },
+    "The next seven nights": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next seven nights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las próximas siete noches"
+          }
+        }
+      }
+    },
+    "The next seven nights: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next seven nights: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las próximas siete noches: %@."
+          }
+        }
+      }
+    },
     "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky.": {
       "extractionState": "manual",
       "localizations": {
@@ -4094,6 +4434,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "La Luna de esta noche"
+          }
+        }
+      }
+    },
+    "Tonight's darkness score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight's darkness score"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índice de oscuridad de esta noche"
+          }
+        }
+      }
+    },
+    "Tonight's sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight's sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo de esta noche"
           }
         }
       }

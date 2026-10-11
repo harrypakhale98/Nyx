@@ -18,6 +18,27 @@ struct MoonEntry: TimelineEntry {
         night=park.map { $0.currentNight(at: date) }
     }
 }
+/// The words of the Moon widget's Lock Screen rectangle: the phase, how much is lit in the reader's
+/// own percent style ("42 %" where that is the custom), and the next moonrise or moonset in the
+/// park's time, with the park's name when it fits and without it when it does not. No event line
+/// without a park, or where the Moon neither rises nor sets in the next two days (far north).
+nonisolated struct MoonRectangleText: Equatable, Sendable {
+    let phase: String
+    let lit: String
+    /// "Rises 8:12 PM · Joshua Tree"
+    let event: String?
+    /// "Rises 8:12 PM"
+    let shortEvent: String?
+    init(moon: MoonNow, park: Park?, locale: Locale = .current) {
+        phase=moon.phase.name
+        let percent=(Double(moon.percent)/100).formatted(.percent.precision(.fractionLength(0)).locale(locale))
+        lit=String(localized: "\(percent) lit")
+        guard let park, let next=moon.next else { event=nil; shortEvent=nil; return }
+        let time=park.time(next.date)
+        event=next.rises ? String(localized: "Rises \(time) · \(park.shortName)") : String(localized: "Sets \(time) · \(park.shortName)")
+        shortEvent=next.rises ? String(localized: "Rises \(time)") : String(localized: "Sets \(time)")
+    }
+}
 struct MoonWidgetView: View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.widgetRenderingMode) private var renderingMode
@@ -53,6 +74,23 @@ struct MoonWidgetView: View {
                     Text(verbatim: percent).font(.caption2.weight(.medium)).monospacedDigit()
                 }
             }.dynamicTypeSize(.small ... .xxxLarge)
+        case .accessoryRectangular:
+            // Three lines on the Lock Screen: the phase as the heading, how much is lit, then the
+            // next rise or set in park time (the park's name dropped before the time is cut).
+            let text=MoonRectangleText(moon: entry.moon, park: entry.park)
+            VStack(alignment: .leading, spacing: 1) {
+                Label { Text(text.phase).lineLimit(1).minimumScaleFactor(0.8) } icon: { symbol.widgetAccentable() }
+                    .font(.headline)
+                Text(text.lit).font(.caption).lineLimit(1)
+                if let event=text.event, let short=text.shortEvent {
+                    ViewThatFits(in: .horizontal) {
+                        Text(event).lineLimit(1)
+                        Text(short).lineLimit(1).minimumScaleFactor(0.8)
+                    }.font(.caption)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .dynamicTypeSize(.small ... .xxxLarge)
         default:
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top) {
@@ -91,11 +129,7 @@ struct MoonWidgetView: View {
         }
     }
     /// "Rises 8:12 PM · Joshua Tree", in park time.
-    private var eventLine: String? {
-        guard let park=entry.park, let next=entry.moon.next else { return nil }
-        let time=park.time(next.date)
-        return next.rises ? String(localized: "Rises \(time) · \(park.shortName)") : String(localized: "Sets \(time) · \(park.shortName)")
-    }
+    private var eventLine: String? { MoonRectangleText(moon: entry.moon, park: entry.park).event }
     var summary: String {
         var text=String(localized: "\(entry.moon.phase.name), \(entry.moon.percent) percent lit.")
         if let up=entry.moon.isUp { text+=" "+(up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
@@ -111,4 +145,14 @@ struct MoonWidgetView: View {
         MoonWidgetView(previewFamily: .systemSmall, entry: MoonEntry(date: .now, park: park, nightVision: false)).frame(width: 158, height: 158).background(.black)
         MoonWidgetView(previewFamily: .accessoryCircular, entry: MoonEntry(date: .now, park: park, nightVision: false)).frame(width: 68, height: 68)
     }.padding().background(Color(white: 0.2))
+}
+#Preview("Moon widget, Lock Screen rectangle") {
+    let library=(try? ParkData.load()) ?? []
+    VStack(alignment: .leading, spacing: 16) {
+        // A park's next rise or set; a longer name that may give way to the time alone; far north; no park.
+        ForEach(["jotr", "grsa", "gaar"], id: \.self) { id in
+            MoonWidgetView(previewFamily: .accessoryRectangular, entry: MoonEntry(date: .now, park: library.first { $0.id == id }, nightVision: false)).frame(width: 160, height: 72)
+        }
+        MoonWidgetView(previewFamily: .accessoryRectangular, entry: MoonEntry(date: .now, park: nil, nightVision: false)).frame(width: 160, height: 72)
+    }.foregroundStyle(.white).padding().background(Color(white: 0.2))
 }

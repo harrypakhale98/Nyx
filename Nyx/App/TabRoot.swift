@@ -1,10 +1,14 @@
 import SwiftUI
 
 /// What every tab's first screen carries in its leading toolbar: night vision, one tap away in the
-/// dark, and Settings. Screen actions (add, share, sort) stay on the trailing side.
+/// dark, and Settings. Screen actions (add, share, sort) stay on the trailing side. The keyboard's
+/// ⌘, and ⌘N (`NyxCommands`) open Settings and the journal editor from here, for the tab on screen.
 struct TabRootToolbar: ViewModifier {
     @State private var settings=false
+    @State private var recording=false
     @Environment(SceneCommands.self) private var commands:SceneCommands?
+    @Environment(PlanModel.self) private var model:PlanModel?
+    @Environment(\.nyxTab) private var tab
     func body(content:Content)->some View {
         content
             .toolbar {
@@ -15,7 +19,27 @@ struct TabRootToolbar: ViewModifier {
                 }
             }
             .sheet(isPresented:$settings) { SettingsSheet() }
+            // ⌘N from any tab: the editor the Journal's "Record a night" opens.
+            .sheet(isPresented:$recording) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .onChange(of:commands?.closeSettings) { settings=false }
+            .onChange(of:commands?.sheetRequest) { _,request in
+                // Only over this window's own screen: never a second sheet above one already open
+                // (Settings, a draft, a park from a reminder), where it would land on top of work.
+                guard let request, request.tab==tab, commands?.topController?.presentingViewController == nil else { return }
+                // A key command leaves a focused field (Find a Park's search) first responder under the sheet,
+                // which then could not be dismissed (seen on iPad after ⌘F): let it go first, as a tap does.
+                // Find a Park's search also ends itself (`SearchEnder`); the sheet waits for that to finish.
+                let hadFocus=UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),to:nil,from:nil,for:nil)
+                Task { @MainActor in
+                    if hadFocus { try? await Task.sleep(for:.milliseconds(350)) } else { await Task.yield() }
+                    switch request.kind {
+                    case .settings: settings=true
+                    case .record: if model?.journalUnavailable == false { recording=true }
+                    }
+                }
+            }
+            // Tonight is the one tab root with pull-to-refresh; it shows and says its own result.
+            .modifier(RefreshKey(speaks:true))
     }
 }
 extension View {

@@ -399,6 +399,11 @@ targets:
       # The phone's night rule (`NightPlanner.night`): the forecast where it reaches, usual clouds beyond.
       - path: Nyx/Services/NightPlanner.swift
         group: Shared
+      # The darkest of the next 14 nights and the week of Moons, shared and tested on the iPhone.
+      - path: Nyx/Services/NightsAhead.swift
+        group: Shared
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
       - path: Nyx/Services/CloudForecastClient.swift
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
@@ -446,7 +451,7 @@ targets:
       - path: Nyx/Models/ParkHandoff.swift
         group: Shared
     # Linked so the App Intents metadata step finds its framework instead of warning on every build
-    # ("Metadata extraction skipped"). The window has no intents of its own yet; linking costs nothing.
+    # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, open a park, stand under tonight's sky) live in NyxVision/Intents.
     dependencies:
       - sdk: AppIntents.framework
       - target: NyxVisionWidgets
@@ -477,6 +482,9 @@ targets:
     platform: visionOS
     sources:
       - path: NyxVisionWidgets
+      # The large face's week of Moons and next new moon, from the date alone.
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
       - path: Nyx/Models/SkyConditions.swift

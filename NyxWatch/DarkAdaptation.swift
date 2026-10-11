@@ -41,6 +41,7 @@ struct DarkAdaptationView: View {
         .background(Color.black)
         .modifier(WatchDebug.TypeSize())
         .task { permission = await AdaptationReminders.status() }
+        .onChange(of: store.reminderStatus) { _, status in if let status { permission = status } }
         .onAppear { store.reloadSettings() }
     }
     private var content: some View {

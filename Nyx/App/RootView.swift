@@ -119,6 +119,8 @@ struct RootView:View {
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
             NotificationRouter.shared.connect { route in openReminder(route) }
+            // Control Center's night-vision switch reaches the Live Activity and the watch from Nyx's process.
+            if DebugScenario.screen == nil { NightVisionFollowers.install(model) }
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
             #if DEBUG
             DebugFollowing.install(model)

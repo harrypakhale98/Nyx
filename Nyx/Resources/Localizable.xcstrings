@@ -290,6 +290,23 @@
         }
       }
     },
+    "%@ has no true darkness tonight at this latitude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ has no true darkness tonight at this latitude."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ no tiene oscuridad total esta noche a esta latitud."
+          }
+        }
+      }
+    },
     "%@ hours of true darkness": {
       "extractionState": "manual",
       "localizations": {
@@ -320,6 +337,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ en %@"
+          }
+        }
+      }
+    },
+    "%@ left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ left"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan %@"
+          }
+        }
+      }
+    },
+    "%@ lit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ lit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ iluminada"
           }
         }
       }
@@ -388,6 +439,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las noches de %@ aquí rara vez están despejadas."
+          }
+        }
+      }
+    },
+    "%@ of 30 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ of 30 min"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de 30 min"
           }
         }
       }
@@ -953,6 +1021,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@. Bortle observado: %lld."
+          }
+        }
+      }
+    },
+    "%@, %@: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %@."
           }
         }
       }
@@ -3317,6 +3402,23 @@
         }
       }
     },
+    "A quiet sky tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A quiet sky tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un cielo tranquilo esta noche"
+          }
+        }
+      }
+    },
     "A red palette reduces glare. Lower the screen brightness too. The flashlight button at the top of each tab and the Control Center control switch it as well. Field mode, from a park's \"I'm here tonight\", turns it on and dims the screen while it is open, then puts both back.": {
       "extractionState": "manual",
       "localizations": {
@@ -3694,6 +3796,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Accesibilidad"
+          }
+        }
+      }
+    },
+    "Adapted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adapted"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptados"
           }
         }
       }
@@ -4674,6 +4793,129 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pregunta sobre este ensayo"
+          }
+        }
+      }
+    },
+    "Asked your iPhone to refresh.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asked your iPad to refresh."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asked your iPhone to refresh."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se pidió a tu iPad que actualice."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Se pidió a tu iPhone que actualice."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Asking your iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asking your iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asking your iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Preguntando a tu iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Preguntando a tu iPhone"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Asks Nyx on iPhone to refresh the cloud forecast and send it to this watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asks Nyx on iPad to refresh the cloud forecast and send it to this watch."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Asks Nyx on iPhone to refresh the cloud forecast and send it to this watch."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pide a Nyx en el iPad que actualice el pronóstico de nubes y lo envíe a este reloj."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pide a Nyx en el iPhone que actualice el pronóstico de nubes y lo envíe a este reloj."
+                }
+              }
+            }
           }
         }
       }
@@ -6583,6 +6825,47 @@
         }
       }
     },
+    "Cloud forecasts are off in Nyx on iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Cloud forecasts are off in Nyx on iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Cloud forecasts are off in Nyx on iPhone."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los pronósticos de nubes están desactivados en Nyx en el iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los pronósticos de nubes están desactivados en Nyx en el iPhone."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Cloud forecasts are off in Your privacy. Showing saved data.": {
       "extractionState": "manual",
       "localizations": {
@@ -7263,6 +7546,40 @@
         }
       }
     },
+    "Dark adaptation is already running: %lld of about 30 minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark adaptation is already running: %lld of about 30 minutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La adaptación a la oscuridad ya está en marcha: %lld de unos 30 minutos."
+          }
+        }
+      }
+    },
+    "Dark adaptation started. Keep the screen red for about 30 minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark adaptation started. Keep the screen red for about 30 minutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptación a la oscuridad iniciada. Mantén la pantalla en rojo unos 30 minutos."
+          }
+        }
+      }
+    },
     "Dark adaptation: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -7327,6 +7644,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oscuro desde %@"
+          }
+        }
+      }
+    },
+    "Dark hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark hours"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horas oscuras"
           }
         }
       }
@@ -9147,6 +9481,23 @@
         }
       }
     },
+    "Eyes adapt in about 30 minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eyes adapt in about 30 minutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los ojos se adaptan en unos 30 minutos."
+          }
+        }
+      }
+    },
     "Eyes adapt to the dark in two steps. Cones settle in about 10 minutes; rods, which see faint stars and the Milky Way, need 20 to 30. Dim red light barely touches rods, and a moment of white light starts them over. This clock counts your time in field mode, so it is only an estimate.": {
       "extractionState": "manual",
       "localizations": {
@@ -9776,6 +10127,23 @@
         }
       }
     },
+    "Follow ${park} on ${night}": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow ${park} on ${night}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir ${park} el ${night}"
+          }
+        }
+      }
+    },
     "Follow %@ on %@": {
       "extractionState": "manual",
       "localizations": {
@@ -9902,6 +10270,23 @@
         }
       }
     },
+    "Follow tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir esta noche"
+          }
+        }
+      }
+    },
     "Follow tonight on the Lock Screen": {
       "extractionState": "manual",
       "localizations": {
@@ -9915,6 +10300,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seguir esta noche en la pantalla bloqueada"
+          }
+        }
+      }
+    },
+    "Following %@ on %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Following %@ on %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiendo %@ el %@."
           }
         }
       }
@@ -10432,6 +10834,88 @@
           "stringUnit": {
             "state": "translated",
             "value": "Del National Park Service, %@"
+          }
+        }
+      }
+    },
+    "From the cloud forecast your iPhone sent at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From the cloud forecast your iPad sent at %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From the cloud forecast your iPhone sent at %@."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Según el pronóstico de nubes que tu iPad envió a las %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Según el pronóstico de nubes que tu iPhone envió a las %@."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "From the cloud forecast your iPhone sent on %@ at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From the cloud forecast your iPad sent on %@ at %@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "From the cloud forecast your iPhone sent on %@ at %@."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Según el pronóstico de nubes que tu iPad envió el %1$@ a las %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Según el pronóstico de nubes que tu iPhone envió el %1$@ a las %2$@."
+                }
+              }
+            }
           }
         }
       }
@@ -11987,6 +12471,57 @@
         }
       }
     },
+    "Leave empty for the park you last used in the field, or your starting park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty for the park you last used in the field, or your starting park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para usar el último parque del modo de campo, o tu parque de partida."
+          }
+        }
+      }
+    },
+    "Leave empty for the park's soonest followed night.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty for the park's soonest followed night."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para la próxima noche que sigues en ese parque."
+          }
+        }
+      }
+    },
+    "Leave empty for the soonest night you follow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty for the soonest night you follow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para la próxima noche que sigues."
+          }
+        }
+      }
+    },
     "Leave empty for your first saved park.": {
       "extractionState": "manual",
       "localizations": {
@@ -12000,6 +12535,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Déjalo vacío para tu primer parque guardado."
+          }
+        }
+      }
+    },
+    "Leave empty for your starting park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty for your starting park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para usar tu parque de partida."
           }
         }
       }
@@ -12976,6 +13528,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "núcleo de la Vía Láctea a la vista todo el periodo"
+          }
+        }
+      }
+    },
+    "Milky Way core: up in true darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milky Way core: up in true darkness from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Núcleo de la Vía Láctea: visible en oscuridad total de %@ a %@."
           }
         }
       }
@@ -14211,6 +14780,23 @@
         }
       }
     },
+    "Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for your starting park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for your starting park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombra lo que vale la pena ver esta noche en un parque nacional: el núcleo de la Vía Láctea, los planetas brillantes, una lluvia de meteoros o un eclipse, con horas del propio parque. Deja el parque vacío para usar tu parque de partida."
+          }
+        }
+      }
+    },
     "National Park Service, retrieved October 5, 2026. Conditions change; check with the park.": {
       "extractionState": "manual",
       "localizations": {
@@ -14683,6 +15269,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Visión nocturna"
+          }
+        }
+      }
+    },
+    "Night vision is on.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night vision is on."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La visión nocturna está activada."
           }
         }
       }
@@ -15381,6 +15984,23 @@
         }
       }
     },
+    "No night to show": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No night to show"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay noche que mostrar"
+          }
+        }
+      }
+    },
     "No nights available": {
       "extractionState": "manual",
       "localizations": {
@@ -15479,6 +16099,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "No hay parques para mostrar."
+          }
+        }
+      }
+    },
+    "No recent forecast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recent forecast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin pronóstico reciente"
           }
         }
       }
@@ -15942,6 +16579,23 @@
         }
       }
     },
+    "Nothing to suggest for this photo. Describe it in your own words.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to suggest for this photo. Describe it in your own words."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay nada que sugerir para esta foto. Descríbela con tus propias palabras."
+          }
+        }
+      }
+    },
     "Notifications for Nyx are off in iPhone Settings. Turn them on there, then switch reminders back on.": {
       "extractionState": "manual",
       "localizations": {
@@ -16303,6 +16957,23 @@
         }
       }
     },
+    "Nyx could not find those nights. They may have passed; ask again for the nights ahead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx could not find those nights. They may have passed; ask again for the nights ahead."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no encontró esas noches. Puede que ya hayan pasado; vuelve a preguntar por las próximas noches."
+          }
+        }
+      }
+    },
     "Nyx could not match an answer to these records. The original data is below.": {
       "extractionState": "manual",
       "localizations": {
@@ -16333,6 +17004,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyx no pudo abrir su almacenamiento"
+          }
+        }
+      }
+    },
+    "Nyx could not put this night on your Lock Screen. Live Activities may be off for Nyx in Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx could not put this night on your Lock Screen. Live Activities may be off for Nyx in Settings."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no pudo poner esta noche en tu pantalla de bloqueo. Puede que las Actividades en vivo de Nyx estén desactivadas en Ajustes."
           }
         }
       }
@@ -16391,6 +17079,47 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyx no tiene un mapa de luz para los hogares. El alumbrado oculta las estrellas tenues; la Luna, los planetas y las estrellas más brillantes se siguen viendo."
+          }
+        }
+      }
+    },
+    "Nyx has no park to follow yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx has no park to follow yet. Save one in Nyx on iPad, or choose one in Nyx on this watch."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx has no park to follow yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx aún no sigue ningún parque. Guarda uno en Nyx en el iPad o elige uno en Nyx en este reloj."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx aún no sigue ningún parque. Guarda uno en Nyx en el iPhone o elige uno en Nyx en este reloj."
+                }
+              }
+            }
           }
         }
       }
@@ -17368,6 +18097,40 @@
         }
       }
     },
+    "Opens Nyx in red and starts a 30-minute dark-adaptation clock, with wrist taps at 25 and 30 minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Nyx in red and starts a 30-minute dark-adaptation clock, with wrist taps at 25 and 30 minutes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Nyx en rojo e inicia un reloj de adaptación a la oscuridad de 30 minutos, con toques en la muñeca a los 25 y 30 minutos."
+          }
+        }
+      }
+    },
+    "Opens Nyx in red and starts a 30-minute dark-adaptation clock.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Nyx in red and starts a 30-minute dark-adaptation clock."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Nyx en rojo e inicia un reloj de adaptación a la oscuridad de 30 minutos."
+          }
+        }
+      }
+    },
     "Opens Nyx in the App Store.": {
       "extractionState": "manual",
       "localizations": {
@@ -17436,19 +18199,19 @@
         }
       }
     },
-    "Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look.": {
+    "Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look. Without a park, it opens at the park you last used in the field, or your starting park.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look."
+            "value": "Opens a dark, red field screen for tonight at a national park: when true darkness begins, the Moon, the Milky Way core and where to look. Without a park, it opens at the park you last used in the field, or your starting park."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abre una pantalla de campo oscura y roja para esta noche en un parque nacional: cuándo empieza la oscuridad total, la Luna, el núcleo de la Vía Láctea y hacia dónde mirar."
+            "value": "Abre una pantalla de campo oscura y roja para esta noche en un parque nacional: cuándo empieza la oscuridad total, la Luna, el núcleo de la Vía Láctea y hacia dónde mirar. Sin parque, se abre en el último parque del modo de campo, o en tu parque de partida."
           }
         }
       }
@@ -19187,6 +19950,23 @@
         }
       }
     },
+    "Record a Night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record a Night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar una noche"
+          }
+        }
+      }
+    },
     "Record a night": {
       "extractionState": "manual",
       "localizations": {
@@ -19238,6 +20018,23 @@
         }
       }
     },
+    "Red light is on. Nyx stays red, day or night, until you change Colors in Parks.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red light is on. Nyx stays red, day or night, until you change Colors in Parks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz roja está activada. Nyx sigue en rojo, de día o de noche, hasta que cambies Colores en Parques."
+          }
+        }
+      }
+    },
     "Red light only. Nyx taps your wrist at 25 and 30 minutes, even with the screen off.": {
       "extractionState": "manual",
       "localizations": {
@@ -19285,6 +20082,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reducir efectos de resaltado atenúa los brillos, los halos y la Vía Láctea, y quita la estrella fugaz. Preferir transiciones de fundido reemplaza el zoom y el deslizamiento del mes en Planear. Cuando iOS pide a las apps que consuman menos, el cielo se queda quieto."
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar"
           }
         }
       }
@@ -20296,6 +21110,47 @@
         }
       }
     },
+    "Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this iPad. Leave the park empty for your starting park."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque nacional, con la hora del parque, calculado en este iPad. Deja el parque vacío para usar tu parque de partida."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque nacional, con la hora del parque, calculado en este iPhone. Deja el parque vacío para usar tu parque de partida."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Score": {
       "extractionState": "manual",
       "localizations": {
@@ -20673,6 +21528,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Configuración"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuración…"
           }
         }
       }
@@ -21636,6 +22508,23 @@
         }
       }
     },
+    "Snooze paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snooze paused"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posposición en pausa"
+          }
+        }
+      }
+    },
     "Snoozing": {
       "extractionState": "manual",
       "localizations": {
@@ -22078,6 +22967,23 @@
         }
       }
     },
+    "Start dark adaptation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start dark adaptation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar adaptación a la oscuridad"
+          }
+        }
+      }
+    },
     "Start field mode": {
       "extractionState": "manual",
       "localizations": {
@@ -22125,6 +23031,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Empezar de nuevo"
+          }
+        }
+      }
+    },
+    "Started at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciado a las %@"
           }
         }
       }
@@ -22418,6 +23341,23 @@
         }
       }
     },
+    "Stop following ${park} on ${night}": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop following ${park} on ${night}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejar de seguir ${park} el ${night}"
+          }
+        }
+      }
+    },
     "Stop following %@ on %@": {
       "extractionState": "manual",
       "localizations": {
@@ -22431,6 +23371,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dejar de seguir %@ el %@"
+          }
+        }
+      }
+    },
+    "Stop following a night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop following a night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejar de seguir una noche"
           }
         }
       }
@@ -22465,6 +23422,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dejar de escuchar"
+          }
+        }
+      }
+    },
+    "Stopped following %@ on %@. It is off your Lock Screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped following %@ on %@. It is off your Lock Screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya no sigues %@ el %@. Se quitó de tu pantalla de bloqueo."
           }
         }
       }
@@ -22867,6 +23841,23 @@
         }
       }
     },
+    "Sunset is at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunset is at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La puesta de sol es a las %@."
+          }
+        }
+      }
+    },
     "Support": {
       "extractionState": "manual",
       "localizations": {
@@ -22931,6 +23922,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Desliza hacia arriba o hacia abajo para girar 45 grados."
+          }
+        }
+      }
+    },
+    "Takes a followed night off your Lock Screen. Leave the park empty for the soonest night you follow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takes a followed night off your Lock Screen. Leave the park empty for the soonest night you follow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quita de tu pantalla de bloqueo una noche que sigues. Deja el parque vacío para la próxima noche que sigues."
           }
         }
       }
@@ -23026,6 +24034,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "The 30-minute dark-adaptation clock, in red while it runs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The 30-minute dark-adaptation clock, in red while it runs."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El reloj de adaptación a la oscuridad de 30 minutos, en rojo mientras corre."
           }
         }
       }
@@ -23992,6 +25017,47 @@
         }
       }
     },
+    "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPhone last sent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPad last sent."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPhone last sent."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "El índice de oscuridad de esta noche en el parque que Nyx sigue en el Apple Watch, con el último pronóstico que envió tu iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "El índice de oscuridad de esta noche en el parque que Nyx sigue en el Apple Watch, con el último pronóstico que envió tu iPhone."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "The darkness score, the Moon and the next moment of the night.": {
       "extractionState": "manual",
       "localizations": {
@@ -24362,6 +25428,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "La noche en sí"
+          }
+        }
+      }
+    },
+    "The night of %@ at %@ is over, so there is nothing to follow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The night of %@ at %@ is over, so there is nothing to follow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La noche del %@ en %@ ya terminó, así que no hay nada que seguir."
           }
         }
       }
@@ -24743,6 +25826,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "El cielo sobre %@, %@"
+          }
+        }
+      }
+    },
+    "The sky stays in twilight from sunset at %@ to sunrise at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sky stays in twilight from sunset at %@ to sunrise at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cielo sigue en crepúsculo desde la puesta de sol, a las %@, hasta el amanecer, a las %@."
           }
         }
       }
@@ -25417,6 +26517,40 @@
         }
       }
     },
+    "Tonight at %@: true darkness from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight at %@: true darkness from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche en %@: oscuridad total de %@ a %@."
+          }
+        }
+      }
+    },
+    "Tonight if empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight if empty."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta noche, si queda vacío."
+          }
+        }
+      }
+    },
     "Tonight is the best night this week.": {
       "extractionState": "manual",
       "localizations": {
@@ -25961,6 +27095,23 @@
         }
       }
     },
+    "True darkness tonight at %@: from %@ to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "True darkness tonight at %@: from %@ to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad total esta noche en %@: de %@ a %@."
+          }
+        }
+      }
+    },
     "True darkness: %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -26080,6 +27231,40 @@
         }
       }
     },
+    "Turn on night vision": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on night vision"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar la visión nocturna"
+          }
+        }
+      }
+    },
+    "Turn on red light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on red light"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar luz roja"
+          }
+        }
+      }
+    },
     "Turn the Crown to look ahead": {
       "extractionState": "manual",
       "localizations": {
@@ -26168,6 +27353,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Activa la paleta roja de visión nocturna de Nyx y ofrece el modo de campo mientras este modo de concentración esté activo."
+          }
+        }
+      }
+    },
+    "Turns on Nyx's red night-vision palette, for eyes adapted to the dark. Widgets and the Lock Screen follow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turns on Nyx's red night-vision palette, for eyes adapted to the dark. Widgets and the Lock Screen follow."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa la paleta roja de visión nocturna de Nyx, para ojos adaptados a la oscuridad. Los widgets y la pantalla de bloqueo la siguen."
           }
         }
       }
@@ -26393,6 +27595,47 @@
         }
       }
     },
+    "Unlock your iPhone, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Unlock your iPad, then try again."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Unlock your iPhone, then try again."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Desbloquea tu iPad y vuelve a intentarlo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Desbloquea tu iPhone y vuelve a intentarlo."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Unsave": {
       "extractionState": "manual",
       "localizations": {
@@ -26525,6 +27768,47 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sobre el horizonte durante toda la oscuridad total."
+          }
+        }
+      }
+    },
+    "Update from iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Update from iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Update from iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Actualizar desde el iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Actualizar desde el iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -27260,6 +28544,23 @@
         }
       }
     },
+    "What's up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo"
+          }
+        }
+      }
+    },
     "What's up this night": {
       "extractionState": "manual",
       "localizations": {
@@ -27290,6 +28591,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "En el cielo esta noche"
+          }
+        }
+      }
+    },
+    "What's up tonight at ${park}": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What's up tonight at ${park}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el cielo esta noche en ${park}"
           }
         }
       }
@@ -27375,6 +28693,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "¿A qué hora sale el núcleo en Big Bend esta noche?"
+          }
+        }
+      }
+    },
+    "When true darkness falls at ${park} tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When true darkness falls at ${park} tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuándo llega la oscuridad total en ${park} esta noche"
+          }
+        }
+      }
+    },
+    "When true darkness falls tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When true darkness falls tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuándo llega la oscuridad total esta noche"
           }
         }
       }
@@ -27913,6 +29265,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sí"
+          }
+        }
+      }
+    },
+    "You are already following %@ on %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are already following %@ on %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya sigues %@ el %@."
+          }
+        }
+      }
+    },
+    "You are not following a night at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are not following a night at %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sigues ninguna noche en %@."
+          }
+        }
+      }
+    },
+    "You are not following any nights.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are not following any nights."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sigues ninguna noche."
           }
         }
       }
@@ -29214,6 +30617,40 @@
         }
       }
     },
+    "aurora": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aurora"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aurora"
+          }
+        }
+      }
+    },
+    "beach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "beach"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "playa"
+          }
+        }
+      }
+    },
     "before dawn": {
       "extractionState": "manual",
       "localizations": {
@@ -29282,6 +30719,74 @@
         }
       }
     },
+    "cactus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cactus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cactus"
+          }
+        }
+      }
+    },
+    "campsite": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "campsite"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "campamento"
+          }
+        }
+      }
+    },
+    "canyon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "canyon"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cañón"
+          }
+        }
+      }
+    },
+    "car": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "car"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "auto"
+          }
+        }
+      }
+    },
     "check alerts before you go": {
       "extractionState": "manual",
       "localizations": {
@@ -29316,6 +30821,23 @@
         }
       }
     },
+    "cliffs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cliffs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "acantilados"
+          }
+        }
+      }
+    },
     "cloud forecast included, %lld%% cloud": {
       "extractionState": "manual",
       "localizations": {
@@ -29329,6 +30851,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "con pronóstico de nubes, %lld%% de nubes"
+          }
+        }
+      }
+    },
+    "clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "clouds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nubes"
           }
         }
       }
@@ -29363,6 +30902,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "confirma el acceso antes de ir"
+          }
+        }
+      }
+    },
+    "desert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "desert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "desierto"
+          }
+        }
+      }
+    },
+    "dunes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dunes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dunas"
           }
         }
       }
@@ -29639,6 +31212,23 @@
         }
       }
     },
+    "fire": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fire"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fuego"
+          }
+        }
+      }
+    },
     "forecast ends": {
       "extractionState": "manual",
       "localizations": {
@@ -29673,6 +31263,23 @@
         }
       }
     },
+    "forest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bosque"
+          }
+        }
+      }
+    },
     "getting there: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -29686,6 +31293,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "cómo llegar: %@"
+          }
+        }
+      }
+    },
+    "glacier": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "glacier"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "glaciar"
+          }
+        }
+      }
+    },
+    "grass": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "grass"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pasto"
           }
         }
       }
@@ -29720,6 +31361,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "alto en el %@"
+          }
+        }
+      }
+    },
+    "hills": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hills"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "colinas"
           }
         }
       }
@@ -29782,6 +31440,47 @@
         }
       }
     },
+    "iPhone not reachable. Open Nyx on iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPad not reachable. Open Nyx on iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "iPhone not reachable. Open Nyx on iPhone."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se puede contactar con el iPad. Abre Nyx en el iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "No se puede contactar con el iPhone. Abre Nyx en el iPhone."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -29816,6 +31515,23 @@
         }
       }
     },
+    "lake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lake"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lago"
+          }
+        }
+      }
+    },
     "left": {
       "extractionState": "manual",
       "localizations": {
@@ -29829,6 +31545,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "la izquierda"
+          }
+        }
+      }
+    },
+    "lighthouse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lighthouse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "faro"
+          }
+        }
+      }
+    },
+    "lightning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lightning"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "relámpagos"
           }
         }
       }
@@ -29948,6 +31698,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "los modelos van de %lld a %lld"
+          }
+        }
+      }
+    },
+    "mountains": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mountains"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "montañas"
+          }
+        }
+      }
+    },
+    "night sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "night sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cielo nocturno"
           }
         }
       }
@@ -30135,6 +31919,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "no visible aquí"
+          }
+        }
+      }
+    },
+    "ocean": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ocean"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "océano"
           }
         }
       }
@@ -30394,6 +32195,23 @@
         }
       }
     },
+    "people": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "people"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "personas"
+          }
+        }
+      }
+    },
     "right": {
       "extractionState": "manual",
       "localizations": {
@@ -30407,6 +32225,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "la derecha"
+          }
+        }
+      }
+    },
+    "river": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "river"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "río"
+          }
+        }
+      }
+    },
+    "road": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "road"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "camino"
+          }
+        }
+      }
+    },
+    "rocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rocks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rocas"
+          }
+        }
+      }
+    },
+    "shore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "shore"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "orilla"
           }
         }
       }
@@ -30632,6 +32518,40 @@
         }
       }
     },
+    "sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cielo"
+          }
+        }
+      }
+    },
+    "snow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "snow"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nieve"
+          }
+        }
+      }
+    },
     "south": {
       "extractionState": "manual",
       "localizations": {
@@ -30734,6 +32654,57 @@
         }
       }
     },
+    "sunset or sunrise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sunset or sunrise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "atardecer o amanecer"
+          }
+        }
+      }
+    },
+    "telescope": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "telescope"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "telescopio"
+          }
+        }
+      }
+    },
+    "tent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tienda de campaña"
+          }
+        }
+      }
+    },
     "the night after the peak": {
       "extractionState": "manual",
       "localizations": {
@@ -30781,6 +32752,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "arriba"
+          }
+        }
+      }
+    },
+    "trees": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "trees"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "árboles"
           }
         }
       }
@@ -30900,6 +32888,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "vista desde tu vehículo"
+          }
+        }
+      }
+    },
+    "volcano": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "volcano"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "volcán"
+          }
+        }
+      }
+    },
+    "waterfall": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "waterfall"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cascada"
           }
         }
       }

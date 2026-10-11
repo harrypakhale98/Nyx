@@ -1,3 +1,4 @@
+import AlarmKit
 import SwiftUI
 import WidgetKit
 
@@ -275,6 +276,124 @@ struct FieldActivityTimer: View {
         }
     }
 }
+// MARK: Field alarms
+
+/// Where a field alarm's Live Activity stands: snoozing (counting down to the moment it rings
+/// again), paused (the time left held until the snooze resumes) or ringing.
+nonisolated struct FieldAlarmStatus: Equatable, Sendable {
+    enum Phase: Equatable, Sendable { case snoozing(fire: Date), paused(left: TimeInterval), ringing }
+    let phase: Phase
+    init(_ mode: AlarmPresentationState.Mode) {
+        switch mode {
+        case .countdown(let countdown): phase = .snoozing(fire: countdown.fireDate)
+        case .paused(let paused): phase = .paused(left: max(0, paused.totalCountdownDuration-paused.previouslyElapsedDuration))
+        case .alert: phase = .ringing
+        @unknown default: phase = .ringing
+        }
+    }
+    init(phase: Phase) { self.phase=phase }
+    /// The time a paused snooze still has, in whole minutes rounded up ("6 min"), so it never reads as less than it is.
+    static func left(_ seconds: TimeInterval) -> String {
+        Duration.seconds(max(seconds, 1)).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated, fractionalPart: .hide(rounded: .up)))
+    }
+    /// What the alarm is doing in a word: AlarmKit's own titles where Nyx set them ("Snoozing"), else Nyx's.
+    func word(countdownTitle: String?, pausedTitle: String?) -> String {
+        switch phase {
+        case .snoozing: countdownTitle ?? String(localized: "Snoozing")
+        case .paused: pausedTitle ?? String(localized: "Snooze paused")
+        case .ringing: String(localized: "Alarm")
+        }
+    }
+    /// The line under the alarm's title: "Snoozing · Joshua Tree", "Snooze paused · Joshua Tree",
+    /// the park alone while it rings. The time itself stands apart (`FieldAlarmClock`).
+    func line(countdownTitle: String?, pausedTitle: String?, park: String?) -> String {
+        let word: String?=phase == .ringing ? nil : self.word(countdownTitle: countdownTitle, pausedTitle: pausedTitle)
+        return [word, park].compactMap { $0 }.joined(separator: " · ")
+    }
+    /// The same, from the alarm's presentation.
+    func word(_ presentation: AlarmPresentation) -> String {
+        word(countdownTitle: presentation.countdown.map { String(localized: $0.title) }, pausedTitle: presentation.paused.map { String(localized: $0.title) })
+    }
+    func line(_ presentation: AlarmPresentation, park: String?) -> String {
+        line(countdownTitle: presentation.countdown.map { String(localized: $0.title) }, pausedTitle: presentation.paused.map { String(localized: $0.title) }, park: park)
+    }
+    var symbol: String {
+        switch phase {
+        case .snoozing: "zzz"
+        case .paused: "pause.fill"
+        case .ringing: "alarm"
+        }
+    }
+}
+/// The time on a field alarm's faces: the snooze counting down, the time a paused snooze still
+/// has (held, with the pause glyph; "6 min" alone in the compact island), or the alarm glyph while it rings.
+struct FieldAlarmClock: View {
+    let status: FieldAlarmStatus
+    var compact=false
+    var body: some View {
+        switch status.phase {
+        case .snoozing(let fire): Text(timerInterval: Date.now...max(Date.now, fire), countsDown: true)
+        case .paused(let left):
+            HStack(spacing: 3) {
+                Image(systemName: "pause.fill").imageScale(.small).accessibilityHidden(true)
+                Text(compact ? FieldAlarmStatus.left(left) : String(localized: "\(FieldAlarmStatus.left(left)) left"))
+            }
+        case .ringing: Image(systemName: "alarm").accessibilityLabel("Alarm")
+        }
+    }
+}
+/// A field alarm's Live Activity on the Lock Screen, or its small family on Apple Watch's Smart
+/// Stack and CarPlay. All in the red the alarm was set with (`FieldAlarms.tint`, from `NightLook`).
+struct FieldAlarmFace: View {
+    @Environment(\.activityFamily) private var family
+    let attributes: AlarmAttributes<FieldAlarmMetadata>
+    let state: AlarmPresentationState
+    var body: some View {
+        switch family {
+        case .small: FieldAlarmSmallView(attributes: attributes, state: state)
+        default: FieldAlarmLockView(attributes: attributes, state: state)
+        }
+    }
+}
+/// The Lock Screen: the alarm's title, what it is doing and for which park, and the time.
+struct FieldAlarmLockView: View {
+    let attributes: AlarmAttributes<FieldAlarmMetadata>
+    let state: AlarmPresentationState
+    var body: some View {
+        let status=FieldAlarmStatus(state.mode)
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(attributes.presentation.alert.title).font(.system(.headline, design: .serif)).lineLimit(2).minimumScaleFactor(0.8)
+                Text(status.line(attributes.presentation, park: attributes.metadata?.parkName)).font(.caption).lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            FieldAlarmClock(status: status).font(.system(.title2, design: .serif)).monospacedDigit()
+                .lineLimit(1).minimumScaleFactor(0.7).multilineTextAlignment(.trailing).frame(maxWidth: 130, alignment: .trailing)
+        }
+        .foregroundStyle(attributes.tintColor).padding(16)
+        .accessibilityElement(children: .combine)
+    }
+}
+/// Apple Watch's Smart Stack and CarPlay: what the alarm is doing, one large time, its title.
+struct FieldAlarmSmallView: View {
+    let attributes: AlarmAttributes<FieldAlarmMetadata>
+    let state: AlarmPresentationState
+    var body: some View {
+        let status=FieldAlarmStatus(state.mode)
+        VStack(alignment: .leading, spacing: 2) {
+            Label { Text(status.word(attributes.presentation)).lineLimit(1).minimumScaleFactor(0.7) }
+                icon: { Image(systemName: status.symbol).accessibilityHidden(true) }
+                .font(.caption.weight(.semibold))
+            FieldAlarmClock(status: status).font(.system(.title2, design: .serif).weight(.medium)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+            Text(attributes.presentation.alert.title).font(.caption2).lineLimit(2).minimumScaleFactor(0.8)
+        }
+        .foregroundStyle(attributes.tintColor)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10).padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+    }
+}
+
 #if DEBUG
 extension FieldActivityAttributes {
     /// The same night moved in time, so a review screen's system timers count against a real clock.
@@ -316,5 +435,31 @@ extension FieldActivityAttributes {
         FieldActivityLockView(attributes:a,state:a.state(at:a.dawn,nightVision:false),isStale:false)
         HStack { FieldActivitySmallView(attributes:a,state:a.state(at:a.dusk,nightVision:false),isStale:false); FieldActivitySmallView(attributes:a,state:a.state(at:a.dusk,nightVision:true),isStale:true) }.frame(height:84)
     }.background(Color.black).padding() }
+}
+/// A snoozing "wake me" alarm at Joshua Tree, as `FieldAlarms` sets one, for previews.
+@available(iOS 26.1, *)
+func previewFieldAlarm(red: NightTint = .standard) -> AlarmAttributes<FieldAlarmMetadata> {
+    // Illustrative words through a variable, so a preview adds nothing to the String Catalog.
+    let title=["True darkness","at Joshua Tree"].joined(separator:" ")
+    let alert=AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: title), secondaryButton: AlarmButton(text: "Snooze", textColor: red.color, systemImageName: "zzz"), secondaryButtonBehavior: .countdown)
+    return AlarmAttributes(presentation: AlarmPresentation(alert: alert, countdown: AlarmPresentation.Countdown(title: "Snoozing")),
+                           metadata: FieldAlarmMetadata(parkName: "Joshua Tree", kind: "darkness"), tintColor: red.color)
+}
+#Preview("Field alarm states") {
+    if #available(iOS 26.1, *) {
+        let alarm=previewFieldAlarm(), brighter=previewFieldAlarm(red: .brighter), id=UUID(), now=Date.now
+        let snoozing=AlarmPresentationState(alarmID: id, mode: .countdown(.init(totalCountdownDuration: 540, previouslyElapsedDuration: 0, startDate: now, fireDate: now.addingTimeInterval(540))))
+        let paused=AlarmPresentationState(alarmID: id, mode: .paused(.init(totalCountdownDuration: 540, previouslyElapsedDuration: 170)))
+        let ringing=AlarmPresentationState(alarmID: id, mode: .alert(.init(time: .init(hour: 19, minute: 42))))
+        ScrollView { VStack(spacing: 12) {
+            // Snoozing, paused and ringing on the Lock Screen; the brighter red (by choice or Increase Contrast).
+            ForEach([snoozing, paused, ringing], id: \.self) { FieldAlarmLockView(attributes: alarm, state: $0) }
+            FieldAlarmLockView(attributes: brighter, state: paused)
+            // The small family: Apple Watch's Smart Stack and CarPlay.
+            HStack { ForEach([snoozing, paused, ringing], id: \.self) { FieldAlarmSmallView(attributes: alarm, state: $0) } }.frame(height: 84)
+        }.background(Color.black).padding() }
+    } else {
+        Text(verbatim: "Field alarms need iOS 26.1.")
+    }
 }
 #endif

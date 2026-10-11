@@ -98,6 +98,10 @@ struct PlannerWindow: View {
         .onContinueUserActivity(ParkHandoff.type) { activity in
             if let handoff = ParkHandoff(userInfo: activity.userInfo) { model.open(handoff) }
         }
+        // And back: the park and night in this window, for Nyx on iPhone or iPad to continue.
+        .modifier(VisionHandoff(park: model.park, night: model.park.map { model.night(for: $0) }))
+        // Siri or Shortcuts asked for a park, or to stand under its sky: answered once this window is active.
+        .task(id: Asked(request: model.intentRequest?.id, active: scenePhase == .active)) { await answerIntent() }
         .onChange(of: scenePhase) { _, phase in
             // The window holds every control for the sky. Closed, it would leave someone standing
             // in a sky they cannot change or leave except by the Digital Crown, so the sky closes
@@ -115,6 +119,15 @@ struct PlannerWindow: View {
         .disabled(skyBusy || model.plan == nil)
         .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
                                 : Text("Surrounds you with this park's computed sky at the time on the clock below the window"))
+    }
+    private struct Asked: Hashable { let request: UUID?; let active: Bool }
+    /// Opens the asked-for park on tonight, and its sky when asked. The first planner window to be
+    /// active takes the request, so a second window never opens the sky twice.
+    private func answerIntent() async {
+        guard scenePhase == .active, let request = model.intentRequest else { return }
+        model.intentRequest = nil
+        model.openTonight(request.parkID)
+        if request.sky, !model.immersiveOpen { await toggleSky() }
     }
     private func toggleSky() async {
         guard !skyBusy else { return }

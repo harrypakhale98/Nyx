@@ -70,25 +70,100 @@ struct FollowNightMenuItem: View {
     }
 }
 
-/// Follows (or stops following) a night from Siri's best-night card. A Live Activity intent, so it
-/// may start or schedule the activity while Nyx stays in the background.
+/// "Follow tonight": puts a night's countdown on the Lock Screen, from Siri, Shortcuts or the
+/// best-night card. Only ever follows; `UnfollowNightIntent` stops. A Live Activity intent, so it
+/// may start or schedule the activity while Nyx stays in the background. Without a park, the night
+/// under way or the starting park; without a night, tonight.
 struct FollowNightIntent: LiveActivityIntent {
     static let title: LocalizedStringResource="Follow a night"
     static let description=IntentDescription("Puts a night's countdown at a national park on your Lock Screen. It starts by itself before sunset; Nyx does not need to be open.")
-    static let isDiscoverable=false
-    @Parameter(title:"Park") var park: ParkEntity
-    @Parameter(title:"Night") var night: Date
+    @Parameter(title:"Park",description:"Leave empty for your starting park.") var park: ParkEntity?
+    @Parameter(title:"Night",description:"Tonight if empty.") var night: Date?
+    static var parameterSummary: some ParameterSummary { Summary("Follow \(\.$park) on \(\.$night)") }
     init() {}
     init(park: ParkEntity, night: Date) { self.park=park; self.night=night }
-    func perform() async throws -> some IntentResult {
-        guard let chosen=try ParkData.load().first(where:{ $0.id==park.id }) else { return .result() }
+    // Live Activity intents run outside the main actor; following reads and changes the app's night list there.
+    @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
+        let chosen=try IntentPark.resolve(park)
+        let now=Date.now
         let shared=SharedSettings.read()
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:[chosen],shared:shared),details:BestNightSearch.details(for:[chosen],shared:shared))
-        let found=planner.night(chosen,on:chosen.evening(night),now:.now)
-        if FieldActivities.isFollowing(park:chosen,night:found.id) { await FieldActivities.unfollow(park:chosen,night:found.id) }
-        else { await FieldActivities.follow(night:found,closure:shared?.closures[chosen.id],nightVision:SharedSettings.defaults.bool(forKey:"nightVision")) }
+        let found=planner.night(chosen,on:night.map { FollowNightWords.evening(of:$0,at:chosen) } ?? chosen.currentNight(at:now),now:now)
+        let result=await FieldActivities.follow(night:found,closure:shared?.closures[chosen.id],nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),now:now)
         BestNightSnippetIntent.reload()
-        return .result()
+        return .result(dialog:IntentDialog(stringLiteral:FollowNightWords.followed(result,park:chosen,night:found.id)))
+    }
+}
+
+/// "Stop following": ends a followed night, scheduled or running. Without a park or a night, the
+/// soonest night followed; with a park alone, that park's soonest.
+struct UnfollowNightIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource="Stop following a night"
+    static let description=IntentDescription("Takes a followed night off your Lock Screen. Leave the park empty for the soonest night you follow.")
+    @Parameter(title:"Park",description:"Leave empty for the soonest night you follow.") var park: ParkEntity?
+    @Parameter(title:"Night",description:"Leave empty for the park's soonest followed night.") var night: Date?
+    static var parameterSummary: some ParameterSummary { Summary("Stop following \(\.$park) on \(\.$night)") }
+    init() {}
+    init(park: ParkEntity, night: Date) { self.park=park; self.night=night }
+    // Live Activity intents run outside the main actor; following reads and changes the app's night list there.
+    @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
+        let library=try ParkData.load()
+        var named: Park?
+        if let park { guard let found=library.first(where:{ $0.id==park.id }) else { throw NyxIntentError.parkNotFound }; named=found }
+        NightFollowing.shared.reload()
+        // Without a named night, one whose dawn has passed (a stale activity iOS has not ended yet) is
+        // not "the soonest": the night still ahead is the one to stop.
+        let now=Date.now
+        let followed=NightFollowing.shared.nights.filter { night != nil || $0.attributes.dawn>now }.compactMap { item -> (park: Park, night: Date)? in
+            guard let park=library.first(where:{ $0.id==item.attributes.parkID }) else { return nil }
+            return (park,item.attributes.nightID ?? park.evening(item.attributes.dusk))
+        }
+        let target=FollowNightWords.target(followed,park:named,night:night)
+        if let target { await FieldActivities.unfollow(park:target.park,night:target.night) }
+        BestNightSnippetIntent.reload()
+        return .result(dialog:IntentDialog(stringLiteral:FollowNightWords.unfollowed(target,park:named)))
+    }
+}
+
+/// What following and unfollowing say, for every outcome, apart from the intents so it can be tested.
+enum FollowNightWords {
+    /// "Friday, October 16", the night's evening in the park's calendar.
+    static func day(_ park: Park, _ night: Date) -> String { park.programDate(park.isoDay(night)) }
+    /// The park's evening for a night given as a date: a night's own evening (the best-night card's
+    /// button) as it is, any other date as the day the person's calendar shows it, as Find the best
+    /// night reads a picked day, so a date picked at midnight never follows the night before.
+    static func evening(of date: Date, at park: Park, calendar: Calendar = .current) -> Date {
+        let exact=park.evening(date)
+        if exact==date { return exact }
+        let day=TripDay(date,calendar:calendar)
+        return park.calendar.date(from:DateComponents(year:day.year,month:day.month,day:day.day,hour:12)) ?? exact
+    }
+    static func followed(_ result: FieldActivities.FollowResult, park: Park, night: Date) -> String {
+        let name=park.shortName, day=Self.day(park,night)
+        switch result {
+        case .scheduled(let start):
+            return String(localized:"Following \(name) on \(day).")+" "+String(localized:"On your Lock Screen from \(park.time(start)), without opening Nyx")+"."
+        case .started:
+            return String(localized:"Following \(name) on \(day).")+" "+String(localized:"On your Lock Screen now, until dawn")+"."
+        case .alreadyFollowing:
+            return String(localized:"You are already following \(name) on \(day).")
+        case .over:
+            return String(localized:"The night of \(day) at \(name) is over, so there is nothing to follow.")
+        case .unavailable:
+            return String(localized:"Nyx could not put this night on your Lock Screen. Live Activities may be off for Nyx in Settings.")
+        }
+    }
+    /// The followed night to stop: the one named, else the park's soonest, else the soonest of all.
+    /// `followed` is in the order ActivityKit's nights are kept (soonest sunset first).
+    static func target(_ followed: [(park: Park, night: Date)], park: Park?, night: Date?, calendar: Calendar = .current) -> (park: Park, night: Date)? {
+        followed.first { item in
+            (park.map { $0.id==item.park.id } ?? true) && (night.map { evening(of:$0,at:item.park,calendar:calendar)==item.night } ?? true)
+        }
+    }
+    static func unfollowed(_ target: (park: Park, night: Date)?, park: Park?) -> String {
+        if let target { return String(localized:"Stopped following \(target.park.shortName) on \(day(target.park,target.night)). It is off your Lock Screen.") }
+        if let park { return String(localized:"You are not following a night at \(park.shortName).") }
+        return String(localized:"You are not following any nights.")
     }
 }
 

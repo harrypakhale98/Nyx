@@ -115,7 +115,11 @@ struct BestNightSnippetIntent: SnippetIntent {
         let now=Date.now
         let shared=SharedSettings.read()
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else { return .result(view:EmptyView()) }
+        // Nothing left to show (the nights have passed since Siri first answered): a calm card that
+        // says so and offers Nyx, never an empty one.
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else {
+            return .result(view:BestNightEmptySnippetView(parkID:parks.count==1 ? parks.first?.id : nil))
+        }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)
         let night=answer.ranked[rank]
         // "Follow this night" where Live Activities are on and the night is still ahead.
@@ -179,13 +183,20 @@ struct BestNightSnippetView: View {
             }
             .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
             if let following {
-                // Puts the night on the Lock Screen before its sunset, with no need to open Nyx.
-                Button(intent:FollowNightIntent(park:ParkEntity(night.park),night:night.id)) {
-                    Label(following ? "Following. Stop" : "Follow this night",systemImage:following ? "moon.stars.fill" : "moon.stars")
+                // Puts the night on the Lock Screen before its sunset, with no need to open Nyx; the
+                // same place stops following. Two intents, so a repeated tap never undoes itself.
+                Group {
+                    if following {
+                        Button(intent:UnfollowNightIntent(park:ParkEntity(night.park),night:night.id)) { Label("Following. Stop",systemImage:"moon.stars.fill") }
+                            .accessibilityLabel("Stop following this night")
+                            .accessibilityHint("Removes the night from your Lock Screen.")
+                    } else {
+                        Button(intent:FollowNightIntent(park:ParkEntity(night.park),night:night.id)) { Label("Follow this night",systemImage:"moon.stars") }
+                            .accessibilityLabel("Follow this night")
+                            .accessibilityHint("Puts the night's countdown on your Lock Screen before sunset.")
+                    }
                 }
                 .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
-                .accessibilityLabel(following ? "Stop following this night" : "Follow this night")
-                .accessibilityHint("Puts the night's countdown on your Lock Screen before sunset.")
             }
         }
         .foregroundStyle(palette.ink)
@@ -195,4 +206,34 @@ struct BestNightSnippetView: View {
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
     }
+}
+
+/// The best-night card when there is no night to show: what happened, in the app's words, and a
+/// way into Nyx (the park, when there was one, else Tonight). Drawn in the app's night look.
+struct BestNightEmptySnippetView: View {
+    var parkID: String?=nil
+    @Environment(\.colorSchemeContrast) private var contrast
+    private var palette: NyxPalette { NightLook(contrast:contrast).palette }
+    var body: some View {
+        VStack(alignment:.leading,spacing:10) {
+            HStack(alignment:.firstTextBaseline,spacing:8) {
+                Image(systemName:"moon").foregroundStyle(palette.accent).accessibilityHidden(true)
+                Text("No night to show").font(.system(.headline,design:.serif))
+            }
+            Text("Nyx could not find those nights. They may have passed; ask again for the nights ahead.")
+                .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Button(intent:OpenTonightParkIntent(parkID:parkID)) { Label("Open in Nyx",systemImage:"arrow.up.forward.app") }
+                .buttonStyle(.bordered).tint(palette.accent).font(.subheadline)
+        }
+        .frame(maxWidth:.infinity,alignment:.leading)
+        .foregroundStyle(palette.ink)
+        .padding(18)
+        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .environment(\.nyx,palette)
+        .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
+        .environment(\.colorScheme,.dark)
+    }
+}
+#Preview("Best night, nothing to show") {
+    BestNightEmptySnippetView().padding()
 }

@@ -98,8 +98,8 @@ extension View {
     func nonEssential() -> some View { modifier(NonEssential()) }
 }
 
-/// One park's night in three pages the Digital Crown moves through: the score and what comes
-/// next, tonight's milestones, and the week.
+/// One park's night in four pages the Digital Crown moves through: the score and what comes
+/// next, tonight's milestones, what's up tonight, and the week.
 struct ParkNightView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
@@ -118,7 +118,9 @@ struct ParkNightView: View {
                 // (The DEBUG Always-On override is repeated per page: pages take the scene's value.)
                 TonightFace(night: night, week: week, now: now, context: store.context, startNight: startNight).modifier(WatchDebug.AlwaysOn()).tag(0)
                 MilestonesPage(night: night, now: now, context: store.context).modifier(WatchDebug.AlwaysOn()).tag(1)
-                WeekPage(park: park, nights: week, now: now, isHome: isHome).modifier(WatchDebug.AlwaysOn()).tag(2)
+                // Tonight's pages together: the moments of the night, then what is up in it.
+                WhatsUpPage(night: night).modifier(WatchDebug.AlwaysOn()).tag(2)
+                WeekPage(park: park, nights: week, now: now, isHome: isHome).modifier(WatchDebug.AlwaysOn()).tag(3)
             }
             .tabViewStyle(.verticalPage)
             // A wrist tap as a moment of the night passes, while its countdown is on screen.
@@ -246,6 +248,7 @@ struct TonightFace: View {
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
+                AskIPhoneRow(source: CloudSource.of(context: context, park: night.park, now: now))
             }.frame(maxWidth: .infinity)
         }
     }
@@ -479,6 +482,7 @@ struct MilestonesPage: View {
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
+                AskIPhoneRow(source: CloudSource.of(context: context, park: night.park, now: now))
                 // No score stands on this page, so the line says what the range is of: under "Clouds
                 // from …" a bare "Forecast models: 59–89" read as cloud cover.
                 if let models = context?.modelRange(for: night) {
@@ -552,6 +556,7 @@ struct WeekPage: View {
                     if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
                 }
                 .font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true).nonEssential()
+                AskIPhoneRow(source: CloudSource.of(context: store.context, park: park, now: now))
                 if !isHome || store.pinned == park.id {
                     let kept = store.pinned == park.id
                     Button { store.pin(kept ? nil : park) } label: {
@@ -651,6 +656,8 @@ struct ParkChooser: View {
                     Text("Choose a park").font(.system(.title3, design: .serif))
                     Text("Nyx on iPhone sends your saved parks and cloud forecasts. Until then, scores use each park's usual clouds.").font(.caption2).foregroundStyle(palette.muted)
                 }.listRowBackground(Color.clear)
+                // Nothing has come from the iPhone yet: ask for it here rather than wait.
+                if store.context == nil { AskIPhoneRow(source: .unsynced).listRowBackground(Color.clear) }
             }
             Section("Dark Sky parks") { ForEach(store.parks.filter(\.darkSkyDesignated)) { row($0) } }
             Section("Other parks") { ForEach(store.parks.filter { !$0.darkSkyDesignated }) { row($0) } }

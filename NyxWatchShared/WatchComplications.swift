@@ -11,6 +11,9 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     var rank: (score: Float, duration: TimeInterval)?
     /// The shown park's closure from the iPhone's last park update, worded as on the iPhone.
     var closure: String? = nil
+    /// The shown park's clouds come from a forecast at least 36 hours old at this entry
+    /// (`CloudSource.lifetime`): still scored, eased toward usual clouds, but worth refreshing.
+    var cloudsOld = false
     var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
 }
 
@@ -66,7 +69,14 @@ nonisolated enum WatchTimeline {
         let best = best(at: date, snapshot: snapshot, cache: &cache)
         let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
         return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) },
-                             closure: best.flatMap { snapshot?.closures[$0.park.id] })
+                             closure: best.flatMap { snapshot?.closures[$0.park.id] },
+                             cloudsOld: isOld(best.flatMap { snapshot?.forecasts[$0.park.id]?.updated }, at: date))
+    }
+    /// A forecast fetched at `updated` is old at `date` once the watch app would say so ("No recent forecast").
+    static func isOld(_ updated: Date?, at date: Date) -> Bool { updated.map { date.timeIntervalSince($0) >= CloudSource.lifetime } ?? false }
+    /// When each snapshot forecast turns old within the next day, so the face says so on time.
+    static func ageMoments(from now: Date, snapshot: SavedSkySnapshot?) -> [Date] {
+        (snapshot?.forecasts.values.map { $0.updated.addingTimeInterval(CloudSource.lifetime) } ?? []).filter { $0 > now && $0 < now.addingTimeInterval(86400) }
     }
     /// Moments a complication must redraw at besides the hour: Automatic changing colour at the
     /// snapshot's parks over the next day.
@@ -82,6 +92,7 @@ nonisolated enum WatchTimeline {
         let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
         var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
         moments.formUnion(paletteMoments(from: now, snapshot: snapshot, look: look))
+        moments.formUnion(ageMoments(from: now, snapshot: snapshot))
         for park in snapshot?.parks ?? [] {
             for offset in 0..<2 {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
@@ -215,25 +226,31 @@ struct WatchComplicationView: View {
     /// Park, score and band, then the next moment; at large text sizes the moment line drops first.
     /// A closure comes before the moment and is never cut: its own words wrapped whole, else
     /// "Closure alert", else the warning mark beside the numeral (the spoken label always has it all).
+    /// An old forecast says so in a line of its own ("No recent forecast"), which gives way after
+    /// the next moment and before the closure is shortened.
     private func rectangular(_ night: Night) -> some View {
-        Group {
+        let old = entry.cloudsOld
+        return Group {
             if let closure = entry.closure {
                 ViewThatFits(in: .vertical) {
-                    rectangular(night, closure: .whole(closure), showsNext: true)
-                    rectangular(night, closure: .whole(closure), showsNext: false)
-                    rectangular(night, closure: .alert, showsNext: false)
-                    rectangular(night, closure: .mark, showsNext: false)
+                    rectangular(night, closure: .whole(closure), old: old, showsNext: true)
+                    rectangular(night, closure: .whole(closure), old: old, showsNext: false)
+                    rectangular(night, closure: .whole(closure), old: false, showsNext: false)
+                    rectangular(night, closure: .alert, old: old, showsNext: false)
+                    rectangular(night, closure: .alert, old: false, showsNext: false)
+                    rectangular(night, closure: .mark, old: false, showsNext: false)
                 }
             } else {
                 ViewThatFits(in: .vertical) {
-                    rectangular(night, closure: nil, showsNext: true)
-                    rectangular(night, closure: nil, showsNext: false)
+                    rectangular(night, closure: nil, old: old, showsNext: true)
+                    rectangular(night, closure: nil, old: old, showsNext: false)
+                    rectangular(night, closure: nil, old: false, showsNext: false)
                 }
             }
         }
         .foregroundStyle(ink).frame(maxWidth: .infinity, alignment: .leading)
     }
-    private func rectangular(_ night: Night, closure: ClosureFit?, showsNext: Bool) -> some View {
+    private func rectangular(_ night: Night, closure: ClosureFit?, old: Bool, showsNext: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 MoonSymbol(night: night).font(.caption2).foregroundStyle(muted)
@@ -250,6 +267,10 @@ struct WatchComplicationView: View {
             case .whole(let text): closureLine(Text(text))
             case .alert: closureLine(Text("Closure alert"))
             case .mark, nil: EmptyView()
+            }
+            if old {
+                Label { Text("No recent forecast") } icon: { Image(systemName: "clock.arrow.circlepath") }
+                    .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
             }
             if showsNext, let next = entry.next {
                 Group {
@@ -283,7 +304,29 @@ struct WatchComplicationView: View {
         // The closure is spoken in every family, right after the score it stands beside.
         if let closure = entry.closure { text += " " + WristClosure.spoken(closure) }
         if let caption = night.basisCaption() { text += " " + caption }
+        // In every family, though only the rectangular one has room to show it.
+        if entry.cloudsOld { text += " " + String(localized: "No recent forecast. Open Nyx on iPhone to refresh.") }
         if let next = entry.next { text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).") }
         return text
+    }
+}
+
+#Preview("Tonight • old forecast, rectangular") { OldForecastPreview() }
+#Preview("Tonight • old forecast and closure") { OldForecastPreview(closure: "Keys View Road and the Geology Tour Road closed for repairs through November") }
+#Preview("Tonight • old forecast • xxxLarge") { OldForecastPreview(closure: "Keys View Road closed at night").dynamicTypeSize(.xxxLarge) }
+/// The rectangular face with a forecast 36 hours old, in full colour and tinted, from the real engine.
+private struct OldForecastPreview: View {
+    var closure: String? = nil
+    private var entry: WatchSkyEntry {
+        var cache: [String: SkyConditions] = [:]
+        let entry = WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
+        return WatchSkyEntry(date: entry.date, night: entry.night, next: entry.next, nightVision: false, closure: closure, cloudsOld: true)
+    }
+    var body: some View {
+        VStack(spacing: 8) {
+            WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry).frame(height: 60)
+            WatchComplicationView(previewFamily: .accessoryRectangular, entry: entry).frame(height: 60).environment(\.widgetRenderingMode, .accented)
+        }
+        .padding(.horizontal, 6)
     }
 }

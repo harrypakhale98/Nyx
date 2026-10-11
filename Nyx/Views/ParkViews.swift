@@ -138,6 +138,7 @@ struct ParksView: View {
                     LazyVStack(spacing:0) { ForEach(shown.filter { p in !(showsSavedSection && saved.contains{$0.parkID==p.id}) }) { p in link(p); Divider().overlay(palette.line) } }
                 }
             }.padding(24)
+            .background { SearchEnder(request:commands?.sheetRequest?.id) }
             // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
             .accessibilityRotor(Text("Closures"),entries:rotor(shown) { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
             .accessibilityRotor(Text("Pristine nights"),entries:rotor(shown) { park in
@@ -892,6 +893,15 @@ private struct SkyFullBleed: ViewModifier {
 /// The system search field in the navigation bar, except at accessibility text sizes, where the
 /// screen shows `InlineSearchField` instead: on iOS 27 the bar's field keeps its height while its
 /// text grows, so at AX5 it draws neither placeholder nor text and does not take a tap.
+/// A sheet asked for from the keyboard (⌘N, ⌘,) ends Find a Park's search first: left presented under the
+/// sheet after ⌘F, the search took the sheet's first Cancel (seen on iPad). Inside the searchable content,
+/// where `dismissSearch` reaches it.
+private struct SearchEnder: View {
+    @Environment(\.dismissSearch) private var dismissSearch
+    @Environment(\.isSearching) private var isSearching
+    let request: Int?
+    var body: some View { Color.clear.accessibilityHidden(true).onChange(of:request) { if isSearching { dismissSearch() } } }
+}
 struct SystemSearch: ViewModifier {
     @Binding var text: String
     var focused: FocusState<Bool>.Binding
