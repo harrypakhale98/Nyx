@@ -17,8 +17,8 @@ struct FindBestNightIntent: AppIntent {
     /// Returns the moment the best night's true darkness begins (sunset where there is none), so a
     /// shortcut can put it in a calendar or a reminder.
     func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
-        let library=try ParkData.load()
         let saved=SharedSettings.read()
+        let library=try ParkLibrary.places(snapshot:saved)
         let parks=park.map { chosen in library.filter { $0.id==chosen.id } } ?? (saved?.parks ?? [])
         guard !parks.isEmpty else { throw NyxIntentError.noParks }
         let now=Date.now, day=start.map { TripDay($0) }
@@ -101,9 +101,9 @@ struct BestNightSnippetIntent: SnippetIntent {
     init() {}
     init(parkIDs: [String], start: Date?, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
     func perform() async throws -> some IntentResult & ShowsSnippetView {
-        let parks=try ParkData.load().filter { parkIDs.contains($0.id) }
-        let now=Date.now
         let shared=SharedSettings.read()
+        let parks=try ParkLibrary.places(snapshot:shared).filter { parkIDs.contains($0.id) }
+        let now=Date.now
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         // Nothing left to show (the nights have passed since Siri first answered): a calm card that
         // says so and offers Nyx, never an empty one.

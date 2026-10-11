@@ -15,8 +15,11 @@ struct ParkEntity:IndexedEntity {
     var state:String=""
     var darkSky=false
     var bortle=0
+    /// A spot the person saved (`pin:`), rather than a catalogue park.
+    var isSpot:Bool { id.hasPrefix(ParkLibrary.spotPrefix) }
     var displayRepresentation:DisplayRepresentation {
-        DisplayRepresentation(title:"\(name)",subtitle:state.isEmpty ? nil : "\(state)",image:.init(systemName:darkSky ? "moon.stars" : "mountain.2"))
+        if isSpot { return DisplayRepresentation(title:"\(name)",subtitle:"Your spot",image:.init(systemName:"mappin.and.ellipse")) }
+        return DisplayRepresentation(title:"\(name)",subtitle:state.isEmpty ? nil : "\(state)",image:.init(systemName:darkSky ? "moon.stars" : "mountain.2"))
     }
     /// The state or states, also Spotlight's state field.
     @ComputedProperty(title:"State",indexingKey:\.stateOrProvince)
@@ -44,13 +47,36 @@ struct ParkEntity:IndexedEntity {
     }
 }
 struct ParkQuery:EntityStringQuery {
-    func entities(for identifiers:[String]) async throws -> [ParkEntity] { try ParkData.load().filter{identifiers.contains($0.id)}.map(ParkEntity.init) }
-    /// Saved parks first (the ones people ask about), then the rest by name.
-    func suggestedEntities() async throws -> [ParkEntity] {
-        let saved=Set(SharedSettings.read()?.parks.map(\.id) ?? [])
-        return try ParkData.load().sorted { (saved.contains($0.id) ? 0 : 1, $0.shortName)<(saved.contains($1.id) ? 0 : 1, $1.shortName) }.map(ParkEntity.init)
+    func entities(for identifiers:[String]) async throws -> [ParkEntity] { try ParkLibrary.places().filter{identifiers.contains($0.id)}.map(ParkEntity.init) }
+    /// Saved spots first, then saved parks (the ones people ask about), then the rest by name.
+    func suggestedEntities() async throws -> [ParkEntity] { try ParkLibrary.suggested().map(ParkEntity.init) }
+    func entities(matching string:String) async throws -> [ParkEntity] { try ParkLibrary.places().filter{$0.matches(string)}.map(ParkEntity.init) }
+}
+/// The places Siri, Shortcuts and the widgets can name: the bundled parks, then the spots the person
+/// saved and follows, as the app last wrote them to the App Group's snapshot (`SavedSkySnapshot.parks`
+/// carries each followed spot's whole place). Catalogue ids resolve exactly as before; a spot no longer
+/// followed (or deleted) leaves the snapshot, and with it these lists, at the app's next update.
+nonisolated enum ParkLibrary {
+    static let spotPrefix="pin:"
+    /// The followed spots in a snapshot, in its order.
+    static func spots(in snapshot:SavedSkySnapshot?)->[Park] { (snapshot?.parks ?? []).filter { $0.id.hasPrefix(spotPrefix) } }
+    static func places(snapshot:SavedSkySnapshot?=SharedSettings.read(),bundle:Bundle = .main) throws -> [Park] {
+        let parks=try ParkData.load(bundle:bundle)
+        let known=Set(parks.map(\.id))
+        return parks+spots(in:snapshot).filter { !known.contains($0.id) }
     }
-    func entities(matching string:String) async throws -> [ParkEntity] { try ParkData.load().filter{$0.matches(string)}.map(ParkEntity.init) }
+    /// One place by id, a park or a followed spot.
+    static func place(_ id:String,snapshot:SavedSkySnapshot?=SharedSettings.read()) -> Park? {
+        if !id.hasPrefix(spotPrefix) { return (try? ParkData.load())?.first { $0.id==id } }
+        return spots(in:snapshot).first { $0.id==id }
+    }
+    /// Spots first, then saved parks, then every other park by name: the order a park choice offers them.
+    static func suggested(snapshot:SavedSkySnapshot?=SharedSettings.read(),bundle:Bundle = .main) throws -> [Park] {
+        let saved=Set(snapshot?.parks.map(\.id) ?? [])
+        let parks=try ParkData.load(bundle:bundle).sorted { (saved.contains($0.id) ? 0 : 1, $0.shortName)<(saved.contains($1.id) ? 0 : 1, $1.shortName) }
+        let known=Set(parks.map(\.id))
+        return spots(in:snapshot).filter { !known.contains($0.id) }+parks
+    }
 }
 /// Opens a park in Nyx: a Spotlight result, a snippet's "Open in Nyx", or Shortcuts.
 struct OpenParkIntent:OpenIntent {

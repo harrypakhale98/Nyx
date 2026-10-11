@@ -529,10 +529,11 @@ private struct ParkMenuRow:View {
     private var name:String { model.park(parkID)?.shortName ?? "" }
     var body:some View {
         Menu {
-            Picker("Park",selection:$parkID) { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+            PlacePickerOptions(title:"Park",selection:$parkID)
         } label:{
             TitleValueLayout(spacing:12) {
-                Text("Park").foregroundStyle(palette.ink)
+                // "Place" once there are spots to choose from too.
+                Text(model.spots.isEmpty ? "Park" : "Place").foregroundStyle(palette.ink)
                 HStack(alignment:.firstTextBaseline,spacing:6) {
                     Text(name).foregroundStyle(palette.accent).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
                     Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(palette.accent)
@@ -540,7 +541,7 @@ private struct ParkMenuRow:View {
             }
             .frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
         }
-        .accessibilityLabel("Park").accessibilityValue(name)
+        .accessibilityLabel(model.spots.isEmpty ? "Park" : "Place").accessibilityValue(name)
     }
 }
 #Preview("Park row, short and long") {

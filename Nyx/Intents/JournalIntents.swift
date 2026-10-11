@@ -91,7 +91,7 @@ struct AddJournalEntryIntent: AppIntent {
         guard !unavailable, let container else { throw NyxIntentError.journalUnavailable }
         return container
     }
-    nonisolated static func park(_ id: String) -> Park? { (try? ParkData.load())?.first { $0.id == id } }
+    nonisolated static func park(_ id: String) -> Park? { ParkLibrary.place(id) }
     /// The park's place for the journal schema: its coordinates and name, nothing looked up.
     nonisolated static func place(_ park: Park) -> PlaceDescriptor {
         PlaceDescriptor(representations: [.coordinate(CLLocationCoordinate2D(latitude: park.latitude, longitude: park.longitude))], commonName: park.name)
@@ -113,7 +113,7 @@ struct AddJournalEntryIntent: AppIntent {
     }
     /// Up to 20 entries whose words contain the text (ignoring case and accents), or whose park it names.
     static func entities(matching string: String) async throws -> [JournalEntryEntity] {
-        let parkIDs=((try? ParkData.load()) ?? []).filter { $0.matches(string) }.map(\.id)
+        let parkIDs=((try? ParkLibrary.places()) ?? []).filter { $0.matches(string) }.map(\.id)
         var descriptor=FetchDescriptor<JournalEntry>(predicate: #Predicate { parkIDs.contains($0.parkID) || $0.notes.localizedStandardContains(string) })
         descriptor.fetchLimit=20
         return try await entities(descriptor)

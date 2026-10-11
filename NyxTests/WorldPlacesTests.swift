@@ -226,6 +226,12 @@ struct NearestInsideTheUnitedStates {
         #expect(!USOutline.contains(latitude: 19.43, longitude: -99.13))      // Mexico City
         #expect(!USOutline.contains(latitude: 48.85, longitude: 2.35))        // Paris
     }
+    @Test func puertoRicoKeepsAtlanticTime() throws {
+        // San Juan: the territory's own towns, never a mainland one with New York's daylight saving.
+        let near=try #require(StartingPlaces.nearest(latitude: 18.42, longitude: -66.06))
+        #expect(near.timeZoneID == "America/Puerto_Rico", "\(near.name) \(near.timeZoneID ?? "-")")
+        #expect(!USOutline.contains(latitude: 18.42, longitude: -66.06))
+    }
     @Test func abroadTheNearestIsLocal() throws {
         let tekapo=try #require(StartingPlaces.nearest(latitude: -44.0, longitude: 170.48))
         #expect(tekapo.countryCode == "NZ" && tekapo.timeZoneID == "Pacific/Auckland")

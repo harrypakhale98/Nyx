@@ -305,6 +305,8 @@ struct TonightMapLabels: Layout {
 
 /// Parks as a map: the picture, what its marks mean, and the darkest few as rows that work at
 /// every text size. `open` pushes the park, exactly as a row of the list does.
+/// Saved spots are not drawn: the map is the United States' outline, and a spot may be anywhere on
+/// Earth; they lead the list instead. The world map that can hold them is G4.
 struct ParksMapView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette

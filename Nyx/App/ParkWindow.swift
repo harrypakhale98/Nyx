@@ -36,6 +36,8 @@ struct ParkWindowRoot: View {
             }
         }
         .environment(\.nyxTab,0)
+        // A spot's page in its own window resolves the spot through the model, which this scene keeps fed.
+        .background(SavedSpotsFeed())
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.skyHome,model.home)

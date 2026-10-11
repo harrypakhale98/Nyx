@@ -1824,6 +1824,50 @@
         }
       }
     },
+    "%@° E": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° E"
+          }
+        }
+      }
+    },
+    "%@° N": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° N"
+          }
+        }
+      }
+    },
+    "%@° S": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° S"
+          }
+        }
+      }
+    },
+    "%@° W": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° W"
+          }
+        }
+      }
+    },
     "%lld": {
       "extractionState": "manual",
       "localizations": {
@@ -3147,6 +3191,29 @@
         }
       }
     },
+    "A backyard, a pullout or a field you know, scored night by night like the parks. It stays on this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "A backyard, a pullout or a field you know, scored night by night like the parks. It stays on this iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "A backyard, a pullout or a field you know, scored night by night like the parks. It stays on this iPhone."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "A bright Moon hides all but the brightest meteors.": {
       "extractionState": "manual",
       "localizations": {
@@ -3177,6 +3244,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Un proyecto de ciencia ciudadana. Observaciones como la tuya permitieron a los científicos estimar que el cielo nocturno se volvió entre un 7 y un 10 por ciento más brillante al año de 2011 a 2022. Se abre en Safari; Nyx no envía nada."
+          }
+        }
+      }
+    },
+    "A city or town": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A city or town"
           }
         }
       }
@@ -3868,6 +3946,17 @@
         }
       }
     },
+    "Accuracy unknown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accuracy unknown."
+          }
+        }
+      }
+    },
     "Adapted": {
       "extractionState": "manual",
       "localizations": {
@@ -4014,6 +4103,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Add a spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a spot"
           }
         }
       }
@@ -4640,6 +4740,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Una ilustración: el mismo cielo dibujado con la clase estimada de este parque y con la de una ciudad."
+          }
+        }
+      }
+    },
+    "An illustration: the same sky drawn at this spot's estimated class and at a city's.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An illustration: the same sky drawn at this spot's estimated class and at a city's."
           }
         }
       }
@@ -6444,6 +6555,17 @@
         }
       }
     },
+    "City or town": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "City or town"
+          }
+        }
+      }
+    },
     "City sky": {
       "extractionState": "manual",
       "localizations": {
@@ -7104,6 +7226,28 @@
         }
       }
     },
+    "Clouds at your saved spots": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds at your saved spots"
+          }
+        }
+      }
+    },
+    "Clouds at your saved spots is off in Your privacy, so nothing is sent: the spot uses its usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clouds at your saved spots is off in Your privacy, so nothing is sent: the spot uses its usual clouds."
+          }
+        }
+      }
+    },
     "Clouds from %@": {
       "extractionState": "manual",
       "localizations": {
@@ -7291,6 +7435,17 @@
         }
       }
     },
+    "Coordinates": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordinates"
+          }
+        }
+      }
+    },
     "Coordinates are approximate, from nps.gov. This is not a navigation guide: check current access, hours and closures with the park.": {
       "extractionState": "manual",
       "localizations": {
@@ -7338,6 +7493,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Copia %@, aproximadas."
+          }
+        }
+      }
+    },
+    "Copies %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies %@."
           }
         }
       }
@@ -8464,6 +8630,17 @@
         }
       }
     },
+    "Delete %@?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        }
+      }
+    },
     "Delete entry": {
       "extractionState": "manual",
       "localizations": {
@@ -8494,6 +8671,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eliminar informes"
+          }
+        }
+      }
+    },
+    "Delete spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete spot"
           }
         }
       }
@@ -10008,6 +10196,17 @@
         }
       }
     },
+    "Find again": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find again"
+          }
+        }
+      }
+    },
     "Find the best night": {
       "extractionState": "manual",
       "localizations": {
@@ -10089,6 +10288,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Encontrar la Vía Láctea"
+          }
+        }
+      }
+    },
+    "Finding where you are": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding where you are"
           }
         }
       }
@@ -10406,6 +10616,17 @@
         }
       }
     },
+    "Follow this spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow this spot"
+          }
+        }
+      }
+    },
     "Follow tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -10436,6 +10657,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seguir esta noche en la pantalla bloqueada"
+          }
+        }
+      }
+    },
+    "Followed spots appear in widgets, reminders and on Apple Watch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Followed spots appear in widgets, reminders and on Apple Watch."
           }
         }
       }
@@ -10562,6 +10794,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Para un lugar que no es uno de los parques, como tu ciudad de partida, Nyx lee dos cuadrículas que vienen con la app. El brillo del cielo sale de las mismas luces nocturnas de la NASA de 2025, sumadas en 300 km alrededor de cada punto y contrastadas con 77 mediciones publicadas, de sitios oscuros a centros de ciudad: por lo general con menos de media magnitud de diferencia, y menos en lugares oscuros. Se muestra como una estimación, con su clase Bortle. Las nubes habituales salen de los mismos diez años de ERA5, promediadas sobre la noche de cada mes en una cuadrícula de un cuarto de grado; la frecuencia de noches mayormente despejadas se estima a partir de ese promedio, por eso dice \"unas\". Los parques conservan sus propios valores. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]."
+          }
+        }
+      }
+    },
+    "For each spot you save, Nyx asks api.open-meteo.com for its clouds with the spot's coordinates rounded to 0.1°, about 11 km. The service learns roughly where your spots are, never the exact point and never their names. Spots are asked about in a request of their own, never mixed with the parks. Your current location is sent only if you save it as a spot. With this off, nothing is sent for spots: they keep their last forecast, then use their usual clouds. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For each spot you save, Nyx asks api.open-meteo.com for its clouds with the spot's coordinates rounded to 0.1°, about 11 km. The service learns roughly where your spots are, never the exact point and never their names. Spots are asked about in a request of their own, never mixed with the parks. Your current location is sent only if you save it as a spot. With this off, nothing is sent for spots: they keep their last forecast, then use their usual clouds. The service receives network information such as your IP address."
           }
         }
       }
@@ -11767,6 +12010,17 @@
         }
       }
     },
+    "Illustration: this spot's sky at its estimated Class %lld, and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration: this spot's sky at its estimated Class %lld, and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."
+          }
+        }
+      }
+    },
     "Import journal": {
       "extractionState": "manual",
       "localizations": {
@@ -11882,6 +12136,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "En pocas palabras"
+          }
+        }
+      }
+    },
+    "In decimal degrees, such as 34.01, -116.18. South and west are negative. You can paste both at once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In decimal degrees, such as 34.01, -116.18. South and west are negative. You can paste both at once."
           }
         }
       }
@@ -12171,6 +12436,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baja de 10° en el %@."
+          }
+        }
+      }
+    },
+    "It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos."
           }
         }
       }
@@ -12573,6 +12849,28 @@
         }
       }
     },
+    "Latitude": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitude"
+          }
+        }
+      }
+    },
+    "Latitude runs from -90 to 90.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitude runs from -90 to 90."
+          }
+        }
+      }
+    },
     "Learn": {
       "extractionState": "manual",
       "localizations": {
@@ -12756,6 +13054,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Salir del modo de campo"
+          }
+        }
+      }
+    },
+    "Leave it empty to use “%@”.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave it empty to use “%@”."
           }
         }
       }
@@ -13083,6 +13392,17 @@
         }
       }
     },
+    "Location is off for Nyx. Turn it on in Settings, or type the coordinates instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location is off for Nyx. Turn it on in Settings, or type the coordinates instead."
+          }
+        }
+      }
+    },
     "Location is off. Choose your city or the park closest to you.": {
       "extractionState": "manual",
       "localizations": {
@@ -13188,6 +13508,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pantalla bloqueada: en línea, Esta noche y la Luna"
+          }
+        }
+      }
+    },
+    "Longitude": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longitude"
+          }
+        }
+      }
+    },
+    "Longitude runs from -180 to 180.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longitude runs from -180 to 180."
           }
         }
       }
@@ -15018,6 +15360,17 @@
         }
       }
     },
+    "Near %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Near %@"
+          }
+        }
+      }
+    },
     "Near me": {
       "extractionState": "manual",
       "localizations": {
@@ -15099,6 +15452,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parques nuevos este año: %@"
+          }
+        }
+      }
+    },
+    "New spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New spot"
           }
         }
       }
@@ -15756,6 +16120,17 @@
         }
       }
     },
+    "No city or town by that name. Try a nearby larger one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No city or town by that name. Try a nearby larger one."
+          }
+        }
+      }
+    },
     "No city, town or park by that name. Try a nearby larger city.": {
       "extractionState": "manual",
       "localizations": {
@@ -16001,6 +16376,17 @@
         }
       }
     },
+    "No light map reaches here, so Nyx assumes a suburban sky, Bortle %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No light map reaches here, so Nyx assumes a suburban sky, Bortle %lld."
+          }
+        }
+      }
+    },
     "No moonlight to speak of: a good night for faint stars.": {
       "extractionState": "manual",
       "localizations": {
@@ -16069,19 +16455,19 @@
         }
       }
     },
-    "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns.": {
+    "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 31,000 cities and towns around the world.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 1,000 US cities and towns."
+            "value": "No national park or city matched \"%@\". Nyx knows the 63 US national parks and about 31,000 cities and towns around the world."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ningún parque nacional ni ciudad coincide con \"%@\". Nyx conoce los 63 parques nacionales y unas 1,000 ciudades y pueblos de EE. UU."
+            "value": "Ningún parque nacional ni ciudad coincide con \"%@\". Nyx conoce los 63 parques nacionales de EE. UU. y unas 31,000 ciudades y pueblos de todo el mundo."
           }
         }
       }
@@ -17253,6 +17639,17 @@
         }
       }
     },
+    "Nyx has no alerts for this place. Check access, local rules and closures before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx has no alerts for this place. Check access, local rules and closures before you go."
+          }
+        }
+      }
+    },
     "Nyx has no light map for homes. Streetlights hide faint stars; the Moon, the planets and the brightest stars still show.": {
       "extractionState": "manual",
       "localizations": {
@@ -17430,6 +17827,63 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Nyx en el iPhone envía tus parques guardados y los pronósticos de nubes. Mientras tanto, los índices usan la nubosidad habitual de cada parque."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Nyx reads where you are once, to save this spot. Nothing is sent unless you save it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx reads where you are once, to save this spot. Nothing is sent unless you save it."
+          }
+        }
+      }
+    },
+    "Nyx reads your location once, on this iPhone, only when you ask.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx reads your location once, on this iPad, only when you ask."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx reads your location once, on this iPhone, only when you ask."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Nyx saves this spot on this iPhone. Its clouds are asked for with its position rounded to about 11 km.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx saves this spot on this iPad. Its clouds are asked for with its position rounded to about 11 km."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx saves this spot on this iPhone. Its clouds are asked for with its position rounded to about 11 km."
                 }
               }
             }
@@ -17767,6 +18221,29 @@
         }
       }
     },
+    "On this iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "On this iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "On this iPhone"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "On this iPhone, Nyx's screen averaged %lld%% of full brightness in the day iOS last reported, ending %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -17957,6 +18434,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Solo quedan la Luna, los planetas y unas cuantas estrellas brillantes."
+          }
+        }
+      }
+    },
+    "Only this iPhone knows the name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Only this iPad knows the name."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Only this iPhone knows the name."
+                }
+              }
+            }
           }
         }
       }
@@ -19287,6 +19787,17 @@
         }
       }
     },
+    "Place": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place"
+          }
+        }
+      }
+    },
     "Places to settle in": {
       "extractionState": "manual",
       "localizations": {
@@ -19623,6 +20134,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Revisión del widget vertical extragrande"
+          }
+        }
+      }
+    },
+    "Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings."
           }
         }
       }
@@ -20290,6 +20812,17 @@
         }
       }
     },
+    "Region": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Region"
+          }
+        }
+      }
+    },
     "Remind me": {
       "extractionState": "manual",
       "localizations": {
@@ -20463,6 +20996,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quita la noche de tu pantalla bloqueada."
+          }
+        }
+      }
+    },
+    "Rename": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        }
+      }
+    },
+    "Rename spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename spot"
           }
         }
       }
@@ -21113,6 +21668,50 @@
         }
       }
     },
+    "Save a spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a spot"
+          }
+        }
+      }
+    },
+    "Save a spot of your own": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a spot of your own"
+          }
+        }
+      }
+    },
+    "Save another spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save another spot"
+          }
+        }
+      }
+    },
+    "Save as a spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as a spot"
+          }
+        }
+      }
+    },
     "Save park": {
       "extractionState": "manual",
       "localizations": {
@@ -21171,6 +21770,17 @@
         }
       }
     },
+    "Save where you are": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save where you are"
+          }
+        }
+      }
+    },
     "Saved for later": {
       "extractionState": "manual",
       "localizations": {
@@ -21205,6 +21815,52 @@
         }
       }
     },
+    "Saved on this iPhone. Clouds at your saved spots is off in Your privacy, so this spot uses its usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPad. Clouds at your saved spots is off in Your privacy, so this spot uses its usual clouds."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPhone. Clouds at your saved spots is off in Your privacy, so this spot uses its usual clouds."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Saved on this iPhone. Its clouds are asked for with its position rounded to about 11 km.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPad. Its clouds are asked for with its position rounded to about 11 km."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved on this iPhone. Its clouds are asked for with its position rounded to about 11 km."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Saved parks": {
       "extractionState": "manual",
       "localizations": {
@@ -21218,6 +21874,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parques guardados"
+          }
+        }
+      }
+    },
+    "Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved parks and spots, journal entries and selected photos are stored on this iPad. iCloud sync is not used. Your device backup settings may include app data."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data."
+                }
+              }
+            }
           }
         }
       }
@@ -21256,43 +21935,13 @@
         }
       }
     },
-    "Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.": {
+    "Saved spots are kept with your journal, which could not be opened. Nothing was changed.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Saved parks, journal entries and selected photos are stored on this iPad. iCloud sync is not used. Your device backup settings may include app data."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Saved parks, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Los parques guardados, las entradas del diario y las fotos seleccionadas se almacenan en este iPad. No se usa la sincronización con iCloud. La configuración de respaldo de tu dispositivo puede incluir datos de la app."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Los parques guardados, las entradas del diario y las fotos seleccionadas se almacenan en este iPhone. No se usa la sincronización con iCloud. La configuración de respaldo de tu dispositivo puede incluir datos de la app."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved spots are kept with your journal, which could not be opened. Nothing was changed."
           }
         }
       }
@@ -21423,19 +22072,19 @@
         }
       }
     },
-    "Search for your city or town, such as Chicago or Denver, or choose a park.": {
+    "Search for your city or town, such as Paris or Denver, or choose a park.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search for your city or town, such as Chicago or Denver, or choose a park."
+            "value": "Search for your city or town, such as Paris or Denver, or choose a park."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Busca tu ciudad o pueblo, como Chicago o Denver, o elige un parque."
+            "value": "Busca tu ciudad o pueblo, como París o Denver, o elige un parque."
           }
         }
       }
@@ -23392,6 +24041,23 @@
         }
       }
     },
+    "Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntos de partida fuera de Estados Unidos: GeoNames (geonames.org), CC BY 4.0."
+          }
+        }
+      }
+    },
     "Starts a 30-minute dark-adaptation clock.": {
       "extractionState": "manual",
       "localizations": {
@@ -23626,6 +24292,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dejar de seguir esta noche"
+          }
+        }
+      }
+    },
+    "Stop following this spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop following this spot"
           }
         }
       }
@@ -26068,6 +26745,17 @@
         }
       }
     },
+    "The spot sits at the town's point on Nyx's list, not at a particular field or hill. For somewhere outside town, use coordinates.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The spot sits at the town's point on Nyx's list, not at a particular field or hill. For somewhere outside town, use coordinates."
+          }
+        }
+      }
+    },
     "The summer Milky Way shows fine structure, and clouds look like black holes in the stars.": {
       "extractionState": "manual",
       "localizations": {
@@ -26153,19 +26841,19 @@
         }
       }
     },
-    "The towns and cities you can start from come from the U.S. Census Bureau's 2025 Gazetteer Files (Places) and its Vintage 2025 population estimates, which are in the public domain. Each place is a single interior point, not a city center, and only straight-line distances are measured from it.": {
+    "The towns and cities you can start from come, in the United States, from the U.S. Census Bureau's 2025 Gazetteer Files (Places) and its Vintage 2025 population estimates, which are in the public domain, and everywhere else from GeoNames (geonames.org): every place of 15,000 people or more, under the Creative Commons Attribution 4.0 license (CC BY 4.0). Each place is a single point, not a boundary, and only straight-line distances are measured from it. A spot you save takes its time zone and region from the nearest of these places; near a border, that can be the neighbor's.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The towns and cities you can start from come from the U.S. Census Bureau's 2025 Gazetteer Files (Places) and its Vintage 2025 population estimates, which are in the public domain. Each place is a single interior point, not a city center, and only straight-line distances are measured from it."
+            "value": "The towns and cities you can start from come, in the United States, from the U.S. Census Bureau's 2025 Gazetteer Files (Places) and its Vintage 2025 population estimates, which are in the public domain, and everywhere else from GeoNames (geonames.org): every place of 15,000 people or more, under the Creative Commons Attribution 4.0 license (CC BY 4.0). Each place is a single point, not a boundary, and only straight-line distances are measured from it. A spot you save takes its time zone and region from the nearest of these places; near a border, that can be the neighbor's."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los pueblos y ciudades desde los que puedes partir vienen de los Gazetteer Files 2025 (Places) y de las estimaciones de población Vintage 2025 de la Oficina del Censo de EE. UU., que son de dominio público. Cada lugar es un solo punto interior, no el centro de la ciudad, y desde él solo se miden distancias en línea recta."
+            "value": "Los pueblos y ciudades desde los que puedes partir vienen, en Estados Unidos, de los Gazetteer Files 2025 (Places) y de las estimaciones de población Vintage 2025 de la Oficina del Censo de EE. UU., que son de dominio público, y en el resto del mundo de GeoNames (geonames.org): todos los lugares de 15,000 habitantes o más, con la licencia Creative Commons Atribución 4.0 (CC BY 4.0). Cada lugar es un solo punto, no un límite, y desde él solo se miden distancias en línea recta. Un sitio que guardes toma la zona horaria y la región del más cercano de estos lugares; cerca de una frontera, puede ser la del vecino."
           }
         }
       }
@@ -26343,6 +27031,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "This is where you are now. If you save it, its rounded position is asked about like any spot's. If you don't, nothing is sent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is where you are now. If you save it, its rounded position is asked about like any spot's. If you don't, nothing is sent."
           }
         }
       }
@@ -26581,6 +27280,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Horario: %@."
+          }
+        }
+      }
+    },
+    "Times here keep %@, from the nearest town on Nyx's list. Near a border, that can be the neighbor's.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Times here keep %@, from the nearest town on Nyx's list. Near a border, that can be the neighbor's."
           }
         }
       }
@@ -27384,6 +28094,17 @@
         }
       }
     },
+    "Try again": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        }
+      }
+    },
     "Try another name or widen your filters.": {
       "extractionState": "manual",
       "localizations": {
@@ -28085,6 +28806,28 @@
         }
       }
     },
+    "Use decimal degrees, such as -116.18.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use decimal degrees, such as -116.18."
+          }
+        }
+      }
+    },
+    "Use decimal degrees, such as 34.01.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use decimal degrees, such as 34.01."
+          }
+        }
+      }
+    },
     "Use motion sensors, and switch lights off when no one needs them.": {
       "extractionState": "manual",
       "localizations": {
@@ -28149,6 +28892,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Usar esta clave"
+          }
+        }
+      }
+    },
+    "Use where I am now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use where I am now"
           }
         }
       }
@@ -28986,6 +29740,17 @@
         }
       }
     },
+    "Where I am now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where I am now"
+          }
+        }
+      }
+    },
     "Where and when\nthe sky is darkest": {
       "extractionState": "manual",
       "localizations": {
@@ -29016,6 +29781,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "¿Desde dónde sales?"
+          }
+        }
+      }
+    },
+    "Where is it?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where is it?"
           }
         }
       }
@@ -29261,6 +30037,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "A menos de"
+          }
+        }
+      }
+    },
+    "Within about %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within about %@."
           }
         }
       }
@@ -30175,6 +30962,17 @@
         }
       }
     },
+    "Your location is unavailable right now. Try again, or type the coordinates instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your location is unavailable right now. Try again, or type the coordinates instead."
+          }
+        }
+      }
+    },
     "Your next dark sky will appear here.": {
       "extractionState": "manual",
       "localizations": {
@@ -30239,6 +31037,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tu privacidad"
+          }
+        }
+      }
+    },
+    "Your spot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your spot"
+          }
+        }
+      }
+    },
+    "Your spot · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your spot · %@"
+          }
+        }
+      }
+    },
+    "Your spots": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your spots"
           }
         }
       }

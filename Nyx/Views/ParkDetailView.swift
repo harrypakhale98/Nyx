@@ -31,12 +31,18 @@ struct ParkDetailView: View {
     var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) var typeSize
     @Query private var saved:[SavedPark]
-    let park:Park
+    /// The place the page was opened with. A saved spot is read again from the model (`park`), so a
+    /// rename shows at once; once deleted, the page keeps what it opened with until it closes.
+    private let given:Park
+    var park:Park { given.isSavedSpot ? (model.park(given.id) ?? given) : given }
     var initialDate:Date?=nil
     /// Opened from a link to that night's What's up (`nyx://whatsup`): scroll there once.
     var focusWhatsUp=false
     /// Told whenever the night on show changes, so a park's own window can keep it (`ParkWindowRoot`).
     var nightChanged:((Date)->Void)?=nil
+    init(park:Park,initialDate:Date?=nil,focusWhatsUp:Bool=false,nightChanged:((Date)->Void)?=nil) {
+        given=park; _selected=State(initialValue:nil); self.initialDate=initialDate; self.focusWhatsUp=focusWhatsUp; self.nightChanged=nightChanged
+    }
     @State var selected:Date?
     @State private var breakdown=false
     /// The breakdown beside the page in a wide window (`WideLayout.inspector`); a sheet otherwise.
@@ -175,8 +181,9 @@ struct ParkDetailView: View {
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it).
             .task(id:riverStart) { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
-            .task { await model.refresh([park],programs:true) }
-            .refreshable { await model.refresh([park],force:true,programs:true) }
+            // Park alerts and ranger programs only where the Park Service runs the place: a saved spot asks it nothing.
+            .task { await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil) }
+            .refreshable { await model.refresh([park],force:true,parkUpdates:park.nps != nil,programs:park.nps != nil) }
     }
     /// Room for the breakdown beside the page (`WideLayout.inspector`).
     private var inspectorRoom:Bool { WideLayout.inspector(width:width,open:inspector,regular:sizeClass == .regular,largeText:typeSize.isAccessibilitySize) }
@@ -221,8 +228,23 @@ struct ParkDetailView: View {
     }
     private var saveButton:some View {
         Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
-            .accessibilityLabel(isSaved ? "Remove from saved parks" : "Save park")
-            .accessibilityInputLabels(isSaved ? [Text("Remove from saved parks"),Text("Unsave"),Text("Unsave park")] : [Text("Save"),Text("Save park")])
+            .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot))
+    }
+}
+/// The bookmark's words. For a park, saving it; for a spot (always kept in Your spots until it is
+/// deleted), following it: a followed spot is in the widgets, reminders and on Apple Watch.
+private struct SaveButtonWords: ViewModifier {
+    let saved: Bool
+    let spot: Bool
+    func body(content:Content)->some View {
+        if spot {
+            content.accessibilityLabel(saved ? "Stop following this spot" : "Follow this spot")
+                .accessibilityHint("Followed spots appear in widgets, reminders and on Apple Watch.")
+                .accessibilityInputLabels(saved ? [Text("Stop following"),Text("Unsave")] : [Text("Follow"),Text("Save")])
+        } else {
+            content.accessibilityLabel(saved ? "Remove from saved parks" : "Save park")
+                .accessibilityInputLabels(saved ? [Text("Remove from saved parks"),Text("Unsave"),Text("Unsave park")] : [Text("Save"),Text("Save park")])
+        }
     }
 }
 /// Reports where a chapter's top sits in the scroll view, for the pinned index.

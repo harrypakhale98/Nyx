@@ -36,7 +36,7 @@ struct DarknessIntent:AppIntent {
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
-        guard let selected=try ParkData.load().first(where:{$0.id==park.id}) else { throw NyxIntentError.parkNotFound }
+        guard let selected=try ParkLibrary.places().first(where:{$0.id==park.id}) else { throw NyxIntentError.parkNotFound }
         // Saved parks share their forecast with the widget; the app's own cache may be newer.
         let shared=SharedSettings.read()
         var voiceOnly=false

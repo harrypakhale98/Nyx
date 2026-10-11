@@ -5,12 +5,28 @@ extension ParkDetailView {
 
     @ViewBuilder var placeChapter: some View {
         chapterHeading(.place,detail:eyebrow)
+        // A saved spot: where it is, whose clock it keeps, Rename and Delete, in place of the parks' viewing spots.
+        if park.isSavedSpot { SpotPanel(spot:park).id("spots") }
         // Sky glow: what city light takes (an illustration), where this park's comes from, and what anyone can do.
         // DEBUG `-nyx-glow-compare city` opens the comparison on the city's sky for captures; nil in Release.
         SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here).id("glow")
-        Panel { ViewingSpots(park:park) }.id("spots")
-        // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
-        WhereToStayPanel(park:park).id("stay")
+        if !park.isSavedSpot { Panel { ViewingSpots(park:park) }.id("spots") }
+        // Campgrounds and ranger programs are the National Park Service's: only where it runs the place.
+        if park.nps != nil {
+            // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
+            WhereToStayPanel(park:park).id("stay")
+            programsPanel
+        }
+        // A spot's own words are on its panel; the Park Service's are only for its parks.
+        if !park.description.isEmpty, !park.isSavedSpot {
+            VStack(alignment:.leading,spacing:8) {
+                Eyebrow(text:"From the National Park Service")
+                ClampedText(text:park.description,lines:4)
+            }.frame(maxWidth:.infinity,alignment:.leading)
+        }
+        AboutDataLink().font(.subheadline)
+    }
+    private var programsPanel: some View {
         Panel { VStack(alignment:.leading,spacing:14) {
             Eyebrow(text:"Ranger night-sky programs")
             if let data=model.enrichments[park.id] {
@@ -20,13 +36,6 @@ extension ParkDetailView {
                 ForEach(programs) { program in ProgramCard(park:park,program:program) }
             } else { Text("Programs are not checked yet. Ask at the visitor center for current night-sky programs.").foregroundStyle(palette.muted) }
         } }.id("programs")
-        if !park.description.isEmpty {
-            VStack(alignment:.leading,spacing:8) {
-                Eyebrow(text:"From the National Park Service")
-                ClampedText(text:park.description,lines:4)
-            }.frame(maxWidth:.infinity,alignment:.leading)
-        }
-        AboutDataLink().font(.subheadline)
     }
 }
 /// A ranger program: title, when and where, then NPS's description clamped to three lines.

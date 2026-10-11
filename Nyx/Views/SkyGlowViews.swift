@@ -42,7 +42,9 @@ struct LightPollution: View {
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
                     .accessibilityElement(children:.ignore).speechLabel(String(localized:"Bortle estimate, class \(park.bortleEstimate) of 9"))
-                Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted)
+                // A saved spot's class is the satellite grid's (or an assumed suburban sky), and says which.
+                if park.isSavedSpot { Text(park.sourceNote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                else { Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted) }
             }
             if let site {
                 let level=SkyGlow.shared.level(site.glow)

@@ -446,14 +446,17 @@ nonisolated enum StartingPlaces {
 }
 
 /// The United States' outline (Census cartographic boundary, public domain; `us-outline.json`, the same
-/// file the journal's map draws), as a point-in-polygon test for `StartingPlaces.nearest`.
+/// file the journal's map draws), the states without the Caribbean territories, as a point-in-polygon
+/// test for `StartingPlaces.nearest`.
 nonisolated enum USOutline {
     private struct File: Decodable { let regions: [String: [[[Double]]]] }
     /// Rings of (longitude, latitude), with their bounding boxes.
     private static let rings: [(box: (minLon: Double, maxLon: Double, minLat: Double, maxLat: Double), points: [(Double, Double)])] = {
         guard let url=Bundle.main.url(forResource:"us-outline",withExtension:"json"), let data=try? Data(contentsOf:url),
               let file=try? JSONDecoder().decode(File.self,from:data) else { return [] }
-        return file.regions.values.flatMap { $0 }.compactMap { ring in
+        // The states only: Puerto Rico and the US Virgin Islands keep Atlantic time with no daylight saving,
+        // and their own towns (GeoNames lists them under PR and VI) are the right nearest; a mainland US town is not.
+        return file.regions.filter { $0.key != "caribbean" }.values.flatMap { $0 }.compactMap { ring in
             let points=ring.compactMap { $0.count>=2 ? ($0[0],$0[1]) : nil }
             guard points.count>=3 else { return nil }
             let lons=points.map(\.0), lats=points.map(\.1)

@@ -1,4 +1,5 @@
 import BackgroundTasks
+import SwiftData
 import SwiftUI
 import WidgetKit
 
@@ -24,6 +25,7 @@ import WidgetKit
     /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`).
     func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false) async {
         guard DebugScenario.screen == nil else { return }
+        Self.loadSpotsIfNeeded(model)
         listenToWatch(model)
         // When the store could not open, the windows read their saved parks from an empty stand-in.
         // That empty list must never reach the widget, the watch or reminders: the parks of the last
@@ -136,6 +138,7 @@ import WidgetKit
     /// `watchSeen`: the bridge has just seen a paired watch with Nyx, so the ranges are worked out
     /// whatever the session reported a moment ago (and the bridge is never asked to call back again).
     func pushWatch(_ model:PlanModel,watchSeen:Bool=false) {
+        Self.loadSpotsIfNeeded(model)
         listenToWatch(model)
         // A background launch (Control Center's night vision, a watch's request) pushes before any
         // update has run: the saved parks the widgets last had stand in, as in `answerWatch`.
@@ -148,6 +151,14 @@ import WidgetKit
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
                     places:ids.compactMap { model.park($0) }.filter(\.isSavedSpot),complete:complete)
+    }
+    /// A launch with no window yet (a background refresh, a watch's request, Control Center) has had
+    /// no window hand the model its saved spots (`RootView`): they are read from the store here, so a
+    /// followed spot keeps its place in the widget, the watch and reminders. Windows keep them current after.
+    static func loadSpotsIfNeeded(_ model:PlanModel) {
+        guard model.spots.isEmpty, !model.journalUnavailable, DebugScenario.screen == nil, let container=JournalAccess.container,
+              let records=try? container.mainContext.fetch(FetchDescriptor<SavedSpot>()), !records.isEmpty else { return }
+        model.setSpots(records)
     }
     /// Answers Apple Watch's "Update from iPhone" with this model from now on (once per process).
     func listenToWatch(_ model:PlanModel) {

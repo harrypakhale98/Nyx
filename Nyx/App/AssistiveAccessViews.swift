@@ -43,18 +43,24 @@ private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Query private var saved: [SavedPark]
+    /// Saved spots (G3) are saved places too: the model resolves their `pin:` ids from these.
+    @Query private var spots: [SavedSpot]
     @AppStorage("notificationsEnabled") private var reminders=false
     var body: some View {
         Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
             .task { await update() }
             .onChange(of: saved.map(\.parkID)) { _, _ in Task { await update() } }
+            .onChange(of: SavedSpotsFeed.signature(spots)) { _, _ in Task { await update() } }
             .onChange(of: reminders) { _, enabled in Task { if enabled { await update() } else { await NotificationScheduler().remove() } } }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { model.tick(); Task { await update() } }
                 if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
             }
     }
-    private func update() async { await model.savedSync.update(model, parkIDs: saved.map(\.parkID)) }
+    private func update() async {
+        model.setSpots(spots)
+        await model.savedSync.update(model, parkIDs: saved.map(\.parkID))
+    }
 }
 /// The three choices: the guidance's limit for a home screen.
 struct AssistiveHome: View {
@@ -169,5 +175,5 @@ struct AssistiveParkCard: View {
     }
 }
 
-#Preview("Assistive Access", traits: .assistiveAccess) { AssistiveAccessRoot().environment(PlanModel()).modelContainer(for: [SavedPark.self, JournalEntry.self], inMemory: true) }
+#Preview("Assistive Access", traits: .assistiveAccess) { AssistiveAccessRoot().environment(PlanModel()).modelContainer(for: [SavedPark.self, JournalEntry.self, SavedSpot.self], inMemory: true) }
 #Preview("Tonight card") { let m=PlanModel(); if let p=m.home { ScrollView { AssistiveParkCard(park: p, reminder: true).padding() }.environment(m).modelContainer(for: [SavedPark.self, JournalEntry.self], inMemory: true).background(.black).preferredColorScheme(.dark) } }

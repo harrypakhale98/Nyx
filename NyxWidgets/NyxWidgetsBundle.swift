@@ -29,10 +29,10 @@ struct TonightProvider:AppIntentTimelineProvider {
         if #available(iOS 27.0,*), family == .systemExtraLargePortrait { return true }
         return family == .systemLarge || family == .systemExtraLarge
     }
-    /// The park a widget was set to follow, from the bundled library.
+    /// The park a widget was set to follow, from the bundled library, or a followed spot from the snapshot.
     static func park(_ entity:ParkEntity?)->Park? {
         guard let entity else { return nil }
-        return (try? ParkData.load())?.first { $0.id==entity.id }
+        return ParkLibrary.place(entity.id)
     }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
     /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
@@ -98,8 +98,7 @@ struct MoonProvider:AppIntentTimelineProvider {
     }
     /// The chosen park, else the first saved park, else Joshua Tree in the gallery's preview.
     static func park(_ entity:ParkEntity?)->Park? {
-        let library=(try? ParkData.load()) ?? []
-        if let entity { return library.first { $0.id==entity.id } }
+        if let entity { return ParkLibrary.place(entity.id) }
         return SharedSettings.read()?.parks.first
     }
 }

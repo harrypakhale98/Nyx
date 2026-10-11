@@ -9,11 +9,9 @@ extension ParkDetailView {
         river
         alerts
     }
-    /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan.
-    var eyebrow:String {
-        let state=park.region.replacingOccurrences(of:",",with:" · ")
-        return park.darkSkyDesignated ? String(localized:"\(state) · International Dark Sky Park") : state
-    }
+    /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan. A saved spot:
+    /// "Your spot · California".
+    var eyebrow:String { park.placeEyebrow }
     /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.
     private func hero(_ proxy:ScrollViewProxy)->some View {
         let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
@@ -85,7 +83,16 @@ extension ParkDetailView {
             NightDirections(park:park)
         }.id("river")
     }
-    private var alerts: some View {
+    @ViewBuilder private var alerts: some View {
+        // A place the Park Service does not run (a saved spot) has no alerts to show: said plainly, once.
+        if park.nps == nil {
+            Panel { VStack(alignment:.leading,spacing:8) {
+                Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader)
+                Text("Nyx has no alerts for this place. Check access, local rules and closures before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            } }.id("alerts")
+        } else { parkAlerts }
+    }
+    private var parkAlerts: some View {
         Panel { VStack(alignment:.leading,spacing:8) {
             Label(otherAlerts>0 ? "Before you go (\(otherAlerts))" : "Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader)
             Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)

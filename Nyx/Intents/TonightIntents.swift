@@ -15,7 +15,7 @@ enum IntentPark {
     }
     /// From the device's own state: the activity running now, and the starting park.
     static func resolve(_ entity: ParkEntity?) throws -> Park {
-        try resolve(entity, library:ParkData.load(), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"))
+        try resolve(entity, library:ParkLibrary.places(), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"))
     }
 }
 

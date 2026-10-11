@@ -16,6 +16,10 @@ struct ParksView: View {
     @State private var stepFreeOnly=DebugScenario.state=="step-free"
     @State private var savedOnly=false
     @State private var saveFailed=false
+    /// "Save a spot" is open.
+    @State private var addingSpot=false
+    /// A spot whose deletion waits for the person to confirm it.
+    @State private var deletingSpot:Park?
     @AppStorage("parksByScore") private var byScore=false
     @Namespace private var zoom
     /// Worked out once per update of the list (the body reads it into `shown`): ranking 63 parks is not free.
@@ -25,11 +29,18 @@ struct ParksView: View {
         let matching=model.parks.filter { p in filter.includes(p) && (!savedOnly || savedIDs.contains(p.id)) && (query.isEmpty || p.matches(folded:query)) }
         return byScore ? model.ranked(matching) : matching
     }
+    /// The person's own spots, above the parks: always, unless a filter only parks can meet is on
+    /// (Dark Sky designation, step-free viewing); a search finds them by name like the parks.
+    private var shownSpots:[Park] {
+        guard !darkOnly, !stepFreeOnly else { return [] }
+        let savedIDs=Set(saved.map(\.parkID)), query=Park.folded(search)
+        return model.spots.filter { spot in (!savedOnly || savedIDs.contains(spot.id)) && (query.isEmpty || spot.matches(folded:query)) }
+    }
     /// Saved parks lead the list only when nothing narrows it.
     private var narrowed:Bool { darkOnly || stepFreeOnly || savedOnly }
     private var showsSavedSection:Bool { !saved.isEmpty && !savedOnly && search.isEmpty && !darkOnly && !stepFreeOnly }
     var body: some View {
-        let shown=filtered
+        let shown=filtered, spots=shownSpots
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
                 Eyebrow(text:byScore ? LocalizedStringKey("Darkest tonight first") : "\(Self.countLine(shown:shown.count,of:model.parks.count,narrowed:narrowed))")
@@ -38,8 +49,15 @@ struct ParksView: View {
                 if shown.contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
-                else if shown.isEmpty || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
+                else if (shown.isEmpty && spots.isEmpty) || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else {
+                    // Your spots: the places the person saved, scored like the parks, then a way to add another.
+                    if !spots.isEmpty {
+                        Eyebrow(text:"Your spots")
+                        ForEach(spots) { spot in link(spot) }
+                        if search.isEmpty { addSpotRow }
+                    }
+                    if !shown.isEmpty, !spots.isEmpty, !showsSavedSection { Eyebrow(text:"All national parks") }
                     if showsSavedSection {
                         Eyebrow(text:"Saved for later")
                         ForEach(model.parks.filter{p in saved.contains{$0.parkID==p.id}}) { p in link(p) }
@@ -50,12 +68,17 @@ struct ParksView: View {
             }.padding(24)
             .background { SearchEnder(request:commands?.sheetRequest?.id) }
             // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
-            .accessibilityRotor(Text("Closures"),entries:rotor(shown) { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
-            .accessibilityRotor(Text("Pristine nights"),entries:rotor(shown) { park in
+            .accessibilityRotor(Text("Closures"),entries:rotor(spots,shown) { park in model.closure(park).map { String(localized:"\(park.shortName): \($0)") } },entryID:\.id,entryLabel:\.label)
+            .accessibilityRotor(Text("Pristine nights"),entries:rotor(spots,shown) { park in
                 let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
         }.background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"Park or state",enabled:!typeSize.isAccessibilitySize))
+            .sheet(isPresented:$addingSpot) { SaveSpotView().nyxPresentation() }
+            .confirmationDialog(deletingSpot.map { String(localized:"Delete \($0.shortName)?") } ?? "",isPresented:Binding(get:{ deletingSpot != nil },set:{ if !$0 { deletingSpot=nil } }),titleVisibility:.visible,presenting:deletingSpot) { spot in
+                Button("Delete spot",role:.destructive) { deleteSpot(spot) }
+                Button("Cancel",role:.cancel) {}
+            } message:{ _ in Text("It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos.") }
             .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             // ⌘F from anywhere in the window.
             .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
@@ -63,6 +86,10 @@ struct ParksView: View {
             // One request brings cloud forecasts for all 63 parks, so every score can include clouds.
             .task { await model.refresh(model.parks,parkUpdates:false) }
             .refreshable { await model.refresh(model.parks,force:true,parkUpdates:false) }
+            .toolbar { ToolbarItem(placement:.topBarTrailing) {
+                Button { addingSpot=true } label:{ Label("Save a spot",systemImage:"plus") }
+                    .accessibilityInputLabels([Text("Save a spot"),Text("Add a spot"),Text("New spot")]).help("Save a spot")
+            } }
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Menu {
                 Picker("Sort",selection:$byScore) { Label("Name",systemImage:"textformat").tag(false); Label("Darkest tonight",systemImage:"moon.stars").tag(true) }
                 Section { Toggle("Dark Sky designated only",isOn:$darkOnly); Toggle("Step-free viewing",isOn:$stepFreeOnly); Toggle("Saved parks only",isOn:$savedOnly) }
@@ -75,11 +102,27 @@ struct ParksView: View {
     }
     struct RotorPark: Identifiable { let id: String; let label: String }
     /// One rotor stop for each park on screen that `label` names, in the order shown.
-    private func rotor(_ shown:[Park],_ label:(Park)->String?)->[RotorPark] {
+    private func rotor(_ spots:[Park],_ shown:[Park],_ label:(Park)->String?)->[RotorPark] {
         let sectioned = showsSavedSection
         let first=sectioned ? model.parks.filter { p in saved.contains { $0.parkID==p.id } } : []
         let rest=shown.filter { p in !(sectioned && saved.contains { $0.parkID==p.id }) }
-        return (first+rest).compactMap { park in label(park).map { RotorPark(id:park.id,label:$0) } }
+        return (spots+first+rest).compactMap { park in label(park).map { RotorPark(id:park.id,label:$0) } }
+    }
+    /// "Save another spot", under the spots already saved.
+    private var addSpotRow: some View {
+        Button { addingSpot=true } label:{
+            Label("Save another spot",systemImage:"plus.circle").font(.subheadline.weight(.medium)).foregroundStyle(palette.accent)
+                .frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+        }.buttonStyle(.plain)
+    }
+    /// Deletes a spot from the list's menu, after the person confirmed it.
+    private func deleteSpot(_ spot:Park) {
+        deletingSpot=nil
+        guard !model.journalUnavailable else { saveFailed=true; return }
+        do {
+            try SavedSpots.delete(spot.id,in:context)
+            if selection?.wrappedValue == spot.id { selection?.wrappedValue=nil }
+        } catch { saveFailed=true }
     }
     @ViewBuilder private func link(_ park:Park)->some View {
         let row=ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7),stepFree:stepFreeOnly)
@@ -101,7 +144,7 @@ struct ParksView: View {
     /// Long press, or a secondary click with a pointer.
     @ViewBuilder private func rowMenu(_ park:Park)->some View {
         let isSaved=saved.contains { $0.parkID==park.id }
-        Button(isSaved ? "Remove from saved parks" : "Save park",systemImage:isSaved ? "bookmark.slash" : "bookmark") {
+        Button(park.isSavedSpot ? (isSaved ? "Stop following this spot" : "Follow this spot") : (isSaved ? "Remove from saved parks" : "Save park"),systemImage:isSaved ? "bookmark.slash" : "bookmark") {
             // Saved parks share the journal's store; a save into its stand-in would not last.
             guard !model.journalUnavailable else { saveFailed=true; return }
             if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
@@ -109,6 +152,7 @@ struct ParksView: View {
         }
         Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
         OpenParkWindowButton(park:park)
+        if park.isSavedSpot { Button("Delete spot",systemImage:"trash",role:.destructive) { deletingSpot=park } }
     }
     private func focusSearchIfAsked() {
         guard commands?.takeSearch() == true else { return }
