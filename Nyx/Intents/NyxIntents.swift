@@ -60,17 +60,7 @@ nonisolated struct DarknessAnswer:Sendable {
     }
     /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
     static func dialog(_ night:Night,closure:String?,voiceOnly:Bool)->String {
-        let park=night.park, score=night.score
-        let body:String
-        if night.sky.darkHours==0 { body=String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        else if voiceOnly {
-            let basis=score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
-            let tonight=String(localized:"Tonight")
-            body=String(localized:"\(tonight) at \(park.shortName): \(score.value), \(score.band.label).")+basis
-        }
-        else if let caption=night.basisCaption() { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-        else { body=String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
-        return closureFirst(body,closure:closure)
+        closureFirst(night.spokenSummary(.siriTonight(voiceOnly:voiceOnly)),closure:closure)
     }
     /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
     static func closureFirst(_ body:String,closure:String?)->String {
@@ -105,12 +95,12 @@ struct DarknessSnippetView:View {
         }
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(palette.snippetBackground,in:RoundedRectangle(cornerRadius:22))
         .environment(\.nyx,palette)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.score.band.label). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))
+        .accessibilityLabel(night.spokenSummary(.snippet))
     }
 }
 /// The celestial gauge's arc and numeral, drawn once: for snapshots (Siri) where nothing animates.

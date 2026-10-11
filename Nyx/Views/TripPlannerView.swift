@@ -326,10 +326,10 @@ struct TripStayRow: View {
         if stay.stops.count>1 {
             parts=[String(localized:"\(stay.stops.count) nights at \(park.shortName), \(park.dayLabel(first.night.id)) to \(park.dayLabel(last.night.id))")]
             if stay.isBest { parts.append(String(localized:"Includes the best night")) }
-            parts+=stay.stops.map { String(localized:"\(park.dayLabel($0.night.id)), \($0.night.score.value) out of 100, \($0.night.bandWithBasis)") }
+            parts+=stay.stops.map { $0.night.spokenSummary(.dayWithBasis) }
         } else {
             parts=[stay.isBest ? String(localized:"Best night. \(park.dayLabel(night.id))") : park.dayLabel(night.id),park.shortName,
-                   String(localized:"\(night.score.value) out of 100, \(night.bandWithBasis)")]
+                   night.spokenSummary(.scoreWithBasis)]
         }
         parts.append(lead.reason)
         if let hop=first.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }

@@ -4234,19 +4234,19 @@
         }
       }
     },
-    "The public coordinates of the 63 national parks. Nothing about you.": {
+    "The public coordinates of the %lld national parks. Nothing about you.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The public coordinates of the 63 national parks. Nothing about you."
+            "value": "The public coordinates of the %lld national parks. Nothing about you."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las coordenadas públicas de los 63 parques nacionales. Nada sobre ti."
+            "value": "Las coordenadas públicas de los %lld parques nacionales. Nada sobre ti."
           }
         }
       }

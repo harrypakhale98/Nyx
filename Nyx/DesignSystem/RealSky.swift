@@ -60,6 +60,8 @@ struct RealSky: View {
         // The lift is off under Reduce Transparency and Increase Contrast: plain black behind text.
         let seen=Visibility(sunAltitude:sky.sunAltitude,highContrast:palette.highContrast,liftAllowed:!reduceTransparency && !palette.highContrast,nightVision:palette.nightVision)
         let showDomes=domes && !sky.domes.isEmpty
+        // The stars' colours over this ink, resolved once per sky rather than mixed again each frame.
+        let tints=SkyProjection.shared.tints(sky,ink:palette.ink)
         // Rests in Low Power Mode and while the device is hot, as the sensors do.
         TimelineView(.animation(minimumInterval:1/30,paused:still || resting || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
@@ -75,17 +77,17 @@ struct RealSky: View {
                 // Each set fades rather than pops when Increase Contrast changes, and leaves the tree
                 // once faded, so a hidden layer (the faint one carries the Milky Way) costs nothing.
                 if seen.faint>0 {
-                    StarLayer(sky:sky,band:.faint,ink:palette.ink,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2).opacity(seen.faint).transition(.opacity)
+                    StarLayer(sky:sky,band:.faint,ink:palette.ink,tints:tints.faint,strength:strength,milkyWay:twinkle*access.glow).equatable().offset(x:tilt.x*2,y:tilt.y*2).opacity(seen.faint).transition(.opacity)
                 }
                 if seen.middle>0 {
-                    StarLayer(sky:sky,band:.middle,ink:palette.ink,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4).opacity(seen.middle).transition(.opacity)
+                    StarLayer(sky:sky,band:.middle,ink:palette.ink,tints:tints.middle,strength:strength,milkyWay:0).equatable().offset(x:tilt.x*4,y:tilt.y*4).opacity(seen.middle).transition(.opacity)
                 }
                 MarkLayer(sky:sky,ink:palette.ink,strength:strength).equatable().offset(x:tilt.x*5,y:tilt.y*5)
                 Canvas { context,size in
                     let amplitude=0.12+0.3*twinkle, speed=0.45+0.7*twinkle
-                    for star in sky.bright {
+                    for (star,tint) in zip(sky.bright,tints.bright) {
                         let shimmer=still ? 0.85 : 0.7+amplitude*sin(t*speed*(1+star.seed)+star.seed*6.28)
-                        StarLayer.draw(star,in:&context,size:size,ink:palette.ink,opacity:shimmer*strength*seen.bright)
+                        StarLayer.draw(star,tint:tint,in:&context,size:size,opacity:shimmer*strength*seen.bright)
                     }
                 }.offset(x:tilt.x*7,y:tilt.y*7)
             }
@@ -105,6 +107,9 @@ private struct StarLayer: View, Equatable {
     let sky: SkyProjection.Sky
     let band: Band
     let ink: Color
+    /// The band's star colours over `ink` (`SkyProjection.tints`): they follow the sky and the ink,
+    /// so equality need not compare them.
+    let tints: [Color]
     let strength: Double
     let milkyWay: Double
     static func == (a:Self,b:Self)->Bool { a.sky.id==b.sky.id && a.band==b.band && a.ink==b.ink && a.strength==b.strength && a.milkyWay==b.milkyWay }
@@ -128,14 +133,14 @@ private struct StarLayer: View, Equatable {
                     }
                 }
             }
-            for star in band == .faint ? sky.faint : sky.middle { StarLayer.draw(star,in:&context,size:size,ink:ink,opacity:strength) }
+            for (star,tint) in zip(band == .faint ? sky.faint : sky.middle,tints) { StarLayer.draw(star,tint:tint,in:&context,size:size,opacity:strength) }
         }
     }
-    static func draw(_ star:SkyProjection.Star,in context:inout GraphicsContext,size:CGSize,ink:Color,opacity:Double) {
+    static func draw(_ star:SkyProjection.Star,tint:Color,in context:inout GraphicsContext,size:CGSize,opacity:Double) {
         let p=SkyProjection.screen(star.position,size:size)
         guard p.x > -4, p.x < size.width+4, p.y > -4, p.y < size.height+4 else { return }
         let d=star.diameter
-        context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(star.tint(ink).opacity(min(1,star.brightness*opacity))))
+        context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(tint.opacity(min(1,star.brightness*opacity))))
     }
 }
 
@@ -149,7 +154,7 @@ private struct MarkLayer: View, Equatable {
     static func == (a:Self,b:Self)->Bool { a.sky.id==b.sky.id && a.ink==b.ink && a.strength==b.strength }
     var body: some View {
         Canvas { context,size in
-            let warm=Color(red:1,green:0.86,blue:0.66).mix(with:ink,by:0.3)
+            let warm=SkyTint.planet(ink:ink)
             let opacity=min(1,strength/0.6)
             if let radiant=sky.radiant {
                 let p=SkyProjection.screen(radiant.position,size:size)
@@ -220,13 +225,7 @@ private struct DomeLayer: View, Equatable {
         /// −0.4 (blue-white) … 2 (deep orange): the B−V colour index.
         let colorIndex: Double
         let seed: Double
-        func tint(_ ink:Color)->Color {
-            // Ballesteros: B−V to temperature; then a gentle warm/cool tint over starlight.
-            let temperature=4600*(1/(0.92*colorIndex+1.7)+1/(0.92*colorIndex+0.62))
-            let warmth=max(-1,min(1,(6500-temperature)/3500))
-            return warmth>0 ? Color(red:1,green:1-0.18*warmth,blue:1-0.42*warmth).mix(with:ink,by:0.35)
-                : Color(red:1+0.25*warmth,green:1+0.1*warmth,blue:1).mix(with:ink,by:0.35)
-        }
+        func tint(_ ink:Color)->Color { SkyTint.star(colorIndex,ink:ink) }
     }
     nonisolated struct GalaxyPoint: Sendable { let position: SIMD2<Double>; let brightness: Double }
     /// A planet or a shower radiant, placed for the same moment as the stars (the name is for debugging and previews).
@@ -256,12 +255,25 @@ private struct DomeLayer: View, Equatable {
     /// Light domes by park. The iPhone app sets this from NASA's night lights (`SkyGlow`); the widget
     /// and watch ship no glow data and draw none.
     var lightSources:(Park)->[LightSource]=SkyProjection.noLight {
-        didSet { cache=[:]; recent=[] }
+        didSet { cache=[:]; recent=[]; tintCache=[:] }
     }
     nonisolated static func noLight(_ park:Park)->[LightSource] { [] }
     private var cache:[String:Sky]=[:]
     private var recent:[String]=[]
     private let capacity=40
+    /// A sky's star colours over one ink, band by band, in the order of its stars.
+    nonisolated struct Tints: Sendable { let faint: [Color]; let middle: [Color]; let bright: [Color] }
+    /// Tints by sky, for the ink they were resolved over; let go with their sky.
+    private var tintCache:[String:(ink:Color,tints:Tints)]=[:]
+    /// The sky's star colours over `ink`, resolved once (`SkyTint.resolved`): the bright set is
+    /// drawn every frame, and each star's colour no longer has to be mixed again for it.
+    func tints(_ sky:Sky,ink:Color)->Tints {
+        if let kept=tintCache[sky.id], kept.ink==ink, kept.tints.bright.count==sky.bright.count, kept.tints.middle.count==sky.middle.count, kept.tints.faint.count==sky.faint.count { return kept.tints }
+        let tints=Tints(faint:SkyTint.resolved(sky.faint.map(\.colorIndex),ink:ink),middle:SkyTint.resolved(sky.middle.map(\.colorIndex),ink:ink),
+                        bright:SkyTint.resolved(sky.bright.map(\.colorIndex),ink:ink))
+        tintCache[sky.id]=(ink,tints)
+        return tints
+    }
     private var catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)] { Self.catalogue }
     /// Read once per process, on whichever thread asks first (the app warms it off the main thread at launch).
     nonisolated static let catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)]={
@@ -367,8 +379,28 @@ private struct DomeLayer: View, Equatable {
         let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,sunAltitude:sunAltitude,planets:planets,radiant:radiant,domes:domes)
         cache[key]=result
         recent.append(key)
-        if recent.count>capacity { cache[recent.removeFirst()]=nil }
+        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
         return result
+    }
+}
+
+/// The sky's colours over starlight, shared by every sky Nyx draws: a star's tint from its B−V
+/// colour index, and the planets' warm point.
+nonisolated enum SkyTint {
+    /// Ballesteros: B−V to temperature; then a gentle warm/cool tint over starlight.
+    static func star(_ colorIndex:Double,ink:Color)->Color {
+        let temperature=4600*(1/(0.92*colorIndex+1.7)+1/(0.92*colorIndex+0.62))
+        let warmth=max(-1,min(1,(6500-temperature)/3500))
+        return warmth>0 ? Color(red:1,green:1-0.18*warmth,blue:1-0.42*warmth).mix(with:ink,by:0.35)
+            : Color(red:1+0.25*warmth,green:1+0.1*warmth,blue:1).mix(with:ink,by:0.35)
+    }
+    /// The planets: slightly warm, over the same starlight.
+    static func planet(ink:Color)->Color { Color(red:1,green:0.86,blue:0.66).mix(with:ink,by:0.3) }
+    /// Star tints resolved to plain colours, so drawing them mixes nothing. Both colours mixed are
+    /// fixed values (the palette's ink is never adaptive), so they resolve alike in any environment.
+    static func resolved(_ colorIndices:[Double],ink:Color)->[Color] {
+        let environment=EnvironmentValues()
+        return colorIndices.map { Color(star($0,ink:ink).resolve(in:environment)) }
     }
 }
 

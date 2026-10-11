@@ -1,0 +1,103 @@
+import SwiftUI
+import TipKit
+
+extension ParkDetailView {
+    // MARK: Tonight
+
+    @ViewBuilder func tonightChapter(_ proxy:ScrollViewProxy)->some View {
+        hero(proxy)
+        river
+        alerts
+    }
+    /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan.
+    var eyebrow:String {
+        let state=park.state.replacingOccurrences(of:",",with:" · ")
+        return park.darkSkyDesignated ? String(localized:"\(state) · International Dark Sky Park") : state
+    }
+    /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.
+    private func hero(_ proxy:ScrollViewProxy)->some View {
+        let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
+        return VStack(alignment:large ? .leading : .center,spacing:12) {
+            Eyebrow(text:"\(eyebrow)")
+            Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
+                .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
+            Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
+            // The closure is the one line that must never be lost in the sky: on a dark scrim, beside the score.
+            if let closure=model.closure(park) {
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align)
+                    .fixedSize(horizontal:false,vertical:true)
+                    .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
+                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
+            }
+            if otherAlerts>0 {
+                Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("alerts",anchor:.top) } } label:{
+                    Label("Before you go (\(otherAlerts))",systemImage:"exclamationmark.shield").font(.footnote.weight(.medium)).frame(minHeight:44).contentShape(Rectangle())
+                }.buttonStyle(.plain).foregroundStyle(palette.ink)
+                .accessibilityHint("Shows the park's other alerts.")
+            }
+            AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
+            // The dial opens at the bottom; let the lines below tuck into that space.
+            let range=CelestialGauge.modelRange(outlook,basis:night.basis)
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(unavailable:!model.beyondForecast(night)),
+                           revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
+                           range:range)
+                .frame(maxWidth:.infinity)
+                .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
+                .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
+                .modifier(DepthParallax(depth:0.1))
+            if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(align) }
+            if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(align) }
+            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) {
+                // The gauge speaks the first sentence; VoiceOver hears only the month's usual clouds here.
+                Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(align)
+                    .accessibilityLabel(night.typicalClouds ?? caption).accessibilityHidden(night.typicalClouds == nil)
+            }
+            // The dial's range mark in words (the gauge speaks it).
+            if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(align).accessibilityHidden(true) }
+            if let smoke=model.smokeCaveat(night) { Label(smoke,systemImage:"smoke").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(align).fixedSize(horizontal:false,vertical:true).padding(.horizontal,large ? 0 : 12) }
+            if let window=model.clearWindow(night) {
+                // At accessibility sizes the glyph would take a column of its own: the words alone.
+                Label { Text(window.line(park:park)).fixedSize(horizontal:false,vertical:true) } icon:{ if !typeSize.isAccessibilitySize { Image(systemName:"sparkles").accessibilityHidden(true) } }
+                    .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(align).padding(.horizontal,large ? 0 : 12)
+                    .accessibilityElement(children:.combine)
+            }
+            ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
+                .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+            if isTonight { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
+            KeepThisNightOffer(park:park).padding(.top,4)
+        }
+    }
+    /// Alerts other than the closure shown beside the score.
+    private var otherAlerts:Int {
+        let alerts=model.enrichments[park.id]?.alerts ?? []
+        return alerts.count-(model.closure(park) == nil ? 0 : 1)
+    }
+    private var river: some View {
+        Panel {
+            let river=model.nights(park,from:riverStart,count:30)
+            TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() })
+            if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
+            Divider().overlay(palette.line).padding(.top,10)
+            AddNightToCalendar(night:night)
+            // Tonight is followed from the hero, beside "I'm here tonight".
+            if !isTonight { FollowNightButton(night:night) }
+            // Where the night is decided, the way there: a quiet row, or the access note for a roadless park.
+            NightDirections(park:park)
+        }.id("river")
+    }
+    private var alerts: some View {
+        Panel { VStack(alignment:.leading,spacing:8) {
+            Label(otherAlerts>0 ? "Before you go (\(otherAlerts))" : "Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader)
+            Text(model.alertSummary(park)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            if model.alertsBusy { AlertsBusyNote(park:park,summarySaysBusy:model.enrichments[park.id] == nil) }
+            if let data=model.enrichments[park.id],!data.alerts.isEmpty {
+                DisclosureGroup {
+                    ForEach(AlertRanking.ranked(data.alerts)) { alert in VStack(alignment:.leading,spacing:8) { Text(alert.displayTitle(park:park)).font(.headline).accessibilityAddTraits(.isHeader);Text(alert.description).font(.subheadline).foregroundStyle(palette.muted) }.padding(.vertical,8) }
+                } label:{ Text("All park alerts (\(data.alerts.count))").frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
+                // The Park Service writes in English: every alert, translated by iOS on this device.
+                TranslateButton(text:AlertRanking.ranked(data.alerts).map { "\($0.title)\n\($0.description)" }.joined(separator:"\n\n"))
+            }
+            if let data=model.enrichments[park.id] { Text("Park update: \(park.timestamp(data.updated))").font(.caption).foregroundStyle(palette.muted) }
+        } }.id("alerts")
+    }
+}

@@ -42,6 +42,9 @@ struct GuideView:View {
         case .learn(let essay): return [String(essay.content.prefix(6500))]
         }
     }
+    /// Whether `records` has anything in it, without ranking parks again to find out: it is empty
+    /// only when planning has no starting park (the starting-point record is always there otherwise).
+    private var hasRecords:Bool { !mode.isPlanning || model.home != nil }
     /// Questions the tools can answer, for an empty page.
     private var suggestions:[String] {
         switch mode {
@@ -150,7 +153,7 @@ struct GuideView:View {
                 .padding(.vertical,8)
             Button { ask(question) } label:{ Image(systemName:"arrow.up.circle.fill").font(.title).foregroundStyle(palette.accent) }
                 .buttonStyle(.plain).frame(minWidth:44,minHeight:44)
-                .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || records.isEmpty)
+                .disabled(question.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty || guide.loading || !hasRecords)
                 .accessibilityLabel("Ask").accessibilityInputLabels([Text("Ask"),Text("Send")])
         }
         .padding(.leading,18).padding(.trailing,6)
@@ -165,7 +168,7 @@ struct GuideView:View {
             Text("Try asking").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
             FlowLayout(spacing:8) {
                 ForEach(suggestions,id:\.self) { text in
-                    Button { ask(text) } label:{ chip(Text(text)) }.buttonStyle(.plain).disabled(records.isEmpty)
+                    Button { ask(text) } label:{ chip(Text(text)) }.buttonStyle(.plain).disabled(!hasRecords)
                 }
             }
         }

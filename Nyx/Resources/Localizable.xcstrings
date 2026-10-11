@@ -2225,19 +2225,19 @@
         }
       }
     },
-    "%lld of 63 parks": {
+    "%lld of %lld parks": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld of 63 parks"
+            "value": "%lld of %lld parks"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld de 63 parques"
+            "value": "%lld de %lld parques"
           }
         }
       }
@@ -2439,6 +2439,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld places to look up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld places to look up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld lugares para mirar al cielo"
           }
         }
       }
@@ -3041,23 +3058,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "30 noches desde el %@"
-          }
-        }
-      }
-    },
-    "63 places to look up": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "63 places to look up"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "63 lugares para mirar al cielo"
           }
         }
       }
@@ -4185,19 +4185,19 @@
         }
       }
     },
-    "Alerts for all 63 parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Campgrounds for all 63 parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
+    "Alerts for all %lld parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alerts for all 63 parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Campgrounds for all 63 parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
+            "value": "Alerts for all %lld parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks are near you. Ranger programs are requested only for a park whose page you open. Campgrounds for all %lld parks arrive in one request, at most once a week, the first time a park's Where to stay appears; it names every park and nothing about you. Your coordinates are never sent. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las alertas de los 63 parques llegan en una sola solicitud a developer.nps.gov, como máximo cada seis horas, así que nunca revela qué parques tienes cerca. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los 63 parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las alertas de los %lld parques llegan en una sola solicitud a developer.nps.gov, como máximo cada seis horas, así que nunca revela qué parques tienes cerca. Los programas de guardaparques se solicitan solo para el parque cuya página abres. Los campamentos de los %lld parques llegan en una sola solicitud, como máximo una vez por semana, la primera vez que aparece Dónde quedarse en un parque; nombra todos los parques y nada sobre ti. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
           }
         }
       }
@@ -12726,19 +12726,19 @@
         }
       }
     },
-    "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.": {
+    "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the %lld parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the 63 parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution."
+            "value": "Light-pollution estimates use NASA Black Marble nighttime lights (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), public domain. Nyx adds the 2025 yearly satellite light within 300 km of each park and viewing spot, weakening with distance (Walker's law), and compares the result across the %lld parks. The same sum, split by direction, finds the light domes on the horizon; a town is named only when a known one lies near the light. It is a comparison between places, not a measurement of sky brightness: it models no terrain, haze or light color, cannot resolve a lit lodge next to a spot, and cannot tell the darkest skies apart. The satellite misses much of the blue light of white LEDs, so towns that switched to LEDs can look darker than they are. The score keeps the conservative Bortle estimate; the satellite view is context. Growth since 2013 is shown only as a comparison between parks, and not for Alaska, lava, oil-field flaring or almost unlit places, where the change is not light pollution."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estimaciones de contaminación lumínica usan las luces nocturnas de NASA Black Marble (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), de dominio público. Nyx suma la luz satelital anual de 2025 en un radio de 300 km de cada parque y punto de observación, atenuada con la distancia (ley de Walker), y compara el resultado entre los 63 parques. La misma suma, dividida por dirección, encuentra los domos de luz en el horizonte; solo se nombra una población cuando hay una conocida cerca de la luz. Es una comparación entre lugares, no una medición del brillo del cielo: no modela el terreno, la bruma ni el color de la luz, no distingue un albergue iluminado junto a un punto de observación y no puede diferenciar los cielos más oscuros entre sí. El satélite no capta buena parte de la luz azul de los LED blancos, así que las poblaciones que cambiaron a LED pueden parecer más oscuras de lo que son. El índice conserva la estimación Bortle conservadora; la vista satelital es contexto. El crecimiento desde 2013 solo se muestra como comparación entre parques, y no para Alaska, zonas de lava, quema de gas en campos petroleros ni lugares casi sin luz, donde el cambio no es contaminación lumínica."
+            "value": "Las estimaciones de contaminación lumínica usan las luces nocturnas de NASA Black Marble (VNP46A4, DOI 10.5067/VIIRS/VNP46A4.002; Román et al. 2018), de dominio público. Nyx suma la luz satelital anual de 2025 en un radio de 300 km de cada parque y punto de observación, atenuada con la distancia (ley de Walker), y compara el resultado entre los %lld parques. La misma suma, dividida por dirección, encuentra los domos de luz en el horizonte; solo se nombra una población cuando hay una conocida cerca de la luz. Es una comparación entre lugares, no una medición del brillo del cielo: no modela el terreno, la bruma ni el color de la luz, no distingue un albergue iluminado junto a un punto de observación y no puede diferenciar los cielos más oscuros entre sí. El satélite no capta buena parte de la luz azul de los LED blancos, así que las poblaciones que cambiaron a LED pueden parecer más oscuras de lo que son. El índice conserva la estimación Bortle conservadora; la vista satelital es contexto. El crecimiento desde 2013 solo se muestra como comparación entre parques, y no para Alaska, zonas de lava, quema de gas en campos petroleros ni lugares casi sin luz, donde el cambio no es contaminación lumínica."
           }
         }
       }
@@ -18046,19 +18046,19 @@
         }
       }
     },
-    "Open-Meteo forecasts cover up to 16 days. All 63 parks share each request, which carries only the public coordinates of each park's main viewing spot. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
+    "Open-Meteo forecasts cover up to 16 days. Every park is asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo forecasts cover up to 16 days. All 63 parks share each request, which carries only the public coordinates of each park's main viewing spot. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
+            "value": "Open-Meteo forecasts cover up to 16 days. Every park is asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Los 63 parques comparten cada solicitud, que lleva solo las coordenadas públicas del punto de observación principal de cada parque. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual. Un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
+            "value": "Los pronósticos de Open-Meteo cubren hasta 16 días. Se pide por todos los parques juntos, hasta 50 en cada solicitud, y cada solicitud lleva solo las coordenadas públicas del punto de observación principal de cada parque. Las nubes se promedian sobre todo el periodo de oscuridad total; en noches sin ella, de la puesta a la salida del sol, o en las cuatro horas alrededor del punto más bajo del Sol bajo el sol de medianoche. Un pronóstico cuenta por completo hasta unos tres días antes de una noche. De ahí hasta diez días se ajusta hacia la nubosidad habitual del parque en ese mes, y esas noches se marcan como vista anticipada; pasados diez días, o sin pronóstico, cuenta solo la nubosidad habitual. Un pronóstico viejo nunca se descarta; simplemente cuenta menos, así que quedarte sin conexión no puede hacer que una noche se vea más despejada de lo que permiten sus nubes. Un pronóstico con cobertura incompleta de una noche no se usa. En Haleakalā, cuya cumbre está por encima de la inversión de los vientos alisios, el índice cuenta las nubes medias y altas cuando ese pronóstico está disponible. Los datos de Open-Meteo tienen licencia CC BY 4.0. Nyx los modifica: las nubes de cada noche se promedian sobre la oscuridad total de esa noche y se ajustan hacia la nubosidad habitual, como se describe aquí."
           }
         }
       }
@@ -20331,36 +20331,36 @@
         }
       }
     },
-    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all 63 parks at once, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los 63 parques a la vez y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. El servicio recibe información de red, como tu dirección IP."
           }
         }
       }
     },
-    "Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
+    "Requests go to api.open-meteo.com for all %lld parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to api.open-meteo.com for all 63 parks at once: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
+            "value": "Requests go to api.open-meteo.com for all %lld parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a api.open-meteo.com para los 63 parques a la vez: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento y visibilidad. Solo usan las coordenadas del punto de observación principal de cada parque, así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a api.open-meteo.com para los %lld parques juntos, hasta 50 en cada solicitud: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento y visibilidad. Solo usan las coordenadas del punto de observación principal de cada parque, así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
           }
         }
       }
@@ -24864,19 +24864,19 @@
         }
       }
     },
-    "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service.": {
+    "The bundled NPS inventory contains %lld national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bundled NPS inventory contains 63 national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service."
+            "value": "The bundled NPS inventory contains %lld national parks. Bortle classes are conservative estimates, not instrument measurements. Dark Sky designations are International Dark Sky Park certifications as of July 2026, cross-checked against the NPS list; a park certified later is not yet marked. Viewing coordinates are approximate, not directions. The sky drawings (Tonight's sky, the Bortle figure and the city comparison) show stars on a moonless night down to the faintest magnitude Bortle's 2001 scale gives each class, about 7.3 at class 2 and 4.5 at class 8; their faintest stars are placed for illustration, not from a catalogue. Park data: National Park Service."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El inventario del NPS incluido contiene 63 parques nacionales. Las clases Bortle son estimaciones conservadoras, no mediciones con instrumentos. Las designaciones Dark Sky son certificaciones International Dark Sky Park a julio de 2026, verificadas con la lista del NPS; un parque certificado después aún no está marcado. Las coordenadas de observación son aproximadas, no indicaciones de ruta. Los dibujos del cielo (el cielo de esta noche, la figura de Bortle y la comparación con una ciudad) muestran estrellas en una noche sin luna hasta la magnitud más débil que la escala de Bortle de 2001 da a cada clase, cerca de 7.3 en la clase 2 y 4.5 en la clase 8; sus estrellas más débiles están colocadas como ilustración, no tomadas de un catálogo. Datos de parques: National Park Service."
+            "value": "El inventario del NPS incluido contiene %lld parques nacionales. Las clases Bortle son estimaciones conservadoras, no mediciones con instrumentos. Las designaciones Dark Sky son certificaciones International Dark Sky Park a julio de 2026, verificadas con la lista del NPS; un parque certificado después aún no está marcado. Las coordenadas de observación son aproximadas, no indicaciones de ruta. Los dibujos del cielo (el cielo de esta noche, la figura de Bortle y la comparación con una ciudad) muestran estrellas en una noche sin luna hasta la magnitud más débil que la escala de Bortle de 2001 da a cada clase, cerca de 7.3 en la clase 2 y 4.5 en la clase 8; sus estrellas más débiles están colocadas como ilustración, no tomadas de un catálogo. Datos de parques: National Park Service."
           }
         }
       }
@@ -29524,36 +29524,36 @@
         }
       }
     },
-    "Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star.": {
+    "Your constellation. A map of the %lld national parks drawn as faint stars. Your first night will be your first star.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star."
+            "value": "Your constellation. A map of the %lld national parks drawn as faint stars. Your first night will be your first star."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu constelación. Un mapa de los 63 parques nacionales dibujados como estrellas tenues. Tu primera noche será tu primera estrella."
+            "value": "Tu constelación. Un mapa de los %lld parques nacionales dibujados como estrellas tenues. Tu primera noche será tu primera estrella."
           }
         }
       }
     },
-    "Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.": {
+    "Your constellation. A map of the %lld national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown."
+            "value": "Your constellation. A map of the %lld national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu constelación. Un mapa de los 63 parques nacionales dibujados como estrellas tenues. No se pudo abrir tu diario, así que tus noches no aparecen."
+            "value": "Tu constelación. Un mapa de los %lld parques nacionales dibujados como estrellas tenues. No se pudo abrir tu diario, así que tus noches no aparecen."
           }
         }
       }

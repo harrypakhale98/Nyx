@@ -102,3 +102,83 @@ extension Night {
         }
     }
 }
+
+#if os(iOS)
+// Only the iPhone and iPad app and its widgets say a night's score as a sentence; the guard keeps
+// these keys out of the watch's and Vision Pro's string extraction.
+extension Night {
+    /// Every sentence that says a night's score ("Fri, Oct 9, 94 out of 100, Pristine. …") in one
+    /// place, so the surfaces cannot drift apart. Each style is its own String Catalog key.
+    nonisolated enum SpokenSummary: Sendable {
+        /// The time river: "Fri, Oct 9, 94 out of 100, Pristine." then the long caption with the
+        /// month's usual clouds, or "Forecast included".
+        case river
+        /// The calendar's list: as `river`, then the night's sky event, under its own key.
+        case calendar(event: String?)
+        /// The Tonight widget: the park, the score and band, then the short caption or "Cached forecast included".
+        case widget
+        /// The chart's summary: "Best night: Fri, Oct 9, 94 out of 100, Pristine."
+        case chartBest
+        /// One night of a stay: "Fri, Oct 9, 94 out of 100, Pristine, usual clouds".
+        case dayWithBasis
+        /// The score alone: "94 out of 100, Pristine, early look".
+        case scoreWithBasis
+        /// A shared trip, one line a night: "Fri, Oct 9: Arches, 94 out of 100, Pristine. New moon, …."
+        case tripLine(reason: String)
+        /// A stay's calendar notes, one line a night: "Fri, Oct 9: darkness score 94 out of 100 (Pristine). …."
+        case stayNote(reason: String)
+        /// A calendar event's first line, with what the clouds rest on.
+        case eventNote
+        /// Siri, tonight at the park (the intent puts any closure first). Voice-only keeps the one caveat that matters.
+        case siriTonight(voiceOnly: Bool)
+        /// Siri, the best of the next `count` nights.
+        case siriBest(count: Int, voiceOnly: Bool)
+        /// Siri's card, for VoiceOver: the score, the band and the Moon.
+        case snippet
+    }
+    nonisolated func spokenSummary(_ style: SpokenSummary) -> String {
+        switch style {
+        case .river:
+            let clouds=basisCaption(typical:true) ?? String(localized:"Forecast included")
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(clouds)")
+        case .calendar(let event):
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Forecast included"))\(event.map { ". "+$0 } ?? "")")
+        case .widget:
+            return String(localized:"\(park.shortName), \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Cached forecast included"))")
+        case .chartBest:
+            return String(localized:"Best night: \(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label).")
+        case .dayWithBasis:
+            return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(bandWithBasis)")
+        case .scoreWithBasis:
+            return String(localized:"\(score.value) out of 100, \(bandWithBasis)")
+        case .tripLine(let reason):
+            return String(localized:"\(park.dayLabel(id)): \(park.shortName), \(score.value) out of 100, \(bandWithBasis). \(reason).")
+        case .stayNote(let reason):
+            return String(localized:"\(park.dayLabel(id)): darkness score \(score.value) out of 100 (\(bandWithBasis)). \(reason).")
+        case .eventNote:
+            return score.hasForecast
+                ? String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)), with the cloud forecast as Nyx last saw it.")
+                : String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)).")+" "+(basisCaption(typical:true) ?? "")
+        case .siriTonight(let voiceOnly):
+            if sky.darkHours==0 { return String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
+            if voiceOnly { return voiceAnswer(String(localized:"Tonight")) }
+            if let caption=basisCaption() { return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
+            return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.")
+        case .siriBest(let count,let voiceOnly):
+            let day=park.programDate(park.isoDay(id))
+            if voiceOnly { return voiceAnswer(day) }
+            if sky.darkHours==0 { return String(localized:"No true darkness at \(park.shortName) in the next \(count) nights. The best is \(day), \(score.value) out of 100.") }
+            let basis=basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
+            return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm park access before you go.")
+        case .snippet:
+            return String(localized:"\(park.shortName) tonight: \(score.value) out of 100, \(score.band.label). \(sky.moon.name), \(Int((sky.moon.illumination*100).rounded())) percent lit.")
+        }
+    }
+    /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full
+    /// forecast, the one caveat about the clouds.
+    private nonisolated func voiceAnswer(_ day: String) -> String {
+        let caveat=score.hasForecast ? "" : " "+(basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+        return String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label).")+caveat
+    }
+}
+#endif

@@ -472,7 +472,7 @@ struct TonightWidgetView:View {
     /// in every family (the Lock Screen and the small widget show only its mark), then what the
     /// larger families add.
     static func summary(_ night:Night,entry:TonightEntry,family:WidgetFamily)->String {
-        var tonight=String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Cached forecast included"))")
+        var tonight=night.spokenSummary(.widget)
         if let closure=entry.closure { tonight+=" "+String(localized:"Closure alert: \(closure)") }
         var portraitXL=false
         if #available(iOS 27.0,*) { portraitXL = family == .systemExtraLargePortrait }

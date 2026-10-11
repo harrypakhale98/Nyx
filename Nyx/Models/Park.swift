@@ -203,8 +203,16 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
     }
 }
 nonisolated enum ParkData {
+    /// The main bundle's parks, decoded once per process: widgets, intents and views all ask, and
+    /// the bundled file never changes while Nyx runs. Another bundle is read each time; a failed
+    /// read is never kept, so the next call tries again.
     static func load(bundle: Bundle = .main) throws -> [Park] {
+        let main = bundle === Bundle.main
+        if main, let kept = bundled.withLock({ $0 }) { return kept }
         guard let url = bundle.url(forResource: "parks", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
-        return try JSONDecoder().decode([Park].self, from: Data(contentsOf: url))
+        let parks = try JSONDecoder().decode([Park].self, from: Data(contentsOf: url))
+        if main { bundled.withLock { $0 = parks } }
+        return parks
     }
+    private static let bundled = Mutex<[Park]?>(nil)
 }

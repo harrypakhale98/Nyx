@@ -3,10 +3,12 @@ import Foundation
 extension PlanModel {
     /// Journal entries as plain values for the constellation and the recap, each with that night's
     /// score at its park (with the park's usual clouds for the month: past clouds are not kept).
+    /// Scores are kept per entry, night and park (`journalScore`), so a render rescores nothing.
     func loggedNights(_ entries: [JournalEntry]) -> [LoggedNight] {
         entries.map { entry in
-            LoggedNight(id:entry.id,date:entry.date,parkID:entry.parkID,observedBortle:entry.observedBortle,
-                        score:park(entry.parkID).map { night($0,on:entry.date).score.value },notes:entry.notes)
+            let id=entry.id, date=entry.date, parkID=entry.parkID
+            return LoggedNight(id:id,date:date,parkID:parkID,observedBortle:entry.observedBortle,
+                               score:journalScore(id:id,date:date,parkID:parkID),notes:entry.notes)
         }
     }
     /// A trip plan from the cached forecasts and park updates, worked out off the main thread.

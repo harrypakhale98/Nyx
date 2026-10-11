@@ -349,8 +349,7 @@ struct TimeRiver: View {
 
     private var spokenValue: String {
         guard let current else { return String(localized:"No nights available") }
-        let clouds=current.basisCaption(typical:true) ?? String(localized:"Forecast included")
-        return String(localized:"\(current.park.dayLabel(current.id)), \(current.score.value) out of 100, \(current.score.band.label). \(clouds)")+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
+        return current.spokenSummary(.river)+(agreementSpoken(current).map { ". "+$0 } ?? "")+(markers[current.id].map { ". "+$0.name } ?? "")
     }
     private func agreementSpoken(_ night:Night)->String? {
         guard let outlook=outlooks[night.id], let agreement=outlook.agreement else { return nil }

@@ -52,8 +52,9 @@ extension ConstellationLayout {
         }
         return SkyMapContent(stars:stars,figures:seasons.map { season in lines.filter { $0.season==season }.map { ($0.from,$0.to) } })
     }
-    var summary: String {
-        guard !stars.isEmpty else { return String(localized:"Your constellation. A map of the 63 national parks drawn as faint stars. Your first night will be your first star.") }
+    /// What VoiceOver hears for the map; `parks` is how many parks it draws.
+    func summary(parks count: Int) -> String {
+        guard !stars.isEmpty else { return String(localized:"Your constellation. A map of the \(count) national parks drawn as faint stars. Your first night will be your first star.") }
         let parks=Set(stars.map(\.night.parkID)).count
         return String(localized:"Your constellation: \(stars.count) nights at \(parks) parks across \(seasons.count) seasons, each a star at its park on a map of the United States.")
     }
@@ -91,7 +92,7 @@ struct YourSkyPanel: View {
                 Spacer(minLength:8)
                 if !nights.isEmpty { ConstellationShareButton(layout:layout,year:Calendar.current.component(.year,from:.now)) }
             }
-            SkyMapView(content:layout.content(parks:model.parks),summary:unavailable ? String(localized:"Your constellation. A map of the 63 national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary,
+            SkyMapView(content:layout.content(parks:model.parks),summary:unavailable ? String(localized:"Your constellation. A map of the \(model.parks.count) national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary(parks:model.parks.count),
                        arriving:arriving,arrivalHold:hold,arrivalPaused:!onScreen || fieldOpen,drawInMemory:"journal",
                        onSelect:{ id in if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) } },
                        onArrived:{ id in arrived(id) })
@@ -175,7 +176,7 @@ struct ConstellationCard: View {
             }.padding(40)
         }.frame(width:580,height:560)
             .environment(\.colorScheme,.dark).dynamicTypeSize(.large)
-            .accessibilityElement(children:.ignore).accessibilityLabel(layout.summary)
+            .accessibilityElement(children:.ignore).accessibilityLabel(layout.summary(parks:model.parks.count))
     }
 }
 struct ConstellationShareButton: View {
@@ -255,7 +256,7 @@ struct YearRecapView: View {
             if let event=recap.event {
                 Label { Text(event).fixedSize(horizontal:false,vertical:true) } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:16,height:16) }.font(.subheadline)
             }
-            if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:model.parks),summary:layout.summary) } } }
+            if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:model.parks),summary:layout.summary(parks:model.parks.count)) } } }
             VStack(alignment:.leading,spacing:10) {
                 Eyebrow(text:"In a few words")
                 if reflecting { ConstellationLoader().frame(maxWidth:.infinity) }

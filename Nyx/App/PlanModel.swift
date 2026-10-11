@@ -4,6 +4,8 @@ import CoreLocation
 
 @MainActor @Observable final class PlanModel {
     let parks: [Park]
+    /// Each park's place in `parks` (the first, should an id repeat), for `park(_:)`.
+    private let parkIndex: [String:Int]
     let loadError: Bool
     private let astronomy: any AstronomyProviding
     private let scoring: any ScoreProviding
@@ -11,18 +13,31 @@ import CoreLocation
     private let parkStore: any ParkProviding
     private let detailService: any DetailProviding
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
-    var forecasts: [String:Forecast] = [:] { didSet { outlookCache=[:] } }
+    var forecasts: [String:Forecast] = [:] { didSet { forecastsChanged() } }
     /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
     /// With "Smoke and haze" off in Your privacy, the air-quality host's data is not used at all:
     /// no aerosol series is kept here, so no score, caveat or snapshot counts cached smoke.
     var details: [String:ForecastDetail] = [:] {
         didSet {
             if !smokeEnabled, details.values.contains(where:{ $0.air != nil }) { details=Self.withoutAir(details) }
-            outlookCache=[:]
+            forecastsChanged()
         }
     }
+    /// Everything worked out from the forecasts and their detail is let go when either changes.
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:] }
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
+    /// Nights already scored, by park and evening: the park list and a month ask for the same
+    /// nights many times a pass. A night is a pure function of its park, sky, forecast, detail and
+    /// scoring; "now" enters only as whether the model spread is recent (`HourlySeries.usable`),
+    /// kept beside each night and checked on every read. Cleared whenever forecasts or detail change.
+    @ObservationIgnored private var nightMemo: [String:[Date:(recent:Bool,night:Night)]] = [:]
+    /// Each park's tonight for the moment it was judged from (`today`), with its evening.
+    @ObservationIgnored private var tonightMemo: [String:(at:Date,park:Park,night:Date,evening:Date)] = [:]
+    /// Journal entries' scores, by entry, night and park (`loggedNights`). The score never reads
+    /// "now", so only a change of forecasts or detail clears them.
+    @ObservationIgnored private var journalScores: [JournalScoreKey:Int?] = [:]
+    nonisolated private struct JournalScoreKey: Hashable, Sendable { let id:UUID; let date:Date; let park:String }
     /// What's up each night. Astronomy only, so never invalidated by a forecast.
     @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
     @ObservationIgnored private var eventCache: [SkyKey:WhatsUp.Events] = [:]
@@ -121,13 +136,17 @@ import CoreLocation
         func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
         for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
         for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
+        for (id,nights) in nightMemo { nightMemo[id]=nights.filter { current(id,$0.key) } }
         skyCache=skyCache.filter { current($0.key.park,$0.key.night) }
         eventCache=eventCache.filter { current($0.key.park,$0.key.night) }
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
          detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
-        do { parks=try ParkData.load(); loadError=false } catch { parks=[]; loadError=true }
+        let loaded:[Park]
+        do { loaded=try ParkData.load(); loadError=false } catch { loaded=[]; loadError=true }
+        parks=loaded
+        parkIndex=Dictionary(loaded.indices.map { (loaded[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
         // (A registered default: anyone who chose Name keeps it.)
@@ -166,17 +185,44 @@ import CoreLocation
         if let park=DebugScenario.park { homeID=park }
         #endif
     }
-    var home: Park? { parks.first { $0.id==homeID } ?? parks.first }
+    var home: Park? { park(homeID) ?? parks.first }
     /// The park-local night in progress (or about to begin) right now.
-    func tonight(_ park:Park)->Date { park.currentNight(at:today) }
-    func park(_ id:String)->Park? { parks.first { $0.id==id } }
+    func tonight(_ park:Park)->Date { tonightEntry(park).night }
+    /// Tonight and its evening, worked out once per park for each moment `today` stands at (it
+    /// moves only when some park's night turns over). Reads `today` every time, as before.
+    private func tonightEntry(_ park:Park)->(night:Date,evening:Date) {
+        let at=today
+        if let kept=tonightMemo[park.id], kept.at==at, kept.park==park { return (kept.night,kept.evening) }
+        let night=park.currentNight(at:at), evening=park.evening(night)
+        tonightMemo[park.id]=(at,park,night,evening)
+        return (night,evening)
+    }
+    func park(_ id:String)->Park? { parkIndex[id].map { parks[$0] } }
     func night(_ park:Park,on date:Date?=nil)->Night {
-        let evening=park.evening(date ?? tonight(park))
+        let evening=date.map(park.evening) ?? tonightEntry(park).evening
+        // Read on every call, kept or not, so a screen still redraws when either changes (the memo is not observed).
+        let forecast=forecasts[park.id], detail=details[park.id], now=present
+        let recent=detail?.models?.usable(now:now) == true
+        if let kept=nightMemo[park.id]?[evening], kept.recent==recent, kept.night.park==park { return kept.night }
         let sky:SkyConditions
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
         }
-        return NightPlanner.night(park:park,sky:sky,forecast:forecasts[park.id],detail:details[park.id],now:present,scoring:scoring)
+        let night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now,scoring:scoring)
+        nightMemo[park.id,default:[:]][evening]=(recent,night)
+        return night
+    }
+    /// A journal entry's score at its park, kept per entry, night and park (`loggedNights`). Nil
+    /// for a park Nyx does not know. Reads the forecasts and detail as `night(_:on:)` would.
+    func journalScore(id:UUID,date:Date,parkID:String)->Int? {
+        let key=JournalScoreKey(id:id,date:date,park:parkID)
+        if let kept=journalScores[key] {
+            if kept != nil { _=forecasts[parkID]; _=details[parkID] }
+            return kept
+        }
+        let score=park(parkID).map { night($0,on:date).score.value }
+        journalScores[key]=score
+        return score
     }
     /// What the forecast says around the score for one night: model agreement (with the score the
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement

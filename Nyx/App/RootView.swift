@@ -424,9 +424,14 @@ private struct DebugWindow: ViewModifier {
 /// DEBUG captures: `-nyx-ax5` and `-nyx-bold`, on the root and on the full-screen sky (a cover does not inherit them).
 struct DebugTypeSize: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
+        #if DEBUG
         // `-nyx-bold` stands in for Bold Text, which the simulator cannot switch from the command line.
         let sized=DebugScenario.isEnabled("ax5") ? AnyView(content.dynamicTypeSize(.accessibility5)) : AnyView(content)
         if DebugScenario.isEnabled("bold") { sized.environment(\.legibilityWeight,.bold) } else { sized }
+        #else
+        // Release: both switches are always off, so the app's root is never type-erased.
+        content
+        #endif
     }
 }
 /// The `assistive*` capture routes: the Assistive Access scene's palette (high contrast) and its own

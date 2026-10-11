@@ -22,7 +22,7 @@ struct YourPrivacyView: View {
                         .accessibilityHint(Text("Shows each night's forecast clouds in the score and the sky"))
                     VStack(alignment: .leading, spacing: 6) {
                         Text("What is sent").font(.subheadline.weight(.semibold))
-                        Text("The public coordinates of the 63 national parks. Nothing about you.")
+                        Text("The public coordinates of the \(model.parks.count) national parks. Nothing about you.")
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityElement(children: .combine)

@@ -78,17 +78,7 @@ nonisolated enum BestNightSearch {
     /// The full answer names the night, the score and what it rests on. Voice-only (iOS 27, no
     /// screen in view) keeps the night, the score and the one caveat that matters.
     static func dialog(_ answer: Answer, voiceOnly: Bool) -> String {
-        let night=answer.best, park=night.park
-        let day=park.programDate(park.isoDay(night.id))
-        if voiceOnly {
-            let basis=night.score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
-            return String(localized:"\(day) at \(park.shortName): \(night.score.value), \(night.score.band.label).")+basis
-        }
-        if night.sky.darkHours==0 {
-            return String(localized:"No true darkness at \(park.shortName) in the next \(answer.count) nights. The best is \(day), \(night.score.value) out of 100.")
-        }
-        let basis=night.basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
-        return String(localized:"The best of the next \(answer.count) nights: \(day) at \(park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(basis) Confirm park access before you go.")
+        answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly))
     }
 }
 
@@ -201,7 +191,7 @@ struct BestNightSnippetView: View {
         }
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(palette.snippetBackground,in:RoundedRectangle(cornerRadius:22))
         .environment(\.nyx,palette)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
@@ -228,7 +218,7 @@ struct BestNightEmptySnippetView: View {
         .frame(maxWidth:.infinity,alignment:.leading)
         .foregroundStyle(palette.ink)
         .padding(18)
-        .background(LinearGradient(colors:[.black,palette.panel],startPoint:.top,endPoint:.bottom),in:RoundedRectangle(cornerRadius:22))
+        .background(palette.snippetBackground,in:RoundedRectangle(cornerRadius:22))
         .environment(\.nyx,palette)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)

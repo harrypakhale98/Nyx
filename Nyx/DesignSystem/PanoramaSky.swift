@@ -137,8 +137,18 @@ nonisolated struct HorizonSky: Sendable {
                            moonIllumination:phase.illumination,moonWaxing:phase.waxing,domes:domes,sunAltitude:sun,named:named,figures:figures)
         cache[key]=sky
         recent.append(key)
-        if recent.count>capacity { cache[recent.removeFirst()]=nil }
+        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
         return sky
+    }
+    /// Star colours by sky, for the ink they were resolved over; let go with their sky.
+    private var tintCache:[String:(ink:Color,tints:[Color])]=[:]
+    /// A sky's catalogue-star colours over `ink`, in the order of `stars`, resolved once
+    /// (`SkyTint.resolved`): turning the sky redraws every star each frame of the drag.
+    func tints(_ sky:HorizonSky,ink:Color)->[Color] {
+        if let kept=tintCache[sky.id], kept.ink==ink, kept.tints.count==sky.stars.count { return kept.tints }
+        let tints=SkyTint.resolved(sky.stars.map(\.colorIndex),ink:ink)
+        tintCache[sky.id]=(ink,tints)
+        return tints
     }
 }
 
@@ -242,12 +252,15 @@ struct PanoramaCanvas: View {
     var options: PanoramaOptions
     var body: some View {
         let ink=palette.ink, highContrast=palette.highContrast, stroke=palette.stroke
-        Canvas { context,size in PanoramaCanvas.draw(sky:sky,options:options,ink:ink,highContrast:highContrast,stroke:stroke,in:&context,size:size) }
+        let tints=HorizonSkies.shared.tints(sky,ink:ink)
+        Canvas { context,size in PanoramaCanvas.draw(sky:sky,options:options,ink:ink,highContrast:highContrast,stroke:stroke,tints:tints,in:&context,size:size) }
             .background(Color.black)
             .accessibilityIgnoresInvertColors()
     }
     /// `highContrast` and `stroke` (Bold Text) set the figures' hairlines; nothing else depends on them.
-    static func draw(sky:HorizonSky,options:PanoramaOptions,ink:Color,highContrast:Bool=false,stroke:Double=1,in context:inout GraphicsContext,size:CGSize) {
+    /// `tints`: the stars' colours over `ink` already resolved (`HorizonSkies.tints`), in the order of
+    /// `sky.stars`; without them each star's tint is worked out as it is drawn.
+    static func draw(sky:HorizonSky,options:PanoramaOptions,ink:Color,highContrast:Bool=false,stroke:Double=1,tints:[Color]?=nil,in context:inout GraphicsContext,size:CGSize) {
         let frame=SkyFrame(options:options,size:size)
         let bortle=options.bortle
         // Twilight and moonlight wash out faint stars, as light pollution does.
@@ -343,19 +356,21 @@ struct PanoramaCanvas: View {
             let d=0.8+0.6*(1-(star.magnitude-4.5)/3.3)
             context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(ink.opacity(0.5*fade)))
         }
-        for star in sky.stars where star.magnitude<limit {
+        let resolved=tints.flatMap { $0.count==sky.stars.count ? $0 : nil }
+        for (index,star) in sky.stars.enumerated() where star.magnitude<limit {
             guard let p=frame.point(star.altitude,star.azimuth), frame.visible(p) else { continue }
             let fade=min(1,max(0,limit-star.magnitude))*contrast
             let d=max(1.1,3.9-0.6*star.magnitude)
             let brightness=max(0.4,min(1,1.25-0.15*star.magnitude))*fade
+            let color=resolved?[index] ?? tint(star.colorIndex,ink:ink)
             if star.magnitude<1.2 {
                 let r=d*2.4
-                context.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[tint(star.colorIndex,ink:ink).opacity(0.25*fade),.clear]),center:p,startRadius:0,endRadius:r))
+                context.fill(Path(ellipseIn:CGRect(x:p.x-r,y:p.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[color.opacity(0.25*fade),.clear]),center:p,startRadius:0,endRadius:r))
             }
-            context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(tint(star.colorIndex,ink:ink).opacity(brightness)))
+            context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(color.opacity(brightness)))
         }
         // Planets: warm points as bright as the brightest stars.
-        let warm=Color(red:1,green:0.86,blue:0.66).mix(with:ink,by:0.3)
+        let warm=SkyTint.planet(ink:ink)
         for planet in sky.planets {
             guard let p=frame.point(planet.altitude,planet.azimuth), frame.visible(p) else { continue }
             let d=max(3.2,min(5.4,4.4-0.4*planet.magnitude))
@@ -457,13 +472,8 @@ struct PanoramaCanvas: View {
         let t=max(0,min(1,(adaptation-0.7)/0.3))
         return t*t*(3-2*t)
     }
-    /// B−V colour index to a gentle warm or cool tint over starlight (Ballesteros).
-    static func tint(_ colorIndex:Double,ink:Color)->Color {
-        let temperature=4600*(1/(0.92*colorIndex+1.7)+1/(0.92*colorIndex+0.62))
-        let warmth=max(-1,min(1,(6500-temperature)/3500))
-        return warmth>0 ? Color(red:1,green:1-0.18*warmth,blue:1-0.42*warmth).mix(with:ink,by:0.35)
-            : Color(red:1+0.25*warmth,green:1+0.1*warmth,blue:1).mix(with:ink,by:0.35)
-    }
+    /// B−V colour index to a gentle warm or cool tint over starlight (`SkyTint`, as RealSky draws it).
+    static func tint(_ colorIndex:Double,ink:Color)->Color { SkyTint.star(colorIndex,ink:ink) }
     /// What is up and where, for VoiceOver: "Facing south at 11:40 PM. Jupiter, high in the southeast. …"
     /// `size` is the view's, for which named stars are in view (as `labelledStars`). The floating
     /// header is ignored here: a star under the title is still in the sky, so the summary does not
