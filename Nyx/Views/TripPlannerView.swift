@@ -180,12 +180,12 @@ struct TripPlannerView: View {
     @ViewBuilder private var results:some View {
         if let plan {
             if plan.stops.isEmpty {
-                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? (onlyByBoatOrPlane ? "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius." : "No national parks fall inside this radius. Widen it or start from another park.") : "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.")
+                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? (onlyByBoatOrPlane ? "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius." : "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.") : "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.")
             } else {
                 Panel { VStack(alignment:.leading,spacing:12) {
                     Eyebrow(text:"The route")
                     SkyMapView(content:routeContent(plan),summary:routeSummary(plan))
-                    Text("Your nights as stars among the national parks, joined night to night. The ring marks the best night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text("Your nights as stars among the parks and dark-sky places, joined night to night. The ring marks the best night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 } }.id("route")
                 VStack(spacing:0) {
                     // Back-to-back nights at one park are one stay: one row, one calendar event.
@@ -208,7 +208,7 @@ struct TripPlannerView: View {
     /// An empty plan only because the drive-to filter left out the boat-and-plane parks in reach.
     private var onlyByBoatOrPlane:Bool {
         guard drivableOnly, let point else { return false }
-        return !TripPlanner.candidates(model.parks,latitude:point.latitude,longitude:point.longitude,radiusMeters:radius).isEmpty
+        return !model.tripCandidates(latitude:point.latitude,longitude:point.longitude,radiusMeters:radius).isEmpty
     }
     private func hero(_ best:TripStop)->some View {
         let park=best.night.park
@@ -228,21 +228,26 @@ struct TripPlannerView: View {
         .accessibilityElement(children:.combine)
         .accessibilityHint("Opens that night at the park.")
     }
+    /// The route on a map fitted around the trip's places and the parks in reach of its first night
+    /// (Lambert, centred on them), so a trip of a few hundred kilometres fills the panel wherever
+    /// on Earth it runs.
     private func routeContent(_ plan:TripPlan)->SkyMapContent {
-        let points=plan.stops.map { SkyMap.position($0.night.park) }
+        let first=plan.stops[0].night.park
+        let nearby=model.tripCandidates(latitude:first.latitude,longitude:first.longitude,radiusMeters:radius,drivableOnly:drivableOnly)
+        let frame=MapFrame.fitting(plan.stops.map { GeoPoint($0.night.park) }+nearby.map(GeoPoint.init),aspect:SkyMap.aspect,padding:0.08,minimumKm:700)
+        func at(_ park:Park)->CGPoint { frame.point(park) ?? CGPoint(x:0.5,y:frame.aspect/2) }
         var seen:[String:Int]=[:]
         let stars=plan.stops.map { stop in
             // A park chosen for several nights gathers a small cluster, as in your constellation.
             let n=seen[stop.night.park.id,default:0]; seen[stop.night.park.id]=n+1
-            let base=SkyMap.position(stop.night.park), radius=0.004*Double(n).squareRoot(), angle=Double(n)*2.399963
+            let base=at(stop.night.park), radius=0.012*Double(n).squareRoot(), angle=Double(n)*2.399963
             return SkyMapContent.Star(id:stop.id,point:CGPoint(x:base.x+radius*cos(angle),y:base.y+radius*sin(angle)),brightness:0.3+0.7*Double(stop.night.score.value)/100,ringed:stop.isBest,label:"")
         }
         // Night to night, only where the nights are back to back and the park changes.
         let edges=zip(plan.stops,plan.stops.dropFirst()).compactMap { a,b in
-            b.hopMeters.flatMap { $0>1000 ? (SkyMap.position(a.night.park),SkyMap.position(b.night.park)) : nil }
+            b.hopMeters.flatMap { $0>1000 ? (at(a.night.park),at(b.night.park)) : nil }
         }
-        let nearby=TripPlanner.candidates(model.parks,latitude:plan.stops[0].night.park.latitude,longitude:plan.stops[0].night.park.longitude,radiusMeters:radius,drivableOnly:drivableOnly).map(SkyMap.position)
-        return SkyMapContent(stars:stars,figures:edges.isEmpty ? [] : [edges],viewport:SkyMapContent.viewport(around:points+nearby),showsInsets:false,outlineRegions:Set(plan.stops.map { SkyMap.region($0.night.park) }))
+        return SkyMapContent(stars:stars,figures:edges.isEmpty ? [] : [edges],frame:frame,background:SkyMap.background(model.mapPlaces,in:frame))
     }
     private func routeSummary(_ plan:TripPlan)->String {
         let parks=Array(NSOrderedSet(array:plan.stops.map(\.night.park.shortName))).compactMap { $0 as? String }

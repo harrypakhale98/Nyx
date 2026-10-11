@@ -10,7 +10,14 @@ extension UTType {
 /// Park ids are the only thing that travels; the park itself always comes from the bundle.
 nonisolated enum ParkCatalog {
     static let parks:[Park]=(try? ParkData.load()) ?? []
-    static func park(_ id:String)->Park? { parks.first { $0.id==id } }
+    /// A curated park, or a world catalogue place by its `wd:` id: the catalogue is decoded only when
+    /// such an id is first asked for (`CatalogData` keeps it for the process). A spot's `pin:` id lives
+    /// in the person's store, not here.
+    static func park(_ id:String)->Park? {
+        if let park=parks.first(where:{ $0.id==id }) { return park }
+        guard id.hasPrefix(Park.catalogPrefix) else { return nil }
+        return ((try? CatalogData.load()) ?? []).first { $0.id==id }
+    }
 }
 nonisolated enum ParkTransferError: Error { case unknownPark }
 /// A park as a drag item: Nyx's own type carries the park id (Plan and Journal accept it), other
@@ -27,13 +34,15 @@ nonisolated extension Park: Transferable {
         guard let url=DeepLink.park(id).url else { throw ParkTransferError.unknownPark }
         return url
     }
-    static func transferred(id:String,catalog:[Park]=ParkCatalog.parks) throws -> Park {
+    /// The place an id names. Without a `catalog`, Nyx's own: the curated parks and the world catalogue.
+    static func transferred(id:String,catalog:[Park]?=nil) throws -> Park {
         // Today's letter ids and the namespaced ones (`wd:Q42`, `pin:<uuid>`) read as a link would read them.
         let trimmed=id.trimmingCharacters(in:.whitespacesAndNewlines), id=DeepLink.placeID(trimmed) ?? trimmed.lowercased()
-        guard let park=catalog.first(where:{ $0.id==id }) else { throw ParkTransferError.unknownPark }
+        let found:Park?=if let catalog { catalog.first { $0.id==id } } else { ParkCatalog.park(id) }
+        guard let park=found else { throw ParkTransferError.unknownPark }
         return park
     }
-    static func transferred(url:URL,catalog:[Park]=ParkCatalog.parks) throws -> Park {
+    static func transferred(url:URL,catalog:[Park]?=nil) throws -> Park {
         guard case .park(let id)?=DeepLink(url) else { throw ParkTransferError.unknownPark }
         return try transferred(id:id,catalog:catalog)
     }

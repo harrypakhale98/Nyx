@@ -182,7 +182,11 @@ struct ParkDetailView: View {
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it).
             .task(id:riverStart) { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             // Park alerts and ranger programs only where the Park Service runs the place: a saved spot asks it nothing.
-            .task { await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil) }
+            // A place abroad: its forecast by its whole 10° tile (the model's), and a place in Spotlight (`SpotlightIndexer.remember`).
+            .task {
+                if park.isCatalogPlace { await SpotlightIndexer.remember(park,followed:Set(saved.map(\.parkID))) }
+                await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil)
+            }
             .refreshable { await model.refresh([park],force:true,parkUpdates:park.nps != nil,programs:park.nps != nil) }
     }
     /// Room for the breakdown beside the page (`WideLayout.inspector`).
@@ -228,19 +232,24 @@ struct ParkDetailView: View {
     }
     private var saveButton:some View {
         Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
-            .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot))
+            .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace))
     }
 }
 /// The bookmark's words. For a park, saving it; for a spot (always kept in Your spots until it is
-/// deleted), following it: a followed spot is in the widgets, reminders and on Apple Watch.
+/// deleted), following it: a followed spot is in the widgets, reminders and on Apple Watch. A place
+/// abroad is saved as a place: a town or a reserve is not a park.
 private struct SaveButtonWords: ViewModifier {
     let saved: Bool
     let spot: Bool
+    var place=false
     func body(content:Content)->some View {
         if spot {
             content.accessibilityLabel(saved ? "Stop following this spot" : "Follow this spot")
                 .accessibilityHint("Followed spots appear in widgets, reminders and on Apple Watch.")
                 .accessibilityInputLabels(saved ? [Text("Stop following"),Text("Unsave")] : [Text("Follow"),Text("Save")])
+        } else if place {
+            content.accessibilityLabel(SaveWords.title(saved:saved,spot:false,place:true))
+                .accessibilityInputLabels(saved ? [Text("Remove from saved places"),Text("Unsave")] : [Text("Save"),Text("Save place")])
         } else {
             content.accessibilityLabel(saved ? "Remove from saved parks" : "Save park")
                 .accessibilityInputLabels(saved ? [Text("Remove from saved parks"),Text("Unsave"),Text("Unsave park")] : [Text("Save"),Text("Save park")])
@@ -260,6 +269,19 @@ private struct ChapterTop: ViewModifier {
 }
 private final class ChapterTracker { var tops:[ParkChapter:CGFloat]=[:] }
 #Preview("Detail") { let m=PlanModel();if let p=m.home { NavigationStack { ParkDetailView(park:p) }.environment(m).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) } }
+#Preview("Detail • a place abroad") {
+    NavigationStack { ParkDetailView(park:WorldPreview.places[0]) }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark)
+}
+#Preview("Detail • a place abroad, no website, AX5") {
+    NavigationStack { ParkDetailView(park:WorldPreview.places[1]) }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark)
+}
+#Preview("Detail • a place abroad, night vision") {
+    NavigationStack { ParkDetailView(park:WorldPreview.places[0]) }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true)
+        .environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark)
+}
+#Preview("Detail • a place abroad, wide iPad") {
+    NavigationStack { ParkDetailView(park:WorldPreview.places[0]) }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).frame(width:1180,height:820).preferredColorScheme(.dark)
+}
 
 /// iOS 27: the navigation bar recedes as the park's page scrolls down, so its sky runs edge to edge;
 /// it returns on the way back up. Like the tab bar (`RootView`), it stays in place under VoiceOver,

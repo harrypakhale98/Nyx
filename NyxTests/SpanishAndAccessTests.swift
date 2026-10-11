@@ -82,20 +82,4 @@ struct SpanishAndAccessTests {
         let records=lookup.parksNear(park:"Channel Islands",radius:50,system:.miles)
         #expect(records.first { $0.hasPrefix("Channel Islands") }?.contains("getting there:")==true)
     }
-
-    // MARK: Map outline
-
-    @Test func outlineSitsInsideItsFrames() throws {
-        let outlines=SkyMap.outlines
-        #expect(Set(outlines.map(\.region))==[.lower48,.alaska,.hawaii])
-        let lower=try #require(outlines.first { $0.region == .lower48 })
-        let frame=SkyMap.inset(.lower48).frame.insetBy(dx:-0.005,dy:-0.005)
-        #expect(lower.rings.joined().allSatisfy { frame.contains($0) })
-        // Joshua Tree lies inside the outline's box, west of Acadia.
-        let box=lower.rings.joined().reduce(CGRect.null) { $0.union(CGRect(origin:$1,size:.zero)) }
-        #expect(try box.contains(SkyMap.position(park("jotr"))) && SkyMap.position(park("jotr")).x<SkyMap.position(park("acad")).x)
-        // Hawaiʻi keeps the islands inside its inset (Maui, the Big Island), not Kauaʻi's fragments.
-        let hawaii=try #require(outlines.first { $0.region == .hawaii })
-        #expect(hawaii.rings.joined().allSatisfy { hawaii.clip.insetBy(dx:-0.02,dy:-0.02).contains($0) })
-    }
 }

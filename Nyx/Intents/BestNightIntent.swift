@@ -19,7 +19,8 @@ struct FindBestNightIntent: AppIntent {
     func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
         let saved=SharedSettings.read()
         let library=try ParkLibrary.places(snapshot:saved)
-        let parks=park.map { chosen in library.filter { $0.id==chosen.id } } ?? (saved?.parks ?? [])
+        // A chosen place the library lacks (a world catalogue place found by search, not followed) resolves by its id.
+        let parks=park.map { chosen in (library.first { $0.id==chosen.id } ?? ParkLibrary.place(chosen.id,snapshot:saved)).map { [$0] } ?? [] } ?? (saved?.parks ?? [])
         guard !parks.isEmpty else { throw NyxIntentError.noParks }
         let now=Date.now, day=start.map { TripDay($0) }
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
@@ -102,7 +103,10 @@ struct BestNightSnippetIntent: SnippetIntent {
     init(parkIDs: [String], start: Date?, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
     func perform() async throws -> some IntentResult & ShowsSnippetView {
         let shared=SharedSettings.read()
-        let parks=try ParkLibrary.places(snapshot:shared).filter { parkIDs.contains($0.id) }
+        let library=try ParkLibrary.places(snapshot:shared)
+        let known=library.filter { parkIDs.contains($0.id) }
+        // An unfollowed world catalogue place the answer was about resolves by its id, as it did for the answer.
+        let parks=known+parkIDs.filter { id in !known.contains { $0.id==id } }.compactMap { ParkLibrary.place($0,snapshot:shared) }
         let now=Date.now
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         // Nothing left to show (the nights have passed since Siri first answered): a calm card that

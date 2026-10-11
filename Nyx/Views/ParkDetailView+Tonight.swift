@@ -10,8 +10,8 @@ extension ParkDetailView {
         alerts
     }
     /// The park's state and Dark Sky status: the eyebrow carries data, not a slogan. A saved spot:
-    /// "Your spot · California".
-    var eyebrow:String { park.placeEyebrow }
+    /// "Your spot · California". A place abroad: what it is and where, "International Dark Sky Park · Catalonia, Spain".
+    var eyebrow:String { park.isCatalogPlace ? park.worldEyebrow : park.placeEyebrow }
     /// At accessibility sizes the words run long, so the whole header reads from the leading edge; the gauge stays centred.
     private func hero(_ proxy:ScrollViewProxy)->some View {
         let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
@@ -61,6 +61,8 @@ extension ParkDetailView {
             }
             ScoreReadout(score:night.score,agreement:outlook?.agreement,isTonight:isTonight) { showBreakdown() }.padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
                 .popoverTip(DebugScenario.screen == nil && !palette.nightVision ? ScoreTip() : nil)
+            // Under the score at a place abroad: Nyx cannot see its closures, so it says so and points to the park's own site.
+            if park.isCatalogPlace { UnknownClosuresNote(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12).id("alerts") }
             if isTonight { FieldEntry(park:park,night:night).padding(.top,typeSize.isAccessibilitySize ? 4 : 10) }
             KeepThisNightOffer(park:park).padding(.top,4)
         }
@@ -84,8 +86,10 @@ extension ParkDetailView {
         }.id("river")
     }
     @ViewBuilder private var alerts: some View {
+        // A place abroad says it under the score (`UnknownClosuresNote`), with its site: not again here.
+        if park.isCatalogPlace { EmptyView() }
         // A place the Park Service does not run (a saved spot) has no alerts to show: said plainly, once.
-        if park.nps == nil {
+        else if park.nps == nil {
             Panel { VStack(alignment:.leading,spacing:8) {
                 Label("Before you go",systemImage:"exclamationmark.shield").font(.subheadline.weight(.medium)).accessibilityAddTraits(.isHeader)
                 Text("Nyx has no alerts for this place. Check access, local rules and closures before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)

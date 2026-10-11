@@ -681,7 +681,7 @@
         }
       }
     },
-    "%@ · %lld parks tonight": {
+    "%@ · %lld places tonight": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -690,13 +690,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld park tonight"
+                  "value": "%@ · %lld place tonight"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld parks tonight"
+                  "value": "%@ · %lld places tonight"
                 }
               }
             }
@@ -708,13 +708,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld parque esta noche"
+                  "value": "%@ · %lld lugar esta noche"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld parques esta noche"
+                  "value": "%@ · %lld lugares esta noche"
                 }
               }
             }
@@ -1832,6 +1832,12 @@
             "state": "translated",
             "value": "%@° E"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° E"
+          }
         }
       }
     },
@@ -1839,6 +1845,12 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° N"
+          }
+        },
+        "es": {
           "stringUnit": {
             "state": "translated",
             "value": "%@° N"
@@ -1854,6 +1866,12 @@
             "state": "translated",
             "value": "%@° S"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° S"
+          }
         }
       }
     },
@@ -1864,6 +1882,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@° W"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@° O"
           }
         }
       }
@@ -2493,6 +2517,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$lld de 100. %2$@. Revisa las alertas del parque antes de ir."
+          }
+        }
+      }
+    },
+    "%lld parks and dark-sky places in %lld countries": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld parks and dark-sky places in %lld countries"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld parques y lugares de cielo oscuro en %2$lld países"
           }
         }
       }
@@ -3211,6 +3252,24 @@
               }
             }
           }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Un patio, un mirador junto a la carretera o un campo que conoces, con su índice noche a noche como los parques. Se queda en este iPad."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Un patio, un mirador junto a la carretera o un campo que conoces, con su índice noche a noche como los parques. Se queda en este iPhone."
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -3255,6 +3314,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "A city or town"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una ciudad o un pueblo"
           }
         }
       }
@@ -3954,6 +4019,12 @@
             "state": "translated",
             "value": "Accuracy unknown."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precisión desconocida."
+          }
         }
       }
     },
@@ -4114,6 +4185,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add a spot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir un sitio"
           }
         }
       }
@@ -4540,23 +4617,6 @@
         }
       }
     },
-    "Am. Samoa": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Am. Samoa"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Samoa Am."
-          }
-        }
-      }
-    },
     "American Samoa": {
       "extractionState": "manual",
       "localizations": {
@@ -4752,6 +4812,12 @@
             "state": "translated",
             "value": "An illustration: the same sky drawn at this spot's estimated class and at a city's."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una ilustración: el mismo cielo dibujado con la clase estimada de este sitio y con la de una ciudad."
+          }
         }
       }
     },
@@ -4853,6 +4919,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Coordenadas aproximadas. Confirma con un guardaparques el acceso, los horarios y los cierres actuales. Esto no es una guía de navegación."
+          }
+        }
+      }
+    },
+    "Around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alrededor de %@"
+          }
+        }
+      }
+    },
+    "Around the world": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around the world"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por el mundo"
+          }
+        }
+      }
+    },
+    "Around you": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around you"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tu alrededor"
           }
         }
       }
@@ -5221,6 +5338,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aquí la aurora se ve a menudo en las noches oscuras, a veces justo encima. Cuando aparece, también ilumina el cielo. Depende de la actividad del Sol, y Nyx no pronostica auroras."
+          }
+        }
+      }
+    },
+    "Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitud para las auroras: calculada a partir del Campo Geomagnético Internacional de Referencia (IGRF-14, IAGA; coeficientes de NOAA NCEI, obra del Gobierno de EE. UU.)."
           }
         }
       }
@@ -5864,6 +5998,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mejor: %@ · %lld"
+          }
+        }
+      }
+    },
+    "Beyond the U.S. national parks, the national parks and certified dark-sky places Nyx knows come from Wikidata, a free shared database, under CC0 (no rights reserved). A few certified dark-sky places missing there were added by hand, each checked against its own published source. Each place is one point for what is often a large area, so the sky can differ across it. Its Bortle class and usual clouds are estimates read from the grids described above, not measured there. Nyx has no closure alerts outside the U.S. national parks, so check the park's own site before you go. Forecasts are asked for by whole regions, every place in a 10° square (about 1,100 km from north to south), so a request never shows which place you are looking at.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beyond the U.S. national parks, the national parks and certified dark-sky places Nyx knows come from Wikidata, a free shared database, under CC0 (no rights reserved). A few certified dark-sky places missing there were added by hand, each checked against its own published source. Each place is one point for what is often a large area, so the sky can differ across it. Its Bortle class and usual clouds are estimates read from the grids described above, not measured there. Nyx has no closure alerts outside the U.S. national parks, so check the park's own site before you go. Forecasts are asked for by whole regions, every place in a 10° square (about 1,100 km from north to south), so a request never shows which place you are looking at."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más allá de los parques nacionales de EE. UU., los parques nacionales y los lugares de cielo oscuro certificados que conoce Nyx vienen de Wikidata, una base de datos libre y compartida, bajo CC0 (sin derechos reservados). Algunos lugares de cielo oscuro certificados que faltaban allí se añadieron a mano, cada uno comprobado con su propia fuente publicada. Cada lugar es un solo punto para lo que a menudo es una zona extensa, así que el cielo puede variar dentro de ella. Su clase Bortle y sus nubes habituales son estimaciones leídas de las cuadrículas descritas arriba, no medidas allí. Nyx no tiene alertas de cierres fuera de los parques nacionales de EE. UU., así que consulta el sitio del propio parque antes de ir. Los pronósticos se piden por regiones enteras, todos los lugares de un cuadrado de 10° (unos 1100 km de norte a sur), así que una solicitud nunca muestra qué lugar estás mirando."
           }
         }
       }
@@ -6563,6 +6714,12 @@
             "state": "translated",
             "value": "City or town"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciudad o pueblo"
+          }
         }
       }
     },
@@ -7234,6 +7391,12 @@
             "state": "translated",
             "value": "Clouds at your saved spots"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes en tus sitios guardados"
+          }
         }
       }
     },
@@ -7244,6 +7407,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Clouds at your saved spots is off in Your privacy, so nothing is sent: the spot uses its usual clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubes en tus sitios guardados está desactivado en Tu privacidad, así que no se envía nada: el sitio usa sus nubes habituales."
           }
         }
       }
@@ -7443,6 +7612,12 @@
             "state": "translated",
             "value": "Coordinates"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordenadas"
+          }
         }
       }
     },
@@ -7504,6 +7679,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Copies %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia %@."
           }
         }
       }
@@ -8545,6 +8726,23 @@
         }
       }
     },
+    "Dashed ring: your search radius, as the crow flies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dashed ring: your search radius, as the crow flies"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anillo discontinuo: tu radio de búsqueda, en línea recta"
+          }
+        }
+      }
+    },
     "Date": {
       "extractionState": "manual",
       "localizations": {
@@ -8638,6 +8836,12 @@
             "state": "translated",
             "value": "Delete %@?"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar %@?"
+          }
         }
       }
     },
@@ -8682,6 +8886,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Delete spot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar sitio"
           }
         }
       }
@@ -9448,6 +9658,23 @@
         }
       }
     },
+    "Elsewhere": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elsewhere"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros lugares"
+          }
+        }
+      }
+    },
     "Email the developer": {
       "extractionState": "manual",
       "localizations": {
@@ -9512,6 +9739,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Estimación"
+          }
+        }
+      }
+    },
+    "Estimated from satellite data, not measured here. Conditions vary across the area.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated from satellite data, not measured here. Conditions vary across the area."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimado con datos satelitales, no medido aquí. Las condiciones varían dentro de la zona."
           }
         }
       }
@@ -10204,6 +10448,12 @@
             "state": "translated",
             "value": "Find again"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar de nuevo"
+          }
         }
       }
     },
@@ -10299,6 +10549,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Finding where you are"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscando dónde estás"
           }
         }
       }
@@ -10624,6 +10880,12 @@
             "state": "translated",
             "value": "Follow this spot"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir este sitio"
+          }
         }
       }
     },
@@ -10668,6 +10930,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Followed spots appear in widgets, reminders and on Apple Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los sitios que sigues aparecen en los widgets, los recordatorios y el Apple Watch."
           }
         }
       }
@@ -10805,6 +11073,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "For each spot you save, Nyx asks api.open-meteo.com for its clouds with the spot's coordinates rounded to 0.1°, about 11 km. The service learns roughly where your spots are, never the exact point and never their names. Spots are asked about in a request of their own, never mixed with the parks. Your current location is sent only if you save it as a spot. With this off, nothing is sent for spots: they keep their last forecast, then use their usual clouds. The service receives network information such as your IP address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para cada sitio que guardas, Nyx pide sus nubes a api.open-meteo.com con las coordenadas del sitio redondeadas a 0,1°, unos 11 km. El servicio sabe más o menos dónde están tus sitios, nunca el punto exacto ni sus nombres. Los sitios se consultan en una solicitud propia, nunca junto con los parques. Tu ubicación actual solo se envía si la guardas como sitio. Con esto desactivado, no se envía nada por tus sitios: conservan su último pronóstico y después usan sus nubes habituales. El servicio recibe información de red, como tu dirección IP."
           }
         }
       }
@@ -11196,6 +11470,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Según las luces nocturnas que captan los satélites de la NASA: una comparación entre parques, no una medición del brillo del cielo. El índice usa la estimación."
+          }
+        }
+      }
+    },
+    "From Wikidata": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From Wikidata"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De Wikidata"
           }
         }
       }
@@ -11748,6 +12039,23 @@
         }
       }
     },
+    "Hides its places.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hides its places."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oculta sus lugares."
+          }
+        }
+      }
+    },
     "Hides the list.": {
       "extractionState": "manual",
       "localizations": {
@@ -11761,6 +12069,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oculta la lista."
+          }
+        }
+      }
+    },
+    "Hides the places abroad.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hides the places abroad."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oculta los lugares de otros países."
           }
         }
       }
@@ -12018,6 +12343,12 @@
             "state": "translated",
             "value": "Illustration: this spot's sky at its estimated Class %lld, and the same sky from a city, Class 8. From a city, the Milky Way and most faint stars disappear; only the brightest stars remain."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustración: el cielo de este sitio con su clase estimada %lld, y el mismo cielo desde una ciudad, clase 8. Desde una ciudad, la Vía Láctea y la mayoría de las estrellas tenues desaparecen; solo quedan las más brillantes."
+          }
         }
       }
     },
@@ -12147,6 +12478,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "In decimal degrees, such as 34.01, -116.18. South and west are negative. You can paste both at once."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En grados decimales, como 34.01, -116.18. El sur y el oeste son negativos. Puedes pegar ambos a la vez."
           }
         }
       }
@@ -12389,6 +12726,23 @@
         }
       }
     },
+    "International Dark Sky Community": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        }
+      }
+    },
     "International Dark Sky Park": {
       "extractionState": "manual",
       "localizations": {
@@ -12402,6 +12756,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "International Dark Sky Park"
+          }
+        }
+      }
+    },
+    "International Dark Sky Reserve": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        }
+      }
+    },
+    "International Dark Sky Sanctuary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
           }
         }
       }
@@ -12447,6 +12835,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sale de tus lugares guardados, los widgets y los recordatorios. Las entradas del diario escritas allí conservan sus palabras y fotos."
           }
         }
       }
@@ -12505,6 +12899,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Se pone en el %@. Desde aquí, oscuridad total sin Luna."
+          }
+        }
+      }
+    },
+    "Its Bortle class is estimated from satellite data, not measured here. Nyx has no viewing spots or ranger programs for it yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its Bortle class is estimated from satellite data, not measured here. Nyx has no viewing spots or ranger programs for it yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su clase Bortle es una estimación con datos satelitales, no una medición hecha aquí. Nyx aún no tiene puntos de observación ni programas con guardaparques para este lugar."
           }
         }
       }
@@ -12857,6 +13268,12 @@
             "state": "translated",
             "value": "Latitude"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitud"
+          }
         }
       }
     },
@@ -12867,6 +13284,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Latitude runs from -90 to 90."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La latitud va de -90 a 90."
           }
         }
       }
@@ -13065,6 +13488,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Leave it empty to use “%@”."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío para usar «%@»."
           }
         }
       }
@@ -13400,6 +13829,12 @@
             "state": "translated",
             "value": "Location is off for Nyx. Turn it on in Settings, or type the coordinates instead."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ubicación está desactivada para Nyx. Actívala en Ajustes o escribe las coordenadas."
+          }
         }
       }
     },
@@ -13520,6 +13955,12 @@
             "state": "translated",
             "value": "Longitude"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longitud"
+          }
         }
       }
     },
@@ -13530,6 +13971,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Longitude runs from -180 to 180."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La longitud va de -180 a 180."
           }
         }
       }
@@ -13598,6 +14045,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bajo: importa una vista despejada hacia el horizonte."
+          }
+        }
+      }
+    },
+    "Lower 48": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower 48"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los 48 contiguos"
           }
         }
       }
@@ -13687,16 +14151,33 @@
         }
       }
     },
-    "Map of %lld national parks by tonight's score. Darkest: %@, %lld, %@.": {
+    "Map area": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Map of %#@parks@ by tonight's score. Darkest: %2$@, %3$lld, %4$@."
+            "value": "Map area"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona del mapa"
+          }
+        }
+      }
+    },
+    "Map of %lld places by tonight's score. Darkest: %@, %lld, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map of %#@places@ by tonight's score. Darkest: %2$@, %3$lld, %4$@."
           },
           "substitutions": {
-            "parks": {
+            "places": {
               "argNum": 1,
               "formatSpecifier": "lld",
               "variations": {
@@ -13704,13 +14185,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%arg national park"
+                      "value": "%arg place"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%arg national parks"
+                      "value": "%arg places"
                     }
                   }
                 }
@@ -13721,10 +14202,10 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mapa de %#@parks@ según el índice de esta noche. El más oscuro: %2$@, %3$lld, %4$@."
+            "value": "Mapa de %#@places@ según el índice de esta noche. El más oscuro: %2$@, %3$lld, %4$@."
           },
           "substitutions": {
-            "parks": {
+            "places": {
               "argNum": 1,
               "formatSpecifier": "lld",
               "variations": {
@@ -13732,13 +14213,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%arg parque nacional"
+                      "value": "%arg lugar"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%arg parques nacionales"
+                      "value": "%arg lugares"
                     }
                   }
                 }
@@ -15368,6 +15849,12 @@
             "state": "translated",
             "value": "Near %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca de %@"
+          }
         }
       }
     },
@@ -15463,6 +15950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "New spot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitio nuevo"
           }
         }
       }
@@ -16128,6 +16621,12 @@
             "state": "translated",
             "value": "No city or town by that name. Try a nearby larger one."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna ciudad ni pueblo con ese nombre. Prueba con uno más grande cercano."
+          }
         }
       }
     },
@@ -16384,6 +16883,12 @@
             "state": "translated",
             "value": "No light map reaches here, so Nyx assumes a suburban sky, Bortle %lld."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún mapa de luz llega hasta aquí, así que Nyx supone un cielo suburbano, Bortle %lld."
+          }
         }
       }
     },
@@ -16485,23 +16990,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ningún parque nacional queda dentro de este radio. Amplíalo o elige otro punto de partida."
-          }
-        }
-      }
-    },
-    "No national parks fall inside this radius. Widen it or start from another park.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No national parks fall inside this radius. Widen it or start from another park."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No hay parques nacionales dentro de este radio. Amplíalo o empieza desde otro parque."
           }
         }
       }
@@ -16659,6 +17147,23 @@
         }
       }
     },
+    "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún parque ni lugar de cielo oscuro queda dentro de este radio. Amplíalo o elige otro punto de partida."
+          }
+        }
+      }
+    },
     "No parks to show.": {
       "extractionState": "manual",
       "localizations": {
@@ -16672,6 +17177,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "No hay parques para mostrar."
+          }
+        }
+      }
+    },
+    "No places in this part of the map. Choose another area above.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No places in this part of the map. Choose another area above."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay lugares en esta parte del mapa. Elige otra zona arriba."
           }
         }
       }
@@ -17438,6 +17960,23 @@
         }
       }
     },
+    "Nyx can't check closures here. Check the park's own site before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx can't check closures here. Check the park's own site before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no puede comprobar los cierres aquí. Consulta el sitio del propio parque antes de ir."
+          }
+        }
+      }
+    },
     "Nyx can't see what you looked at while you were away. Bright light resets dark adaptation.": {
       "extractionState": "manual",
       "localizations": {
@@ -17647,6 +18186,12 @@
             "state": "translated",
             "value": "Nyx has no alerts for this place. Check access, local rules and closures before you go."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx no tiene alertas para este lugar. Comprueba el acceso, las normas locales y los cierres antes de ir."
+          }
         }
       }
     },
@@ -17842,6 +18387,12 @@
             "state": "translated",
             "value": "Nyx reads where you are once, to save this spot. Nothing is sent unless you save it."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx lee dónde estás una vez, para guardar este sitio. No se envía nada a menos que lo guardes."
+          }
         }
       }
     },
@@ -17865,6 +18416,24 @@
               }
             }
           }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx lee tu ubicación una vez, en este iPad, solo cuando lo pides."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx lee tu ubicación una vez, en este iPhone, solo cuando lo pides."
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -17884,6 +18453,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Nyx saves this spot on this iPhone. Its clouds are asked for with its position rounded to about 11 km."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx guarda este sitio en este iPad. Sus nubes se consultan con su posición redondeada a unos 11 km."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nyx guarda este sitio en este iPhone. Sus nubes se consultan con su posición redondeada a unos 11 km."
                 }
               }
             }
@@ -18241,6 +18828,24 @@
               }
             }
           }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "En este iPad"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "En este iPhone"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -18454,6 +19059,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Only this iPhone knows the name."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Solo este iPad conoce el nombre."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Solo este iPhone conoce el nombre."
                 }
               }
             }
@@ -19056,6 +19679,23 @@
         }
       }
     },
+    "Opens the park's own site in Safari.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the park's own site in Safari."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el sitio del propio parque en Safari."
+          }
+        }
+      }
+    },
     "Opens the park's page in Safari.": {
       "extractionState": "manual",
       "localizations": {
@@ -19154,6 +19794,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abre la página de soporte en Safari."
+          }
+        }
+      }
+    },
+    "Opens this place's Wikidata entry in Safari.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens this place's Wikidata entry in Safari."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la entrada de este lugar en Wikidata en Safari."
           }
         }
       }
@@ -19413,6 +20070,40 @@
         }
       }
     },
+    "Park website": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park website"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitio web del parque"
+          }
+        }
+      }
+    },
+    "Park, region or country": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park, region or country"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parque, región o país"
+          }
+        }
+      }
+    },
     "Park-local time": {
       "extractionState": "manual",
       "localizations": {
@@ -19477,6 +20168,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parques y resplandor"
+          }
+        }
+      }
+    },
+    "Parks around the world": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parks around the world"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques del mundo"
           }
         }
       }
@@ -19794,6 +20502,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lugar"
           }
         }
       }
@@ -20145,6 +20859,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Precise Location is off for Nyx, so this is only good to a few kilometers. You can turn it on in Settings."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ubicación exacta está desactivada para Nyx, así que esto solo es fiable a unos pocos kilómetros. Puedes activarla en Ajustes."
           }
         }
       }
@@ -20820,6 +21540,12 @@
             "state": "translated",
             "value": "Region"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Región"
+          }
         }
       }
     },
@@ -20911,6 +21637,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quitar de los parques guardados"
+          }
+        }
+      }
+    },
+    "Remove from saved places": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from saved places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de los lugares guardados"
           }
         }
       }
@@ -21008,6 +21751,12 @@
             "state": "translated",
             "value": "Rename"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renombrar"
+          }
         }
       }
     },
@@ -21018,6 +21767,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rename spot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renombrar sitio"
           }
         }
       }
@@ -21676,6 +22431,12 @@
             "state": "translated",
             "value": "Save a spot"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar un sitio"
+          }
         }
       }
     },
@@ -21686,6 +22447,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save a spot of your own"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar un sitio propio"
           }
         }
       }
@@ -21698,6 +22465,12 @@
             "state": "translated",
             "value": "Save another spot"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar otro sitio"
+          }
         }
       }
     },
@@ -21708,6 +22481,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save as a spot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar como sitio"
           }
         }
       }
@@ -21725,6 +22504,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Guardar parque"
+          }
+        }
+      }
+    },
+    "Save place": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar lugar"
           }
         }
       }
@@ -21777,6 +22573,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save where you are"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar dónde estás"
           }
         }
       }
@@ -21835,6 +22637,24 @@
               }
             }
           }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPad. Nubes en tus sitios guardados está desactivado en Tu privacidad, así que este sitio usa sus nubes habituales."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPhone. Nubes en tus sitios guardados está desactivado en Tu privacidad, así que este sitio usa sus nubes habituales."
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -21854,6 +22674,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Saved on this iPhone. Its clouds are asked for with its position rounded to about 11 km."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPad. Sus nubes se consultan con su posición redondeada a unos 11 km."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Guardado en este iPhone. Sus nubes se consultan con su posición redondeada a unos 11 km."
                 }
               }
             }
@@ -21894,6 +22732,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los parques y sitios guardados, las entradas del diario y las fotos elegidas se guardan en este iPad. No se usa la sincronización con iCloud. La configuración de copia de seguridad de tu dispositivo puede incluir datos de la app."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Los parques y sitios guardados, las entradas del diario y las fotos elegidas se guardan en este iPhone. No se usa la sincronización con iCloud. La configuración de copia de seguridad de tu dispositivo puede incluir datos de la app."
                 }
               }
             }
@@ -21942,6 +22798,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saved spots are kept with your journal, which could not be opened. Nothing was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los sitios guardados se conservan con tu diario, que no se pudo abrir. No se cambió nada."
           }
         }
       }
@@ -22885,6 +23747,23 @@
         }
       }
     },
+    "Showing %lld of %lld places in view, the darkest where they crowd together.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing %lld of %lld places in view, the darkest where they crowd together."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se muestran %1$lld de los %2$lld lugares a la vista; donde se agrupan, los más oscuros."
+          }
+        }
+      }
+    },
     "Shown": {
       "extractionState": "manual",
       "localizations": {
@@ -22919,6 +23798,23 @@
         }
       }
     },
+    "Shows its parks and dark-sky places.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows its parks and dark-sky places."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra sus parques y lugares de cielo oscuro."
+          }
+        }
+      }
+    },
     "Shows less.": {
       "extractionState": "manual",
       "localizations": {
@@ -22949,6 +23845,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Muestra la noche de un parque, o la más oscura de tus parques guardados. Los parques guardados incluyen su pronóstico de nubes."
+          }
+        }
+      }
+    },
+    "Shows parks and dark-sky places in other countries, by country.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows parks and dark-sky places in other countries, by country."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra parques y lugares de cielo oscuro de otros países, por país."
           }
         }
       }
@@ -24304,6 +25217,12 @@
             "state": "translated",
             "value": "Stop following this spot"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejar de seguir este sitio"
+          }
         }
       }
     },
@@ -25038,19 +25957,19 @@
         }
       }
     },
-    "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a park lies from Earth's magnetic pole (its geomagnetic latitude) and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score.": {
+    "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a place lies from Earth's magnetic pole, traced along the magnetic field itself with the International Geomagnetic Reference Field (IGRF-14), and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a park lies from Earth's magnetic pole (its geomagnetic latitude) and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score."
+            "value": "The Milky Way's bright center is taken as the direction of Sagittarius A*, counted as up once it is 10° clear of the horizon. Planets use Paul Schlyter's low-precision orbital elements and agree with a professional ephemeris to within about a degree from 2026 to 2032; brightness is given in words, because Mercury's can be off by more than half a magnitude. A planet is listed once it is 8° up in a sky dark enough for its brightness: civil twilight for Venus and Jupiter at their brightest, the Sun 9° down for planets brighter than magnitude 0, 12° down for the rest; Mercury fainter than magnitude 1.5 is left out. Rise, set and best times are found to within a minute of the model, but hills, trees and haze can shift what you see by a few minutes or more. Meteor showers come from the International Meteor Organization's 2026 Meteor Shower Calendar (IMO, edited by Jürgen Rendtel): dates, radiants and published peak rates. Nyx estimates an hourly rate for one observer from the radiant's height, the Moon and the park's estimated sky brightness, shown as a range: the upper figure is what a trained observer could count, and casual watchers see about half. It is a rough guide, and real showers vary from year to year. Lunar eclipse times: Eclipse Predictions by Fred Espenak, NASA's GSFC. Nyx checks the Moon's height at the park itself and names the deepest stage you can see, so a Moon that rises during the partial phase is shown, not hidden. Satellites are counted as sunlit while the Sun is less than about 23° below the horizon, for a 550 km orbit overhead. The faintest-star figure is an estimate from the park's Bortle class, moonlight, twilight and haze. Aurora notes come from how far a place lies from Earth's magnetic pole, traced along the magnetic field itself with the International Geomagnetic Reference Field (IGRF-14), and appear only on nights dark enough to see one; Nyx does not forecast aurora. None of this changes the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El centro brillante de la Vía Láctea se toma como la dirección de Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. Las notas de aurora dependen de lo lejos que está un parque del polo magnético de la Tierra (su latitud geomagnética) y solo aparecen en noches lo bastante oscuras para ver una; Nyx no pronostica auroras. Nada de esto cambia el índice."
+            "value": "El centro brillante de la Vía Láctea se toma como la dirección de Sagitario A*, que se considera sobre el horizonte cuando supera los 10°. Los planetas usan los elementos orbitales de baja precisión de Paul Schlyter y coinciden con una efeméride profesional con un margen de un grado entre 2026 y 2032; el brillo se da con palabras, porque el de Mercurio puede desviarse más de media magnitud. Un planeta aparece en la lista cuando está a 8° de altura en un cielo lo bastante oscuro para su brillo: crepúsculo civil para Venus y Júpiter en su máximo brillo, el Sol 9° bajo el horizonte para los planetas más brillantes que la magnitud 0 y 12° para los demás; Mercurio más tenue que la magnitud 1.5 se omite. Las horas de salida, puesta y mejor momento se calculan con un margen de un minuto respecto al modelo, pero las colinas, los árboles y la bruma pueden cambiar lo que ves en unos minutos o más. Las lluvias de meteoros provienen del Meteor Shower Calendar 2026 de la International Meteor Organization (IMO, editado por Jürgen Rendtel): fechas, radiantes y tasas máximas publicadas. Nyx estima una tasa por hora para un observador a partir de la altura del radiante, la Luna y el brillo estimado del cielo del parque, y la muestra como un rango: la cifra mayor es lo que podría contar un observador entrenado, y quien mira de forma casual ve más o menos la mitad. Es una guía aproximada, y las lluvias reales varían de un año a otro. Horarios de los eclipses de Luna: Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx comprueba la altura de la Luna en el propio parque y nombra la fase más profunda que puedes ver, así que una Luna que sale durante la fase parcial se muestra, no se oculta. Los satélites se cuentan como iluminados por el Sol mientras el Sol está a menos de unos 23° bajo el horizonte, para una órbita de 550 km sobre ti. La cifra de la estrella más tenue es una estimación a partir de la clase Bortle del parque, la luz de la Luna, el crepúsculo y la bruma. Las notas de aurora dependen de lo lejos que está un lugar del polo magnético de la Tierra, siguiendo el propio campo magnético con el Campo Geomagnético Internacional de Referencia (IGRF-14), y solo aparecen en noches lo bastante oscuras para ver una; Nyx no pronostica auroras. Nada de esto cambia el índice."
           }
         }
       }
@@ -26007,6 +26926,23 @@
         }
       }
     },
+    "The first %lld matches. Add a word to narrow them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first %lld matches. Add a word to narrow them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los primeros %lld resultados. Agrega una palabra para acotarlos."
+          }
+        }
+      }
+    },
     "The first night to consider. Tonight if empty.": {
       "extractionState": "manual",
       "localizations": {
@@ -26439,6 +27375,23 @@
         }
       }
     },
+    "The parks and dark-sky places beyond the U.S. national parks are never asked about one at a time. The world is divided into squares of 10° of latitude and longitude, and a request carries the public coordinates of every listed place in one square, at most 1,000; squares with only a few places are asked about together. The service can tell which part of the world interests you, a region about the size of a country, but never the place you look at or where you are.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parks and dark-sky places beyond the U.S. national parks are never asked about one at a time. The world is divided into squares of 10° of latitude and longitude, and a request carries the public coordinates of every listed place in one square, at most 1,000; squares with only a few places are asked about together. The service can tell which part of the world interests you, a region about the size of a country, but never the place you look at or where you are."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los parques y lugares de cielo oscuro que no son parques nacionales de EE. UU. nunca se piden uno por uno. El mundo se divide en cuadrados de 10° de latitud y longitud, y cada solicitud lleva las coordenadas públicas de todos los lugares de la lista en un cuadrado, como máximo 1000; los cuadrados con pocos lugares se piden juntos. El servicio puede saber qué parte del mundo te interesa, una región del tamaño aproximado de un país, pero nunca el lugar que miras ni dónde estás."
+          }
+        }
+      }
+    },
     "The peak falls in daylight or twilight here, so only the edges of it reach a dark sky.": {
       "extractionState": "manual",
       "localizations": {
@@ -26753,6 +27706,12 @@
             "state": "translated",
             "value": "The spot sits at the town's point on Nyx's list, not at a particular field or hill. For somewhere outside town, use coordinates."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El sitio queda en el punto del pueblo en la lista de Nyx, no en un campo o una colina concretos. Para un lugar fuera del pueblo, usa coordenadas."
+          }
         }
       }
     },
@@ -27043,6 +28002,12 @@
             "state": "translated",
             "value": "This is where you are now. If you save it, its rounded position is asked about like any spot's. If you don't, nothing is sent."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí es donde estás ahora. Si lo guardas, su posición redondeada se consulta como la de cualquier sitio. Si no, no se envía nada."
+          }
         }
       }
     },
@@ -27291,6 +28256,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Times here keep %@, from the nearest town on Nyx's list. Near a border, that can be the neighbor's."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las horas aquí siguen la %@, del pueblo más cercano de la lista de Nyx. Cerca de una frontera, puede ser la del vecino."
           }
         }
       }
@@ -28102,6 +29073,12 @@
             "state": "translated",
             "value": "Try again"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intentar de nuevo"
+          }
         }
       }
     },
@@ -28431,6 +29408,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Islas Vírgenes de EE. UU."
+          }
+        }
+      }
+    },
+    "US national parks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "US national parks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques nacionales de EE. UU."
           }
         }
       }
@@ -28814,6 +29808,12 @@
             "state": "translated",
             "value": "Use decimal degrees, such as -116.18."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa grados decimales, como -116.18."
+          }
         }
       }
     },
@@ -28824,6 +29824,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use decimal degrees, such as 34.01."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa grados decimales, como 34.01."
           }
         }
       }
@@ -28903,6 +29909,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use where I am now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar dónde estoy ahora"
           }
         }
       }
@@ -29090,23 +30102,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vista"
-          }
-        }
-      }
-    },
-    "Virgin Is.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virgin Is."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I. Vírgenes"
           }
         }
       }
@@ -29417,6 +30412,23 @@
         }
       }
     },
+    "Website": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitio web"
+          }
+        }
+      }
+    },
     "Weekends only": {
       "extractionState": "manual",
       "localizations": {
@@ -29464,6 +30476,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oeste"
+          }
+        }
+      }
+    },
+    "West to east": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "West to east"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De oeste a este"
           }
         }
       }
@@ -29748,6 +30777,12 @@
             "state": "translated",
             "value": "Where I am now"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donde estoy ahora"
+          }
         }
       }
     },
@@ -29792,6 +30827,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Where is it?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Dónde está?"
           }
         }
       }
@@ -30049,6 +31090,12 @@
             "state": "translated",
             "value": "Within about %@."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con un margen de unos %@."
+          }
         }
       }
     },
@@ -30140,6 +31187,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Calculando el cielo de esta noche"
+          }
+        }
+      }
+    },
+    "World": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "World"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mundo"
+          }
+        }
+      }
+    },
+    "World map: Natural Earth, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "World map: Natural Earth, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa del mundo: Natural Earth, dominio público."
+          }
+        }
+      }
+    },
+    "World parks and dark-sky places: Wikidata, CC0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "World parks and dark-sky places: Wikidata, CC0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parques y lugares de cielo oscuro del mundo: Wikidata, CC0."
           }
         }
       }
@@ -30583,6 +31681,23 @@
         }
       }
     },
+    "Your constellation. A map of the parks and dark-sky places near you, drawn as faint stars. Your first night will be your first star.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation. A map of the parks and dark-sky places near you, drawn as faint stars. Your first night will be your first star."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu constelación. Un mapa de los parques y lugares de cielo oscuro cercanos, dibujados como estrellas tenues. Tu primera noche será tu primera estrella."
+          }
+        }
+      }
+    },
     "Your constellation: %lld nights at %lld parks across %lld seasons, each a star at its park on a map of the United States.": {
       "extractionState": "manual",
       "localizations": {
@@ -30695,6 +31810,147 @@
                     "stringUnit": {
                       "state": "translated",
                       "value": "%arg parques"
+                    }
+                  }
+                }
+              }
+            },
+            "seasons": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg estación"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg estaciones"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Your constellation: %lld nights at %lld places across %lld seasons, each a star at its true place on the map.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your constellation: %#@nights@ at %#@places@ across %#@seasons@, each a star at its true place on the map."
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg night"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg nights"
+                    }
+                  }
+                }
+              }
+            },
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg place"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg places"
+                    }
+                  }
+                }
+              }
+            },
+            "seasons": {
+              "argNum": 3,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg season"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg seasons"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu constelación: %#@nights@ en %#@places@ a lo largo de %#@seasons@, cada una como una estrella en su lugar real del mapa."
+          },
+          "substitutions": {
+            "nights": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg noche"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg noches"
+                    }
+                  }
+                }
+              }
+            },
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg lugar"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg lugares"
                     }
                   }
                 }
@@ -30970,6 +32226,12 @@
             "state": "translated",
             "value": "Your location is unavailable right now. Try again, or type the coordinates instead."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu ubicación no está disponible ahora. Inténtalo de nuevo o escribe las coordenadas."
+          }
         }
       }
     },
@@ -30990,19 +32252,19 @@
         }
       }
     },
-    "Your nights as stars among the national parks, joined night to night. The ring marks the best night.": {
+    "Your nights as stars among the parks and dark-sky places, joined night to night. The ring marks the best night.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your nights as stars among the national parks, joined night to night. The ring marks the best night."
+            "value": "Your nights as stars among the parks and dark-sky places, joined night to night. The ring marks the best night."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus noches como estrellas entre los parques nacionales, unidas noche a noche. El anillo marca la mejor noche."
+            "value": "Tus noches como estrellas entre los parques y lugares de cielo oscuro, unidas noche a noche. El anillo marca la mejor noche."
           }
         }
       }
@@ -31049,6 +32311,12 @@
             "state": "translated",
             "value": "Your spot"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu sitio"
+          }
         }
       }
     },
@@ -31060,6 +32328,12 @@
             "state": "translated",
             "value": "Your spot · %@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu sitio · %@"
+          }
         }
       }
     },
@@ -31070,6 +32344,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your spots"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus sitios"
           }
         }
       }

@@ -32,9 +32,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// [lowest, highest]. Two small numbers a night, and only for the nights that have one: the
     /// watch cannot work it out itself, since the three models' clouds stay on the iPhone.
     let ranges: [String: [String: [Int]]]
-    /// Saved spots among the saved parks (G3), whole: the watch's bundled parks cannot hold a place
-    /// the person saved. Empty from an iPhone without spots; a watch from before G3 ignores it and
-    /// simply leaves the spots out, as any id it does not know.
+    /// Saved spots (G3) and world catalogue places (G4, `wd:` ids) among the saved parks and the
+    /// starting park, whole: the watch bundles only the curated parks, never a place the person saved
+    /// or the world catalogue. Empty from an iPhone without either; a watch from before G3 ignores it
+    /// and simply leaves those places out, as any id it does not know.
     let places: [Place]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
@@ -76,8 +77,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             used += size + id.utf8.count + 4
             return true
         }
-        // A saved spot first: without its place the watch cannot show it at all, while a forecast
-        // left out only costs clouds. Only spots that are saved, in order, once.
+        // A spot or catalogue place first: without its record the watch cannot show it at all, while a
+        // forecast left out only costs clouds. Only places that are followed (or the start), in order, once.
         var sentPlaces: [Place] = [], placed = Set<String>()
         for place in places where ids.contains(place.id) && placed.insert(place.id).inserted {
             guard fits(place, place.id) else { break }

@@ -126,7 +126,11 @@ struct ScienceTests {
         #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-10-15"))?.contains("Nyx does not forecast aurora") == true)
         #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-06-15")) == nil)
         #expect(SkyNotes.aurora(park: jotr, evening: try evening(jotr, "2026-10-15")) == nil)
-        #expect(parks.filter { SkyNotes.aurora(park: $0, evening: (try? evening($0, "2026-12-01")) ?? .now) != nil }.count == 16)
+        // 18 on the corrected-latitude grid (G4): every park in the three tiers, all dark enough on Dec 1.
+        let noted = parks.filter { SkyNotes.aurora(park: $0, evening: (try? evening($0, "2026-12-01")) ?? .now) != nil }
+        #expect(Set(noted.map(\.id)) == ["gaar", "kova", "dena", "wrst", "glba", "katm", "voya", "isro", "lacl", "kefj",
+                                          "glac", "thro", "noca", "olym", "mora", "badl", "wica", "yell"])
+        #expect(noted.count == 18)
     }
     @Test func satellitesCatchSunlight() throws {
         #expect(abs(SkyNotes.shellDepression-23.0) < 0.1)

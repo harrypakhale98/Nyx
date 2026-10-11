@@ -46,11 +46,14 @@ struct CreditsView: View {
                 credit("Star names: the IAU Working Group on Star Names (WGSN).")
                 credit("Lunar eclipses: NASA eclipse predictions by Fred Espenak (NASA/GSFC).")
                 credit("Meteor showers: the International Meteor Organization (IMO) calendar.")
+                credit("Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work).")
             }.listRowBackground(palette.panel)
             Section("Parks and places") {
                 credit("Parks, alerts and ranger programs: the National Park Service.")
                 credit("Starting points and the map of the United States: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.")
                 credit("Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.")
+                credit("World parks and dark-sky places: Wikidata, CC0.")
+                credit("World map: Natural Earth, public domain.")
             }.listRowBackground(palette.panel)
             Section {
                 credit("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")

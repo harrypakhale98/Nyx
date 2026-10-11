@@ -10,7 +10,8 @@ extension ParkDetailView {
         // Sky glow: what city light takes (an illustration), where this park's comes from, and what anyone can do.
         // DEBUG `-nyx-glow-compare city` opens the comparison on the city's sky for captures; nil in Release.
         SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here).id("glow")
-        if !park.isSavedSpot { Panel { ViewingSpots(park:park) }.id("spots") }
+        // Viewing spots are hand-checked from nps.gov: the curated parks only (none for a place abroad yet).
+        if !park.isSavedSpot, !park.isCatalogPlace { Panel { ViewingSpots(park:park) }.id("spots") }
         // Campgrounds and ranger programs are the National Park Service's: only where it runs the place.
         if park.nps != nil {
             // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.
@@ -24,7 +25,21 @@ extension ParkDetailView {
                 ClampedText(text:park.description,lines:4)
             }.frame(maxWidth:.infinity,alignment:.leading)
         }
+        if park.isCatalogPlace { worldSource }
         AboutDataLink().font(.subheadline)
+    }
+    /// Where a place abroad comes from, said plainly: the Wikidata item (linked), and a Bortle class
+    /// estimated from satellite data rather than checked by hand as the curated parks' are.
+    private var worldSource: some View {
+        VStack(alignment:.leading,spacing:6) {
+            Text("Its Bortle class is estimated from satellite data, not measured here. Nyx has no viewing spots or ranger programs for it yet.")
+                .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            if let url=park.wikidataURL {
+                Link(destination:url) { Label("From Wikidata",systemImage:"safari").font(.subheadline).frame(minHeight:44).contentShape(Rectangle()) }
+                    .foregroundStyle(palette.accent)
+                    .accessibilityHint("Opens this place's Wikidata entry in Safari.")
+            }
+        }.frame(maxWidth:.infinity,alignment:.leading)
     }
     private var programsPanel: some View {
         Panel { VStack(alignment:.leading,spacing:14) {

@@ -24,9 +24,32 @@ struct TonightView: View {
     /// "Near me" chosen in the starting-point sheet: the location explainer follows once it closes.
     @State private var nearMeAfterPicker=false
     @Namespace private var zoom
-    private var candidates:[Park] { model.nearby(latitude:location.latitude,longitude:location.longitude) }
-    /// Ranked once per update of the page (the body reads it into `best` and passes it down).
-    private var best:[Park] { Array(model.ranked(candidates).prefix(5)) }
+    private var candidates:[Park] { reach().places }
+    /// Everything within `radiusMeters` (the chosen radius by default) of where distances are measured
+    /// from (`TonightReach`): from a US starting point with only US places in range, the national parks
+    /// exactly as before the world catalogue; otherwise every place in range, catalogue and spots too.
+    private func reach(radiusMeters:Double?=nil)->(places:[Park],world:Bool) {
+        let parks=model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMeters:radiusMeters)
+        guard !model.catalog.isEmpty, let from=from else { return (parks,false) }
+        let everything=model.places(near:from.latitude,longitude:from.longitude,radiusMeters:radiusMeters ?? model.radiusMeters)
+        let places=TonightReach.candidates(parks:parks,places:everything,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
+        return (places,places != parks)
+    }
+    /// The device's location under "Near me", else the starting point.
+    private var from:(latitude:Double,longitude:Double)? {
+        if let lat=location.latitude, let lon=location.longitude { return (lat,lon) }
+        return model.origin
+    }
+    /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
+    /// radius can hold hundreds of places: until their nights are worked out off the main thread
+    /// (`prepared`), the page ranks a shortlist (`TonightReach.shortlist`), never hundreds at once.
+    private var best:[Park] { Array(model.ranked(pool).prefix(5)) }
+    private var pool:[Park] {
+        let all=candidates
+        return all.count<=TonightReach.shortlistSize || prepared==TonightReach.key(all) ? all : TonightReach.shortlist(all,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0)
+    }
+    /// The places in reach whose tonight has been worked out in the background (`TonightReach.key`).
+    @State private var prepared:String?
     @State private var width=0.0
     /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
     @State private var riverNight:Date?
@@ -54,7 +77,7 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:"No national parks fall inside this radius. Widen it or choose a different starting point.");farther(than:nil);startingPoint(heading:false);fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil);startingPoint(heading:false);fromHome }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         farther(than:park)
@@ -83,7 +106,15 @@ struct TonightView: View {
                 } }.nyxPresentation().presentationDetents([.large])
             }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
-            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMeters)+(location.latitude?.description ?? "manual")) { await model.refresh(candidates) }
+            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMeters)+(location.latitude?.description ?? "manual")+(model.catalog.isEmpty ? "" : "|world")) {
+                let all=candidates
+                // Hundreds of places in reach (abroad): tonight at each, worked out off the main thread, before ranking them all.
+                if all.count>TonightReach.shortlistSize {
+                    await model.prepareNights(all,count:1)
+                    prepared=TonightReach.key(all)
+                }
+                await model.refresh(all)
+            }
             // A location found is a starting point chosen.
             .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
             // Back from the background: where you are may have changed, and so may the sky.
@@ -157,7 +188,9 @@ struct TonightView: View {
         let wider=SearchRadius.wider()
         if model.radiusMeters<wider, candidates.count<3 || (best?.bortleEstimate ?? 9)>=5 {
             let inReach=Set(candidates.map(\.id)), bestScore=best.map { model.night($0).score.value } ?? -1
-            if let far=model.ranked(model.nearby(latitude:location.latitude,longitude:location.longitude,radiusMeters:wider)).first(where:{ !inReach.contains($0.id) }),
+            let wide=reach(radiusMeters:wider).places.filter { !inReach.contains($0.id) }
+            let shortlist=wide.count>TonightReach.shortlistSize ? TonightReach.shortlist(wide,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0) : wide
+            if let far=model.ranked(shortlist).first,
                model.night(far).score.value>bestScore {
                 Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMeters=wider } } label:{
                     HStack(spacing:8) {
@@ -188,7 +221,21 @@ struct TonightView: View {
     private var weekAcross: some View {
         let radius=SearchRadius.label(model.radiusMeters)
         let reach=location.latitude != nil ? String(localized:"within \(radius) of you") : String(localized:"within \(radius) of \(model.originName)")
-        return WeekAcrossParksPanel(week:.make(model.ranked(candidates).map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) }),reach:reach)
+        return WeekAcrossParksPanel(week:.make(aheadPool.map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) }),reach:reach)
+    }
+    /// The places whose coming nights are looked at (the darker night ahead, the week across parks):
+    /// all of them in the US as before; abroad, the twelve best tonight, so a radius of hundreds of
+    /// places never asks for thousands of nights.
+    private var aheadPool:[Park] {
+        let ranked=model.ranked(pool)
+        return reach().world ? Array(ranked.prefix(TonightReach.aheadSize)) : ranked
+    }
+    /// Nothing in reach: national parks from a US starting point, as before; any kind of place elsewhere.
+    private var emptyMessage:LocalizedStringKey {
+        guard !model.catalog.isEmpty, let from, !USOutline.contains(latitude:from.latitude,longitude:from.longitude) else {
+            return "No national parks fall inside this radius. Widen it or choose a different starting point."
+        }
+        return "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point."
     }
     private func stepRiver(_ delta:Int) {
         guard let park=best.first else { return }
@@ -218,8 +265,13 @@ struct TonightView: View {
             if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             // A forecast more than six hours old says when it is from.
             let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
+            // A place the Park Service does not run: Nyx cannot see its closures, and says so (G4).
+            if park.nps == nil {
+                if let stale { forecastAsOf(park,stale) }
+                UnknownClosuresNote(park:park,compact:true).padding(.horizontal,12)
+            }
             // A closure is the one line here that must never be lost in the sky: it sits on a dark scrim.
-            if let closure=model.closure(park) {
+            else if let closure=model.closure(park) {
                 if let stale { forecastAsOf(park,stale) }
                 Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
                 .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
@@ -340,7 +392,7 @@ struct TonightView: View {
     /// Tonight answers where; this answers when. The darkest of the next six nights across every
     /// park in reach, shown only when it is clearly better than tonight's best.
     @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
-        let ahead=candidates.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) }
+        let ahead=aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) }
             .reduce(nil as Night?) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night }
         if let ahead, ahead.score.value>=tonight.score.value+5 {
             capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)"),hint:"Opens that night at the park.") {
@@ -480,11 +532,53 @@ struct PermissionExplainer: View {
     }
 }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Tonight • from abroad") { NavigationStack { TonightView() }.environment(TonightReach.previewModel(from:"Reykjavík")).preferredColorScheme(.dark) }
+#Preview("Tonight • from abroad, AX5, night vision") {
+    NavigationStack { TonightView() }.environment(TonightReach.previewModel(from:"Paris")).dynamicTypeSize(.accessibility5)
+        .environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark)
+}
+#Preview("Tonight • from abroad, wide iPad") { NavigationStack { TonightView() }.environment(TonightReach.previewModel(from:"Sydney")).frame(width:1180,height:820).preferredColorScheme(.dark) }
 #Preview("Caveat • two facts") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go")]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
 #Preview("Caveat • no alerts listed") { CaveatLine(facts:[String(localized:"No alerts listed"),String(localized:"confirm access before you go")]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
 #Preview("Caveat • old forecast, wraps at the last dot") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
 #Preview("Caveat • old forecast, AX5") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
 #Preview("Caveat • night vision") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) }
+/// Which places Tonight weighs, apart from the view so it can be tested (G4).
+nonisolated enum TonightReach {
+    /// Beyond this many places in reach, the first ranking is of a shortlist until every night is ready.
+    static let shortlistSize=40
+    /// Abroad, the coming nights are looked at for this many of the best places tonight.
+    static let aheadSize=12
+    /// From a US starting point with only US places in range: the national parks, exactly as before
+    /// the world catalogue (US dark-sky places and saved spots stay out of Tonight there, as they did).
+    /// From anywhere else, near a border, or where no national park is in reach: every place in range,
+    /// curated, catalogue and saved spots alike, ranked as the parks always were.
+    static func candidates(parks:[Park],places:[Park],originInUS:Bool)->[Park] {
+        if originInUS, !parks.isEmpty, places.allSatisfy({ $0.countryCode.uppercased()=="US" }) { return parks }
+        return places
+    }
+    /// At most `limit` places to rank first: every curated park and saved spot in reach, then catalogue
+    /// places by what their sky offers before any forecast (the lower Bortle class first, a DarkSky
+    /// designation next), then the nearer. Only an order of work: the answer is still the best score.
+    static func shortlist(_ places:[Park],latitude:Double,longitude:Double,limit:Int=shortlistSize)->[Park] {
+        let kept=places.filter { !$0.isCatalogPlace }
+        let rest=places.filter(\.isCatalogPlace).map { ($0,$0.distanceMeters(latitude:latitude,longitude:longitude)) }.sorted { a,b in
+            if a.0.bortleEstimate != b.0.bortleEstimate { return a.0.bortleEstimate<b.0.bortleEstimate }
+            if a.0.darkSkyDesignated != b.0.darkSkyDesignated { return a.0.darkSkyDesignated }
+            return (a.1,a.0.id)<(b.1,b.0.id)
+        }.map(\.0)
+        return Array((kept+rest).prefix(max(limit,kept.count)))
+    }
+    /// The same places in reach, the same key: whether their nights have been worked out.
+    static func key(_ places:[Park])->String { places.map(\.id).sorted().joined(separator:",") }
+    /// For previews: a model starting from a city abroad, with the catalogue on its way.
+    @MainActor static func previewModel(from city:String)->PlanModel {
+        let model=PlanModel()
+        model.prepareCatalog()
+        if let place=StartingPlaces.all.first(where:{ $0.name==city }) { model.choose(place) }
+        return model
+    }
+}
 /// The nights Tonight has already marked with the double tap, so each is felt once.
 enum FoundNights {
     private static let key="foundNights"

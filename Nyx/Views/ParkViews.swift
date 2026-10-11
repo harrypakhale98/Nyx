@@ -17,6 +17,81 @@ struct AccessNoteLabel: View {
         }
     }
 }
+/// How a place from the world catalogue (G4, `catalog.json`, from Wikidata) names itself on screen:
+/// what it is, in DarkSky International's own designation names, and where it is, in the reader's
+/// language. The curated parks and saved spots keep their own words (`regionLine`, `placeEyebrow`).
+extension Place {
+    /// "National park", or the DarkSky designation exactly as DarkSky International names it. Nil for
+    /// a place the person saved, which says "Your spot" instead.
+    var kindLabel: String? {
+        switch kind {
+        case .nationalPark: String(localized:"National park")
+        case .darkSkyPark: String(localized:"International Dark Sky Park")
+        case .reserve: String(localized:"International Dark Sky Reserve")
+        case .sanctuary: String(localized:"International Dark Sky Sanctuary")
+        case .community: String(localized:"International Dark Sky Community")
+        case .custom: nil
+        }
+    }
+    /// "Catalonia, Spain"; "Colorado and Utah, United States"; "Iceland" where Wikidata gives no
+    /// region. The country follows the reader's language and is never stored.
+    var worldLocality: String {
+        let country=StartingPlaces.countryName(countryCode)
+        let parts=region.split(separator:",").map { $0.trimmingCharacters(in:.whitespaces) }.filter { !$0.isEmpty }
+        let names=countryCode.uppercased()=="US" ? parts.map { StartingPlaces.stateNames[$0] ?? $0 } : parts
+        guard !names.isEmpty else { return country }
+        let regions=ListFormatter.localizedString(byJoining:names)
+        return Park.folded(regions)==Park.folded(country) ? country : "\(regions), \(country)"
+    }
+    /// The eyebrow over a catalogue place's name on its page: "International Dark Sky Park · Catalonia, Spain".
+    var worldEyebrow: String { kindLabel.map { String(localized:"\($0) · \(worldLocality)") } ?? worldLocality }
+    /// The line under a place's name in a list: a park's states, a spot's region, a catalogue place's region and country.
+    var rowLocality: String { isCatalogPlace ? worldLocality : regionLine }
+    /// The Wikidata item a catalogue place comes from (`sourceURL`), linked only over HTTPS on wikidata.org.
+    var wikidataURL: URL? {
+        guard isCatalogPlace, let url=URL(string:sourceURL), url.scheme?.lowercased()=="https", let host=url.host()?.lowercased(),
+              host=="wikidata.org" || host.hasSuffix(".wikidata.org") else { return nil }
+        return url
+    }
+    /// What Nyx can say about closures at a place the National Park Service does not run, instead of
+    /// an empty "no alerts": a catalogue place points to its own site; a saved spot to local checks.
+    var unknownClosuresLine: String {
+        isCatalogPlace ? String(localized:"Nyx can't check closures here. Check the park's own site before you go.")
+            : String(localized:"Nyx has no alerts for this place. Check access, local rules and closures before you go.")
+    }
+}
+/// Under the score at a catalogue place: Nyx cannot see its closures, so it says so and links the
+/// park's official site (HTTPS only, `Place.website`). Opens in Safari; Nyx itself contacts nothing.
+struct UnknownClosuresNote: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let park: Park
+    var alignment: HorizontalAlignment = .center
+    /// Tonight: the line alone, a quiet caption under the dial like the parks' alert line; the park's
+    /// page sets it as a sentence with its icon and adds the link.
+    var compact=false
+    var body: some View {
+        VStack(alignment:alignment,spacing:2) {
+            if compact {
+                Text(park.unknownClosuresLine).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            } else {
+                Label { Text(park.unknownClosuresLine).fixedSize(horizontal:false,vertical:true) } icon:{
+                    // At accessibility sizes the glyph would take a column of its own: the words alone.
+                    if !typeSize.isAccessibilitySize { Image(systemName:"exclamationmark.shield").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                }
+                .font(.subheadline).foregroundStyle(palette.ink).multilineTextAlignment(alignment == .center ? .center : .leading)
+            }
+            if !compact, let url=park.website {
+                Link(destination:url) {
+                    Label("Park website",systemImage:"safari").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle())
+                }
+                .foregroundStyle(palette.accent)
+                .accessibilityHint("Opens the park's own site in Safari.")
+                .accessibilityInputLabels([Text("Park website"),Text("Website")])
+            }
+        }
+    }
+}
 struct ParkRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -58,13 +133,17 @@ struct ParkRow: View {
         if night.park.isSavedSpot {
             // A spot says where it is in words; far from every town on the list, it says nothing.
             if !night.park.spotLocality.isEmpty { items.append(.init(label:String(localized:"Region"),value:night.park.spotLocality,high:false)) }
+        } else if night.park.isCatalogPlace {
+            // A place abroad: its region and country, then what DarkSky International certified it as.
+            items.append(.init(label:String(localized:"Region"),value:night.park.worldLocality,high:false))
+            if night.park.darkSkyDesignated, let kind=night.park.kindLabel { items.append(.init(label:String(localized:"Dark Sky designation"),value:kind,high:false)) }
         } else { items.append(.init(label:String(localized:"State"),value:night.park.region.replacingOccurrences(of:",",with:", "),high:false)) }
         return items
     }
     private var names: some View {
         VStack(alignment:.leading,spacing:6) {
             Text(night.park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-            Text("\(night.park.regionLine)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
+            Text("\(night.park.rowLocality)\(night.park.darkSkyDesignated ? " · "+String(localized:"Dark Sky designated") : "")").font(.caption).foregroundStyle(palette.muted)
             if stepFree { Label("Step-free viewing",systemImage:"figure.roll").font(.caption).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
             if !night.park.drivable { Label("No road access",systemImage:"ferry").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if week.count>1 { WeekStrip(nights:week).padding(.top,4) }
@@ -164,6 +243,29 @@ struct SoundAndTouchRow: View {
     private func feel() { MoonHaptics.shared.play(.moon(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing)) }
 }
 #Preview("Park row") { if let p=PlanModel().home { ParkRow(night:PlanModel().night(p)).padding().background(.black) } }
+#Preview("Park row • a place abroad") {
+    let model=PlanModel()
+    VStack(spacing:0) { ForEach(WorldPreview.places) { place in ParkRow(night:model.night(place)); Divider() } }.padding().background(.black).preferredColorScheme(.dark)
+}
+#Preview("Park row • a place abroad, AX5") {
+    let model=PlanModel()
+    ScrollView { ParkRow(night:model.night(WorldPreview.places[0])).padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark)
+}
+#Preview("Unknown closures • with and without a website") {
+    VStack(spacing:28) { ForEach(WorldPreview.places) { UnknownClosuresNote(park:$0) }; UnknownClosuresNote(park:WorldPreview.places[0],compact:true) }.padding(24).frame(width:402).background(.black).preferredColorScheme(.dark)
+}
+#Preview("Unknown closures • night vision, AX5") {
+    UnknownClosuresNote(park:WorldPreview.places[0],alignment:.leading).padding(24).background(.black)
+        .environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark)
+}
+/// Two catalogue places for previews, read from the bundled `catalog.json`: a Dark Sky community
+/// with an HTTPS site (Fulda), and a national park with none (Tai Romyen).
+enum WorldPreview {
+    static let places:[Park]={
+        let catalog=(try? CatalogData.load()) ?? []
+        return ["wd:Q3963","wd:Q6652926"].compactMap { id in catalog.first { $0.id==id } }
+    }()
+}
 #Preview("Access note • boat, limited road, none") {
     let parks=(try? ParkData.load()) ?? []
     VStack(alignment:.leading,spacing:20) {

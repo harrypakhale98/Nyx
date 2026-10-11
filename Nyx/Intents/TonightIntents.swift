@@ -4,18 +4,22 @@ import Foundation
 /// The park a spoken question is about when it names none: the night under way on the Lock Screen
 /// (field mode or a followed night), else the starting park, as the journal action chooses.
 enum IntentPark {
-    static func resolve(_ entity: ParkEntity?, library: [Park], inProgress: String?, home: String?) throws -> Park {
+    /// `place` finds what the library lacks by id: an unfollowed world catalogue place (`ParkLibrary.place`),
+    /// chosen from a search or the starting park abroad.
+    static func resolve(_ entity: ParkEntity?, library: [Park], inProgress: String?, home: String?, place: (String) -> Park? = { _ in nil }) throws -> Park {
+        func find(_ id: String) -> Park? { library.first(where:{ $0.id==id }) ?? place(id) }
         if let entity {
-            guard let park=library.first(where:{ $0.id==entity.id }) else { throw NyxIntentError.parkNotFound }
+            guard let park=find(entity.id) else { throw NyxIntentError.parkNotFound }
             return park
         }
-        for id in [inProgress, home, Park.defaultID].compactMap({ $0 }) { if let park=library.first(where:{ $0.id==id }) { return park } }
+        for id in [inProgress, home, Park.defaultID].compactMap({ $0 }) { if let park=find(id) { return park } }
         guard let first=library.first else { throw NyxIntentError.parkNotFound }
         return first
     }
     /// From the device's own state: the activity running now, and the starting park.
     static func resolve(_ entity: ParkEntity?) throws -> Park {
-        try resolve(entity, library:ParkLibrary.places(), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"))
+        try resolve(entity, library:ParkLibrary.places(), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"),
+                    place:{ ParkLibrary.place($0) })
     }
 }
 

@@ -33,11 +33,20 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// True for a viewing summit above the trade-wind inversion (Haleakalā): low cloud there lies
     /// below the observer, so the score counts mid and high cloud when the layer forecast has them.
     var aboveInversion: Bool?
+    /// The place's own website (a catalogue place's official site, Wikidata P856), for the line that
+    /// asks people to check closures there. HTTPS only: a site offered only over plain HTTP is not
+    /// linked. Nil for the curated parks, whose closures come from the NPS.
+    var website: URL?
     nonisolated enum Kind: String, Codable, Hashable, Sendable {
         case nationalPark, darkSkyPark, reserve, sanctuary, community, custom
     }
     /// The catalogue's place when nothing else chooses one: no saved park, no starting point, no night under way.
     static let defaultID = "jotr"
+    /// A world catalogue place's id begins with this (`wd:Q123456`, a Wikidata item; `catalog.json`).
+    static let catalogPrefix = "wd:"
+    /// True for a world catalogue place (`catalog.json`, G4), as opposed to a curated park or a saved spot.
+    /// The watch and the widgets bundle no catalogue, so such a place travels to them whole.
+    var isCatalogPlace: Bool { id.hasPrefix(Self.catalogPrefix) }
     /// South of the equator the Milky Way's core rides high and the Moon is seen turned over.
     var southern: Bool { latitude < 0 }
     nonisolated struct Access: Codable, Hashable, Sendable {
@@ -224,7 +233,7 @@ nonisolated struct RangerProgram: Codable, Identifiable, Sendable, Equatable {
 nonisolated extension Place {
     fileprivate enum CodingKeys: String, CodingKey {
         case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
-             bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion
+             bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion, website
         // Before G1 (1.4.1 and earlier): kept so a shared snapshot written by an older build still reads.
         case apiCode, state, hemisphere
     }
@@ -249,6 +258,12 @@ nonisolated extension Place {
         viewingSpots = try c.decode([ViewingSpot].self, forKey: .viewingSpots)
         access = try c.decodeIfPresent(Access.self, forKey: .access)
         aboveInversion = try c.decodeIfPresent(Bool.self, forKey: .aboveInversion)
+        website = Self.website((try? c.decodeIfPresent(String.self, forKey: .website)) ?? nil)
+    }
+    /// A website as Nyx links it: an absolute HTTPS URL with a host, else nil (a plain-HTTP site is not linked).
+    static func website(_ text: String?) -> URL? {
+        guard let text, let url = URL(string: text), url.scheme?.lowercased() == "https", let host = url.host(), !host.isEmpty else { return nil }
+        return url
     }
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
@@ -259,7 +274,7 @@ nonisolated extension Place {
         try c.encode(bortleEstimate, forKey: .bortleEstimate); try c.encode(description, forKey: .description)
         try c.encode(sourceURL, forKey: .sourceURL); try c.encode(sourceNote, forKey: .sourceNote)
         try c.encode(viewingSpots, forKey: .viewingSpots); try c.encodeIfPresent(access, forKey: .access)
-        try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion)
+        try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion); try c.encodeIfPresent(website?.absoluteString, forKey: .website)
         // Written for a release or two so a build from before G1, installed again, still reads the shared snapshot.
         try c.encodeIfPresent(nps, forKey: .apiCode); try c.encode(region, forKey: .state)
         try c.encode(southern ? "south" : "north", forKey: .hemisphere)
@@ -276,6 +291,22 @@ nonisolated enum ParkData {
         let parks = try JSONDecoder().decode([Park].self, from: Data(contentsOf: url))
         if main { bundled.withLock { $0 = parks } }
         return parks
+    }
+    private static let bundled = Mutex<[Park]?>(nil)
+}
+/// The world catalogue (`catalog.json`, G4): national parks worldwide and the certified dark-sky
+/// places, from Wikidata, never repeating a curated park. Only the iPhone app bundles it; elsewhere
+/// (the widgets, the watch, Vision Pro) it is absent and a catalogue place arrives whole instead.
+nonisolated enum CatalogData {
+    /// Decoded once per process for the main bundle (about 1.5 MB of JSON: call it off the main
+    /// thread, as `PlanModel.prepareCatalog` does). A failed read is never kept.
+    static func load(bundle: Bundle = .main) throws -> [Park] {
+        let main = bundle === Bundle.main
+        if main, let kept = bundled.withLock({ $0 }) { return kept }
+        guard let url = bundle.url(forResource: "catalog", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
+        let places = try JSONDecoder().decode([Park].self, from: Data(contentsOf: url))
+        if main { bundled.withLock { $0 = $0 ?? places } }
+        return places
     }
     private static let bundled = Mutex<[Park]?>(nil)
 }

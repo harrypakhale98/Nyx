@@ -72,7 +72,8 @@ nonisolated struct TripPlan: Sendable {
 /// gap (weekends only) are independent, since you go home in between. The plan maximises the total
 /// value; ties go to the darker measured skies and longer true darkness (`NightPlanner.better`'s
 /// order), then the shorter total distance driven, then the park whose id sorts first, so the
-/// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps.
+/// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps;
+/// with the world catalogue the candidates are the places in range, at most `maxCandidates`.
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
 ///
 /// **Honest comparison.** Every night is scored by `NightPlanner.night`, so every score counts
@@ -99,6 +100,20 @@ nonisolated enum TripPlanner {
     /// `drivableOnly`, parks whose sky needs a boat or a plane (`Park.drivable`) are left out.
     static func candidates(_ parks: [Park], latitude: Double, longitude: Double, radiusMeters: Double, drivableOnly: Bool = false) -> [Park] {
         parks.filter { (!drivableOnly || $0.drivable) && $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMeters }.sorted { $0.id<$1.id }
+    }
+    /// The most places one plan weighs. The assignment is nights × places², so with the world
+    /// catalogue a wide radius is limited first: 14 × 120 × 120 is about 200,000 steps, as fast as
+    /// the 63 parks ever were.
+    static let maxCandidates = 120
+    /// `candidates` cut to `limit`, when there are more: the darkest skies first (the lower Bortle
+    /// class, a dark-sky designation, then nearer), so a plan still weighs every truly dark place in
+    /// range; returned sorted by id, as `candidates` are. Under the limit, unchanged.
+    static func limited(_ candidates: [Park], latitude: Double, longitude: Double, limit: Int = maxCandidates) -> [Park] {
+        guard candidates.count>limit else { return candidates }
+        func key(_ park: Park) -> (Int, Int, Double, String) {
+            (park.bortleEstimate, park.darkSkyDesignated ? 0 : 1, park.distanceMeters(latitude:latitude,longitude:longitude), park.id)
+        }
+        return Array(candidates.sorted { key($0)<key($1) }.prefix(max(0,limit))).sorted { $0.id<$1.id }
     }
     /// Every candidate's night for every day, `[day][park]`, scored as `PlanModel.night` scores it.
     /// Pure and off the main actor: astronomy, the cached forecasts and nothing else.

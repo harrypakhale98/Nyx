@@ -42,8 +42,10 @@ struct LightPollution: View {
             VStack(alignment:.leading,spacing:6) {
                 LabeledContent("Bortle estimate",value:String(localized:"Class \(park.bortleEstimate) of 9"))
                     .accessibilityElement(children:.ignore).speechLabel(String(localized:"Bortle estimate, class \(park.bortleEstimate) of 9"))
-                // A saved spot's class is the satellite grid's (or an assumed suburban sky), and says which.
+                // A saved spot's class is the satellite grid's (or an assumed suburban sky), and says which;
+                // a world catalogue place's is the grid's at its one point.
                 if park.isSavedSpot { Text(park.sourceNote).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                else if !park.curated { Text("Estimated from satellite data, not measured here. Conditions vary across the area.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 else { Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted) }
             }
             if let site {
