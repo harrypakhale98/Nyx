@@ -228,7 +228,7 @@ import Testing
         #expect(best[0].contains("cloud forecast included") && best.last?.contains("score") == true)
         // "tonight" and unreadable dates start tonight; an unknown park says so instead of guessing.
         #expect(lookup.bestNights(park: "joshua tree", from: "tonight", nights: 3, limit: 3).count == 3)
-        #expect(lookup.bestNights(park: "Atlantis", from: "tonight", nights: 3).first?.hasPrefix("No national park matched") == true)
+        #expect(lookup.bestNights(park: "Atlantis", from: "tonight", nights: 3).first?.hasPrefix("No park or dark-sky place matched") == true)
         // What's up on the Geminid peak names the shower.
         let sky = lookup.whatsUp(park: "Joshua Tree", on: "2026-12-13")
         #expect(sky.first?.contains("2026-12-13") == true && sky.contains { $0.contains("Geminids") })

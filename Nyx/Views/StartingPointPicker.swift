@@ -44,7 +44,7 @@ struct StartingPointPicker: View {
                 }.listRowBackground(palette.panel)
             }
             if !parks.isEmpty {
-                Section("National parks") {
+                Section("US national parks") {
                     ForEach(parks) { park in row(title:park.shortName,detail:park.region.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
                 }.listRowBackground(palette.panel)
             } else if places.isEmpty {

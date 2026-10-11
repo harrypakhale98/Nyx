@@ -22,7 +22,7 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
     case parkNotFound, noParks, noNights, journalUnavailable
     var localizedStringResource:LocalizedStringResource {
         switch self {
-        case .parkNotFound: "That park could not be found in the bundled library."
+        case .parkNotFound: "That place could not be found in Nyx."
         case .noParks: "Choose a park, or save parks in Nyx to compare them."
         case .noNights: "Nyx could not find those nights."
         case .journalUnavailable: "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more."
@@ -33,7 +33,7 @@ enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
 /// on a still dial, the Moon, what the clouds rest on), and returns the score so Shortcuts can use it.
 struct DarknessIntent:AppIntent {
     static let title:LocalizedStringResource="Tonight's darkness score"
-    static let description=IntentDescription("Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.")
+    static let description=IntentDescription("Find the on-device darkness estimate for a park or dark-sky place. Returns the score, 0 to 100.")
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
@@ -83,7 +83,7 @@ struct DarknessSnippetView:View {
         HStack(alignment:.center,spacing:18) {
             StaticScoreDial(score:night.score.value,hasForecast:night.score.hasForecast,palette:palette).frame(width:118,height:118)
             VStack(alignment:.leading,spacing:6) {
-                Text("Tonight").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:8) {

@@ -94,7 +94,7 @@ struct MoonWidgetView: View {
         default:
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top) {
-                    Text("The Moon").textCase(.uppercase).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
+                    Text("The Moon").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75)
                     Spacer(minLength: 4)
                 }
                 disc.frame(width: 58, height: 58).frame(maxWidth: .infinity, alignment: .center).padding(.vertical, 2)

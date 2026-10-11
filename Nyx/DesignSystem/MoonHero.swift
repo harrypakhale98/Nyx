@@ -72,7 +72,7 @@ struct MoonHero: View {
     @ViewBuilder private var times: some View {
         ForEach(Self.events(night),id:\.label) { event in
             VStack(spacing:2) {
-                Text(event.label).font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).kerning(typeSize.isAccessibilitySize ? 0 : 1.2)
+                Text(event.label).font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).kerning(typeSize.isAccessibilitySize ? 0 : 1.2)
                 Text(event.time).font(.system(.title3,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
             }
         }

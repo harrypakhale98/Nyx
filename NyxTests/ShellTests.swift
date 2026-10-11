@@ -41,7 +41,23 @@ import Testing
         #expect(denver.contains { $0.hasPrefix("Rocky Mountain") })
         // A park's own name still wins: Mesa Verde is a park, not Mesa, Arizona.
         #expect(lookup.origin(named:"Mesa Verde")?.label=="Mesa Verde")
-        #expect(lookup.parksNear(park:"Brigadoon",radius:300,system:.miles).first?.hasPrefix("No national park or city") == true)
+        #expect(lookup.parksNear(park:"Brigadoon",radius:300,system:.miles).first?.hasPrefix("No park, dark-sky place or town matched") == true)
+    }
+    /// Ask Nyx's tools know the world catalogue (G5): a place abroad by name, places near a town abroad,
+    /// never a place found only by its country, and from a US town the national parks exactly as before.
+    @Test func askNyxKnowsTheWorld() throws {
+        let catalog=ParkLibrary.catalog()
+        try #require(catalog.count>3000)
+        let lookup=NightLookup(parks:parks,forecasts:[:],now:Date(timeIntervalSince1970:1791403200),others:catalog)
+        #expect(lookup.park(named:"Kruger")?.id=="wd:Q24451")
+        #expect(lookup.park(named:"Eifel National Park")?.id=="wd:Q705097")
+        #expect(lookup.park(named:"Glacier")?.id=="glac")
+        #expect(lookup.park(named:"Germany") == nil)
+        let namibia=lookup.parksNear(park:"Windhoek",radius:400,system:.kilometers)
+        #expect(!namibia.isEmpty && namibia.allSatisfy { $0.contains("km straight-line from Windhoek") && $0.contains("Namibia") })
+        let denver=lookup.parksNear(park:"Denver",radius:100,system:.miles)
+        #expect(denver.contains { $0.hasPrefix("Rocky Mountain") } && denver.allSatisfy { line in parks.contains { line.hasPrefix($0.shortName+",") } })
+        #expect(lookup.bestNights(park:"Atlantis",from:"tonight",nights:3).first == "No park or dark-sky place matched \"Atlantis\".")
     }
 
     // MARK: Tabs and links

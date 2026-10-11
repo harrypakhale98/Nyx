@@ -715,13 +715,14 @@ nonisolated struct PlaceCatalog: Sendable {
         return zip(places, terms).compactMap { place, terms in terms.rank(needle).map { (place,$0) } }
     }
     /// A place's name (and short name and aliases), region and country (in the reader's language), folded once.
+    /// A place shown in the app's language is found by its English name and region too (`Place.searchNames`).
     nonisolated struct Terms: Sendable {
         let names: [String]
         let others: [String]
         init(_ place: Park, locale: Locale = .current) {
-            names=Array(Set([place.name, place.shortName]+(Park.aliases[place.id] ?? [])).map(Park.folded).filter { !$0.isEmpty }).sorted()
+            names=Array(Set(place.searchNames+(Park.aliases[place.id] ?? [])).map(Park.folded).filter { !$0.isEmpty }).sorted()
             let country=place.countryCode.isEmpty ? nil : locale.localizedString(forRegionCode: place.countryCode)
-            others=([place.region]+(country.map { [$0] } ?? [])).map(Park.folded).filter { !$0.isEmpty }
+            others=(place.searchRegions+(country.map { [$0] } ?? [])).map(Park.folded).filter { !$0.isEmpty }
         }
         /// 0 the whole name, 1 a name beginning with the query, 2 a word of the name beginning with it,
         /// 3 the name containing it; 4 to 7 the same for the region or country; nil for no match.

@@ -93,11 +93,16 @@ struct Panel<Content: View>: View {
             .overlay(shape.stroke(palette.line,lineWidth:0.5))
     }
 }
+/// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read
+/// as broken words, so spaced labels set solid when the app speaks Japanese.
+nonisolated enum Lettering {
+    static let spaced = !(Bundle.main.preferredLocalizations.first ?? "en").hasPrefix("ja")
+}
 struct Eyebrow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
-    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 2.4).textCase(typeSize.isAccessibilitySize ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
+    var body: some View { Text(text).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize || !Lettering.spaced ? 0 : 2.4).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase).fixedSize(horizontal:false,vertical:true).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader) }
 }
 struct NightBackground: View {
     @Environment(\.skyHome) private var home

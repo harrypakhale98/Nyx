@@ -13,14 +13,33 @@ nonisolated struct NightLookup: Sendable {
     var details: [String: ForecastDetail] = [:]
     /// Cities and towns a question may start from (`places.json`).
     var places: [StartingPlace] = StartingPlaces.all
+    /// The places beyond the curated parks that a question may name: the saved spots and the world
+    /// catalogue (national parks abroad and certified dark-sky places). Empty until the catalogue is read.
+    var others: [Park] = []
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
-    /// A park by name: an exact short name first, then the app's own search (aliases included).
+    /// A place by name: a curated park's exact short name, a spot's or catalogue place's exact name, then
+    /// the app's own park search (aliases included), then a spot or catalogue place whose name begins
+    /// with, or contains, the words asked. Never a place found only by its region or country.
     func park(named name: String) -> Park? {
         let folded=Park.folded(name)
         // An empty name matches every park in search; here it must match none.
         guard !folded.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
-        return parks.first { Park.folded($0.shortName)==folded || Park.folded($0.name)==folded } ?? parks.first { $0.matches(name) }
+        func exact(_ park: Park) -> Bool { Park.folded(park.shortName)==folded || Park.folded(park.name)==folded }
+        if let park=parks.first(where: exact) { return park }
+        // The cached search terms narrow the world first, so only a few names are folded per question.
+        let named=others.filter { $0.matches(folded: folded) }
+        if let place=named.first(where: exact) { return place }
+        if let park=parks.first(where: { $0.matches(folded: folded) }) { return park }
+        return named.first { Park.folded($0.shortName).hasPrefix(folded) || Park.folded($0.name).hasPrefix(folded) }
+            ?? named.first { Park.folded($0.name).contains(folded) }
+    }
+    /// Where a place is, for a "parks near" record: a curated park's state as before ("Arches, UT"),
+    /// a place abroad's region and country in the reader's language ("Eifel, North Rhine-Westphalia, Germany").
+    static func locality(_ park: Park) -> String {
+        guard park.isCatalogPlace, !park.countryCode.isEmpty else { return park.region }
+        let country=Locale.current.localizedString(forRegionCode: park.countryCode) ?? park.countryCode
+        return park.region.isEmpty || park.region==country ? country : "\(park.region), \(country)"
     }
     /// "2026-11-14" in the park's time zone, or tonight for "tonight", empty or unreadable text.
     func night(_ text: String, at park: Park) -> Date {
@@ -49,14 +68,14 @@ nonisolated struct NightLookup: Sendable {
         park.accessNote.map { "; "+String(localized: "getting there: \($0)") } ?? ""
     }
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
-        guard let park=park(named: name) else { return [String(localized: "No national park matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks.")] }
+        guard let park=park(named: name) else { return [Self.noMatch(name)] }
         // A named day is that day's night (never one already past); anything else is tonight.
         let ranked=TripDay(iso: first).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
             ?? planner.bestNights([park], from: now, count: min(30, max(1, nights)), now: now, limit: limit)
         return ranked.map(describe)
     }
     func whatsUp(park name: String, on day: String) -> [String] {
-        guard let park=park(named: name) else { return [String(localized: "No national park matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks.")] }
+        guard let park=park(named: name) else { return [Self.noMatch(name)] }
         let night=planner.night(park, on: night(day, at: park), now: now)
         let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: now), table: table)
         return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
@@ -69,14 +88,27 @@ nonisolated struct NightLookup: Sendable {
         if let place=StartingPlaces.named(name, in: places) { return (place.label, place.latitude, place.longitude) }
         return park(named: name).map { ($0.shortName, $0.latitude, $0.longitude) }
     }
-    /// Parks within a straight-line radius of a starting park or place, best tonight first. Never a
-    /// drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
+    /// Parks and places within a straight-line radius of a starting park or town, best tonight first.
+    /// Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
     func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
-        guard let origin=origin(named: name) else { return [String(localized: "No national park or city matched \"\(name.prefix(60))\". Nyx knows the 63 US national parks and about 31,000 cities and towns around the world.")] }
+        guard let origin=origin(named: name) else { return [String(localized: "No park, dark-sky place or town matched \"\(name.prefix(60))\".")] }
         let radius=Self.toolRadius(asked, system)
-        let near=parks.compactMap { park -> (Park, Double)? in
-            let distance=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/system.meters
-            return distance<=radius ? (park, distance) : nil
+        func inReach(_ places: [Park]) -> [(Park, Double)] {
+            places.compactMap { park -> (Park, Double)? in
+                let distance=Park.distance(origin.latitude, origin.longitude, park.latitude, park.longitude)/system.meters
+                return distance<=radius ? (park, distance) : nil
+            }
+        }
+        // Tonight's rule (`TonightReach`): from a US starting point with only US places in range, the
+        // national parks; otherwise every place in range, the darkest skies weighed first when there are many.
+        var near=inReach(parks)
+        if !others.isEmpty {
+            let curated=Set(parks.map(\.id))
+            let all=near+inReach(others).filter { !curated.contains($0.0.id) }
+            let distances=Dictionary(all.map { ($0.0.id, $0.1) }, uniquingKeysWith: { a, _ in a })
+            let chosen=TonightReach.candidates(parks: near.map(\.0), places: all.map(\.0), originInUS: USOutline.contains(latitude: origin.latitude, longitude: origin.longitude))
+            let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: origin.latitude, longitude: origin.longitude) : chosen
+            near=pool.compactMap { park in distances[park.id].map { (park, $0) } }
         }
         let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: now), now: now)) }, uniquingKeysWith: { a, _ in a })
         let ranked=near.sorted { a, b in
@@ -84,18 +116,21 @@ nonisolated struct NightLookup: Sendable {
             return NightPlanner.better(x, y)
         }.prefix(limit)
         guard !ranked.isEmpty else {
-            return [system == .miles ? String(localized: "No national parks within \(Int(radius)) miles of \(origin.label), straight-line.")
-                                     : String(localized: "No national parks within \(Int(radius)) km of \(origin.label), straight-line.")]
+            return [system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
+                                     : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line.")]
         }
         return ranked.map { park, distance in
             let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
-            let line=system == .miles ? String(localized: "\(park.shortName), \(park.region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
-                                      : String(localized: "\(park.shortName), \(park.region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
+            let region=Self.locality(park)
+            let line=system == .miles ? String(localized: "\(park.shortName), \(region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
+                                      : String(localized: "\(park.shortName), \(region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
             return line+(basis.isEmpty ? "" : "; "+basis)+access(park)
         }
     }
     /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.
     static func toolRadius(_ asked: Int, _ system: SearchRadius.System) -> Double { Double(min(system == .miles ? 1500 : 2500, max(10, asked))) }
+    /// What a tool says when no place has the name asked for.
+    static func noMatch(_ name: String) -> String { String(localized: "No park or dark-sky place matched \"\(name.prefix(60))\".") }
 }
 
 /// Numbers every record the model sees, injected or looked up, so a citation can be checked, and
@@ -174,9 +209,9 @@ nonisolated extension NightLookup {
 
 nonisolated struct BestNightsTool: Tool {
     let name="bestNights"
-    let description="Ranks one national park's coming nights by Nyx's darkness score, best first. Returns computed records with IDs to cite."
+    let description="Ranks one place's coming nights by Nyx's darkness score, best first. Returns computed records with IDs to cite."
     @Generable struct Arguments {
-        @Guide(description: "A US national park, for example Joshua Tree")
+        @Guide(description: "A park or dark-sky place by name, for example Joshua Tree")
         var park: String
         @Guide(description: "First night as YYYY-MM-DD, or tonight")
         var firstNight: String
@@ -192,9 +227,9 @@ nonisolated struct BestNightsTool: Tool {
 }
 nonisolated struct WhatsUpTool: Tool {
     let name="whatsUp"
-    let description="What is in one park's sky on one night: the score, the Milky Way core, planets, a meteor shower or an eclipse. Returns computed records with IDs."
+    let description="What is in one place's sky on one night: the score, the Milky Way core, planets, a meteor shower or an eclipse. Returns computed records with IDs."
     @Generable struct Arguments {
-        @Guide(description: "A US national park, for example Big Bend")
+        @Guide(description: "A park or dark-sky place by name, for example Big Bend")
         var park: String
         @Guide(description: "The night as YYYY-MM-DD, or tonight")
         var night: String
@@ -209,10 +244,10 @@ nonisolated struct ParksNearTool: Tool {
     let name="parksNear"
     /// Miles where the person's roads are signed in miles, kilometres elsewhere (`SearchRadius`).
     var description: String {
-        "National parks within a straight-line radius of a starting park or city, with tonight's score. The radius and distances are straight-line \(system == .miles ? "miles" : "kilometers"), never drive times."
+        "Parks and dark-sky places within a straight-line radius of a starting place or town, with tonight's score. The radius and distances are straight-line \(system == .miles ? "miles" : "kilometers"), never drive times."
     }
     @Generable struct Arguments {
-        @Guide(description: "The starting national park, or a city or town such as Denver")
+        @Guide(description: "The starting park or place, or a city or town such as Denver")
         var park: String
         @Guide(description: "Straight-line radius, in the unit the tool's description names", .range(10...2500))
         var radius: Int

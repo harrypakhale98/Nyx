@@ -37,6 +37,14 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// asks people to check closures there. HTTPS only: a site offered only over plain HTTP is not
     /// linked. Nil for the curated parks, whose closures come from the NPS.
     var website: URL?
+    /// The name and region as the bundle writes them (English), kept when `name` and `region` show a
+    /// world catalogue place in the app's language (`PlaceNames`, G5); nil when they are the same.
+    /// Search reads both, so "Eifel National Park" still finds "Nationalpark Eifel".
+    var englishName: String? = nil
+    var englishRegion: String? = nil
+    /// The short name in the app's language, set with a localized name: the English stripping in
+    /// `shortName` never applies to it ("Nationalpark Eifel" shows "Eifel" in lists).
+    var localShortName: String? = nil
     nonisolated enum Kind: String, Codable, Hashable, Sendable {
         case nationalPark, darkSkyPark, reserve, sanctuary, community, custom
     }
@@ -60,11 +68,17 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     var accessNote: String? { access.map { Bundle.main.localizedString(forKey: "access.\(id)", value: $0.note, table: nil) } }
     /// Whether a car reaches somewhere in the park to watch the sky. Parks without a note are.
     var drivable: Bool { access?.road ?? true }
-    var shortName: String {
+    var shortName: String { localShortName ?? Self.shortened(name) }
+    /// An English name without its designation: "Etosha National Park" is "Etosha".
+    static func shortened(_ name: String) -> String {
         name.replacingOccurrences(of: " National Park & Preserve", with: "")
             .replacingOccurrences(of: " National Park", with: "")
             .replacingOccurrences(of: " National and State Parks", with: "")
     }
+    /// The names search matches: as shown, and as bundled in English when the place is shown in another language.
+    var searchNames: [String] { [name, shortName]+(englishName.map { [$0, Self.shortened($0)] } ?? []) }
+    /// The regions search matches, likewise.
+    var searchRegions: [String] { [region]+(englishRegion.map { [$0] } ?? []) }
     var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .gmt }
     /// Search should forgive spelling: "Hawaii Volcanoes" finds Hawaiʻi, "Wrangell St Elias" finds the en dash.
     func matches(_ query: String) -> Bool { matches(folded: Self.folded(query)) }
@@ -77,7 +91,7 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     private var searchTerms: [String] {
         let key = id+"|"+name+"|"+region
         if let kept = Self.foldedTerms.withLock({ $0[key] }) { return kept }
-        let terms = ([name, region] + (Self.aliases[id] ?? [])).map(Self.folded)
+        let terms = ([name, region] + [englishName, englishName.map(Self.shortened), englishRegion].compactMap { $0 } + (Self.aliases[id] ?? [])).map(Self.folded)
         Self.foldedTerms.withLock { $0[key] = terms }
         return terms
     }
@@ -234,6 +248,7 @@ nonisolated extension Place {
     fileprivate enum CodingKeys: String, CodingKey {
         case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
              bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion, website
+        case englishName, englishRegion, localShortName
         // Before G1 (1.4.1 and earlier): kept so a shared snapshot written by an older build still reads.
         case apiCode, state, hemisphere
     }
@@ -259,6 +274,9 @@ nonisolated extension Place {
         access = try c.decodeIfPresent(Access.self, forKey: .access)
         aboveInversion = try c.decodeIfPresent(Bool.self, forKey: .aboveInversion)
         website = Self.website((try? c.decodeIfPresent(String.self, forKey: .website)) ?? nil)
+        englishName = try c.decodeIfPresent(String.self, forKey: .englishName)
+        englishRegion = try c.decodeIfPresent(String.self, forKey: .englishRegion)
+        localShortName = try c.decodeIfPresent(String.self, forKey: .localShortName)
     }
     /// A website as Nyx links it: an absolute HTTPS URL with a host, else nil (a plain-HTTP site is not linked).
     static func website(_ text: String?) -> URL? {
@@ -275,6 +293,8 @@ nonisolated extension Place {
         try c.encode(sourceURL, forKey: .sourceURL); try c.encode(sourceNote, forKey: .sourceNote)
         try c.encode(viewingSpots, forKey: .viewingSpots); try c.encodeIfPresent(access, forKey: .access)
         try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion); try c.encodeIfPresent(website?.absoluteString, forKey: .website)
+        try c.encodeIfPresent(englishName, forKey: .englishName); try c.encodeIfPresent(englishRegion, forKey: .englishRegion)
+        try c.encodeIfPresent(localShortName, forKey: .localShortName)
         // Written for a release or two so a build from before G1, installed again, still reads the shared snapshot.
         try c.encodeIfPresent(nps, forKey: .apiCode); try c.encode(region, forKey: .state)
         try c.encode(southern ? "south" : "north", forKey: .hemisphere)
@@ -299,14 +319,120 @@ nonisolated enum ParkData {
 /// (the widgets, the watch, Vision Pro) it is absent and a catalogue place arrives whole instead.
 nonisolated enum CatalogData {
     /// Decoded once per process for the main bundle (about 1.5 MB of JSON: call it off the main
-    /// thread, as `PlanModel.prepareCatalog` does). A failed read is never kept.
-    static func load(bundle: Bundle = .main) throws -> [Park] {
-        let main = bundle === Bundle.main
+    /// thread, as `PlanModel.prepareCatalog` does). A failed read is never kept. Places are named in
+    /// the app's language (`PlaceNames`, read with the catalogue); `language` asks for another ("en"
+    /// for the bundled English), read each time, never kept.
+    static func load(bundle: Bundle = .main, language: String? = nil) throws -> [Park] {
+        let main = bundle === Bundle.main && language == nil
         if main, let kept = bundled.withLock({ $0 }) { return kept }
         guard let url = bundle.url(forResource: "catalog", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
         let places = try JSONDecoder().decode([Park].self, from: Data(contentsOf: url))
-        if main { bundled.withLock { $0 = $0 ?? places } }
-        return places
+        let names = main ? PlaceNames.current : PlaceNames.load(language: language ?? PlaceNames.appLanguage, bundle: bundle)
+        let shown = names.isEmpty ? places : places.map { $0.named(in: names) }
+        if main { bundled.withLock { $0 = $0 ?? shown } }
+        return shown
     }
     private static let bundled = Mutex<[Park]?>(nil)
+}
+
+// MARK: Place names in the app's language (G5)
+
+/// Names of world catalogue places, their regions and the starting towns in one language, from
+/// Wikidata's labels (CC0), as `Scripts/build_place_names.py` writes them (`names-<lang>.json`, only
+/// the names that differ from the English). The language is the app's own (`appLanguage`), so a
+/// per-app language choice in Settings is followed. English, or a language without a file, has none.
+/// The curated US parks are never renamed. Only the iPhone app bundles the files.
+nonisolated struct PlaceNames: Sendable {
+    /// A name and the part of it that lists show ("Nationalpark Eifel", "Eifel").
+    nonisolated struct Name: Hashable, Sendable {
+        let name: String
+        let short: String
+    }
+    let language: String
+    /// Catalogue place id (`wd:Q…`) to its name.
+    let places: [String: Name]
+    /// "CC|English region" to the region's name: "DE|Bavaria" is "Bayern".
+    let regions: [String: String]
+    /// How many starting towns the file was built against; its towns apply only to a list that long.
+    let townCount: Int
+    /// The towns' names, unparsed until `townNames` (see the script for the format).
+    private let townText: String
+
+    static let empty = PlaceNames(language: "en", places: [:], regions: [:], townCount: 0, townText: "")
+    var isEmpty: Bool { places.isEmpty && regions.isEmpty && townText.isEmpty }
+    /// The languages with a names file.
+    static let languages: Set<String> = ["es", "de", "fr", "ja"]
+    /// The language code of the app's own localization: "es" for es-419, "ja", or "en".
+    static var appLanguage: String { code(Bundle.main.preferredLocalizations.first) }
+    /// A place and the larger area it lies in, as the app's language writes them: "Ontario, Canada",
+    /// "鹿児島県、日本" (Japanese joins with the ideographic comma).
+    static func joined(_ place: String, _ area: String, language: String = appLanguage) -> String {
+        language == "ja" ? "\(place)、\(area)" : "\(place), \(area)"
+    }
+    static func code(_ identifier: String?) -> String {
+        guard let identifier, let first = identifier.split(whereSeparator: { $0 == "-" || $0 == "_" }).first else { return "en" }
+        return first.lowercased()
+    }
+    /// The main bundle's names in the app's language, read once, on first use: off the main thread,
+    /// with the catalogue or the starting places.
+    static let current: PlaceNames = load(language: appLanguage)
+
+    init(language: String, places: [String: Name], regions: [String: String], townCount: Int, townText: String) {
+        self.language = language; self.places = places; self.regions = regions; self.townCount = townCount; self.townText = townText
+    }
+    /// A language's names from `bundle`; empty for English, for a language without a file, or for a file that does not read.
+    static func load(language: String, bundle: Bundle = .main) -> PlaceNames {
+        let language = code(language)
+        guard languages.contains(language), let url = bundle.url(forResource: "names-\(language)", withExtension: "json"),
+              let data = try? Data(contentsOf: url), let file = try? JSONDecoder().decode(File.self, from: data) else { return .empty }
+        return PlaceNames(language: language, places: file.places.mapValues(Self.name(braced:)), regions: file.regions,
+                          townCount: file.towns.count, townText: file.towns.names)
+    }
+    private struct File: Decodable {
+        struct Towns: Decodable { let count: Int; let names: String }
+        let places: [String: String]
+        let regions: [String: String]
+        let towns: Towns
+    }
+    /// "Parc national des {Cévennes}": the name without the braces, and the braced part as its short name.
+    static func name(braced text: String) -> Name {
+        guard let open = text.firstIndex(of: "{"), let close = text[open...].firstIndex(of: "}") else { return Name(name: text, short: text) }
+        let short = String(text[text.index(after: open)..<close])
+        let name = String(text[..<open]) + short + String(text[text.index(after: close)...])
+        return Name(name: name, short: short.isEmpty ? name : short)
+    }
+    /// A region's name, nil where it has none or the region is a US state (written as postal codes).
+    func region(countryCode: String, region: String) -> String? {
+        guard !regions.isEmpty, !region.isEmpty, countryCode.uppercased() != "US" else { return nil }
+        return regions[countryCode+"|"+region]
+    }
+    /// One entry per starting town, in the bundled order: the town's name where this language has its
+    /// own, else nil. All nil when the file was built against another list (`townCount`).
+    func townNames(count: Int) -> [String?] {
+        var out = [String?](repeating: nil, count: count)
+        guard count == townCount, !townText.isEmpty else { return out }
+        var index = -1
+        for line in townText.split(separator: "\n", omittingEmptySubsequences: true) {
+            guard let tab = line.firstIndex(of: "\t"), let gap = Int(line[..<tab]), gap >= 0 else { continue }
+            index += gap+1
+            guard index < count else { break }
+            out[index] = String(line[line.index(after: tab)...])
+        }
+        return out
+    }
+}
+nonisolated extension Place {
+    /// This place as `names` names it: a world catalogue place in that language, its English name and
+    /// region kept for search (`englishName`, `englishRegion`). Anything else, or a place without a
+    /// name there, unchanged.
+    func named(in names: PlaceNames) -> Place {
+        guard isCatalogPlace, englishName == nil, englishRegion == nil else { return self }
+        let local = names.places[id], area = names.region(countryCode: countryCode, region: region)
+        guard local != nil || area != nil else { return self }
+        return Place(id: id, nps: nps, name: local?.name ?? name, countryCode: countryCode, region: area ?? region, kind: kind, curated: curated,
+                     latitude: latitude, longitude: longitude, timeZoneID: timeZoneID, darkSkyDesignated: darkSkyDesignated,
+                     bortleEstimate: bortleEstimate, description: description, sourceURL: sourceURL, sourceNote: sourceNote,
+                     viewingSpots: viewingSpots, access: access, aboveInversion: aboveInversion, website: website,
+                     englishName: local == nil ? nil : name, englishRegion: area == nil ? nil : region, localShortName: local?.short ?? localShortName)
+    }
 }

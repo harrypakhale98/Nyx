@@ -179,7 +179,7 @@ struct ParksView: View {
         // Searching from abroad, the places that match come first; the US parks follow.
         if !fromUS, !found.isEmpty { foundSection(found,heading:!spots.isEmpty) }
         if !shown.isEmpty || (savedOnly && !savedWorld.isEmpty) {
-            if !spots.isEmpty || showsSavedSection || (!fromUS && !found.isEmpty) { Eyebrow(text:fromUS ? "All national parks" : "US national parks") }
+            if !spots.isEmpty || showsSavedSection || (!fromUS && !found.isEmpty) { Eyebrow(text:"US national parks") }
             LazyVStack(spacing:0) {
                 ForEach(shown.filter { p in !(showsSavedSection && saved.contains { $0.parkID==p.id }) }) { p in link(p); Divider().overlay(palette.line) }
                 if savedOnly { ForEach(savedWorld) { p in worldRow(p) } }

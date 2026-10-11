@@ -230,9 +230,10 @@ struct TonightView: View {
         let ranked=model.ranked(pool)
         return reach().world ? Array(ranked.prefix(TonightReach.aheadSize)) : ranked
     }
-    /// Nothing in reach: national parks from a US starting point, as before; any kind of place elsewhere.
+    /// Nothing in reach. Once the catalogue is read, nothing of any kind is (from a US starting point too,
+    /// `TonightReach` weighs every place when no national park is in range); before, only the parks were looked at.
     private var emptyMessage:LocalizedStringKey {
-        guard !model.catalog.isEmpty, let from, !USOutline.contains(latitude:from.latitude,longitude:from.longitude) else {
+        guard !model.catalog.isEmpty else {
             return "No national parks fall inside this radius. Widen it or choose a different starting point."
         }
         return "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point."
@@ -248,7 +249,7 @@ struct TonightView: View {
         let night=model.night(park)
         return VStack(spacing:10) {
             // The first line is the answer's own context: the night, and from where.
-            answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize ? nil : .uppercase)
+            answerLine(park).font(.caption.weight(.medium)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6).textCase(typeSize.isAccessibilitySize || !Lettering.spaced ? nil : .uppercase)
                 .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
@@ -464,8 +465,8 @@ struct TonightView: View {
     /// Near me (or Settings when location is off), always in words: it is the main way into location.
     @ViewBuilder private var locationControl:some View {
         if location.locating { ProgressView().accessibilityLabel("Finding your location") }
-        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize().accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize().accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
+        else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
+        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
     }
     /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
     /// distances in the locale's unit (`SearchRadius`), and the current one too when it was set in the
@@ -484,7 +485,7 @@ struct TonightView: View {
             }
             .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
         }
-        .buttonStyle(.plain).fixedSize()
+        .buttonStyle(.plain).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true)
         .accessibilityLabel("Radius").accessibilityValue(distance+", "+String(localized:"as the crow flies")).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
 }

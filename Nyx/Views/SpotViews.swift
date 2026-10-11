@@ -178,7 +178,7 @@ struct PlacePickerOptions: View {
                 ForEach(model.parks) { Text($0.shortName).tag($0.id) }
             } else {
                 Section("Your spots") { ForEach(model.spots) { Text($0.shortName).tag($0.id) } }
-                Section("National parks") { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
+                Section("US national parks") { ForEach(model.parks) { Text($0.shortName).tag($0.id) } }
             }
         }
     }

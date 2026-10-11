@@ -6,7 +6,7 @@ import SwiftUI
 /// Answers with a short dialog and an interactive snippet (iOS 26).
 struct FindBestNightIntent: AppIntent {
     static let title: LocalizedStringResource="Find the best night"
-    static let description=IntentDescription("Finds the darkest night ahead at a national park, or across your saved parks, using Nyx's on-device darkness score. Clouds count only where a cached forecast reaches.")
+    static let description=IntentDescription("Finds the darkest night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. Clouds count only where a cached forecast reaches.")
     @Parameter(title:"Park",description:"Leave empty to compare your saved parks.") var park: ParkEntity?
     @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:14,inclusiveRange:(1,30)) var nights: Int
     @Parameter(title:"Starting",description:"The first night to consider. Tonight if empty.") var start: Date?
@@ -150,7 +150,7 @@ struct BestNightSnippetView: View {
             HStack(alignment:.top) {
                 VStack(alignment:.leading,spacing:3) {
                     Text(rank==0 ? "Best of the next \(nights) nights" : "Number \(rank+1) of the next \(nights) nights")
-                        .textCase(.uppercase).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                        .textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
                     Text(night.park.shortName).font(.system(.title3,design:.serif))
                     Text(night.park.programDate(night.park.isoDay(night.id))).font(.subheadline).foregroundStyle(palette.muted)
                 }

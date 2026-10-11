@@ -76,7 +76,7 @@ struct FollowNightMenuItem: View {
 /// under way or the starting park; without a night, tonight.
 struct FollowNightIntent: LiveActivityIntent {
     static let title: LocalizedStringResource="Follow a night"
-    static let description=IntentDescription("Puts a night's countdown at a national park on your Lock Screen. It starts by itself before sunset; Nyx does not need to be open.")
+    static let description=IntentDescription("Puts a night's countdown at a park or dark-sky place on your Lock Screen. It starts by itself before sunset; Nyx does not need to be open.")
     @Parameter(title:"Park",description:"Leave empty for your starting park.") var park: ParkEntity?
     @Parameter(title:"Night",description:"Tonight if empty.") var night: Date?
     static var parameterSummary: some ParameterSummary { Summary("Follow \(\.$park) on \(\.$night)") }

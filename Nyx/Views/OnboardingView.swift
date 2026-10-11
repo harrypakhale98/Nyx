@@ -13,8 +13,12 @@ struct OnboardingView:View {
     @ScaledMetric(relativeTo:.body) private var fade=24.0
     let finish:()->Void
     private let titles:[LocalizedStringKey]=["Where and when\nthe sky is darkest","A darker sky.\nA clearer plan.","Made for dark eyes"]
+    /// The first page names the US national parks where the device is set to the United States, as it
+    /// always has; anywhere else, the parks and dark-sky places of every country that Nyx now scores.
     private var messages:[LocalizedStringKey] {[
-        "Nyx compares the \(model.parks.isEmpty ? 63 : model.parks.count) national parks night by night, so you know which park to drive to and which night to take off.",
+        Locale.current.region?.identifier == "US"
+            ? "Nyx compares the \(model.parks.isEmpty ? 63 : model.parks.count) national parks night by night, so you know which park to drive to and which night to take off."
+            : "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off.",
         "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown.",
         "Turn the screen red at any time, here or from Control Center. Nyx has no account, no ads, no tracking. Your journal never leaves this phone.",
     ]}

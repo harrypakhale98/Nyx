@@ -2,13 +2,13 @@ import AppIntents
 import CoreSpotlight
 import Foundation
 
-/// A national park, for Siri, Shortcuts, Spotlight, and the widgets' and controls' park choice.
-/// Shared by the app and the widget extension. Indexed (iOS 18+), so Spotlight's semantic search
+/// A place: a curated park, a world catalogue place or a saved spot, for Siri, Shortcuts, Spotlight,
+/// and the widgets' and controls' park choice. Shared by the app and the widget extension. Indexed (iOS 18+), so Spotlight's semantic search
 /// finds "dark sky park in Utah" and a tap opens the park through `OpenParkIntent`; its state,
 /// Dark Sky designation and Bortle class are entity properties (iOS 26), so Shortcuts can filter
-/// on them ("National parks where Dark Sky designation is International Dark Sky Park").
+/// on them ("Places where Dark Sky designation is International Dark Sky Park").
 struct ParkEntity:IndexedEntity {
-    static let typeDisplayRepresentation=TypeDisplayRepresentation(name:"National park")
+    static let typeDisplayRepresentation=TypeDisplayRepresentation(name:"Place")
     static let defaultQuery=ParkQuery()
     let id:String
     let name:String
@@ -20,6 +20,8 @@ struct ParkEntity:IndexedEntity {
     var country:String=""
     /// Whether "national park" describes it (a Dark Sky community or reserve abroad is not one).
     var nationalPark=true
+    /// A catalogue place's English name when the app shows it in another language, so Spotlight finds either.
+    var englishName=""
     /// A spot the person saved (`pin:`), rather than a catalogue park.
     var isSpot:Bool { id.hasPrefix(ParkLibrary.spotPrefix) }
     var displayRepresentation:DisplayRepresentation {
@@ -49,19 +51,26 @@ struct ParkEntity:IndexedEntity {
     init(id:String,name:String) { self.id=id; self.name=name }
     init(_ park:Park) {
         id=park.id; name=park.shortName; state=park.region; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate
-        if park.isCatalogPlace { country=park.countryCode; nationalPark=park.kind == .nationalPark }
+        if park.isCatalogPlace { country=park.countryCode; nationalPark=park.kind == .nationalPark; englishName=park.englishName.map(Park.shortened) ?? "" }
     }
     /// Shared with `SpotlightIndexer`'s items, so the entity and the item describe the park alike.
-    var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle,country:country,nationalPark:nationalPark) }
-    static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0,country:String="",nationalPark:Bool=true)->CSSearchableItemAttributeSet {
+    var attributeSet:CSSearchableItemAttributeSet { Self.attributes(name:name,state:state,darkSky:darkSky,bortle:bortle,country:country,nationalPark:nationalPark,englishName:englishName) }
+    static func attributes(name:String,state:String,darkSky:Bool,bortle:Int=0,country:String="",nationalPark:Bool=true,englishName:String="")->CSSearchableItemAttributeSet {
         let attributes=CSSearchableItemAttributeSet(contentType:.text)
         let place=locality(state:state,country:country)
         attributes.title=name
         attributes.displayName=name
         attributes.contentDescription=String(localized:"Plan a dark-sky night at \(name), \(place).")
         let countryName=country.isEmpty ? [] : [Locale.current.localizedString(forRegionCode:country) ?? country]
-        let words:[String]=["stars","stargazing"]+(nationalPark ? ["national park"] : [])+["night sky","Milky Way",name,state]+countryName
-        attributes.keywords=words+(darkSky ? ["dark sky park"] : [])+(bortle>0 ? ["Bortle \(bortle)"] : [])
+        // The English words stay beside the reader's own, so a search in either finds the place.
+        let english:[String]=["stars","stargazing"]+(nationalPark ? ["national park"] : [])+["night sky","Milky Way"]+(darkSky ? ["dark sky park"] : [])
+        var local:[String]=[String(localized:"stars"),String(localized:"stargazing")]
+        if nationalPark { local.append(String(localized:"national park")) }
+        local+=[String(localized:"night sky"),String(localized:"Milky Way")]
+        if darkSky { local.append(String(localized:"dark sky park")) }
+        var words:[String]=[]
+        for word in english+local+[name,englishName,state]+countryName where !word.isEmpty && !words.contains(word) { words.append(word) }
+        attributes.keywords=words+(bortle>0 ? ["Bortle \(bortle)"] : [])
         return attributes
     }
 }
@@ -133,10 +142,11 @@ nonisolated enum ParkLibrary {
             return folded
         }
         let ranked:[(Park,Int)]=catalog(bundle:bundle).compactMap { place in
-            let name=Park.folded(place.name), short=Park.folded(place.shortName)
-            if name==needle || short==needle { return (place,0) }
-            if name.hasPrefix(needle) || short.hasPrefix(needle) { return (place,1) }
-            if name.contains(" "+needle) { return (place,2) }
+            // Local and English names rank alike (a German "Eifel" or "Nationalpark Eifel" is found by either).
+            let names=place.searchNames.map(Park.folded)
+            if names.contains(needle) { return (place,0) }
+            if names.contains(where: { $0.hasPrefix(needle) }) { return (place,1) }
+            if names.contains(where: { $0.contains(" "+needle) }) { return (place,2) }
             if place.matches(folded:needle) || country(place.countryCode).contains(needle) { return (place,3) }
             return nil
         }
@@ -146,7 +156,7 @@ nonisolated enum ParkLibrary {
 /// Opens a park in Nyx: a Spotlight result, a snippet's "Open in Nyx", or Shortcuts.
 struct OpenParkIntent:OpenIntent {
     static let title:LocalizedStringResource="Open park"
-    static let description=IntentDescription("Opens a national park in Nyx: its darkness score, Moon, sky and closures.")
+    static let description=IntentDescription("Opens a park or dark-sky place in Nyx: its darkness score, Moon and sky, and closures where Nyx can check them.")
     @Parameter(title:"Park") var target:ParkEntity
     init() {}
     init(target:ParkEntity) { self.target=target }

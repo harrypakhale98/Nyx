@@ -2,7 +2,7 @@ Sharing the night
 
 A quiet place under the stars is often a shared place. Some visitors have brought telescopes. Some are making photographs. Others are seeing the Milky Way for the first time. A little care helps everyone keep the darkness they came to find, and helps the park remain a home for wildlife after the daytime crowds leave.
 
-Begin by checking access. A park may be open at night while a particular road, overlook or visitor facility is closed. Seasonal conditions can change what is safe to reach. Read current alerts and ask a ranger before your trip. Nyx may have cached information, so a score never confirms that a road is open. If conditions are uncertain, choose a familiar, permitted viewing area rather than improvising a route in the dark.
+Begin by checking access. A park may be open at night while a particular road, overlook or visitor facility is closed. Seasonal conditions can change what is safe to reach. Read current alerts or the park's own notices, and ask a ranger or the site's staff before your trip. Nyx may have cached information, so a score never confirms that a road is open. If conditions are uncertain, choose a familiar, permitted viewing area rather than improvising a route in the dark.
 
 Bring a small red light and use the lowest useful brightness. Even red light can be disruptive if it is aimed directly into someone's eyes. Point it at the ground when you need to move. Let your eyes adjust gradually. Avoid checking a bright phone screen; if you use Nyx's night-vision mode, also lower the device brightness to a comfortable level before you start observing.
 

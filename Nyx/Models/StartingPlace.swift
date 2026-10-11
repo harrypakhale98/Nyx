@@ -7,7 +7,13 @@ import Foundation
 /// of 15,000 people or more (GeoNames, CC BY 4.0), each with its own time zone. Searched on this
 /// device; never fetched.
 nonisolated struct StartingPlace: Codable, Hashable, Sendable, Identifiable {
+    /// The name shown: in the app's language where Wikidata has one ("東京" in Japanese, `PlaceNames`),
+    /// else as bundled ("Tokyo"). Identity and what is saved use `savedName`.
     let name: String
+    /// The name as `places.json` writes it, when `name` shows another; nil otherwise. Search reads both.
+    var bundledName: String? = nil
+    /// The bundled name: the place's identity, saved and matched whatever the app's language.
+    var savedName: String { bundledName ?? name }
     /// The region within the country: in the US the two-letter postal code ("IL"); elsewhere the
     /// first-level region's name ("Ontario"), empty where the country has none (Singapore).
     let state: String
@@ -26,9 +32,9 @@ nonisolated struct StartingPlace: Codable, Hashable, Sendable, Identifiable {
     var asciiName: String? = nil
     /// "Chicago, IL" in the US, as before; elsewhere unique across the list: same-named towns in one
     /// region are told apart by their point.
-    var id: String { countryCode=="US" ? label : "\(countryCode)|\(name)|\(state)|\(latitude),\(longitude)" }
+    var id: String { countryCode=="US" ? "\(savedName), \(state)" : "\(countryCode)|\(savedName)|\(state)|\(latitude),\(longitude)" }
     /// "Chicago, IL"; elsewhere the country in the reader's language: "Paris, France".
-    var label: String { countryCode=="US" ? "\(name), \(state)" : "\(name), \(StartingPlaces.countryName(countryCode))" }
+    var label: String { countryCode=="US" ? "\(name), \(state)" : PlaceNames.joined(name, StartingPlaces.countryName(countryCode)) }
     /// "Illinois"; "Ontario, Canada"; "Singapore".
     var regionName: String { StartingPlaces.regionName(countryCode: countryCode, region: state) }
     /// The place's own zone. A record without one (none ship) uses this device's zone, the zone
@@ -43,30 +49,54 @@ nonisolated struct StartingPlace: Codable, Hashable, Sendable, Identifiable {
     /// Straight-line distance to a park, in meters.
     func distanceMeters(to park: Park) -> Double { park.distanceMeters(latitude:latitude,longitude:longitude) }
 
-    /// Identity is what is saved: the name, region, point, country and zone. Population and the
-    /// plain spelling only rank and find, so a saved home still equals the row the picker shows.
+    /// Identity is what is saved: the bundled name, region, point, country and zone. Population, the
+    /// plain spelling and the name in the app's language only rank, find and show, so a saved home
+    /// still equals the row the picker shows, in any language.
     static func == (a: Self, b: Self) -> Bool {
-        a.name==b.name && a.state==b.state && a.latitude==b.latitude && a.longitude==b.longitude && a.countryCode==b.countryCode && a.timeZoneID==b.timeZoneID
+        a.savedName==b.savedName && a.state==b.state && a.latitude==b.latitude && a.longitude==b.longitude && a.countryCode==b.countryCode && a.timeZoneID==b.timeZoneID
     }
     func hash(into hasher: inout Hasher) {
-        hasher.combine(name); hasher.combine(state); hasher.combine(latitude); hasher.combine(longitude); hasher.combine(countryCode); hasher.combine(timeZoneID)
+        hasher.combine(savedName); hasher.combine(state); hasher.combine(latitude); hasher.combine(longitude); hasher.combine(countryCode); hasher.combine(timeZoneID)
     }
 
-    enum CodingKeys: String, CodingKey { case name, state, latitude, longitude, countryCode, timeZoneID }
+    /// `name` is always the bundled name; `shownName` the name shown with it, in the language
+    /// `shownLanguage`, so a saved home reads back in that language while the app keeps it.
+    enum CodingKeys: String, CodingKey { case name, state, latitude, longitude, countryCode, timeZoneID, shownName, shownLanguage }
     /// A home place saved before places carried a country and zone (`{name, state, latitude,
     /// longitude}`) reads as the bundled place of the same label, so it gains its zone and still
     /// equals the row the picker shows.
     init(from decoder: any Decoder) throws {
         let c=try decoder.container(keyedBy:CodingKeys.self)
-        name=try c.decode(String.self,forKey:.name); state=try c.decode(String.self,forKey:.state)
+        let saved=try c.decode(String.self,forKey:.name)
+        if let shown=try c.decodeIfPresent(String.self,forKey:.shownName), shown != saved,
+           try c.decodeIfPresent(String.self,forKey:.shownLanguage)==PlaceNames.appLanguage {
+            name=shown; bundledName=saved
+        } else {
+            name=saved
+        }
+        state=try c.decode(String.self,forKey:.state)
         latitude=try c.decode(Double.self,forKey:.latitude); longitude=try c.decode(Double.self,forKey:.longitude)
         countryCode=try c.decodeIfPresent(String.self,forKey:.countryCode) ?? "US"
         timeZoneID=try c.decodeIfPresent(String.self,forKey:.timeZoneID)
-        if timeZoneID == nil, let bundled=StartingPlaces.all.first(where: { $0.countryCode==countryCode && $0.name==name && $0.state==state }) { timeZoneID=bundled.timeZoneID }
+        if timeZoneID == nil, let bundled=StartingPlaces.all.first(where: { $0.countryCode==countryCode && $0.savedName==savedName && $0.state==state }) { timeZoneID=bundled.timeZoneID }
+    }
+    func encode(to encoder: any Encoder) throws {
+        var c=encoder.container(keyedBy:CodingKeys.self)
+        try c.encode(savedName,forKey:.name); try c.encode(state,forKey:.state)
+        try c.encode(latitude,forKey:.latitude); try c.encode(longitude,forKey:.longitude)
+        try c.encode(countryCode,forKey:.countryCode); try c.encodeIfPresent(timeZoneID,forKey:.timeZoneID)
+        if bundledName != nil { try c.encode(name,forKey:.shownName); try c.encode(PlaceNames.appLanguage,forKey:.shownLanguage) }
     }
     init(name: String, state: String, latitude: Double, longitude: Double, countryCode: String = "US", timeZoneID: String? = nil, population: Int? = nil, asciiName: String? = nil) {
         self.name=name; self.state=state; self.latitude=latitude; self.longitude=longitude; self.countryCode=countryCode; self.timeZoneID=timeZoneID
         self.population=population; self.asciiName=asciiName
+    }
+    /// This place shown as `local` (the bundled name kept as `savedName`); unchanged for nil or the same name.
+    func named(_ local: String?) -> StartingPlace {
+        guard let local, !local.isEmpty, local != name, bundledName == nil else { return self }
+        var place=StartingPlace(name: local, state: state, latitude: latitude, longitude: longitude, countryCode: countryCode, timeZoneID: timeZoneID, population: population, asciiName: asciiName)
+        place.bundledName=name
+        return place
     }
 }
 
@@ -92,11 +122,17 @@ nonisolated enum StartingPlaces {
     static func prepare() {
         Task.detached(priority: .utility) { _ = index; _ = grid; _ = usGrid }
     }
-    static func load(bundle: Bundle = .main) -> [StartingPlace] { loadFile(bundle: bundle).places }
-    private static func loadFile(bundle: Bundle = .main) -> File {
+    /// The bundled places, named in `language` ("ja": Tokyo shows as 東京) or, without one, in the app's language.
+    static func load(bundle: Bundle = .main, language: String? = nil) -> [StartingPlace] { loadFile(bundle: bundle, language: language).places }
+    /// The towns are named in the app's language (`PlaceNames`) as they are read, off the main thread
+    /// when `prepare()` reads them; `nearbyOnly` is never shown and keeps its names.
+    private static func loadFile(bundle: Bundle = .main, language: String? = nil) -> File {
         guard let url=bundle.url(forResource:"places",withExtension:"json"), let data=try? Data(contentsOf:url),
               let file=try? JSONDecoder().decode(File.self,from:data) else { return File(places: [], nearbyOnly: []) }
-        return file
+        let names=language.map { PlaceNames.load(language: $0, bundle: bundle) } ?? (bundle === Bundle.main ? PlaceNames.current : PlaceNames.load(language: PlaceNames.appLanguage, bundle: bundle))
+        guard !names.isEmpty else { return file }
+        let local=names.townNames(count: file.places.count)
+        return File(places: zip(file.places, local).map { $0.named($1) }, nearbyOnly: file.nearbyOnly)
     }
 
     // MARK: Search
@@ -162,10 +198,14 @@ nonisolated enum StartingPlaces {
     /// when there is no region or the region is the country ("Reunion" in Réunion).
     static func regionName(countryCode: String, region: String) -> String {
         if countryCode.uppercased()=="US" { return stateNames[region] ?? region }
-        return regionName(region: region, country: countryName(countryCode))
+        return regionName(region: localRegion(countryCode: countryCode, region: region), country: countryName(countryCode))
     }
     fileprivate static func regionName(region: String, country: String) -> String {
-        region.isEmpty || region==country || Park.folded(region)==Park.folded(country) ? country : "\(region), \(country)"
+        region.isEmpty || region==country || Park.folded(region)==Park.folded(country) ? country : PlaceNames.joined(region, country)
+    }
+    /// A region outside the US in the app's language where Wikidata has it ("Bayern" for Bavaria), else as bundled.
+    static func localRegion(countryCode: String, region: String, names: PlaceNames = .current) -> String {
+        names.region(countryCode: countryCode, region: region) ?? region
     }
     /// The country in the reader's language: "France". Never stored, so it follows the language.
     static func countryName(_ code: String) -> String { Locale.current.localizedString(forRegionCode:code) ?? code }
@@ -251,8 +291,9 @@ nonisolated enum StartingPlaces {
     final class Index: Sendable {
         static let exact=0, regionPrefix=1, namePrefix=2, wordPrefix=3, contains=4
         private let text: [UInt8]
-        /// Per place: the folded name, then the plain spelling (empty when none), as offsets into `text`.
-        private let bounds: [(name: Range<Int>, ascii: Range<Int>)]
+        /// Per place: the folded name, the plain spelling and the bundled name when the name shown is
+        /// another (each empty when none), as offsets into `text`.
+        private let bounds: [(name: Range<Int>, ascii: Range<Int>, bundled: Range<Int>)]
         /// Per place: the ids of the regions it can be narrowed by (`regionIDs`), a range into `regionRefs`.
         private let regionRanges: [Range<Int>]
         private let regionRefs: [Int32]
@@ -260,7 +301,7 @@ nonisolated enum StartingPlaces {
         private let population: [Int]
 
         init(_ places: [StartingPlace]) {
-            var text:[UInt8]=[], bounds:[(name: Range<Int>, ascii: Range<Int>)]=[], ranges:[Range<Int>]=[], refs:[Int32]=[], ids:[String:Int32]=[:]
+            var text:[UInt8]=[], bounds:[(name: Range<Int>, ascii: Range<Int>, bundled: Range<Int>)]=[], ranges:[Range<Int>]=[], refs:[Int32]=[], ids:[String:Int32]=[:]
             // Regions and countries repeat thousands of times; each is folded once.
             var regionsOf:[String:[Int32]]=[:], countries:[String:(name: String, keys: [String])]=[:]
             text.reserveCapacity(places.count*12); bounds.reserveCapacity(places.count); ranges.reserveCapacity(places.count)
@@ -268,7 +309,8 @@ nonisolated enum StartingPlaces {
             for place in places {
                 let name=append(Index.fold(place.name))
                 let ascii=place.asciiName.map { append(Index.fold($0)) } ?? text.count..<text.count
-                bounds.append((name,ascii))
+                let bundled=place.bundledName.map { append(Index.fold($0)) } ?? text.count..<text.count
+                bounds.append((name,ascii,bundled))
                 let key=place.countryCode+"|"+place.state
                 var regions=regionsOf[key] ?? []
                 if regionsOf[key]==nil {
@@ -306,15 +348,17 @@ nonisolated enum StartingPlaces {
             return text.withUnsafeBufferPointer { text in query.needle.withUnsafeBufferPointer { needle in tier(index, query, regions, text, needle) } }
         }
         private func tier(_ index: Int, _ query: Query, _ regions: [Int32?], _ text: UnsafeBufferPointer<UInt8>, _ needle: UnsafeBufferPointer<UInt8>) -> Int? {
-            let (name, ascii)=bounds[index]
+            let (name, ascii, bundled)=bounds[index]
             var best=Self.tier(text, name, needle)
-            if !ascii.isEmpty, let other=Self.tier(text, ascii, needle) { best=min(best ?? other, other) }
+            for other in [ascii, bundled] where !other.isEmpty {
+                if let found=Self.tier(text, other, needle) { best=min(best ?? found, found) }
+            }
             if best==Self.exact { return best }
             // "Springfield Illinois", "Toronto Canada", "Lodz Poland": a name, then its region.
             let own=regionRefs[regionRanges[index]]
             for (split, region) in zip(query.splits, regions) {
                 guard let region, own.contains(region) else { continue }
-                for range in [name, ascii] where !range.isEmpty {
+                for range in [name, ascii, bundled] where !range.isEmpty {
                     split.city.withUnsafeBufferPointer { city in
                         if Self.starts(text, range, city) { best=min(best ?? Int.max, range.count==city.count ? Self.exact : Self.regionPrefix) }
                     }
@@ -382,13 +426,16 @@ nonisolated enum StartingPlaces {
         }
         /// What a place's region can be typed as, folded as a query is: in the US the postal code
         /// and the state's name ("il", "illinois"); elsewhere the region, the region with its
-        /// country, and the country ("ontario", "ontario canada", "canada", "ca").
+        /// country, and the country ("ontario", "ontario canada", "canada", "ca"); the region also as the
+        /// app's language names it ("bayern" for Bavaria).
         private static func regionKeys(_ place: StartingPlace, country: (name: String, keys: [String])) -> [String] {
             let keys:[String]
             if place.countryCode=="US" {
                 keys=[fold(place.state), fold(StartingPlaces.stateNames[place.state] ?? place.state)]
             } else {
-                keys=[fold(place.state), fold(StartingPlaces.regionName(region: place.state, country: country.name))]+country.keys
+                let local=StartingPlaces.localRegion(countryCode: place.countryCode, region: place.state)
+                keys=[fold(place.state), fold(StartingPlaces.regionName(region: place.state, country: country.name)), fold(local),
+                      fold(StartingPlaces.regionName(region: local, country: country.name))]+country.keys
             }
             var seen=Set<String>()
             return keys.filter { !$0.isEmpty && seen.insert($0).inserted }
@@ -445,8 +492,7 @@ nonisolated enum StartingPlaces {
     }
 }
 
-/// The United States' outline (Census cartographic boundary, public domain; `us-outline.json`, the same
-/// file the journal's map draws), the states without the Caribbean territories, as a point-in-polygon
+/// The United States' outline (Census cartographic boundary, public domain; `us-outline.json`), the states without the Caribbean territories, as a point-in-polygon
 /// test for `StartingPlaces.nearest`.
 nonisolated enum USOutline {
     private struct File: Decodable { let regions: [String: [[[Double]]]] }

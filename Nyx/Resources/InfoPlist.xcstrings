@@ -4,6 +4,12 @@
     "NSAlarmKitUsageDescription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx stellt Wecker, die du für Momente in der Nacht auswählst, etwa den Aufgang des Milchstraßenzentrums. Sie werden nur auf diesem Gerät gestellt."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -15,22 +21,52 @@
             "state": "translated",
             "value": "Nyx programa las alarmas que eliges para momentos de la noche, como la salida del núcleo de la Vía Láctea. Se configuran solo en este dispositivo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx règle les alarmes que vous choisissez pour des moments de la nuit, comme le lever du cœur de la Voie lactée. Elles sont réglées sur cet appareil uniquement."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは、天の川の中心部が昇るときなど、あなたが選んだ夜の時刻にアラームを設定します。アラームはこのデバイスだけで設定されます。"
+          }
         }
       }
     },
     "NSLocationWhenInUseUsageDescription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx nutzt deinen Standort auf diesem Gerät, um Parks und Dunkelorte in deiner Nähe zu finden, zu erkennen, wann du in einem US-Nationalpark bist, und den Himmel nach geografisch Nord auszurichten. Er bleibt auf diesem Gerät, außer du speicherst deinen Standort als Platz; dann wird die auf etwa 11 km gerundete Position dieses Platzes für seine Wolkenvorhersage verwendet."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx uses your location on this device to find nearby national parks, notice when you are at one, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 11 km, is used for its cloud forecast."
+            "value": "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 11 km, is used for its cloud forecast."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx usa tu ubicación en este dispositivo para encontrar parques nacionales cercanos, saber cuándo estás en uno y orientar el cielo hacia el norte verdadero. No sale de este dispositivo, salvo que guardes como sitio el lugar donde estás; entonces la posición de ese sitio, redondeada a unos 11 km, se usa para su pronóstico de nubes."
+            "value": "Nyx usa tu ubicación en este dispositivo para encontrar parques y lugares de cielo oscuro cercanos, saber cuándo estás en un parque nacional de EE. UU. y orientar el cielo hacia el norte verdadero. No sale de este dispositivo, salvo que guardes como sitio el lugar donde estás; entonces la posición de ese sitio, redondeada a unos 11 km, se usa para su pronóstico de nubes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx utilise votre position sur cet appareil pour trouver les parcs et sites de ciel étoilé près de vous, savoir quand vous êtes dans un parc national des États-Unis et orienter le ciel vers le nord géographique. Elle reste sur cet appareil, sauf si vous enregistrez l’endroit où vous êtes comme lieu ; la position de ce lieu, arrondie à environ 11 km, sert alors à sa prévision de nuages."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxはこのデバイス上で位置情報を使い、近くの公園や暗い空の場所を探したり、米国の国立公園にいることを確認したり、空を真北に合わせたりします。位置情報はこのデバイスの外に出ません。ただし、今いる場所をスポットとして保存した場合は、その位置を約11 kmに丸めて、雲予報の取得に使います。"
           }
         }
       }
@@ -38,6 +74,12 @@
     "NSMotionUsageDescription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx folgt über Kopfhörer, die Bewegungen erfassen, wie du deinen Kopf drehst, damit der Ton im Feldmodus in Richtung des Himmelsbereichs bleibt, den du gewählt hast. Bewegungsdaten verlassen dieses Gerät nie."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -49,12 +91,30 @@
             "state": "translated",
             "value": "Nyx sigue cómo gira tu cabeza con audífonos que detectan movimiento, para que el tono del modo de campo se mantenga hacia la parte del cielo que elegiste. El movimiento nunca sale de este dispositivo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx suit les mouvements de votre tête grâce aux écouteurs qui les détectent, pour que le son du mode terrain reste orienté vers la partie du ciel que vous avez choisie. Les mouvements ne quittent jamais cet appareil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは、動きを検知するヘッドフォンを通じて頭の向きを追い、フィールドモードの音があなたの選んだ空の方向にとどまるようにします。動きの情報がこのデバイスの外に出ることはありません。"
+          }
         }
       }
     },
     "Nyx Journal": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx-Journal"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -66,12 +126,30 @@
             "state": "translated",
             "value": "Diario de Nyx"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal Nyx"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxジャーナル"
+          }
         }
       }
     },
     "Nyx Park": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx-Park"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -82,6 +160,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parque de Nyx"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parc Nyx"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxの公園"
           }
         }
       }

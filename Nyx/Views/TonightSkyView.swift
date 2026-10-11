@@ -432,7 +432,7 @@ struct BortleFigure: View {
     private var shownClass: Int { Int(level.rounded()) }
     var body: some View {
         VStack(alignment:.leading,spacing:14) {
-            Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(.uppercase).kerning(1.6)
+            Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(Lettering.spaced ? .uppercase : nil).kerning(1.6)
             if let park {
                 PanoramaCanvas(sky:Self.sky(park),options:Self.options(park,bortle:level))
                     .frame(height:260)

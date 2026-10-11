@@ -323,7 +323,7 @@ nonisolated struct SkiesSeen: Sendable {
     var line: String { String(localized:"\(parks.count) of \(total) national park skies") }
 }
 
-/// A year under the stars, from the journal alone: nights out, parks, the darkest sky observed,
+/// A year under the stars, from the journal alone: nights out, places, the darkest sky observed,
 /// the Moon's phases met, and the best meteor shower or eclipse you were out for. The template is
 /// the honest fallback and the facts any on-device wording must keep.
 nonisolated struct YearRecap: Sendable {
@@ -332,6 +332,9 @@ nonisolated struct YearRecap: Sendable {
     let nights: Int
     let parkNames: [String]
     let newParkNames: [String]
+    /// Every place of the year is a national park (a curated park, or a catalogue place of that kind),
+    /// so the words can say "national parks"; otherwise they say "places".
+    let allNationalParks: Bool
     let darkest: Darkest?
     /// Indices 0…7, new moon first, as `YearRecap.phaseIndex` numbers them.
     let phases: Set<Int>
@@ -345,6 +348,7 @@ nonisolated struct YearRecap: Sendable {
         let nights=known.filter { yearOf($0)==year }.sorted { $0.date<$1.date }
         self.nights=nights.count
         let visited=Array(Set(nights.map(\.parkID)))
+        allNationalParks=visited.allSatisfy { byID[$0]?.kind == .nationalPark }
         let before=Set(known.filter { yearOf($0)<year }.map(\.parkID))
         parkNames=visited.compactMap { byID[$0]?.shortName }.sorted()
         newParkNames=visited.filter { !before.contains($0) }.compactMap { byID[$0]?.shortName }.sorted()
@@ -392,7 +396,9 @@ nonisolated struct YearRecap: Sendable {
         guard nights>0 else { return String(localized:"No nights recorded in \(String(year)) yet. Your first night will be your first star.") }
         var lines:[String]=[]
         let nightsText=nights==1 ? String(localized:"one night") : String(localized:"\(nights) nights")
-        let parksText=parkNames.count==1 ? String(localized:"one national park") : String(localized:"\(parkNames.count) national parks")
+        let parksText=allNationalParks
+            ? (parkNames.count==1 ? String(localized:"one national park") : String(localized:"\(parkNames.count) national parks"))
+            : (parkNames.count==1 ? String(localized:"one place") : String(localized:"\(parkNames.count) places"))
         switch newParkNames.count {
         case 0: lines.append(String(localized:"In \(String(year)) you spent \(nightsText) under the stars in \(parksText)."))
         case parkNames.count: lines.append(String(localized:"In \(String(year)) you spent \(nightsText) under the stars in \(parksText), each one new to you."))
@@ -405,8 +411,8 @@ nonisolated struct YearRecap: Sendable {
     }
     /// Facts for the on-device model, one per line, never more than the template already says.
     var facts: [String] {
-        var facts=[String(localized:"Year: \(String(year))"),String(localized:"Nights recorded: \(nights)"),String(localized:"Parks: \(parkNames.joined(separator:", "))")]
-        if !newParkNames.isEmpty { facts.append(String(localized:"New parks this year: \(newParkNames.joined(separator:", "))")) }
+        var facts=[String(localized:"Year: \(String(year))"),String(localized:"Nights recorded: \(nights)"),allNationalParks ? String(localized:"Parks: \(parkNames.joined(separator:", "))") : String(localized:"Places: \(parkNames.joined(separator:", "))")]
+        if !newParkNames.isEmpty { facts.append(allNationalParks ? String(localized:"New parks this year: \(newParkNames.joined(separator:", "))") : String(localized:"New places this year: \(newParkNames.joined(separator:", "))")) }
         if let darkest { facts.append(String(localized:"Darkest observed sky: \(darkest.parkName), \(darkest.dateLabel), Bortle \(darkest.bortle)")) }
         facts.append(String(localized:"Moon phases met: \(phases.count) of 8"))
         if let event { facts.append(event) }

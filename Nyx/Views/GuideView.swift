@@ -28,17 +28,34 @@ struct GuideView:View {
     /// The uncited records under a checked answer, folded until opened.
     @State private var othersOpen=false
     @FocusState private var typing:Bool
-    private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details) }
+    /// The tools find the curated parks, saved spots and the world catalogue by name (G5).
+    private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details,others:model.spots+model.catalog) }
+    /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
+    /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
+    /// darkest skies first when there are many.
+    private var inReach:[Park] {
+        let parks=model.nearby(latitude:model.location.latitude,longitude:model.location.longitude)
+        let from:(latitude:Double,longitude:Double)?
+        if let latitude=model.location.latitude, let longitude=model.location.longitude { from=(latitude,longitude) } else { from=model.origin }
+        guard !model.catalog.isEmpty, let from else { return parks }
+        let all=model.places(near:from.latitude,longitude:from.longitude,radiusMeters:model.radiusMeters)
+        let chosen=TonightReach.candidates(parks:parks,places:all,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
+        return chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen,latitude:from.latitude,longitude:from.longitude) : chosen
+    }
+    /// Every place a record may name, so a record about a place abroad or a spot finds its page.
+    private var recordPlaces:[Park] { model.parks+model.spots+model.catalog }
+    /// Where a record's closures stand: the Park Service's alerts where it runs the place; elsewhere, plainly, none.
+    private func closures(_ park:Park)->String { park.nps == nil ? park.unknownClosuresLine : model.alertSummary(park) }
     private var records:[String] {
         switch mode {
         case .planning:
             guard let home=model.home else { return [] }
-            let best=Array(model.ranked(model.nearby(latitude:model.location.latitude,longitude:model.location.longitude)).prefix(3))
+            let best=Array(model.ranked(inReach).prefix(3))
             let lookup=lookup
             let start=model.location.latitude != nil ? String(localized:"Starting point: the device location. Distances are straight-line estimates.")
                 : model.homePlace.map { String(localized:"Starting point: \($0.label). Distances are straight-line estimates.") }
                 ?? String(localized:"Starting park: \(home.shortName). Distances are straight-line estimates.")
-            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in lookup.describe(night)+". "+model.alertSummary(park) } }+[start]
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in lookup.describe(night)+". "+closures(park) } }+[start]
         case .learn(let essay): return [String(essay.content.prefix(6500))]
         }
     }
@@ -48,7 +65,15 @@ struct GuideView:View {
     /// Questions the tools can answer, for an empty page.
     private var suggestions:[String] {
         switch mode {
-        case .planning: [String(localized:"Best night at Arches this month"),String(localized:"Darkest park within 300 mi of Denver this weekend"),String(localized:"When does the core rise at Big Bend tonight?")]
+        case .planning:
+            // From a starting point abroad, the examples name its own place and town rather than Utah's.
+            if let home=model.home, let from=model.origin, !USOutline.contains(latitude:from.latitude,longitude:from.longitude) {
+                [String(localized:"Best night at \(home.shortName) this month"),
+                 String(localized:"Darkest place within \(SearchRadius.label(model.radiusMeters)) of \(model.originName) this weekend"),
+                 String(localized:"When does the core rise at \(home.shortName) tonight?")]
+            } else {
+                [String(localized:"Best night at Arches this month"),String(localized:"Darkest park within 300 mi of Denver this weekend"),String(localized:"When does the core rise at Big Bend tonight?")]
+            }
         case .learn: [String(localized:"Explain the main idea in plain language")]
         }
     }
@@ -71,7 +96,7 @@ struct GuideView:View {
                     // The source is the essay the reader just left; don't print it twice.
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else {
-                    let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }
+                    let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:recordPlaces,tonight:{ model.tonight($0) }) }
                     GuideRecords(all:all,citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
                 }
             }.padding(24).readableColumn() }
@@ -122,7 +147,7 @@ struct GuideView:View {
         let tonight=lookup.whatsUp(park:"Arches",on:today).prefix(1)
         let found=best+tonight
         let records=records
-        guard let first=found.first.map({ GuideRecord($0,parks:model.parks,tonight:{ model.tonight($0) }) }), let park=first.park, let night=first.night, let score=first.score else { return }
+        guard let first=found.first.map({ GuideRecord($0,parks:recordPlaces,tonight:{ model.tonight($0) }) }), let park=first.park, let night=first.night, let score=first.score else { return }
         let words="The best of the next 30 nights at Arches is \(park.dayLabel(night)), at \(score) out of 100, \(first.band ?? ""). Check the clouds and park alerts again closer to the night."
         let shown=checked ? words : String(words.prefix(words.count*3/5))
         asked=suggestions[0]; sent=records

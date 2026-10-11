@@ -85,15 +85,23 @@ struct AssistiveHome: View {
 /// The one park for tonight.
 struct AssistiveTonight: View {
     @Environment(PlanModel.self) private var model
-    /// The darkest park within the radius of the starting point (the first run's choice, or the
-    /// example park until one is chosen).
-    static func best(_ model: PlanModel) -> Park? { model.ranked(model.nearby(latitude: nil, longitude: nil)).first }
+    /// The darkest place within the radius of the starting point (the first run's choice, or the
+    /// example park until one is chosen), weighed as Tonight weighs it (`TonightReach`): from a US
+    /// starting point with only US places in range, the national parks; anywhere else, every place in range.
+    static func best(_ model: PlanModel) -> Park? {
+        let parks=model.nearby(latitude: nil, longitude: nil)
+        guard !model.catalog.isEmpty, let from=model.origin else { return model.ranked(parks).first }
+        let all=model.places(near: from.latitude, longitude: from.longitude, radiusMeters: model.radiusMeters)
+        let chosen=TonightReach.candidates(parks: parks, places: all, originInUS: USOutline.contains(latitude: from.latitude, longitude: from.longitude))
+        let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: from.latitude, longitude: from.longitude) : chosen
+        return model.ranked(pool).first
+    }
     var body: some View {
         ScrollView {
             if let park=Self.best(model) {
                 AssistiveParkCard(park: park, reminder: true).padding(20)
             } else {
-                Text("No national park is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).padding(20)
+                Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).padding(20)
             }
         }
         .navigationTitle("Tonight")

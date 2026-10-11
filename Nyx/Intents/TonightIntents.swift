@@ -30,7 +30,7 @@ enum IntentPark {
 /// (sunset, or the evening, where there is none), as Find the best night does.
 struct DarkTonightIntent: AppIntent {
     static let title: LocalizedStringResource="When true darkness falls tonight"
-    static let description=IntentDescription("Says when true darkness begins and ends tonight at a national park, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park.")
+    static let description=IntentDescription("Says when true darkness begins and ends tonight at a park or dark-sky place, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park.")
     @Parameter(title:"Park",description:"Leave empty for your starting park.") var park: ParkEntity?
     static var parameterSummary: some ParameterSummary { Summary("When true darkness falls at \(\.$park) tonight") }
     init() {}
@@ -87,7 +87,7 @@ nonisolated enum DarkWindowAnswer {
 /// the Milky Way core and the brightest planets), said briefly with park-local times.
 struct WhatsUpTonightIntent: AppIntent {
     static let title: LocalizedStringResource="What's up tonight"
-    static let description=IntentDescription("Names what is worth seeing tonight at a national park: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for your starting park.")
+    static let description=IntentDescription("Names what is worth seeing tonight at a park or dark-sky place: the Milky Way core, bright planets, a meteor shower or an eclipse, with times in the park's own time. Leave the park empty for your starting park.")
     @Parameter(title:"Park",description:"Leave empty for your starting park.") var park: ParkEntity?
     static var parameterSummary: some ParameterSummary { Summary("What's up tonight at \(\.$park)") }
     init() {}

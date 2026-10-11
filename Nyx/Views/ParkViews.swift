@@ -41,7 +41,7 @@ extension Place {
         let names=countryCode.uppercased()=="US" ? parts.map { StartingPlaces.stateNames[$0] ?? $0 } : parts
         guard !names.isEmpty else { return country }
         let regions=ListFormatter.localizedString(byJoining:names)
-        return Park.folded(regions)==Park.folded(country) ? country : "\(regions), \(country)"
+        return Park.folded(regions)==Park.folded(country) ? country : PlaceNames.joined(regions,country)
     }
     /// The eyebrow over a catalogue place's name on its page: "International Dark Sky Park · Catalonia, Spain".
     var worldEyebrow: String { kindLabel.map { String(localized:"\($0) · \(worldLocality)") } ?? worldLocality }

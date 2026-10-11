@@ -54,15 +54,19 @@ extension ConstellationLayout {
         return SkyMapContent(stars:stars,figures:seasons.map { season in lines.filter { $0.season==season }.map { ($0.from,$0.to) } },
                              frame:frame,background:SkyMap.background(parks,in:frame))
     }
-    /// What VoiceOver hears for the map; `parks` is how many parks it draws on the lower 48's map.
-    func summary(parks count: Int) -> String {
+    /// What VoiceOver hears for the map. On the lower 48's map the faint stars are the national parks
+    /// there (`SkyMap.background` draws only the curated parks on it); on any other map, the parks and
+    /// dark-sky places around. `unavailable`: the journal could not be opened, so no night is shown.
+    func summary(unavailable: Bool = false) -> String {
         guard onLower48 else {
+            if unavailable { return String(localized:"Your constellation. A map of the parks and dark-sky places near you, drawn as faint stars. Your journal could not be opened, so your nights are not shown.") }
             guard !stars.isEmpty else { return String(localized:"Your constellation. A map of the parks and dark-sky places near you, drawn as faint stars. Your first night will be your first star.") }
             return String(localized:"Your constellation: \(stars.count) nights at \(Set(stars.map(\.night.parkID)).count) places across \(seasons.count) seasons, each a star at its true place on the map.")
         }
-        guard !stars.isEmpty else { return String(localized:"Your constellation. A map of the \(count) national parks drawn as faint stars. Your first night will be your first star.") }
+        if unavailable { return String(localized:"Your constellation. A map of the national parks in the lower 48 states, drawn as faint stars. Your journal could not be opened, so your nights are not shown.") }
+        guard !stars.isEmpty else { return String(localized:"Your constellation. A map of the national parks in the lower 48 states, drawn as faint stars. Your first night will be your first star.") }
         let parks=Set(stars.map(\.night.parkID)).count
-        return String(localized:"Your constellation: \(stars.count) nights at \(parks) parks across \(seasons.count) seasons, each a star at its park on a map of the United States.")
+        return String(localized:"Your constellation: \(stars.count) nights at \(parks) parks across \(seasons.count) seasons, each a star at its park on a map of the lower 48 states.")
     }
 }
 extension PlanModel {
@@ -112,7 +116,7 @@ struct YourSkyPanel: View {
                 Spacer(minLength:8)
                 if !nights.isEmpty { ConstellationShareButton(layout:layout,year:Calendar.current.component(.year,from:.now)) }
             }
-            SkyMapView(content:layout.content(parks:places),summary:unavailable ? String(localized:"Your constellation. A map of the \(model.parks.count) national parks drawn as faint stars. Your journal could not be opened, so your nights are not shown.") : layout.summary(parks:model.parks.count),
+            SkyMapView(content:layout.content(parks:places),summary:layout.summary(unavailable:unavailable),
                        arriving:arriving,arrivalHold:hold,arrivalPaused:!onScreen || fieldOpen,drawInMemory:"journal",
                        onSelect:{ id in if let night=nights.first(where:{ $0.id.uuidString==id }) { open(night.id) } },
                        onArrived:{ id in arrived(id) })
@@ -126,7 +130,9 @@ struct YourSkyPanel: View {
             } else {
                 Text("Brighter stars mark darker skies. Each season's nights join into a figure. Tap a star to open its night.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 Divider().overlay(palette.line)
-                SkiesSeenSection(seen:SkiesSeen(nights:nights,parks:model.parks))
+                // The US national parks as a collection: shown once one is logged, or from a US starting point.
+                let seen=SkiesSeen(nights:nights,parks:model.parks)
+                if !seen.parks.isEmpty || (model.mapOriginCountry ?? "US") == "US" { SkiesSeenSection(seen:seen) }
             }
         } }
         .onAppear { fieldOpen=FieldPresenter.isOpen(in:commands?.windowScene); onScreen=true; catchArrival(ids) }
@@ -182,7 +188,9 @@ struct ConstellationCard: View {
     let layout: ConstellationLayout
     let title: String
     var body: some View {
-        let parks=Set(layout.stars.map(\.night.parkID)).count
+        let ids=Set(layout.stars.map(\.night.parkID)), parks=ids.count
+        // "national parks" only while every star is at one; a dark-sky place or a spot makes them "places".
+        let allNationalParks=ids.allSatisfy { model.park($0)?.kind == .nationalPark }
         ZStack {
             Color.black
             Starfield(seed:"my-sky",twinkle:0)
@@ -190,13 +198,13 @@ struct ConstellationCard: View {
                 Text("NYX").font(.caption).tracking(7).foregroundStyle(palette.muted)
                 Text(title).font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(palette.ink)
                 SkyMapCanvas(content:layout.content(parks:model.mapPlaces)).frame(width:500,height:500*layout.frame.aspect)
-                Text(String(localized:"\(layout.stars.count) nights under the stars at \(parks) national parks"))
+                Text(allNationalParks ? String(localized:"\(layout.stars.count) nights under the stars at \(parks) national parks") : String(localized:"\(layout.stars.count) nights under the stars at \(parks) places"))
                     .font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-                Text("Each star is a night at its park. Brighter stars, darker skies.").font(.caption).foregroundStyle(palette.muted)
+                Text("Each star is a night at its place. Brighter stars, darker skies.").font(.caption).foregroundStyle(palette.muted)
             }.padding(40)
         }.frame(width:580,height:560)
             .environment(\.colorScheme,.dark).dynamicTypeSize(.large)
-            .accessibilityElement(children:.ignore).accessibilityLabel(layout.summary(parks:model.parks.count))
+            .accessibilityElement(children:.ignore).accessibilityLabel(layout.summary())
     }
 }
 struct ConstellationShareButton: View {
@@ -245,7 +253,7 @@ struct YearRecapView: View {
     }
     private var years: [Int] { Array(Set(nights.map { Calendar.current.component(.year,from:$0.date) })).sorted(by:>) }
     var body: some View {
-        let recap=YearRecap(year:year,nights:nights,parks:model.parks)
+        let recap=YearRecap(year:year,nights:nights,parks:model.mapPlaces)
         let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
         let places=model.mapPlaces
         let layout=ConstellationLayout(nights:yearNights,parks:places)
@@ -279,7 +287,7 @@ struct YearRecapView: View {
             if let event=recap.event {
                 Label { Text(event).fixedSize(horizontal:false,vertical:true) } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:16,height:16) }.font(.subheadline)
             }
-            if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:places),summary:layout.summary(parks:model.parks.count)) } } }
+            if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:places),summary:layout.summary()) } } }
             VStack(alignment:.leading,spacing:10) {
                 Eyebrow(text:"In a few words")
                 if reflecting { ConstellationLoader().frame(maxWidth:.infinity) }
@@ -302,7 +310,7 @@ struct YearRecapView: View {
         }
     }
     @ViewBuilder private func stats(_ recap:YearRecap)->some View {
-        let tiles=[(recap.nights,String(localized:"Nights out")),(recap.parkNames.count,String(localized:"Parks")),(recap.newParkNames.count,String(localized:"New to you"))]
+        let tiles=[(recap.nights,String(localized:"Nights out")),(recap.parkNames.count,recap.allNationalParks ? String(localized:"Parks") : String(localized:"Places")),(recap.newParkNames.count,String(localized:"New to you"))]
         ViewThatFits(in:.horizontal) {
             HStack(spacing:12) { ForEach(tiles,id:\.1) { tile($0.0,$0.1) } }
             VStack(spacing:12) { ForEach(tiles,id:\.1) { tile($0.0,$0.1) } }
@@ -349,7 +357,7 @@ struct RecapCard: View {
             Color.black
             Starfield(seed:"recap-\(recap.year)",twinkle:0)
             VStack(alignment:.leading,spacing:16) {
-                Text("Nyx · Year under the stars").textCase(.uppercase).font(.caption).tracking(4).foregroundStyle(palette.muted)
+                Text("Nyx · Year under the stars").textCase(Lettering.spaced ? .uppercase : nil).font(.caption).tracking(4).foregroundStyle(palette.muted)
                 Text(String(recap.year)).font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:28) {
                     figure(recap.nights,String(localized:"nights out"))

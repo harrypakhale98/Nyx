@@ -27,11 +27,15 @@ import Testing
         #expect(ParksView.countLine(shown:5,of:70,narrowed:true)=="5 of 70 parks")
     }
 
-    @Test func emptyConstellationNamesTheCatalogueCount() throws {
+    /// The lower 48's map draws the national parks there and says so, with no count it cannot keep;
+    /// any other map names the parks and dark-sky places around (G5).
+    @Test func emptyConstellationNamesWhatItDraws() throws {
         let all=try parks()
         let empty=ConstellationLayout(nights:[],parks:all)
-        #expect(empty.summary(parks:all.count)=="Your constellation. A map of the \(all.count) national parks drawn as faint stars. Your first night will be your first star.")
-        #expect(empty.summary(parks:70).contains("A map of the 70 national parks"))
+        #expect(empty.summary()=="Your constellation. A map of the national parks in the lower 48 states, drawn as faint stars. Your first night will be your first star.")
+        #expect(empty.summary(unavailable:true).hasSuffix("Your journal could not be opened, so your nights are not shown."))
+        let paris=ConstellationLayout(nights:[],parks:all,empty:SkyMap.frame(.around,origin:GeoPoint(latitude:48.85,longitude:2.35),radiusMeters:400_000))
+        #expect(paris.summary()=="Your constellation. A map of the parks and dark-sky places near you, drawn as faint stars. Your first night will be your first star.")
     }
 
     // MARK: Park row "More content"

@@ -22,3 +22,6 @@ Store/Social/*.mp4
 # iCloud Drive conflict copies (the repo lives in ~/Documents)
 /Nyx [0-9]*.xcodeproj/
 Store/Promo/*.mp4
+
+# Translators' to-do lists (python3 Scripts/apply_translations.py --report)
+Research/localization/reports/
