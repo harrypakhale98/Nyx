@@ -27,6 +27,17 @@ struct TonightEntry:TimelineEntry {
     var stepScope:String?=nil
     /// The night on the face: tonight, or the night of the week the buttons moved to.
     var shown:Night? { offset>0 && offset<week.count ? week[offset] : night }
+    /// The night on the face carries a soft plate in the week's column or the month's cell, tonight
+    /// included, wherever night buttons can move it.
+    func marks(_ candidate:Night)->Bool { stepScope != nil && candidate.id == shown?.id }
+    /// What a tap on the face opens: the place on the night the face shows (`nyx://park/<id>?night=`)
+    /// when that is a night ahead, so the app opens on the score the widget showed; the place
+    /// itself on tonight; Tonight with nothing saved.
+    static func link(face:Night?,tonight:Night?)->URL? {
+        guard let face else { return URL(string:"nyx://tonight") }
+        if let tonight, face.id != tonight.id { return URL(string:"nyx://park/\(face.park.id)?night=\(face.park.isoDay(face.id))") }
+        return URL(string:"nyx://park/\(face.park.id)")
+    }
 }
 /// Builds Tonight entries from the shared snapshot. Each night's sky is computed once and reused
 /// across entries; the large widget's month (35 nights with shower and eclipse marks) once per night.
@@ -182,8 +193,15 @@ struct TonightWidgetView:View {
     private var palette:NyxPalette { look.palette }
     var body:some View {
         content.foregroundStyle(ink)
-            .containerBackground(for:.widget) { WidgetSky(seed:entry.night?.park.id ?? "nyx",ink:ink,night:entry.night) }
-            .widgetURL(URL(string:entry.night.map{"nyx://park/\($0.park.id)"} ?? "nyx://tonight"))
+            // The real stars over the place on the night the face shows, and a tap opens that night.
+            .containerBackground(for:.widget) { WidgetSky(seed:entry.night?.park.id ?? "nyx",ink:ink,night:faceNight) }
+            .widgetURL(TonightEntry.link(face:faceNight,tonight:entry.night))
+    }
+    /// The night the face shows: the one the night buttons moved to where they are drawn (medium
+    /// outside accessibility sizes, large), else tonight.
+    private var faceNight:Night? {
+        let steps=entry.stepScope != nil && (family == .systemLarge || family == .systemMedium && !entry.week.isEmpty && !typeSize.isAccessibilitySize)
+        return steps ? entry.shown : entry.night
     }
     /// iPad's portrait extra-large widget (iOS 27): tonight above the month.
     private var portraitXL:Bool {
@@ -419,7 +437,6 @@ struct TonightWidgetView:View {
     /// nights without a cloud forecast are hollow.
     private func weekStrip(_ week:[Night])->some View {
         let best=NightPlanner.best(week)?.id
-        let shown=entry.shown?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
                 // With night buttons, they lead the row and the week's columns say the rest.
@@ -440,7 +457,7 @@ struct TonightWidgetView:View {
                         Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
                     // The night on the face, where the buttons can move it.
-                    .background { if entry.stepScope != nil && night.id==shown { RoundedRectangle(cornerRadius:8).fill(ink.opacity(tinted ? 0.2 : 0.12)) } }
+                    .background { if entry.marks(night) { RoundedRectangle(cornerRadius:8).fill(ink.opacity(tinted ? 0.2 : 0.12)) } }
                 }
             }.accessibilityHidden(true)
             // A closure takes this line's room below; the ring already marks the best night.
@@ -495,7 +512,7 @@ struct TonightWidgetView:View {
                         Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
                     }
                 }.invalidatableContent(entry.stepScope != nil)
-                monthGrid(night.park,month:month,shown:entry.stepScope == nil ? nil : night.id)
+                monthGrid(night.park,month:month,shown:entry.marks(night) ? night.id : nil)
                 HStack(spacing:6) {
                     // The ring already marks the best night; a closure the header cannot hold takes its line.
                     if !isTonight(night), entry.closure != nil { closureMark(.caption2) }

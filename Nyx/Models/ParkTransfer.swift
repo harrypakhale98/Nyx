@@ -43,7 +43,9 @@ nonisolated extension Park: Transferable {
         return park
     }
     static func transferred(url:URL,catalog:[Park]?=nil) throws -> Park {
-        guard case .park(let id)?=DeepLink(url) else { throw ParkTransferError.unknownPark }
-        return try transferred(id:id,catalog:catalog)
+        switch DeepLink(url) {
+        case .park(let id)?, .parkNight(let id,_)?: return try transferred(id:id,catalog:catalog)
+        default: throw ParkTransferError.unknownPark
+        }
     }
 }

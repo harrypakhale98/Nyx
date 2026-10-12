@@ -16,14 +16,24 @@ nonisolated struct NightTransfer: Codable, Equatable, Sendable, Transferable {
     init(place: String, night: String) { self.place=place; self.night=night }
     init(_ night: Night) { self.init(place:night.park.id,night:night.park.isoDay(night.id)) }
     /// The night's own date at `park` (its noon there, as the app keys nights); nil for another
-    /// place or a day that is not a real Gregorian date.
+    /// place, or a day that is not a real Gregorian "YYYY-MM-DD" between 1900 and 2200 (the years
+    /// Nyx's links accept).
     func date(at park: Park) -> Date? {
-        guard park.id == place else { return nil }
-        let parts=night.split(separator:"-",omittingEmptySubsequences:false).map { Int($0) }
-        guard parts.count == 3, let year=parts[0], let month=parts[1], let day=parts[2],
-              let date=park.calendar.date(from:DateComponents(year:year,month:month,day:day,hour:12)),
+        guard park.id == place, let day=TripDay(iso:night), Self.years.contains(day.year),
+              let date=park.calendar.date(from:DateComponents(year:day.year,month:day.month,day:day.day,hour:12)),
               park.isoDay(date) == night else { return nil }
         return date
+    }
+    static let years=1900...2200
+    /// A night as it arrives from a drag, which any app can offer under Nyx's type: small, a place
+    /// id in its stored form (`DeepLink.placeID`) and a real day, or nothing.
+    static func received(_ data: Data) throws -> NightTransfer {
+        guard data.count <= 512 else { throw ParkTransferError.unknownPark }
+        let transfer=try JSONDecoder().decode(NightTransfer.self,from:data)
+        guard DeepLink.placeID(transfer.place) == transfer.place, let day=TripDay(iso:transfer.night), years.contains(day.year) else {
+            throw ParkTransferError.unknownPark
+        }
+        return transfer
     }
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType:.nyxNight)
@@ -35,7 +45,7 @@ nonisolated enum JournalDrop: Transferable, Equatable, Sendable {
     case park(String)
     static var transferRepresentation: some TransferRepresentation {
         // Nyx's night, else a park by any of the ways a park arrives (its id, its nyx:// link).
-        DataRepresentation(importedContentType:.nyxNight) { data in JournalDrop.night(try JSONDecoder().decode(NightTransfer.self,from:data)) }
+        DataRepresentation(importedContentType:.nyxNight) { data in JournalDrop.night(try NightTransfer.received(data)) }
         ProxyRepresentation(importing:{ (park:Park) in JournalDrop.park(park.id) })
     }
 }

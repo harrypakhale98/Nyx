@@ -97,6 +97,51 @@ import WidgetKit
         #expect(plain.offset == 0 && plain.stepScope == nil && plain.shown?.id == night.id)
     }
 
+    @Test func theShownNightIsMarkedTonightIncluded() throws {
+        let (defaults, name) = try suite()
+        defer { defaults.removePersistentDomain(forName: name) }
+        let jotr = try park("jotr")
+        let scope = WidgetNightStep.scope(place: "jotr", family: "medium")
+        var builder = TonightTimeline(snapshot: SavedSkySnapshot(parks: [jotr], forecasts: [:]), large: false, pinned: jotr)
+        builder.stepScope = scope
+        builder.stepDefaults = defaults
+        // Tonight: the week's first column carries the plate, as the large widget's month marks tonight.
+        let tonight = builder.entry(at: now)
+        #expect(tonight.week.count == WidgetNightStep.nights)
+        #expect(tonight.week.map { tonight.marks($0) } == [true] + Array(repeating: false, count: WidgetNightStep.nights-1))
+        let night = try #require(tonight.night)
+        WidgetNightStep.set(3, scope: scope, park: "jotr", tonight: night.id, now: now, defaults: defaults)
+        let moved = builder.entry(at: now)
+        #expect(moved.week.indices.filter { moved.marks(moved.week[$0]) } == [3])
+        // The gallery and the families without buttons mark nothing.
+        var plain = TonightTimeline(snapshot: SavedSkySnapshot(parks: [jotr], forecasts: [:]), large: false, pinned: jotr)
+        plain.stepDefaults = defaults
+        let gallery = plain.entry(at: now)
+        #expect(!gallery.week.contains { gallery.marks($0) })
+    }
+
+    @Test func aTapOnANightAheadOpensThatNight() throws {
+        let jotr = try park("jotr")
+        let planner = NightPlanner(forecasts: [:])
+        let tonight = planner.night(jotr, on: jotr.currentNight(at: now), now: now)
+        let ahead = planner.night(jotr, on: jotr.date(tonight.id, addingDays: 3), now: now)
+        // Tonight opens the park, as before; nothing saved opens Tonight.
+        #expect(TonightEntry.link(face: tonight, tonight: tonight)?.absoluteString == "nyx://park/jotr")
+        #expect(TonightEntry.link(face: nil, tonight: nil)?.absoluteString == "nyx://tonight")
+        // A night ahead opens the park on that night, the score the face showed.
+        let link = try #require(TonightEntry.link(face: ahead, tonight: tonight))
+        let day = try #require(TripDay(iso: jotr.isoDay(ahead.id)))
+        #expect(DeepLink(link) == .parkNight(park: "jotr", day: day))
+        #expect(day.evening(in: jotr) == ahead.id)
+        #expect(DeepLink.parkNight(park: "jotr", day: day).url == link)
+        // A link whose night is not a real day, or out of range, still opens the park.
+        for bad in ["2026-02-30", "tomorrow", "0001-01-01", "9999-12-31", ""] {
+            #expect(DeepLink(try #require(URL(string: "nyx://park/jotr?night=\(bad)"))) == .park("jotr"), "\(bad)")
+        }
+        // A park link carrying a night still drags in as the park.
+        #expect(try Park.transferred(url: link).id == "jotr")
+    }
+
     @Test func aNightAheadIsSpokenWithItsDateBasisAndMoon() throws {
         let jotr = try park("jotr")
         var builder = TonightTimeline(snapshot: SavedSkySnapshot(parks: [jotr], forecasts: [:]), large: false, pinned: jotr)
@@ -159,6 +204,29 @@ import WidgetKit
         let place = try await jotr.exported(as: .nyxPark)
         #expect(try await JournalDrop(importing: place, contentType: .nyxPark) == .park("jotr"))
         #expect(JournalDrop.importedContentTypes().first == .nyxNight)
+    }
+
+    @Test func aMalformedOrHostileNightIsRefused() async throws {
+        func data(_ json: String) -> Data { Data(json.utf8) }
+        let refused: [Data] = [
+            data("{}"), data("not json"), data(#"{"place":"jotr"}"#),
+            // Not a stored place id: a path, upper case, a near-miss namespace.
+            data(#"{"place":"../../jotr","night":"2026-10-05"}"#), data(#"{"place":"JOTR","night":"2026-10-05"}"#),
+            data(#"{"place":"pin:not-a-uuid","night":"2026-10-05"}"#),
+            // Not a real day in the years Nyx accepts.
+            data(#"{"place":"jotr","night":"0001-01-01"}"#), data(#"{"place":"jotr","night":"2026-1-5"}"#),
+            data(#"{"place":"jotr","night":"99999-01-01"}"#), data(#"{"place":"jotr","night":"2026-02-30"}"#),
+            // Far larger than a night ever is.
+            data(#"{"place":"jotr","night":"2026-10-05","pad":""# + String(repeating: "x", count: 4096) + #""}"#)
+        ]
+        for payload in refused {
+            await #expect(throws: (any Error).self) { try await JournalDrop(importing: payload, contentType: .nyxNight) }
+        }
+        let good = try await JournalDrop(importing: data(#"{"place":"jotr","night":"2026-10-05"}"#), contentType: .nyxNight)
+        #expect(good == .night(NightTransfer(place: "jotr", night: "2026-10-05")))
+        // Built in code rather than received, a day outside those years still names no night.
+        let jotr = try park("jotr")
+        #expect(NightTransfer(place: "jotr", night: "1850-06-01").date(at: jotr) == nil)
     }
 
     @Test func recordingANightFillsItAsKeepThisNightAndNeverAheadOfNow() throws {

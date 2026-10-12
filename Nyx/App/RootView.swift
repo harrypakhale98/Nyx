@@ -275,6 +275,7 @@ struct RootView:View {
     private func handle(_ link:DeepLink?) {
         switch link {
         case .park(let id): withPlace(id) { open($0) }
+        case .parkNight(let id,let day): withPlace(id) { open($0,night:(day.evening(in:$0),false)) }
         case .tonight: commands.tab=0
         case .field(let id): withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) }
         case .whatsUp(let id,let day): withPlace(id) { open($0,night:(day.evening(in:$0),true)) }

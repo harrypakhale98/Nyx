@@ -6,6 +6,9 @@ import Foundation
 nonisolated enum DeepLink: Equatable, Sendable {
     /// `nyx://park/<id>`
     case park(String)
+    /// `nyx://park/<id>?night=YYYY-MM-DD`: the park's page on that night (the Tonight widget
+    /// moved to a night ahead). A night that is not a real day opens the park on tonight.
+    case parkNight(park: String, day: TripDay)
     /// `nyx://tonight`
     case tonight
     /// `nyx://field/<id>`
@@ -22,7 +25,9 @@ nonisolated enum DeepLink: Equatable, Sendable {
         func item(_ name: String) -> String? { query.first { $0.name==name }?.value?.trimmingCharacters(in:.whitespaces) }
         func parkID(_ raw: String?) -> String? { raw.flatMap(Self.placeID) }
         switch host {
-        case "park": guard let id=parkID(path.first) else { return nil }; self = .park(id)
+        case "park":
+            guard let id=parkID(path.first) else { return nil }
+            if let day=item("night").flatMap(TripDay.init(iso:)), (1900...2200).contains(day.year) { self = .parkNight(park:id,day:day) } else { self = .park(id) }
         case "tonight": self = .tonight
         case "field": guard let id=parkID(path.first) else { return nil }; self = .field(id)
         case "whatsup":
@@ -62,6 +67,7 @@ nonisolated enum DeepLink: Equatable, Sendable {
     var url: URL? {
         switch self {
         case .park(let id): URL(string:"nyx://park/\(id)")
+        case .parkNight(let park,let day): URL(string:"nyx://park/\(park)?night=\(day.iso)")
         case .tonight: URL(string:"nyx://tonight")
         case .field(let id): URL(string:"nyx://field/\(id)")
         case .whatsUp(let park,let day): URL(string:"nyx://whatsup?date=\(day.iso)&park=\(park)")
