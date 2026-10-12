@@ -24,6 +24,8 @@ struct TonightView: View {
     /// "Near me" chosen in the starting-point sheet: the location explainer follows once it closes.
     @State private var nearMeAfterPicker=false
     @Namespace private var zoom
+    /// The explainer only before iOS's first prompt; once answered, Near me just finds you.
+    private func nearMe() { if location.needsPermission { explainLocation=true } else { location.request() } }
     private var candidates:[Park] { reach().places }
     /// Everything within `radiusMeters` (the chosen radius by default) of where distances are measured
     /// from (`TonightReach`): from a US starting point with only US places in range, the national parks
@@ -103,7 +105,7 @@ struct TonightView: View {
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .navigationDestination(for:ZoomRoute.self) { route in ParkDetailView(park:route.park).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park).score.value) } }
-            .sheet(isPresented:$chooseHome,onDismiss:{ if nearMeAfterPicker { nearMeAfterPicker=false; explainLocation=true } }) {
+            .sheet(isPresented:$chooseHome,onDismiss:{ if nearMeAfterPicker { nearMeAfterPicker=false; nearMe() } }) {
                 NavigationStack { StartingPointPicker(nearMe:{ nearMeAfterPicker=true },selectedParkID:model.homeID,selectedPlace:model.homePlace,locationOff:location.denied || DebugScenario.state=="no-location") { choice in
                     switch choice {
                     case .park(let id): model.choose(parkID:id)
@@ -165,7 +167,7 @@ struct TonightView: View {
     }
     @ViewBuilder private var firstRunButtons: some View {
         if !location.denied {
-            Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").frame(minHeight:30) }
+            Button { nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:30) }
                 .buttonStyle(.borderedProminent).foregroundStyle(Color.black)
                 .accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")])
         }
@@ -470,7 +472,7 @@ struct TonightView: View {
     @ViewBuilder private var locationControl:some View {
         if location.locating { ProgressView().accessibilityLabel("Finding your location") }
         else if location.denied { Button { if let url=URL(string:UIApplication.openSettingsURLString) { openURL(url) } } label:{ Label("Settings",systemImage:"location.slash").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Turn on location in Settings").accessibilityInputLabels([Text("Settings"),Text("Turn on location")]) }
-        else if location.latitude==nil { Button { explainLocation=true } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
+        else if location.latitude==nil { Button { nearMe() } label:{ Label("Near me",systemImage:"location").font(.subheadline).frame(minHeight:30) }.buttonStyle(.bordered).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true).accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }
     }
     /// The radius as the distance itself in amber with the system's up-down chevrons; a menu of four
     /// distances in the locale's unit (`SearchRadius`), and the current one too when it was set in the
