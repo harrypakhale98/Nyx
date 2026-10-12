@@ -48551,97 +48551,37 @@
         }
       }
     },
-    "Says when true darkness begins and ends tonight at a park or dark-sky place, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park.": {
+    "Says when true darkness begins and ends tonight at a park or dark-sky place, in the place's own time, worked out on this device. Leave the park empty for your starting park.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Sagt, wann die echte Dunkelheit heute Nacht in einem Park oder Dunkelort beginnt und endet, in der Ortszeit des Parks, berechnet auf diesem iPad. Lass den Park leer für deinen Ausgangspark."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Sagt, wann die echte Dunkelheit heute Nacht in einem Park oder Dunkelort beginnt und endet, in der Ortszeit des Parks, berechnet auf diesem iPhone. Lass den Park leer für deinen Ausgangspark."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagt, wann die echte Dunkelheit heute Nacht in einem Park oder Dunkelort beginnt und endet, in der Ortszeit des Orts, berechnet auf diesem Gerät. Lass den Park leer für deinen Ausgangspark."
           }
         },
         "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Says when true darkness begins and ends tonight at a park or dark-sky place, in the park's own time, worked out on this iPad. Leave the park empty for your starting park."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Says when true darkness begins and ends tonight at a park or dark-sky place, in the park's own time, worked out on this iPhone. Leave the park empty for your starting park."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Says when true darkness begins and ends tonight at a park or dark-sky place, in the place's own time, worked out on this device. Leave the park empty for your starting park."
           }
         },
         "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque o lugar de cielo oscuro, con la hora del lugar, calculado en este iPad. Deja el parque vacío para usar tu parque de partida."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque o lugar de cielo oscuro, con la hora del lugar, calculado en este iPhone. Deja el parque vacío para usar tu parque de partida."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dice cuándo empieza y termina la oscuridad total esta noche en un parque o lugar de cielo oscuro, con la hora del lugar, calculado en este dispositivo. Deja el parque vacío para usar tu parque de partida."
           }
         },
         "fr": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Indique quand l’obscurité totale commence et finit ce soir dans un parc ou un site de ciel étoilé, à l’heure du lieu, calculé sur cet iPad. Laissez le parc vide pour votre parc de départ."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Indique quand l’obscurité totale commence et finit ce soir dans un parc ou un site de ciel étoilé, à l’heure du lieu, calculé sur cet iPhone. Laissez le parc vide pour votre parc de départ."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique quand l’obscurité totale commence et finit ce soir dans un parc ou un site de ciel étoilé, à l’heure du lieu, calculé sur cet appareil. Laissez le parc vide pour votre parc de départ."
           }
         },
         "ja": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "公園や暗い空の場所で今夜、完全な暗さがいつ始まりいつ終わるかを、公園の現地時間で伝えます。計算はこのiPadで行います。公園を空欄にすると、出発地の公園を使います。"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "公園や暗い空の場所で今夜、完全な暗さがいつ始まりいつ終わるかを、公園の現地時間で伝えます。計算はこのiPhoneで行います。公園を空欄にすると、出発地の公園を使います。"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園や暗い空の場所で今夜、完全な暗さがいつ始まりいつ終わるかを、その場所の現地時間で伝えます。計算はこのデバイスで行います。公園を空欄にすると、出発地の公園を使います。"
           }
         }
       }
@@ -57007,97 +56947,37 @@
         }
       }
     },
-    "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPhone last sent.": {
+    "The darkness score tonight at the park Nyx follows on the wrist, from the last forecast your phone sent.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Der Dunkelheitswert heute Nacht im Park, dem Nyx auf der Apple Watch folgt, aus der Vorhersage, die dein iPad zuletzt gesendet hat."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Der Dunkelheitswert heute Nacht im Park, dem Nyx auf der Apple Watch folgt, aus der Vorhersage, die dein iPhone zuletzt gesendet hat."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Dunkelheitswert heute Nacht im Park, dem Nyx am Handgelenk folgt, aus der Vorhersage, die dein Telefon zuletzt gesendet hat."
           }
         },
         "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPad last sent."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPhone last sent."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkness score tonight at the park Nyx follows on the wrist, from the last forecast your phone sent."
           }
         },
         "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "El índice de oscuridad de esta noche en el parque que Nyx sigue en el Apple Watch, con el último pronóstico que envió tu iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "El índice de oscuridad de esta noche en el parque que Nyx sigue en el Apple Watch, con el último pronóstico que envió tu iPhone."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "El índice de oscuridad de esta noche en el parque que Nyx sigue en la muñeca, con el último pronóstico que envió tu teléfono."
           }
         },
         "fr": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "L’indice d’obscurité de ce soir au parc que Nyx suit sur l’Apple Watch, d’après la dernière prévision envoyée par votre iPad."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "L’indice d’obscurité de ce soir au parc que Nyx suit sur l’Apple Watch, d’après la dernière prévision envoyée par votre iPhone."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’indice d’obscurité de ce soir au parc que Nyx suit au poignet, d’après la dernière prévision envoyée par votre téléphone."
           }
         },
         "ja": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Apple WatchでNyxがフォローしている公園の今夜の暗さスコア。iPadが最後に送った予報によります。"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Apple WatchでNyxがフォローしている公園の今夜の暗さスコア。iPhoneが最後に送った予報によります。"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "手首でNyxがフォローしている公園の今夜の暗さスコア。スマートフォンが最後に送った予報によります。"
           }
         }
       }

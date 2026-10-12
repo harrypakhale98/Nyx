@@ -20,7 +20,7 @@ struct NyxWatchShortcuts: AppShortcutsProvider {
 /// iPhone last sent. Read only; a closure comes first.
 struct WristTonightIntent: AppIntent {
     static let title: LocalizedStringResource = "Tonight's darkness score"
-    static let description = IntentDescription("The darkness score tonight at the park Nyx follows on Apple Watch, from the forecast your iPhone last sent.")
+    static let description = IntentDescription("The darkness score tonight at the park Nyx follows on the wrist, from the last forecast your phone sent.")
     init() {}
     func perform() async throws -> some IntentResult & ProvidesDialog {
         .result(dialog: IntentDialog(stringLiteral: WristTonightAnswer.dialog(now: .now)))
