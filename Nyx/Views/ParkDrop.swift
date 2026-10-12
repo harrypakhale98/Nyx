@@ -1,24 +1,24 @@
 import SwiftUI
 
 /// A screen that accepts a dragged park (iPad, or iPhone with a long-press drag): Plan opens that
-/// park's month, Journal starts an entry for it. While a park hovers over the screen, a quiet amber
-/// frame and one line say what letting go will do. VoiceOver users reach the same actions from
-/// each park's own menu ("Show in Plan") and the journal's "Record a night".
-struct ParkDropTarget: ViewModifier {
+/// park's month, Journal starts an entry for it (or for a night dragged from Plan's month, on iPad).
+/// While an item hovers over the screen, a quiet amber frame and one line say what letting go will
+/// do. VoiceOver users reach the same actions from each park's own menu ("Show in Plan"), each
+/// night's "Record this night" and the journal's "Record a night".
+struct ParkDropTarget<Item: Transferable>: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let prompt: LocalizedStringKey
     let symbol: String
-    let drop: (Park)->Void
+    let drop: (Item)->Bool
     @State private var targeted=false
     func body(content:Content)->some View {
         content
             // The iOS 16 form, which reports hovering on iOS 26 as well; the iOS 26 session form
             // only reports it from iOS 27 (`onDropSessionUpdated`).
-            .dropDestination(for:Park.self) { parks,_ in
-                guard let park=parks.first else { return false }
-                drop(park)
-                return true
+            .dropDestination(for:Item.self) { items,_ in
+                guard let item=items.first else { return false }
+                return drop(item)
             } isTargeted:{ targeted=$0 }
             .overlay {
                 if targeted {
@@ -41,7 +41,11 @@ struct ParkDropTarget: ViewModifier {
 extension View {
     /// Accepts a park dropped onto the screen (`ParkDropTarget`).
     func acceptsPark(_ prompt:LocalizedStringKey,systemImage:String,drop:@escaping (Park)->Void)->some View {
-        modifier(ParkDropTarget(prompt:prompt,symbol:systemImage,drop:drop))
+        modifier(ParkDropTarget<Park>(prompt:prompt,symbol:systemImage) { park in drop(park); return true })
+    }
+    /// Accepts a night or a park dropped onto the journal; `drop` says whether it was taken.
+    func acceptsJournalDrop(_ prompt:LocalizedStringKey,systemImage:String,drop:@escaping (JournalDrop)->Bool)->some View {
+        modifier(ParkDropTarget<JournalDrop>(prompt:prompt,symbol:systemImage,drop:drop))
     }
 }
 extension JournalPrefill {

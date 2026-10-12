@@ -180,6 +180,8 @@ extension Night {
         case calendar(event: String?)
         /// The Tonight widget: the park, the score and band, then the short caption or "Cached forecast included".
         case widget
+        /// The Tonight widget moved to another night of the week: as `widget`, with the night's date.
+        case widgetNight
         /// The chart's summary: "Best night: Fri, Oct 9, 94 out of 100, Pristine."
         case chartBest
         /// One night of a stay: "Fri, Oct 9, 94 out of 100, Pristine, usual clouds".
@@ -208,6 +210,8 @@ extension Night {
             return String(localized:"\(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label). \(basisCaption(typical:true) ?? String(localized:"Forecast included"))\(event.map { ". "+$0 } ?? "")")
         case .widget:
             return String(localized:"\(park.shortName), \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Cached forecast included"))")
+        case .widgetNight:
+            return String(localized:"\(park.shortName), \(park.dayLabel(id)): \(score.value) out of 100, \(score.band.label). \(basisCaption() ?? String(localized:"Cached forecast included"))")
         case .chartBest:
             return String(localized:"Best night: \(park.dayLabel(id)), \(score.value) out of 100, \(score.band.label).")
         case .dayWithBasis:

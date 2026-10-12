@@ -76,6 +76,10 @@ struct RootView:View {
                     Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.accent)) }
                     Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.accent)) }
                     Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.accent)) }
+                        // iPad: a night from Plan's month or a park held over the Journal's tab item or sidebar
+                        // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
+                        // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
+                        .springLoadingBehavior(UIDevice.current.userInterfaceIdiom == .pad ? .enabled : .automatic)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
@@ -322,6 +326,8 @@ struct RootView:View {
         // 1.1 platform lane: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
         case "widgets-new": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),newer:true,moon:MoonEntry(date:.now,park:model.home,nightVision:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-xl-portrait": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),portrait:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        case "widgets-step": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),stepped:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
+        case "widgets-step-large": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),steppedLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-empty": WidgetReviewView(entry:TonightEntry(date:.now,night:nil,nightVision:false))
         case "skyarc": if let park=model.home { ScrollView { Panel { SkyArc(night:model.night(park),core:model.whatsUp(model.night(park)).core) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }
         case "whatsup": if let park=model.home { ScrollView { Panel { WhatsUpPanel(whatsUp:model.whatsUp(model.night(park)),notes:model.skyNotes(model.night(park))) }.padding(24) }.background(NightBackground(park:park,night:model.tonight(park))) }

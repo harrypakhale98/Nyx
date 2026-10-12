@@ -25,7 +25,7 @@ struct JournalView: View {
     @State private var pendingImport:PendingImport?
     /// An export being gathered or an import being read, off the main thread (photos can be many megabytes).
     @State private var working:LocalizedStringKey?
-    /// A park dropped onto the journal: a new entry for it, tonight's date.
+    /// A park dropped onto the journal (a new entry for it, tonight's date), or a night from Plan's month.
     @State private var dropped:JournalPrefill?
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
@@ -74,11 +74,9 @@ struct JournalView: View {
             .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
             .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
             .sheet(item:$dropped) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
-            // iPad: drop a park here to start an entry for it (never into a journal that could not open).
-            .acceptsPark("Record a night at this park",systemImage:"book.closed") { park in
-                guard !model.journalUnavailable else { return }
-                dropped=JournalPrefill.dropped(park:park,tonight:model.tonight(park))
-            }
+            // iPad: drop a park, or a night from Plan's month (held over the Journal's tab, it opens),
+            // here to start an entry for it (never into a journal that could not open).
+            .acceptsJournalDrop("Record a night at this park",systemImage:"book.closed") { drop in record(drop) }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
             .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentType:.nyxJournal,
@@ -108,6 +106,12 @@ struct JournalView: View {
                 }
                 await importJournal(url)
             }
+    }
+    /// Opens "Record a night" for a dropped night or park; false when there is nothing to record.
+    private func record(_ drop:JournalDrop)->Bool {
+        guard !model.journalUnavailable, editing == false, dropped == nil, let prefill=drop.prefill(model:model) else { return false }
+        dropped=prefill
+        return true
     }
     /// Gathers every entry and its photos from the store on a background context, so the photos'
     /// files are read off the main thread; the exporter opens once the archive is ready.

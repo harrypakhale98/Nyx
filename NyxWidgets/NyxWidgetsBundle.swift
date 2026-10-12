@@ -18,7 +18,19 @@ struct TonightProvider:AppIntentTimelineProvider {
         // The widget gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not "save a park".
         if context.isPreview, snapshot?.parks.isEmpty ?? true, configuration.park == nil { snapshot=Self.sample }
         var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
+        // The gallery shows tonight; a placed widget shows the night its buttons moved to.
+        if !context.isPreview { builder.stepScope=Self.stepScope(configuration,family:context.family) }
         return builder.entry(at:.now)
+    }
+    /// Previous and next night on the medium and large widgets, kept per setting and size; nil elsewhere.
+    static func stepScope(_ configuration:TonightWidgetIntent,family:WidgetFamily)->String? {
+        let name:String
+        switch family {
+        case .systemMedium: name="medium"
+        case .systemLarge: name="large"
+        default: return nil
+        }
+        return WidgetNightStep.scope(place:configuration.park?.id,family:name)
     }
     /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
     static var sample:SavedSkySnapshot? {
@@ -49,6 +61,7 @@ struct TonightProvider:AppIntentTimelineProvider {
     func timeline(for configuration:TonightWidgetIntent,in context:Context) async -> Timeline<TonightEntry> {
         let now=Date.now
         var builder=TonightTimeline(snapshot:SharedSettings.read(),large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
+        builder.stepScope=Self.stepScope(configuration,family:context.family)
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
         let edges=builder.duskWindows(from:now,nights:2).flatMap { [$0.start,$0.end] }.filter { $0>now && $0<end }
@@ -192,6 +205,27 @@ extension TonightProvider {
         entry.closure="Keys View Road closed at night"
         return entry
     }
+}
+extension TonightProvider {
+    /// Joshua Tree with its night buttons, moved `offset` nights ahead, for the night buttons' previews.
+    static func steppedSample(offset:Int,large:Bool,closure:String?=nil)->TonightEntry {
+        var builder=TonightTimeline(snapshot:sample,large:large)
+        var entry=builder.entry(at:.now)
+        entry.stepScope=WidgetNightStep.scope(place:nil,family:large ? "large" : "medium")
+        entry.offset=offset
+        entry.closure=closure
+        return entry
+    }
+}
+#Preview("Night buttons · tonight, three ahead, the last night",as:.systemMedium) { TonightWidget() } timeline:{
+    TonightProvider.steppedSample(offset:0,large:false)
+    TonightProvider.steppedSample(offset:3,large:false)
+    TonightProvider.steppedSample(offset:6,large:false)
+}
+#Preview("Night buttons · large, with a closure",as:.systemLarge) { TonightWidget() } timeline:{
+    TonightProvider.steppedSample(offset:0,large:true,closure:"Keys View Road closed at night")
+    TonightProvider.steppedSample(offset:4,large:true,closure:"Keys View Road closed at night")
+    TonightProvider.steppedSample(offset:6,large:true)
 }
 #Preview("Closure",as:.systemSmall) { TonightWidget() } timeline:{ TonightProvider.closureSample }
 #Preview("Closure",as:.accessoryRectangular) { TonightWidget() } timeline:{ TonightProvider.closureSample }

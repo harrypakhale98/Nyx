@@ -103,6 +103,16 @@
 			<key>UTTypeIdentifier</key>
 			<string>com.harrypakhale.nyx.park</string>
 		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Nyx Night</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.harrypakhale.nyx.night</string>
+		</dict>
 	</array>
 </dict>
 </plist>

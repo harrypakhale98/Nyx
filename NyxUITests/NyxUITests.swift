@@ -169,6 +169,53 @@ final class NyxUITests:XCTestCase {
         night.press(forDuration:1.2)
         XCTAssertTrue(app.buttons["Why this score"].waitForExistence(timeout:5),"No peek on the visible month")
     }
+    /// A night that has begun offers "Record this night" in its menu, which opens the journal's
+    /// editor for it (on iPad the same night can be dragged onto the Journal); a night still
+    /// ahead does not, since a journal keeps nights that happened.
+    func testRecordThisNightFromTheMonth() {
+        continueAfterFailure=false
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","plan","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let tonight=app.buttons.matching(NSPredicate(format:"label BEGINSWITH %@","Tonight, ")).firstMatch
+        XCTAssertTrue(tonight.waitForExistence(timeout:20),"No tonight in the month")
+        tonight.press(forDuration:1.2)
+        let record=app.buttons["Record this night"].firstMatch
+        XCTAssertTrue(record.waitForExistence(timeout:5),"Tonight's menu has no Record this night")
+        record.tap()
+        XCTAssertTrue(app.navigationBars["Record a night"].waitForExistence(timeout:10),"Record this night did not open the editor")
+        app.navigationBars["Record a night"].buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Record a night"].waitForNonExistence(timeout:10))
+        // Tomorrow, still ahead: its menu has no Record this night.
+        let tomorrow=app.buttons.matching(NSPredicate(format:"label CONTAINS %@ AND NOT (label BEGINSWITH %@)","No cloud forecast yet","Tonight")).firstMatch
+        if tomorrow.waitForExistence(timeout:5) {
+            tomorrow.press(forDuration:1.2)
+            XCTAssertTrue(app.buttons["Why this score"].waitForExistence(timeout:5),"No menu on a night ahead")
+            XCTAssertFalse(app.buttons["Record this night"].exists,"A night still ahead offers Record this night")
+        }
+    }
+    /// iPad: a night lifted from the month and held over the Journal's row in the sidebar opens
+    /// the Journal, whose screen takes the drop ("Record a night" for that night). On iPhone a long
+    /// press stays the night's menu alone.
+    func testANightHeldOverTheJournalOpensIt() {
+        guard UIDevice.current.userInterfaceIdiom == .pad else { return }
+        continueAfterFailure=false
+        // Landscape, where the sidebar stands beside the month rather than over it.
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app=XCUIApplication()
+        app.launchArguments=["-nyx-screen","plan","-nyx-state","no-forecast","-nyx-reduce-motion"]
+        app.launch()
+        let tonight=app.buttons.matching(NSPredicate(format:"label BEGINSWITH %@","Tonight, ")).firstMatch
+        XCTAssertTrue(tonight.waitForExistence(timeout:20),"No tonight in the month")
+        let sidebar=app.buttons.matching(NSPredicate(format:"identifier ==[c] %@","ToggleSidebar")).firstMatch
+        if sidebar.exists { sidebar.tap(); sleep(2) }
+        let journal=app.descendants(matching:.any).matching(NSPredicate(format:"label == %@ AND elementType != %d","Journal",XCUIElement.ElementType.navigationBar.rawValue)).firstMatch
+        XCTAssertTrue(journal.waitForExistence(timeout:5),"No Journal in the sidebar")
+        XCTAssertTrue(tonight.isHittable,"Tonight is covered")
+        tonight.press(forDuration:1.0,thenDragTo:journal,withVelocity:.slow,thenHoldForDuration:3.0)
+        XCTAssertTrue(app.navigationBars["Journal"].waitForExistence(timeout:10),"A night held over the Journal did not open it")
+    }
     /// The night-vision switch is a lamp (`NightVisionLamp`): a tap turns the red on under a black
     /// cover, two quick taps turn back and forth from wherever the cover is, and once the lamp has
     /// settled the switch shows the stored setting again. Ends with night vision off, as it began.

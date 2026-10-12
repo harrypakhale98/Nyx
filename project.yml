@@ -74,6 +74,10 @@ targets:
           - UTTypeIdentifier: com.harrypakhale.nyx.park
             UTTypeDescription: Nyx Park
             UTTypeConformsTo: [public.data]
+          # A night dragged from Plan's month onto the Journal (iPad): only the place's id and the night's day travel.
+          - UTTypeIdentifier: com.harrypakhale.nyx.night
+            UTTypeDescription: Nyx Night
+            UTTypeConformsTo: [public.data]
         CFBundleDocumentTypes:
           - CFBundleTypeName: Nyx Journal
             CFBundleTypeRole: Editor

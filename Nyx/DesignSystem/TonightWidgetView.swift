@@ -20,6 +20,13 @@ struct TonightEntry:TimelineEntry {
     /// Set to a saved spot or world place that is no longer saved: its name ("" when unknown). The
     /// widget says so, rather than showing another place under the setting's name.
     var unsaved:String?=nil
+    /// The night the previous and next buttons moved to, as nights after tonight (0 is tonight).
+    var offset=0
+    /// This widget's setting and size (`WidgetNightStep.scope`), where it offers previous and next
+    /// night (medium and large); nil elsewhere, and the face stays on tonight.
+    var stepScope:String?=nil
+    /// The night on the face: tonight, or the night of the week the buttons moved to.
+    var shown:Night? { offset>0 && offset<week.count ? week[offset] : night }
 }
 /// Builds Tonight entries from the shared snapshot. Each night's sky is computed once and reused
 /// across entries; the large widget's month (35 nights with shower and eclipse marks) once per night.
@@ -30,6 +37,10 @@ struct TonightTimeline {
     let pinned:Park?
     /// The widget was set to a place no longer saved (its name, or ""): every entry says so.
     var unsaved:String?=nil
+    /// The widget's setting and size, where it offers previous and next night (`WidgetNightStep`).
+    var stepScope:String?=nil
+    /// Where the widgets keep each one's night (the App Group; a test's own suite).
+    var stepDefaults:UserDefaults=SharedSettings.defaults
     private var skies:[String:SkyConditions]=[:]
     private var months:[String:NightPlanner.Month]=[:]
     /// Built once: the snapshot's forecasts and the usual clouds it carries.
@@ -51,7 +62,9 @@ struct TonightTimeline {
         let tonight=parks.map { night($0,$0.currentNight(at:date),at:date) }
         // A widget set to one park shows that park; otherwise the darkest saved park (or the one "next" moved to).
         let shown=pinned == nil ? WidgetSelection.pick(tonight) : tonight.first
-        let week=shown.map { first in (0..<7).map { night(first.park,first.park.date(first.id,addingDays:$0),at:date) } } ?? []
+        let week=shown.map { first in (0..<WidgetNightStep.nights).map { night(first.park,first.park.date(first.id,addingDays:$0),at:date) } } ?? []
+        // The night the buttons moved to, read for each entry: one past the shown place's sunrise is tonight again.
+        let offset=stepScope.flatMap { scope in shown.map { WidgetNightStep.offset(scope:scope,park:$0.park.id,tonight:$0.id,defaults:stepDefaults) } } ?? 0
         var month:NightPlanner.Month?
         if large, let shown {
             // Recomputed when the night turns over. A forecast fades by how far ahead it was made,
@@ -64,7 +77,7 @@ struct TonightTimeline {
         return TonightEntry(date:date,night:shown,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),week:week,month:month,
                             position:pinned == nil ? shown.map { WidgetSelection.position(of:$0,in:tonight) } ?? 0 : 0,savedCount:pinned == nil ? parks.count : 0,
                             relevance:TimelineEntryRelevance(score:relevance.score,duration:relevance.duration),
-                            closure:shown.flatMap { snapshot?.closures[$0.park.id] })
+                            closure:shown.flatMap { snapshot?.closures[$0.park.id] },offset:offset,stepScope:shown == nil ? nil : stepScope)
     }
     /// When each park the widget can show moves on to its next night (`Park.nightTurnovers`).
     func turnovers(from start:Date,to end:Date)->[Date] {
@@ -150,6 +163,7 @@ struct TonightWidgetView:View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.displayScale) private var displayScale
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The eyebrow's smaller step: about four fifths of caption 2, following Dynamic Type.
     @ScaledMetric(relativeTo:.caption2) private var eyebrowSmall=8.8
     var previewFamily:WidgetFamily?=nil
@@ -208,15 +222,20 @@ struct TonightWidgetView:View {
             } else if family == .systemExtraLarge, let month=entry.month, !typeSize.isAccessibilitySize {
                 extraLargeContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
             } else if family == .systemLarge || family == .systemExtraLarge || portraitXL, let month=entry.month {
-                largeContent(night,month:month).summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
+                // The night the buttons moved to, else tonight; the "2 of 3" button still counts tonight's places.
+                let shown=entry.shown ?? night
+                largeContent(shown,month:month).overlay(alignment:.topTrailing) { cycleButton(night) }
             } else if family == .systemMedium && !entry.week.isEmpty && !typeSize.isAccessibilitySize {
+                let shown=entry.shown ?? night
                 VStack(alignment:.leading,spacing:6) {
                     HStack(alignment:.top,spacing:14) {
-                        homeContent(night).frame(maxWidth:132,alignment:.leading)
+                        // The one spoken summary; the week's marks and the closure line are in it, and the
+                        // night buttons beside it stay buttons of their own.
+                        homeContent(shown).frame(maxWidth:132,alignment:.leading).summarized(summary(shown))
                         weekStrip(entry.week)
                     }
-                    closureLine(.caption2)
-                }.summarized(summary(night)).overlay(alignment:.topTrailing) { cycleButton(night) }
+                    closureLine(.caption2).accessibilityHidden(true)
+                }.overlay(alignment:.topTrailing) { cycleButton(night) }
             } else {
                 // The small widget (and medium at accessibility sizes) marks a closure in a short
                 // line; the whole of it is in the spoken summary and on the park's page.
@@ -297,12 +316,13 @@ struct TonightWidgetView:View {
     /// little smaller (English, as before), then set solid on two lines where one is not enough
     /// ("PRÓXIMAS SIETE / NOCHES", "NÄCHSTE SIEBEN / NÄCHTE"). Each step is measured whole, where a
     /// shrinking single line used to end in "…". Japanese is set solid throughout (`Lettering`).
-    private func eyebrow(_ text:LocalizedStringKey)->some View {
+    private func eyebrow(_ text:LocalizedStringKey)->some View { eyebrow(Text(text)) }
+    private func eyebrow(_ text:Text)->some View {
         let caps=Lettering.spaced, regular=Font.caption2.weight(.medium), small=Font.system(size:eyebrowSmall,weight:.medium)
         return ViewThatFits(in:.horizontal) {
-            Text(text).textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(regular).lineLimit(1)
-            Text(text).textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(small).lineLimit(1)
-            Text(text).textCase(caps ? .uppercase : nil).font(small).lineLimit(2).minimumScaleFactor(0.8)
+            text.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(regular).lineLimit(1)
+            text.textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(small).lineLimit(1)
+            text.textCase(caps ? .uppercase : nil).font(small).lineLimit(2).minimumScaleFactor(0.8)
         }.foregroundStyle(muted)
     }
     /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
@@ -327,15 +347,53 @@ struct TonightWidgetView:View {
             if !typeSize.isAccessibilitySize {
                 HStack(alignment:.center) {
                     if mark && entry.closure != nil { closureMark(.caption2) }
-                    else { eyebrow("Tonight's sky") }
+                    else { nightEyebrow(night) }
                     Spacer(minLength:4)
-                    moon(night).frame(width:18,height:18)
+                    moon(night).frame(width:18,height:18).id(night.id)
                 }
             } else if mark { closureMark(.caption2) }
             Text("\(night.score.value)").font(.system(size:48,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
+                .modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
             Text(night.park.shortName).font(.system(.caption,design:.serif)).fixedSize(horizontal:false,vertical:true)
             Text(forecastLabel(night)).font(.caption2).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
+                .modifier(NightTurn(reduceMotion:reduceMotion))
         }.frame(maxWidth:.infinity,alignment:.leading)
+        // While a night button's tap is being answered, the system marks what is about to change.
+        .invalidatableContent(entry.stepScope != nil)
+    }
+    /// "Tonight's sky", or the night the buttons moved to ("Sat, Oct 17"), always in words.
+    private func nightEyebrow(_ night:Night)->some View {
+        Group {
+            if isTonight(night) { eyebrow("Tonight's sky") }
+            else { eyebrow(Text(verbatim:night.park.dayLabel(night.id))) }
+        }.modifier(NightTurn(reduceMotion:reduceMotion))
+    }
+    private func isTonight(_ night:Night)->Bool { entry.night.map { $0.id == night.id } ?? true }
+    /// Previous and next night (medium and large, `WidgetNightStep`): a pair of chevrons in one
+    /// capsule, as the "2 of 3" button is drawn. Tonight has no previous night and the week's last
+    /// night no next one: that chevron is dimmed and is not a button, and VoiceOver skips it.
+    @ViewBuilder private func nightStepper(_ shown:Night)->some View {
+        if let scope=entry.stepScope, let tonight=entry.night, entry.week.count>1 {
+            let last=entry.week.count-1
+            HStack(spacing:0) {
+                stepButton(scope:scope,tonight:tonight,shown:shown,to:entry.offset-1,enabled:entry.offset>0,symbol:"chevron.backward",label:"Previous night")
+                stepButton(scope:scope,tonight:tonight,shown:shown,to:entry.offset+1,enabled:entry.offset<last,symbol:"chevron.forward",label:"Next night")
+            }
+            .background(ink.opacity(tinted ? 0.22 : 0.13),in:Capsule())
+            .dynamicTypeSize(.small ... .large)
+        }
+    }
+    @ViewBuilder private func stepButton(scope:String,tonight:Night,shown:Night,to offset:Int,enabled:Bool,symbol:String,label:LocalizedStringKey)->some View {
+        let glyph=Image(systemName:symbol).font(.caption.weight(.semibold)).frame(width:36,height:28).contentShape(Rectangle())
+        if enabled {
+            Button(intent:StepWidgetNightIntent(scope:scope,park:tonight.park.id,tonight:tonight.id,offset:offset)) { glyph.foregroundStyle(ink) }
+                .buttonStyle(.plain)
+                .accessibilityLabel(label)
+                // Where the widget is now, since the face's own summary is a separate element.
+                .accessibilityValue(isTonight(shown) ? Text("Tonight") : Text(verbatim:shown.park.dayLabel(shown.id)))
+        } else {
+            glyph.foregroundStyle(ink.opacity(0.3)).accessibilityHidden(true)
+        }
     }
     /// The app's pre-rendered lit Moon when it exists; the vector Moon, rendered to an image,
     /// otherwise. An image either way, so a tinted or clear Home Screen can draw it desaturated
@@ -361,9 +419,12 @@ struct TonightWidgetView:View {
     /// nights without a cloud forecast are hollow.
     private func weekStrip(_ week:[Night])->some View {
         let best=NightPlanner.best(week)?.id
+        let shown=entry.shown?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
-                eyebrow("Next seven nights")
+                // With night buttons, they lead the row and the week's columns say the rest.
+                if entry.stepScope != nil, let night=entry.shown { nightStepper(night) }
+                else { eyebrow("Next seven nights").accessibilityHidden(true) }
                 // Room for the "2 of 3" button laid over the top corner.
                 Spacer(minLength:entry.savedCount>1 ? 62 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
@@ -378,11 +439,14 @@ struct TonightWidgetView:View {
                         }.frame(height:24)
                         Text("\(night.score.value)").font(.caption2.monospacedDigit()).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
                     }.frame(maxWidth:.infinity)
+                    // The night on the face, where the buttons can move it.
+                    .background { if entry.stepScope != nil && night.id==shown { RoundedRectangle(cornerRadius:8).fill(ink.opacity(tinted ? 0.2 : 0.12)) } }
                 }
-            }
+            }.accessibilityHidden(true)
             // A closure takes this line's room below; the ring already marks the best night.
             if entry.closure == nil, let top=week.first(where:{ $0.id==best }) {
                 Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
+                    .accessibilityHidden(true)
             }
         }.dynamicTypeSize(...DynamicTypeSize.large) // Seven fixed columns: 11 pt text that always fits.
     }
@@ -401,38 +465,55 @@ struct TonightWidgetView:View {
     private func largeContent(_ night:Night,month:NightPlanner.Month)->some View {
         VStack(alignment:.leading,spacing:10) {
             HStack(spacing:0) {
-                // A closure takes the eyebrow's place, so the month keeps its room.
-                if entry.closure != nil { closureLine(.caption2) }
-                else { Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.2 : 0).foregroundStyle(muted) }
-                Spacer(minLength:entry.savedCount>1 ? 70 : 0)
+                // A closure takes the eyebrow's place, so the month keeps its room. On another night
+                // the night's date leads, and the closure's mark takes the best night's line below
+                // (its words are in the spoken summary, and back on tonight's face).
+                Group {
+                    if !isTonight(night) { largeEyebrow(Text(verbatim:night.park.dayLabel(night.id))) }
+                    else if entry.closure != nil { closureLine(.caption2) }
+                    else { largeEyebrow(Text("Tonight's sky")) }
+                }.accessibilityHidden(true)
+                Spacer(minLength:6)
+                nightStepper(night)
+                // Room for the "2 of 3" button laid over the top corner.
+                if entry.savedCount>1 { Color.clear.frame(width:entry.stepScope == nil ? 64 : 70,height:1) }
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
-            HStack(alignment:.center,spacing:12) {
-                VStack(alignment:.leading,spacing:0) {
-                    Text(night.park.shortName).font(.system(.headline,design:.serif)).lineLimit(1).minimumScaleFactor(0.8)
-                    HStack(alignment:.firstTextBaseline,spacing:8) {
-                        Text("\(night.score.value)").font(.system(size:44,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
-                        Text(forecastLabel(night)).font(.caption).foregroundStyle(muted)
+            VStack(alignment:.leading,spacing:10) {
+                HStack(alignment:.center,spacing:12) {
+                    VStack(alignment:.leading,spacing:0) {
+                        Text(night.park.shortName).font(.system(.headline,design:.serif)).lineLimit(1).minimumScaleFactor(0.8)
+                        HStack(alignment:.firstTextBaseline,spacing:8) {
+                            Text("\(night.score.value)").font(.system(size:44,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
+                                .modifier(NightTurn(value:night.score.value,reduceMotion:reduceMotion))
+                            Text(forecastLabel(night)).font(.caption).foregroundStyle(muted).modifier(NightTurn(reduceMotion:reduceMotion))
+                        }
+                    }
+                    Spacer(minLength:4)
+                    VStack(alignment:.trailing,spacing:3) {
+                        moon(night).frame(width:34,height:34).id(night.id)
+                        Text(night.sky.moon.name).font(.caption2)
+                        Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
+                    }
+                }.invalidatableContent(entry.stepScope != nil)
+                monthGrid(night.park,month:month,shown:entry.stepScope == nil ? nil : night.id)
+                HStack(spacing:6) {
+                    // The ring already marks the best night; a closure the header cannot hold takes its line.
+                    if !isTonight(night), entry.closure != nil { closureMark(.caption2) }
+                    else if let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
+                        Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                    Spacer(minLength:4)
+                    if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
+                        Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
+                        Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
                     }
                 }
-                Spacer(minLength:4)
-                VStack(alignment:.trailing,spacing:3) {
-                    moon(night).frame(width:34,height:34)
-                    Text(night.sky.moon.name).font(.caption2)
-                    Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
-                }
-            }
-            monthGrid(night.park,month:month)
-            HStack(spacing:6) {
-                if let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
-                    Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
-                }
-                Spacer(minLength:4)
-                if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
-                    Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
-                    Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
-                }
-            }
+            }.summarized(summary(night))
         }.dynamicTypeSize(.small ... .xLarge)
+    }
+    private func largeEyebrow(_ text:Text)->some View {
+        text.textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.2 : 0).foregroundStyle(muted)
+            .lineLimit(1).minimumScaleFactor(0.8).accessibilityHidden(true).modifier(NightTurn(reduceMotion:reduceMotion))
     }
     /// iPad's extra-large widget: tonight on the left, large enough to read across a room, and the
     /// coming nights as the same calendar of small skies on the right.
@@ -505,7 +586,8 @@ struct TonightWidgetView:View {
         }.dynamicTypeSize(.small ... .xLarge)
     }
     /// `scale` enlarges the cells, rings and dots together (the portrait extra-large widget).
-    private func monthGrid(_ park:Park,month:NightPlanner.Month,scale:Double=1)->some View {
+    /// `shown` marks the night on the face, where night buttons can move it.
+    private func monthGrid(_ park:Park,month:NightPlanner.Month,scale:Double=1,shown:Date?=nil)->some View {
         let rows=stride(from:0,to:month.nights.count,by:7).map { Array(month.nights[$0..<min($0+7,month.nights.count)]) }
         let first=month.tonight?.id
         return Grid(horizontalSpacing:0,verticalSpacing:4*scale) {
@@ -517,7 +599,7 @@ struct TonightWidgetView:View {
             ForEach(Array(rows.enumerated()),id:\.offset) { _,row in
                 GridRow {
                     ForEach(Array(row.enumerated()),id:\.offset) { _,night in
-                        if let night { nightCell(night,best:night.id==month.best,tonight:night.id==first,event:month.events[night.id],scale:scale) }
+                        if let night { nightCell(night,best:night.id==month.best,tonight:night.id==first,event:month.events[night.id],scale:scale,shown:night.id==shown) }
                         else { Color.clear.frame(height:28*scale) }
                     }
                 }
@@ -529,7 +611,7 @@ struct TonightWidgetView:View {
         guard let tonight=month.tonight else { return "" }
         return park.weekdayInitial(park.date(tonight.id,addingDays:column-lead))
     }
-    private func nightCell(_ night:Night,best:Bool,tonight:Bool,event:WhatsUp.Events.Glyph?,scale:Double=1)->some View {
+    private func nightCell(_ night:Night,best:Bool,tonight:Bool,event:WhatsUp.Events.Glyph?,scale:Double=1,shown:Bool=false)->some View {
         let d=(4+9*Double(night.score.value)/100)*scale
         return VStack(spacing:0) {
             Text(night.park.calendar.component(.day,from:night.id),format:.number).font((scale>1 ? Font.caption : .caption2).weight(tonight ? .bold : .regular)).monospacedDigit()
@@ -541,13 +623,16 @@ struct TonightWidgetView:View {
                 if let event { SkyGlyph(event == .eclipse ? .eclipse : .meteors,color:ink).frame(width:12*scale,height:12*scale).offset(x:13*scale,y:-3*scale) }
             }.frame(height:15*scale)
         }.frame(maxWidth:.infinity).frame(height:28*scale)
+            .background { if shown { RoundedRectangle(cornerRadius:6).fill(ink.opacity(tinted ? 0.2 : 0.12)).padding(.horizontal,2) } }
     }
     private func summary(_ night:Night)->String { Self.summary(night,entry:entry,family:family) }
     /// What VoiceOver says for the widget: the park, its score and band, then any closure in full
     /// in every family (the Lock Screen and the small widget show only its mark), then what the
     /// larger families add.
     static func summary(_ night:Night,entry:TonightEntry,family:WidgetFamily)->String {
-        var tonight=night.spokenSummary(.widget)
+        // Another night of the week, moved to with the night buttons: its date, then its Moon.
+        let ahead=entry.night.map { $0.id != night.id } ?? false
+        var tonight=night.spokenSummary(ahead ? .widgetNight : .widget)
         if let closure=entry.closure { tonight+=" "+String(localized:"Closure alert: \(closure)") }
         var portraitXL=false
         if #available(iOS 27.0,*) { portraitXL = family == .systemExtraLargePortrait }
@@ -558,6 +643,7 @@ struct TonightWidgetView:View {
             return ([tonight,String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."),
                      String(localized:"Best of the next \(count) nights: \(top.park.dayLabel(top.id)), \(top.score.value).")]+events.map { $0+"." }).joined(separator:" ")
         }
+        if ahead { tonight+=" "+String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit.") }
         guard family == .systemMedium,let top=NightPlanner.best(entry.week) else { return tonight }
         return tonight+" "+String(localized:"Best of the next seven nights: \(top.park.dayLabel(top.id)), \(top.score.value).")
     }
@@ -565,6 +651,16 @@ struct TonightWidgetView:View {
 private extension View {
     /// One spoken summary for the widget's information; a button beside it stays its own element.
     func summarized(_ label:String)->some View { accessibilityElement(children:.ignore).accessibilityLabel(label) }
+}
+/// How a night's words and score change when the night buttons move the face: the numeral rolls
+/// to the new score, the words cross-fade; under Reduce Motion everything cross-fades in place.
+struct NightTurn:ViewModifier {
+    var value:Int?=nil
+    let reduceMotion:Bool
+    func body(content:Content)->some View {
+        if let value, !reduceMotion { content.contentTransition(.numericText(value:Double(value))) }
+        else { content.contentTransition(.opacity) }
+    }
 }
 /// A still, seeded sky behind the widget. Widgets render once per entry, so nothing animates.
 struct WidgetSky:View {
@@ -611,6 +707,18 @@ struct WidgetReviewView:View {
     private func standBy<Content:View>(_ content:Content)->some View {
         content.saturation(0).colorMultiply(Color(red:1,green:0.16,blue:0.12)).background(Color.black)
     }
+    /// `widgets-step`: the medium widget with its night buttons, on tonight, a night ahead and the
+    /// last night, with a closure and in night vision; `widgets-step-large`: the large widget, a
+    /// night ahead with a closure, tonight, and the last night on a tinted Home Screen.
+    var stepped=false
+    var steppedLarge=false
+    private func steppedEntry(_ entry:TonightEntry,offset:Int,family:String,closure:String?=nil,nightVision:Bool=false)->TonightEntry {
+        var moved=TonightEntry(date:entry.date,night:entry.night,nightVision:nightVision,week:entry.week,month:entry.month,
+                               position:entry.position,savedCount:entry.savedCount,closure:closure)
+        moved.stepScope=WidgetNightStep.scope(place:nil,family:family)
+        moved.offset=offset
+        return moved
+    }
     /// `widgets-new`: the inline Lock Screen widget, the Moon widget, a closure line and a widget set to one park.
     var newer=false
     /// `widgets-xl-portrait`: iPad's portrait extra-large family (iOS 27), at an illustrative size.
@@ -629,8 +737,23 @@ struct WidgetReviewView:View {
     }
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:20) {
-            Text(portrait ? "Portrait extra-large widget review" : newer ? "New widgets review" : extraLarge ? "Extra-large widget review" : large ? "Large widget review" : "Widget content review").font(.system(size:20,design:.serif))
-            if portrait {
+            Text(stepped || steppedLarge ? "Night buttons review" : portrait ? "Portrait extra-large widget review" : newer ? "New widgets review" : extraLarge ? "Extra-large widget review" : large ? "Large widget review" : "Widget content review").font(.system(size:20,design:.serif))
+            if stepped {
+                let sample="Keys View Road closed at night"
+                Text(verbatim:"Medium: tonight, three nights ahead, the last night").font(.caption)
+                card(.systemMedium,steppedEntry(entry,offset:0,family:"medium"),height:158)
+                card(.systemMedium,steppedEntry(entry,offset:3,family:"medium"),height:158)
+                card(.systemMedium,steppedEntry(entry,offset:6,family:"medium"),height:158)
+                Text(verbatim:"Medium with a closure; night vision").font(.caption)
+                card(.systemMedium,steppedEntry(entry,offset:2,family:"medium",closure:sample),height:158)
+                card(.systemMedium,steppedEntry(entry,offset:2,family:"medium",nightVision:true),height:158)
+            } else if steppedLarge {
+                let sample="Keys View Road closed at night"
+                Text(verbatim:"Large: a night ahead with a closure, tonight, tinted").font(.caption)
+                card(.systemLarge,steppedEntry(entry,offset:4,family:"large",closure:sample),height:338)
+                card(.systemLarge,steppedEntry(entry,offset:0,family:"large"),height:338)
+                card(.systemLarge,steppedEntry(entry,offset:6,family:"large"),height:338,mode:.vibrant).saturation(0).colorMultiply(Color(white:0.85))
+            } else if portrait {
                 if #available(iOS 27.0,*) {
                     card(.systemExtraLargePortrait,with(entry,closure:"Keys View Road closed at night"),height:740).frame(maxWidth:380+32)
                 } else { Text("Portrait extra-large needs iOS 27.").font(.caption) }

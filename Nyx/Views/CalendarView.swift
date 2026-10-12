@@ -143,6 +143,8 @@ struct CalendarView: View {
     @State private var peeking=false
     /// A night being added to Calendar from its context menu (no calendar permission: the system editor).
     @State private var calendarNight:Night?
+    /// A night that has begun, opened in "Record a night" from its menu or VoiceOver action.
+    @State private var recording:JournalPrefill?
     /// The pager's page in view, as a slot: -1 the month before, 0 the current month, 1 the month
     /// after. Once a slide settles the month becomes current and the pager returns to slot 0, which
     /// then draws that same month, so the window of three pages moves without a visible jump.
@@ -276,6 +278,7 @@ struct CalendarView: View {
             .sensoryFeedback(.impact(weight:.light),trigger:ringsLit)
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
+            .sheet(item:$recording) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
@@ -323,6 +326,8 @@ struct CalendarView: View {
                     VStack(alignment:.leading,spacing:12) { ForEach(past) { night in
                         Text(park.dayLabel(night.id)).font(.body).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                             .accessibilityLabel("\(park.dayLabel(night.id)). Past night")
+                            .contextMenu { recordItem(night,tonight:data.tonight) }
+                            .modifier(RecordableNight(night:night,enabled:recordable(night,tonight:data.tonight)) { record(night,tonight:data.tonight) })
                     } }.padding(.top,10)
                 } label:{
                     // The list is the accessibility-size layout: the count on a line of its own, no dot to break.
@@ -350,7 +355,9 @@ struct CalendarView: View {
                     Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                     Button("Why this score",systemImage:"chart.bar") { chosen=night }
                     if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
+                    recordItem(night,tonight:data.tonight)
                 }
+                .modifier(RecordableNight(night:night,enabled:recordable(night,tonight:data.tonight)) { record(night,tonight:data.tonight) })
                 .accessibilityInputLabels(Self.spokenNames(night))
         } }
         .accessibilityRotor(Text("Best nights"),entries:Self.bestNights(data.nights,after:data.tonight),entryID:\.id,entryLabel:\.label)
@@ -439,7 +446,10 @@ struct CalendarView: View {
                             Button("Open this night",systemImage:"arrow.up.right") { chosen=night;peeking=true }
                             Button("Why this score",systemImage:"chart.bar") { chosen=night }
                             if night.id>=data.tonight { Button("Add to Calendar",systemImage:"calendar.badge.plus") { calendarNight=night }; FollowNightMenuItem(night:night) }
+                            recordItem(night,tonight:data.tonight)
                         } preview: { NightPeek(night:night,isTonight:night.id==data.tonight,event:events.item(park:park,sky:night.sky,isTonight:night.id==data.tonight)).environment(\.nyx,palette).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) }
+                        // iPad: drag a night that has begun onto the Journal; everywhere, "Record this night".
+                        .modifier(RecordableNight(night:night,enabled:recordable(night,tonight:data.tonight)) { record(night,tonight:data.tonight) })
                 } else {
                     cell
                 }
@@ -448,6 +458,12 @@ struct CalendarView: View {
             if let sample=data.nights.first { ForEach(100..<(100+trailing),id:\.self) { _ in NightCell(night:sample,scale:scale).hidden().accessibilityHidden(true) } }
         }
         .modifier(MonthRotors(enabled:current,best:Self.bestNights(data.nights,after:data.tonight),stretchTitle:data.stretch.kind.title,stretch:Self.rotor(data.stretch.nights.filter { data.inWindow.contains($0.id) })))
+    }
+    /// A night the journal can keep: tonight or one before it, while the journal is open.
+    private func recordable(_ night:Night,tonight:Date)->Bool { night.id<=tonight && !model.journalUnavailable }
+    private func record(_ night:Night,tonight:Date) { recording=JournalPrefill.recording(night,tonight:tonight) }
+    @ViewBuilder private func recordItem(_ night:Night,tonight:Date)->some View {
+        if recordable(night,tonight:tonight) { Button("Record this night",systemImage:"book.closed") { record(night,tonight:tonight) } }
     }
     /// A month not yet worked out: quiet weeks of faint dots, the same size as the real page.
     private func skeleton(_ park:Park,scale:Double,weeks:Int)->some View {

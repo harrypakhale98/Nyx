@@ -2298,6 +2298,41 @@
         }
       }
     },
+    "%@, %@: %lld out of 100, %@. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld von 100, %@. %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld out of 100, %@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@: %lld de 100, %@. %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ : %lld sur 100, %@. %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@：100点中%3$lld点、%4$@。%5$@"
+          }
+        }
+      }
+    },
     "%@, %@; %lld km straight-line from %@; tonight %lld/100 %@": {
       "extractionState": "manual",
       "localizations": {
@@ -33583,6 +33618,41 @@
         }
       }
     },
+    "Moves the Tonight's sky widget to an earlier or later night this week. At sunrise it returns to tonight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stellt das Widget „Himmel heute Nacht“ auf eine frühere oder spätere Nacht dieser Woche um. Bei Sonnenaufgang kehrt es zu heute Nacht zurück."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the Tonight's sky widget to an earlier or later night this week. At sunrise it returns to tonight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasa el widget Cielo de esta noche a una noche anterior o posterior de esta semana. Al amanecer vuelve a esta noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passe le widget Ciel de ce soir à une nuit plus tôt ou plus tard dans la semaine. Au lever du soleil, il revient à ce soir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「今夜の空」ウィジェットを今週の前後の夜に切り替えます。日の出とともに今夜に戻ります。"
+          }
+        }
+      }
+    },
     "Moves the Tonight's sky widget to your next saved park, in order of tonight's score. Tomorrow it returns to your darkest park.": {
       "extractionState": "manual",
       "localizations": {
@@ -34944,6 +35014,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜"
+          }
+        }
+      }
+    },
+    "Night buttons review": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prüfung der Nachttasten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night buttons review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión de los botones de noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revue des boutons de nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜ボタンの確認"
           }
         }
       }
@@ -46221,6 +46326,41 @@
         }
       }
     },
+    "Record this night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nacht festhalten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record this night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noter cette nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜を記録"
+          }
+        }
+      }
+    },
     "Red light": {
       "extractionState": "manual",
       "localizations": {
@@ -50726,6 +50866,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Show another night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Nacht anzeigen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show another night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar otra noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher une autre nuit"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "別の夜を表示"
           }
         }
       }
@@ -66413,6 +66588,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "範囲を%@に広げます。"
+          }
+        }
+      }
+    },
+    "Widget": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ウィジェット"
           }
         }
       }
