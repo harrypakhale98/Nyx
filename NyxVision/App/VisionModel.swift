@@ -111,6 +111,7 @@ nonisolated struct SkyMoment: Sendable {
     var selectedID: String? {
         didSet {
             guard settled, selectedID != oldValue else { return }
+            readCacheIfPending()
             refresh(resetTime: true)
             refreshAhead()
             // Remembered for the next launch; a pinned clock (previews, DEBUG captures) leaves it alone.
@@ -174,6 +175,13 @@ nonisolated struct SkyMoment: Sendable {
     private var keepingNight = false
     /// False while `init` sets the launch state, so no observer starts a second computation of it.
     @ObservationIgnored private var settled = false
+    /// True from launch until every park's cached forecast has been read off the main thread and
+    /// merged. Meanwhile a newly chosen park reads its own cache first (`readCacheIfPending`) and
+    /// the list waits, so no score is computed without a forecast already on this headset.
+    @ObservationIgnored private var readingCache = false
+    /// True when forecasts come from the app's own services, whose cache files a chosen park can
+    /// read directly; previews and tests that hand in a service read only through it.
+    @ObservationIgnored private var readsCacheFiles = false
 
     /// A clock fixed by the caller (previews) or by DEBUG's `-nyx-date` never moves.
     private let pinned: Bool
@@ -198,6 +206,7 @@ nonisolated struct SkyMoment: Sendable {
             if let cover = VisionDebug.clouds { forecasts = Self.fixture(parks: self.parks, cover: cover, issued: start) }
             #endif
             if VisionDebug.clouds == nil, weather == nil {
+                readsCacheFiles = true
                 forecasts = Self.cachedForecast(for: park)
                 summitLayers = Self.cachedLayers(for: park)
             }
@@ -213,11 +222,13 @@ nonisolated struct SkyMoment: Sendable {
         // window then asks for fresh forecasts.
         if VisionDebug.clouds == nil {
             let parks = self.parks, service = self.weather, summits = self.summits
+            readingCache = true
             let cached = Task.detached(priority: .userInitiated) {
                 (await service.forecasts(for: parks, network: false, force: false), await summits.layers(for: parks, network: false))
             }
             Task {
                 let (fresh, layers) = await cached.value
+                readingCache = false
                 if !merge(fresh, layers: layers) { refreshList() }
             }
         } else {
@@ -231,6 +242,20 @@ nonisolated struct SkyMoment: Sendable {
     private static func cachedLayers(for park: Park) -> [String: HourlySeries] {
         guard park.aboveInversion == true else { return [:] }
         return CacheDirectory.read(HourlySeries.self, name: "summit-\(park.id)").map { [park.id: $0] } ?? [:]
+    }
+    /// A park chosen (from the list, Handoff, Siri or Shortcuts) before every park's cache has been
+    /// read: its own cached forecast and summit layers, read here as `init` reads the first park's,
+    /// so its night and nights ahead are scored with them from the first frame. Read quietly (no
+    /// rescoring of the old park); the caller then scores the new one.
+    private func readCacheIfPending() {
+        guard readingCache, readsCacheFiles, let park else { return }
+        let forecast = forecasts[park.id] == nil ? Self.cachedForecast(for: park) : [:]
+        let layers = summitLayers[park.id] == nil ? Self.cachedLayers(for: park) : [:]
+        guard !forecast.isEmpty || !layers.isEmpty else { return }
+        settled = false
+        defer { settled = true }
+        if !forecast.isEmpty { forecasts.merge(forecast) { held, _ in held } }
+        if !layers.isEmpty { summitLayers.merge(layers) { held, _ in held } }
     }
     /// Where the night's clock opens: the middle of true darkness, or DEBUG's `-nyx-vision-time`.
     private static func opening(of plan: NightPlan) -> Double {
@@ -300,6 +325,9 @@ nonisolated struct SkyMoment: Sendable {
         }
     }
     private func refreshList() {
+        // Every park's cached forecast is still being read: the list keeps its loading state, and
+        // is scored once the read lands (`init`).
+        guard !readingCache else { return }
         let parks = parks, offset = nightOffset, now = now, forecasts = forecasts, layers = summitLayers
         listTask?.cancel()
         let work = Task.detached(priority: .utility) {

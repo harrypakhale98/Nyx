@@ -81,15 +81,18 @@ import Testing
         for rate in [24.0, 60, 120] {
             for score in [70, 90, 94] {
                 var shown=0, mediums=0
-                let frames=Int((CelestialGauge.duration(score: score)*rate).rounded(.down))
+                let frames=Int((CelestialGauge.duration(score: score)*rate).rounded(.up))+2
                 for frame in 0..<frames {
-                    let value=CelestialGauge.countValue(score: score, at: Double(frame)/rate)
+                    let value=CelestialGauge.frameValue(score: score, at: Double(frame)/rate)
                     mediums+=CelestialGauge.milestones(from: shown, to: value).isEmpty ? 0 : 1
                     shown=value
                 }
+                // Frames never reach the score; the landing writes it and plays exactly one haptic.
+                #expect(shown < score, "\(score) at \(rate) Hz")
                 let landing=CelestialGauge.landingPulse(from: shown, score: score)
                 if landing == .milestone { mediums+=1 }
                 #expect(mediums == (score>=90 ? 2 : 1), "\(score) at \(rate) Hz")
+                #expect((landing == .milestone) == [70, 90].contains(score), "\(score) at \(rate) Hz")
             }
         }
     }

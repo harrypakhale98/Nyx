@@ -185,6 +185,9 @@ struct CelestialGauge: View {
     nonisolated static let numeralLag=0.08
     /// The numeral `t` seconds into the count-up.
     nonisolated static func countValue(score:Int,at t:Double)->Int { min(score,Int((Double(score)*progress(t-numeralLag)).rounded())) }
+    /// The numeral a frame of the count may show: never the score itself, which only the landing
+    /// writes, so a score of 70 or 90 gets its milestone from the landing alone (one haptic, never two).
+    nonisolated static func frameValue(score:Int,at t:Double)->Int { min(countValue(score:score,at:t),max(0,score-1)) }
     /// The milestones a step of the count from `old` to `new` crosses (70 and 90), for the medium ticks.
     nonisolated static func milestones(from old:Int,to new:Int)->[Int] { [70,90].filter { old<$0 && new>=$0 } }
     /// The display's frames drive the dial only while a count-up runs: started, not yet landed, cut
@@ -374,7 +377,7 @@ struct CelestialGauge: View {
     private func tick(_ now:Date) {
         guard counting, let countStart else { return }
         let t=now.timeIntervalSince(countStart)
-        let value=Self.countValue(score:score,at:t)
+        let value=Self.frameValue(score:score,at:t)
         if !Self.milestones(from:shown,to:value).isEmpty { milestone+=1; surges.append(now) }
         arc=Double(score)*Self.progress(t)
         shown=value
