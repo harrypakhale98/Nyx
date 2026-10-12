@@ -401,17 +401,31 @@ struct TonightWidgetView:View {
             .dynamicTypeSize(.small ... .large)
         }
     }
+    /// Each chevron draws 36 by 28 inside the capsule, and its tap target is 44 by 44: 8 pt more on
+    /// the capsule's outer side (the two targets meet at its middle, never overlapping), 12 above
+    /// (the widget's top margin) and 4 below (short of the week's initials). Transparent padding,
+    /// taken back by negative padding, so the capsule and the layout around it keep their size.
     @ViewBuilder private func stepButton(scope:String,tonight:Night,shown:Night,to offset:Int,enabled:Bool,symbol:String,label:LocalizedStringKey)->some View {
-        let glyph=Image(systemName:symbol).font(.caption.weight(.semibold)).frame(width:36,height:28).contentShape(Rectangle())
+        let glyph=Image(systemName:symbol).font(.caption.weight(.semibold)).frame(width:36,height:28)
+        let outer:Edge.Set=offset<entry.offset ? .leading : .trailing
         if enabled {
-            Button(intent:StepWidgetNightIntent(scope:scope,park:tonight.park.id,tonight:tonight.id,offset:offset)) { glyph.foregroundStyle(ink) }
+            Button(intent:StepWidgetNightIntent(scope:scope,park:tonight.park.id,tonight:tonight.id,offset:offset)) {
+                glyph.foregroundStyle(ink)
+                    .padding(outer,StepTarget.side).padding(.top,StepTarget.above).padding(.bottom,StepTarget.below)
+                    .contentShape(Rectangle())
+            }
                 .buttonStyle(.plain)
+                .padding(outer,-StepTarget.side).padding(.top,-StepTarget.above).padding(.bottom,-StepTarget.below)
                 .accessibilityLabel(label)
                 // Where the widget is now, since the face's own summary is a separate element.
                 .accessibilityValue(isTonight(shown) ? Text("Tonight") : Text(verbatim:shown.park.dayLabel(shown.id)))
         } else {
             glyph.foregroundStyle(ink.opacity(0.3)).accessibilityHidden(true)
         }
+    }
+    /// The night buttons' transparent reach past each 36 by 28 chevron, to a 44 by 44 target.
+    private enum StepTarget {
+        static let side:CGFloat=8, above:CGFloat=12, below:CGFloat=4
     }
     /// The app's pre-rendered lit Moon when it exists; the vector Moon, rendered to an image,
     /// otherwise. An image either way, so a tinted or clear Home Screen can draw it desaturated
@@ -493,7 +507,7 @@ struct TonightWidgetView:View {
                 Spacer(minLength:6)
                 nightStepper(night)
                 // Room for the "2 of 3" button laid over the top corner.
-                if entry.savedCount>1 { Color.clear.frame(width:entry.stepScope == nil ? 64 : 70,height:1) }
+                if entry.savedCount>1 { Color.clear.frame(width:entry.stepScope == nil ? 64 : 78,height:1) }
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             VStack(alignment:.leading,spacing:10) {
                 HStack(alignment:.center,spacing:12) {
