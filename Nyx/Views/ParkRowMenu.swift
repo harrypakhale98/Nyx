@@ -14,10 +14,13 @@ struct ParkRowMenu: View {
     let failed: ()->Void
     /// Offered only where the list can ask before deleting a spot.
     var deleteSpot: ((Park)->Void)?=nil
+    /// "Show in Plan", left out where Plan could not come forward: Ask Nyx is pushed on Plan's own
+    /// stack, so the request would change nothing on screen.
+    var showsPlan=true
     var body: some View {
         let isSaved=saved.contains { $0.parkID==park.id }
         Button(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.slash" : "bookmark") { toggle(isSaved) }
-        Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
+        if showsPlan { Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 } }
         OpenParkWindowButton(park:park)
         if park.isSavedSpot, let deleteSpot { Button("Delete spot",systemImage:"trash",role:.destructive) { deleteSpot(park) } }
     }
@@ -36,8 +39,9 @@ struct ParkRowMenu: View {
 extension View {
     /// A park row outside the Parks list behaves as one inside it: the same menu, the highlight
     /// under a pointer, and the park dragged onto Plan (its month), Journal (a new entry) or another window.
-    func parkRowActions(_ park:Park,failed:@escaping ()->Void)->some View {
-        contextMenu { ParkRowMenu(park:park,failed:failed) }.hoverEffect(.highlight).draggable(park)
+    /// `showsPlan` false leaves out "Show in Plan" (`ParkRowMenu.showsPlan`).
+    func parkRowActions(_ park:Park,showsPlan:Bool=true,failed:@escaping ()->Void)->some View {
+        contextMenu { ParkRowMenu(park:park,failed:failed,showsPlan:showsPlan) }.hoverEffect(.highlight).draggable(park)
     }
     /// "Unable to save", after a save from a park row's menu could not be stored.
     func parkSaveAlert(isPresented:Binding<Bool>,journalUnavailable:Bool)->some View {

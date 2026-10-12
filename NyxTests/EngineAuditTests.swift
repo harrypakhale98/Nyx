@@ -190,7 +190,10 @@ struct FixedWeather: WeatherProviding {
         var tries=0
         while !(await echo.waiting), tries<500 { tries+=1; try await Task.sleep(for: .milliseconds(5)) }
         let second=Task { await service.spotForecasts(for: [b], network: true) }
-        try await Task.sleep(for: .milliseconds(50))
+        // Released only once the second caller is waiting on the first request, so it truly joins it.
+        tries=0
+        while await service.spotWaiting<2, tries<1000 { tries+=1; try await Task.sleep(for: .milliseconds(5)) }
+        #expect(await service.spotWaiting == 2)
         await echo.release()
         #expect(await first.value[a.id] != nil)
         #expect(await second.value[b.id] != nil)

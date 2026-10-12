@@ -16,8 +16,13 @@ struct VisionPalette: Equatable {
     /// white there (as on the iPhone): a red ink filtered again would turn a dim, unreadable red.
     var ink: Color { base.ink }
     var accent: Color { base.accent }
-    /// Words in the immersive sky, which no window filter reaches: night vision's red itself.
-    var skyInk: Color { nightVision ? red : NyxPalette.starlight }
+    /// Words in the immersive sky, which no window filter reaches. In night vision always the
+    /// brighter red (`NightTint.brighter`), at full strength (`skyOpacity`): over the dark sky, with
+    /// no Increase Contrast to ask for it, the standard red reads at only 4.3:1 for protan eyes,
+    /// and the brighter one at 5.1:1 (at 0.78 opacity it too would fall to 4.2:1).
+    var skyInk: Color { nightVision ? NightTint.brighter.color : NyxPalette.starlight }
+    /// A sky label's opacity: as given in starlight, full under Increase Contrast or in night vision.
+    func skyOpacity(_ opacity: Double) -> Double { highContrast || nightVision ? 1 : opacity }
     /// Night vision's red multiplier (`NyxPalette.red`, `NightTint`): the deepest red that keeps
     /// text at 6.2:1 on black, or under Increase Contrast the brighter one that keeps it above
     /// 4.5:1 for protan and deutan eyes too.

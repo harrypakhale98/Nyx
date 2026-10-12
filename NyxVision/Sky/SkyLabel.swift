@@ -17,15 +17,15 @@ struct SkyLabel: View {
     var body: some View {
         switch style {
         case .compass:
-            Text(title).font(font(32, .title1, weight: .semibold)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.78))
+            Text(title).font(font(32, .title1, weight: .semibold)).foregroundStyle(palette.skyInk.opacity(palette.skyOpacity(0.78)))
         case .whisper:
             Text(title).font(font(18, .body, weight: .medium)).italic().kerning(Lettering.spaced ? 1 : 0)
-                .foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.82))
+                .foregroundStyle(palette.skyInk.opacity(palette.skyOpacity(0.82)))
                 .padding(.horizontal, 12).padding(.vertical, 6)
         case .card:
             VStack(spacing: 3) {
                 Text(title).font(font(22, .title2, weight: .semibold))
-                if let detail { Text(detail).font(font(16, .callout, weight: .medium, serif: false)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.88)) }
+                if let detail { Text(detail).font(font(16, .callout, weight: .medium, serif: false)).foregroundStyle(palette.skyInk.opacity(palette.skyOpacity(0.88))) }
             }
             .multilineTextAlignment(.center)
             .foregroundStyle(palette.skyInk).padding(.horizontal, 18).padding(.vertical, 10)
@@ -34,7 +34,7 @@ struct SkyLabel: View {
             VStack(spacing: 8) {
                 Text(title).font(font(28, .title1, weight: .medium)).foregroundStyle(palette.skyInk)
                 if let detail {
-                    Text(detail).font(font(17, .body, weight: .medium, serif: false)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.88))
+                    Text(detail).font(font(17, .body, weight: .medium, serif: false)).foregroundStyle(palette.skyInk.opacity(palette.skyOpacity(0.88)))
                         .multilineTextAlignment(.center).frame(width: 380*scale(.body)).fixedSize(horizontal: false, vertical: true)
                 }
             }

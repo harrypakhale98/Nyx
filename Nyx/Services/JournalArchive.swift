@@ -116,61 +116,57 @@ nonisolated struct JournalArchive: Sendable, Equatable {
               manifest.entries.allSatisfy({ $0.photos.count<=PhotoScaling.perEntry }) else { throw ArchiveError.tooLarge }
         return manifest
     }
-    /// Merges the archive as an import would (`JournalImport`): photos re-encoded, limits checked.
+    /// Merges the archive as an import would (`JournalImport`): limits checked, photos re-encoded.
     @MainActor func merge(into context: ModelContext) throws -> (added: Int, skipped: Int) {
         try JournalImport(self).merge(into: context)
     }
 }
 
-/// A journal made ready to merge, entirely off the main thread: its counts and every file's size
-/// checked before anything is read, its words cut to length, and each photo re-encoded once
-/// through `PhotoScaling` (a JPEG, an HEIC or a PNG only, drawn again as the editor's JPEG, so no
-/// location or camera metadata in the file ever reaches the journal). Nyx itself never writes a
-/// journal past these limits (an entry holds at most `PhotoScaling.perEntry` photos, each a
-/// 2,400-pixel JPEG), so an archive beyond any of them is refused whole and nothing changes.
-/// Over-long words are cut instead: a long note never costs the whole journal.
+/// A journal made ready to merge, off the main thread, without reading a single photo: its counts
+/// and every photo file's size checked from the manifest and the files' attributes, and its words
+/// cut to length. The photos are read only when the merge reaches them, a few nights at a time, and
+/// only for nights not already in the journal: each is re-encoded once through `PhotoScaling` (a
+/// JPEG, an HEIC or a PNG only, drawn again as the editor's JPEG, so no location or camera metadata
+/// in the file ever reaches the journal). Nyx itself never writes a journal past these limits (an
+/// entry holds at most `PhotoScaling.perEntry` photos, each a 2,400-pixel JPEG), so an archive
+/// beyond any of them is refused whole and nothing changes. There is no limit on the package as a
+/// whole: it follows from these (`maxEntries` × `PhotoScaling.perEntry` × `PhotoScaling.maxSourceBytes`),
+/// and a file in the package that no entry names is never read. Over-long words are cut instead:
+/// a long note never costs the whole journal.
 nonisolated struct JournalImport: Sendable {
     static let maxEntries=5_000
     static let maxSpots=500
-    static let maxPackageBytes=500_000_000
     static let manifestBytes=100_000_000
     /// Notes, a spot's note and a photo's description.
     static let maxText=20_000
     /// A spot's name, region and country code.
     static let maxSpotText=100
 
+    /// Each entry's photos as named in the file, kept only where the file is there (within the size
+    /// limit) and named for the first time; nothing has been read from them yet.
     let manifest: JournalArchive.Manifest
-    /// Each photo file named by an entry, re-encoded; a file named a second time is not used again.
-    let photos: [String: Data]
-    let thumbnails: [UUID: Data]
+    private let source: Source
+    /// Where the photos are read from at merge time: an archive already in memory, or the package's
+    /// own Photos folder, by the names its listing gave (never a path an entry spells).
+    private enum Source: Sendable { case memory([String: Data]), package(URL, [String: URL]) }
 
     /// From an archive in memory (the tests, the exporter's document).
     init(_ archive: JournalArchive) throws {
         guard archive.manifest.entries.count<=Self.maxEntries, (archive.manifest.spots?.count ?? 0)<=Self.maxSpots,
               archive.manifest.entries.allSatisfy({ $0.photos.count<=PhotoScaling.perEntry }),
-              archive.photos.values.allSatisfy({ $0.count<=PhotoScaling.maxSourceBytes }),
-              archive.photos.values.reduce(0, { $0+$1.count })<=Self.maxPackageBytes else { throw JournalArchive.ArchiveError.tooLarge }
-        try self.init(manifest: archive.manifest) { archive.photos[$0] }
+              archive.photos.values.allSatisfy({ $0.count<=PhotoScaling.maxSourceBytes }) else { throw JournalArchive.ArchiveError.tooLarge }
+        self.init(manifest: archive.manifest, available: Set(archive.photos.keys), source: .memory(archive.photos))
     }
-    /// From a `.nyxjournal` package on disk. Sizes come from the files' attributes first: a package
-    /// past `maxPackageBytes`, an entries.json past `manifestBytes` or a photo past
-    /// `PhotoScaling.maxSourceBytes` is refused before it is read. Only files inside the package's
-    /// own Photos folder are opened, by the names its listing gives, never a path an entry spells,
-    /// and a symbolic link is never followed.
+    /// From a `.nyxjournal` package on disk. Sizes come from the files' attributes: an entries.json
+    /// past `manifestBytes` or a photo past `PhotoScaling.maxSourceBytes` is refused before it is
+    /// read. Only files inside the package's own Photos folder are ever opened, by the names its
+    /// listing gives, never a path an entry spells, and a symbolic link is never followed. No photo
+    /// is opened here at all; the merge reads them.
     static func read(_ url: URL) throws -> JournalImport {
         let scoped=url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        let manager=FileManager.default
         let keys: Set<URLResourceKey>=[.fileSizeKey, .isRegularFileKey, .isSymbolicLinkKey]
-        guard (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true,
-              let walker=manager.enumerator(at: url, includingPropertiesForKeys: Array(keys)) else { throw JournalArchive.ArchiveError.unreadable }
-        var total=0
-        for case let file as URL in walker {
-            let values=try file.resourceValues(forKeys: keys)
-            guard values.isSymbolicLink != true, values.isRegularFile == true else { continue }
-            total+=values.fileSize ?? 0
-            guard total<=maxPackageBytes else { throw JournalArchive.ArchiveError.tooLarge }
-        }
+        guard (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true else { throw JournalArchive.ArchiveError.unreadable }
         let json=url.appendingPathComponent("entries.json", isDirectory: false)
         let jsonValues=try? json.resourceValues(forKeys: keys)
         guard jsonValues?.isRegularFile == true, jsonValues?.isSymbolicLink != true else { throw JournalArchive.ArchiveError.unreadable }
@@ -179,29 +175,23 @@ nonisolated struct JournalImport: Sendable {
         // The Photos folder's own listing: a name an entry gives is looked up here, never joined to a path.
         var files: [String: (url: URL, size: Int)]=[:]
         let folder=url.appendingPathComponent("Photos", isDirectory: true)
-        for file in (try? manager.contentsOfDirectory(at: folder, includingPropertiesForKeys: Array(keys))) ?? [] {
+        for file in (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: Array(keys))) ?? [] {
             guard let values=try? file.resourceValues(forKeys: keys), values.isRegularFile == true, values.isSymbolicLink != true else { continue }
             files[file.lastPathComponent]=(file, values.fileSize ?? 0)
         }
         for entry in manifest.entries {
             for photo in entry.photos where (files[photo.file]?.size ?? 0)>PhotoScaling.maxSourceBytes { throw JournalArchive.ArchiveError.tooLarge }
         }
-        return try JournalImport(manifest: manifest) { name in
-            files[name].flatMap { try? Data(contentsOf: $0.url, options: .mappedIfSafe) }
-        }
+        return JournalImport(manifest: manifest, available: Set(files.keys), source: .package(url, files.mapValues(\.url)))
     }
-    /// `read` gives a photo file's data by name (nil when there is none). Each file is read and
-    /// re-encoded at its first use only; a photo that is not a JPEG, HEIC or PNG is left out.
-    private init(manifest: JournalArchive.Manifest, read: (String) -> Data?) throws {
-        var used=Set<String>(), photos: [String: Data]=[:], thumbnails: [UUID: Data]=[:]
+    /// `available`: the photo files there are. A photo is kept at its first use only, and only when its file is there.
+    private init(manifest: JournalArchive.Manifest, available: Set<String>, source: Source) {
+        var used=Set<String>()
         func clip(_ text: String, _ limit: Int) -> String { text.count>limit ? String(text.prefix(limit)) : text }
         let entries=manifest.entries.map { item in
-            let kept=item.photos.filter { used.insert($0.file).inserted }.compactMap { photo -> JournalArchive.Photo? in
-                guard let data=read(photo.file), data.count<=PhotoScaling.maxSourceBytes, let keepsake=PhotoScaling.keepsake(data) else { return nil }
-                photos[photo.file]=keepsake
-                return JournalArchive.Photo(file: photo.file, altText: photo.altText.map { clip($0, Self.maxText) })
+            let kept=item.photos.filter { available.contains($0.file) && used.insert($0.file).inserted }.map { photo in
+                JournalArchive.Photo(file: photo.file, altText: photo.altText.map { clip($0, Self.maxText) })
             }
-            if let first=kept.first.flatMap({ photos[$0.file] }), let thumbnail=PhotoScaling.jpeg(first, maxPixels: 900) { thumbnails[item.id]=thumbnail }
             return JournalArchive.Entry(id: item.id, date: item.date, parkID: item.parkID, observedBortle: item.observedBortle,
                                         notes: clip(item.notes, Self.maxText), photos: kept)
         }
@@ -211,40 +201,109 @@ nonisolated struct JournalImport: Sendable {
                                 region: clip(spot.region, Self.maxSpotText), created: spot.created, note: spot.note.map { clip($0, Self.maxText) }, saved: spot.saved)
         } }
         self.manifest=JournalArchive.Manifest(format: manifest.format, exported: manifest.exported, entries: entries, spots: spots)
-        self.photos=photos
-        self.thumbnails=thumbnails
+        self.source=source
     }
 
-    /// What the confirmation names before anything is merged: the nights and photos in the file,
-    /// how many of those nights are already in this journal, and the spots that would be added.
+    /// What the confirmation names before anything is merged, from the manifest and the files'
+    /// sizes alone (no photo is opened): the nights and photos in the file, how many of those nights
+    /// are already in this journal, and the spots that would be added.
     struct Summary: Equatable, Sendable { let nights: Int; let photos: Int; let alreadyHere: Int; let spots: Int }
     @MainActor func summary(in context: ModelContext) throws -> Summary {
         let merger=try Merger(self, context: context)
         return Summary(nights: manifest.entries.count, photos: manifest.entries.reduce(0) { $0+$1.photos.count },
                        alreadyHere: manifest.entries.filter { merger.isHere($0) }.count, spots: merger.newSpots.count)
     }
+    /// Nights whose photos are read and re-encoded together during a merge: only these nights'
+    /// photos are ever decoded at once.
+    static let mergeBatch=8
     /// Adds the entries the journal does not have yet and returns how many were added and how many
     /// were already there. Only entries already on the device count: two different entries from the
-    /// same night in one archive are both added. Nothing existing is changed, and a failed save
-    /// leaves nothing behind. Saved spots (format 2) arrive first: one not on the device yet is
+    /// same night in one archive are both added. Nothing existing is changed. The merge works in a
+    /// context of its own with autosave off, saved once at the end, so nothing reaches the store
+    /// (or the journal on screen) before that save, and a failed save leaves nothing behind, whatever
+    /// else saves `context` meanwhile. Saved spots (format 2) arrive first: one not on the device yet is
     /// added to Your spots, unfollowed, so an archive never sets up reminders, widgets or
     /// forecast requests on its own; one already here (the same id) is left as it is. Spots are not counted.
     @MainActor func merge(into context: ModelContext) throws -> (added: Int, skipped: Int) {
-        var merger=try Merger(self, context: context)
+        let folder=try Self.stagingFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        var merger=try Merger(self, context: Self.workspace(context))
         merger.insertSpots()
-        for item in manifest.entries { merger.insert(item) }
-        return try merger.save()
-    }
-    /// The same, `batch` entries at a time with a yield between, so a long journal never holds the
-    /// main thread for the whole import. One save at the end: still all or nothing.
-    @MainActor func merge(into context: ModelContext, batch: Int) async throws -> (added: Int, skipped: Int) {
-        var merger=try Merger(self, context: context)
-        merger.insertSpots()
-        for (index, item) in manifest.entries.enumerated() {
-            if index>0, index.isMultiple(of: max(1, batch)) { await Task.yield() }
-            merger.insert(item)
+        for start in stride(from: 0, to: manifest.entries.count, by: Self.mergeBatch) {
+            let adding=merger.admit(manifest.entries[start..<min(manifest.entries.count, start+Self.mergeBatch)])
+            merger.insert(adding, staged: try stage(adding, in: folder))
         }
-        return try merger.save()
+        return try merger.save { try $0.save() }
+    }
+    /// The same, `batch` nights at a time, their photos read and re-encoded off the main thread, so a
+    /// long journal never holds the main thread or more than one batch of decoded photos. One save at
+    /// the end (`save`, which tests replace): still all or nothing.
+    @MainActor func merge(into context: ModelContext, batch: Int, save: @MainActor (ModelContext) throws -> Void = { try $0.save() }) async throws -> (added: Int, skipped: Int) {
+        let folder=try Self.stagingFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        var merger=try Merger(self, context: Self.workspace(context))
+        merger.insertSpots()
+        let size=max(1, batch)
+        for start in stride(from: 0, to: manifest.entries.count, by: size) {
+            let adding=merger.admit(manifest.entries[start..<min(manifest.entries.count, start+size)])
+            let staged=try await Task.detached(priority: .userInitiated) { [self] in try self.stage(adding, in: folder) }.value
+            merger.insert(adding, staged: staged)
+        }
+        return try merger.save(save)
+    }
+    /// A context of the store's own for one merge, never saved on its own.
+    @MainActor private static func workspace(_ context: ModelContext) -> ModelContext {
+        let work=ModelContext(context.container)
+        work.autosaveEnabled=false
+        return work
+    }
+    /// Where re-encoded photos wait for the merge's save, removed once it is over.
+    private static func stagingFolder() throws -> URL {
+        let folder=FileManager.default.temporaryDirectory.appendingPathComponent("nyx-import-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder
+    }
+    /// A night's photos as the journal keeps them, and its card's thumbnail.
+    struct Staged: Sendable { var photos: [(altText: String?, data: Data)]=[]; var thumbnail: Data? }
+    /// Reads and re-encodes the photos of `items`, one at a time, each written to `folder` and read
+    /// back mapped from there: the merge's single save finds a long journal's photos on disk rather
+    /// than in memory. A photo that is gone, has grown past the limit, or is not a JPEG, HEIC or PNG is
+    /// left out. A photo that cannot be written (no space) fails the merge, which then changes nothing.
+    func stage(_ items: [JournalArchive.Entry], in folder: URL) throws -> [UUID: Staged] {
+        var scoped: URL?
+        if case .package(let root, _)=source, root.startAccessingSecurityScopedResource() { scoped=root }
+        defer { scoped?.stopAccessingSecurityScopedResource() }
+        var staged: [UUID: Staged]=[:]
+        for item in items {
+            var night=Staged()
+            for photo in item.photos {
+                let file=folder.appendingPathComponent(UUID().uuidString+".jpg", isDirectory: false)
+                let written=try autoreleasepool { () throws -> Bool in
+                    guard let original=data(photo.file), let keepsake=PhotoScaling.keepsake(original) else { return false }
+                    if night.thumbnail == nil { night.thumbnail=PhotoScaling.jpeg(keepsake, maxPixels: 900) }
+                    try keepsake.write(to: file)
+                    return true
+                }
+                if written { night.photos.append((photo.altText, try Data(contentsOf: file, options: .alwaysMapped))) }
+            }
+            staged[item.id]=night
+        }
+        return staged
+    }
+    /// One photo file's data as it is now (mapped from disk, not copied), or nil when it is gone, is
+    /// no longer a plain file, or has grown past the limit since the file was read.
+    private func data(_ file: String) -> Data? {
+        switch source {
+        case .memory(let photos):
+            return photos[file].flatMap { $0.count<=PhotoScaling.maxSourceBytes ? $0 : nil }
+        case .package(_, let files):
+            guard var url=files[file] else { return nil }
+            url.removeAllCachedResourceValues()
+            guard let values=try? url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey, .isSymbolicLinkKey]), values.isRegularFile == true,
+                  values.isSymbolicLink != true, (values.fileSize ?? 0)<=PhotoScaling.maxSourceBytes,
+                  let data=try? Data(contentsOf: url, options: .mappedIfSafe), data.count<=PhotoScaling.maxSourceBytes else { return nil }
+            return data
+        }
     }
 
     /// What makes two entries the same entry when their ids differ: the park, the moment to the
@@ -284,25 +343,35 @@ nonisolated struct JournalImport: Sendable {
                                          countryCode: spot.countryCode, region: spot.region, createdAt: spot.created, note: spot.note))
             }
         }
-        mutating func insert(_ item: JournalArchive.Entry) {
-            // `ids` grows as entries are added, so an id repeated within the archive arrives once.
-            guard !isHere(item) else { skipped+=1; return }
-            // A park id that names no place in any form Nyx writes is kept as a night outside, never stored as given.
-            let parkID=DeepLink.placeID(item.parkID) == nil ? "" : item.parkID
-            let entry=JournalEntry(date: item.date, parkID: parkID, observedBortle: min(9, max(1, item.observedBortle)), notes: item.notes)
-            entry.id=item.id
-            context.insert(entry)
-            let kept=item.photos.compactMap { photo in source.photos[photo.file].map { (photo, $0) } }
-            for (index, (photo, data)) in kept.enumerated() {
-                let record=JournalPhoto(index: index, data: data, altText: photo.altText)
-                context.insert(record)
-                record.entry=entry
+        /// The nights among `items` to add, before any photo is read: those not on the device and
+        /// not earlier in the archive. `ids` grows as they are admitted, so an id repeated within
+        /// the archive arrives once; the rest count as skipped.
+        mutating func admit(_ items: ArraySlice<JournalArchive.Entry>) -> [JournalArchive.Entry] {
+            var adding: [JournalArchive.Entry]=[]
+            for item in items {
+                if isHere(item) { skipped+=1 } else { ids.insert(item.id); adding.append(item) }
             }
-            entry.thumbnail=source.thumbnails[item.id]
-            ids.insert(item.id); added+=1
+            return adding
         }
-        func save() throws -> (added: Int, skipped: Int) {
-            do { try context.save() } catch { context.rollback(); throw error }
+        mutating func insert(_ items: [JournalArchive.Entry], staged: [UUID: Staged]) {
+            for item in items {
+                // A park id that names no place in any form Nyx writes is kept as a night outside, never stored as given.
+                let parkID=DeepLink.placeID(item.parkID) == nil ? "" : item.parkID
+                let entry=JournalEntry(date: item.date, parkID: parkID, observedBortle: min(9, max(1, item.observedBortle)), notes: item.notes)
+                entry.id=item.id
+                context.insert(entry)
+                let night=staged[item.id] ?? Staged()
+                for (index, photo) in night.photos.enumerated() {
+                    let record=JournalPhoto(index: index, data: photo.data, altText: photo.altText)
+                    context.insert(record)
+                    record.entry=entry
+                }
+                entry.thumbnail=night.thumbnail
+                added+=1
+            }
+        }
+        func save(_ save: @MainActor (ModelContext) throws -> Void) throws -> (added: Int, skipped: Int) {
+            do { try save(context) } catch { context.rollback(); throw error }
             return (added, skipped)
         }
     }

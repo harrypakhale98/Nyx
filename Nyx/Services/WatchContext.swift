@@ -75,10 +75,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// last night it reaches.
     static let forecastReach: TimeInterval = 11*86400
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
-    /// through the forecast's last useful night) and to the byte budget, saved parks first in their order. Each park's
-    /// clouds go first, then its smoke and summit layers and its models' ranges (which mean
-    /// nothing without its clouds); closures, which are short, come last (the followed parks' first).
+    /// through the forecast's last useful night) and to the byte budget, saved parks first in their order.
     /// A spot or world place travels first, its usual clouds (from `climate`, the iPhone's grid) right behind it.
+    /// The followed parks' closures come next, before any forecast: a closure is safety, and it is
+    /// the forecasts that give way when room runs short. Then each park's clouds, its smoke and
+    /// summit layers and its models' ranges (which mean nothing without its clouds); the other
+    /// parks' closures (a complication can be set to any park) fill what room is left.
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared, now: Date = .now) -> WatchContext {
@@ -102,6 +104,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             // About 150 bytes: without them the place's nights past the forecast count no clouds at all.
             if let months = climate.months(for: place), fits(months, place.id) { sentUsual[place.id] = months }
         }
+        let followed = Set(ids)
+        // Each closure the room allows; a long one left out never keeps a shorter one off the wrist.
+        func pack(_ closures: [(key: String, value: String)]) {
+            for (id, closure) in closures where fits(closure, id) { sentClosures[id] = closure }
+        }
+        pack(closures.filter { followed.contains($0.key) }.sorted { (ids.firstIndex(of: $0.key) ?? 0) < (ids.firstIndex(of: $1.key) ?? 0) })
         for id in ids {
             // Kept to the hours that still count: a forecast weighs nothing ten days after it was made
             // (`CloudBasis.forecastWeight`), plus a day so a night that begins before then has all its
@@ -121,11 +129,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
                 if fits(pairs, id) { sentRanges[id] = pairs }
             }
         }
-        let followed = Set(ids)
-        for (id, closure) in closures.sorted(by: { (followed.contains($0.key) ? 0 : 1, $0.key) < (followed.contains($1.key) ? 0 : 1, $1.key) }) {
-            guard fits(closure, id) else { break }
-            sentClosures[id] = closure
-        }
+        pack(closures.filter { !followed.contains($0.key) }.sorted { $0.key < $1.key })
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: compact,
                             details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual)
     }

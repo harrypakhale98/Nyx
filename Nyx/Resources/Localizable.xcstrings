@@ -60007,37 +60007,37 @@
         }
       }
     },
-    "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ in all. Nothing was changed.": {
+    "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ a photo. Nothing was changed.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dieses Journal ist zu groß für den Import. Nyx importiert bis zu %1$@ Nächte, %2$lld Fotos pro Nacht und insgesamt %3$@. Nichts wurde geändert."
+            "value": "Dieses Journal ist zu groß für den Import. Nyx importiert bis zu %1$@ Nächte, %2$lld Fotos pro Nacht und %3$@ pro Foto. Nichts wurde geändert."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ in all. Nothing was changed."
+            "value": "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ a photo. Nothing was changed."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este diario es demasiado grande para importarlo. Nyx importa hasta %1$@ noches, %2$lld fotos por noche y %3$@ en total. No se cambió nada."
+            "value": "Este diario es demasiado grande para importarlo. Nyx importa hasta %1$@ noches, %2$lld fotos por noche y %3$@ por foto. No se cambió nada."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce journal est trop volumineux pour être importé. Nyx importe jusqu’à %1$@ nuits, %2$lld photos par nuit et %3$@ au total. Rien n’a été modifié."
+            "value": "Ce journal est trop volumineux pour être importé. Nyx importe jusqu’à %1$@ nuits, %2$lld photos par nuit et %3$@ par photo. Rien n’a été modifié."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このジャーナルは大きすぎて読み込めません。Nyxが読み込めるのは、%1$@夜まで、1夜につき写真%2$lld枚まで、合計%3$@までです。何も変更されていません。"
+            "value": "このジャーナルは大きすぎて読み込めません。Nyxが読み込めるのは、%1$@夜まで、1夜につき写真%2$lld枚まで、写真1枚につき%3$@までです。何も変更されていません。"
           }
         }
       }

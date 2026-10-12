@@ -470,7 +470,8 @@ struct GuideRecordRow: View {
                 NavigationLink { ParkDetailView(park:park,initialDate:record.night) } label:{ content }.buttonStyle(.plain)
                     .accessibilityHint("Opens that night at the park.")
                     // A park in Ask Nyx's records is a park row like any other: its menu, highlight and drag.
-                    .parkRowActions(park) { saveFailed=true }
+                    // Not "Show in Plan": Ask Nyx stands on Plan's own stack, so Plan would not come forward.
+                    .parkRowActions(park,showsPlan:false) { saveFailed=true }
                     .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             } else { content }
         }

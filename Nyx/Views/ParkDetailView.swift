@@ -83,15 +83,18 @@ struct ParkDetailView: View {
         ScrollViewReader { proxy in
             Group {
                 if wide {
+                    // Both columns within a readable width, centred in a very wide window: the room
+                    // beyond it is each scroll view's own margin, so both still scroll from the window's edges.
+                    let side=WideLayout.twoColumnSide(width)
                     HStack(alignment:.top,spacing:0) {
                         ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding(24) }
-                            .scrollDisabled(scrubbing || holdingArc).frame(width:WideLayout.leadingWidth(width))
+                            .contentMargins(.leading,side,for:.scrollContent)
+                            .scrollDisabled(scrubbing || holdingArc).frame(width:WideLayout.leadingWidth(width)+side)
                         // The sky arc lives here, so its held finger holds this column still too.
                         ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding(24) }
+                            .contentMargins(.trailing,side,for:.scrollContent)
                             .scrollDisabled(scrubbing || holdingArc)
                     }
-                    // Both columns within a readable width, centred in a very wide window.
-                    .frame(maxWidth:WideLayout.twoColumnMaximum).frame(maxWidth:.infinity)
                 } else {
                     ScrollView {
                         VStack(spacing:26) {

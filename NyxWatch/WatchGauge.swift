@@ -62,14 +62,16 @@ struct WatchGauge: View {
             var elapsed = 0.0
             for beat in Self.beats(score: score) {
                 try? await Task.sleep(for: .seconds(beat.at - elapsed))
-                guard !Task.isCancelled else { return }
+                // The wrist went down mid-sweep: no tap against a lowered arm.
+                guard !Task.isCancelled, !dimmed else { return }
                 elapsed = beat.at
                 if let mark = beat.milestone { milestone = mark } else { landed = true }
             }
         }
         // The iPhone gauge's vocabulary (`CelestialGauge`): medium at a milestone, light as it lands.
-        .sensoryFeedback(.impact(weight: .medium), trigger: milestone) { _, new in new > 0 }
-        .sensoryFeedback(.impact(weight: .light), trigger: landed) { _, new in new }
+        // Read again as each beat lands, so a wrist lowered mid-sweep is never tapped.
+        .sensoryFeedback(.impact(weight: .medium), trigger: milestone) { _, new in new > 0 && !dimmed }
+        .sensoryFeedback(.impact(weight: .light), trigger: landed) { _, new in new && !dimmed }
         .onChange(of: dimmed) { _, _ in shown = Double(score) }
     }
     /// When the shared spring, sweeping from 0 to `score`, first reaches 70 and 90 (where the score

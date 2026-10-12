@@ -101,8 +101,8 @@ import Observation
                 // Words appear only while every citation so far is a real record and every number
                 // so far is in the records; a number still arriving waits for its last digit.
                 let facts=context+ledger.all+[question,today]+ids.map { String($0) }
-                let closed=Self.hasClosure(context+ledger.all)
-                if let shown=Self.partial(whole,ids:ids,valid:Set(context.indices).union(ledger.ids),facts:facts,closed:closed) {
+                let records=context+ledger.all
+                if let shown=Self.partial(whole,ids:ids,valid:Set(context.indices).union(ledger.ids),facts:facts,closed:Self.closedNames(records,lookup:lookup),records:records) {
                     text=shown;citations=Array(Set(ids)).sorted()
                 }
             }
@@ -113,8 +113,9 @@ import Observation
             let facts=context+ledger.all+[question,today]+ids.map { String($0) }
             let valid=Set(context.indices).union(ledger.ids)
             let final=whole.trimmingCharacters(in:.whitespacesAndNewlines)
-            // And an answer never says a place is open or accessible when a record flags a closure.
-            if ids.isEmpty || !ids.allSatisfy(valid.contains) || !Self.grounded(final,facts:facts) || (Self.hasClosure(context+ledger.all) && Self.claimsAccess(final)) {
+            // And an answer never says a place is open or accessible when a record flags a closure there.
+            let records=context+ledger.all
+            if ids.isEmpty || !ids.allSatisfy(valid.contains) || !Self.grounded(final,facts:facts) || Self.claimsAccess(final,closed:Self.closedNames(records,lookup:lookup),records:records) {
                 error=String(localized:"Nyx could not match an answer to these records. The original data is below.");text="";citations=[]
             } else { text=final;citations=Array(Set(ids)).sorted();checked=true }
         } catch {
@@ -131,11 +132,12 @@ import Observation
     #endif
     /// What may be shown of an answer still streaming: nil until it cites only real records, with
     /// a trailing run of digits held back until the number is whole (a "9" on its way to "94"
-    /// would pass the check alone), and only while every number shown is in the facts.
-    nonisolated static func partial(_ text:String,ids:[Int],valid:Set<Int>,facts:[String],closed:Bool=false)->String? {
+    /// would pass the check alone), and only while every number shown is in the facts and nothing
+    /// shown opens a place in `closed` (`claimsAccess`).
+    nonisolated static func partial(_ text:String,ids:[Int],valid:Set<Int>,facts:[String],closed:[String]=[],records:[String]=[])->String? {
         guard !ids.isEmpty, ids.allSatisfy(valid.contains) else { return nil }
         let held=heldBack(text)
-        guard !held.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty, grounded(held,facts:facts), !(closed && claimsAccess(held)) else { return nil }
+        guard !held.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty, grounded(held,facts:facts), !claimsAccess(held,closed:closed,records:records) else { return nil }
         return held
     }
     /// True when any record carries the closure flag.
@@ -143,19 +145,120 @@ import Observation
         let flag=closureRecord
         return records.contains { $0.contains(flag) }
     }
+    /// The place a record is about: a night's record names it first, before the first ";"
+    /// (`NightLookup.describe`). Nil for a record of another shape.
+    nonisolated static func recordPlace(_ record:String)->String? {
+        guard let semicolon=record.firstIndex(of:";") else { return nil }
+        let name=record[..<semicolon].trimmingCharacters(in:.whitespaces)
+        return name.isEmpty ? nil : name
+    }
+    /// The places with a closure: each record carrying the closure flag names its place first, and
+    /// `lookup` knows every place with a closure, by its short and its full name.
+    nonisolated static func closedNames(_ records:[String],lookup:NightLookup?=nil)->[String] {
+        let flag=closureRecord
+        var names=records.filter { $0.contains(flag) }.compactMap { record -> String? in
+            guard let name=recordPlace(record), let flagged=record.range(of:flag), record[..<flagged.lowerBound].contains(";") else { return nil }
+            return name
+        }
+        if let lookup, !lookup.closed.isEmpty {
+            for park in lookup.parks+lookup.others where lookup.closed.contains(park.id) { names+=[park.shortName,park.name] }
+        }
+        return Array(Set(names.filter { !$0.isEmpty })).sorted()
+    }
     /// Words that say a place can be reached or is open, in each language Nyx speaks, matched on
-    /// whole words with case and accents folded. Deliberately broad: beside a closure even "the rest
-    /// is open" is not Nyx's to say, so such an answer gives way to the records themselves.
+    /// whole words with case and accents folded.
     private nonisolated static let accessWords:Set<String>=["open","opened","reopened","reopens","accessible","passable","abierto","abierta","abiertos","abiertas",
         "accesible","accesibles","transitable","geoffnet","offen","offnet","zuganglich","befahrbar","ouvert","ouverte","ouverts","ouvertes","praticable"]
-    private nonisolated static let accessPhrases=["no closure","no closures","not closed","sin cierres","no hay cierres","keine sperrung","nicht gesperrt","aucune fermeture",
-        "pas ferme","開いて","開放","通行可","通行でき","営業中","利用可能","閉鎖はありません","閉鎖されていません","オープン"]
-    nonisolated static func claimsAccess(_ text:String)->Bool {
-        let folded=text.folding(options:[.caseInsensitive,.diacriticInsensitive,.widthInsensitive],locale:nil)
+    /// A closure denied: an access claim in its own right.
+    private nonisolated static let accessPhrases=["no closure","no closures","not closed","sin cierres","no hay cierres","keine sperrung","keine sperrungen","nicht gesperrt",
+        "aucune fermeture","pas ferme","pas fermee"]
+    private nonisolated static let japaneseAccess=["開いて","開放","通行可","通行でき","営業中","利用可能","オープン"]
+    private nonisolated static let japaneseOpenings=["閉鎖はありません","閉鎖されていません","閉鎖はない","閉鎖されていない"]
+    private nonisolated static let japaneseClosures=["閉鎖","通行止め","休業"]
+    private nonisolated static let japaneseNegations=["ません","ない","なく"]
+    /// Words that say a place is closed: a sentence with one, not denied, confirms the closure.
+    private nonisolated static let closureWords:Set<String>=["closed","closure","closures","closing","shut","cerrado","cerrada","cerrados","cerradas","cierre","cierres",
+        "gesperrt","sperrung","sperrungen","geschlossen","schliessung","ferme","fermee","fermes","fermees","fermeture","fermetures"]
+    /// Words that deny the word a few places after them ("not open", "n'est pas ouvert", "nicht geöffnet").
+    private nonisolated static let negations:Set<String>=["not","no","never","isn","aren","wasn","weren","won","nor","nunca","sin","ni","nicht","kein","keine","nie","niemals",
+        "pas","jamais","aucun","aucune","n","non"]
+    /// "Open" about the sky, not a road: "open skies", "cielo abierto", "ciel ouvert", "the sky is open".
+    private nonisolated static let skyWords:Set<String>=["sky","skies","horizon","horizons","view","views","air","cielo","cielos","horizonte","horizontes","vista","vistas",
+        "ciel","cieux","vue","vues","himmel","horizont","sicht"]
+    private nonisolated static let copulas:Set<String>=["is","are","was","stays","remains","es","esta","estan","ist","sind","bleibt","est","sont","reste"]
+    private nonisolated static func fold(_ text:String)->String {
+        text.folding(options:[.caseInsensitive,.diacriticInsensitive,.widthInsensitive],locale:nil)
+    }
+    /// `name` in `text` (both folded) as a whole name: no Latin letter or digit runs on at either end,
+    /// so "Arches" is not found in "Archesville", while "Joshua Treeは" still names Joshua Tree.
+    private nonisolated static func mentions(_ text:String,_ name:String)->Bool {
+        guard !name.isEmpty else { return false }
+        func joins(_ character:Character?)->Bool { character.map { $0.isASCII && ($0.isLetter || $0.isNumber) } ?? false }
+        var from=text.startIndex
+        while let found=text.range(of:name,range:from..<text.endIndex) {
+            let before=found.lowerBound>text.startIndex ? text[text.index(before:found.lowerBound)] : nil
+            let after=found.upperBound<text.endIndex ? text[found.upperBound] : nil
+            if !joins(before) && !joins(after) { return true }
+            from=text.index(after:found.lowerBound)
+        }
+        return false
+    }
+    /// True when the answer says a place with a closure (`closed`, from `closedNames`) is open or can
+    /// be reached. Only sentences about such a place are read: one that names it, or one that names
+    /// no place from the records and so goes on about the place last named ("It is open."). In
+    /// those, a record repeated word for word is the record's, not the answer's, and is set aside;
+    /// a denied word ("not open", "no longer open") is no claim, nor is "open" about the sky ("open
+    /// skies", "cielo abierto") or the forecast service ("Open-Meteo"); and a sentence that confirms
+    /// the closure ("the park is open but the road is closed") says what the records say. A denied
+    /// closure ("no closures") is a claim. Matched with case and accents folded, in each language Nyx speaks.
+    nonisolated static func claimsAccess(_ text:String,closed:[String],records:[String]=[])->Bool {
+        let shut=Set(closed.map(fold).filter { !$0.isEmpty })
+        guard !shut.isEmpty else { return false }
+        let places=shut.union(records.compactMap(recordPlace).map(fold))
+        // Each record's parts, folded, with the place it is about: repeated whole, a part is set aside.
+        let parts=records.flatMap { record -> [(place:String?,text:String)] in
+            let place=recordPlace(record).map(fold)
+            return fold(record).components(separatedBy:CharacterSet(charactersIn:";.。")).map { (place,$0.trimmingCharacters(in:.whitespaces)) }.filter { $0.1.count>=12 }
+        }
+        var subject=Set<String>()
+        var sentences:[String]=[]
+        text.enumerateSubstrings(in:text.startIndex..<text.endIndex,options:.bySentences) { sentence,_,_,_ in if let sentence { sentences.append(sentence) } }
+        for sentence in sentences {
+            var folded=fold(sentence)
+            let named=places.filter { mentions(folded,$0) }
+            if !named.isEmpty { subject=named }
+            let about=subject.intersection(shut)
+            guard !about.isEmpty else { continue }
+            for part in parts where part.place.map(about.contains) ?? false { folded=folded.replacingOccurrences(of:part.text,with:" ") }
+            if sentenceClaimsAccess(folded) { return true }
+        }
+        return false
+    }
+    private nonisolated static func sentenceClaimsAccess(_ sentence:String)->Bool {
+        let folded=sentence.replacingOccurrences(of:"open-meteo",with:" ").replacingOccurrences(of:"open meteo",with:" ")
         let words=folded.split { !$0.isLetter }.map(String.init)
-        if words.contains(where:accessWords.contains) { return true }
-        let spaced=words.joined(separator:" ")
-        return accessPhrases.contains { spaced.contains($0) || folded.contains($0) }
+        let spaced=" "+words.joined(separator:" ")+" "
+        if accessPhrases.contains(where:{ spaced.contains(" \($0) ") }) || japaneseOpenings.contains(where:folded.contains) { return true }
+        func denied(_ index:Int)->Bool { words[max(0,index-3)..<index].contains(where:negations.contains) }
+        func japanese(_ phrases:[String])->Bool {
+            phrases.contains { phrase in
+                var from=folded.startIndex
+                while let found=folded.range(of:phrase,range:from..<folded.endIndex) {
+                    let next=String(folded[found.upperBound...].prefix(8))
+                    if !japaneseNegations.contains(where:next.contains) { return true }
+                    from=found.upperBound
+                }
+                return false
+            }
+        }
+        // The closure itself, said and not denied: the sentence agrees with the records.
+        if words.indices.contains(where:{ closureWords.contains(words[$0]) && !denied($0) }) || japanese(japaneseClosures) { return false }
+        for (index,word) in words.enumerated() where accessWords.contains(word) && !denied(index) {
+            let next=index+1<words.count ? words[index+1] : "", previous=index>0 ? words[index-1] : ""
+            let sky=skyWords.contains(next) || skyWords.contains(previous) || (index>1 && skyWords.contains(words[index-2]) && copulas.contains(previous))
+            if !sky { return true }
+        }
+        return japanese(japaneseAccess)
     }
     /// The text without a trailing run of digits, which may still be growing.
     nonisolated static func heldBack(_ text:String)->String {

@@ -50,8 +50,11 @@ actor ForecastDetailService: DetailProviding {
     /// Counts `forgetAir` calls. A refresh notes it when it begins; smoke that arrives after the
     /// switch went off (the request was already in flight) is dropped instead of stored.
     private var airGeneration=0
-    /// A refresh already under way; later callers wait for it instead of asking again.
-    private var running: Task<Void, Never>?
+    /// A refresh already under way, with the parks it asked about for each kind; later callers wait
+    /// for it instead of asking again.
+    private var running: (task: Task<Void, Never>, attempted: [Kind: Set<String>])?
+    /// Callers waiting for a refresh to end, the one that started it included (tests read it).
+    private(set) var waiting=0
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
          budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget
@@ -90,17 +93,24 @@ actor ForecastDetailService: DetailProviding {
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
         for park in parks { load(park.id) }
         // Another request is on its way (perhaps for other parks): wait for it, then decide again
-        // what is due. A cancelled caller stops waiting and returns what is kept; the request
-        // finishes and stores itself.
-        while let running {
-            guard await SharedRequest.value(of: running) != nil else { return kept(parks) }
+        // what is due, leaving out what it already asked for: a request that failed without a
+        // backoff (a timeout, a refusal, an unreadable answer) is not sent again once per waiter. A
+        // cancelled caller stops waiting and returns what is kept; the request finishes and stores itself.
+        var attempted: [Kind: Set<String>] = [:]
+        while let current=running {
+            waiting+=1
+            let finished=await SharedRequest.value(of: current.task) != nil
+            waiting-=1
+            guard finished else { return kept(parks) }
+            attempted.merge(current.attempted) { $0.union($1) }
         }
         do {
             let now=clock()
             var jobs: [(Kind, [Park])] = []
             for kind in Kind.allCases where (kind == .air ? smoke : weather) && backoff.allows(kind.host, now: now) {
                 let due=parks.filter { park in
-                    ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
+                    attempted[kind]?.contains(park.id) != true
+                        && ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
                 }
                 for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
             }
@@ -131,8 +141,12 @@ actor ForecastDetailService: DetailProviding {
                     self.store(results, airGeneration: generation)
                     self.running=nil
                 }
-                running=task
+                var asked: [Kind: Set<String>] = [:]
+                for (kind, chunk) in jobs { asked[kind, default: []].formUnion(chunk.map(\.id)) }
+                running=(task, asked)
+                waiting+=1
                 _=await SharedRequest.value(of: task)
+                waiting-=1
             }
         }
         return kept(parks)

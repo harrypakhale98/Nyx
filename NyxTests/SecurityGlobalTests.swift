@@ -117,12 +117,6 @@ struct SecurityGlobalTests {
         try Self.sparse(photo.appendingPathComponent("Photos/big.jpg"), size: PhotoScaling.maxSourceBytes+1)
         #expect(throws: JournalArchive.ArchiveError.tooLarge) { try JournalImport.read(photo) }
 
-        let package=try Self.folder()
-        defer { try? FileManager.default.removeItem(at: package) }
-        try Self.manifestJSON(JournalArchive.Manifest(format: 1, exported: .now, entries: [Self.entry()])).write(to: package.appendingPathComponent("entries.json"))
-        try Self.sparse(package.appendingPathComponent("padding.bin"), size: JournalImport.maxPackageBytes+1)
-        #expect(throws: JournalArchive.ArchiveError.tooLarge) { try JournalImport.read(package) }
-
         let manifestOnly=try Self.folder()
         defer { try? FileManager.default.removeItem(at: manifestOnly) }
         try Self.sparse(manifestOnly.appendingPathComponent("entries.json"), size: JournalImport.manifestBytes+1)
@@ -145,7 +139,8 @@ struct SecurityGlobalTests {
         #expect(PhotoScaling.keepsake(tiff) == nil && PhotoScaling.keepsake(Data("text".utf8)) == nil)
         let manifest=JournalArchive.Manifest(format: 1, exported: .now, entries: [Self.entry(photos: ["a.jpg", "b.png", "c.tif"])])
         let prepared=try JournalImport(JournalArchive(manifest: manifest, photos: ["a.jpg": located, "b.png": png, "c.tif": tiff]))
-        #expect(prepared.photos.count == 2 && prepared.photos.values.allSatisfy { !Self.hasLocation($0) })
+        // Nothing is decoded before the merge: the TIFF is left out only as it is read.
+        #expect(prepared.manifest.entries.first?.photos.count == 3)
         let context=try Self.context()
         #expect(try await prepared.merge(into: context, batch: 1).added == 1)
         let stored=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
@@ -168,10 +163,11 @@ struct SecurityGlobalTests {
         let manifest=JournalArchive.Manifest(format: 1, exported: .now, entries: [Self.entry(photos: ["own.jpg", "link.jpg", "../\(outside.lastPathComponent)"])])
         try Self.manifestJSON(manifest).write(to: package.appendingPathComponent("entries.json"))
         let prepared=try JournalImport.read(package)
-        #expect(Array(prepared.photos.keys) == ["own.jpg"])
         #expect(prepared.manifest.entries.first?.photos.map(\.file) == ["own.jpg"])
         let context=try Self.context()
         #expect(try prepared.summary(in: context) == JournalImport.Summary(nights: 1, photos: 1, alreadyHere: 0, spots: 0))
+        #expect(try prepared.merge(into: context).added == 1)
+        #expect(try context.fetch(FetchDescriptor<JournalEntry>()).first?.photoItems.count == 1)
     }
     /// The confirmation says what the file holds, what is skipped and how spots arrive; nothing is
     /// stored until the merge.
@@ -245,16 +241,18 @@ struct SecurityGlobalTests {
     @Test func answersThatOpenAClosedPlaceAreRejected() {
         let records=["Joshua Tree; Friday; score 90/100. "+OnDeviceGuide.closureRecord]
         #expect(OnDeviceGuide.hasClosure(records) && !OnDeviceGuide.hasClosure(["Arches; score 80/100"]))
-        for claim in ["Joshua Tree is open on Friday.", "The roads are accessible.", "There are no closures there.", "El parque está abierto.",
-                      "Der Park ist geöffnet.", "La route est ouverte.", "公園は開いています。", "道路は通行可能です。"] {
-            #expect(OnDeviceGuide.claimsAccess(claim), "\(claim)")
+        let closed=OnDeviceGuide.closedNames(records)
+        #expect(closed == ["Joshua Tree"])
+        for claim in ["Joshua Tree is open on Friday.", "Joshua Tree's roads are accessible.", "There are no closures at Joshua Tree.", "Joshua Tree está abierto.",
+                      "Joshua Tree ist geöffnet.", "La route de Joshua Tree est ouverte.", "Joshua Treeは開いています。", "Joshua Treeの道路は通行可能です。"] {
+            #expect(OnDeviceGuide.claimsAccess(claim, closed: closed, records: records), "\(claim)")
         }
-        for calm in ["Friday scores 90; a closure is listed, so read it in Nyx first.", "Confirm access with the park before you go.", "閉鎖があります。"] {
-            #expect(!OnDeviceGuide.claimsAccess(calm), "\(calm)")
+        for calm in ["Friday scores 90 at Joshua Tree; a closure is listed, so read it in Nyx first.", "Confirm access with Joshua Tree before you go.", "Joshua Treeは閉鎖があります。"] {
+            #expect(!OnDeviceGuide.claimsAccess(calm, closed: closed, records: records), "\(calm)")
         }
         // While streaming too: an answer that opens a closed place never shows.
-        #expect(OnDeviceGuide.partial("Joshua Tree is open Friday, score 90.", ids: [0], valid: [0], facts: records, closed: true) == nil)
-        #expect(OnDeviceGuide.partial("Joshua Tree scores 90 Friday.", ids: [0], valid: [0], facts: records, closed: true) != nil)
+        #expect(OnDeviceGuide.partial("Joshua Tree is open Friday, score 90.", ids: [0], valid: [0], facts: records, closed: closed, records: records) == nil)
+        #expect(OnDeviceGuide.partial("Joshua Tree scores 90 Friday.", ids: [0], valid: [0], facts: records, closed: closed, records: records) != nil)
     }
 
     // MARK: The journal while locked

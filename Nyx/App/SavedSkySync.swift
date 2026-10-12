@@ -49,8 +49,8 @@ import WidgetKit
         model.tick()
         defer {
             running=false
-            // A run cut short (background time ran out) does not start another: the next opening of Nyx runs one.
-            if let next=again { again=nil; if !Task.isCancelled { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } } }
+            if let next=Self.followUp(again,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }
+            again=nil
         }
         let parks=current.compactMap { model.park($0) }
         let ids=Set(parks.map(\.id))
@@ -72,6 +72,15 @@ import WidgetKit
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
         if again == nil, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); await Self.refreshFollowed(model) }
         Self.scheduleRefresh()
+    }
+    /// The run that follows one that ends with `queued` asked for meanwhile. A run cut short
+    /// (background time ran out, its window closed) starts no new requests: the next opening of Nyx
+    /// runs them. What was queued is still published from the cache, though, as a republish asks:
+    /// switching "Smoke and haze" off during a run must not leave the widget and the watch with the
+    /// old scores until then.
+    nonisolated static func followUp(_ queued:(publishOnly:Bool,background:Bool)?,cancelled:Bool)->(publishOnly:Bool,background:Bool)? {
+        guard let queued else { return nil }
+        return cancelled ? (publishOnly:true,background:queued.background) : queued
     }
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
     /// snapshot, the watch and reminders, then the next request about six hours on. Same hosts and

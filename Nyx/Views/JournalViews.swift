@@ -20,7 +20,8 @@ struct JournalView: View {
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
-    /// A journal read and checked, waiting for the person to confirm the import.
+    /// A journal's manifest read and checked, waiting for the person to confirm the import. Its
+    /// photos stay in the file until the merge reads them.
     @State private var pendingImport:PendingImport?
     /// An export being gathered or an import being read, off the main thread (photos can be many megabytes).
     @State private var working:LocalizedStringKey?
@@ -92,7 +93,7 @@ struct JournalView: View {
             // Nothing is merged until the person has seen what the file holds.
             .alert("Import this journal?",isPresented:Binding(get:{ pendingImport != nil },set:{ if !$0 { pendingImport=nil } }),presenting:pendingImport) { pending in
                 Button("Import") { Task { await confirmImport(pending) } }
-                Button("Cancel",role:.cancel) {}
+                Button("Cancel",role:.cancel) { finishImport(pending.url) }
             } message:{ pending in Text(Self.importMessage(pending.summary)) }
             .task(id:model.journalFile) {
                 // A journal opened from Files or another app.
@@ -123,37 +124,43 @@ struct JournalView: View {
             else { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
         }
     }
-    /// Reads the package off the main thread (every limit checked, every photo re-encoded), then
-    /// asks before anything is merged: the counts, and that spots arrive unfollowed. A copy another
-    /// app left in Documents/Inbox is removed once it has been read, imported or not.
+    /// Reads the package's manifest off the main thread (every count and file size checked, no
+    /// photo opened), then asks before anything is merged: the counts, and that spots arrive
+    /// unfollowed. The file stays where it is until the import is confirmed or cancelled; a copy
+    /// another app left in Documents/Inbox is removed then, or at once when it cannot be read.
     private func importJournal(_ url:URL) async {
         working="Importing your journal"
         model.importingJournal=url
         let read=await Task.detached(priority:.userInitiated) { () -> Result<JournalImport,any Error> in Result { try JournalImport.read(url) } }.value
         working=nil
-        if model.importingJournal == url { model.importingJournal=nil }
-        Task.detached(priority:.utility) { JournalInbox.remove(url) }
         switch read {
         case .success(let prepared):
-            if let summary=try? prepared.summary(in:context) { pendingImport=PendingImport(prepared:prepared,summary:summary) }
-            else { importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.") }
+            if let summary=try? prepared.summary(in:context) { pendingImport=PendingImport(prepared:prepared,summary:summary,url:url); return }
+            importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
         case .failure(let error):
             importResult=(error as? JournalArchive.ArchiveError) == .tooLarge ? Self.tooLargeMessage
                 : String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
         }
+        finishImport(url)
     }
-    /// Adds the nights the journal does not have yet; nothing already here is changed. The inserts
-    /// run in batches with a pause between, and one save makes it all or nothing.
+    /// Adds the nights the journal does not have yet; nothing already here is changed. The photos
+    /// are read and re-encoded a few nights at a time off the main thread (`JournalImport.merge`),
+    /// in a context of the merge's own, and one save makes it all or nothing.
     private func confirmImport(_ pending:PendingImport) async {
         working="Importing your journal"
-        defer { working=nil }
+        defer { working=nil; finishImport(pending.url) }
         do {
-            let result=try await pending.prepared.merge(into:context,batch:100)
+            let result=try await pending.prepared.merge(into:context,batch:JournalImport.mergeBatch)
             importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
         } catch {
-            context.rollback()
             importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
         }
+    }
+    /// The import of `url` is over (merged, cancelled or unreadable): the file is no longer kept
+    /// from the Inbox sweep, and a copy another app left there is removed.
+    private func finishImport(_ url:URL) {
+        if model.importingJournal == url { model.importingJournal=nil }
+        Task.detached(priority:.utility) { JournalInbox.remove(url) }
     }
     /// The confirmation's words: what the file holds, what is skipped, and how spots arrive.
     nonisolated static func importMessage(_ summary:JournalImport.Summary)->String {
@@ -165,8 +172,8 @@ struct JournalView: View {
     }
     /// A journal past `JournalImport`'s limits, with the limits in the reader's own numbers.
     nonisolated static var tooLargeMessage:String {
-        let nights=JournalImport.maxEntries.formatted(), size=Int64(JournalImport.maxPackageBytes).formatted(.byteCount(style:.file))
-        return String(localized:"This journal is too large to import. Nyx imports up to \(nights) nights, \(PhotoScaling.perEntry) photos a night and \(size) in all. Nothing was changed.")
+        let nights=JournalImport.maxEntries.formatted(), size=Int64(PhotoScaling.maxSourceBytes).formatted(.byteCount(style:.file))
+        return String(localized:"This journal is too large to import. Nyx imports up to \(nights) nights, \(PhotoScaling.perEntry) photos a night and \(size) a photo. Nothing was changed.")
     }
     @ViewBuilder private var entryList: some View {
         // An empty journal's button sits inside the constellation, under its promise (`YourSkyPanel`).
@@ -237,10 +244,12 @@ struct JournalCard:View {
         } }
     }
 }
-/// A journal read and checked, and what the confirmation says about it.
+/// A journal's manifest read and checked (its photos not yet opened), what the confirmation says
+/// about it, and the file it came from.
 struct PendingImport {
     let prepared:JournalImport
     let summary:JournalImport.Summary
+    let url:URL
 }
 /// Image I/O downsampling: decodes straight to the target size, never the full photo.
 nonisolated enum PhotoScaling {

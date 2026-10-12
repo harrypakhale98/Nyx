@@ -468,7 +468,7 @@ struct DataLaneTests {
         #expect(JournalMigration.hasRoom(forStoreAt: store))
     }
     /// The journal's export is gathered on a background context and an import's thumbnails are
-    /// drawn before the inserts, as the Journal tab does off the main thread: same archive, same cards.
+    /// drawn as each batch of photos is re-encoded, as the Journal tab does off the main thread: same archive, same cards.
     @MainActor @Test func journalArchiveWorkHappensOffTheMainThread() async throws {
         let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let container=try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true))
@@ -484,7 +484,8 @@ struct DataLaneTests {
         let made=try #require(archive)
         #expect(made.manifest.entries.map(\.id) == [entry.id] && made.photos.values.first == photo)
         let prepared=try await Task.detached { try JournalImport(made) }.value
-        let thumbnail=try #require(prepared.thumbnails[entry.id])
+        // Drawn from the re-encoded photo during the merge, off the main thread.
+        let thumbnail=try #require(PhotoScaling.keepsake(photo).flatMap { PhotoScaling.jpeg($0, maxPixels: 900) })
         let other=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
         #expect(try await prepared.merge(into: other, batch: 1).added == 1)
         #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.thumbnail == thumbnail)

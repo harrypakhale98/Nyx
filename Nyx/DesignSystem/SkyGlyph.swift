@@ -58,7 +58,7 @@ extension SkyGlyph.Kind {
     init(_ kind:WhatsUp.Kind) { self = switch kind { case .core: .core; case .planet: .planet; case .meteors: .meteors; case .eclipse: .eclipse } }
 }
 #Preview("Glyphs") {
-    HStack(spacing:24) { ForEach([SkyGlyph.Kind.core,.planet,.meteors,.eclipse],id:\.self) { SkyGlyph($0,color:Color(red:1,green:0.706,blue:0.329)).frame(width:28) } }
+    HStack(spacing:24) { ForEach([SkyGlyph.Kind.core,.planet,.meteors,.eclipse],id:\.self) { SkyGlyph($0,color:NyxPalette.amber).frame(width:28) } }
         .padding().background(.black)
 }
 #Preview("Glyphs • small") {

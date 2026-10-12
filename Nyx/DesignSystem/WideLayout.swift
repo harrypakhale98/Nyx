@@ -46,6 +46,10 @@ nonisolated enum WideLayout {
     }
     /// The side margin that centres a column of at most `measure` points in `width`.
     static func margin(width:Double,measure:Double)->Double { max(0,(width-measure)/2) }
+    /// Each side's room beyond a two-column page's `twoColumnMaximum`, in whole points: kept as
+    /// the outer scroll view's content margin, never by narrowing the scroll views, so a column
+    /// still scrolls (and shows its indicator) at the window's edge.
+    static func twoColumnSide(_ width:Double)->Double { margin(width:width,measure:twoColumnMaximum).rounded(.down) }
 }
 
 extension View {

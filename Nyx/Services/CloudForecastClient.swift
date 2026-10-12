@@ -678,8 +678,10 @@ actor WeatherService: WeatherProviding {
     private var inFlight: [String: Task<[String: Forecast], Never>] = [:]
     /// How many callers are still waiting on each request in flight.
     private var waiters: [Task<[String: Forecast], Never>: Int] = [:]
-    /// The saved spots' request under way, if any; later callers wait for it.
-    private var spotFlight: Task<[String: Forecast], Never>?
+    /// The saved spots' request under way, if any, with the spots it asked about; later callers wait for it.
+    private var spotFlight: (task: Task<[String: Forecast], Never>, attempted: Set<String>)?
+    /// Callers waiting for the spots' request to end, the one that started it included (tests read it).
+    private(set) var spotWaiting=0
     /// Catalogue tile requests under way, by their members; a caller asking for the same tile waits for it.
     private var catalogFlight: [String: Task<[String: Forecast], Never>] = [:]
     /// The parks' or spots' forecast was due and held back (`heldBack()`).
@@ -771,12 +773,19 @@ actor WeatherService: WeatherProviding {
         let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
         guard network && SpotForecast.isOn(defaults) else { return kept() }
         // Another request is on its way (perhaps for other spots): wait for it, then decide again
-        // what is due. A cancelled caller stops waiting and returns what is kept.
+        // what is due, leaving out the spots it already asked about, so a request that failed
+        // without a backoff is not sent again once per waiter. A cancelled caller stops waiting and
+        // returns what is kept.
+        var attempted=Set<String>()
         while let running=spotFlight {
-            guard await SharedRequest.value(of: running) != nil else { return kept() }
+            spotWaiting+=1
+            let finished=await SharedRequest.value(of: running.task) != nil
+            spotWaiting-=1
+            guard finished else { return kept() }
+            attempted.formUnion(running.attempted)
         }
         let now=clock()
-        var due=spots.filter { ForecastReuse.due(memory[$0.id]?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) }
+        var due=spots.filter { !attempted.contains($0.id) && ForecastReuse.due(memory[$0.id]?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) }
         if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
         if !due.isEmpty {
             let task=Task {
@@ -786,8 +795,10 @@ actor WeatherService: WeatherProviding {
                 self.spotFlight=nil
                 return fetched
             }
-            spotFlight=task
+            spotFlight=(task, Set(due.map(\.id)))
+            spotWaiting+=1
             _=await SharedRequest.value(of: task)
+            spotWaiting-=1
         }
         return kept()
     }
@@ -928,8 +939,10 @@ actor SummitLayerService {
     private var memory: [String: HourlySeries] = [:]
     /// Parks whose cache file has been looked for, found or not, so no file is read twice.
     private var loaded=Set<String>()
-    /// A request already under way; later callers wait for it instead of asking again.
-    private var running: Task<Void, Never>?
+    /// A request already under way, with the summits it asked about; later callers wait for it instead of asking again.
+    private var running: (task: Task<Void, Never>, attempted: Set<String>)?
+    /// Callers waiting for a request to end, the one that started it included (tests read it).
+    private(set) var waiting=0
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
          budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget
@@ -942,21 +955,29 @@ actor SummitLayerService {
         let summits=parks.filter { $0.aboveInversion == true }
         for park in summits { load(park.id) }
         // Another request is on its way (perhaps for other summits): wait for it, then decide again
-        // what is due. A cancelled caller stops waiting and returns what is kept; the request
-        // finishes and stores itself.
-        while network, let running {
-            guard await SharedRequest.value(of: running) != nil else { return kept(summits) }
+        // what is due, leaving out the summits it already asked about (a failure without a backoff
+        // is not sent again once per waiter). A cancelled caller stops waiting and returns what is
+        // kept; the request finishes and stores itself.
+        var attempted=Set<String>()
+        while network, let current=running {
+            waiting+=1
+            let finished=await SharedRequest.value(of: current.task) != nil
+            waiting-=1
+            guard finished else { return kept(summits) }
+            attempted.formUnion(current.attempted)
         }
         if network {
             let now=clock()
-            let due=summits.filter { park in (memory[park.id].map { now.timeIntervalSince($0.updated) } ?? .infinity) >= Self.freshFor }
+            let due=summits.filter { park in !attempted.contains(park.id) && (memory[park.id].map { now.timeIntervalSince($0.updated) } ?? .infinity) >= Self.freshFor }
             if !due.isEmpty, backoff.allows(WeatherService.host, now: now) {
                 let task=Task {
                     self.keep(await self.fetch(due))
                     self.running=nil
                 }
-                running=task
+                running=(task, Set(due.map(\.id)))
+                waiting+=1
                 _=await SharedRequest.value(of: task)
+                waiting-=1
             }
         }
         return kept(summits)
