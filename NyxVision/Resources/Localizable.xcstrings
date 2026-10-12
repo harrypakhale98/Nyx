@@ -666,41 +666,6 @@
         }
       }
     },
-    "%lld h %lld min": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld h %lld Min."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld h %lld min"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld h %lld min"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld h %lld min"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld時間%lld分"
-          }
-        }
-      }
-    },
     "%lld nights after the peak": {
       "extractionState": "manual",
       "localizations": {
@@ -767,6 +732,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "100点中%1$lld点、%2$@"
+          }
+        }
+      }
+    },
+    "%lld · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld · %@"
           }
         }
       }
@@ -1366,6 +1366,41 @@
         }
       }
     },
+    "An International Dark Sky Park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein International Dark Sky Park."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An International Dark Sky Park."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un International Dark Sky Park."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un International Dark Sky Park."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Parkです。"
+          }
+        }
+      }
+    },
     "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -1397,6 +1432,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "座標はおおよそです。現在のアクセス、開場時間、閉鎖情報はレンジャーに確認してください。これはナビゲーションのための案内ではありません。"
+          }
+        }
+      }
+    },
+    "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Künstliches Licht am Himmel, als vorsichtige Bortle-Schätzung. Es ist keine Messung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz artificial en el cielo, como una estimación conservadora en la escala de Bortle. No es una medición."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La lumière artificielle dans le ciel, en estimation prudente sur l’échelle de Bortle. Ce n’est pas une mesure."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空に広がる人工の光を、控えめなボートル推定値で示しています。測定値ではありません。"
           }
         }
       }
@@ -1646,37 +1716,37 @@
         }
       }
     },
-    "Bortle %lld": {
+    "Bortle class %lld of 9, estimated.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld"
+            "value": "Bortle-Klasse %lld von 9, geschätzt."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld"
+            "value": "Bortle class %lld of 9, estimated."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld"
+            "value": "Clase Bortle %lld de 9, estimada."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bortle %lld"
+            "value": "Classe de Bortle %lld sur 9, estimée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボートル%lld"
+            "value": "ボートルクラス%lld（9段階中、推定）。"
           }
         }
       }
@@ -2132,6 +2202,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "地平線上の方位"
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view. Cloud forecast unavailable, so no clouds are shown, and the skyline is illustrative.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechnet für %@, %@. Keine Live-Ansicht. Die Wolkenvorhersage ist nicht verfügbar, daher werden keine Wolken gezeigt, und die Horizontlinie ist illustrativ."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view. Cloud forecast unavailable, so no clouds are shown, and the skyline is illustrative."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo. El pronóstico de nubes no está disponible, así que no se muestran nubes, y el horizonte es ilustrativo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculé pour %@, %@. Pas une vue en direct. La prévision de nuages est indisponible, donc aucun nuage n’est affiché, et la ligne d’horizon est illustrative."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@について計算した空です。リアルタイムの景色ではありません。雲予報を取得できないため雲は表示しておらず、地平線の景色はイメージです。"
+          }
+        }
+      }
+    },
+    "Computed for %@, %@. Not a live view. Cloud forecast unavailable, so no clouds are shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechnet für %@, %@. Keine Live-Ansicht. Die Wolkenvorhersage ist nicht verfügbar, daher werden keine Wolken gezeigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed for %@, %@. Not a live view. Cloud forecast unavailable, so no clouds are shown."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculado para %@, %@. No es una vista en vivo. El pronóstico de nubes no está disponible, así que no se muestran nubes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculé pour %@, %@. Pas une vue en direct. La prévision de nuages est indisponible, donc aucun nuage n’est affiché."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、%2$@について計算した空です。リアルタイムの景色ではありません。雲予報を取得できないため、雲は表示していません。"
           }
         }
       }
@@ -2832,41 +2972,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "推定"
-          }
-        }
-      }
-    },
-    "Estimate · International Dark Sky Park": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schätzung · International Dark Sky Park"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estimate · International Dark Sky Park"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estimación · International Dark Sky Park"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estimation · International Dark Sky Park"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "推定 · International Dark Sky Park"
           }
         }
       }
@@ -5986,6 +6091,41 @@
         }
       }
     },
+    "None drawn: cloud forecast unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine gezeichnet: Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None drawn: cloud forecast unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se dibujan: el pronóstico de nubes no está disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun dessiné : prévision de nuages indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "表示なし：雲予報を取得できません"
+          }
+        }
+      }
+    },
     "None drawn: no cloud forecast reaches this night": {
       "extractionState": "manual",
       "localizations": {
@@ -6262,6 +6402,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxは、National Park Service、NASA、DarkSky Internationalとは提携しておらず、これらの組織から推奨を受けているものでもありません。"
+          }
+        }
+      }
+    },
+    "Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx auf Apple Vision Pro umfasst die US-Nationalparks. Gesicherte Plätze und Orte im Ausland bleiben auf deinem iPhone und iPad."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx en Apple Vision Pro abarca los parques nacionales de EE. UU. Los sitios guardados y los lugares en el extranjero se quedan en tu iPhone y tu iPad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx sur Apple Vision Pro couvre les parcs nationaux des États-Unis. Les lieux enregistrés et les lieux à l’étranger restent sur votre iPhone et votre iPad."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Vision Pro版のNyxが扱うのは、アメリカの国立公園です。保存したスポットや海外の場所は、iPhoneとiPadに残ります。"
+          }
+        }
+      }
+    },
+    "OK": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Only national parks here": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier nur Nationalparks"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only national parks here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí solo hay parques nacionales"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ici, seulement les parcs nationaux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ここでは国立公園のみ"
           }
         }
       }

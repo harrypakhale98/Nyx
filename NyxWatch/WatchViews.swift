@@ -6,6 +6,7 @@ import WatchKit
 struct WatchRootView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     @Environment(\.scenePhase) private var scenePhase
     /// When Nyx last became active: between two minute marks, "now" is never earlier than this.
     @State private var woke = Date.now
@@ -25,7 +26,9 @@ struct WatchRootView: View {
         }
     }
     private func content(now: Date) -> some View {
-        let palette = NyxPalette(nightVision: store.nightVision(at: now), highContrast: contrast == .increased)
+        // The iPhone's brighter red and Bold Text reach the wrist as they do every iPhone screen.
+        let palette = NyxPalette(nightVision: store.nightVision(at: now), highContrast: contrast == .increased,
+                                 brighterRed: store.context?.brighterRed ?? false, boldText: legibility == .bold)
         return NavigationStack(path: $path) {
             Group {
                 #if DEBUG
@@ -363,7 +366,8 @@ struct NightGlance: View {
                 day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
-                Text("Dark \(night.park.time(start)) to \(night.park.time(end))").font(.system(.subheadline, design: .serif))
+                // Park time: the zone rides on the last time where the park's clock is not the watch's.
+                Text("Dark \(night.park.time(start)) to \(night.park.wristTime(end))").font(.system(.subheadline, design: .serif))
             } else {
                 Text(SkyConditions.noDarknessMessage(tonight: isTonight)).font(.footnote)
             }
@@ -411,15 +415,17 @@ struct NextMoment: View {
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
                         .lineLimit(limit).minimumScaleFactor(0.7)
                     Group {
-                        let at = Text("at \(night.park.time(next.date))")
-                        if cloudsUnknown { Text("at \(night.park.time(next.date)) · no cloud forecast").minimumScaleFactor(0.8) }
+                        // Park time, with its zone where the park's clock is not the watch's ("at 4:52 AM MST").
+                        let time = night.park.wristTime(next.date)
+                        let at = Text("at \(time)")
+                        if cloudsUnknown { Text("at \(time) · no cloud forecast").minimumScaleFactor(0.8) }
                         else if let models {
                             // The range shares the line only whole, never shrunk or cut (a cut "models
                             // 59–8…" would show a wrong number): where it does not fit, the time stands
                             // alone and the hairline on the dial's rim carries the range. At accessibility
                             // sizes the line wraps instead. The dial speaks the range; VoiceOver hears
                             // only the time here.
-                            let full = Text("at \(night.park.time(next.date)) · models \(models.lowerBound)–\(models.upperBound)")
+                            let full = Text("at \(time) · models \(models.lowerBound)–\(models.upperBound)")
                             if typeSize.isAccessibilitySize { full.accessibilityLabel(at) }
                             else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(at) }
                         } else { at.minimumScaleFactor(0.8) }
@@ -458,9 +464,9 @@ struct MilestonesPage: View {
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
                         // Passed moments are small filled dots, the next one ringed, later ones hollow.
                         ZStack {
-                            if milestone == next { Circle().stroke(palette.accent, lineWidth: 1.2).frame(width: 11, height: 11) }
+                            if milestone == next { Circle().stroke(palette.accent, lineWidth: 1.2*palette.stroke).frame(width: 11, height: 11) }
                             Circle().fill(past ? palette.faint : Color.clear).frame(width: 4, height: 4)
-                            if !past && milestone != next { Circle().stroke(palette.muted, lineWidth: 1).frame(width: 7, height: 7) }
+                            if !past && milestone != next { Circle().stroke(palette.muted, lineWidth: palette.stroke).frame(width: 7, height: 7) }
                         }
                         .frame(width: 12).alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center]+4 }
                         VStack(alignment: .leading, spacing: 0) {
@@ -477,7 +483,7 @@ struct MilestonesPage: View {
                     .accessibilityValue(past ? String(localized: "Passed") : milestone == next ? String(localized: "Next") : "")
                 }
                 if list.isEmpty { Text("No sunset, darkness or moonrise tonight.").font(.footnote) }
-                Rectangle().fill(palette.line).frame(height: 0.5).padding(.vertical, 2).accessibilityHidden(true)
+                Rectangle().fill(palette.line).frame(height: 0.5*palette.stroke).padding(.vertical, 2).accessibilityHidden(true)
                 Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.footnote)
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
@@ -494,7 +500,7 @@ struct MilestonesPage: View {
                 } else {
                     Text(SkyConditions.noDarknessMessage(tonight: true)).font(.footnote)
                 }
-                if night.park.timeZone.secondsFromGMT(for: now) != TimeZone.current.secondsFromGMT(for: now) {
+                if night.park.keepsOtherTime(at: now) {
                     Text("Times in \(night.park.timeZoneName)").font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
             }
@@ -534,9 +540,15 @@ struct WeekPage: View {
             VStack(alignment: .leading, spacing: 8) {
                 WatchEyebrow(text: "Next 7 nights")
                 if typeSize.isAccessibilitySize {
+                    // Rows of words, no dots: what a hollow dot would say ("Early look", "Usual clouds")
+                    // is written under the night it belongs to, so the legend below is not needed.
                     ForEach(nights) { night in
-                        HStack { Text(park.dayLabel(night.id)); Spacer(); Text(night.score.value, format: .number).foregroundStyle(palette.accent) }
-                            .font(.footnote).accessibilityElement(children: .ignore).accessibilityLabel(label(night))
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack { Text(park.dayLabel(night.id)); Spacer(); Text(night.score.value, format: .number).foregroundStyle(palette.accent) }
+                            if let basis = night.basisLabel { Text(basis).font(.caption2).foregroundStyle(palette.muted) }
+                        }
+                        .font(.footnote).fixedSize(horizontal: false, vertical: true)
+                        .accessibilityElement(children: .ignore).accessibilityLabel(label(night))
                     }
                 } else {
                     HStack(spacing: 0) { ForEach(nights) { night in column(night, best: tied.contains { $0.id == night.id }) } }
@@ -545,12 +557,12 @@ struct WeekPage: View {
                     VStack(alignment: .leading, spacing: 0) {
                         if tied.count > 1 { Text("Darkest: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
                         else { Text("Darkest: \(park.dayLabel(best.id))").font(.footnote) }
-                        Text("\(best.score.value) · \(best.score.band.label)").font(.system(.body, design: .serif)).foregroundStyle(palette.accent)
+                        Text(best.score.withBand).font(.system(.body, design: .serif)).foregroundStyle(palette.accent)
                     }
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
                 }
                 Group {
-                    if nights.contains(where: { !$0.score.hasForecast }) {
+                    if !typeSize.isAccessibilitySize, nights.contains(where: { !$0.score.hasForecast }) {
                         Text("Hollow nights have no full cloud forecast yet.")
                     }
                     if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
@@ -572,11 +584,11 @@ struct WeekPage: View {
         VStack(spacing: 3) {
             Text(park.weekdayInitial(night.id)).font(.caption2.weight(best ? .bold : .regular)).foregroundStyle(best ? palette.ink : palette.muted)
             ZStack {
-                if best { Circle().stroke(palette.accent.opacity(0.8), lineWidth: 1).frame(width: 20, height: 20) }
+                if best { Circle().stroke(palette.accent.opacity(0.8), lineWidth: palette.stroke).frame(width: 20, height: 20) }
                 let d = 4 + 11*Double(night.score.value)/100
                 // Wrist down the fills drop to one quiet level; only the sizes still rank the nights.
                 if night.score.hasForecast { Circle().fill(palette.accent.opacity(dimmed ? 0.5 : 0.5+Double(night.score.value)/200)).frame(width: d, height: d) }
-                else { Circle().stroke(palette.accent, lineWidth: 1).frame(width: d, height: d) }
+                else { Circle().stroke(palette.accent, lineWidth: palette.stroke).frame(width: d, height: d) }
             }.frame(height: 22)
             Text(night.score.value, format: .number).font(.caption2.monospacedDigit()).foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.7)
         }
@@ -682,7 +694,7 @@ struct ParkChooser: View {
 extension NyxPalette {
     /// Toolbar buttons fill with the tint on watchOS. A bright fill would be the brightest thing on
     /// the screen at night, so they sit dark: nebula violet, or near-black under red light.
-    var toolbarTint: Color { nightVision ? Color(white: 0.2) : Color(red: 0.165, green: 0.106, blue: 0.306) }
+    var toolbarTint: Color { nightVision ? Color(white: 0.2) : NyxPalette.nebula }
 }
 extension View {
     /// The system title is a dim grey that falls below 4.5:1 once turned red; draw it in ink instead.
@@ -763,6 +775,11 @@ private struct ModelsPreview<Content: View>: View {
 #Preview("Milestones • Always-On") {
     WatchPreviewHost(nightVision: false) { park, store in MilestonesPage(night: store.tonight(park, at: .now), now: .now, context: nil) }
         .environment(\.isLuminanceReduced, true)
+}
+#Preview("Week • AX5") {
+    // Rows of words: each night's basis written under it, and no legend for dots that are not drawn.
+    WatchPreviewHost(nightVision: false) { park, store in WeekPage(park: park, nights: store.week(park, at: .now), now: .now, isHome: true) }
+        .dynamicTypeSize(.accessibility5)
 }
 #Preview("Parks") {
     WatchPreviewHost(nightVision: false) { _, _ in NavigationStack { ParksList() } }

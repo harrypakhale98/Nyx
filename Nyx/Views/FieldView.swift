@@ -87,7 +87,8 @@ struct FieldView: View {
         .modifier(FieldJournalStore())
         .sensoryFeedback(.selection,trigger:focused)
         .sensoryFeedback(.impact(weight:.light),trigger:session.milestonesPassed)
-        .sensoryFeedback(.success,trigger:session.darknessBegan)
+        // True darkness is the night's milestone: the vocabulary's medium pulse (the success thump is the journal's).
+        .sensoryFeedback(.impact(weight:.medium),trigger:session.darknessBegan)
         .sheet(isPresented:alarms) {
             NavigationStack {
                 ScrollView { FieldAlarmRows(park:session.park,options:session.night.alarmOptions(at:session.now)).padding(24) }

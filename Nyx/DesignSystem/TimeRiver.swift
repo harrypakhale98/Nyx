@@ -68,7 +68,13 @@ struct TimeRiver: View {
     private let inset=14.0, moonSize=30.0, lensSize=30.0
     /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may
     /// rise above the river into the panel (over the eyebrow, never past the panel's padding).
-    private let loupeSize=56.0, loupeLift=34.0, loupeHeadroom=24.0
+    /// Its date and score follow Dynamic Type up to half again their size, and the loupe grows
+    /// with them, so neither is clipped at AX5 (`loupeScale`); the lift grows too, so it still clears the finger.
+    @ScaledMetric(relativeTo:.title2) private var loupeType=22.0
+    private var loupeScale:Double { min(1.5,max(1,loupeType/22)) }
+    private var loupeSize:Double { 56*loupeScale }
+    private var loupeLift:Double { 34*loupeScale }
+    private let loupeHeadroom=24.0
     /// The loupe is up: a horizontal scrub is under way (or a DEBUG capture holds it up).
     private var lifted:Bool { scrubbing==true || DebugScenario.isEnabled("loupe") }
     private let tip=RiverTip()
@@ -212,10 +218,10 @@ struct TimeRiver: View {
             if lifted {
                 VStack(spacing:1) {
                     // The finger covers the date row; the loupe carries the night's date above it.
-                    Text(Self.loupeDate(night.id,locale:locale,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit()
+                    Text(Self.loupeDate(night.id,locale:locale,timeZone:night.park.timeZone)).font(.system(size:10*loupeScale,weight:.semibold)).monospacedDigit()
                         .foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8)
                     // Light, or regular under Bold Text, as the strokes follow it.
-                    Text(night.score.value,format:.number).font(.system(size:22,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
+                    Text(night.score.value,format:.number).font(.system(size:22*loupeScale,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
                         .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
                 }.transition(.opacity)
             }
@@ -528,6 +534,7 @@ private struct RiverAccessibility: ViewModifier {
 #Preview("River • Steps") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyxAccess,NyxAccess(preferSteps:true)).background(.black) } }
 #Preview("River • Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();TimeRiver(nights:m.nights(p,from:.now,count:30),selected:.constant(m.tonight(p))).padding().environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black) } }
 #Preview("River • Loupe") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();VStack(spacing:24) { LoupePreview(night:m.night(p),solid:false);LoupePreview(night:m.night(p),solid:true) }.padding(40).background(Color(red:0.043,green:0.063,blue:0.149)) } }
+#Preview("River • Loupe • AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { let m=PlanModel();HStack(spacing:24) { LoupePreview(night:m.night(p),solid:false);LoupePreview(night:m.night(p),solid:true) }.dynamicTypeSize(.accessibility5).padding(40).background(.black) } }
 #Preview("Empty river") { TimeRiver(nights:[],selected:.constant(.now)).padding().background(.black) }
 #if DEBUG
 /// The river route's own selection, so a scrub, a step or an activation can move it (or not) as in a park page.
@@ -588,13 +595,16 @@ private struct LoupeSurface: ViewModifier {
 /// The loupe alone, glass and solid, for previews.
 private struct LoupePreview: View {
     @Environment(\.nyx) private var palette
+    /// The river's own scale (`TimeRiver.loupeScale`): up to half again at the largest sizes.
+    @ScaledMetric(relativeTo:.title2) private var loupeType=22.0
     let night:Night
     let solid:Bool
     var body: some View {
+        let scale=min(1.5,max(1,loupeType/22))
         VStack(spacing:1) {
-            Text(TimeRiver.loupeDate(night.id,locale:.current,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit().foregroundStyle(palette.muted)
-            Text(night.score.value,format:.number).font(.system(size:22,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
-        }.frame(width:56,height:56).modifier(LoupeSurface(solid:solid,lifted:true))
+            Text(TimeRiver.loupeDate(night.id,locale:.current,timeZone:night.park.timeZone)).font(.system(size:10*scale,weight:.semibold)).monospacedDigit().foregroundStyle(palette.muted)
+            Text(night.score.value,format:.number).font(.system(size:22*scale,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+        }.frame(width:56*scale,height:56*scale).modifier(LoupeSurface(solid:solid,lifted:true))
     }
 }
 /// The river explains itself once, then gets out of the way: it closes after the first scrub.

@@ -2,8 +2,9 @@ import SwiftUI
 
 /// The iPhone's celestial gauge, distilled for the wrist: an arc open at the bottom, ticks every
 /// ten points, a leading star where the score has reached, and the Moon resting in the opening.
-/// The arc sweeps in on the shared spring once, with one light tap as it lands; still under Reduce
-/// Motion and wrist-down. Turning the Crown through the week springs the arc to each night's score.
+/// The arc sweeps in on the shared spring once, with the iPhone's haptics: a medium pulse as it
+/// passes 70 and 90 (the score milestones) and a light tap as it lands; still and silent under
+/// Reduce Motion and wrist-down. Turning the Crown through the week springs the arc to each night's score.
 /// Where the iPhone shows the forecast models' range, a hairline along the rim marks it, as on the
 /// iPhone's dial, and settles in as the arc lands, so uncertainty comes last and costs no line of text.
 struct WatchGauge: View {
@@ -19,7 +20,9 @@ struct WatchGauge: View {
     /// drawn along the rim and spoken with the score; the words under the dial are hidden from VoiceOver.
     var models: ClosedRange<Int>? = nil
     @State private var shown = 0.0
-    @State private var revealed = false
+    /// The last milestone the sweeping arc passed (70, 90), and whether it has landed: the haptics' triggers.
+    @State private var milestone = 0
+    @State private var landed = false
     var body: some View {
         let score = night.score.value
         // Proportions follow the dial, not the text size: the numeral is the dial's face. At
@@ -55,10 +58,32 @@ struct WatchGauge: View {
             if reduceMotion || dimmed || shown > 0 { withAnimation(reduceMotion ? nil : NyxMotion.spring) { shown = Double(score) }; return }
             try? await Task.sleep(for: WatchDebug.revealDelay)
             withAnimation(NyxMotion.spring) { shown = Double(score) }
-            revealed = true
+            // The haptics follow the spring itself: each fires when the arc reaches its mark.
+            var elapsed = 0.0
+            for beat in Self.beats(score: score) {
+                try? await Task.sleep(for: .seconds(beat.at - elapsed))
+                guard !Task.isCancelled else { return }
+                elapsed = beat.at
+                if let mark = beat.milestone { milestone = mark } else { landed = true }
+            }
         }
-        .sensoryFeedback(.selection, trigger: revealed) { _, new in new }
+        // The iPhone gauge's vocabulary (`CelestialGauge`): medium at a milestone, light as it lands.
+        .sensoryFeedback(.impact(weight: .medium), trigger: milestone) { _, new in new > 0 }
+        .sensoryFeedback(.impact(weight: .light), trigger: landed) { _, new in new }
         .onChange(of: dimmed) { _, _ in shown = Double(score) }
+    }
+    /// When the shared spring, sweeping from 0 to `score`, first reaches 70 and 90 (where the score
+    /// does) and then the score itself, in seconds from the start of the sweep, in order.
+    nonisolated static func beats(score: Int) -> [(milestone: Int?, at: Double)] {
+        guard score > 0 else { return [] }
+        var beats: [(milestone: Int?, at: Double)] = [], marks = [70, 90].filter { score >= $0 }
+        for step in 1...240 {
+            let t = Double(step)/120, value = NyxMotion.model.value(target: Double(score), time: t)
+            while let mark = marks.first, value >= Double(mark) { beats.append((mark, t)); marks.removeFirst() }
+            if value >= Double(score) - 0.5 { beats.append((nil, t)); return beats }
+        }
+        beats.append((nil, 2))
+        return beats
     }
     /// The numeral's and band word's sizes for this dial. At accessibility sizes the word leaves
     /// the dial for the line below it.
@@ -75,7 +100,9 @@ struct WatchGauge: View {
         var clouds = night.basisCaption() ?? String(localized: "Includes cloud forecast.")
         if let models { clouds += " " + String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound).") }
         let day = nightLabel.map { $0 + ", " } ?? "", lit = Int((night.sky.moon.illumination*100).rounded())
-        return String(localized: "\(day)\(night.score.value) out of 100, \(night.score.band.label). \(clouds) \(night.sky.moon.name), \(lit) percent lit.")
+        let spoken = String(localized: "\(day)\(night.score.value) out of 100, \(night.score.band.label). \(clouds) \(night.sky.moon.name), \(lit) percent lit.")
+        // The words under the dial give park times; where the park's clock is not the watch's, say whose.
+        return night.park.spokenZone(at: night.sky.evening).map { spoken + " " + $0 } ?? spoken
     }
 }
 
@@ -94,14 +121,14 @@ private struct GaugeArc: View, Animatable {
             let start = 140.0, sweep = 260.0
             var track = Path()
             track.addArc(center: center, radius: radius, startAngle: .degrees(start), endAngle: .degrees(start+sweep), clockwise: false)
-            context.stroke(track, with: .color(palette.line), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            context.stroke(track, with: .color(palette.line), style: StrokeStyle(lineWidth: 2*palette.stroke, lineCap: .round))
             for tick in 0...10 {
                 let a = (start + Double(tick)*sweep/10) * .pi/180
                 let lit = Double(tick*10) <= value
                 var line = Path()
                 line.move(to: CGPoint(x: center.x+cos(a)*(radius-5), y: center.y+sin(a)*(radius-5)))
                 line.addLine(to: CGPoint(x: center.x+cos(a)*(radius-(tick%5==0 ? 10 : 8)), y: center.y+sin(a)*(radius-(tick%5==0 ? 10 : 8))))
-                context.stroke(line, with: .color(lit ? palette.accent.opacity(0.7) : palette.line), lineWidth: 1)
+                context.stroke(line, with: .color(lit ? palette.accent.opacity(0.7) : palette.line), lineWidth: palette.stroke)
             }
             if let models {
                 // The models' range just outside the track: a hairline with a tick at each end, so it
@@ -120,7 +147,7 @@ private struct GaugeArc: View, Animatable {
                     span.move(to: CGPoint(x: center.x+cos(a)*(r-3), y: center.y+sin(a)*(r-3)))
                     span.addLine(to: CGPoint(x: center.x+cos(a)*(r+3), y: center.y+sin(a)*(r+3)))
                 }
-                context.stroke(span, with: .color(palette.accent.opacity((dimmed ? 0.6 : 0.85)*settle)), style: StrokeStyle(lineWidth: 1.5, lineCap: .butt))
+                context.stroke(span, with: .color(palette.accent.opacity((dimmed ? 0.6 : 0.85)*settle)), style: StrokeStyle(lineWidth: 1.5*palette.stroke, lineCap: .butt))
             }
             guard value > 0.5 else { return }
             let tip = start + sweep*min(100, value)/100
@@ -161,6 +188,14 @@ private struct GaugeArc: View, Animatable {
     if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
         let night = WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now)
         WatchGauge(night: night, models: max(0, night.score.value-12)...min(100, night.score.value+6))
+    }
+}
+#Preview("Brighter red • Bold Text") {
+    // The iPhone's brighter red and Bold Text reach the wrist: a heavier track and ticks, the protan-safe red.
+    if let park = try? ParkData.load().first(where: { $0.id == "jotr" }) {
+        let palette = NyxPalette(nightVision: true, highContrast: false, brighterRed: true, boldText: true)
+        WatchGauge(night: WatchSky.night(park, evening: park.currentNight(at: .now), forecast: nil, detail: nil, now: .now))
+            .environment(\.nyx, palette).modifier(NightVisionFilter(enabled: true, red: palette.red)).environment(\.legibilityWeight, .bold)
     }
 }
 #Preview("Models' range • red") {

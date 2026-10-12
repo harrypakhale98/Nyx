@@ -14,7 +14,7 @@ struct WhereToStayPanel: View {
     @State private var showsAll=false
     @State private var loading=false
     var body: some View {
-        VStack(alignment:.leading,spacing:16) {
+        Panel { VStack(alignment:.leading,spacing:16) {
             Eyebrow(text:"Where to stay")
             // The honest limit comes first, before the list it qualifies.
             if !(model.campgrounds?.list(park).isEmpty ?? true) {
@@ -25,11 +25,7 @@ struct WhereToStayPanel: View {
             if let updated=model.campgrounds?.updated {
                 Text("From the National Park Service, \(park.timestamp(updated)).").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
-        }
-        .frame(maxWidth:.infinity,alignment:.leading)
-        .padding(20)
-        .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
+        } }
         .task {
             loading=model.campgrounds == nil
             await model.refreshCampgrounds()

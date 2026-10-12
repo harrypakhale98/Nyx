@@ -18,9 +18,13 @@ nonisolated enum WatchSky {
         return WatchContext(data: data)
     }
     static func save(_ context: WatchContext) {
+        // Kept beside the context, so the complications read the red without decoding it.
+        defaults.set(context.brighterRed, forKey: NightTint.key)
         guard let url = contextURL, let data = context.data else { return }
         try? data.write(to: url, options: .atomic)
     }
+    /// The iPhone's "Brighter red", from the last context it sent (`WatchContext.brighterRed`).
+    static var brighterRed: Bool { defaults.bool(forKey: NightTint.key) }
     static var palette: PaletteChoice {
         get { PaletteChoice(rawValue: defaults.string(forKey: paletteKey) ?? "") ?? .automatic }
         set { defaults.set(newValue.rawValue, forKey: paletteKey) }
@@ -151,6 +155,20 @@ nonisolated struct WatchLink: Hashable, Sendable {
 extension Park {
     /// The name as it fits a wrist: "American Samoa", not "National Park of American Samoa".
     nonisolated var wristName: String { shortName.replacingOccurrences(of: "National Park of ", with: "") }
+    /// Whether the park's clock reads differently from this watch's at `date`: its times are park-local.
+    nonisolated func keepsOtherTime(at date: Date) -> Bool { timeZone.secondsFromGMT(for: date) != TimeZone.current.secondsFromGMT(for: date) }
+    /// A park-local time, carrying the park's short zone ("4:52 AM MST") where its clock is not
+    /// this watch's: one glance cannot hold "Times in Mountain Standard Time" without costing the dial.
+    nonisolated func wristTime(_ date: Date) -> String {
+        guard keepsOtherTime(at: date) else { return time(date) }
+        var format = Date.FormatStyle.dateTime.hour().minute().timeZone(.specificName(.short))
+        format.timeZone = timeZone
+        return date.formatted(format)
+    }
+    /// "Times in Mountain Time." where the park's clock is not this watch's, for what VoiceOver hears.
+    nonisolated func spokenZone(at date: Date) -> String? {
+        keepsOtherTime(at: date) ? String(localized: "\(String(localized: "Times in \(timeZoneName)")).") : nil
+    }
 }
 
 extension NyxPalette {

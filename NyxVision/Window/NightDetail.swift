@@ -30,7 +30,7 @@ struct NightDetail: View {
             .background {
                 // Nyx's night over the glass: deep indigo fading to void black, calm in a bright room.
                 // Under Reduce Transparency it is nearly opaque, so nothing in the room shows through.
-                LinearGradient(colors: [Color(red: 0.043, green: 0.063, blue: 0.149).opacity(palette.solid ? 0.96 : 0.55), Color.black.opacity(palette.solid ? 0.96 : 0.45)], startPoint: .top, endPoint: .bottom)
+                LinearGradient(colors: [NyxPalette.indigo.opacity(palette.solid ? 0.96 : 0.55), Color.black.opacity(palette.solid ? 0.96 : 0.45)], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea().accessibilityHidden(true)
             }
         } else if model.parks.isEmpty {
@@ -85,7 +85,7 @@ struct NightDetail: View {
                 .frame(width: moonSide, height: moonSide)
                 .background {
                     // A piece of night behind the Moon, so even a new moon reads as a disc against the sky.
-                    Circle().fill(RadialGradient(colors: [Color(red: 0.16, green: 0.12, blue: 0.32).opacity(palette.nightVision ? 0.3 : 0.75), Color(red: 0.043, green: 0.063, blue: 0.149).opacity(0.5), .clear],
+                    Circle().fill(RadialGradient(colors: [NyxPalette.nebula.opacity(palette.nightVision ? 0.3 : 0.75), NyxPalette.indigo.opacity(0.5), .clear],
                                                  center: .center, startRadius: moonSide*0.3, endRadius: moonSide*0.85))
                         .frame(width: moonSide*1.7, height: moonSide*1.7)
                         .accessibilityHidden(true)
@@ -101,7 +101,8 @@ struct NightDetail: View {
         let darkness: String = if let start = sky.darkStart, let end = sky.darkEnd, end > start {
             String(localized: "\(park.time(start)) – \(park.time(end))")
         } else { SkyConditions.noDarknessMessage(tonight: model.nightOffset == 0) }
-        let hours = sky.darkHours > 0 ? String(localized: "\(Int(sky.darkHours)) h \(Int((sky.darkHours*60).truncatingRemainder(dividingBy: 60))) min") : nil
+        // The reader's own units ("6 hr, 40 min", "6 Std., 40 Min."), as the iPhone writes a span.
+        let hours = sky.darkHours > 0 ? Duration.seconds(sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)) : nil
         let moonLine: String = switch (sky.moonrise, sky.moonset) {
         case let (rise?, set?): rise < set ? String(localized: "Rises \(park.time(rise)), sets \(park.time(set))") : String(localized: "Sets \(park.time(set)), rises \(park.time(rise))")
         case let (rise?, nil): String(localized: "Rises \(park.time(rise))")
@@ -120,7 +121,10 @@ struct NightDetail: View {
     @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park) -> some View {
         Fact(title: "True darkness", value: darkness, note: hours.map { "\($0) · \(park.timeZoneName)" } ?? park.timeZoneName)
         Fact(title: "Moon", value: moonLine, note: moonNote)
-        Fact(title: "Sky glow", value: String(localized: "Bortle \(park.bortleEstimate)"), note: park.darkSkyDesignated ? String(localized: "Estimate · International Dark Sky Park") : String(localized: "Estimate"))
+        // The iPhone's words (`ScoreBreakdownView`): the class on its scale, called an estimate, and what it means.
+        let glow = String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement.")
+        Fact(title: "Sky glow", value: String(localized: "Bortle class \(park.bortleEstimate) of 9, estimated."),
+             note: park.darkSkyDesignated ? glow+" "+String(localized: "An International Dark Sky Park.") : glow)
     }
 
     private func whatsUp(_ plan: NightPlan) -> some View {
@@ -172,7 +176,7 @@ struct NightDetail: View {
             plan.night.basis.isEarlyLook ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look eased toward usual clouds")
                 : String(localized: "About \(Int((cloud*100).rounded()))% of the sky this hour")
         } else if plan.night.basis == .usual {
-            String(localized: "None drawn: no cloud forecast reaches this night")
+            plan.beyondForecast ? String(localized: "None drawn: no cloud forecast reaches this night") : String(localized: "None drawn: cloud forecast unavailable")
         } else {
             String(localized: "None drawn: the forecast has no value for this hour")
         }
@@ -214,7 +218,7 @@ private struct Fact: View {
     /// Reduce Transparency, and nothing in night vision, where the window's dark panel shows.
     private var background: AnyShapeStyle {
         if palette.nightVision { return AnyShapeStyle(Color.clear) }
-        return palette.solid ? AnyShapeStyle(Color(red: 0.07, green: 0.08, blue: 0.14)) : AnyShapeStyle(.regularMaterial)
+        return palette.solid ? AnyShapeStyle(palette.solidPanel) : AnyShapeStyle(.regularMaterial)
     }
 }
 

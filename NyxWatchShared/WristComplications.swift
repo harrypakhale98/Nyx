@@ -65,9 +65,7 @@ nonisolated enum WristTimeline {
 struct MoonPhaseGlyph: View {
     let phase: MoonPhase
     let southern: Bool
-    var body: some View {
-        Image(systemName: phase.symbolName).scaleEffect(x: southern ? -1 : 1, y: southern ? -1 : 1)
-    }
+    var body: some View { Image(systemName: phase.symbolName(southern: southern)) }
 }
 
 struct MoonComplicationView: View {
@@ -94,7 +92,7 @@ struct MoonComplicationView: View {
                 glyph.font(.title2).foregroundStyle(colors.accent).widgetAccentable()
                     .widgetLabel { Text(cornerLine) }
             case .accessoryInline:
-                Text("\(Image(systemName: entry.moon.phase.symbolName)) \(cornerLine)")
+                Text("\(Image(systemName: entry.moon.phase.symbolName(southern: (entry.park?.latitude ?? 0) < 0))) \(cornerLine)")
             default:
                 HStack(spacing: 8) {
                     glyph.font(.title).foregroundStyle(colors.accent).widgetAccentable()
@@ -204,7 +202,9 @@ struct NextDarkComplicationView: View {
         return date.formatted(format)
     }
     private var symbol: String {
-        switch entry.moment {
+        // No park yet: the empty Tonight complication's mark, never a claim about a sky nobody chose.
+        guard entry.park != nil else { return "moon.stars" }
+        return switch entry.moment {
         case .darkNow: "moon.stars.fill"
         case .begins(_, true): "moonset.fill"
         case .begins: "moon.stars"
@@ -217,13 +217,17 @@ struct NextDarkComplicationView: View {
         now.map { Text(verbatim: inDuration(until: date, from: $0)) } ?? Text(.currentDate, format: .reference(to: date, allowedFields: [.hour, .minute]))
     }
     @ViewBuilder private var headline: some View {
-        switch entry.moment {
-        case .darkNow: Text("Truly dark now")
-        case .begins(let date, true): Text("Moon down \(reference(date))")
-        case .begins(let date, false): Text("True darkness \(reference(date))")
-        case .moonlit(let from, _) where from > entry.date: Text("True darkness \(reference(from))")
-        case .moonlit: Text("Moonlit darkness now")
-        case .none: Text("No true darkness")
+        if entry.park == nil {
+            Text("Choose a park")
+        } else {
+            switch entry.moment {
+            case .darkNow: Text("Truly dark now")
+            case .begins(let date, true): Text("Moon down \(reference(date))")
+            case .begins(let date, false): Text("True darkness \(reference(date))")
+            case .moonlit(let from, _) where from > entry.date: Text("True darkness \(reference(from))")
+            case .moonlit: Text("Moonlit darkness now")
+            case .none: Text("No true darkness")
+            }
         }
     }
     private var detail: String {

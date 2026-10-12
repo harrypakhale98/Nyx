@@ -4,8 +4,10 @@ import SwiftUI
 extension VisionModel {
     /// Opens a park and night handed off from park detail on iPhone or iPad. A night that has
     /// already passed opens tonight; one further ahead than the window steps opens as far as it can.
+    /// Vision Pro carries the US national parks only: a saved spot or a place abroad is answered
+    /// with a calm alert (`handoffElsewhere`), never silence.
     func open(_ handoff: ParkHandoff) {
-        guard let park = parks.first(where: { $0.id == handoff.parkID }) else { return }
+        guard let park = parks.first(where: { $0.id == handoff.parkID }) else { handoffElsewhere = true; return }
         selectedID = park.id
         nightOffset = Self.offset(for: handoff, park: park, now: now)
     }

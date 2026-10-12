@@ -104,7 +104,44 @@ struct TonightControlValue:Sendable {
         guard let night=NightPlanner.best(parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }) else {
             self.init(parkID:nil,name:nil,score:nil,symbol:"moon.stars"); return
         }
-        self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,symbol:night.sky.moon.symbolName)
+        self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,symbol:night.sky.moon.symbolName(southern:night.park.latitude<0))
+    }
+}
+/// A widget set to a place no longer saved (a spot deleted, a place abroad unsaved): it names the
+/// place and says what to do, in every family, rather than quietly showing another place. Shared
+/// by the Tonight and Moon widgets, so both say it in the same words.
+struct UnsavedPlaceFace:View {
+    let name:String
+    let family:WidgetFamily
+    let muted:Color
+    var body:some View {
+        let spoken=Self.summary(name)
+        if family == .accessoryInline {
+            Label("No longer saved",systemImage:"mappin.slash").summarized(spoken)
+        } else if family == .accessoryCircular {
+            ZStack { AccessoryWidgetBackground(); Image(systemName:"mappin.slash").font(.title3) }.summarized(spoken)
+        } else if family == .accessoryRectangular {
+            VStack(alignment:.leading,spacing:2) {
+                Label("No longer saved",systemImage:"mappin.slash").font(.headline).lineLimit(1).minimumScaleFactor(0.8)
+                if !name.isEmpty { Text(verbatim:name).font(.caption).lineLimit(1) }
+            }.frame(maxWidth:.infinity,alignment:.leading).dynamicTypeSize(.small ... .xxxLarge).summarized(spoken)
+        } else {
+            ViewThatFits(in:.vertical) {
+                VStack(alignment:.leading,spacing:8) {
+                    Image(systemName:"mappin.slash").foregroundStyle(muted)
+                    Text(Self.title(name)).font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                    Text("Save it again in Nyx, or edit the widget to choose another place.").font(.caption).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
+                }
+                Text(Self.title(name)).font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
+            }.frame(maxWidth:.infinity,alignment:.leading).summarized(spoken)
+        }
+    }
+    /// "Eifel is no longer saved in Nyx.", or without a name when the setting kept none.
+    static func title(_ name:String)->String {
+        name.isEmpty ? String(localized:"This place is no longer saved in Nyx.") : String(localized:"\(name) is no longer saved in Nyx.")
+    }
+    static func summary(_ name:String)->String {
+        title(name)+" "+String(localized:"Save it again in Nyx, or edit the widget to choose another place.")
     }
 }
 struct TonightWidgetView:View {
@@ -144,7 +181,7 @@ struct TonightWidgetView:View {
             if family == .accessoryInline {
                 // Above the clock: "☾ 94 Joshua Tree", tonight's phase as the symbol; a closure takes
                 // the symbol's place ("⚠ 94 Joshua Tree"), and the spoken summary names it.
-                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{ Image(systemName:entry.closure == nil ? night.sky.moon.symbolName : "exclamationmark.triangle.fill") }
+                Label { Text(verbatim:"\(night.score.value) \(night.park.shortName)") } icon:{ Image(systemName:entry.closure == nil ? night.sky.moon.symbolName(southern:night.park.latitude<0) : "exclamationmark.triangle.fill") }
                     .summarized(summary(night))
             } else if family == .accessoryCircular {
                 // The Lock Screen ring echoes the app's celestial gauge.
@@ -191,7 +228,7 @@ struct TonightWidgetView:View {
                 }.summarized(summary(night))
             }
         } else if let name=entry.unsaved {
-            unsavedContent(name)
+            UnsavedPlaceFace(name:name,family:family,muted:muted)
         } else if family == .accessoryInline {
             Label("Save a park in Nyx",systemImage:"moon.stars")
                 .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
@@ -215,37 +252,9 @@ struct TonightWidgetView:View {
             }.summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
         }
     }
-    /// Set to a place no longer saved (a spot deleted, a place abroad unsaved): the widget names it
-    /// and says what to do, in every family, rather than quietly showing another place.
-    @ViewBuilder private func unsavedContent(_ name:String)->some View {
-        let spoken=Self.unsavedSummary(name)
-        if family == .accessoryInline {
-            Label("No longer saved",systemImage:"mappin.slash").summarized(spoken)
-        } else if family == .accessoryCircular {
-            ZStack { AccessoryWidgetBackground(); Image(systemName:"mappin.slash").font(.title3) }.summarized(spoken)
-        } else if family == .accessoryRectangular {
-            VStack(alignment:.leading,spacing:2) {
-                Label("No longer saved",systemImage:"mappin.slash").font(.headline).lineLimit(1).minimumScaleFactor(0.8)
-                if !name.isEmpty { Text(verbatim:name).font(.caption).lineLimit(1) }
-            }.frame(maxWidth:.infinity,alignment:.leading).dynamicTypeSize(.small ... .xxxLarge).summarized(spoken)
-        } else {
-            ViewThatFits(in:.vertical) {
-                VStack(alignment:.leading,spacing:8) {
-                    Image(systemName:"mappin.slash").foregroundStyle(muted)
-                    Text(Self.unsavedTitle(name)).font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                    Text("Save it again in Nyx, or edit the widget to choose another place.").font(.caption).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
-                }
-                Text(Self.unsavedTitle(name)).font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
-            }.frame(maxWidth:.infinity,alignment:.leading).summarized(spoken)
-        }
-    }
     /// "Eifel is no longer saved in Nyx.", or without a name when the setting kept none.
-    static func unsavedTitle(_ name:String)->String {
-        name.isEmpty ? String(localized:"This place is no longer saved in Nyx.") : String(localized:"\(name) is no longer saved in Nyx.")
-    }
-    static func unsavedSummary(_ name:String)->String {
-        unsavedTitle(name)+" "+String(localized:"Save it again in Nyx, or edit the widget to choose another place.")
-    }
+    static func unsavedTitle(_ name:String)->String { UnsavedPlaceFace.title(name) }
+    static func unsavedSummary(_ name:String)->String { UnsavedPlaceFace.summary(name) }
     /// "2 of 3 ›": moves the widget to the next saved park. Only with two or more saved parks, and
     /// only where it fits (medium and large, outside accessibility sizes); a tap anywhere else opens the park.
     @ViewBuilder private func cycleButton(_ night:Night)->some View {
@@ -380,7 +389,8 @@ struct TonightWidgetView:View {
     private func compactContent(_ night:Night)->some View {
         VStack(alignment:.leading,spacing:4) {
             closureMark(.caption2)
-            Text("\(night.score.value)").font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(accent)
+            // In the accent group as on every other face, so a tinted Home Screen keeps the score its hero.
+            Text("\(night.score.value)").font(.system(size:40,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
             Text(night.park.shortName).font(.system(.caption2,design:.serif)).fixedSize(horizontal:false,vertical:true)
             Text(forecastLabel(night)).font(.caption2).fixedSize(horizontal:false,vertical:true)
         }.frame(maxWidth:.infinity,alignment:.leading)

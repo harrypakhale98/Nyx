@@ -8,11 +8,14 @@ struct DarkAdaptationView: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.legibilityWeight) private var legibility
     let park: Park
     @State private var showsInfo = WatchDebug.showsInfo
     @State private var permission: UNAuthorizationStatus?
-    /// Always red; under Increase Contrast the brighter red, as everywhere in Nyx (`NyxPalette.red`).
-    private var palette: NyxPalette { NyxPalette(nightVision: true, highContrast: contrast == .increased) }
+    /// Always red; under Increase Contrast or by the iPhone's choice the brighter red, as everywhere in Nyx (`NyxPalette.red`).
+    private var palette: NyxPalette {
+        NyxPalette(nightVision: true, highContrast: contrast == .increased, brighterRed: store.context?.brighterRed ?? false, boldText: legibility == .bold)
+    }
     var body: some View {
         // Its own stack, filtered as a whole: the system's close button would otherwise be the one
         // white thing on the screen. A dark, red-glyphed Done replaces it.
@@ -107,7 +110,7 @@ private struct NextInDark: View {
         VStack(spacing: 0) {
             countdownText(next, now: now).font(.system(.subheadline, design: .serif))
                 .lineLimit(typeSize.isAccessibilitySize ? nil : 1).minimumScaleFactor(0.7)
-            Text("at \(night.park.time(next.date))").font(.caption2).foregroundStyle(palette.muted).nonEssential()
+            Text("at \(night.park.wristTime(next.date))").font(.caption2).foregroundStyle(palette.muted).nonEssential()
         }
         .fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .combine)
@@ -165,13 +168,13 @@ private struct RingArc: View, Animatable {
             let start = 140.0, sweep = 260.0
             var track = Path()
             track.addArc(center: center, radius: radius, startAngle: .degrees(start), endAngle: .degrees(start+sweep), clockwise: false)
-            context.stroke(track, with: .color(palette.line), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            context.stroke(track, with: .color(palette.line), style: StrokeStyle(lineWidth: 2*palette.stroke, lineCap: .round))
             for tick in 0...6 {
                 let a = (start + Double(tick)*sweep/6) * .pi/180
                 var line = Path()
                 line.move(to: CGPoint(x: center.x+cos(a)*(radius-5), y: center.y+sin(a)*(radius-5)))
                 line.addLine(to: CGPoint(x: center.x+cos(a)*(radius-10), y: center.y+sin(a)*(radius-10)))
-                context.stroke(line, with: .color(Double(tick)/6 <= value ? palette.accent.opacity(0.7) : palette.line), lineWidth: 1)
+                context.stroke(line, with: .color(Double(tick)/6 <= value ? palette.accent.opacity(0.7) : palette.line), lineWidth: palette.stroke)
             }
             guard value > 0.002 else { return }
             let tip = start + sweep*min(1, value)

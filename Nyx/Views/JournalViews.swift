@@ -56,7 +56,7 @@ struct JournalView: View {
                     if !season && !nights.isEmpty { recapCard }
                     entryList
                 }
-            }.padding(24).readableColumn(wide ? .infinity : WideLayout.readableWidth)
+            }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
         }.measuringWidth($width).background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
@@ -326,8 +326,19 @@ struct JournalThumbnail:View {
     var saving=false
     var error:String?
     var saved=false
+    /// What the editor holds, to tell an untouched form from one with words or photos in it.
+    private struct Draft:Equatable {
+        let date:Date, parkID:String, observedBortle:Int, notes:String, photos:[Data], descriptions:[String]
+    }
+    private var draft:Draft { Draft(date:date,parkID:parkID,observedBortle:observedBortle,notes:notes,photos:photos,descriptions:descriptions) }
+    @ObservationIgnored private var clean:Draft?
+    /// Something was written, chosen or added since the editor opened (or was prefilled): closing
+    /// it asks first, and a swipe down cannot throw it away.
+    var hasChanges:Bool { !saved && clean.map { $0 != draft } ?? false }
+    /// The form as it stands is the starting point: after opening, prefilling, or the date moving to the night just seen.
+    func markClean() { clean=draft }
     init(entry:JournalEntry?=nil) {
-        defer { settled=true }
+        defer { settled=true; clean=draft }
         if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos;descriptions=entry.orderedPhotos.map { $0.altText ?? "" } }
         else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
         #if DEBUG
@@ -402,6 +413,8 @@ struct JournalEditorView:View {
     @Environment(\.dismiss) private var dismiss
     @State private var editor:JournalEditorModel
     @State private var picker:[PhotosPickerItem]=[]
+    /// Cancel with words or photos in the form: "Discard this night?" first.
+    @State private var confirmDiscard=false
     var existing:JournalEntry?
     /// Called once the entry is saved (a kept night tells the rating request).
     var saved:(()->Void)?=nil
@@ -412,6 +425,7 @@ struct JournalEditorView:View {
         existing=nil; self.saved=saved
         let editor=JournalEditorModel(entry:nil)
         editor.parkID=prefill.parkID; editor.date=prefill.date; editor.observedBortle=prefill.observedBortle; editor.notes=prefill.notes
+        editor.markClean()
         _editor=State(initialValue:editor)
     }
     var body:some View {
@@ -437,9 +451,15 @@ struct JournalEditorView:View {
         }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
         .onAppear {
             // A new entry starts on the night just seen, not the calendar day it is written on.
-            if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)) }
+            if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }
         }
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.disabled(editor.loadingPhotos || editor.saving) } }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button("Save") { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.disabled(editor.loadingPhotos || editor.saving) } }
+            // A swipe down never throws away what was written; Cancel asks first.
+            .interactiveDismissDisabled(editor.hasChanges)
+            .confirmationDialog(existing==nil ? "Discard this night?" : "Discard your changes?",isPresented:$confirmDiscard,titleVisibility:.visible) {
+                Button("Discard",role:.destructive) { dismiss() }
+                Button("Keep editing",role:.cancel) {}
+            }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
     }

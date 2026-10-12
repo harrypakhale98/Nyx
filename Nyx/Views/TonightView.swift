@@ -21,6 +21,8 @@ struct TonightView: View {
     private var location:LocationService { model.location }
     @State private var explainLocation=false
     @State private var chooseHome=false
+    /// A save from a park row's menu could not be stored.
+    @State private var saveFailed=false
     /// "Near me" chosen in the starting-point sheet: the location explainer follows once it closes.
     @State private var nearMeAfterPicker=false
     @Namespace private var zoom
@@ -84,7 +86,7 @@ struct TonightView: View {
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
                     weekAcross
-                }.padding(24)
+                }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
             } else {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
@@ -118,6 +120,7 @@ struct TonightView: View {
                 } }.nyxPresentation().presentationDetents([.large])
             }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
+            .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             // Keyed on the places in reach, not the raw fix: a location that moves a few metres, or a
             // catalogue that arrives with nothing new in range, never cancels and re-sends the request.
             // The places a wider radius would add: their nights worked out off the main thread before they are ranked.
@@ -222,9 +225,7 @@ struct TonightView: View {
                         Text("Darker within \(SearchRadius.label(wider)): \(far.shortName), \(model.night(far).score.value) tonight").multilineTextAlignment(.leading)
                         Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
                     }
-                    .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-                    .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
-                }.buttonStyle(.plain).frame(maxWidth:.infinity)
+                }.buttonStyle(.capsuleAction).frame(maxWidth:.infinity)
                 .accessibilityHint("Widens the radius to \(SearchRadius.label(wider)).")
             }
         }
@@ -341,7 +342,7 @@ struct TonightView: View {
     @ViewBuilder private func more(_ best:[Park])->some View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
-            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).hoverEffect(.highlight).draggable(park);Divider().overlay(palette.line) }
+            ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line) }
             // Only worth saying when a row actually reads "Estimate", as on Parks.
             if best.dropFirst().contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
@@ -393,9 +394,7 @@ struct TonightView: View {
                 Text(text).multilineTextAlignment(.leading)
                 Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
-        }.buttonStyle(.plain).padding(.top,4)
+        }.buttonStyle(.capsuleAction).padding(.top,4)
         .accessibilityHint("Opens field mode: a dark red screen with tonight's milestones and where to look.")
     }
     private func upcomingEvent(_ park:Park)->(night:Night,glyph:WhatsUp.Events.Glyph,text:String)? {
@@ -434,9 +433,7 @@ struct TonightView: View {
                 Text(text).multilineTextAlignment(.leading)
                 Image(systemName:"chevron.forward").imageScale(.small).font(.caption.weight(.semibold)).accessibilityHidden(true)
             }
-            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
-        }.buttonStyle(.plain).padding(.top,4)
+        }.buttonStyle(.capsuleAction).padding(.top,4)
         .accessibilityHint(hint)
     }
     /// The starting point is a chosen park, a city or town, or the device location: one at a time.
@@ -554,6 +551,8 @@ struct PermissionExplainer: View {
     let proceed:()->Void
     var body: some View {
         NavigationStack { ScrollView { VStack(spacing:24) { CalmState(symbol:symbol,title:title,message:message);Button(action,action:proceed).buttonStyle(.borderedProminent).foregroundStyle(Color.black);Button("Continue without it") { dismiss() } }.padding(24) }.background(Color.black).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Close") { dismiss() } } } }.presentationDetents([.medium,.large])
+            // A form-sized card on iPad, never a page stretched across the window.
+            .presentationSizing(.form)
     }
 }
 #Preview("Tonight") { NavigationStack { TonightView() }.environment(PlanModel()).preferredColorScheme(.dark) }

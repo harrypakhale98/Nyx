@@ -75,7 +75,7 @@ struct DarkestAhead: View {
     /// Transparency, and nothing in night vision, where the window's dark panel shows.
     private var background: AnyShapeStyle {
         if palette.nightVision { return AnyShapeStyle(Color.clear) }
-        return palette.solid ? AnyShapeStyle(Color(red: 0.07, green: 0.08, blue: 0.14)) : AnyShapeStyle(.regularMaterial)
+        return palette.solid ? AnyShapeStyle(palette.solidPanel) : AnyShapeStyle(.regularMaterial)
     }
 }
 

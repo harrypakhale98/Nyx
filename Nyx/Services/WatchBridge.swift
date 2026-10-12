@@ -39,8 +39,8 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
               closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
               complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
-        let nightVision = SharedSettings.defaults.bool(forKey: "nightVision")
-        let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts,
+        let nightVision = SharedSettings.defaults.bool(forKey: "nightVision"), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
+        let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
                                         details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places)
         let session = WCSession.default
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }

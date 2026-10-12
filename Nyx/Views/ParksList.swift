@@ -112,7 +112,7 @@ struct ParksView: View {
                 if DebugScenario.state=="loading" || waiting { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else { sections(shown:shown,spots:spots,found:found,savedWorld:savedWorld,savedListed:savedListed,groups:groups,own:own,others:others,abroad:abroad) }
-            }.padding(24)
+            }.padding(NyxMetrics.pagePadding).readableColumn()
             .background { SearchEnder(request:commands?.sheetRequest?.id) }
             // VoiceOver rotors: jump straight to the parks with a closure alert, or a Pristine sky tonight.
             // The rows already on screen only: a rotor never scores the whole world.
@@ -130,7 +130,7 @@ struct ParksView: View {
                 Button("Delete spot",role:.destructive) { deleteSpot(spot) }
                 Button("Cancel",role:.cancel) {}
             } message:{ _ in Text("It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos.") }
-            .alert("Unable to save",isPresented:$saveFailed) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
+            .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             // ⌘F from anywhere in the window.
             .onChange(of:commands?.searchRequest) { _,_ in focusSearchIfAsked() }
             .onAppear { focusSearchIfAsked() }
@@ -363,22 +363,10 @@ struct ParksView: View {
                 .draggable(park)
         }
     }
-    /// Long press, or a secondary click with a pointer.
-    @ViewBuilder private func rowMenu(_ park:Park)->some View {
-        let isSaved=saved.contains { $0.parkID==park.id }
-        Button(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.slash" : "bookmark") {
-            // Saved parks share the journal's store; a save into its stand-in would not last.
-            guard !model.journalUnavailable else { saveFailed=true; return }
-            if let item=saved.first(where:{ $0.parkID==park.id }) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }
-            do {
-                try context.save()
-                // A followed place abroad joins Spotlight (`SpotlightIndexer.remember`).
-                if !isSaved, park.isCatalogPlace { let followed=Set(saved.map(\.parkID)).union([park.id]); Task { await SpotlightIndexer.remember(park,followed:followed) } }
-            } catch { context.rollback();saveFailed=true }
-        }
-        Button("Show in Plan",systemImage:"calendar") { commands?.calendarRequest=CalendarRequest(parkID:park.id,year:nil,month:nil); commands?.tab=2 }
-        OpenParkWindowButton(park:park)
-        if park.isSavedSpot { Button("Delete spot",systemImage:"trash",role:.destructive) { deletingSpot=park } }
+    /// Long press, or a secondary click with a pointer: the menu every park row shares (`ParkRowMenu`),
+    /// with deleting a spot, which this list confirms.
+    private func rowMenu(_ park:Park)->some View {
+        ParkRowMenu(park:park,failed:{ saveFailed=true },deleteSpot:{ deletingSpot=$0 })
     }
     private func focusSearchIfAsked() {
         guard commands?.takeSearch() == true else { return }

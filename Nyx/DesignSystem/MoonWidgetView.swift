@@ -12,8 +12,11 @@ struct MoonEntry: TimelineEntry {
     /// The park's night at `date`, for the app's picture of that night's Moon.
     let night: Date?
     let nightVision: Bool
-    init(date: Date, park: Park?, nightVision: Bool) {
-        self.date=date; self.park=park; self.nightVision=nightVision
+    /// Set to a place no longer saved (`TonightProvider.unsaved`): its name, or "" when the setting
+    /// kept none. The widget says so rather than showing the Moon from nowhere in particular.
+    let unsaved: String?
+    init(date: Date, park: Park?, nightVision: Bool, unsaved: String?=nil) {
+        self.date=date; self.park=park; self.nightVision=nightVision; self.unsaved=unsaved
         moon=MoonNow(at: date, park: park)
         night=park.map { $0.currentNight(at: date) }
     }
@@ -57,10 +60,13 @@ struct MoonWidgetView: View {
     private var percent: String { (Double(entry.moon.percent)/100).formatted(.percent.precision(.fractionLength(0))) }
     private var southern: Bool { (entry.park?.latitude ?? 1)<0 }
     var body: some View {
-        content.foregroundStyle(ink)
-            .accessibilityElement(children: .ignore).accessibilityLabel(summary)
-            .containerBackground(for: .widget) { WidgetSky(seed: "moon", ink: ink) }
-            .widgetURL(URL(string: entry.park.map { "nyx://park/\($0.id)" } ?? "nyx://tonight"))
+        Group {
+            if let name=entry.unsaved { UnsavedPlaceFace(name: name, family: family, muted: muted) }
+            else { content.accessibilityElement(children: .ignore).accessibilityLabel(summary) }
+        }
+        .foregroundStyle(ink)
+        .containerBackground(for: .widget) { WidgetSky(seed: "moon", ink: ink) }
+        .widgetURL(URL(string: entry.park.map { "nyx://park/\($0.id)" } ?? "nyx://tonight"))
     }
     @ViewBuilder private var content: some View {
         switch family {
@@ -108,7 +114,7 @@ struct MoonWidgetView: View {
     }
     /// The phase as a symbol, turned for the southern sky.
     private var symbol: some View {
-        Image(systemName: entry.moon.phase.symbolName).scaleEffect(x: southern ? -1 : 1, y: southern ? -1 : 1)
+        Image(systemName: entry.moon.phase.symbolName(southern: southern))
     }
     /// The app's picture of that night's Moon (or the nearest night it drew), else the vector Moon.
     @ViewBuilder private var disc: some View {
@@ -154,5 +160,11 @@ struct MoonWidgetView: View {
             MoonWidgetView(previewFamily: .accessoryRectangular, entry: MoonEntry(date: .now, park: library.first { $0.id == id }, nightVision: false)).frame(width: 160, height: 72)
         }
         MoonWidgetView(previewFamily: .accessoryRectangular, entry: MoonEntry(date: .now, park: nil, nightVision: false)).frame(width: 160, height: 72)
+    }.foregroundStyle(.white).padding().background(Color(white: 0.2))
+}
+#Preview("Moon widget, place no longer saved") {
+    HStack(spacing: 20) {
+        MoonWidgetView(previewFamily: .systemSmall, entry: MoonEntry(date: .now, park: nil, nightVision: false, unsaved: "Eifel")).frame(width: 158, height: 158).background(.black)
+        MoonWidgetView(previewFamily: .accessoryRectangular, entry: MoonEntry(date: .now, park: nil, nightVision: false, unsaved: "Eifel")).frame(width: 160, height: 72)
     }.foregroundStyle(.white).padding().background(Color(white: 0.2))
 }

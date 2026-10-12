@@ -214,7 +214,8 @@ struct CalendarView: View {
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
-            .safeAreaBar(edge:.top,spacing:0) { if let bar { bar } }
+            // The bar (Plan's picker) as wide as the month under it, so their edges line up.
+            .safeAreaBar(edge:.top,spacing:0) { if let bar { bar.readableColumn(wide ? 760 : WideLayout.readableWidth) } }
             .measuringWidth($width)
             .inspector(isPresented:Binding(get:{ inspector },set:{ open in inspector=open; if !open { inspectorWanted=false } })) {
                 // The page in view, so a keyboard step across a month's edge shows its night while the page

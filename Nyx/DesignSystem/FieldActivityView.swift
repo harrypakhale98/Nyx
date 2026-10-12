@@ -38,7 +38,8 @@ struct FieldActivityLockView: View {
                 Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
                 Spacer(minLength:8)
                 // The night's latest score; its day when it is old, so the face is never surer than Nyx.
-                Text(attributes.scoreLine(state)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+                // Two lines where the band carries its basis ("Excellent, usual clouds"): wrapped, never cut.
+                Text(attributes.scoreLine(state)).monospacedDigit().lineLimit(2).minimumScaleFactor(0.8).multilineTextAlignment(.trailing)
                     .accessibilityLabel(attributes.spokenScore(state))
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {

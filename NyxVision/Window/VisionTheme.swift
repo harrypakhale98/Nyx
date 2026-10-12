@@ -2,23 +2,26 @@ import SwiftUI
 
 /// Nyx's palette on Vision Pro: starlight text, moon-amber for the score, void black behind the
 /// sky. Night vision turns everything a dim signal red, in the window and in the immersive sky.
+/// Derived from the iPhone's `NyxPalette` and `NightTint` (one copy of every colour, NyxPalette.swift),
+/// so Vision Pro can never drift from the red the contrast tests measure.
 struct VisionPalette: Equatable {
     var nightVision = false
     var highContrast = false
     /// Reduce Transparency: panels behind words become nearly opaque.
     var solid = false
+    /// The iPhone's palette with the same switches. Vision Pro has no "Brighter red" of its own and
+    /// no channel to the iPhone's setting, so its red follows Increase Contrast, as the iPhone's does.
+    var base: NyxPalette { NyxPalette(nightVision: nightVision, highContrast: highContrast) }
     /// Window colours. In night vision the window's red filter does the tinting, so ink stays
     /// white there (as on the iPhone): a red ink filtered again would turn a dim, unreadable red.
-    var ink: Color { nightVision ? .white : Color(red: 0.961, green: 0.945, blue: 0.902) }
-    var accent: Color { nightVision ? .white : Color(red: 1, green: 0.706, blue: 0.329) }
-    /// Words in the immersive sky, which no window filter reaches: red already in night vision,
-    /// the brighter red under Increase Contrast.
-    var skyInk: Color { nightVision ? (highContrast ? red : Color(red: 1, green: 0.30, blue: 0.24)) : Color(red: 0.961, green: 0.945, blue: 0.902) }
-    /// Night vision's red multiplier, as on the iPhone (`NyxPalette.red`, `NightTint`): the deepest
-    /// red that keeps text at 6.2:1 on black, or under Increase Contrast the brighter one that
-    /// keeps it above 4.5:1 for protan and deutan eyes too. The same two values, repeated here
-    /// because the visionOS target does not compile the iPhone's design system.
-    var red: Color { highContrast ? Color(red: 1, green: 0.36, blue: 0.31) : Color(red: 1, green: 0.27, blue: 0.23) }
+    var ink: Color { base.ink }
+    var accent: Color { base.accent }
+    /// Words in the immersive sky, which no window filter reaches: night vision's red itself.
+    var skyInk: Color { nightVision ? red : NyxPalette.starlight }
+    /// Night vision's red multiplier (`NyxPalette.red`, `NightTint`): the deepest red that keeps
+    /// text at 6.2:1 on black, or under Increase Contrast the brighter one that keeps it above
+    /// 4.5:1 for protan and deutan eyes too.
+    var red: Color { base.red.color }
     /// Secondary text. On glass it is the system's vibrant secondary style, which keeps its
     /// contrast over whatever the room shows through; night vision and Increase Contrast use a
     /// near-solid ink instead.
@@ -26,8 +29,11 @@ struct VisionPalette: Equatable {
         highContrast || nightVision ? AnyShapeStyle(ink.opacity(highContrast ? 0.95 : 0.9)) : AnyShapeStyle(.secondary)
     }
     var line: Color { ink.opacity(highContrast ? 0.6 : 0.2) }
-    /// Behind the window's content in night vision, where grey glass would read as a bright panel.
-    var nightPanel: Color { Color(red: 0.07, green: 0.008, blue: 0.005) }
+    /// Behind the window's content in night vision, where grey glass would read as a bright panel:
+    /// the iPhone's night panel.
+    var nightPanel: Color { NyxPalette(nightVision: true, highContrast: highContrast).panel }
+    /// Behind words under Reduce Transparency, in place of glass: a near-opaque deep indigo.
+    var solidPanel: Color { Color(red: 0.07, green: 0.08, blue: 0.14) }
     /// The same red mapping as the iPhone's night-vision filter, for linear colours in the sky.
     func sky(_ rgb: SIMD3<Double>) -> SIMD3<Double> {
         guard nightVision else { return rgb }
@@ -40,8 +46,8 @@ extension EnvironmentValues {
     var visionPalette: VisionPalette { get { self[VisionPaletteKey.self] } set { self[VisionPaletteKey.self] = newValue } }
 }
 enum VisionMotion {
-    /// The app's one spring (the iPhone's `NyxMotion.spring`).
-    static let spring = Animation.spring(response: 0.65, dampingFraction: 0.82)
+    /// The app's one spring: the iPhone's own (`NyxMotion.spring`).
+    static let spring = NyxMotion.spring
 }
 
 /// Small spaced capitals over a section, as on the iPhone; set solid in Japanese (`Lettering`).

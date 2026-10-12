@@ -12,7 +12,7 @@ struct FromHomePanel: View {
     let now: Date
     @State private var sky: HomeSky?
     var body: some View {
-        VStack(alignment:.leading,spacing:16) {
+        Panel { VStack(alignment:.leading,spacing:16) {
             Eyebrow(text:"From \(origin.name) tonight")
             Text("Not heading to a park tonight? This is the sky over your starting point.")
                 .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
@@ -22,11 +22,7 @@ struct FromHomePanel: View {
             } else {
                 ProgressView().frame(maxWidth:.infinity,minHeight:60).accessibilityLabel("Working out tonight's sky")
             }
-        }
-        .frame(maxWidth:.infinity,alignment:.leading)
-        .padding(20)
-        .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
+        } }
         .accessibilityElement(children:.contain).accessibilityIdentifier("fromHome")
         // Worked out off the main thread, once per place and night.
         .task(id:key) {

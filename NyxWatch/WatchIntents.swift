@@ -11,7 +11,7 @@ struct NyxWatchShortcuts: AppShortcutsProvider {
         AppShortcut(intent: StartAdaptationIntent(), phrases: ["Start dark adaptation in \(.applicationName)", "Adapt my eyes to the dark with \(.applicationName)"],
                     shortTitle: "Dark adaptation", systemImageName: "eye")
         AppShortcut(intent: RedLightOnIntent(), phrases: ["Red light on in \(.applicationName)", "Turn on red light in \(.applicationName)"],
-                    shortTitle: "Red light", systemImageName: "eye.fill")
+                    shortTitle: "Red light", systemImageName: "flashlight.on.circle.fill")
     }
 }
 

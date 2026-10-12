@@ -64,7 +64,7 @@ struct TripPlannerView: View {
                         if let best=plan?.best { hero(best) }
                         results
                     }.frame(maxWidth:.infinity)
-                }.padding(24)
+                }.padding(NyxMetrics.pagePadding).readableColumn(WideLayout.twoColumnMaximum)
             } else {
                 VStack(alignment:.leading,spacing:24) {
                     intro
@@ -277,7 +277,10 @@ nonisolated struct TripStay: Identifiable, Sendable {
 /// nights reads "3 nights at Death Valley" with each night's score beneath it.
 struct TripStayRow: View {
     @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
     @ScaledMetric(relativeTo:.title) private var scoreSize=40.0
+    /// A save from the stop's menu could not be stored.
+    @State private var saveFailed=false
     let stay: TripStay
     let addToCalendar: ()->Void
     let distance: (Double)->String
@@ -311,6 +314,9 @@ struct TripStayRow: View {
                 .accessibilityElement(children:.ignore)
                 .accessibilityLabel(spoken)
                 .accessibilityHint(several ? "Opens the best of these nights at the park." : "Opens that night at the park.")
+                // The park as a row anywhere else: its menu, the pointer's highlight, and dragging it onto Plan or Journal.
+                .parkRowActions(park) { saveFailed=true }
+                .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
                 Button(action:addToCalendar) { Label(several ? String(localized:"Add \(stay.stops.count) nights to Calendar") : String(localized:"Add to Calendar"),systemImage:"calendar.badge.plus").font(.subheadline).frame(minHeight:44) }
                     .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
                     .accessibilityLabel(several ? String(localized:"Add \(stay.stops.count) nights at \(park.shortName) to Calendar") : String(localized:"Add \(park.shortName) on \(park.dayLabel(night.id)) to Calendar"))

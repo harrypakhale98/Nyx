@@ -75,8 +75,9 @@ extension FieldActivityAttributes {
             }
             if same || activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
         }
-        let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.band.label, closure: closure)
-        let scored=FieldActivityAttributes.Scored(score: score.value, band: score.band.label, closure: closure, at: now)
+        // The band carries its basis ("Excellent, usual clouds"): the Lock Screen has no room for the caption.
+        let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.bandWithBasis, closure: closure)
+        let scored=FieldActivityAttributes.Scored(score: score.value, band: score.bandWithBasis, closure: closure, at: now)
         _=try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, scored: scored))
         NightFollowing.shared.reload()
     }
@@ -99,7 +100,7 @@ extension FieldActivityAttributes {
     nonisolated static func scored(_ current: Now?, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState, now: Date) -> FieldActivityAttributes.Scored? {
         guard let current else { return previous.scored }
         let closure=current.closureKnown ? current.closure : attributes.closure(previous)
-        return .init(score: current.night.score.value, band: current.night.score.band.label, closure: closure, at: scoredAt(current.night, now: now))
+        return .init(score: current.night.score.value, band: current.night.bandWithBasis, closure: closure, at: scoredAt(current.night, now: now))
     }
     /// What a refresh does to a followed night.
     nonisolated enum Action: Equatable { case keep, update, reschedule }
@@ -128,7 +129,7 @@ extension FieldActivityAttributes {
         guard enabled else { return .unavailable }
         guard !FieldNight.isOver(night.sky, at: now) else { return .over }
         guard !isFollowing(park: park, night: night.id) else { return .alreadyFollowing }
-        let scored=FieldActivityAttributes.Scored(score: night.score.value, band: night.score.band.label, closure: closure, at: Self.scoredAt(night, now: now))
+        let scored=FieldActivityAttributes.Scored(score: night.score.value, band: night.bandWithBasis, closure: closure, at: Self.scoredAt(night, now: now))
         let start=FieldActivityAttributes.followStart(night.sky)
         defer { NightFollowing.shared.reload() }
         if start<=now.addingTimeInterval(60) {

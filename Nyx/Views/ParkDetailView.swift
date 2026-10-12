@@ -90,6 +90,8 @@ struct ParkDetailView: View {
                         ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding(24) }
                             .scrollDisabled(scrubbing || holdingArc)
                     }
+                    // Both columns within a readable width, centred in a very wide window.
+                    .frame(maxWidth:WideLayout.twoColumnMaximum).frame(maxWidth:.infinity)
                 } else {
                     ScrollView {
                         VStack(spacing:26) {

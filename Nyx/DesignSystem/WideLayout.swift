@@ -13,6 +13,13 @@ nonisolated enum WideLayout {
     static let readableWidth=700.0
     /// Essays and forms read best a little narrower.
     static let proseWidth=680.0
+    /// A two-column page's widest: both columns and the gap between them, centred beyond it, so on a
+    /// 13-inch iPad in landscape the eye never travels a whole window between a score and its reasons.
+    static let twoColumnMaximum=1240.0
+    /// The page's measure at this width: two columns up to `twoColumnMaximum`, one at `readableWidth`.
+    static func pageWidth(width:Double,largeText:Bool)->Double {
+        columns(width:width,largeText:largeText)==2 ? twoColumnMaximum : readableWidth
+    }
     static func columns(width:Double,largeText:Bool)->Int {
         width>=(largeText ? twoColumnWidthLargeText : twoColumnWidth) ? 2 : 1
     }

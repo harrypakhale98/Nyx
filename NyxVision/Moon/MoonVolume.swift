@@ -32,7 +32,7 @@ struct MoonVolume: View {
                 content.subscribe(to: AccessibilityEvents.Decrement.self) { _ in stepper.wrappedValue = max(0, stepper.wrappedValue-1) },
             ]
         } update: { _ in
-            if let view { globe.show(view, nightVision: model.nightVision, reduceMotion: reduceMotion) }
+            if let view { globe.show(view, nightVision: model.nightVision, red: contrast == .increased ? .brighter : .standard, reduceMotion: reduceMotion) }
         }
         .gesture(DragGesture(minimumDistance: 4).targetedToAnyEntity()
             .onChanged { value in globe.turn(by: Float(value.translation.width)) }
@@ -124,6 +124,7 @@ nonisolated struct MoonView: Sendable, Equatable {
     private var relief: TextureResource?
     private var shown: MoonView?
     private var shownNightVision = false
+    private var shownRed = NightTint.standard
     private var spin: Float = 0
     /// VoiceOver's increment and decrement, kept alive with the globe.
     var subscriptions: [EventSubscription] = []
@@ -151,17 +152,19 @@ nonisolated struct MoonView: Sendable, Equatable {
         root.addChild(sun)
     }
 
-    func show(_ view: MoonView, nightVision: Bool, reduceMotion: Bool) {
-        if shown != view || shownNightVision != nightVision {
+    /// `red`: night vision's red (`NightTint`, the brighter one under Increase Contrast), as the window's.
+    func show(_ view: MoonView, nightVision: Bool, red tint: NightTint = .standard, reduceMotion: Bool) {
+        if shown != view || shownNightVision != nightVision || shownRed != tint {
             let first = shown == nil
             shown = view
             shownNightVision = nightVision
+            shownRed = tint
             // Natural sunlight; the night side keeps a trace of earthshine, strongest around new
             // moon, as on the window's disc. In night vision the sunlight itself is red: the
             // material's specular and Fresnel sheen (present even at roughness 1) take the light's
             // colour, not the base colour's, so under white light the limb and the full Moon's
             // bright opposition patch would stay a neutral pink-white.
-            let red = UIColor(red: 1, green: 0.27, blue: 0.23, alpha: 1)
+            let red = UIColor(red: tint.rgb.x, green: tint.rgb.y, blue: tint.rgb.z, alpha: 1)
             sun.light = DirectionalLightComponent(color: nightVision ? red : UIColor(red: 1, green: 0.98, blue: 0.95, alpha: 1), intensity: 15000)
             if var material {
                 // Night vision also tints the surface itself, as the window's filter tints its
@@ -184,8 +187,11 @@ nonisolated struct MoonView: Sendable, Equatable {
                 sun.transform = light
                 sphere.transform = face
             } else {
-                sun.move(to: light, relativeTo: root, duration: 0.6, timingFunction: .easeInOut)
-                sphere.move(to: face, relativeTo: root, duration: 0.6, timingFunction: .easeInOut)
+                // The shared spring, as everything celestial in Nyx moves (`NyxMotion.spring`).
+                Entity.animate(VisionMotion.spring) {
+                    sun.transform = light
+                    sphere.transform = face
+                }
             }
             var access = AccessibilityComponent()
             access.isAccessibilityElement = true
@@ -206,7 +212,7 @@ nonisolated struct MoonView: Sendable, Equatable {
         spin = 0
         guard let shown else { return }
         let face = Transform(rotation: shown.orientation)
-        if reduceMotion { sphere.transform = face } else { sphere.move(to: face, relativeTo: root, duration: 1.4, timingFunction: .easeInOut) }
+        if reduceMotion { sphere.transform = face } else { Entity.animate(VisionMotion.spring) { sphere.transform = face } }
     }
 
     /// A globe whose texture coordinates follow the Moon shader's map lookup (`MoonGlobeGrid`):
@@ -323,7 +329,7 @@ struct MoonControls: View {
         .glassBackgroundEffect(displayMode: palette.nightVision || palette.solid ? .never : .always)
         .background {
             if palette.nightVision { RoundedRectangle(cornerRadius: 32).fill(palette.nightPanel) }
-            else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(Color(red: 0.07, green: 0.08, blue: 0.14)) }
+            else if palette.solid { RoundedRectangle(cornerRadius: 32).fill(palette.solidPanel) }
         }
         .saturation(palette.nightVision ? 0 : 1)
         .colorMultiply(palette.nightVision ? palette.red : .white)

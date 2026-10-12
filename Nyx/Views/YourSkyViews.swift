@@ -371,7 +371,8 @@ struct RecapCard: View {
                 Text(String(recap.year)).font(.system(size:80,weight:.light,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:28) {
                     figure(recap.nights,String(localized:"nights out"))
-                    figure(recap.parkNames.count,String(localized:"parks"))
+                    // "parks" only while every night was at a national park, as the recap's own tiles say.
+                    figure(recap.parkNames.count,recap.allNationalParks ? String(localized:"parks") : String(localized:"places"))
                     figure(recap.phases.count,String(localized:"Moon phases"))
                 }
                 SkyMapCanvas(content:layout.content(parks:model.mapPlaces)).frame(width:500,height:500*layout.frame.aspect)

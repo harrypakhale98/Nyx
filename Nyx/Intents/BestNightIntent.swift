@@ -152,6 +152,8 @@ struct BestNightSnippetView: View {
     /// Whether this night is followed on the Lock Screen; nil where following is not offered.
     var following: Bool?=nil
     @Environment(\.colorSchemeContrast) private var contrast
+    /// The hero numeral follows Dynamic Type, held to a size the card can carry.
+    @ScaledMetric(relativeTo:.largeTitle) private var numeral=56.0
     /// The app's night look, so a night-vision evening is not lit up by a white card.
     private var palette: NyxPalette { NightLook(contrast:contrast).palette }
     var body: some View {
@@ -168,7 +170,7 @@ struct BestNightSnippetView: View {
                     .frame(width:44,height:44).accessibilityIgnoresInvertColors()
             }
             HStack(alignment:.firstTextBaseline,spacing:10) {
-                Text("\(night.score.value)").font(.system(size:56,weight:.light,design:.serif)).foregroundStyle(palette.accent)
+                Text("\(night.score.value)").font(.system(size:min(numeral,76),weight:.light,design:.serif)).foregroundStyle(palette.accent)
                 VStack(alignment:.leading,spacing:2) {
                     Text(night.score.band.label).font(.system(.headline,design:.serif))
                     Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted)

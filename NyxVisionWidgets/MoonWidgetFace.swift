@@ -47,8 +47,8 @@ struct MoonWidgetFace: View {
     let facts: MoonFacts
     let family: WidgetFamily
     var simplified = false
-    private static let ink = Color(red: 0.961, green: 0.945, blue: 0.902)
-    private static let amber = Color(red: 1, green: 0.706, blue: 0.329)
+    private static let ink = NyxPalette.starlight
+    private static let amber = NyxPalette.amber
     /// Increase Contrast lifts the quieter lines, as the iPhone's palette does (`NyxPalette.muted`, 0.9).
     private var high: Bool { contrast == .increased }
     private var eyebrowInk: Color { Self.ink.opacity(high ? 0.9 : 0.7) }
@@ -143,7 +143,7 @@ struct MoonWidgetFace: View {
     }
     /// Deep indigo to void black, Nyx's night.
     static var background: LinearGradient {
-        LinearGradient(colors: [Color(red: 0.043, green: 0.063, blue: 0.149), .black], startPoint: .top, endPoint: .bottom)
+        LinearGradient(colors: [NyxPalette.indigo, .black], startPoint: .top, endPoint: .bottom)
     }
 }
 

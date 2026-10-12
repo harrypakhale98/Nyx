@@ -36,16 +36,20 @@ nonisolated struct WristLook: Sendable {
 /// luminance itself and stacked opacities turn to mud: everything is one ink, and only the score,
 /// its gauge and a park's closure join the accent group. Increase Contrast lifts the quieter text
 /// as the app's palette does (`NyxPalette.muted`): 0.9 instead of 0.72, and red at full strength.
+/// The red itself is the app's (`NightLook`): the brighter one under Increase Contrast or when
+/// chosen on iPhone (`WatchSky.brighterRed`), as on every other surface.
 struct WristInk {
-    let nightVision: Bool
     let mode: WidgetRenderingMode
-    let highContrast: Bool
-    init(nightVision: Bool, mode: WidgetRenderingMode, contrast: ColorSchemeContrast = .standard) {
-        self.nightVision = nightVision; self.mode = mode; highContrast = contrast == .increased
+    let look: NightLook
+    init(nightVision: Bool, mode: WidgetRenderingMode, contrast: ColorSchemeContrast = .standard, brighterRed: Bool = WatchSky.brighterRed) {
+        self.mode = mode
+        look = NightLook(nightVision: nightVision, brighterRed: brighterRed, highContrast: contrast == .increased)
     }
+    var nightVision: Bool { look.nightVision }
+    var highContrast: Bool { look.highContrast }
     var layered: Bool { mode == .fullColor }
-    var ink: Color { nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
-    var accent: Color { nightVision || !layered ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
+    var ink: Color { look.ink }
+    var accent: Color { nightVision || !layered ? ink : look.accent }
     var mutedOpacity: Double { nightVision ? (highContrast ? NightRed.levels[0] : NightRed.levels[1]) : (highContrast ? 0.9 : 0.72) }
     var muted: Color { layered ? ink.opacity(mutedOpacity) : ink }
 }

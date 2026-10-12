@@ -12,6 +12,9 @@ nonisolated struct NightPlan: Sendable {
     /// The park's last cloud forecast, for the immersive sky's hour-by-hour clouds: over a summit
     /// scored from mid and high cloud, those layers combined (low cloud lies below the observer).
     let forecast: Forecast?
+    /// True when the night has no forecast clouds because it lies beyond the forecast's reach;
+    /// false for one the forecast should reach but could not (switched off, never fetched, unreadable).
+    let beyondForecast: Bool
     var score: DarknessScore { night.score }
     let whatsUp: WhatsUp
     let moon: MoonGeometry
@@ -28,6 +31,7 @@ nonisolated struct NightPlan: Sendable {
         let scored = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
         self.night = scored
         self.forecast = scored.upperCloudOnly ? layers?.upperCloud ?? forecast : forecast
+        beyondForecast = NightPlanner.beyondForecast(scored, forecast: forecast, detail: VisionModel.detail(layers), now: now)
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
@@ -138,6 +142,9 @@ nonisolated struct SkyMoment: Sendable {
     /// A park, or its sky, asked for by Siri or Shortcuts (`VisionIntents.swift`), for the planner
     /// window to act on once it is active.
     var intentRequest: VisionIntentRequest?
+    /// A Handoff arrived for a place Vision Pro does not carry (a saved spot, a place abroad): the
+    /// planner says so in a calm alert rather than doing nothing.
+    var handoffElsewhere = false
     /// The last cloud forecast for each park, from this headset's cache or Open-Meteo
     /// (`VisionModel+Forecasts.swift`). A change rescores the night, the list and the nights ahead.
     var forecasts: [String: Forecast] = [:] { didSet { refresh(resetTime: false); refreshList(); refreshAhead() } }

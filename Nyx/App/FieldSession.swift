@@ -17,7 +17,7 @@ import WidgetKit
     var adaptation: DarkAdaptation
     /// Set when the eye's clock started over on return, until acknowledged.
     var reset: DarkAdaptation.Reset?
-    /// Haptic triggers: a light tick per milestone, a soft success when true darkness begins.
+    /// Haptic triggers: a light tick per milestone, a medium pulse when true darkness begins.
     var milestonesPassed=0
     var darknessBegan=0
     /// The night's Live Activity is running for this park.

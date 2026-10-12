@@ -79,6 +79,12 @@ extension VisionModel {
     /// `inSky` also owns up to the plaque's illustrative skyline.
     nonisolated static func honesty(_ plan: NightPlan, inSky: Bool = false) -> String {
         let park = plan.park, night = park.dayLabel(plan.sky.evening)
+        // Without forecast clouds, why: beyond the forecast's reach, or a forecast this night should
+        // have but does not (switched off in Your privacy, never fetched): never "no forecast reaches" for that.
+        if plan.night.basis == .usual, !plan.beyondForecast {
+            return inSky ? String(localized: "Computed for \(park.shortName), \(night). Not a live view. Cloud forecast unavailable, so no clouds are shown, and the skyline is illustrative.")
+                : String(localized: "Computed for \(park.shortName), \(night). Not a live view. Cloud forecast unavailable, so no clouds are shown.")
+        }
         switch (plan.night.basis == .usual, inSky) {
         case (true, false): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. No cloud forecast reaches this night, so no clouds are shown.")
         case (true, true): return String(localized: "Computed for \(park.shortName), \(night). Not a live view. No cloud forecast reaches this night, so no clouds are shown, and the skyline is illustrative.")

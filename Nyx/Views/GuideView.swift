@@ -73,7 +73,8 @@ struct GuideView:View {
                  String(localized:"Darkest place within \(SearchRadius.label(model.radiusMeters)) of \(model.originName) this weekend"),
                  String(localized:"When does the core rise at \(home.shortName) tonight?")]
             } else {
-                [String(localized:"Best night at Arches this month"),String(localized:"Darkest park within 300 mi of Denver this weekend"),String(localized:"When does the core rise at Big Bend tonight?")]
+                // The distance in the reader's own units and radius ("300 mi", "500 km"), as Tonight writes it.
+                [String(localized:"Best night at Arches this month"),String(localized:"Darkest park within \(SearchRadius.label(model.radiusMeters)) of Denver this weekend"),String(localized:"When does the core rise at Big Bend tonight?")]
             }
         case .learn: [String(localized:"Explain the main idea in plain language")]
         }
@@ -435,6 +436,9 @@ struct GuideRecord: Equatable {
 struct GuideRecordRow: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(PlanModel.self) private var model
+    /// A save from the record's menu could not be stored.
+    @State private var saveFailed=false
     let number:Int
     let record:GuideRecord
     var night:Night?=nil
@@ -454,8 +458,7 @@ struct GuideRecordRow: View {
     /// Turned for the southern sky, as `MoonSymbol` is.
     static func moonGlyph(_ night:Night)->some View {
         let moon=night.sky.moon
-        let south=night.park.latitude<0 ? -1.0 : 1.0
-        return Image(systemName:Int((moon.illumination*100).rounded())<5 ? "moonphase.new.moon" : moon.symbolName).scaleEffect(x:south,y:south)
+        return Image(systemName:Int((moon.illumination*100).rounded())<5 ? "moonphase.new.moon" : moon.symbolName(southern:night.park.latitude<0))
     }
     /// The basis said once above the records.
     static func sharedCaption(_ basis:String)->String {
@@ -466,6 +469,9 @@ struct GuideRecordRow: View {
             if let park=record.park {
                 NavigationLink { ParkDetailView(park:park,initialDate:record.night) } label:{ content }.buttonStyle(.plain)
                     .accessibilityHint("Opens that night at the park.")
+                    // A park in Ask Nyx's records is a park row like any other: its menu, highlight and drag.
+                    .parkRowActions(park) { saveFailed=true }
+                    .parkSaveAlert(isPresented:$saveFailed,journalUnavailable:model.journalUnavailable)
             } else { content }
         }
         .accessibilityElement(children:.combine)

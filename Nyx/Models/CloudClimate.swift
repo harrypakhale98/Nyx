@@ -105,6 +105,21 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     }
 }
 
+extension DarknessScore {
+    /// The band with what its clouds rest on, wherever a score stands without room for a caption
+    /// (a widget, the Live Activity, a spoken summary): "Excellent", "Excellent, early look",
+    /// "Excellent, usual clouds". One place, so the basis never drops off a surface again.
+    nonisolated var bandWithBasis: String {
+        switch basis {
+        case .forecast: band.label
+        case .blended: String(localized: "\(band.label), early look")
+        case .usual: String(localized: "\(band.label), usual clouds")
+        }
+    }
+    /// "94 · Excellent, early look": the score and its band with basis, for one short line.
+    nonisolated var withBand: String { String(localized: "\(value) · \(bandWithBasis)") }
+}
+
 extension Night {
     /// What every ranking of nights compares: the score itself, which already counts the park's
     /// usual clouds where no forecast reaches. Ties are broken by `NightPlanner.better`.
@@ -123,13 +138,7 @@ extension Night {
         }
     }
     /// The band where room is short: "Excellent", "Excellent, early look", "Excellent, usual clouds".
-    nonisolated var bandWithBasis: String {
-        switch basis {
-        case .forecast: score.band.label
-        case .blended: String(localized: "\(score.band.label), early look")
-        case .usual: String(localized: "\(score.band.label), usual clouds")
-        }
-    }
+    nonisolated var bandWithBasis: String { score.bandWithBasis }
     /// The word under a score where one word fits: the band, "Early look" or "Estimate".
     nonisolated var compactBandLabel: String {
         switch basis {
@@ -227,7 +236,7 @@ extension Night {
             let basis=basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
             return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm park access before you go.")
         case .snippet:
-            return String(localized:"\(park.shortName) tonight: \(score.value) out of 100, \(score.band.label). \(sky.moon.name), \(Int((sky.moon.illumination*100).rounded())) percent lit.")
+            return String(localized:"\(park.shortName) tonight: \(score.value) out of 100, \(bandWithBasis). \(sky.moon.name), \(Int((sky.moon.illumination*100).rounded())) percent lit.")
         }
     }
     /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full

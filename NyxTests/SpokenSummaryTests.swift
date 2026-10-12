@@ -45,7 +45,8 @@ import Testing
             }
             #expect(night.spokenSummary(.widget) == String(localized:"\(night.park.shortName), \(night.score.value) out of 100, \(night.score.band.label). \(night.basisCaption() ?? String(localized:"Cached forecast included"))"))
             #expect(night.spokenSummary(.chartBest) == String(localized:"Best night: \(night.park.dayLabel(night.id)), \(night.score.value) out of 100, \(night.score.band.label)."))
-            #expect(night.spokenSummary(.snippet) == String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.score.band.label). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))
+            // Siri's card says what the clouds rest on with the band (2.0 design review): "Excellent, usual clouds".
+            #expect(night.spokenSummary(.snippet) == String(localized:"\(night.park.shortName) tonight: \(night.score.value) out of 100, \(night.bandWithBasis). \(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded())) percent lit."))
         }
         // The calendar's list reads in English as the time river does, under its own key.
         let first=try #require(try fixtures().first)

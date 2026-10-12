@@ -20,11 +20,9 @@ struct NightListenView: View {
             Button { if playing { listener.stop() } else { listener.play(sound); showsTranscript=true } } label:{
                 Label(playing ? String(localized:"Stop listening") : isTonight ? String(localized:"Listen to tonight") : String(localized:"Listen to this night"),
                       systemImage:playing ? "stop.fill" : "waveform")
-                    .font(.subheadline.weight(.medium)).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
-                    .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1))).overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5))
-                    .contentShape(Capsule())
+                    .font(.subheadline.weight(.medium))
             }
-            .buttonStyle(.plain).foregroundStyle(palette.accent)
+            .buttonStyle(.capsuleAction)
             .accessibilityHint("Plays the night from sunset to sunrise as twelve seconds of sound.")
             .accessibilityInputLabels([Text("Listen"),Text("Listen to tonight"),Text("Stop")])
             Text(NightSonification.key).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)

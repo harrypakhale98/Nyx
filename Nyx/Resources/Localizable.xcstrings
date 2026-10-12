@@ -18104,37 +18104,37 @@
         }
       }
     },
-    "Darkest park within 300 mi of Denver this weekend": {
+    "Darkest park within %@ of Denver this weekend": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dunkelster Park im Umkreis von 300 mi um Denver an diesem Wochenende"
+            "value": "Dunkelster Park im Umkreis von %@ um Denver an diesem Wochenende"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Darkest park within 300 mi of Denver this weekend"
+            "value": "Darkest park within %@ of Denver this weekend"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Parque más oscuro a menos de 300 mi de Denver este fin de semana"
+            "value": "Parque más oscuro a menos de %@ de Denver este fin de semana"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Parc le plus sombre à moins de 300 mi de Denver ce week-end"
+            "value": "Parc le plus sombre à moins de %@ de Denver ce week-end"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今週末、Denverから300マイル以内でいちばん暗い公園"
+            "value": "今週末、Denverから%@以内でいちばん暗い公園"
           }
         }
       }
@@ -19745,6 +19745,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "方位は真北を基準にしています。"
+          }
+        }
+      }
+    },
+    "Discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwerfen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "破棄"
+          }
+        }
+      }
+    },
+    "Discard this night?": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nacht verwerfen?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard this night?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Descartar esta noche?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer cette nuit ?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜を破棄しますか？"
+          }
+        }
+      }
+    },
+    "Discard your changes?": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Änderungen verwerfen?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard your changes?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Descartar los cambios?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer vos modifications ?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "変更を破棄しますか？"
           }
         }
       }
@@ -28325,6 +28430,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "暗さに慣れた目を守るため、昼も夜も手首のNyxを赤いままにします。"
+          }
+        }
+      }
+    },
+    "Keep editing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter bearbeiten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep editing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir editando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer la modification"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編集を続ける"
           }
         }
       }
@@ -74007,6 +74147,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "人"
+          }
+        }
+      }
+    },
+    "places": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orte"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lugares"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lieux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "場所"
           }
         }
       }

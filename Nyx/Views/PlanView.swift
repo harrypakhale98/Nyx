@@ -10,6 +10,8 @@ struct PlanView: View {
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.dynamicTypeSize) private var typeSize
     @SceneStorage("planMode") private var mode:Mode = .month
+    /// The page's width, so the picker over the trip planner is as wide as the planner's page.
+    @State private var width=0.0
     var body: some View {
         Group {
             switch mode {
@@ -18,7 +20,8 @@ struct PlanView: View {
             case .free: TripPlannerView(embedded:true)
             }
         }
-        .safeAreaBar(edge:.top,spacing:0) { if mode == .free { picker } }
+        .safeAreaBar(edge:.top,spacing:0) { if mode == .free { picker.readableColumn(WideLayout.pageWidth(width:width,largeText:typeSize.isAccessibilitySize)) } }
+        .measuringWidth($width)
         .navigationTitle("Plan").navigationBarTitleDisplayMode(.inline)
         .tabRootToolbar()
         .toolbar {
@@ -48,8 +51,8 @@ struct PlanView: View {
             if typeSize.isAccessibilitySize { control.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) }
             else { control.pickerStyle(.segmented) }
         }
+        // As wide as the page under it (the month's column, or the planner's), set by whoever places it.
         .padding(.horizontal,24).padding(.vertical,8)
-        .frame(maxWidth:WideLayout.readableWidth).frame(maxWidth:.infinity)
         .accessibilityHint("One park's month, or the best park for each night you are free.")
     }
 }

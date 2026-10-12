@@ -474,9 +474,10 @@ struct BortleFigure: View {
             Text("A summer sky in \(park?.shortName ?? String(localized:"a national park")), redrawn at each class. Real skies vary with the season, the weather and where you stand.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
         .sensoryFeedback(.selection,trigger:shownClass)
+        // A card like `Panel`, a little tighter so the sky figure keeps its width inside an essay's column.
         .padding(18)
-        .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
+        .background(RoundedRectangle(cornerRadius:NyxMetrics.cardRadius).fill(palette.panel))
+        .overlay(RoundedRectangle(cornerRadius:NyxMetrics.cardRadius).stroke(palette.line,lineWidth:0.5))
     }
 }
 /// A live figure an essay can carry, placed after one of its paragraphs.

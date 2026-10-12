@@ -200,6 +200,30 @@ extension ButtonStyle where Self == NyxActionStyle {
     /// A text-only action that gains an outline under Show Borders.
     static var nyxAction: NyxActionStyle { NyxActionStyle() }
 }
+/// An action that leads somewhere from an answer (a darker night ahead, a wider radius, field mode,
+/// Listen): amber words in a faintly filled hairline capsule, at least 44 pt tall. Pressed it dims;
+/// under a pointer (iPad) the capsule lifts. The capsule already outlines it, so Show Borders adds nothing.
+struct CapsuleActionStyle: ButtonStyle {
+    func makeBody(configuration:Configuration)->some View { CapsuleActionLabel(configuration:configuration) }
+}
+private struct CapsuleActionLabel: View {
+    let configuration: ButtonStyleConfiguration
+    @Environment(\.nyx) private var palette
+    @Environment(\.isEnabled) private var enabled
+    var body: some View {
+        configuration.label
+            .font(.subheadline).foregroundStyle(palette.accent).padding(.vertical,10).padding(.horizontal,16).frame(minHeight:44)
+            .background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0 : 0.1)))
+            .overlay(Capsule().stroke(palette.accent.opacity(0.35),lineWidth:0.5*palette.stroke))
+            .contentShape(.hoverEffect,Capsule()).hoverEffect(.highlight)
+            .contentShape(Capsule())
+            .opacity(configuration.isPressed ? 0.55 : enabled ? 1 : 0.45)
+    }
+}
+extension ButtonStyle where Self == CapsuleActionStyle {
+    /// The amber capsule that leads from an answer to the next step.
+    static var capsuleAction: CapsuleActionStyle { CapsuleActionStyle() }
+}
 
 // MARK: Colour independence
 

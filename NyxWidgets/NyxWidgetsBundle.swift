@@ -95,11 +95,15 @@ struct TonightWidget:Widget {
 struct MoonProvider:AppIntentTimelineProvider {
     func placeholder(in context:Context)->MoonEntry { MoonEntry(date:.now,park:Self.park(nil),nightVision:false) }
     func snapshot(for configuration:MoonWidgetIntent,in context:Context) async -> MoonEntry {
-        MoonEntry(date:.now,park:Self.park(configuration.park),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"))
+        MoonEntry(date:.now,park:Self.park(configuration.park),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),unsaved:TonightProvider.unsaved(configuration.park))
     }
     /// Every hour for a day, plus each rise and set, so "up now" and the next event turn over on time.
     func timeline(for configuration:MoonWidgetIntent,in context:Context) async -> Timeline<MoonEntry> {
         let now=Date.now, park=Self.park(configuration.park), vision=SharedSettings.defaults.bool(forKey:"nightVision")
+        // A deleted spot or unsaved place abroad: one entry that says so, as the Tonight widget does.
+        if let unsaved=TonightProvider.unsaved(configuration.park) {
+            return Timeline(entries:[MoonEntry(date:now,park:nil,nightVision:vision,unsaved:unsaved)],policy:.never)
+        }
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
         let events=park.map { MoonNow.events(at:$0,around:now).map(\.date).filter { $0>now && $0<end } } ?? []

@@ -235,9 +235,10 @@ struct DuskWidget: Widget {
 struct RedLightControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: WatchSky.redLightKind, provider: RedLightProvider()) { isOn in
-            // The state reads in word and symbol: "On" with a filled eye, "Automatic" with an outline.
+            // The state reads in word and symbol: "On" with a filled flashlight, "Automatic" with an
+            // outline: the iPhone's night-vision glyph (the eye stays dark adaptation's).
             ControlWidgetToggle(isOn: isOn, action: RedLightIntent()) { Text("Red light") } valueLabel: { isOn in
-                if isOn { Label("On", systemImage: "eye.fill") } else { Label("Automatic", systemImage: "eye") }
+                if isOn { Label("On", systemImage: "flashlight.on.circle.fill") } else { Label("Automatic", systemImage: "flashlight.off.circle") }
             }
         }
         .displayName("Red light")
@@ -300,6 +301,13 @@ private var closedSample: WatchSkyEntry {
     NextDarkEntry(date: .now, park: park, moment: .darkNow(until: .now.addingTimeInterval(9000), moonrise: true), nightVision: true)
     NextDarkEntry(date: .now, park: park, moment: .moonlit(from: .now.addingTimeInterval(3600), to: .now.addingTimeInterval(30000)), nightVision: true)
     NextDarkEntry(date: .now, park: park, moment: .none, nightVision: false)
+    // No park chosen yet: "Choose a park" under the empty face's mark, never a claim about the sky.
+    NextDarkEntry(date: .now, park: nil, moment: .none, nightVision: false)
+}
+#Preview("Moon • inline, southern sky", as: .accessoryInline) { MoonComplication() } timeline: {
+    // American Samoa: the phase symbol turned for the southern sky, by name, inside text.
+    let samoa = try? ParkData.load().first(where: { $0.id == "npsa" })
+    MoonEntry(date: .now, park: samoa, moon: MoonNow(at: .now, park: samoa), nightVision: false)
 }
 #Preview("Next dark • circular", as: .accessoryCircular) { NextDarkComplication() } timeline: {
     NextDarkEntry(date: .now, park: WatchTimeline.sample?.parks.first, moment: .begins(.now.addingTimeInterval(7800), moonset: true), nightVision: true)

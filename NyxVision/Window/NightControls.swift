@@ -20,8 +20,12 @@ struct NightControls: View {
         }
         .padding(.horizontal, 28).padding(.vertical, 18)
         .frame(minWidth: 760)
-        .glassBackgroundEffect(displayMode: model.nightVision ? .never : .always)
-        .background { if model.nightVision { Capsule().fill(palette.nightPanel) } }
+        // Under Reduce Transparency a solid panel, as the Moon's controls have (`MoonControls`).
+        .glassBackgroundEffect(displayMode: model.nightVision || palette.solid ? .never : .always)
+        .background {
+            if model.nightVision { Capsule().fill(palette.nightPanel) }
+            else if palette.solid { Capsule().fill(palette.solidPanel) }
+        }
         .saturation(model.nightVision ? 0 : 1)
         .colorMultiply(model.nightVision ? palette.red : .white)
     }
@@ -105,6 +109,10 @@ struct NightControls: View {
     model.selectedID = "dena"
     model.nightOffset = 2
     return NightControls().environment(model)
+}
+
+#Preview("Night controls, Reduce Transparency") {
+    NightControls().environment(VisionModel(now: .now)).environment(\.visionPalette, VisionPalette(solid: true))
 }
 
 #Preview("Night controls, night vision") {

@@ -54,7 +54,7 @@ struct PlannerWindow: View {
                             .accessibilityHint(Text("Shows or hides the constellation figures in the sky"))
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Toggle(isOn: $model.nightVision) { Label("Night vision", systemImage: "eye") }
+                        Toggle(isOn: $model.nightVision) { Label("Night vision", systemImage: model.nightVision ? "flashlight.on.circle.fill" : "flashlight.off.circle") }
                             .toggleStyle(.button)
                             .accessibilityHint(Text("Turns the window and the sky a dim red that keeps your eyes adapted to the dark"))
                     }
@@ -98,6 +98,11 @@ struct PlannerWindow: View {
         .onContinueUserActivity(ParkHandoff.type) { activity in
             if let handoff = ParkHandoff(userInfo: activity.userInfo) { model.open(handoff) }
         }
+        .alert(Text("Only national parks here"), isPresented: $model.handoffElsewhere) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad.")
+        }
         // And back: the park and night in this window, for Nyx on iPhone or iPad to continue.
         .modifier(VisionHandoff(park: model.park, night: model.park.map { model.night(for: $0) }))
         // Siri or Shortcuts asked for a park, or to stand under its sky: answered once this window is active.
@@ -115,7 +120,7 @@ struct PlannerWindow: View {
         return Button { Task { await toggleSky() } } label: {
             Label(open ? "Leave the sky" : "Stand under this sky", systemImage: open ? "xmark" : "sparkles")
         }
-        .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : Color(red: 1, green: 0.706, blue: 0.329).opacity(0.85))
+        .buttonStyle(.borderedProminent).tint(model.nightVision ? .white.opacity(0.3) : NyxPalette.amber.opacity(0.85))
         .disabled(skyBusy || model.plan == nil)
         .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
                                 : Text("Surrounds you with this park's computed sky at the time on the clock below the window"))
