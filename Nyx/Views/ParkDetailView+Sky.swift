@@ -47,10 +47,11 @@ extension ParkDetailView {
             if let clarity=outlook?.clarity {
                 VStack(alignment:.leading,spacing:6) {
                     LabeledContent("Air",value:clarity.label)
-                    Text("Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    Text("Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
             } else if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-            if let updated=night.forecastUpdated { Text("Open-Meteo · updated \(park.timestamp(updated))").font(.caption).foregroundStyle(palette.muted) }
+            // The credit Open-Meteo's licence asks for, as a link beside its data.
+            if let updated=night.forecastUpdated { OpenMeteoCredit(updated:park.timestamp(updated)) }
             if !nightItself.isEmpty {
                 Divider().overlay(palette.line)
                 VStack(alignment:.leading,spacing:10) {

@@ -17,7 +17,7 @@ struct TonightProvider:AppIntentTimelineProvider {
         var snapshot=SharedSettings.read()
         // The widget gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not "save a park".
         if context.isPreview, snapshot?.parks.isEmpty ?? true, configuration.park == nil { snapshot=Self.sample }
-        var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park))
+        var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
         return builder.entry(at:.now)
     }
     /// Joshua Tree tonight, with its usual clouds. Nil only if the bundled parks cannot be read.
@@ -34,11 +34,20 @@ struct TonightProvider:AppIntentTimelineProvider {
         guard let entity else { return nil }
         return ParkLibrary.place(entity.id)
     }
+    /// The name of the place a widget or the control was set to when it no longer resolves: a saved
+    /// spot deleted or a place abroad unsaved (the extension knows only the followed ones). The 63
+    /// parks are bundled and always resolve. Nil when nothing was set or it resolves.
+    static func unsaved(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?=SharedSettings.read())->String? {
+        // Without a snapshot (Nyx not opened since install) nothing is known to be unsaved.
+        guard let entity, let snapshot, entity.id.contains(":"), ParkLibrary.place(entity.id,snapshot:snapshot) == nil else { return nil }
+        // A setting restored without its place keeps only the id: no name rather than the id itself.
+        return entity.name == entity.id ? "" : entity.name
+    }
     /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
     /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
     func timeline(for configuration:TonightWidgetIntent,in context:Context) async -> Timeline<TonightEntry> {
         let now=Date.now
-        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:Self.large(context.family),pinned:Self.park(configuration.park))
+        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
         let edges=builder.duskWindows(from:now,nights:2).flatMap { [$0.start,$0.end] }.filter { $0>now && $0<end }
@@ -153,7 +162,9 @@ struct TonightControl:ControlWidget {
 struct TonightControlProvider:AppIntentControlValueProvider {
     func previewValue(configuration:TonightControlIntent)->TonightControlValue { TonightControlValue(parkID:nil,name:"Joshua Tree",score:93,symbol:"moon.stars") }
     func currentValue(configuration:TonightControlIntent) async throws -> TonightControlValue {
-        TonightControlValue(snapshot:SharedSettings.read(),pinned:TonightProvider.park(configuration.park),now:.now)
+        let snapshot=SharedSettings.read()
+        if TonightProvider.unsaved(configuration.park,snapshot:snapshot) != nil { return .unsaved }
+        return TonightControlValue(snapshot:snapshot,pinned:TonightProvider.park(configuration.park),now:.now)
     }
 }
 #Preview(as:.systemSmall) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }

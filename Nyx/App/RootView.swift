@@ -213,13 +213,15 @@ struct RootView:View {
         .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); Task { await updateSaved() } }
         .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
-            open(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String)
+            withPlace(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String) { open($0) }
         }
         // A park and night handed off from park detail on another iPhone or iPad.
         .onContinueUserActivity(ParkHandoff.type) { activity in
-            guard let handoff=ParkHandoff(userInfo:activity.userInfo), let park=model.park(handoff.parkID) else { return }
-            // A night that has passed since it was handed off opens tonight instead.
-            open(park.id,night:handoff.evening(in:park).flatMap { $0>=model.tonight(park) ? ($0,false) : nil })
+            guard let handoff=ParkHandoff(userInfo:activity.userInfo) else { return }
+            withPlace(handoff.parkID) { park in
+                // A night that has passed since it was handed off opens tonight instead.
+                open(park,night:handoff.evening(in:park).flatMap { $0>=model.tonight(park) ? ($0,false) : nil })
+            }
         }
         .onOpenURL { url in
             // A journal export opened from Files: the Journal tab offers to import it.
@@ -257,15 +259,12 @@ struct RootView:View {
     /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.
     private func handle(_ link:DeepLink?) {
         switch link {
-        case .park(let id): open(id)
+        case .park(let id): withPlace(id) { open($0) }
         case .tonight: commands.tab=0
-        case .field(let id): if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) }
-        case .whatsUp(let id,let day):
-            guard let park=model.park(id) else { return }
-            open(id,night:(day.evening(in:park),true))
+        case .field(let id): withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) }
+        case .whatsUp(let id,let day): withPlace(id) { open($0,night:(day.evening(in:$0),true)) }
         case .calendar(let id,let year,let month):
-            guard model.park(id) != nil else { return }
-            commands.tab=2; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month)
+            withPlace(id) { _ in commands.tab=2; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month) }
         case nil: break
         }
     }
@@ -350,31 +349,40 @@ struct RootView:View {
     /// up, when the link names one). When another sheet is already up (a journal draft, a
     /// breakdown), the park is presented above it instead of waiting or dismissing it, so nothing
     /// the person was doing is lost.
-    private func open(_ parkID:String?,night:(date:Date,whatsUp:Bool)?=nil) {
-        guard let parkID,let park=model.park(parkID) else { return }
+    private func open(_ park:Park,night:(date:Date,whatsUp:Bool)?=nil) {
         // This window's own stack: a link or reminder never opens over another iPad window.
         guard let top=commands.topController, top.presentingViewController != nil else { launch=LaunchPark(park:park,night:night?.date,whatsUp:night?.whatsUp ?? false); return }
         let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
-    /// Opens field mode when Control Center, Siri or Shortcuts asked for it: the named park, else
-    /// the last park used in the field, else the starting park.
+    /// Opens field mode when Control Center, Siri or Shortcuts asked for it: the named place and no
+    /// other (a place abroad on a cold launch once the catalogue is read); with none named, the last
+    /// place used in the field, else the starting place.
     private func openRequestedField() {
         guard DebugScenario.screen == nil, let request=FieldModeRequest.take() else { return }
-        let id=request.parkID ?? SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey) ?? model.homeID
-        guard let park=model.park(id) ?? model.home else { return }
-        FieldPresenter.present(park:park,model:model,from:commands.topController)
+        let show:(Park)->Void={ FieldPresenter.present(park:$0,model:model,from:commands.topController) }
+        if let id=request.parkID { withPlace(id,show); return }
+        let last=SharedSettings.defaults.string(forKey:FieldModeRequest.lastParkKey)
+        Task { if let park=await model.usualFieldPlace(lastUsed:last) { show(park) } }
     }
     /// A tapped reminder opens the night it announced (a shower reminder at What's up).
     private func openReminder(_ route:ReminderRoute) {
-        guard let park=model.park(route.parkID) else { return }
-        open(route.parkID,night:route.day.map { ($0.evening(in:park),route.whatsUp) })
+        withPlace(route.parkID) { park in open(park,night:route.day.map { ($0.evening(in:park),route.whatsUp) }) }
     }
     /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`),
     /// or the Tonight tab when the Tonight control was tapped before any park was saved.
     private func openRequestedPark() {
         guard DebugScenario.screen == nil, let request=ParkOpenRequest.take() else { return }
-        if let id=request.parkID { open(id) } else { commands.tab=0 }
+        if let id=request.parkID { withPlace(id) { open($0) } } else { commands.tab=0 }
+    }
+    /// Every route from outside (links, widgets, reminders, Spotlight, Handoff, Siri) finds its place
+    /// here: at once when it is known; a place abroad named on a cold launch, before the world catalogue
+    /// is read, once it is (`PlanModel.place(named:)`). An id Nyx does not know opens nothing, never another place.
+    private func withPlace(_ id:String?,_ act:@escaping (Park)->Void) {
+        guard let id else { return }
+        if let park=model.park(id) { act(park); return }
+        guard model.awaitsCatalog(id) else { return }
+        Task { if let park=await model.place(named:id) { act(park) } }
     }
     private static func currentMoonIcon()->Image {
         let moon=AstronomyEngine().moonPhase(at:.now)

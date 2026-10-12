@@ -338,7 +338,7 @@ struct NightGlance: View {
             let eyebrow = Font.caption2.weight(.semibold)
             if let models, typeSize.isAccessibilitySize {
                 // In the scrolling accessibility layout a line costs the dial nothing: the range has its own.
-                day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
                 Text("Models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
             } else if let models {
                 // The models' range rides on the day's line where it fits whole ("SAT, OCT 10 · MODELS
@@ -350,17 +350,17 @@ struct NightGlance: View {
                 let range = Text("Models \(models.lowerBound)–\(models.upperBound)")
                 ViewThatFits(in: .horizontal) {
                     Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
-                        .font(eyebrow).textCase(.uppercase).tracking(1)
+                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0)
                     Text("\(day.foregroundStyle(palette.accent)) · \(range.foregroundStyle(palette.muted))")
-                        .font(eyebrow).textCase(.uppercase)
+                        .font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil)
                     // Narrower still: the range in lower case and regular weight, the iPhone river's "models 73–89".
                     let upper = (isTonight ? String(localized: "Tonight") : night.park.dayLabel(night.id)).uppercased(with: locale)
                     Text("\(Text(verbatim: upper).font(eyebrow).foregroundStyle(palette.accent)) · \(Text("models \(models.lowerBound)–\(models.upperBound)").font(.caption2).foregroundStyle(palette.muted))")
-                    day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+                    day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
                 }
                 .lineLimit(1).accessibilityLabel(day)
             } else {
-                day.font(eyebrow).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+                day.font(eyebrow).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
             }
             if let start = night.sky.darkStart, let end = night.sky.darkEnd, night.sky.darkHours > 0 {
                 Text("Dark \(night.park.time(start)) to \(night.park.time(end))").font(.system(.subheadline, design: .serif))
@@ -405,7 +405,7 @@ struct NextMoment: View {
                 VStack(spacing: 0) {
                     // At the site the first question is "is it dark yet": answer it before the countdown.
                     if let state = nowLine {
-                        Text(state).font(.caption2.weight(.semibold)).textCase(.uppercase).tracking(1).foregroundStyle(palette.accent)
+                        Text(state).font(.caption2.weight(.semibold)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1 : 0).foregroundStyle(palette.accent)
                             .lineLimit(limit).minimumScaleFactor(0.8)
                     }
                     countdownText(next, now: now).font(.system(.subheadline, design: .serif)).foregroundStyle(palette.ink)
@@ -594,7 +594,7 @@ struct WatchEyebrow: View {
     @Environment(\.nyx) private var palette
     let text: LocalizedStringKey
     var body: some View {
-        Text(text).font(.caption2.weight(.medium)).textCase(.uppercase).tracking(1.2).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
+        Text(text).font(.caption2.weight(.medium)).textCase(Lettering.spaced ? .uppercase : nil).tracking(Lettering.spaced ? 1.2 : 0).foregroundStyle(palette.muted).accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -615,7 +615,8 @@ struct ParksList: View {
                 if !store.savedParks.isEmpty {
                     Section("Saved on iPhone") { ForEach(store.savedParks) { row($0, now: now, scored: true) } }
                 }
-                Section("All parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
+                // The watch bundles the 63 US national parks only; saved spots and places abroad come from iPhone, above.
+                Section("US national parks") { ForEach(store.parks) { row($0, now: now, scored: false) } }
                 Section {
                     Picker("Colors", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
                 } footer: { Text("Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
@@ -659,16 +660,20 @@ struct ParkChooser: View {
                 // Nothing has come from the iPhone yet: ask for it here rather than wait.
                 if store.context == nil { AskIPhoneRow(source: .unsynced).listRowBackground(Color.clear) }
             }
-            Section("Dark Sky parks") { ForEach(store.parks.filter(\.darkSkyDesignated)) { row($0) } }
-            Section("Other parks") { ForEach(store.parks.filter { !$0.darkSkyDesignated }) { row($0) } }
+            // The 63 US national parks the watch bundles, Dark Sky designated ones first (marked), as one honest list.
+            Section("US national parks") { ForEach(store.parks.filter(\.darkSkyDesignated) + store.parks.filter { !$0.darkSkyDesignated }) { row($0) } }
         }
         .nyxTitle("Nyx")
     }
     private func row(_ park: Park) -> some View {
         Button { store.pin(park) } label: {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(park.wristName).font(.system(.body, design: .serif))
-                Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+            HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(park.wristName).font(.system(.body, design: .serif))
+                    Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption2).foregroundStyle(palette.muted)
+                }
+                Spacer(minLength: 2)
+                if park.darkSkyDesignated { Image(systemName: "moon.stars").font(.caption2).foregroundStyle(palette.accent).accessibilityLabel("Dark Sky designated") }
             }
         }
     }
@@ -747,7 +752,7 @@ private struct ModelsPreview<Content: View>: View {
             if let context = WatchDebug.modelsContext(savedParkIDs: [park.id], store: store) {
                 let week = (0..<7).map {
                     WatchSky.night(park, evening: park.date(park.currentNight(at: .now), addingDays: $0), forecast: context.cloudForecasts[park.id],
-                                   detail: context.forecastDetails[park.id], now: .now)
+                                   detail: context.forecastDetails[park.id], now: .now, climate: context.climate)
                 }
                 content(week, context)
             }

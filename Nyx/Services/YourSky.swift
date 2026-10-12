@@ -94,9 +94,25 @@ nonisolated enum SkyMap {
     /// anywhere else, the circle around it. No starting point: the lower 48.
     static func defaultRegion(origin: GeoPoint?, countryCode: String?) -> Region {
         guard let origin else { return .lower48 }
-        let american=["US","AS","VI","PR","GU","MP","UM"].contains(countryCode?.uppercased() ?? "US")
+        let american=americanCodes.contains(countryCode?.uppercased() ?? "US")
         guard american else { return .around }
         return region(of:origin) ?? .around
+    }
+    /// The United States and its territories, as places' country codes give them.
+    static let americanCodes: Set<String> = ["US","AS","VI","PR","GU","MP","UM"]
+    /// A US place: a curated park, a catalogue place in the US or a territory, or a saved spot there
+    /// (by its nearest town's country, or inside the states' outline, so a spot near the border whose
+    /// nearest town lies across it still counts).
+    static func isAmerican(_ place: Park) -> Bool {
+        if place.curated || americanCodes.contains(place.countryCode.uppercased()) { return true }
+        return place.isSavedSpot && USOutline.contains(latitude:place.latitude,longitude:place.longitude)
+    }
+    /// The places a map of `region` may draw. A US area's box reaches into Canada, Mexico and the
+    /// Bahamas, and its name ("Lower 48") says the United States, so it draws US places only; the
+    /// circle around the starting point and the world draw every place.
+    static func places(_ places: [Park], for region: Region) -> [Park] {
+        guard Region.unitedStates.contains(region) else { return places }
+        return places.filter(isAmerican)
     }
     /// Every place Nyx knows once: the curated parks, the rest of the catalogue, then saved spots.
     static func merged(parks: [Park], catalog: [Park], spots: [Park]) -> [Park] {
@@ -112,13 +128,25 @@ nonisolated enum SkyMap {
     /// hundred. Returns the places drawn and how many lay in view.
     static func shown(_ places: [Park], in frame: MapFrame, spacing: Double = 0.03, limit: Int = 200, scoreLimit: Int = 400,
                       rank: ([Park]) -> [Park]) -> (places: [Park], inView: Int) {
+        shown(pool(places,in:frame,spacing:spacing,scoreLimit:scoreLimit),spacing:spacing,limit:limit,rank:rank)
+    }
+    /// A map's places before any is scored: those always drawn (curated parks and saved spots in
+    /// view), the rest (thinned by what is known without a forecast where more than `scoreLimit`
+    /// crowd the view), each one's point, and how many lay in view. `rest` is exactly what `shown`
+    /// hands to `rank`, so a screen can work out those nights off the main thread first.
+    struct Pool: Sendable {
+        let fixed: [Park]
+        let rest: [Park]
+        let points: [String: CGPoint]
+        let inView: Int
+    }
+    static func pool(_ places: [Park], in frame: MapFrame, spacing: Double = 0.03, scoreLimit: Int = 400) -> Pool {
         var points:[String:CGPoint]=[:], fixed:[Park]=[], rest:[Park]=[]
         for place in places {
             guard points[place.id] == nil, let p=frame.point(place), frame.shows(p,margin:0.01) else { continue }
             points[place.id]=p
             if place.curated || place.isSavedSpot { fixed.append(place) } else { rest.append(place) }
         }
-        func at(_ place: Park) -> CGPoint { points[place.id] ?? .zero }
         let inView=fixed.count+rest.count
         if rest.count>scoreLimit {
             let known=rest.sorted { a,b in
@@ -126,9 +154,13 @@ nonisolated enum SkyMap {
                 return a.bortleEstimate != b.bortleEstimate ? a.bortleEstimate<b.bortleEstimate : a.id<b.id
             }
             let pinned=Set(fixed.map(\.id))
-            rest=MapThinning.thin(always:fixed,ranked:known,point:at,spacing:spacing,limit:scoreLimit+fixed.count).filter { !pinned.contains($0.id) }
+            rest=MapThinning.thin(always:fixed,ranked:known,point:{ points[$0.id] ?? .zero },spacing:spacing,limit:scoreLimit+fixed.count).filter { !pinned.contains($0.id) }
         }
-        return (MapThinning.thin(always:fixed,ranked:rank(rest),point:at,spacing:spacing,limit:max(limit,fixed.count)),inView)
+        return Pool(fixed:fixed,rest:rest,points:points,inView:inView)
+    }
+    /// The places drawn from a pool: the fixed ones, then the rest as `rank` orders them, thinned.
+    static func shown(_ pool: Pool, spacing: Double = 0.03, limit: Int = 200, rank: ([Park]) -> [Park]) -> (places: [Park], inView: Int) {
+        (MapThinning.thin(always:pool.fixed,ranked:rank(pool.rest),point:{ pool.points[$0.id] ?? .zero },spacing:spacing,limit:max(limit,pool.fixed.count)),pool.inView)
     }
     /// The circle `meters` around a place, as `steps` points on Earth (exact on any projection).
     static func circle(around centre: GeoPoint, meters: Double, steps: Int = 96) -> [GeoPoint] {

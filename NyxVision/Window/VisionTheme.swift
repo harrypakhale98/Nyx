@@ -44,14 +44,15 @@ enum VisionMotion {
     static let spring = Animation.spring(response: 0.65, dampingFraction: 0.82)
 }
 
-/// Small spaced capitals over a section, as on the iPhone.
+/// Small spaced capitals over a section, as on the iPhone; set solid in Japanese (`Lettering`).
 struct VisionEyebrow: View {
     @Environment(\.visionPalette) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
     let text: LocalizedStringKey
     var body: some View {
-        Text(text).font(.footnote.weight(.semibold)).kerning(typeSize.isAccessibilitySize ? 0 : 1.6)
-            .textCase(typeSize.isAccessibilitySize ? nil : .uppercase).foregroundStyle(palette.muted)
+        let spaced = Lettering.spaced && !typeSize.isAccessibilitySize
+        Text(text).font(.footnote.weight(.semibold)).kerning(spaced ? 1.6 : 0)
+            .textCase(spaced ? .uppercase : nil).foregroundStyle(palette.muted)
             .accessibilityAddTraits(.isHeader)
     }
 }

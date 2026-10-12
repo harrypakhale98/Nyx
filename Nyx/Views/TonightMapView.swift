@@ -42,24 +42,30 @@ struct TonightMapCanvas: View {
                 cross.move(to:CGPoint(x:o.x,y:o.y-arm)); cross.addLine(to:CGPoint(x:o.x,y:o.y+arm))
                 context.stroke(cross,with:.color(palette.ink.opacity(0.75)),lineWidth:1.1*palette.stroke)
             }
-            // Dimmer nights first, so the darkest skies sit on top where places crowd together.
-            for mark in map.marks.sorted(by:{ $0.score<$1.score }) {
-                // West to east, each mark fading in over a fifth of the reveal.
-                let start=(map.reveal[mark.id] ?? 0)*0.8
-                let shown=min(1,max(0,(progress-start)/0.2))
-                guard shown>0 else { continue }
-                let p=screen(mark.point), radius=mark.radius*size1
-                guard p.x > -radius-8, p.y > -radius-8, p.x<size.width+radius+8, p.y<size.height+radius+8 else { continue }
-                var layer=context
-                layer.opacity=shown
-                // A soft glow for Excellent and Pristine nights: a dark sky glows a little.
-                if mark.score>=75 && !palette.nightVision {
-                    let halo=radius*3
-                    layer.drawLayer { glow in
-                        glow.addFilter(.blur(radius:halo/2.6))
-                        glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35*access.glow)))
+            // West to east, each mark fading in over a fifth of the reveal.
+            func shown(_ mark:TonightMap.Mark)->Double { min(1,max(0,(progress-(map.reveal[mark.id] ?? 0)*0.8)/0.2)) }
+            func visible(_ p:CGPoint,_ radius:Double)->Bool { p.x > -radius-8 && p.y > -radius-8 && p.x<size.width+radius+8 && p.y<size.height+radius+8 }
+            // A soft glow for Excellent and Pristine nights (a dark sky glows a little), all in one blurred layer
+            // under the marks: one blur a frame, however many places glow.
+            let glowing=palette.nightVision ? [] : map.marks.filter { $0.score>=75 }
+            if !glowing.isEmpty {
+                context.drawLayer { glow in
+                    glow.addFilter(.blur(radius:TonightMap.radius(score:88)*size1*3/2.6))
+                    for mark in glowing {
+                        let lit=shown(mark), p=screen(mark.point), radius=mark.radius*size1, halo=radius*3
+                        guard lit>0, visible(p,halo) else { continue }
+                        glow.fill(Path(ellipseIn:CGRect(x:p.x-halo/2,y:p.y-halo/2,width:halo,height:halo)),with:.color(palette.accent.opacity(0.35*access.glow*lit)))
                     }
                 }
+            }
+            // Dimmer nights first, so the darkest skies sit on top where places crowd together.
+            for mark in map.marks.sorted(by:{ $0.score<$1.score }) {
+                let lit=shown(mark)
+                guard lit>0 else { continue }
+                let p=screen(mark.point), radius=mark.radius*size1
+                guard visible(p,radius) else { continue }
+                var layer=context
+                layer.opacity=lit
                 let shape=NightMark.mark(score:mark.score,hasForecast:mark.fill == .full,differentiate:access.differentiate)
                 shape.draw(in:&layer,center:p,radius:radius,fill:mark.fill,color:palette.accent,fillOpacity:palette.markOpacity(score:mark.score),lineWidth:1,stroke:palette.stroke,hollowBackground:palette.panel)
                 if mark.closure != nil { layer.stroke(Self.triangle(at:CGPoint(x:p.x+radius*0.8+4,y:p.y-radius*0.8-2),size:6),with:.color(palette.ink),lineWidth:1.1*palette.stroke) }
@@ -96,6 +102,8 @@ struct TonightMapView: View {
     var origin: CGPoint? = nil
     /// What the map shows ("Lower 48", "Around Chicago"), said before the map's summary.
     var title: String? = nil
+    /// True while the places' scores are worked out: the land shows, and the marks light up once they are ready.
+    var pending=false
     let open: (String)->Void
     @State private var hovered: String?
     @AccessibilityFocusState private var focused: String?
@@ -104,15 +112,18 @@ struct TonightMapView: View {
     @Namespace private var rotor
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     private static let reveal=1.2
+    private struct RevealKey: Hashable { let frame: MapFrame; let pending: Bool }
+    private var summary: String { pending ? String(localized:"Working out tonight's scores.") : map.summary }
     var body: some View {
         drawing
             .aspectRatio(1/map.frame.aspect,contentMode:.fit)
             .overlay { GeometryReader { proxy in interaction(size:proxy.size) } }
             .accessibilityElement(children:.contain)
-            .accessibilityLabel(title.map { "\($0). \(map.summary)" } ?? map.summary)
+            .accessibilityLabel(title.map { "\($0). \(summary)" } ?? summary)
             .accessibilityRotor("West to east") { ForEach(map.marks.sorted { $0.point.x<$1.point.x }) { mark in AccessibilityRotorEntry(Text(mark.label),id:mark.id,in:rotor) } }
-            // A new area lights up again from the west.
-            .task(id:map.frame) { await reveal() }
+            // A new area lights up again from the west, once its places are scored.
+            .task(id:RevealKey(frame:map.frame,pending:pending)) { if !pending { await reveal() } }
+            .onChange(of:pending) { _,waiting in if waiting { started=nil; done=false } }
             .task { await WorldLandStore.shared.load() }
     }
     private var drawing: some View {
@@ -262,6 +273,8 @@ struct ParksMapView: View {
     @SceneStorage("parksMapArea") private var areaChoice=""
     /// Which catalogue places this map has asked forecasts for (held outside observation).
     @State private var forecasts=OnScreenForecasts()
+    /// The pool whose nights have been worked out off the main thread (`warmKey`).
+    @State private var warmed:String?
     let open: (Park)->Void
     private var area: SkyMap.Region {
         let chosen=SkyMap.Region(rawValue:areaChoice)
@@ -271,7 +284,12 @@ struct ParksMapView: View {
     var body: some View {
         let origin=model.mapOrigin, area=area
         let frame=SkyMap.frame(area,origin:origin,radiusMeters:model.radiusMeters)
-        let picked=SkyMap.shown(model.mapPlaces,in:frame) { places in places.map { model.night($0) }.sorted(by:NightPlanner.better).map(\.park) }
+        // The places in view, before any is scored. A crowded view (the world, a circle abroad) has its
+        // nights worked out off the main thread first (`prepareNights`); until then the land shows without marks.
+        let pool=SkyMap.pool(SkyMap.places(model.mapPlaces,for:area),in:frame)
+        let key=Self.warmKey(pool,clock:model.clock)
+        let ready=pool.rest.count<=Self.warmAbove || warmed==key
+        let picked=ready ? SkyMap.shown(pool) { places in places.map { model.night($0) }.sorted(by:NightPlanner.better).map(\.park) } : (places:[],inView:pool.inView)
         let byID=Dictionary(picked.places.map { ($0.id,$0) },uniquingKeysWith:{ a,_ in a })
         let closures=Dictionary(picked.places.compactMap { place in model.closure(place).map { (place.id,$0) } },uniquingKeysWith:{ a,_ in a })
         let map=TonightMap(nights:picked.places.map { model.night($0) },closures:closures,frame:frame,inView:picked.inView)
@@ -284,10 +302,10 @@ struct ParksMapView: View {
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
                 ViewThatFits(in:.horizontal) {
-                    HStack(alignment:.firstTextBaseline,spacing:8) { eyebrow(map); Spacer(minLength:8); areaMenu(origin:origin) }
-                    VStack(alignment:.leading,spacing:8) { eyebrow(map); areaMenu(origin:origin) }
+                    HStack(alignment:.firstTextBaseline,spacing:8) { eyebrow(map,ready:ready); Spacer(minLength:8); areaMenu(origin:origin) }
+                    VStack(alignment:.leading,spacing:8) { eyebrow(map,ready:ready); areaMenu(origin:origin) }
                 }
-                TonightMapView(map:map,ring:ring,origin:start,title:area == .around ? aroundTitle : area.name) { id in if let park=byID[id] { open(park) } }
+                TonightMapView(map:map,ring:ring,origin:start,title:area == .around ? aroundTitle : area.name,pending:!ready) { id in if let park=byID[id] { open(park) } }
                     .padding(12)
                     .background(RoundedRectangle(cornerRadius:24).fill(palette.panel))
                     .overlay(RoundedRectangle(cornerRadius:24).stroke(palette.line,lineWidth:0.5))
@@ -295,7 +313,9 @@ struct ParksMapView: View {
                 // accessibility sizes it runs long, so the answer comes first and the legend follows the list.
                 if !typeSize.isAccessibilitySize { legend(ring:ring != nil) }
                 Eyebrow(text:"Darkest tonight")
-                if map.darkest.isEmpty {
+                if !ready {
+                    ProgressView().frame(maxWidth:.infinity,minHeight:44)
+                } else if map.darkest.isEmpty {
                     Text("No places in this part of the map. Choose another area above.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 VStack(spacing:0) {
@@ -319,6 +339,11 @@ struct ParksMapView: View {
         .background(NightBackground()).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
         // Clouds for the curated parks in one request, and the one bulk alerts request for the closure marks.
         .task { await model.refresh(model.parks) }
+        .task(id:key) {
+            guard !ready else { return }
+            await model.prepareNights(pool.rest,count:1)
+            if !Task.isCancelled { warmed=key }
+        }
         .task(id:wanted.map(\.id)) {
             guard !wanted.isEmpty else { return }
             try? await Task.sleep(for:OnScreenForecasts.settle)
@@ -327,18 +352,26 @@ struct ParksMapView: View {
         }
         .refreshable { await model.refresh(model.parks,force:true) }
     }
-    @ViewBuilder private func eyebrow(_ map:TonightMap)->some View {
-        if let home=model.home { Eyebrow(text:"\(home.dayLabel(model.tonight(home))) · \(map.marks.count) places tonight") }
+    /// The night, and how many places this map draws (a crowded map draws the darkest of each crowd,
+    /// so the count is the map's, not every place in view). Just the night while the scores are worked out.
+    @ViewBuilder private func eyebrow(_ map:TonightMap,ready:Bool)->some View {
+        if let home=model.home {
+            let day=home.dayLabel(model.tonight(home))
+            if ready { Eyebrow(text:"\(day) · \(map.marks.count) places on this map") } else { Eyebrow(text:"\(day)") }
+        }
     }
+    /// Above this many places to score, a map works their nights out off the main thread before drawing.
+    private static let warmAbove=40
+    /// The places a map warmed, for the night they were warmed for (`PlanModel.clock` moves on at a turn of night).
+    private static func warmKey(_ pool:SkyMap.Pool,clock:Date)->String { "\(Int(clock.timeIntervalSince1970))|"+pool.rest.map(\.id).joined(separator:",") }
     /// Which part of the world the map shows: a stock menu, said as "Map area".
     private func areaMenu(origin:GeoPoint?)->some View {
-        Picker("Map area",selection:Binding(get:{ area },set:{ areaChoice=$0.rawValue })) {
+        let area=area
+        return WrappingMenuPicker(title:"Map area",selection:Binding(get:{ area },set:{ areaChoice=$0.rawValue }),current:area == .around ? aroundTitle : area.name) {
             if origin != nil { Text(aroundTitle).tag(SkyMap.Region.around) }
             ForEach(SkyMap.Region.unitedStates,id:\.self) { region in Text(region.name).tag(region) }
             Text(SkyMap.Region.world.name).tag(SkyMap.Region.world)
         }
-        .pickerStyle(.menu).labelsHidden().fixedSize()
-        .accessibilityLabel("Map area")
     }
     /// What the marks mean, in words beside small drawn examples.
     private func legend(ring:Bool)->some View {
@@ -372,6 +405,36 @@ struct ParksMapView: View {
             }
         }
         .padding(.vertical,12).frame(minHeight:44).contentShape(Rectangle())
+    }
+}
+
+/// A stock menu picker, kept at its own width beside other words. A menu-style picker keeps its
+/// label on one line, so at accessibility sizes a long choice ("Around Windhoek", "Los 48
+/// contiguos") would widen the whole page past the screen. There it becomes a stock menu holding
+/// the same inline picker, under a label that wraps.
+struct WrappingMenuPicker<Value: Hashable, Options: View>: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let title: LocalizedStringKey
+    let selection: Binding<Value>
+    /// The chosen option's words, shown as the label at accessibility sizes.
+    let current: String
+    @ViewBuilder let options: () -> Options
+    var body: some View {
+        if typeSize.isAccessibilitySize {
+            Menu {
+                Picker(title,selection:selection) { options() }.pickerStyle(.inline)
+            } label:{
+                HStack(alignment:.firstTextBaseline,spacing:6) {
+                    Text(current).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                    Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).accessibilityHidden(true)
+                }
+                .foregroundStyle(.tint).frame(minHeight:44,alignment:.leading).contentShape(Rectangle())
+            }
+            .accessibilityLabel(title).accessibilityValue(current)
+        } else {
+            Picker(title,selection:selection) { options() }.pickerStyle(.menu).labelsHidden().fixedSize()
+                .accessibilityLabel(title)
+        }
     }
 }
 

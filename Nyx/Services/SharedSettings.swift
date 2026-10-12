@@ -47,17 +47,25 @@ nonisolated enum MoonImages {
 /// decoded leniently, so a field added later, or one park that no longer decodes, never blanks a
 /// widget until the app is next opened.
 nonisolated struct SavedSkySnapshot:Codable,Sendable {
-    /// 2 adds the version and the per-park closures (1.1).
-    static let currentVersion=2
+    /// 2 adds the version and the per-park closures (1.1); 3 the carried usual clouds (2.0). Readers
+    /// never refuse a version: every field after the parks is optional.
+    static let currentVersion=3
     var version=SavedSkySnapshot.currentVersion
     let parks:[Park]
     let forecasts:[String:Forecast]
     /// Smoke and cloud layers for the same parks, so widgets and reminders score as the app does.
     /// Optional: snapshots written before it existed still decode.
     var details:[String:ForecastDetail]?=nil
-    var planner:NightPlanner { NightPlanner(forecasts:forecasts,details:details ?? [:]) }
+    var planner:NightPlanner { NightPlanner(forecasts:forecasts,details:details ?? [:],climate:climate) }
     /// Each saved park's closure as Nyx words it beside the score, from the last park update.
     var closures:[String:String]=[:]
+    /// The usual clouds of each place here that the bundled per-park file does not hold (saved spots,
+    /// world places), worked out on the iPhone from its world grid (`CloudClimate.carriedMonths`):
+    /// the widgets and the watch bundle no grid, and score those places with these, as the app does.
+    /// Optional both ways: an older reader ignores it, and a snapshot without it still decodes.
+    var usualClouds:[String:CloudClimate.Months]?=nil
+    /// The climate every night here is scored with: the bundled one plus the carried months.
+    var climate:CloudClimate { CloudClimate.shared.carrying(usualClouds) }
     /// Bulk reminder planning is safe to run off the main actor. It never reads
     /// preferences, does I/O, or assumes missing clouds are clear.
     func nights(from date:Date,count:Int,forecastAsOf:Date = .now)->[Night] {
@@ -75,6 +83,8 @@ nonisolated extension SavedSkySnapshot {
         forecasts=(try container.decodeIfPresent([String:Lenient<Forecast>].self,forKey:.forecasts) ?? [:]).compactMapValues(\.value)
         details=(try? container.decodeIfPresent([String:Lenient<ForecastDetail>].self,forKey:.details))?.compactMapValues(\.value)
         closures=(try? container.decodeIfPresent([String:String].self,forKey:.closures)) ?? [:]
+        // Absent before 2.0 (15); one place's months that no longer decode cost only that place's usual clouds.
+        usualClouds=(try? container.decodeIfPresent([String:Lenient<CloudClimate.Months>].self,forKey:.usualClouds))?.compactMapValues(\.value)
     }
 }
 /// A value that decodes to nil instead of failing the whole document.

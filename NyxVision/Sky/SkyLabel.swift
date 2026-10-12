@@ -19,7 +19,7 @@ struct SkyLabel: View {
         case .compass:
             Text(title).font(font(32, .title1, weight: .semibold)).foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.78))
         case .whisper:
-            Text(title).font(font(18, .body, weight: .medium)).italic().kerning(1)
+            Text(title).font(font(18, .body, weight: .medium)).italic().kerning(Lettering.spaced ? 1 : 0)
                 .foregroundStyle(palette.skyInk.opacity(palette.highContrast ? 1 : 0.82))
                 .padding(.horizontal, 12).padding(.vertical, 6)
         case .card:

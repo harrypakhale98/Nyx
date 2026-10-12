@@ -77,6 +77,26 @@ struct PlaceNamesTests {
             #expect((try? Self.place(id, language))?.shortName == short, "\(language)")
         }
     }
+    /// Labels that name another place or an older name are not used (Scripts/build_place_names.py's
+    /// NAME_OVERRIDES and its rule for renamed places): the place keeps its English name there.
+    @Test func wrongAndOutdatedLabelsAreLeftOut() throws {
+        let spanish=PlaceNames.load(language: "es"), german=PlaceNames.load(language: "de"), french=PlaceNames.load(language: "fr")
+        // Jerusalem Walls is not the City of David; Migdal Afek is not the lordship of Mirabel.
+        #expect(spanish.places["wd:Q2908664"] == nil && spanish.places["wd:Q568521"] == nil && french.places["wd:Q568521"] == nil)
+        // Budj Bim, not Mount Eccles; Kalkajaka, not Black Mountain.
+        #expect(german.places["wd:Q1950297"] == nil && french.places["wd:Q1950297"] == nil && french.places["wd:Q542749"] == nil)
+        #expect(try Self.place("wd:Q1950297", "de").name == "Budj Bim National Park")
+        // Nkasa Rupara, not Mamili.
+        #expect(spanish.places["wd:Q1392554"]?.short == "Nkasa Rupara")
+        // A short name starts with a capital.
+        #expect(french.places["wd:Q3364499"]?.short == "Forêts")
+        // Towns: the town, not its district or station.
+        let towns=french.townNames(count: french.townCount)
+        let hannover=try #require(StartingPlaces.all.firstIndex { $0.savedName == "Hannover" })
+        #expect(towns[hannover] == "Hanovre")
+        let spanishTowns=spanish.townNames(count: spanish.townCount)
+        for (index, name) in spanishTowns.enumerated() { if let name { #expect(!name.contains("Municipio") && !name.contains("Estación"), "\(index)") } }
+    }
     @Test func searchFindsAPlaceByItsLocalAndItsEnglishName() throws {
         let catalog=PlaceCatalog(try Self.catalog("de"))
         for query in ["Nationalpark Eifel", "eifel", "Eifel National Park", "Nordrhein-Westfalen", "North Rhine-Westphalia"] {

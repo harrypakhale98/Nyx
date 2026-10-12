@@ -173,9 +173,10 @@ struct TripPlannerView: View {
         }
     }
     private func menu(title:LocalizedStringKey,selection:Binding<Double>,values:[Double])->some View {
-        Picker(title,selection:selection) {
+        // At accessibility sizes the menu's label wraps rather than widening the page.
+        WrappingMenuPicker(title:title,selection:selection,current:SearchRadius.label(selection.wrappedValue)) {
             ForEach(SearchRadius.choices(values,keeping:selection.wrappedValue),id:\.self) { meters in Text(SearchRadius.label(meters)).tag(meters) }
-        }.pickerStyle(.menu).fixedSize()
+        }
     }
     @ViewBuilder private var results:some View {
         if let plan {

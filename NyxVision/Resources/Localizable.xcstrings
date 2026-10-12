@@ -2381,37 +2381,37 @@
         }
       }
     },
-    "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024).": {
+    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (ERA5, 2015–2024)."
+            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015–2024. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contains modified Copernicus Climate Change Service information (ERA5, 2015–2024)."
+            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (ERA5, 2015–2024)."
+            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015–2024. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Climate Change Service (ERA5, 2015–2024)."
+            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015–2024. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Copernicus Climate Change Serviceの情報（ERA5、2015–2024）を加工して含んでいます。"
+            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015–2024。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -3532,6 +3532,146 @@
           "stringUnit": {
             "state": "translated",
             "value": "夕暮れ後、%1$@の空。%2$@に沈みます。"
+          }
+        }
+      }
+    },
+    "International Dark Sky Community": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Community"
+          }
+        }
+      }
+    },
+    "International Dark Sky Park": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Park"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Park"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Park"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Park"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Park"
+          }
+        }
+      }
+    },
+    "International Dark Sky Reserve": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Reserve"
+          }
+        }
+      }
+    },
+    "International Dark Sky Sanctuary": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "International Dark Sky Sanctuary"
           }
         }
       }
@@ -9587,6 +9727,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "一晩中空にあり、%1$@ごろ%2$@の空で最も高くなります。"
+          }
+        }
+      }
+    },
+    "Urban Night Sky Place": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
           }
         }
       }

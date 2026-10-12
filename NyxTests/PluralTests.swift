@@ -36,9 +36,9 @@ struct PluralTests {
     /// The count is not the first argument: the string's other arguments keep their places.
     @Test func countsAfterOtherArguments() {
         let today="Today", zion="Zion"
-        check([("\(today) · \(1) places tonight","Today · 1 place tonight")],"en")
+        check([("\(today) · \(1) places on this map","Today · 1 place on this map")],"en")
         check([
-            ("\(today) · \(7) places tonight","Today · 7 lugares esta noche"),
+            ("\(today) · \(7) places on this map","Today · 7 lugares en este mapa"),
             ("\(1) nights at \(zion)","1 noche en Zion"),
             ("Add \(2) nights at \(zion) to Calendar","Agregar 2 noches en Zion a Calendario"),
         ],"es")

@@ -31,26 +31,33 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
         return WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
     }
     func snapshot(for configuration: TonightParkIntent, in context: Context) async -> WatchSkyEntry {
-        var snapshot = Self.snapshot(for: configuration)
+        let choice = Self.snapshot(for: configuration)
+        if choice.unsaved { return WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: .now), unsaved: true) }
+        var snapshot = choice.snapshot
         // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         var cache: [String: SkyConditions] = [:]
         return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, cache: &cache)
     }
     func timeline(for configuration: TonightParkIntent, in context: Context) async -> Timeline<WatchSkyEntry> {
-        let now = Date.now
-        let entries = WatchTimeline.entries(from: now, snapshot: Self.snapshot(for: configuration), look: .current)
+        let now = Date.now, choice = Self.snapshot(for: configuration)
+        if choice.unsaved {
+            // Until the face is set to another place (or the place is saved again, which reloads every timeline).
+            return Timeline(entries: [WatchSkyEntry(date: now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: now), unsaved: true)], policy: .never)
+        }
+        let entries = WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current)
         return Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600)))
     }
-    /// The parks this complication weighs: the watch app's choice, or the one park set, with the
-    /// clouds and the closure the iPhone last sent for it.
-    static func snapshot(for configuration: TonightParkIntent) -> SavedSkySnapshot? {
-        guard let id = configuration.park?.id, id != WristParkEntity.darkestID,
-              let park = WristParkQuery.allParks().first(where: { $0.id == id }) else { return SharedSettings.read() }
+    /// The parks this complication weighs: the watch app's choice, or the one place set (a park, or a
+    /// saved spot or world place the iPhone sent whole), with the clouds, the usual clouds and the
+    /// closure the iPhone last sent for it. `unsaved`: the place set is no longer among those the
+    /// iPhone sends, so the face says so rather than quietly showing another place.
+    static func snapshot(for configuration: TonightParkIntent) -> (snapshot: SavedSkySnapshot?, unsaved: Bool) {
+        guard let id = configuration.park?.id, id != WristParkEntity.darkestID else { return (SharedSettings.read(), false) }
         let context = WatchSky.readContext()
-        let forecast = context?.cloudForecasts[id], detail = context?.forecastDetails[id], closure = context?.closures[id]
-        return SavedSkySnapshot(parks: [park], forecasts: forecast.map { [id: $0] } ?? [:], details: detail.map { [id: $0] } ?? [:],
-                                closures: closure.map { [id: $0] } ?? [:])
+        // Before anything has come from the iPhone, nothing is known about what is saved: the default holds.
+        guard let park = WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: context) else { return context == nil ? (SharedSettings.read(), false) : (nil, true) }
+        return (WatchSky.snapshot(parks: [park], context: context), false)
     }
 }
 
@@ -81,9 +88,15 @@ struct WristParkQuery: EntityQuery {
         let parks = allParks(), context = WatchSky.readContext()
         return (context?.savedParkIDs ?? []).compactMap { id in WatchSky.place(id, in: parks, context: context) }
     }
+    /// A spot or world place the iPhone no longer sends stays the face's setting, named "No longer
+    /// saved", so the face can say so instead of falling back to the darkest saved park unnoticed.
     func entities(for identifiers: [String]) async throws -> [WristParkEntity] {
         let parks = Self.allParks(), context = WatchSky.readContext()
-        return identifiers.compactMap { id in id == WristParkEntity.darkestID ? .darkest : WatchSky.place(id, in: parks, context: context).map(WristParkEntity.init) }
+        return identifiers.compactMap { id in
+            if id == WristParkEntity.darkestID { return .darkest }
+            if let place = WatchSky.place(id, in: parks, context: context) { return WristParkEntity(place) }
+            return WatchLink.placeID(id) == id && id.contains(":") ? WristParkEntity(id: id, name: String(localized: "No longer saved")) : nil
+        }
     }
     /// Darkest saved park, then the saved parks, then every park.
     func suggestedEntities() async throws -> [WristParkEntity] {
@@ -164,12 +177,12 @@ struct DuskProvider: RelevanceEntriesProvider {
     static let parkRadius: CLLocationDistance = 25_000
     func relevance() async -> WidgetRelevance<DuskNight> {
         guard let snapshot = SharedSettings.read() else { return WidgetRelevance([]) }
-        let now = Date.now
+        let now = Date.now, climate = snapshot.climate
         var attributes: [WidgetRelevanceAttribute<DuskNight>] = []
         for park in snapshot.parks {
             for offset in 0..<7 {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
-                let night = WatchSky.night(park, evening: evening, forecast: snapshot.forecasts[park.id], detail: snapshot.details?[park.id], now: now)
+                let night = WatchSky.night(park, evening: evening, forecast: snapshot.forecasts[park.id], detail: snapshot.details?[park.id], now: now, climate: climate)
                 guard NightPlanner.worthSurfacing(night), let window = WatchTimeline.duskWindow(sky: night.sky), window.end > now else { continue }
                 attributes.append(WidgetRelevanceAttribute(configuration: DuskNight(park: park.id, evening: evening), context: .date(interval: window, kind: .informational)))
             }
@@ -184,16 +197,18 @@ struct DuskProvider: RelevanceEntriesProvider {
     }
     func entry(configuration: DuskNight, context: Context) async throws -> DuskEntry {
         let now = Date.now
-        let snapshot = SharedSettings.read()
+        let snapshot = SharedSettings.read(), context = WatchSky.readContext()
         let parks = snapshot?.parks ?? []
         let look = WristLook.current
-        guard let id = configuration.park, let park = parks.first(where: { $0.id == id }) ?? WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: WatchSky.readContext()) else {
+        guard let id = configuration.park, let park = parks.first(where: { $0.id == id }) ?? WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: context) else {
             return DuskEntry(entry: WatchSkyEntry(date: now, night: nil, next: nil, nightVision: look.nightVision(park: nil, at: now)))
         }
         let evening = configuration.evening ?? park.currentNight(at: now)
-        let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: now)
+        // The usual clouds the snapshot carries, else those the iPhone sent for a place it no longer weighs.
+        let climate = (snapshot?.climate ?? .shared).carrying((context?.usualClouds ?? [:]).filter { $0.key == id && snapshot?.usualClouds?[id] == nil })
+        let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: now, climate: climate)
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
-        let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : WatchSky.readContext()?.closures[id]
+        let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : context?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
                                               closure: closure, cloudsOld: WatchTimeline.isOld(snapshot?.forecasts[park.id]?.updated, at: now)))
     }

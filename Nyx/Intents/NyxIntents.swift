@@ -62,7 +62,21 @@ nonisolated struct DarknessAnswer:Sendable {
     }
     /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
     static func dialog(_ night:Night,closure:String?,voiceOnly:Bool)->String {
-        closureFirst(night.spokenSummary(.siriTonight(voiceOnly:voiceOnly)),closure:closure)
+        withClosures(night.spokenSummary(.siriTonight(voiceOnly:voiceOnly)),park:night.park,closure:closure)
+    }
+    /// Every spoken answer about a place, as to closures: a park's closure first (`closureFirst`); at a
+    /// place the Park Service does not run, where Nyx has no closures to know, a last sentence that says
+    /// so, so silence never reads as "nothing is closed".
+    static func withClosures(_ body:String,park:Park,closure:String?)->String {
+        let answer=closureFirst(body,closure:closure)
+        return unknownClosures(park).map { answer+" "+$0 } ?? answer
+    }
+    /// What the place's own page says where the Park Service has no alerts (`Place.unknownClosuresLine`):
+    /// a place abroad points to its own site, a saved spot to local checks. Nil for a national park.
+    static func unknownClosures(_ park:Park)->String? {
+        guard park.nps == nil else { return nil }
+        return park.isCatalogPlace ? String(localized:"Nyx can't check closures here. Check the park's own site before you go.")
+            : String(localized:"Nyx has no alerts for this place. Check access, local rules and closures before you go.")
     }
     /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
     static func closureFirst(_ body:String,closure:String?)->String {
@@ -83,7 +97,7 @@ struct DarknessSnippetView:View {
         HStack(alignment:.center,spacing:18) {
             StaticScoreDial(score:night.score.value,hasForecast:night.score.hasForecast,palette:palette).frame(width:118,height:118)
             VStack(alignment:.leading,spacing:6) {
-                Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
                 HStack(spacing:8) {
@@ -92,6 +106,8 @@ struct DarknessSnippetView:View {
                     Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption).foregroundStyle(palette.muted)
                 }
                 Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                // A place the Park Service does not run: Nyx cannot see its closures, and says so.
+                if let unknown=DarknessAnswer.unknownClosures(night.park) { Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
             Spacer(minLength:0)
         }
@@ -102,7 +118,7 @@ struct DarknessSnippetView:View {
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(night.spokenSummary(.snippet))
+        .accessibilityLabel(DarknessAnswer.withClosures(night.spokenSummary(.snippet),park:night.park,closure:nil))
     }
 }
 /// The celestial gauge's arc and numeral, drawn once: for snapshots (Siri) where nothing animates.

@@ -100,7 +100,8 @@ struct SaveSpotView: View {
             .navigationTitle("Save a spot").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement:.confirmationAction) { Button("Save") { save() }.disabled(point == nil) }
+                // Dimmed until there is a place to save: the app's starlight foreground would otherwise keep it as bright as Cancel.
+                ToolbarItem(placement:.confirmationAction) { Button("Save") { save() }.disabled(point == nil).foregroundStyle(point == nil ? palette.ink.opacity(palette.highContrast ? 0.55 : 0.38) : palette.ink) }
             }
             .sheet(isPresented:$explainLocation) {
                 PermissionExplainer(symbol:"location",title:"Save where you are",message:"Nyx reads where you are once, to save this spot. Nothing is sent unless you save it.",action:"Use my location") {

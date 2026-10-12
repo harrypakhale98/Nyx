@@ -56,7 +56,14 @@ struct TonightView: View {
     @State private var scrubbing=false
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    private var loading:Bool { DebugScenario.state=="loading" }
+    private var loading:Bool { DebugScenario.state=="loading" || awaitingWorld }
+    /// From outside the US the answer weighs the world catalogue, read off the main thread from launch:
+    /// until it is ready the page shows the loader, never the national parks' empty state or a US-only
+    /// answer that would change a moment later.
+    private var awaitingWorld:Bool {
+        guard !model.catalogIsReady, let from else { return false }
+        return !USOutline.contains(latitude:from.latitude,longitude:from.longitude)
+    }
     var body: some View {
         let best=self.best
         let empty=best.isEmpty || DebugScenario.state=="empty"

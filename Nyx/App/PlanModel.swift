@@ -21,8 +21,9 @@ import CoreLocation
     /// The catalogue's lookup, spatial index, search terms and forecast regions, built with it.
     @ObservationIgnored private var placeCatalog=PlaceCatalog.empty
     @ObservationIgnored private var catalogTask: Task<Void,Never>?
-    /// True once the catalogue has been read (even if it came back empty).
-    @ObservationIgnored private(set) var catalogIsReady=false
+    /// True once the catalogue has been read (even if it came back empty). Observed, so a screen that
+    /// waits for the world abroad (Tonight's loader, the Parks list's skeleton rows) moves on when it arrives.
+    private(set) var catalogIsReady=false
     /// The curated parks' folded search terms, made on the first search.
     @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
     let loadError: Bool
@@ -263,6 +264,24 @@ import CoreLocation
         prepareCatalog()
         await catalogTask?.value
     }
+    /// A place named from outside the app (a widget, a reminder, Spotlight, a link, Handoff, Siri): at
+    /// once when it is known; a world catalogue id named before the catalogue is read (a cold launch)
+    /// once it is, so it is never dropped. Nil for an id Nyx does not know, never another place.
+    func place(named id:String) async -> Park? {
+        if let known=park(id) { return known }
+        guard awaitsCatalog(id) else { return nil }
+        await catalogReady()
+        return park(id)
+    }
+    /// True for a world catalogue id while the catalogue is still being read: its place is not known yet.
+    func awaitsCatalog(_ id:String)->Bool { id.hasPrefix(Park.catalogPrefix) && !catalogIsReady }
+    /// Field mode's place when none was named (Control Center, "I'm stargazing"): the last place used in
+    /// the field, else the starting place, each waited for when it is a catalogue place not read yet;
+    /// the first park only when neither is known.
+    func usualFieldPlace(lastUsed:String?) async -> Park? {
+        for id in [lastUsed,homeID].compactMap({ $0 }) { if let found=await place(named:id) { return found } }
+        return home
+    }
     private func install(_ built:PlaceCatalog) {
         placeCatalog=built
         catalogIsReady=true
@@ -286,7 +305,7 @@ import CoreLocation
     /// Curated parks and catalogue places whose name, region or country (in the reader's language)
     /// matches `query`, folded as the park list folds it ("Iguazu" finds Iguazú). Ranked: the whole
     /// name, a name that begins with it, a word of the name that does, the name containing it, then
-    /// region or country the same way; on a tie a curated park first, then by name. Empty for an empty query.
+    /// region or country the same way; on a tie a curated park first, then by the name shown. Empty for an empty query.
     func searchPlaces(_ query:String,limit:Int=50)->[Park] {
         _=catalog.isEmpty
         let needle=Park.folded(query)
@@ -297,7 +316,8 @@ import CoreLocation
         return found.sorted { a,b in
             if a.1 != b.1 { return a.1<b.1 }
             if a.0.curated != b.0.curated { return a.0.curated }
-            return (a.0.name,a.0.id)<(b.0.name,b.0.id)
+            // By the name the list shows, as the world list orders a country (`WorldBrowse.shownBefore`).
+            return WorldBrowse.shownBefore(a.0,b.0)
         }.prefix(limit).map(\.0)
     }
     /// Forecasts for these places, as `refreshForecasts(watching:)`: the curated parks' request as it
@@ -469,6 +489,23 @@ import CoreLocation
         // Far from every curated park (abroad), the nearest world catalogue place is the home park
         // instead. Within reach of one, the curated park stays, as before the catalogue.
         guard curated.map({ place.distanceMeters(to:$0)>Self.curatedReach }) ?? true else { return }
+        guard catalogIsReady else {
+            // Chosen before the catalogue was read (first run, a cold launch): the nearest curated park
+            // stands in until it is, then the place nearest the city is chosen, unless the starting
+            // point or the home park has changed meanwhile. Never a park an ocean away for good.
+            let provisional=homeID
+            Task { [weak self] in
+                await self?.catalogReady()
+                guard let self, self.homePlace == place, self.homeID == provisional else { return }
+                self.chooseLocal(near:place,curated:curated)
+            }
+            return
+        }
+        chooseLocal(near:place,curated:curated)
+    }
+    /// The world catalogue place nearest a starting point abroad as the home park, when it is nearer
+    /// than the nearest curated park.
+    private func chooseLocal(near place:StartingPlace,curated:Park?) {
         let local=Self.nearestPark(to:place,in:placeCatalog.nearby(latitude:place.latitude,longitude:place.longitude,radiusMeters:2*Self.curatedReach))
         if let local, curated.map({ place.distanceMeters(to:local)<place.distanceMeters(to:$0) }) ?? true { homeID=local.id }
     }

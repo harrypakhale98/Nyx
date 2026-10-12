@@ -10,6 +10,7 @@ struct ParkPillPicker: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     /// The other parks in reach, best first.
     let others: [Park]
@@ -19,6 +20,7 @@ struct ParkPillPicker: View {
     @State private var open=DebugScenario.isEnabled("pill-open")
     @Namespace private var glass
     private var solid: Bool { palette.nightVision || reduceTransparency || palette.highContrast }
+    private var large: Bool { typeSize.isAccessibilitySize }
     var body: some View {
         Group {
             if solid { stack } else { GlassEffectContainer(spacing:10) { stack } }
@@ -27,27 +29,13 @@ struct ParkPillPicker: View {
     }
     private var stack: some View {
         VStack(spacing:10) {
-            HStack(spacing:6) {
-                NavigationLink(value:ZoomRoute.pill(park)) {
-                    HStack { Text(park.shortName).font(.system(.title2,design:.serif)); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
-                        .padding(.vertical,14).padding(.horizontal,22)
-                        .modifier(PillGlass(solid:solid,shape:Capsule(),id:"pill",namespace:glass))
-                }
-                .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pill(park).source,in:zoom).hoverEffect(.lift)
-                if !others.isEmpty {
-                    Button { open.toggle() } label:{
-                        Image(systemName:"chevron.down").font(.subheadline.weight(.semibold))
-                            .rotationEffect(.degrees(open ? 180 : 0)).accessibilityHidden(true)
-                            // The whole 44 pt circle is the target, for the finger and for accessibility, not the glyph.
-                            .frame(width:44,height:44).contentShape(Circle())
-                            .modifier(PillGlass(solid:solid,shape:Circle(),id:"toggle",namespace:glass))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Other parks within reach")
-                    .accessibilityValue(open ? "Shown" : "Hidden")
-                    .accessibilityHint(open ? "Hides the list." : "Shows the other parks in reach and their scores tonight.")
-                    .accessibilityInputLabels([Text("Other parks"),Text("More parks")])
-                }
+            // At accessibility sizes the name takes the full width on a rounded rectangle, with the toggle
+            // underneath: a capsule around three wrapped lines becomes an egg, and a narrow one breaks words.
+            if large {
+                pill
+                toggle
+            } else {
+                HStack(spacing:6) { pill; toggle }
             }
             if open {
                 VStack(spacing:0) {
@@ -71,6 +59,43 @@ struct ParkPillPicker: View {
                 .modifier(PillGlass(solid:solid,shape:RoundedRectangle(cornerRadius:22),id:"list",namespace:glass))
                 .transition(.opacity)
             }
+        }
+    }
+}
+extension ParkPillPicker {
+    private var pillShape: AnyShape { large ? AnyShape(RoundedRectangle(cornerRadius:22,style:.continuous)) : AnyShape(Capsule()) }
+    private var pill: some View {
+        NavigationLink(value:ZoomRoute.pill(park)) {
+            Group {
+                if large {
+                    // The arrow rides at the end of the words, so the name has the whole width and long words stay whole.
+                    Text("\(Text(park.shortName).font(.system(.title2,design:.serif))) \(Text(Image(systemName:"arrow.up.right")).font(.subheadline))")
+                        .accessibilityLabel(park.shortName)
+                        .multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                        .frame(maxWidth:.infinity).padding(.vertical,14).padding(.horizontal,16)
+                } else {
+                    HStack { Text(park.shortName).font(.system(.title2,design:.serif)); Image(systemName:"arrow.up.right").font(.subheadline).accessibilityHidden(true) }
+                        .padding(.vertical,14).padding(.horizontal,22)
+                }
+            }
+            .modifier(PillGlass(solid:solid,shape:pillShape,id:"pill",namespace:glass))
+        }
+        .buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.pill(park).source,in:zoom).hoverEffect(.lift)
+    }
+    @ViewBuilder private var toggle: some View {
+        if !others.isEmpty {
+            Button { open.toggle() } label:{
+                Image(systemName:"chevron.down").font(.subheadline.weight(.semibold))
+                    .rotationEffect(.degrees(open ? 180 : 0)).accessibilityHidden(true)
+                    // The whole 44 pt circle is the target, for the finger and for accessibility, not the glyph.
+                    .frame(width:44,height:44).contentShape(Circle())
+                    .modifier(PillGlass(solid:solid,shape:Circle(),id:"toggle",namespace:glass))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Other parks within reach")
+            .accessibilityValue(open ? "Shown" : "Hidden")
+            .accessibilityHint(open ? "Hides the list." : "Shows the other parks in reach and their scores tonight.")
+            .accessibilityInputLabels([Text("Other parks"),Text("More parks")])
         }
     }
 }

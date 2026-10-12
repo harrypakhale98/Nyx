@@ -36,8 +36,8 @@ struct CreditsView: View {
                         .accessibilityHint("Opens open-meteo.com in Safari.")
                 }
                 credit("Cloud forecasts and the three forecast models: Open-Meteo, CC BY 4.0.")
-                credit("Smoke and haze: CAMS, the Copernicus Atmosphere Monitoring Service, via Open-Meteo, CC BY 4.0.")
-                credit("Usual clouds: contains modified Copernicus Climate Change Service information (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0.")
+                credit("Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.")
+                credit("Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0.")
             }.listRowBackground(palette.panel)
             Section("Sky and light") {
                 credit("The Moon: NASA's Scientific Visualization Studio, CGI Moon Kit, with the LRO LROC (Hapke Normalized WAC Mosaic) and LOLA teams.")

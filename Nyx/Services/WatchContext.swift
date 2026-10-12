@@ -37,35 +37,45 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// or the world catalogue. Empty from an iPhone without either; a watch from before G3 ignores it
     /// and simply leaves those places out, as any id it does not know.
     let places: [Place]
+    /// The usual clouds of each place in `places`, month by month, from the iPhone's world grid
+    /// (`CloudClimate.carriedMonths`): the watch bundles no grid, and without them it would score a
+    /// spot or world place with no usual clouds where the forecast does not reach. Empty from an
+    /// iPhone before 2.0 (15); an older watch ignores it.
+    let usualClouds: [String: CloudClimate.Months]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
     /// The smoke and summit layers in the shape `NightPlanner.night` reads, expanded once. Not sent.
     let forecastDetails: [String: ForecastDetail]
+    /// The climate the watch scores with: the bundled one plus `usualClouds`. Not sent.
+    let climate: CloudClimate
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
-    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures, ranges, places }
+    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, forecasts, details, closures, ranges, places, usualClouds }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
         a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
-            && a.ranges == b.ranges && a.places == b.places
+            && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: CompactForecast],
-         details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = []) {
+         details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
+         usualClouds: [String: CloudClimate.Months] = [:]) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
-        self.places = places
+        self.places = places; self.usualClouds = usualClouds
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
+        climate = CloudClimate.shared.carrying(usualClouds)
     }
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
     /// through a week ahead) and to the byte budget, saved parks first in their order. Each park's
     /// clouds go first, then its smoke and summit layers and its models' ranges (which mean
     /// nothing without its clouds); closures, which are short, come last (the followed parks' first).
+    /// A spot or world place travels first, its usual clouds (from `climate`, the iPhone's grid) right behind it.
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
-                     ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], now: Date = .now) -> WatchContext {
+                     ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared, now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
@@ -79,10 +89,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         }
         // A spot or catalogue place first: without its record the watch cannot show it at all, while a
         // forecast left out only costs clouds. Only places that are followed (or the start), in order, once.
-        var sentPlaces: [Place] = [], placed = Set<String>()
+        var sentPlaces: [Place] = [], placed = Set<String>(), sentUsual: [String: CloudClimate.Months] = [:]
         for place in places where ids.contains(place.id) && placed.insert(place.id).inserted {
             guard fits(place, place.id) else { break }
             sentPlaces.append(place)
+            // About 150 bytes: without them the place's nights past the forecast count no clouds at all.
+            if let months = climate.months(for: place), fits(months, place.id) { sentUsual[place.id] = months }
         }
         for id in ids {
             guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
@@ -104,7 +116,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             sentClosures[id] = closure
         }
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: compact,
-                            details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces)
+                            details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual)
     }
     var data: Data? { try? JSONEncoder().encode(self) }
     var dictionary: [String: Any] { data.map { [Self.key: $0] } ?? [:] }
@@ -119,7 +131,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The same context stamped at another moment, for comparing what it says rather than when.
     func sent(at date: Date) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, forecasts: forecasts, details: details,
-                     closures: closures, ranges: ranges, places: places)
+                     closures: closures, ranges: ranges, places: places, usualClouds: usualClouds)
     }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
@@ -155,7 +167,10 @@ nonisolated extension WatchContext {
         ranges = (try? container.decodeIfPresent([String: [String: [Int]]].self, forKey: .ranges)) ?? [:]
         // Absent before G3; a spot that no longer decodes is left out, never the context.
         places = ((try? container.decodeIfPresent([Lenient<Place>].self, forKey: .places)) ?? []).compactMap(\.value)
+        // Absent before 2.0 (15); one place's months that no longer decode cost only that place's usual clouds.
+        usualClouds = ((try? container.decodeIfPresent([String: Lenient<CloudClimate.Months>].self, forKey: .usualClouds)) ?? [:]).compactMapValues(\.value)
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
+        climate = CloudClimate.shared.carrying(usualClouds)
     }
 }
 

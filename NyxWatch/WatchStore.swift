@@ -108,7 +108,8 @@ import WidgetKit
         let sky = skies[key] ?? AstronomyEngine().conditions(for: park, on: evening)
         if skies.count > 120 { skies.removeAll() }
         skies[key] = sky
-        return WatchSky.night(park, evening: evening, forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now, sky: sky)
+        return WatchSky.night(park, evening: evening, forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now, sky: sky,
+                              climate: context?.climate ?? .shared)
     }
     func week(_ park: Park, at now: Date) -> [Night] { (0..<7).map { night(park, offset: $0, at: now) } }
     /// Hand the complications what Tonight shows, then ask them and the Smart Stack to look again.

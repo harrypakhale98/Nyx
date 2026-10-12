@@ -80,10 +80,11 @@ struct AdaptationProvider: TimelineProvider {
 struct AdaptationComplicationView: View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorSchemeContrast) private var contrast
     var previewFamily: WidgetFamily?
     let entry: AdaptationEntry
     private var family: WidgetFamily { previewFamily ?? systemFamily }
-    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
+    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     var body: some View {
         Group {
             switch family {

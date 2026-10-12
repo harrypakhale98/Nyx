@@ -701,6 +701,41 @@
         }
       }
     },
+    "%@ is no longer saved in Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ist nicht mehr in Nyx gespeichert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is no longer saved in Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ya no está guardado en Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ n’est plus enregistré dans Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@はNyxに保存されていません。"
+          }
+        }
+      }
+    },
     "%@ left": {
       "extractionState": "manual",
       "localizations": {
@@ -1401,7 +1436,7 @@
         }
       }
     },
-    "%@ · %lld places tonight": {
+    "%@ · %lld places on this map": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -1410,13 +1445,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · heute Nacht %lld Ort"
+                  "value": "%@ · %lld Ort auf dieser Karte"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · heute Nacht %lld Orte"
+                  "value": "%@ · %lld Orte auf dieser Karte"
                 }
               }
             }
@@ -1428,13 +1463,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld place tonight"
+                  "value": "%@ · %lld place on this map"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld places tonight"
+                  "value": "%@ · %lld places on this map"
                 }
               }
             }
@@ -1446,13 +1481,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld lugar esta noche"
+                  "value": "%@ · %lld lugar en este mapa"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld lugares esta noche"
+                  "value": "%@ · %lld lugares en este mapa"
                 }
               }
             }
@@ -1464,13 +1499,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld lieu ce soir"
+                  "value": "%@ · %lld lieu sur cette carte"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · %lld lieux ce soir"
+                  "value": "%@ · %lld lieux sur cette carte"
                 }
               }
             }
@@ -1482,7 +1517,7 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%@ · 今夜%lldか所"
+                  "value": "%@ · この地図に%lldか所"
                 }
               }
             }
@@ -9264,37 +9299,37 @@
         }
       }
     },
-    "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Copernicus Atmosphere Monitoring Service (CAMS) through Open-Meteo, CC BY 4.0, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy.": {
+    "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die aerosoloptische Dicke bei 550 nm aus der globalen CAMS-Vorhersage (Copernicus Atmosphere Monitoring Service), über den Luftqualitätsdienst von Open-Meteo, reicht etwa fünf Tage weit. Sie wird über die Dunkelphase gemittelt: unter 0,1 ist klare Luft, 0,1 bis 0,25 leichter Dunst, 0,25 bis 0,5 Dunst oder Rauch, der die Milchstraße blass wirken lässt, und ab 0,5 dichter Rauch oder Dunst, der schwache Sterne verbirgt. Ab 0,25 erscheint neben dem Wert ein Hinweis, und Rauch begrenzt ihn: höchstens 74 ab 0,25, höchstens 59 ab 0,5. Reicht keine Rauchvorhersage bis zu einer Nacht, wird nichts begrenzt. Luftqualitätsdaten: Copernicus Atmosphere Monitoring Service (CAMS) über Open-Meteo, CC BY 4.0, von Nyx über die echte Dunkelheit der Nacht gemittelt. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten. Du kannst diese Anfrage unter „Deine Privatsphäre“ ausschalten."
+            "value": "Die aerosoloptische Dicke bei 550 nm aus der globalen CAMS-Vorhersage (Copernicus Atmosphere Monitoring Service), über den Luftqualitätsdienst von Open-Meteo, reicht etwa fünf Tage weit. Sie wird über die Dunkelphase gemittelt: unter 0,1 ist klare Luft, 0,1 bis 0,25 leichter Dunst, 0,25 bis 0,5 Dunst oder Rauch, der die Milchstraße blass wirken lässt, und ab 0,5 dichter Rauch oder Dunst, der schwache Sterne verbirgt. Ab 0,25 erscheint neben dem Wert ein Hinweis, und Rauch begrenzt ihn: höchstens 74 ab 0,25, höchstens 59 ab 0,5. Reicht keine Rauchvorhersage bis zu einer Nacht, wird nichts begrenzt. Luftqualitätsdaten: enthalten veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo, von Nyx über die echte Dunkelheit der Nacht gemittelt. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten. Du kannst diese Anfrage unter „Deine Privatsphäre“ ausschalten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Copernicus Atmosphere Monitoring Service (CAMS) through Open-Meteo, CC BY 4.0, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy."
+            "value": "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the dark window: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La profundidad óptica de aerosoles a 550 nm, del pronóstico global CAMS (Copernicus Atmosphere Monitoring Service) a través del servicio de calidad del aire de Open-Meteo, cubre unos cinco días. Se promedia sobre el periodo de oscuridad: menos de 0.1 es aire limpio; de 0.1 a 0.25, bruma ligera; de 0.25 a 0.5, bruma o humo que hacen ver tenue la Vía Láctea, y 0.5 o más, humo o bruma densos que ocultan las estrellas débiles. A partir de 0.25 aparece una advertencia junto al índice, y el humo lo limita: como máximo 74 desde 0.25 y como máximo 59 desde 0.5. Cuando ningún pronóstico de humo llega a una noche, no se limita nada. Datos de calidad del aire: Copernicus Atmosphere Monitoring Service (CAMS) a través de Open-Meteo, CC BY 4.0, promediados por Nyx sobre la oscuridad total de la noche. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene. Puedes desactivar esta solicitud en Tu privacidad."
+            "value": "La profundidad óptica de aerosoles a 550 nm, del pronóstico global CAMS (Copernicus Atmosphere Monitoring Service) a través del servicio de calidad del aire de Open-Meteo, cubre unos cinco días. Se promedia sobre el periodo de oscuridad: menos de 0.1 es aire limpio; de 0.1 a 0.25, bruma ligera; de 0.25 a 0.5, bruma o humo que hacen ver tenue la Vía Láctea, y 0.5 o más, humo o bruma densos que ocultan las estrellas débiles. A partir de 0.25 aparece una advertencia junto al índice, y el humo lo limita: como máximo 74 desde 0.25 y como máximo 59 desde 0.5. Cuando ningún pronóstico de humo llega a una noche, no se limita nada. Datos de calidad del aire: contienen información modificada del Copernicus Atmosphere Monitoring Service (2026), a través de Open-Meteo, promediados por Nyx sobre la oscuridad total de la noche. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene. Puedes desactivar esta solicitud en Tu privacidad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur la période d’obscurité : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. Données de qualité de l’air : Copernicus Atmosphere Monitoring Service (CAMS) via Open-Meteo, CC BY 4.0, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
+            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur la période d’obscurité : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. Données de qualité de l’air : contiennent des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "550 nmのエアロゾル光学的厚さは、Open-Meteoの大気質サービスを通じたCAMS全球予報（コペルニクス大気監視サービス）によるもので、約5日先までをカバーします。暗い時間帯で平均し、0.1未満は澄んだ空気、0.1〜0.25は薄いもや、0.25〜0.5は天の川がかすんで見えるもやや煙、0.5以上は暗い星を隠す濃い煙やもやです。0.25以上になるとスコアの横に注意書きが表示され、煙によってスコアに上限がかかります。0.25以上では最大74、0.5以上では最大59です。煙の予報が届いていない夜には、上限はかかりません。大気質データ：Copernicus Atmosphere Monitoring Service（CAMS）、Open-Meteo経由、CC BY 4.0。Nyxがその夜の完全に暗い時間で平均しています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。このリクエストは「あなたのプライバシー」でオフにできます。"
+            "value": "550 nmのエアロゾル光学的厚さは、Open-Meteoの大気質サービスを通じたCAMS全球予報（コペルニクス大気監視サービス）によるもので、約5日先までをカバーします。暗い時間帯で平均し、0.1未満は澄んだ空気、0.1〜0.25は薄いもや、0.25〜0.5は天の川がかすんで見えるもやや煙、0.5以上は暗い星を隠す濃い煙やもやです。0.25以上になるとスコアの横に注意書きが表示され、煙によってスコアに上限がかかります。0.25以上では最大74、0.5以上では最大59です。煙の予報が届いていない夜には、上限はかかりません。大気質データ：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含みます。Open-Meteo経由。Nyxがその夜の完全に暗い時間で平均しています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。このリクエストは「あなたのプライバシー」でオフにできます。"
           }
         }
       }
@@ -9695,41 +9730,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園のすべてのアラート（%lld）"
-          }
-        }
-      }
-    },
-    "All parks": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle Parks"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All parks"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todos los parques"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tous les parcs"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべての公園"
           }
         }
       }
@@ -12929,37 +12929,37 @@
         }
       }
     },
-    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+    "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Erstellt mit Informationen des Copernicus Climate Change Service [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+            "value": "Jenseits der Vorhersage weiß Nyx, wie bewölkt die Nächte jedes Parks in jedem Monat üblicherweise sind: zehn Jahre (2015 bis 2024) ERA5, eine aus Beobachtungen rekonstruierte Aufzeichnung des vergangenen Wetters, gemittelt über die echte Dunkelheit jeder Nacht an den Koordinaten des Parks. Nächte ohne Vorhersage werden mit dieser üblichen Bewölkung bewertet und sagen das auch („Noch keine Wolkenvorhersage“), damit ein Park mit meist bedeckten Winternächten nicht mit einer Wüste gleichzieht und eine Nacht, die niemand vorhersagen kann, nie als klar gilt. Sie sagen auch, wie oft die Nächte dieses Monats überwiegend klar sind (unter 30 % Bewölkung). Es ist ein langjähriger Mittelwert, nie eine Vorhersage. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), gelesen aus seiner stündlichen Zeitreihe (DOI 10.24381/1cf1ad76) und von Nyx über die echte Dunkelheit jeder Nacht gemittelt. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Generated using Copernicus Climate Change Service information [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+            "value": "Beyond the forecast, Nyx knows how cloudy each park's nights usually are in each month: ten years (2015 to 2024) of ERA5, a record of past weather rebuilt from observations, averaged over each night's true darkness at the park's coordinates. Nights without a forecast are scored with these usual clouds and say so (\"No cloud forecast yet\"), so a park whose winter nights are mostly overcast does not tie a desert and a night nobody can forecast is never treated as clear. They also say how often that month's nights are mostly clear (under 30% cloud). It is a long-term average, never a forecast. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), read from its hourly time series (DOI 10.24381/1cf1ad76) and averaged over each night's true darkness by Nyx. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) de ERA5, un registro del clima pasado reconstruido a partir de observaciones, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]: ERA5 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+            "value": "Más allá del pronóstico, Nyx sabe cuán nubladas suelen ser las noches de cada parque en cada mes: diez años (2015 a 2024) de ERA5, un registro del clima pasado reconstruido a partir de observaciones, promediados sobre la oscuridad total de cada noche en las coordenadas del parque. Las noches sin pronóstico se calculan con estas nubes habituales y lo indican (“Aún sin pronóstico de nubes”), para que un parque cuyas noches de invierno suelen estar cubiertas no empate con un desierto y una noche que nadie puede pronosticar nunca se trate como despejada. También indican con qué frecuencia las noches de ese mes están mayormente despejadas (menos del 30% de nubes). Es un promedio a largo plazo, nunca un pronóstico. Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026), de ERA5, 2015 a 2024 (Hersbach et al. 2020; DOI 10.24381/cds.adbb2d47), leída de su serie horaria (DOI 10.24381/1cf1ad76) y promediada por Nyx sobre la oscuridad total de cada noche. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au-delà de la prévision, Nyx sait à quel point les nuits de chaque parc sont habituellement nuageuses, mois par mois : dix ans (2015 à 2024) d’ERA5, une archive de la météo passée reconstituée à partir d’observations, moyennés sur l’obscurité totale de chaque nuit aux coordonnées du parc. Les nuits sans prévision sont notées avec cette nébulosité habituelle et le disent (« Pas encore de prévision de nuages »), afin qu’un parc dont les nuits d’hiver sont surtout couvertes ne fasse pas jeu égal avec un désert, et qu’une nuit que personne ne peut prévoir ne soit jamais traitée comme dégagée. Elles indiquent aussi à quelle fréquence les nuits de ce mois sont plutôt dégagées (moins de 30 % de nuages). C’est une moyenne à long terme, jamais une prévision. Généré à partir d’informations du Copernicus Climate Change Service [2015–2024] : ERA5 (Hersbach et al. 2020 ; DOI 10.24381/cds.adbb2d47), lu dans sa série horaire (DOI 10.24381/1cf1ad76) et moyenné par Nyx sur l’obscurité totale de chaque nuit. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+            "value": "Au-delà de la prévision, Nyx sait à quel point les nuits de chaque parc sont habituellement nuageuses, mois par mois : dix ans (2015 à 2024) d’ERA5, une archive de la météo passée reconstituée à partir d’observations, moyennés sur l’obscurité totale de chaque nuit aux coordonnées du parc. Les nuits sans prévision sont notées avec cette nébulosité habituelle et le disent (« Pas encore de prévision de nuages »), afin qu’un parc dont les nuits d’hiver sont surtout couvertes ne fasse pas jeu égal avec un désert, et qu’une nuit que personne ne peut prévoir ne soit jamais traitée comme dégagée. Elles indiquent aussi à quelle fréquence les nuits de ce mois sont plutôt dégagées (moins de 30 % de nuages). C’est une moyenne à long terme, jamais une prévision. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024 (Hersbach et al. 2020 ; DOI 10.24381/cds.adbb2d47), lu dans sa série horaire (DOI 10.24381/1cf1ad76) et moyenné par Nyx sur l’obscurité totale de chaque nuit. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報の範囲を超えた夜については、各公園の夜が月ごとにどのくらい曇りやすいかをNyxは知っています。過去の観測から再構築された過去の天気の記録ERA5の10年分（2015〜2024年）を、公園の座標で各夜の完全に暗い時間について平均したものです。予報のない夜はこの平年の雲量でスコアを出し、そのことを表示します（「雲予報はまだありません」）。そのため、冬の夜がほとんど曇っている公園が砂漠と同点になることはなく、誰にも予報できない夜が晴れとして扱われることもありません。その月の夜がおおむね晴れる（雲量30%未満）頻度も示します。これは長期の平均で、予報ではありません。Copernicus Climate Change Serviceの情報［2015–2024］を使用して作成：ERA5（Hersbach et al. 2020、DOI 10.24381/cds.adbb2d47）。毎時の時系列（DOI 10.24381/1cf1ad76）から読み取り、Nyxが各夜の完全に暗い時間で平均しています。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
+            "value": "予報の範囲を超えた夜については、各公園の夜が月ごとにどのくらい曇りやすいかをNyxは知っています。過去の観測から再構築された過去の天気の記録ERA5の10年分（2015〜2024年）を、公園の座標で各夜の完全に暗い時間について平均したものです。予報のない夜はこの平年の雲量でスコアを出し、そのことを表示します（「雲予報はまだありません」）。そのため、冬の夜がほとんど曇っている公園が砂漠と同点になることはなく、誰にも予報できない夜が晴れとして扱われることもありません。その月の夜がおおむね晴れる（雲量30%未満）頻度も示します。これは長期の平均で、予報ではありません。Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年（Hersbach et al. 2020、DOI 10.24381/cds.adbb2d47）。毎時の時系列（DOI 10.24381/1cf1ad76）から読み取り、Nyxが各夜の完全に暗い時間で平均しています。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -17124,41 +17124,6 @@
         }
       }
     },
-    "Dark Sky parks": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark-Sky-Parks"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark Sky parks"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parques Dark Sky"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parcs Dark Sky"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark Skyの公園"
-          }
-        }
-      }
-    },
     "Dark adaptation": {
       "extractionState": "manual",
       "localizations": {
@@ -20639,6 +20604,41 @@
         }
       }
     },
+    "Edit the complication to choose another place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeite die Komplikation, um einen anderen Ort zu wählen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit the complication to choose another place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edita la complicación para elegir otro lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifiez la complication pour choisir un autre lieu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コンプリケーションを編集して別の場所を選んでください。"
+          }
+        }
+      }
+    },
     "Elsewhere": {
       "extractionState": "manual",
       "localizations": {
@@ -23524,37 +23524,37 @@
         }
       }
     },
-    "For a place that is not one of the U.S. national parks, such as your starting city, a spot you save or a park or dark-sky place in another country, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The U.S. national parks keep their own checked values. Generated using Copernicus Climate Change Service information [2015–2024].": {
+    "For a place that is not one of the U.S. national parks, such as your starting city, a spot you save or a park or dark-sky place in another country, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The U.S. national parks keep their own checked values. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Für einen Ort, der keiner der US-Nationalparks ist, etwa deine Ausgangsstadt, einen gespeicherten Platz oder einen Park oder Dunkelort in einem anderen Land, liest Nyx zwei Raster, die mit der App geliefert werden. Die Himmelshelligkeit stammt aus denselben NASA-Nachtlichtern von 2025, im Umkreis von 300 km um jeden Punkt aufsummiert und mit 77 veröffentlichten Messungen von dunklen Orten bis zu Stadtzentren abgeglichen: meist auf eine halbe Größenklasse genau, an dunklen Orten genauer. Sie wird als Schätzung mit ihrer Bortle-Klasse angezeigt. Die übliche Bewölkung stammt aus denselben zehn Jahren ERA5, gemittelt über die Nacht jedes Monats auf einem Viertelgrad-Raster; wie oft Nächte überwiegend klar sind, wird aus diesem Mittelwert geschätzt, daher steht dort „etwa“. Die US-Nationalparks behalten ihre eigenen geprüften Werte. Erstellt mit Informationen des Copernicus Climate Change Service [2015–2024]."
+            "value": "Für einen Ort, der keiner der US-Nationalparks ist, etwa deine Ausgangsstadt, einen gespeicherten Platz oder einen Park oder Dunkelort in einem anderen Land, liest Nyx zwei Raster, die mit der App geliefert werden. Die Himmelshelligkeit stammt aus denselben NASA-Nachtlichtern von 2025, im Umkreis von 300 km um jeden Punkt aufsummiert und mit 77 veröffentlichten Messungen von dunklen Orten bis zu Stadtzentren abgeglichen: meist auf eine halbe Größenklasse genau, an dunklen Orten genauer. Sie wird als Schätzung mit ihrer Bortle-Klasse angezeigt. Die übliche Bewölkung stammt aus denselben zehn Jahren ERA5, gemittelt über die Nacht jedes Monats auf einem Viertelgrad-Raster; wie oft Nächte überwiegend klar sind, wird aus diesem Mittelwert geschätzt, daher steht dort „etwa“. Die US-Nationalparks behalten ihre eigenen geprüften Werte. Enthält veränderte Informationen des Copernicus Climate Change Service (2026), aus ERA5, 2015 bis 2024."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "For a place that is not one of the U.S. national parks, such as your starting city, a spot you save or a park or dark-sky place in another country, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The U.S. national parks keep their own checked values. Generated using Copernicus Climate Change Service information [2015–2024]."
+            "value": "For a place that is not one of the U.S. national parks, such as your starting city, a spot you save or a park or dark-sky place in another country, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The U.S. national parks keep their own checked values. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Para un lugar que no es uno de los parques nacionales de EE. UU., como tu ciudad de partida, un sitio que guardes o un parque o lugar de cielo oscuro de otro país, Nyx lee dos cuadrículas que vienen con la app. El brillo del cielo sale de las mismas luces nocturnas de la NASA de 2025, sumadas en 300 km alrededor de cada punto y contrastadas con 77 mediciones publicadas, de sitios oscuros a centros de ciudad: por lo general con menos de media magnitud de diferencia, y menos en lugares oscuros. Se muestra como una estimación, con su clase Bortle. Las nubes habituales salen de los mismos diez años de ERA5, promediadas sobre la noche de cada mes en una cuadrícula de un cuarto de grado; la frecuencia de noches mayormente despejadas se estima a partir de ese promedio, por eso dice \"unas\". Los parques nacionales de EE. UU. conservan sus propios valores revisados. Generado con información del Servicio de Cambio Climático de Copernicus [2015–2024]."
+            "value": "Para un lugar que no es uno de los parques nacionales de EE. UU., como tu ciudad de partida, un sitio que guardes o un parque o lugar de cielo oscuro de otro país, Nyx lee dos cuadrículas que vienen con la app. El brillo del cielo sale de las mismas luces nocturnas de la NASA de 2025, sumadas en 300 km alrededor de cada punto y contrastadas con 77 mediciones publicadas, de sitios oscuros a centros de ciudad: por lo general con menos de media magnitud de diferencia, y menos en lugares oscuros. Se muestra como una estimación, con su clase Bortle. Las nubes habituales salen de los mismos diez años de ERA5, promediadas sobre la noche de cada mes en una cuadrícula de un cuarto de grado; la frecuencia de noches mayormente despejadas se estima a partir de ese promedio, por eso dice \"unas\". Los parques nacionales de EE. UU. conservan sus propios valores revisados. Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026), de ERA5, 2015 a 2024."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour un lieu qui n’est pas l’un des parcs nationaux des États-Unis, comme votre ville de départ, un lieu que vous enregistrez ou un parc ou site de ciel étoilé d’un autre pays, Nyx lit deux grilles fournies avec l’app. La luminosité du ciel vient des mêmes lumières nocturnes 2025 de la NASA, additionnées dans un rayon de 300 km autour de chaque point et comparées à 77 mesures publiées, de sites sombres à des centres-villes : en général à moins d’une demi-magnitude près, plus proche encore dans les lieux sombres. Elle est affichée comme une estimation, avec sa classe de Bortle. La nébulosité habituelle vient des mêmes dix ans d’ERA5, moyennée sur la nuit de chaque mois sur une grille d’un quart de degré ; la fréquence des nuits plutôt dégagées est estimée à partir de cette moyenne, d’où le mot « environ ». Les parcs nationaux des États-Unis gardent leurs propres valeurs vérifiées. Généré à partir d’informations du Copernicus Climate Change Service [2015–2024]."
+            "value": "Pour un lieu qui n’est pas l’un des parcs nationaux des États-Unis, comme votre ville de départ, un lieu que vous enregistrez ou un parc ou site de ciel étoilé d’un autre pays, Nyx lit deux grilles fournies avec l’app. La luminosité du ciel vient des mêmes lumières nocturnes 2025 de la NASA, additionnées dans un rayon de 300 km autour de chaque point et comparées à 77 mesures publiées, de sites sombres à des centres-villes : en général à moins d’une demi-magnitude près, plus proche encore dans les lieux sombres. Elle est affichée comme une estimation, avec sa classe de Bortle. La nébulosité habituelle vient des mêmes dix ans d’ERA5, moyennée sur la nuit de chaque mois sur une grille d’un quart de degré ; la fréquence des nuits plutôt dégagées est estimée à partir de cette moyenne, d’où le mot « environ ». Les parcs nationaux des États-Unis gardent leurs propres valeurs vérifiées. Contient des informations modifiées du Copernicus Climate Change Service (2026), issues d’ERA5, 2015 à 2024."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "出発地の都市、保存したスポット、ほかの国の公園や暗い空の場所など、米国の国立公園以外の場所については、アプリに含まれる2つのグリッドを読み取ります。夜空の明るさは同じ2025年のNASAの夜間光データを各地点の300 km以内で合計したもので、暗い場所から都市の中心部まで77か所の公表された測定値と照合しています。誤差はたいてい0.5等級以内で、暗い場所ほど近い値になります。推定値として、ボートルクラスとともに表示します。平年の雲量は同じ10年分のERA5を、0.25度のグリッドで各月の夜について平均したものです。夜がおおむね晴れる頻度はこの平均から推定しているので、「約」と表示します。米国の国立公園には、確認済みの独自の値があります。Copernicus Climate Change Serviceの情報［2015–2024］を使用して作成。"
+            "value": "出発地の都市、保存したスポット、ほかの国の公園や暗い空の場所など、米国の国立公園以外の場所については、アプリに含まれる2つのグリッドを読み取ります。夜空の明るさは同じ2025年のNASAの夜間光データを各地点の300 km以内で合計したもので、暗い場所から都市の中心部まで77か所の公表された測定値と照合しています。誤差はたいてい0.5等級以内で、暗い場所ほど近い値になります。推定値として、ボートルクラスとともに表示します。平年の雲量は同じ10年分のERA5を、0.25度のグリッドで各月の夜について平均したものです。夜がおおむね晴れる頻度はこの平均から推定しているので、「約」と表示します。米国の国立公園には、確認済みの独自の値があります。Copernicus Climate Change Serviceの情報（2026）を加工して含みます（ERA5、2015〜2024年）。"
           }
         }
       }
@@ -29099,37 +29099,37 @@
         }
       }
     },
-    "Links to nps.gov pages, Recreation.gov campground reservations and Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites.": {
+    "Links open only when you tap them, in Safari, Maps, Mail or the App Store: nps.gov pages, Recreation.gov campground reservations, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or official website, get-nyx.com, directions to a viewing spot or a saved spot, an email to the developer, and Nyx's App Store page. Nyx itself sends nothing to those sites.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Links zu Seiten auf nps.gov, zu Campingplatzreservierungen bei Recreation.gov und zu Globe at Night öffnen sich in Safari, wenn du darauf tippst. Nyx selbst sendet nichts an diese Websites."
+            "value": "Links öffnen sich nur, wenn du darauf tippst, in Safari, Karten, Mail oder im App Store: Seiten auf nps.gov, Campingplatzreservierungen bei Recreation.gov, Globe at Night, Open-Meteo und die Creative-Commons-Lizenz, die Wikidata-Seite oder offizielle Website eines Orts, get-nyx.com, die Route zu einem Beobachtungsplatz oder einem gespeicherten Platz, eine E-Mail an den Entwickler und die App-Store-Seite von Nyx. Nyx selbst sendet nichts an diese Websites."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Links to nps.gov pages, Recreation.gov campground reservations and Globe at Night open in Safari when you tap them. Nyx itself sends nothing to those sites."
+            "value": "Links open only when you tap them, in Safari, Maps, Mail or the App Store: nps.gov pages, Recreation.gov campground reservations, Globe at Night, Open-Meteo and the Creative Commons licence, a place's Wikidata page or official website, get-nyx.com, directions to a viewing spot or a saved spot, an email to the developer, and Nyx's App Store page. Nyx itself sends nothing to those sites."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los enlaces a páginas de nps.gov, a las reservaciones de campamentos en Recreation.gov y a Globe at Night se abren en Safari cuando los tocas. Nyx no envía nada a esos sitios."
+            "value": "Los enlaces se abren solo cuando los tocas, en Safari, Mapas, Mail o el App Store: páginas de nps.gov, reservaciones de campamentos en Recreation.gov, Globe at Night, Open-Meteo y la licencia Creative Commons, la página de Wikidata o el sitio web oficial de un lugar, get-nyx.com, cómo llegar a un punto de observación o a un sitio guardado, un correo al desarrollador y la página de Nyx en el App Store. Nyx no envía nada a esos sitios web."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les liens vers les pages de nps.gov, les réservations de camping sur Recreation.gov et Globe at Night s’ouvrent dans Safari quand vous les touchez. Nyx lui-même n’envoie rien à ces sites."
+            "value": "Les liens ne s’ouvrent que quand vous les touchez, dans Safari, Plans, Mail ou l’App Store : les pages de nps.gov, les réservations de camping sur Recreation.gov, Globe at Night, Open-Meteo et la licence Creative Commons, la page Wikidata ou le site officiel d’un lieu, get-nyx.com, l’itinéraire vers un point d’observation ou un lieu enregistré, un e-mail au développeur et la page de Nyx sur l’App Store. Nyx lui-même n’envoie rien à ces sites."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "nps.govのページ、Recreation.govのキャンプ場予約、Globe at Nightへのリンクは、タップするとSafariで開きます。Nyx自体がそれらのサイトに何かを送ることはありません。"
+            "value": "リンクは、タップしたときだけSafari、マップ、メール、App Storeで開きます。対象は、nps.govのページ、Recreation.govのキャンプ場予約、Globe at Night、Open-MeteoとCreative Commonsライセンス、場所のWikidataページや公式サイト、get-nyx.com、観察スポットや保存したスポットへの経路、開発者へのメール、App StoreのNyxのページです。Nyx自体がそれらのサイトに何かを送ることはありません。"
           }
         }
       }
@@ -29554,7 +29554,7 @@
         }
       }
     },
-    "Location is used only while you use Nyx, to compare park distances on this iPhone and to work out the sky From home tonight, which asks no service for anything. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.": {
+    "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about 11 km.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -29563,13 +29563,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt, um auf diesem iPad Entfernungen zu Parks zu vergleichen und den Himmel für „Von zu Hause heute Nacht“ zu berechnen, wofür kein Dienst abgefragt wird. Auf Fotos wird nur über die Fotoauswahl des Systems zugegriffen. Erinnerungen und Wecker sind lokal. Im Feldmodus nutzt Nyx die Bewegung dieses iPad, um den Himmel dorthin auszurichten, wohin du es hältst; nichts wird aufgezeichnet."
+                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für „Von zu Hause heute Nacht“ und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPad; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa 11 km gerundet."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt, um auf diesem iPhone Entfernungen zu Parks zu vergleichen und den Himmel für „Von zu Hause heute Nacht“ zu berechnen, wofür kein Dienst abgefragt wird. Auf Fotos wird nur über die Fotoauswahl des Systems zugegriffen. Erinnerungen und Wecker sind lokal. Im Feldmodus nutzt Nyx die Bewegung dieses iPhone, um den Himmel dorthin auszurichten, wohin du es hältst; nichts wird aufgezeichnet."
+                  "value": "Der Standort wird nur verwendet, während du Nyx benutzt: um Entfernungen zu messen, für „Von zu Hause heute Nacht“ und den Ausgangspunkt einer Reise, um abends zu erkennen, dass du in einem US-Nationalpark bist, um den Himmel nach geografisch Nord auszurichten und, nur wenn du darum bittest, um deinen Standort als Platz zu speichern. Wo du bist, bleibt auf diesem iPhone; ein gespeicherter Platz wird nur als seine Position gesendet, auf etwa 11 km gerundet."
                 }
               }
             }
@@ -29581,13 +29581,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Location is used only while you use Nyx, to compare park distances on this iPad and to work out the sky From home tonight, which asks no service for anything. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPad to point the sky where you hold it; nothing is recorded."
+                  "value": "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPad; a spot you save is sent only as its position, rounded to about 11 km."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Location is used only while you use Nyx, to compare park distances on this iPhone and to work out the sky From home tonight, which asks no service for anything. Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded."
+                  "value": "Location is used only while you use Nyx: to measure distances, for From home tonight and a trip's starting point, to notice in the evening that you are at a U.S. national park, to point the sky to true north, and, only when you ask, to save where you stand as a spot. Where you are stays on this iPhone; a spot you save is sent only as its position, rounded to about 11 km."
                 }
               }
             }
@@ -29599,13 +29599,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx, para comparar distancias a los parques en este iPad y para calcular el cielo de Desde casa esta noche, que no pide nada a ningún servicio. Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPad para orientar el cielo hacia donde lo sostienes; no se registra nada."
+                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para Desde casa esta noche y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPad; un sitio que guardas solo se envía como su posición, redondeada a unos 11 km."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La ubicación solo se usa mientras usas Nyx, para comparar distancias a los parques en este iPhone y para calcular el cielo de Desde casa esta noche, que no pide nada a ningún servicio. Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPhone para orientar el cielo hacia donde lo sostienes; no se registra nada."
+                  "value": "La ubicación solo se usa mientras usas Nyx: para medir distancias, para Desde casa esta noche y el punto de partida de un viaje, para notar por la noche que estás en un parque nacional de EE. UU., para orientar el cielo hacia el norte verdadero y, solo cuando lo pides, para guardar como sitio el lugar donde estás. Tu ubicación se queda en este iPhone; un sitio que guardas solo se envía como su posición, redondeada a unos 11 km."
                 }
               }
             }
@@ -29617,13 +29617,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx, pour comparer les distances aux parcs sur cet iPad et pour calculer le ciel de Depuis chez vous ce soir, qui ne demande rien à aucun service. Les photos ne sont accessibles que par le sélecteur de photos du système. Les rappels et les alarmes sont locaux. En mode terrain, Nyx utilise les mouvements de cet iPad pour orienter le ciel là où vous le tenez ; rien n’est enregistré."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour Depuis chez vous ce soir et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPad ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ 11 km."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx, pour comparer les distances aux parcs sur cet iPhone et pour calculer le ciel de Depuis chez vous ce soir, qui ne demande rien à aucun service. Les photos ne sont accessibles que par le sélecteur de photos du système. Les rappels et les alarmes sont locaux. En mode terrain, Nyx utilise les mouvements de cet iPhone pour orienter le ciel là où vous le tenez ; rien n’est enregistré."
+                  "value": "La position n’est utilisée que pendant que vous utilisez Nyx : pour mesurer les distances, pour Depuis chez vous ce soir et le point de départ d’un voyage, pour remarquer le soir que vous êtes dans un parc national des États-Unis, pour orienter le ciel vers le nord géographique et, seulement quand vous le demandez, pour enregistrer l’endroit où vous êtes comme lieu. Votre position reste sur cet iPhone ; un lieu enregistré n’est envoyé que sous la forme de sa position, arrondie à environ 11 km."
                 }
               }
             }
@@ -29635,13 +29635,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "位置情報は、Nyxを使っている間だけ、このiPad上で公園までの距離を比べたり、「今夜、自宅から」の空を計算したりするために使います。どちらもサービスへの問い合わせは行いません。写真には、システムの写真ピッカーを通してだけアクセスします。リマインダーとアラームはローカルです。フィールドモードでは、このiPadのモーションを使って、かざした方向に空を合わせます。何も記録しません。"
+                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、「今夜、自宅から」と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPadから出ません。保存したスポットは、約11 kmに丸めた位置としてだけ送信されます。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "位置情報は、Nyxを使っている間だけ、このiPhone上で公園までの距離を比べたり、「今夜、自宅から」の空を計算したりするために使います。どちらもサービスへの問い合わせは行いません。写真には、システムの写真ピッカーを通してだけアクセスします。リマインダーとアラームはローカルです。フィールドモードでは、このiPhoneのモーションを使って、かざした方向に空を合わせます。何も記録しません。"
+                  "value": "位置情報は、Nyxを使っている間だけ、次のために使います。距離を測ること、「今夜、自宅から」と旅の出発地、夜に米国の国立公園にいると気づくこと、空を真北に合わせること、そして求められたときだけ、今いる場所をスポットとして保存すること。現在地はこのiPhoneから出ません。保存したスポットは、約11 kmに丸めた位置としてだけ送信されます。"
                 }
               }
             }
@@ -35873,6 +35873,41 @@
         }
       }
     },
+    "No longer saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht mehr gespeichert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No longer saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya no está guardado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "N’est plus enregistré"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存されていません"
+          }
+        }
+      }
+    },
     "No moonlight to speak of: a good night for faint stars.": {
       "extractionState": "manual",
       "localizations": {
@@ -41191,41 +41226,6 @@
         }
       }
     },
-    "Open-Meteo · updated %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open-Meteo · aktualisiert %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open-Meteo · updated %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open-Meteo · actualizado %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open-Meteo · mis à jour %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open-Meteo · %@に更新"
-          }
-        }
-      }
-    },
     "Opens Apple Maps with driving directions. Nyx sends nothing.": {
       "extractionState": "manual",
       "localizations": {
@@ -43497,6 +43497,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "写真"
+          }
+        }
+      }
+    },
+    "Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf Fotos wird nur über die Fotoauswahl des Systems zugegriffen. Erinnerungen und Wecker sind lokal. Im Feldmodus nutzt Nyx die Bewegung dieses iPad, um den Himmel dorthin auszurichten, wohin du es hältst; nichts wird aufgezeichnet."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auf Fotos wird nur über die Fotoauswahl des Systems zugegriffen. Erinnerungen und Wecker sind lokal. Im Feldmodus nutzt Nyx die Bewegung dieses iPhone, um den Himmel dorthin auszurichten, wohin du es hältst; nichts wird aufgezeichnet."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPad to point the sky where you hold it; nothing is recorded."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Photos are accessed only through the system photo picker. Reminders and alarms are local. In field mode, Nyx uses motion on this iPhone to point the sky where you hold it; nothing is recorded."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPad para orientar el cielo hacia donde lo sostienes; no se registra nada."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Las fotos solo se abren con el selector de fotos del sistema. Los recordatorios y las alarmas son locales. En modo de campo, Nyx usa el movimiento de este iPhone para orientar el cielo hacia donde lo sostienes; no se registra nada."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Les photos ne sont accessibles que par le sélecteur de photos du système. Les rappels et les alarmes sont locaux. En mode terrain, Nyx utilise les mouvements de cet iPad pour orienter le ciel là où vous le tenez ; rien n’est enregistré."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Les photos ne sont accessibles que par le sélecteur de photos du système. Les rappels et les alarmes sont locaux. En mode terrain, Nyx utilise les mouvements de cet iPhone pour orienter le ciel là où vous le tenez ; rien n’est enregistré."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "写真には、システムの写真ピッカーを通してだけアクセスします。リマインダーとアラームはローカルです。フィールドモードでは、このiPadのモーションを使って、かざした方向に空を合わせます。何も記録しません。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "写真には、システムの写真ピッカーを通してだけアクセスします。リマインダーとアラームはローカルです。フィールドモードでは、このiPhoneのモーションを使って、かざした方向に空を合わせます。何も記録しません。"
+                }
+              }
+            }
           }
         }
       }
@@ -47726,6 +47821,41 @@
         }
       }
     },
+    "Save it again in Nyx, or edit the widget to choose another place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichere ihn wieder in Nyx oder bearbeite das Widget, um einen anderen Ort zu wählen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save it again in Nyx, or edit the widget to choose another place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a guardarlo en Nyx o edita el widget para elegir otro lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrez-le de nouveau dans Nyx ou modifiez le widget pour choisir un autre lieu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxでもう一度保存するか、ウィジェットを編集して別の場所を選んでください。"
+          }
+        }
+      }
+    },
     "Save park": {
       "extractionState": "manual",
       "localizations": {
@@ -50386,31 +50516,135 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld von %lld Orten im Bild werden angezeigt; wo sie dicht beieinanderliegen, die dunkelsten."
+            "value": "Angezeigt: %1$lld von %#@places@ im Bild; wo sie dicht beieinanderliegen, die dunkelsten."
+          },
+          "substitutions": {
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg Ort"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg Orten"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Showing %lld of %lld places in view, the darkest where they crowd together."
+            "value": "Showing %1$lld of %#@places@ in view, the darkest where they crowd together."
+          },
+          "substitutions": {
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg place"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg places"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se muestran %1$lld de los %2$lld lugares a la vista; donde se agrupan, los más oscuros."
+            "value": "En el mapa: %1$lld de %#@places@ a la vista; donde se agrupan, los más oscuros."
+          },
+          "substitutions": {
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg lugar"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "los %arg lugares"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$lld lieux affichés sur %2$lld dans le champ, les plus sombres là où ils se regroupent."
+            "value": "%#@places@ sur %2$lld dans le champ, les plus sombres là où ils se regroupent."
+          },
+          "substitutions": {
+            "places": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg lieu affiché"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg lieux affichés"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "表示範囲にある%2$lldか所のうち%1$lldか所を表示しています。密集しているところでは、いちばん暗い場所を表示します。"
+            "value": "表示範囲にある%#@places@か所のうち%1$lldか所を表示しています。密集しているところでは、いちばん暗い場所を表示します。"
+          },
+          "substitutions": {
+            "places": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -51290,72 +51524,72 @@
         }
       }
     },
-    "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score.": {
+    "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rauch- und Dunstvorhersage von Copernicus (CAMS), dem europäischen Atmosphärendienst. Nicht Teil des Werts."
+            "value": "Rauch- und Dunstvorhersage von Copernicus (CAMS), dem europäischen Atmosphärendienst. Dichter Rauch oder Dunst begrenzt den Wert."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Not part of the score."
+            "value": "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pronóstico de humo y bruma de Copernicus (CAMS), el servicio atmosférico europeo. No forma parte del índice."
+            "value": "Pronóstico de humo y bruma de Copernicus (CAMS), el servicio atmosférico europeo. El humo o la bruma densos limitan el índice."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prévision de fumée et de brume de Copernicus (CAMS), le service européen de surveillance de l’atmosphère. Ne compte pas dans l’indice."
+            "value": "Prévision de fumée et de brume de Copernicus (CAMS), le service européen de surveillance de l’atmosphère. Une fumée ou une brume épaisse plafonne l’indice."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "煙ともやの予報は、ヨーロッパの大気サービスCopernicus（CAMS）によるものです。スコアには含まれません。"
+            "value": "煙ともやの予報は、ヨーロッパの大気サービスCopernicus（CAMS）によるものです。濃い煙やもやがあると、スコアに上限がかかります。"
           }
         }
       }
     },
-    "Smoke and haze: CAMS, the Copernicus Atmosphere Monitoring Service, via Open-Meteo, CC BY 4.0.": {
+    "Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rauch und Dunst: CAMS, der Copernicus Atmosphere Monitoring Service, über Open-Meteo, CC BY 4.0."
+            "value": "Rauch und Dunst: enthält veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smoke and haze: CAMS, the Copernicus Atmosphere Monitoring Service, via Open-Meteo, CC BY 4.0."
+            "value": "Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humo y bruma: CAMS, el Servicio de Vigilancia Atmosférica de Copernicus, vía Open-Meteo, CC BY 4.0."
+            "value": "Humo y bruma: contiene información modificada del Servicio de Vigilancia Atmosférica de Copernicus (2026), vía Open-Meteo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fumée et brume : CAMS, le Copernicus Atmosphere Monitoring Service, via Open-Meteo, CC BY 4.0."
+            "value": "Fumée et brume : contient des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "煙ともや：CAMS（Copernicus Atmosphere Monitoring Service）、Open-Meteo経由、CC BY 4.0。"
+            "value": "煙ともや：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含んでいます。Open-Meteo経由。"
           }
         }
       }
@@ -57803,6 +58037,41 @@
         }
       }
     },
+    "The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about 11 km, for its cloud forecast. You can turn that off below.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der einzige Ort von dir, den Nyx irgendwohin sendet, ist ein Platz, den du speicherst: nur seine Position, auf etwa 11 km gerundet, für seine Wolkenvorhersage. Du kannst das unten ausschalten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about 11 km, for its cloud forecast. You can turn that off below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El único lugar tuyo que Nyx envía a otra parte es un sitio que guardes: solo su posición, redondeada a unos 11 km, para su pronóstico de nubes. Puedes desactivarlo más abajo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le seul endroit à vous que Nyx envoie où que ce soit est un lieu que vous enregistrez : seulement sa position, arrondie à environ 11 km, pour sa prévision de nuages. Vous pouvez désactiver cet envoi ci-dessous."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxがどこかへ送るあなたの場所は、保存したスポットだけです。それも、雲の予報のために約11 kmに丸めた位置だけです。下でオフにできます。"
+          }
+        }
+      }
+    },
     "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius.": {
       "extractionState": "manual",
       "localizations": {
@@ -59364,6 +59633,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "この写真は大きすぎます。もっと小さい画像を選んでください。"
+          }
+        }
+      }
+    },
+    "This place is no longer saved in Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Ort ist nicht mehr in Nyx gespeichert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This place is no longer saved in Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este lugar ya no está guardado en Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce lieu n’est plus enregistré dans Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この場所はNyxに保存されていません。"
           }
         }
       }
@@ -62908,6 +63212,41 @@
         }
       }
     },
+    "Updated %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiert %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizado %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis à jour %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@に更新"
+          }
+        }
+      }
+    },
     "Updated %@. Open Nyx to refresh.": {
       "extractionState": "manual",
       "localizations": {
@@ -62939,6 +63278,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@に更新。Nyxを開くと最新になります。"
+          }
+        }
+      }
+    },
+    "Urban Night Sky Place": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urban Night Sky Place"
           }
         }
       }
@@ -63206,7 +63580,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usar dónde estoy ahora"
+            "value": "Usar donde estoy ahora"
           }
         },
         "fr": {
@@ -63363,72 +63737,72 @@
         }
       }
     },
-    "Usual clouds: contains modified Copernicus Climate Change Service information (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0.": {
+    "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0."
+            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0."
+            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubes habituales: contiene información modificada del Servicio de Cambio Climático de Copernicus (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0."
+            "value": "Nubes habituales: contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015 a 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (2015–2024). ERA5, Hersbach et al. 2020, CC BY 4.0."
+            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015 à 2024, Hersbach et al. 2020, CC BY 4.0."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2015–2024）を加工して含んでいます。ERA5、Hersbach et al. 2020、CC BY 4.0。"
+            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます。ERA5、2015〜2024年、Hersbach et al. 2020、CC BY 4.0。"
           }
         }
       }
     },
-    "Usual clouds: contains modified Copernicus Climate Change Service information (ERA5, 2015–2024).": {
+    "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (ERA5, 2015–2024)."
+            "value": "Übliche Bewölkung: enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015–2024."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (ERA5, 2015–2024)."
+            "value": "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubosidad habitual: contiene información modificada del Servicio de Cambio Climático de Copernicus (ERA5, 2015–2024)."
+            "value": "Nubosidad habitual: contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015–2024."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (ERA5, 2015–2024)."
+            "value": "Nébulosité habituelle : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015–2024."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（ERA5、2015–2024）を加工して含んでいます。"
+            "value": "平年の雲量：Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015–2024。"
           }
         }
       }
@@ -65859,6 +66233,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Working out tonight's scores.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Werte für heute Nacht werden berechnet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working out tonight's scores."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculando los índices de esta noche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcul des indices de ce soir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜のスコアを計算しています。"
           }
         }
       }

@@ -57,15 +57,24 @@ nonisolated enum WatchSky {
     /// One night at one park, scored on the watch from the bundled park, the astronomy engine and,
     /// when the iPhone sent them, the cached cloud forecast and the smoke and summit layers, by the
     /// iPhone's own rule (`NightPlanner.night`): without a forecast, the park's usual clouds for the month.
-    static func night(_ park: Park, evening: Date, forecast: Forecast?, detail: ForecastDetail?, now: Date, sky cached: SkyConditions? = nil) -> Night {
-        NightPlanner.night(park: park, sky: cached ?? AstronomyEngine().conditions(for: park, on: evening), forecast: forecast, detail: detail, now: now)
+    /// `climate` carries the usual clouds the iPhone sent for spots and world places (`WatchContext.climate`,
+    /// `SavedSkySnapshot.climate`); the bundled climate alone knows only the 63 parks.
+    static func night(_ park: Park, evening: Date, forecast: Forecast?, detail: ForecastDetail?, now: Date, sky cached: SkyConditions? = nil,
+                      climate: CloudClimate = .shared) -> Night {
+        NightPlanner.night(park: park, sky: cached ?? AstronomyEngine().conditions(for: park, on: evening), forecast: forecast, detail: detail, now: now, climate: climate)
     }
-    /// Write what the complications read: the candidate parks, their forecasts, smoke and layers.
+    /// Write what the complications read: the candidate parks, their forecasts, smoke and layers,
+    /// and the usual clouds the iPhone sent for spots and world places.
     static func publish(parks: [Park], context: WatchContext?) {
+        SharedSettings.write(snapshot(parks: parks, context: context))
+    }
+    /// The candidate parks with what the iPhone sent for them, as the complications read it.
+    static func snapshot(parks: [Park], context: WatchContext?) -> SavedSkySnapshot {
         let ids = Set(parks.map(\.id))
-        SharedSettings.write(SavedSkySnapshot(parks: parks, forecasts: (context?.cloudForecasts ?? [:]).filter { ids.contains($0.key) },
-                                              details: (context?.forecastDetails ?? [:]).filter { ids.contains($0.key) },
-                                              closures: (context?.closures ?? [:]).filter { ids.contains($0.key) }))
+        let usual = (context?.usualClouds ?? [:]).filter { ids.contains($0.key) }
+        return SavedSkySnapshot(parks: parks, forecasts: (context?.cloudForecasts ?? [:]).filter { ids.contains($0.key) },
+                                details: (context?.forecastDetails ?? [:]).filter { ids.contains($0.key) },
+                                closures: (context?.closures ?? [:]).filter { ids.contains($0.key) }, usualClouds: usual.isEmpty ? nil : usual)
     }
     /// Red or not, for the park Tonight follows at that moment (Automatic reads its Sun).
     static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {

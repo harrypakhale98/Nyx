@@ -17,6 +17,9 @@ struct TonightEntry:TimelineEntry {
     var relevance:TimelineEntryRelevance?=nil
     /// The shown park's closure, as the app words it beside the score (from the snapshot).
     var closure:String?=nil
+    /// Set to a saved spot or world place that is no longer saved: its name ("" when unknown). The
+    /// widget says so, rather than showing another place under the setting's name.
+    var unsaved:String?=nil
 }
 /// Builds Tonight entries from the shared snapshot. Each night's sky is computed once and reused
 /// across entries; the large widget's month (35 nights with shower and eclipse marks) once per night.
@@ -25,10 +28,16 @@ struct TonightTimeline {
     let large:Bool
     /// A park the widget was set to; nil follows the darkest saved park.
     let pinned:Park?
+    /// The widget was set to a place no longer saved (its name, or ""): every entry says so.
+    var unsaved:String?=nil
     private var skies:[String:SkyConditions]=[:]
     private var months:[String:NightPlanner.Month]=[:]
-    init(snapshot:SavedSkySnapshot?,large:Bool,pinned:Park?=nil) { self.snapshot=snapshot; self.large=large; self.pinned=pinned }
-    private var planner:NightPlanner { snapshot?.planner ?? NightPlanner(forecasts:[:]) }
+    /// Built once: the snapshot's forecasts and the usual clouds it carries.
+    private let planner:NightPlanner
+    init(snapshot:SavedSkySnapshot?,large:Bool,pinned:Park?=nil,unsaved:String?=nil) {
+        self.snapshot=snapshot; self.large=large; self.pinned=pinned; self.unsaved=unsaved
+        planner=snapshot?.planner ?? NightPlanner(forecasts:[:])
+    }
     /// The sky is fixed; the score is taken at the entry's date (its forecast never expires; it fades by lead time).
     private mutating func night(_ park:Park,_ evening:Date,at date:Date)->Night {
         let key="\(park.id)-\(evening.timeIntervalSince1970)"
@@ -37,6 +46,7 @@ struct TonightTimeline {
         return planner.night(park,sky:sky,now:date)
     }
     mutating func entry(at date:Date)->TonightEntry {
+        if let unsaved { return TonightEntry(date:date,night:nil,nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),unsaved:unsaved) }
         let parks=pinned.map { [$0] } ?? snapshot?.parks ?? []
         let tonight=parks.map { night($0,$0.currentNight(at:date),at:date) }
         // A widget set to one park shows that park; otherwise the darkest saved park (or the one "next" moved to).
@@ -58,7 +68,8 @@ struct TonightTimeline {
     }
     /// Dusk windows of Good or better nights across the saved parks (or the set park), `nights` nights from `start`.
     mutating func duskWindows(from start:Date,nights count:Int)->[DateInterval] {
-        (pinned.map { [$0] } ?? snapshot?.parks ?? []).flatMap { park in
+        guard unsaved == nil else { return [] }
+        return (pinned.map { [$0] } ?? snapshot?.parks ?? []).flatMap { park in
             (0..<count).compactMap { offset in NightPlanner.duskWindow(night(park,park.date(park.currentNight(at:start),addingDays:offset),at:start)) }
         }.filter { $0.end>start }
     }
@@ -80,6 +91,8 @@ struct TonightControlValue:Sendable {
     /// The set park's night, else the darkest saved park's (`NightPlanner.best`, as everywhere);
     /// no score before any park is saved. Never the park the widget's "next" button moved to: the
     /// control answers "where is darkest tonight", whatever a widget is showing.
+    /// Set to a place no longer saved: it says so, and a tap opens Nyx.
+    static let unsaved=TonightControlValue(parkID:nil,name:String(localized:"No longer saved"),score:nil,symbol:"mappin.slash")
     init(snapshot:SavedSkySnapshot?,pinned:Park?,now:Date) {
         let planner=snapshot?.planner ?? NightPlanner(forecasts:[:])
         let parks=pinned.map { [$0] } ?? snapshot?.parks ?? []
@@ -95,6 +108,8 @@ struct TonightWidgetView:View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.displayScale) private var displayScale
     @Environment(\.colorSchemeContrast) private var contrast
+    /// The eyebrow's smaller step: about four fifths of caption 2, following Dynamic Type.
+    @ScaledMetric(relativeTo:.caption2) private var eyebrowSmall=8.8
     var previewFamily:WidgetFamily?=nil
     private var family:WidgetFamily { previewFamily ?? systemFamily }
     let entry:TonightEntry
@@ -170,6 +185,8 @@ struct TonightWidgetView:View {
                     compactContent(night).dynamicTypeSize(.small ... .xxxLarge)
                 }.summarized(summary(night))
             }
+        } else if let name=entry.unsaved {
+            unsavedContent(name)
         } else if family == .accessoryInline {
             Label("Save a park in Nyx",systemImage:"moon.stars")
                 .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
@@ -192,6 +209,37 @@ struct TonightWidgetView:View {
                 Text("Save a park in Nyx").font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
             }.summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
         }
+    }
+    /// Set to a place no longer saved (a spot deleted, a place abroad unsaved): the widget names it
+    /// and says what to do, in every family, rather than quietly showing another place.
+    @ViewBuilder private func unsavedContent(_ name:String)->some View {
+        let spoken=Self.unsavedSummary(name)
+        if family == .accessoryInline {
+            Label("No longer saved",systemImage:"mappin.slash").summarized(spoken)
+        } else if family == .accessoryCircular {
+            ZStack { AccessoryWidgetBackground(); Image(systemName:"mappin.slash").font(.title3) }.summarized(spoken)
+        } else if family == .accessoryRectangular {
+            VStack(alignment:.leading,spacing:2) {
+                Label("No longer saved",systemImage:"mappin.slash").font(.headline).lineLimit(1).minimumScaleFactor(0.8)
+                if !name.isEmpty { Text(verbatim:name).font(.caption).lineLimit(1) }
+            }.frame(maxWidth:.infinity,alignment:.leading).dynamicTypeSize(.small ... .xxxLarge).summarized(spoken)
+        } else {
+            ViewThatFits(in:.vertical) {
+                VStack(alignment:.leading,spacing:8) {
+                    Image(systemName:"mappin.slash").foregroundStyle(muted)
+                    Text(Self.unsavedTitle(name)).font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                    Text("Save it again in Nyx, or edit the widget to choose another place.").font(.caption).foregroundStyle(muted).fixedSize(horizontal:false,vertical:true)
+                }
+                Text(Self.unsavedTitle(name)).font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
+            }.frame(maxWidth:.infinity,alignment:.leading).summarized(spoken)
+        }
+    }
+    /// "Eifel is no longer saved in Nyx.", or without a name when the setting kept none.
+    static func unsavedTitle(_ name:String)->String {
+        name.isEmpty ? String(localized:"This place is no longer saved in Nyx.") : String(localized:"\(name) is no longer saved in Nyx.")
+    }
+    static func unsavedSummary(_ name:String)->String {
+        unsavedTitle(name)+" "+String(localized:"Save it again in Nyx, or edit the widget to choose another place.")
     }
     /// "2 of 3 ›": moves the widget to the next saved park. Only with two or more saved parks, and
     /// only where it fits (medium and large, outside accessibility sizes); a tap anywhere else opens the park.
@@ -231,6 +279,18 @@ struct TonightWidgetView:View {
                 .font(font.weight(.medium)).foregroundStyle(accent).widgetAccentable()
         }
     }
+    /// The small and medium widgets' eyebrow, never cut: spaced capitals where they fit, then a
+    /// little smaller (English, as before), then set solid on two lines where one is not enough
+    /// ("PRÓXIMAS SIETE / NOCHES", "NÄCHSTE SIEBEN / NÄCHTE"). Each step is measured whole, where a
+    /// shrinking single line used to end in "…". Japanese is set solid throughout (`Lettering`).
+    private func eyebrow(_ text:LocalizedStringKey)->some View {
+        let caps=Lettering.spaced, regular=Font.caption2.weight(.medium), small=Font.system(size:eyebrowSmall,weight:.medium)
+        return ViewThatFits(in:.horizontal) {
+            Text(text).textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(regular).lineLimit(1)
+            Text(text).textCase(caps ? .uppercase : nil).tracking(caps ? 0.8 : 0).font(small).lineLimit(1)
+            Text(text).textCase(caps ? .uppercase : nil).font(small).lineLimit(2).minimumScaleFactor(0.8)
+        }.foregroundStyle(muted)
+    }
     /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
     private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
     /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it,
@@ -253,7 +313,7 @@ struct TonightWidgetView:View {
             if !typeSize.isAccessibilitySize {
                 HStack(alignment:.center) {
                     if mark && entry.closure != nil { closureMark(.caption2) }
-                    else { Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.75) }
+                    else { eyebrow("Tonight's sky") }
                     Spacer(minLength:4)
                     moon(night).frame(width:18,height:18)
                 }
@@ -289,7 +349,7 @@ struct TonightWidgetView:View {
         let best=NightPlanner.best(week)?.id
         return VStack(alignment:.leading,spacing:6) {
             HStack(spacing:0) {
-                Text("Next seven nights").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(0.8).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.7)
+                eyebrow("Next seven nights")
                 // Room for the "2 of 3" button laid over the top corner.
                 Spacer(minLength:entry.savedCount>1 ? 62 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
@@ -328,7 +388,7 @@ struct TonightWidgetView:View {
             HStack(spacing:0) {
                 // A closure takes the eyebrow's place, so the month keeps its room.
                 if entry.closure != nil { closureLine(.caption2) }
-                else { Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.2).foregroundStyle(muted) }
+                else { Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.2 : 0).foregroundStyle(muted) }
                 Spacer(minLength:entry.savedCount>1 ? 70 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(alignment:.center,spacing:12) {
@@ -364,7 +424,7 @@ struct TonightWidgetView:View {
     private func extraLargeContent(_ night:Night,month:NightPlanner.Month)->some View {
         HStack(alignment:.top,spacing:28) {
             VStack(alignment:.leading,spacing:8) {
-                Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).lineLimit(2).minimumScaleFactor(0.8)
                 Text("\(night.score.value)").font(.system(size:72,weight:.light,design:.serif)).foregroundStyle(accent).widgetAccentable()
                 Text(forecastLabel(night)).font(.subheadline).foregroundStyle(muted)
@@ -395,7 +455,7 @@ struct TonightWidgetView:View {
     private func portraitContent(_ night:Night,month:NightPlanner.Month)->some View {
         VStack(alignment:.leading,spacing:14) {
             HStack(spacing:0) {
-                Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(1.4).foregroundStyle(muted)
+                Text("Tonight's sky").textCase(Lettering.spaced ? .uppercase : nil).font(.caption.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(muted)
                 Spacer(minLength:entry.savedCount>1 ? 70 : 0)
             }.frame(minHeight:entry.savedCount>1 ? 24 : nil)
             HStack(alignment:.center,spacing:16) {

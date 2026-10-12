@@ -6,7 +6,7 @@ struct WatchCredits: View {
     @Environment(\.nyx) private var palette
     private let lines: [LocalizedStringKey] = [
         "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx.",
-        "Usual clouds: contains modified Copernicus Climate Change Service information (ERA5, 2015–2024).",
+        "Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024.",
         "Stars: Yale Bright Star Catalogue.",
         "Moon: NASA's Scientific Visualization Studio; LRO LROC and LOLA teams.",
         "Park data: National Park Service.",

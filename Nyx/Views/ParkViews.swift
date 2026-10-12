@@ -21,16 +21,13 @@ struct AccessNoteLabel: View {
 /// what it is, in DarkSky International's own designation names, and where it is, in the reader's
 /// language. The curated parks and saved spots keep their own words (`regionLine`, `placeEyebrow`).
 extension Place {
-    /// "National park", or the DarkSky designation exactly as DarkSky International names it. Nil for
-    /// a place the person saved, which says "Your spot" instead.
+    /// "National park", or the DarkSky designation exactly as DarkSky International names it
+    /// (`designationName`). Nil for a place the person saved, which says "Your spot" instead.
     var kindLabel: String? {
         switch kind {
         case .nationalPark: String(localized:"National park")
-        case .darkSkyPark: String(localized:"International Dark Sky Park")
-        case .reserve: String(localized:"International Dark Sky Reserve")
-        case .sanctuary: String(localized:"International Dark Sky Sanctuary")
-        case .community: String(localized:"International Dark Sky Community")
         case .custom: nil
+        case .darkSkyPark, .reserve, .sanctuary, .community, .urbanNightSky: designationName
         }
     }
     /// "Catalonia, Spain"; "Colorado and Utah, United States"; "Iceland" where Wikidata gives no

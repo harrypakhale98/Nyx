@@ -179,9 +179,15 @@ nonisolated enum JournalMigration {
     enum MigrationError: Error { case notEnoughSpace }
     /// Free space the move leaves untouched beyond the photo copies, so it never fills the device.
     static let headroom: Int64=100_000_000
+    /// Where the photos wait between the two stages: Application Support, unless a test names its own
+    /// folder for the work it runs (`$folderOverride.withValue`), so tests never touch the app's.
     static var folder: URL? {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("JournalMigration", isDirectory: true)
+        folderOverride ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("JournalMigration", isDirectory: true)
     }
+    /// Tests only: the stash folder, for the task that sets it. Nil, the app's.
+    @TaskLocal static var folderOverride: URL?
+    /// Tests only: the space to leave free instead of `headroom`, for the task that sets it.
+    @TaskLocal static var headroomOverride: Int64?
     /// Copies every V0 entry's photos to `folder/<entry id>/<index>`. The copies take as much space
     /// as the photos, so the move does not start without that room: SwiftData changes the store only
     /// after `willMigrate` returns, so throwing here leaves the file exactly as build 7 wrote it. The
@@ -208,7 +214,7 @@ nonisolated enum JournalMigration {
     /// `headroom`. An unreadable capacity counts as room, as before the check existed.
     static func hasRoom(forStoreAt url: URL) -> Bool {
         guard let available=try? url.deletingLastPathComponent().resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage else { return true }
-        return available >= footprint(ofStoreAt: url)+headroom
+        return available >= footprint(ofStoreAt: url)+(headroomOverride ?? headroom)
     }
     /// The bytes the store takes: the database, its write-ahead files, and the folder of records
     /// kept outside it (`.<name>_SUPPORT`, where external-storage photos live). An upper bound on the photos.

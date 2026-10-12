@@ -184,7 +184,8 @@ struct ProtectThisSky: View {
     @Environment(\.nyx) private var palette
     let park: Park
     private let habits:[(symbol:String,text:LocalizedStringKey)]=[
-        ("light.recessed","Shield outdoor lights so they shine down, never up."),
+        // An outline lamp shining down: the filled recessed light read as a solid blob at this size.
+        ("lamp.ceiling","Shield outdoor lights so they shine down, never up."),
         ("lightbulb.min","Choose warm bulbs, 3000 K or lower."),
         ("sensor","Use motion sensors, and switch lights off when no one needs them."),
     ]
@@ -227,6 +228,32 @@ enum BrowserLink {
     private static func page(host:String,path:String="")->URL? {
         var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path
         return components.url
+    }
+}
+/// The credit Open-Meteo's licence asks for beside its forecast ("Weather data by Open-Meteo.com",
+/// linked), with when the forecast was issued. Opens open-meteo.com in Safari; Nyx requests nothing.
+struct OpenMeteoCredit: View {
+    @Environment(\.nyx) private var palette
+    /// The forecast's issue time, park-local and already formatted.
+    let updated: String
+    var body: some View {
+        let issued=String(localized:"Updated \(updated)")
+        if let url=BrowserLink.openMeteo {
+            Link(destination:url) {
+                VStack(alignment:.leading,spacing:2) {
+                    HStack(alignment:.firstTextBaseline,spacing:4) {
+                        Text("Weather data by Open-Meteo.com").foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                        Image(systemName:"arrow.up.right").imageScale(.small).foregroundStyle(palette.accent).accessibilityHidden(true)
+                    }
+                    Text(issued).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+                .font(.caption).frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle())
+            }
+            .accessibilityElement(children:.combine)
+            .accessibilityHint("Opens open-meteo.com in Safari.")
+        } else {
+            Text(issued).font(.caption).foregroundStyle(palette.muted)
+        }
     }
 }
 /// Globe at Night: citizen-science observations of the stars people see, used to track light pollution.

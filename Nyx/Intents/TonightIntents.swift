@@ -73,7 +73,7 @@ nonisolated enum DarkWindowAnswer {
                 }
             }
         }
-        return DarknessAnswer.closureFirst(body,closure:closure)
+        return DarknessAnswer.withClosures(body,park:park,closure:closure)
     }
     /// " Times are Pacific Time." only when the park's clock differs from this device's.
     static func zoneNote(park: Park, at date: Date, device: TimeZone) -> String {
@@ -112,7 +112,7 @@ nonisolated enum WhatsUpAnswer {
         let lines=whatsUp.items.prefix(limit).map { line($0,core:whatsUp.coreNight,park:park,voiceOnly:voiceOnly) }
         let lead=String(localized:"Tonight at \(park.shortName)")+"."
         let zone=DarkWindowAnswer.zoneNote(park:park,at:whatsUp.coreNight.highest,device:device)
-        return DarknessAnswer.closureFirst(([lead]+lines).joined(separator:" ")+zone,closure:closure)
+        return DarknessAnswer.withClosures(([lead]+lines).joined(separator:" ")+zone,park:park,closure:closure)
     }
     /// One item, briefly: the core's dark hours, a shower's rate, a planet's times. The panel's
     /// longer notes (the published rate, the Moon's share of the core's hours) stay in the app.

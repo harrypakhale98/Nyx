@@ -27,9 +27,9 @@ struct CatalogTests {
 
     @Test func everyPlaceDecodesWithAUniqueID() throws {
         let catalog=try Self.catalog(), parks=try ParkData.load()
-        #expect(catalog.count == 3_417 && parks.count == 63)
+        #expect(catalog.count == 3_359 && parks.count == 63)
         let ids=(catalog+parks).map(\.id)
-        #expect(Set(ids).count == 3_480)
+        #expect(Set(ids).count == 3_422)
         for place in catalog {
             #expect(place.isCatalogPlace && !place.curated && place.nps == nil && place.viewingSpots.isEmpty, "\(place.id)")
             #expect(DeepLink.placeID(place.id) == place.id, "\(place.id)")
@@ -40,11 +40,49 @@ struct CatalogTests {
         }
         #expect(parks.allSatisfy { !$0.isCatalogPlace && $0.curated && $0.website == nil })
     }
+    /// The build's rules (Scripts/build_catalog.py, Research/catalog.md): one record per place, a
+    /// point of its own, an English name in the Latin script, and the corrections it lists.
+    @Test func everyPlaceIsOnePlaceAtItsOwnPoint() throws {
+        let catalog=try Self.catalog()
+        var points=Set<String>()
+        for place in catalog {
+            #expect(points.insert("\(place.latitude),\(place.longitude)").inserted, "\(place.id) shares its point")
+            let name=place.name
+            #expect(name == name.trimmingCharacters(in: .whitespaces) && !name.contains("  ") && !name.contains("„") && !name.contains("\""), "\(place.id)")
+            #expect(name.first?.isLowercase == false && !name.hasPrefix("Unnamed") && name != "National Park", "\(place.id)")
+            #expect(!name.contains("Nationalpark") && !name.contains(" project"), "\(place.id)")
+            #expect(name.unicodeScalars.allSatisfy { !(0x0400...0x04FF).contains($0.value) && !(0x3040...0x9FFF).contains($0.value) }, "\(place.id)")
+        }
+        let ids=Set(catalog.map(\.id))
+        // Merged into the place they are part of, or not a place: Greater Kruger (Kruger), a proposal,
+        // a synagogue, a placeholder, an umbrella over Tsavo East and West.
+        for gone in ["wd:Q5600596", "wd:Q16945675", "wd:Q2916829", "wd:Q105805604", "wd:Q110541232"] { #expect(!ids.contains(gone), "\(gone)") }
+        #expect(ids.isSuperset(of: [Self.kruger, "wd:Q1368818", "wd:Q1602738"]))
+        func place(_ id: String) throws -> Park { try #require(catalog.first { $0.id == id }) }
+        // NamibRand: its region and a point that is not a whole degree; Guanacaste off Rincón de la Vieja's point.
+        let namibRand=try place("wd:Q1802857")
+        #expect(namibRand.region == "Hardap Region" && namibRand.latitude != -25 && namibRand.longitude != 16)
+        #expect(try place("wd:Q1587862").latitude != place("wd:Q1431228").latitude)
+        // Broken Hill's clock is the Unincorporated Far West's only.
+        #expect(try place("wd:Q1670728").timeZoneID == "Australia/Sydney" && place("wd:Q972962").timeZoneID == "Australia/Broken_Hill")
+        // An Urban Night Sky Place is named as one.
+        #expect(try place("wd:Q17108098").kind == .urbanNightSky)
+        #expect(try place("wd:Q1703071").countryCode == "NL")
+    }
+    /// A kind a later build adds reads as `custom` in this one, never as an unreadable place.
+    @Test func anUnknownKindDecodesAsCustom() throws {
+        let place=try #require(try Self.catalog().first { $0.kind == .urbanNightSky })
+        var object=try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(place)) as? [String: Any])
+        #expect(object["kind"] as? String == "urbanNightSky")
+        object["kind"]="aKindFromTheFuture"
+        let later=try JSONDecoder().decode(Park.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(later.kind == .custom && later.id == place.id)
+    }
     /// A website is linked only over HTTPS; one offered only over plain HTTP is left out.
     @Test func websitesAreHTTPSOnly() throws {
         let catalog=try Self.catalog()
         let linked=catalog.compactMap(\.website)
-        #expect(linked.count == 550)
+        #expect(linked.count == 548)
         #expect(linked.allSatisfy { $0.scheme == "https" && $0.host() != nil })
         #expect(Place.website("http://dilijanpark.am/") == nil && Place.website("https://example.org/a") != nil && Place.website("not a url") == nil)
         // A catalogue place round-trips whole, website included, and still writes G1's legacy keys.
@@ -61,7 +99,7 @@ struct CatalogTests {
     @MainActor @Test func theCatalogueIsReadOffTheMainThreadAndResolves() async throws {
         let model=Self.model()
         await model.catalogReady()
-        #expect(model.catalogIsReady && model.catalog.count == 3_417)
+        #expect(model.catalogIsReady && model.catalog.count == 3_359)
         #expect(model.park(Self.kruger)?.name == "Kruger National Park")
         #expect(model.park("wd:Q999999999999") == nil && model.park("jotr")?.curated == true)
         // The curated parks are never repeated in the catalogue.

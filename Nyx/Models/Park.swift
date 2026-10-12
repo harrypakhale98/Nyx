@@ -45,8 +45,25 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// The short name in the app's language, set with a localized name: the English stripping in
     /// `shortName` never applies to it ("Nationalpark Eifel" shows "Eifel" in lists).
     var localShortName: String? = nil
+    /// What a place is: a national park, one of DarkSky International's five designations, or a place
+    /// of the person's own (`custom`). `urbanNightSky` (an Urban Night Sky Place) came with 2.0; a build
+    /// before it reads the case as `custom`, as it reads any kind it does not know.
     nonisolated enum Kind: String, Codable, Hashable, Sendable {
-        case nationalPark, darkSkyPark, reserve, sanctuary, community, custom
+        case nationalPark, darkSkyPark, reserve, sanctuary, community, urbanNightSky, custom
+    }
+    /// The place's DarkSky designation exactly as DarkSky International names it ("International Dark
+    /// Sky Reserve", "Urban Night Sky Place"), or nil without one. A curated park keeps the kind
+    /// `nationalPark` with the flag, and every designated US national park is an International Dark Sky Park.
+    /// Shared by the app's pages, Siri, Shortcuts and Spotlight (`ParkEntity`), which the widgets compile too.
+    var designationName: String? {
+        switch kind {
+        case .darkSkyPark: String(localized: "International Dark Sky Park")
+        case .reserve: String(localized: "International Dark Sky Reserve")
+        case .sanctuary: String(localized: "International Dark Sky Sanctuary")
+        case .community: String(localized: "International Dark Sky Community")
+        case .urbanNightSky: String(localized: "Urban Night Sky Place")
+        case .nationalPark, .custom: darkSkyDesignated ? String(localized: "International Dark Sky Park") : nil
+        }
     }
     /// The catalogue's place when nothing else chooses one: no saved park, no starting point, no night under way.
     static let defaultID = "jotr"

@@ -73,10 +73,11 @@ struct MoonPhaseGlyph: View {
 struct MoonComplicationView: View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorSchemeContrast) private var contrast
     var previewFamily: WidgetFamily?
     let entry: MoonEntry
     private var family: WidgetFamily { previewFamily ?? systemFamily }
-    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
+    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     private var glyph: MoonPhaseGlyph { MoonPhaseGlyph(phase: entry.moon.phase, southern: (entry.park?.latitude ?? 0) < 0) }
     var body: some View {
         Group {
@@ -146,12 +147,13 @@ struct MoonComplicationView: View {
 struct NextDarkComplicationView: View {
     @Environment(\.widgetFamily) private var systemFamily
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorSchemeContrast) private var contrast
     var previewFamily: WidgetFamily?
     let entry: NextDarkEntry
     /// A fixed moment for countdowns, for views built in the app (the DEBUG review); nil in the widget, which counts down live.
     var now: Date? = nil
     private var family: WidgetFamily { previewFamily ?? systemFamily }
-    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
+    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     private var target: Date? { entry.moment.target(at: entry.date) }
     var body: some View {
         Group {

@@ -120,9 +120,8 @@ nonisolated struct NotificationScheduler {
         // Nights already announced hold their park for the spacing either side.
         var taken:[String:[Date]]=[:]
         for id in delivered {
-            let parts=id.split(separator:"-")
-            guard parts.count==4, let stamp=Double(parts[3]) else { continue }
-            taken[String(parts[2]),default:[]].append(Date(timeIntervalSince1970:stamp))
+            guard let (park,night)=Self.scoreReminder(id) else { continue }
+            taken[park,default:[]].append(night)
         }
         let window=Double(Self.spacing)*86400-12*3600
         var plans:[NightReminder]=[]
@@ -209,6 +208,16 @@ nonisolated struct NotificationScheduler {
         }
     }
     static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
+    /// A score reminder's place and night, read back from its identifier: the stamp after the last dash,
+    /// the place between the prefix and that dash, so a spot's id (`pin:` and a UUID, itself hyphenated)
+    /// reads as whole as a park's. Nil for a shower reminder or anything else.
+    static func scoreReminder(_ id:String)->(parkID:String,night:Date)? {
+        let prefix="nyx-night-"
+        guard id.hasPrefix(prefix), !id.contains("-meteors-"), let dash=id.lastIndex(of:"-") else { return nil }
+        let start=id.index(id.startIndex,offsetBy:prefix.count)
+        guard start<dash, let stamp=Double(id[id.index(after:dash)...]) else { return nil }
+        return (String(id[start..<dash]),Date(timeIntervalSince1970:stamp))
+    }
     /// Same prefix and trailing night stamp as score reminders, so the ledger and cancel paths treat both alike.
     static func showerIdentifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-meteors-\(Int(night.timeIntervalSince1970))" }
     /// Replans reminders, off the main actor (planning works out What's up for every saved park's

@@ -65,7 +65,8 @@ nonisolated enum BestNightSearch {
     static func forecasts(for parks: [Park], shared: SavedSkySnapshot?) -> [String: Forecast] {
         var result: [String: Forecast]=[:]
         for park in parks {
-            let candidates=[shared?.forecasts[park.id],CacheDirectory.read(Forecast.self,name:"weather-\(park.id)")].compactMap { $0 }
+            // The name the forecast client writes: "weather-jotr" for a park, no colon for a place abroad or a spot.
+            let candidates=[shared?.forecasts[park.id],CacheDirectory.read(Forecast.self,name:SpotForecast.cacheName(park.id))].compactMap { $0 }
             result[park.id]=candidates.max { $0.updated<$1.updated }
         }
         return result
@@ -77,9 +78,10 @@ nonisolated enum BestNightSearch {
         return sky.darkStart ?? sky.sunset ?? sky.evening
     }
     /// The full answer names the night, the score and what it rests on. Voice-only (iOS 27, no
-    /// screen in view) keeps the night, the score and the one caveat that matters.
+    /// screen in view) keeps the night, the score and the one caveat that matters. At a place the Park
+    /// Service does not run, it ends by saying Nyx cannot check closures there.
     static func dialog(_ answer: Answer, voiceOnly: Bool) -> String {
-        answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly))
+        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly)),park:answer.best.park,closure:nil)
     }
 }
 
@@ -150,7 +152,7 @@ struct BestNightSnippetView: View {
             HStack(alignment:.top) {
                 VStack(alignment:.leading,spacing:3) {
                     Text(rank==0 ? "Best of the next \(nights) nights" : "Number \(rank+1) of the next \(nights) nights")
-                        .textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(1.4).foregroundStyle(palette.muted)
+                        .textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(palette.muted)
                     Text(night.park.shortName).font(.system(.title3,design:.serif))
                     Text(night.park.programDate(night.park.isoDay(night.id))).font(.subheadline).foregroundStyle(palette.muted)
                 }
@@ -167,7 +169,13 @@ struct BestNightSnippetView: View {
             }
             .accessibilityElement(children:.combine)
             if let typical=night.typicalClouds { Text(typical).font(.caption).foregroundStyle(palette.muted) }
-            Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
+            // A place the Park Service does not run: Nyx cannot see its closures, and says so instead.
+            if let unknown=DarknessAnswer.unknownClosures(night.park) {
+                Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption).foregroundStyle(palette.muted)
+                Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            } else {
+                Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
+            }
             HStack(spacing:10) {
                 if total>1 {
                     Button(intent:NextBestNightIntent(count:total)) { Label("Next best",systemImage:"arrow.forward") }

@@ -7,6 +7,9 @@ nonisolated struct NightPlanner: Sendable {
     let forecasts: [String: Forecast]
     /// Smoke, cloud layers and model agreement, where known; optional everywhere.
     var details: [String: ForecastDetail] = [:]
+    /// Usual clouds: the bundled file and world grid, plus any months the iPhone handed over for
+    /// places off the file (`CloudClimate.carried`), which the widgets and the watch read this way.
+    var climate: CloudClimate = .shared
     var astronomy = AstronomyEngine()
     var scoring = ScoreEngine()
 
@@ -14,7 +17,7 @@ nonisolated struct NightPlanner: Sendable {
     func night(_ park: Park, on evening: Date, now: Date) -> Night { night(park, sky: astronomy.conditions(for: park, on: evening), now: now) }
     /// The same, for a sky already computed (a widget reuses each night's sky across entries).
     func night(_ park: Park, sky: SkyConditions, now: Date) -> Night {
-        Self.night(park: park, sky: sky, forecast: forecasts[park.id], detail: details[park.id], now: now, scoring: scoring)
+        Self.night(park: park, sky: sky, forecast: forecasts[park.id], detail: details[park.id], now: now, climate: climate, scoring: scoring)
     }
 
     // MARK: The one way a night is built

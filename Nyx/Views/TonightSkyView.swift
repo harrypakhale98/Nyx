@@ -368,36 +368,50 @@ struct FloatingGlass<S: Shape>: ViewModifier {
 /// The sky for a night as a window on the park's page: a still render that opens the full sky.
 struct SkyWindowCard: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     let night: Night
     var isTonight=true
     let open: ()->Void
     var body: some View {
         let sky=HorizonSkies.shared.sky(park:night.park,night:night.id,at:SkyAlmanac.nightWindow(night.sky).start.addingTimeInterval(TonightSkyView.defaultMinutes(night.sky)*60))
         let shape=RoundedRectangle(cornerRadius:24)
+        let picture=PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:night.park),centreAltitude:32,span:1.7,labels:false,bortle:Double(night.park.bortleEstimate)))
         Button(action:open) {
-            PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:night.park),centreAltitude:32,span:1.7,labels:false,bortle:Double(night.park.bortleEstimate)))
-                .frame(height:200)
-                .overlay(alignment:.bottomLeading) {
-                    HStack(alignment:.bottom) {
-                        VStack(alignment:.leading,spacing:4) {
-                            Text(isTonight ? String(localized:"Tonight's sky") : String(localized:"This night's sky")).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-                            Text("Planets, the Milky Way and town light, hour by hour").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                        }
-                        Spacer(minLength:8)
-                        Image(systemName:"arrow.up.left.and.arrow.down.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent).accessibilityHidden(true)
+            Group {
+                if typeSize.isAccessibilitySize {
+                    // Large text would overflow a fixed window, so the words sit under the picture, as tall as they need.
+                    VStack(alignment:.leading,spacing:0) {
+                        picture.frame(height:160)
+                        VStack(alignment:.leading,spacing:12) { caption; expandGlyph }
+                            .frame(maxWidth:.infinity,alignment:.leading).padding(16).background(palette.panel)
                     }
-                    .padding(16)
-                    .background(LinearGradient(colors:[.clear,.black.opacity(0.75)],startPoint:.top,endPoint:.bottom))
+                } else {
+                    picture.frame(height:200)
+                        .overlay(alignment:.bottomLeading) {
+                            HStack(alignment:.bottom) { caption; Spacer(minLength:8); expandGlyph }
+                                .padding(16)
+                                .background(LinearGradient(colors:[.clear,.black.opacity(0.75)],startPoint:.top,endPoint:.bottom))
+                        }
                 }
-                .clipShape(shape)
-                .overlay(shape.stroke(palette.line,lineWidth:0.5))
-                .contentShape(shape)
+            }
+            .clipShape(shape)
+            .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .contentShape(shape)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children:.ignore)
         .accessibilityLabel(isTonight ? String(localized:"Tonight's sky over \(night.park.shortName)") : String(localized:"The sky over \(night.park.shortName), \(night.park.dayLabel(night.id))"))
         .accessibilityHint("Opens the sky for this night, hour by hour.")
         .accessibilityAddTraits(.isButton)
+    }
+    private var caption: some View {
+        VStack(alignment:.leading,spacing:4) {
+            Text(isTonight ? String(localized:"Tonight's sky") : String(localized:"This night's sky")).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+            Text("Planets, the Milky Way and town light, hour by hour").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }
+    }
+    private var expandGlyph: some View {
+        Image(systemName:"arrow.up.left.and.arrow.down.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent).accessibilityHidden(true)
     }
 }
 

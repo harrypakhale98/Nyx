@@ -33,7 +33,8 @@ nonisolated enum WristTonightAnswer {
         let context = WatchSky.readContext()
         let parks = (try? ParkData.load()) ?? []
         let nights = WatchSky.candidates(in: parks, context: context, pinned: WatchSky.pinnedPark).map { park in
-            WatchSky.night(park, evening: park.currentNight(at: now), forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now)
+            WatchSky.night(park, evening: park.currentNight(at: now), forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now,
+                           climate: context?.climate ?? .shared)
         }
         guard let night = NightPlanner.best(nights) else {
             return String(localized: "Nyx has no park to follow yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.")

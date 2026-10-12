@@ -133,11 +133,18 @@ struct CatalogScreensTests {
     }
     @Test func designationsKeepDarkSkyInternationalsNames() throws {
         let kinds = ["darkSkyPark": "International Dark Sky Park", "reserve": "International Dark Sky Reserve",
-                     "sanctuary": "International Dark Sky Sanctuary", "community": "International Dark Sky Community", "nationalPark": "National park"]
+                     "sanctuary": "International Dark Sky Sanctuary", "community": "International Dark Sky Community",
+                     "urbanNightSky": "Urban Night Sky Place", "nationalPark": "National park"]
         for (kind, label) in kinds {
             // The test plan runs in English.
-            #expect(try Self.place("wd:Q1", "X", country: "NZ", kind: kind).kindLabel == label)
+            let place = try Self.place("wd:Q1", "X", country: "NZ", kind: kind, designated: kind != "nationalPark")
+            #expect(place.kindLabel == label)
+            // Siri, Shortcuts and Spotlight name the same designation, and only a designated place has one.
+            #expect(ParkEntity(place).designation == (kind == "nationalPark" ? "" : label), "\(kind)")
         }
+        // A curated park keeps its kind with the flag: an International Dark Sky Park.
+        let jotr = try #require(ParkData.load().first { $0.id == "jotr" })
+        #expect(jotr.designationName == "International Dark Sky Park" && ParkEntity(jotr).designation == "International Dark Sky Park")
         // Several US states read as a list, with the country.
         let us = try Self.place("wd:Q3", "X", country: "US", region: "CO,UT")
         #expect(us.worldLocality.hasPrefix("Colorado") && us.worldLocality.contains("Utah") && us.worldLocality.hasSuffix(StartingPlaces.countryName("US")))

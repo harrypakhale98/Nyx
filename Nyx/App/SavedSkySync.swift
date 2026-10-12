@@ -135,7 +135,9 @@ import WidgetKit
     /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
     @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
         let ids=Set(parks.map(\.id))
-        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) },details:model.details.filter { ids.contains($0.key) },closures:Self.closures(model))
+        // Saved spots and world places carry their usual clouds from the grid, which the widgets do not bundle.
+        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) },details:model.details.filter { ids.contains($0.key) },closures:Self.closures(model),
+                                      usualClouds:CloudClimate.shared.carriedMonths(for:parks))
         if SharedSettings.write(snapshot) || moonsDrawn {
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)

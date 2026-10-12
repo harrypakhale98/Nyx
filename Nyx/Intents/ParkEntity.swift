@@ -4,7 +4,7 @@ import Foundation
 
 /// A place: a curated park, a world catalogue place or a saved spot, for Siri, Shortcuts, Spotlight,
 /// and the widgets' and controls' park choice. Shared by the app and the widget extension. Indexed (iOS 18+), so Spotlight's semantic search
-/// finds "dark sky park in Utah" and a tap opens the park through `OpenParkIntent`; its state,
+/// finds "dark sky park in Utah" and a tap opens the park through `OpenParkIntent`; its region,
 /// Dark Sky designation and Bortle class are entity properties (iOS 26), so Shortcuts can filter
 /// on them ("Places where Dark Sky designation is International Dark Sky Park").
 struct ParkEntity:IndexedEntity {
@@ -14,6 +14,9 @@ struct ParkEntity:IndexedEntity {
     let name:String
     var state:String=""
     var darkSky=false
+    /// The DarkSky designation's own name (`Park.designationName`): "International Dark Sky Reserve",
+    /// "Urban Night Sky Place". Empty without one.
+    var designationName=""
     var bortle=0
     /// A place from the world catalogue (`wd:`, G4): its ISO country code, so Siri and Spotlight can
     /// say where it is ("Catalonia, Spain"). Empty for the curated parks and saved spots.
@@ -36,13 +39,13 @@ struct ParkEntity:IndexedEntity {
         let region=state.replacingOccurrences(of:",",with:" · ")
         return region.isEmpty || region==name ? name : "\(region), \(name)"
     }
-    /// The state or states, also Spotlight's state field.
-    @ComputedProperty(title:"State",indexingKey:\.stateOrProvince)
+    /// The state or states, or a region abroad, also Spotlight's state-or-province field.
+    @ComputedProperty(title:"Region",indexingKey:\.stateOrProvince)
     var stateName:String { state }
-    /// "International Dark Sky Park", or empty. Indexed as the item's theme: the designation is
-    /// what the park's night is known for.
+    /// "International Dark Sky Park", "Urban Night Sky Place" and the rest, or empty. Indexed as the
+    /// item's theme: the designation is what the place's night is known for.
     @ComputedProperty(title:"Dark Sky designation",indexingKey:\.theme)
-    var designation:String { darkSky ? String(localized:"International Dark Sky Park") : "" }
+    var designation:String { designationName.isEmpty && darkSky ? String(localized:"International Dark Sky Park") : designationName }
     /// The park's estimated Bortle class, 1 (darkest) to 9. No Spotlight field fits a 1–9 sky
     /// class (a custom key's initializer can fail, which a property's key may not), so Spotlight
     /// finds it as the keyword "Bortle 2"; Shortcuts filters the number.
@@ -51,6 +54,7 @@ struct ParkEntity:IndexedEntity {
     init(id:String,name:String) { self.id=id; self.name=name }
     init(_ park:Park) {
         id=park.id; name=park.shortName; state=park.region; darkSky=park.darkSkyDesignated; bortle=park.bortleEstimate
+        designationName=park.designationName ?? ""
         if park.isCatalogPlace { country=park.countryCode; nationalPark=park.kind == .nationalPark; englishName=park.englishName.map(Park.shortened) ?? "" }
     }
     /// Shared with `SpotlightIndexer`'s items, so the entity and the item describe the park alike.
@@ -80,7 +84,16 @@ struct ParkQuery:EntityStringQuery {
         let snapshot=SharedSettings.read(), library=try ParkLibrary.places(snapshot:snapshot)
         var seen=Set<String>()
         return identifiers.filter { seen.insert($0).inserted }
-            .compactMap { id in library.first { $0.id==id } ?? ParkLibrary.place(id,snapshot:snapshot) }.map(ParkEntity.init)
+            .compactMap { id in
+                if let place=library.first(where: { $0.id==id }) ?? ParkLibrary.place(id,snapshot:snapshot) { return ParkEntity(place) }
+                // A spot or place abroad no longer followed stays the widget's or control's setting, with no
+                // name, so it can say the place is no longer saved instead of quietly showing another one.
+                return Self.unsavedPlace(id) ? ParkEntity(id:id,name:"") : nil
+            }
+    }
+    /// A well-formed spot or catalogue id (`pin:…`, `wd:Q…`) that no list knows any more.
+    static func unsavedPlace(_ id:String)->Bool {
+        (id.hasPrefix("pin:") || id.hasPrefix("wd:Q")) && id.count<=64 && !id.contains(where: { $0.isWhitespace || $0=="/" })
     }
     /// Saved spots first, then followed places abroad and saved parks (the ones people ask about), then
     /// the rest of the 63 by name. Never the whole world: a list of 3,400 helps no one choose.

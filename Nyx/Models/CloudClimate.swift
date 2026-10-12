@@ -8,11 +8,16 @@ import Foundation
 /// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look". A place
 /// the file does not hold reads the world grid's usual clouds instead (`SkyGrid`, G2).
 nonisolated struct CloudClimate: Decodable, Sendable {
-    struct Months: Decodable, Sendable {
+    struct Months: Codable, Sendable, Equatable {
         /// Mean cloud over the dark hours, percent, January first.
         let cloud: [Int?]
         /// Share of nights under 30% cloud ("mostly clear"), percent.
         let clear: [Int?]
+        /// One month of the twelve, or nil when either value is missing.
+        func month(_ month: Int) -> (cloud: Double, clear: Double)? {
+            guard cloud.count == 12, clear.count == 12, (1...12).contains(month), let mean = cloud[month-1], let share = clear[month-1] else { return nil }
+            return (Double(mean), Double(share))
+        }
     }
     /// One park's month.
     struct Typical: Sendable, Equatable {
@@ -38,6 +43,11 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     /// the 63 parks). nil keeps to the file alone: `load` and every hand-built climate, so a test's
     /// empty climate still means no usual clouds at all.
     var grid: SkyGrid? = nil
+    /// Usual clouds handed over by the iPhone for places the per-park file does not hold (followed
+    /// world places and saved spots), read from its world grid: the widgets and Apple Watch bundle no
+    /// grid tiles, so without these they would score those places with no usual clouds at all.
+    /// Keyed by place id; the values are the grid's own, so the score matches the iPhone's.
+    var carried: [String: Months] = [:]
 
     /// The bundled per-park file, with the world grid behind it.
     static let shared: CloudClimate = {
@@ -52,14 +62,39 @@ nonisolated struct CloudClimate: Decodable, Sendable {
     /// The month of the night that begins on `evening`, at `park`. A park in the file keeps its
     /// own ten years of ERA5 at its coordinates (the 63 parks never take the grid's value);
     /// anywhere else, the grid's cell, marked `estimated`.
+    /// Anywhere else, the months the iPhone carried for the place (off the phone), marked `estimated`
+    /// as the grid's are.
     func typical(_ park: Park, on evening: Date) -> Typical? {
         let month = park.calendar.component(.month, from: evening)
         if let entry = parks[park.id] {
-            guard entry.cloud.count == 12, entry.clear.count == 12, let cloud = entry.cloud[month-1], let clear = entry.clear[month-1] else { return nil }
-            return Typical(month: month, cloud: Double(cloud), clear: Double(clear))
+            guard let value = entry.month(month) else { return nil }
+            return Typical(month: month, cloud: value.cloud, clear: value.clear)
         }
+        if let value = carried[park.id]?.month(month) { return Typical(month: month, cloud: value.cloud, clear: value.clear, estimated: true) }
         guard let cell = grid?.cloudNight(latitude: park.latitude, longitude: park.longitude, month: month) else { return nil }
         return Typical(month: month, cloud: cell.mean, clear: cell.clear, estimated: true)
+    }
+    /// This climate with months handed over from the iPhone (`carried`); the per-park file still comes first.
+    func carrying(_ months: [String: Months]?) -> CloudClimate {
+        guard let months, !months.isEmpty else { return self }
+        var climate = self
+        climate.carried.merge(months) { _, new in new }
+        return climate
+    }
+    /// The twelve months to hand over with a place the per-park file does not hold, from the world
+    /// grid (the iPhone's): nil for one of the 63 parks (bundled everywhere), without the grid's
+    /// tiles (off the phone), or where the grid has no month at all (at sea).
+    func months(for park: Park) -> Months? {
+        guard parks[park.id] == nil, let grid else { return nil }
+        let cells = (1...12).map { grid.cloudNight(latitude: park.latitude, longitude: park.longitude, month: $0) }
+        guard cells.contains(where: { $0 != nil }) else { return nil }
+        return Months(cloud: cells.map { $0.map { Int($0.mean.rounded()) } }, clear: cells.map { $0.map { Int($0.clear.rounded()) } })
+    }
+    /// The months to hand over for these places, by id (`months(for:)`); empty on the watch and in widgets.
+    func carriedMonths(for places: [Park]) -> [String: Months] {
+        var months: [String: Months] = [:]
+        for place in places where months[place.id] == nil { if let value = self.months(for: place) { months[place.id] = value } }
+        return months
     }
     /// The plain line beside a night that has no cloud forecast; nil without data.
     func sentence(_ park: Park, on evening: Date) -> String? {

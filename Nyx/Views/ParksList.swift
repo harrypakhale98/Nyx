@@ -68,6 +68,12 @@ struct ParksView: View {
     private var worldShown:Bool { !model.catalog.isEmpty && !groups.isEmpty && !stepFreeOnly }
     /// Browsing abroad: the person's own country and the world by country take the national parks' place.
     private var abroad:Bool { worldShown && homeCountry != "US" && search.isEmpty && !savedOnly }
+    /// Abroad, until the world catalogue is read (off the main thread from launch) and grouped by country:
+    /// skeleton rows, never the US national parks standing in for the person's own country.
+    private var awaitingWorld:Bool {
+        guard homeCountry != "US", search.isEmpty, !savedOnly, !stepFreeOnly else { return false }
+        return !model.catalogIsReady || (!model.catalog.isEmpty && groups.isEmpty)
+    }
     /// Followed catalogue places, for "Saved for later" and "Saved parks only", narrowed like the parks.
     private var savedWorld:[Park] {
         guard !model.catalog.isEmpty, !stepFreeOnly else { return [] }
@@ -83,8 +89,8 @@ struct ParksView: View {
     }
     /// The scrolling list itself.
     @ViewBuilder private var list: some View {
-        let abroad:Bool=self.abroad
-        let shown:[Park]=abroad ? [] : filtered, spots=shownSpots
+        let abroad:Bool=self.abroad, waiting:Bool=awaitingWorld
+        let shown:[Park]=abroad || waiting ? [] : filtered, spots=shownSpots
         let savedWorld:[Park]=self.savedWorld, groups:[CountryGroup]=shownGroups
         let found:[Park]=worldShown && !search.isEmpty ? self.found.filter { ParkFilter(darkOnly:darkOnly).includes($0) } : []
         let home:String=homeCountry
@@ -97,12 +103,13 @@ struct ParksView: View {
         let nothing:Bool=isEmpty(shown:shown,spots:spots,found:found,savedWorld:savedWorld,groups:groups,abroad:abroad)
         ScrollView {
             VStack(alignment:.leading,spacing:18) {
-                Eyebrow(text:eyebrow)
+                // Waiting for the world, no count yet: "63 places" would describe only the US parks.
+                if !waiting { Eyebrow(text:eyebrow) }
                 if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:searchPrompt,focus:$searchFocused) }
                 // Only worth saying when a row actually reads "Estimate".
-                if estimateShown(shown:shown,own:own) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if !waiting, estimateShown(shown:shown,own:own) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                if DebugScenario.state=="loading" { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
+                if DebugScenario.state=="loading" || waiting { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
                 else { sections(shown:shown,spots:spots,found:found,savedWorld:savedWorld,savedListed:savedListed,groups:groups,own:own,others:others,abroad:abroad) }
             }.padding(24)
@@ -228,7 +235,7 @@ struct ParksView: View {
         return shown.count+found.count+(savedOnly ? savedWorld.count : 0)
     }
     /// The eyebrow's count: the 63 parks from a US starting point, exactly as before; from anywhere
-    /// else, once the catalogue is read, every place Nyx can look up ("3,480 places to look up").
+    /// else, once the catalogue is read, every place Nyx can look up ("3,422 places to look up").
     private func countLine(listed:Int)->String {
         let world=worldShown && homeCountry != "US"
         return Self.countLine(shown:listed,of:world ? model.parks.count+model.catalog.count : model.parks.count,narrowed:narrowed)
@@ -408,15 +415,14 @@ nonisolated enum WorldBrowse {
         return code.map { $0.uppercased() }.flatMap { $0.count==2 ? $0 : nil } ?? "US"
     }
     /// Places by country: the home country first, then the others alphabetically by their name in the
-    /// reader's language; within a country, by name (accents and case folded, numbers in order).
+    /// reader's language; within a country, by the name each row shows (`shownBefore`).
     static func groups(_ places:[Park],home:String?,name:(String)->String = StartingPlaces.countryName)->[CountryGroup] {
         let byCountry=Dictionary(grouping:places) { $0.countryCode.uppercased() }
         let groups=byCountry.map { code,list in
-            CountryGroup(code:code,name:code.isEmpty ? String(localized:"Elsewhere") : name(code),
-                         places:list.sorted { a,b in
-                             let order=a.name.localizedStandardCompare(b.name)
-                             return order == .orderedSame ? a.id<b.id : order == .orderedAscending
-                         })
+            // Each place's shown name worked out once, not once per comparison.
+            let keyed=list.map { (place:$0,shown:$0.shortName) }
+            return CountryGroup(code:code,name:code.isEmpty ? String(localized:"Elsewhere") : name(code),
+                                places:keyed.sorted { shownBefore($0.place,$1.place,shown:($0.shown,$1.shown)) }.map(\.place))
         }
         let home=home?.uppercased()
         return groups.sorted { a,b in
@@ -424,6 +430,16 @@ nonisolated enum WorldBrowse {
             let order=a.name.localizedStandardCompare(b.name)
             return order == .orderedSame ? a.code<b.code : order == .orderedAscending
         }
+    }
+    /// The order a list shows places in: by the name its rows show (`shortName`, in the reader's language:
+    /// "Bayerischer Wald" before "Rhön", whatever their full names), accents and case folded and numbers in
+    /// order; then by the full name, then the id. The world list and the search's ties both use it.
+    static func shownBefore(_ a:Park,_ b:Park)->Bool { shownBefore(a,b,shown:(a.shortName,b.shortName)) }
+    private static func shownBefore(_ a:Park,_ b:Park,shown:(String,String))->Bool {
+        let order=shown.0.localizedStandardCompare(shown.1)
+        if order != .orderedSame { return order == .orderedAscending }
+        let full=a.name.localizedStandardCompare(b.name)
+        return full == .orderedSame ? a.id<b.id : full == .orderedAscending
     }
     /// The groups as shown: Dark Sky designated only when asked, the curated parks only when they are
     /// not listed above (`curated`), `hiding` the places listed elsewhere; empty countries dropped.
@@ -452,7 +468,7 @@ nonisolated enum WorldBrowse {
             return [Row.country(group,open:isOpen)]+(isOpen ? group.places.map(Row.place) : [])
         }
     }
-    /// "3,417 parks and dark-sky places in 173 countries".
+    /// "3,359 parks and dark-sky places in 172 countries".
     static func summary(_ groups:[CountryGroup])->String {
         let places=groups.reduce(0) { $0+$1.places.count }
         return String(localized:"\(places) parks and dark-sky places in \(groups.count) countries")

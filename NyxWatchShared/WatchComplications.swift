@@ -14,6 +14,9 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     /// The shown park's clouds come from a forecast at least 36 hours old at this entry
     /// (`CloudSource.lifetime`): still scored, eased toward usual clouds, but worth refreshing.
     var cloudsOld = false
+    /// The face is set to a saved spot or world place the iPhone no longer sends: it says so, rather
+    /// than showing another place.
+    var unsaved = false
     var relevance: TimelineEntryRelevance? { rank.map { TimelineEntryRelevance(score: $0.score, duration: $0.duration) } }
 }
 
@@ -31,14 +34,20 @@ nonisolated struct WristLook: Sendable {
 /// Colours every Nyx complication shares. In full colour they follow the palette; in the tinted
 /// (accented) and vibrant face modes there are no opacity levels, because the system maps
 /// luminance itself and stacked opacities turn to mud: everything is one ink, and only the score,
-/// its gauge and a park's closure join the accent group.
+/// its gauge and a park's closure join the accent group. Increase Contrast lifts the quieter text
+/// as the app's palette does (`NyxPalette.muted`): 0.9 instead of 0.72, and red at full strength.
 struct WristInk {
     let nightVision: Bool
     let mode: WidgetRenderingMode
+    let highContrast: Bool
+    init(nightVision: Bool, mode: WidgetRenderingMode, contrast: ColorSchemeContrast = .standard) {
+        self.nightVision = nightVision; self.mode = mode; highContrast = contrast == .increased
+    }
     var layered: Bool { mode == .fullColor }
     var ink: Color { nightVision ? Color(red: NightRed.red, green: NightRed.green, blue: NightRed.blue) : Color(red: 0.961, green: 0.945, blue: 0.902) }
     var accent: Color { nightVision || !layered ? ink : Color(red: 1, green: 0.706, blue: 0.329) }
-    var muted: Color { layered ? ink.opacity(nightVision ? NightRed.levels[1] : 0.72) : ink }
+    var mutedOpacity: Double { nightVision ? (highContrast ? NightRed.levels[0] : NightRed.levels[1]) : (highContrast ? 0.9 : 0.72) }
+    var muted: Color { layered ? ink.opacity(mutedOpacity) : ink }
 }
 
 /// Builds complication timelines on the watch from the snapshot the watch app wrote: the same
@@ -58,10 +67,11 @@ nonisolated enum WatchTimeline {
     /// on the iPhone (`NightPlanner.best`).
     static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Night? {
         var nights: [Night] = []
+        let climate = snapshot?.climate ?? .shared
         for park in snapshot?.parks ?? [] {
             let evening = park.currentNight(at: date)
             nights.append(WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: date,
-                                         sky: sky(park, evening: evening, cache: &cache)))
+                                         sky: sky(park, evening: evening, cache: &cache), climate: climate))
         }
         return NightPlanner.best(nights)
     }
@@ -167,8 +177,9 @@ struct WatchComplicationView: View {
     /// Next moment as a clock time instead of a self-updating countdown, for cards built once.
     var clockTimes = false
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.colorSchemeContrast) private var contrast
     private var family: WidgetFamily { previewFamily ?? systemFamily }
-    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode) }
+    private var colors: WristInk { WristInk(nightVision: entry.nightVision, mode: renderingMode, contrast: contrast) }
     private var ink: Color { colors.ink }
     private var accent: Color { colors.accent }
     private var muted: Color { colors.muted }
@@ -181,10 +192,11 @@ struct WatchComplicationView: View {
                 case .accessoryInline: inline(night)
                 default: rectangular(night)
                 }
-            } else { empty }
+            } else if entry.unsaved { unsaved } else { empty }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(entry.night.map(summary) ?? String(localized: "Nyx. Choose a park in Nyx on Apple Watch."))
+        .accessibilityLabel(entry.night.map(summary) ?? (entry.unsaved ? String(localized: "This place is no longer saved in Nyx.")+" "+String(localized: "Edit the complication to choose another place.")
+                                                          : String(localized: "Nyx. Choose a park in Nyx on Apple Watch.")))
         .containerBackground(for: .widget) { Color.black }
         // A tap opens this park on this night, not whatever Tonight would show.
         .widgetURL(entry.night.flatMap { WatchLink(park: $0.park, evening: $0.sky.evening).url })
@@ -295,6 +307,21 @@ struct WatchComplicationView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Nyx", systemImage: "moon.stars").font(.headline)
                     Text("Open Nyx to choose a park.").font(.caption2).foregroundStyle(muted)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }.foregroundStyle(ink)
+    }
+    /// Set to a place no longer saved: the mark of a place taken off the map, and the two words that say why.
+    private var unsaved: some View {
+        Group {
+            switch family {
+            case .accessoryCircular: ZStack { AccessoryWidgetBackground(); Image(systemName: "mappin.slash") }
+            case .accessoryCorner: Image(systemName: "mappin.slash").widgetLabel("No longer saved")
+            case .accessoryInline: Text("\(Image(systemName: "mappin.slash")) \(Text("No longer saved"))")
+            default:
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("No longer saved", systemImage: "mappin.slash").font(.headline).lineLimit(1).minimumScaleFactor(0.8)
+                    Text("Edit the complication to choose another place.").font(.caption2).foregroundStyle(muted).lineLimit(2).minimumScaleFactor(0.8)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
         }.foregroundStyle(ink)
