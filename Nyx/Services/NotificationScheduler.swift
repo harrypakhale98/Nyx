@@ -80,6 +80,9 @@ nonisolated struct ReminderLedger:Sendable {
         }
         defaults.set(Array(kept).sorted(),forKey:"issuedReminders")
     }
+    /// The app's language when the pending reminders were written; nil before any was.
+    var language:String? { defaults.string(forKey:"remindersLanguage") }
+    func record(language:String) { defaults.set(language,forKey:"remindersLanguage") }
 }
 nonisolated struct NotificationScheduler {
     let center:any LocalNotificationCenter
@@ -233,10 +236,19 @@ nonisolated struct NotificationScheduler {
     /// Without permission nothing is added, but reminders that no longer qualify are still
     /// cancelled: iOS keeps pending ones while notifications are off and delivers them if they
     /// are turned back on.
-    @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,details:[String:ForecastDetail]=[:]) async {
+    /// A reminder's words are in the app's language when it was planned (`language`, the app's own
+    /// localization): after the language changes, every pending reminder is taken back and planned
+    /// again in the new one, at the same moment. None of them was seen, so each stays plannable.
+    @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,details:[String:ForecastDetail]=[:],language:String=PlaceNames.appLanguage) async {
         let allowed=await center.authorized()
         let pending=await center.pendingIDs()
-        let ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
+        var ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
+        if let written=ledger.language, written != language, !ours.isEmpty {
+            await center.remove(ours.sorted())
+            ledger.record(ledger.ids.subtracting(ours),now:now)
+            ours=[]
+        }
+        ledger.record(language:language)
         let issued=ledger.ids
         // Issued before and no longer pending: it was delivered, tapped or cleared.
         let finished=issued.subtracting(ours).union(await center.deliveredIDs())

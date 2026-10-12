@@ -83,7 +83,7 @@ struct FeelTonightView: View {
                     Text(touch.opening).font(.subheadline).fixedSize(horizontal:false,vertical:true)
                     // By position: two moments can share a second (true darkness and the core already up).
                     ForEach(Array(touch.lines.enumerated()),id:\.offset) { _,line in
-                        Text(verbatim:"\(Int(line.offset.rounded())) s · \(line.text)").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                        Text(verbatim:"\(Measurement(value:line.offset.rounded(),unit:UnitDuration.seconds).formatted(.measurement(width:.narrow))) · \(line.text)").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                             .accessibilityLabel(String(localized:"At \(Int(line.offset.rounded())) seconds: \(line.text)"))
                     }
                 }.padding(.top,8)

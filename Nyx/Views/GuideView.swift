@@ -29,7 +29,7 @@ struct GuideView:View {
     @State private var othersOpen=false
     @FocusState private var typing:Bool
     /// The tools find the curated parks, saved spots and the world catalogue by name (G5).
-    private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details,others:model.spots+model.catalog) }
+    private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details,others:model.spots+model.catalog,closed:model.closedParks) }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
     /// darkest skies first when there are many.
@@ -44,8 +44,9 @@ struct GuideView:View {
     }
     /// Every place a record may name, so a record about a place abroad or a spot finds its page.
     private var recordPlaces:[Park] { model.parks+model.spots+model.catalog }
-    /// Where a record's closures stand: the Park Service's alerts where it runs the place; elsewhere, plainly, none.
-    private func closures(_ park:Park)->String { park.nps == nil ? park.unknownClosuresLine : model.alertSummary(park) }
+    /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
+    /// is already flagged in the night's own line (`NightLookup.describe`).
+    private func closures(_ park:Park,lookup:NightLookup)->String? { lookup.closed.contains(park.id) ? nil : model.guideAccess(park) }
     private var records:[String] {
         switch mode {
         case .planning:
@@ -55,7 +56,7 @@ struct GuideView:View {
             let start=model.location.latitude != nil ? String(localized:"Starting point: the device location. Distances are straight-line estimates.")
                 : model.homePlace.map { String(localized:"Starting point: \($0.label). Distances are straight-line estimates.") }
                 ?? String(localized:"Starting park: \(home.shortName). Distances are straight-line estimates.")
-            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in lookup.describe(night)+". "+closures(park) } }+[start]
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in Phrase.sentences([lookup.describe(night)]+[closures(park,lookup:lookup)].compactMap { $0 }) } }+[start]
         case .learn(let essay): return [String(essay.content.prefix(6500))]
         }
     }
@@ -276,14 +277,16 @@ private struct RecordsDisclosureStyle: DisclosureGroupStyle {
 }
 private struct RecordsDisclosure: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.layoutDirection) private var layoutDirection
     let configuration:DisclosureGroupStyleConfiguration
     var body: some View {
         VStack(alignment:.leading,spacing:0) {
             Button { configuration.isExpanded.toggle() } label:{
                 HStack(spacing:8) {
                     configuration.label
-                    Image(systemName:"chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent)
-                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
+                    // Forward in the reading direction, turned down when open (the other way round in a right-to-left language).
+                    Image(systemName:"chevron.forward").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent)
+                        .rotationEffect(.degrees(configuration.isExpanded ? (layoutDirection == .rightToLeft ? -90 : 90) : 0))
                         .accessibilityHidden(true)
                 }
                 .contentShape(Rectangle())

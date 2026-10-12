@@ -408,7 +408,7 @@ struct TonightWidgetView:View {
                 VStack(alignment:.trailing,spacing:3) {
                     moon(night).frame(width:34,height:34)
                     Text(night.sky.moon.name).font(.caption2)
-                    Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption2).foregroundStyle(muted)
+                    Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
                 }
             }
             monthGrid(night.park,month:month)
@@ -437,7 +437,7 @@ struct TonightWidgetView:View {
                     moon(night).frame(width:34,height:34)
                     VStack(alignment:.leading,spacing:2) {
                         Text(night.sky.moon.name).font(.caption)
-                        Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption2).foregroundStyle(muted)
+                        Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
                     }
                 }.padding(.top,10)
                 if let best=month.best, let top=month.nights.compactMap({ $0 }).first(where:{ $0.id==best }) {
@@ -475,7 +475,7 @@ struct TonightWidgetView:View {
                 VStack(alignment:.center,spacing:4) {
                     moon(night).frame(width:56,height:56)
                     Text(night.sky.moon.name).font(.caption)
-                    Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption2).foregroundStyle(muted)
+                    Text("\(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption2).foregroundStyle(muted)
                 }
             }
             closureLine(.subheadline)

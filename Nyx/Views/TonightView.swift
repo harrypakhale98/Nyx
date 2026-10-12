@@ -510,7 +510,7 @@ struct TonightView: View {
             .font(.subheadline).foregroundStyle(palette.accent).frame(minWidth:44,minHeight:44).contentShape(Rectangle())
         }
         .buttonStyle(.plain).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true)
-        .accessibilityLabel("Radius").accessibilityValue(distance+", "+String(localized:"as the crow flies")).accessibilityInputLabels([Text("Radius"),Text("Distance")])
+        .accessibilityLabel("Radius").accessibilityValue(Phrase.clauses([distance,String(localized:"as the crow flies")])).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
 }
 /// The quiet facts under Tonight's dial when nothing is closed: "No closures listed · check alerts
@@ -536,7 +536,7 @@ struct CaveatLine: View {
     /// Each line speaks its facts as sentences, without the dots. (Not one ignoring container over the
     /// `ViewThatFits`: the accessibility audit then finds the unused layouts as empty, too-small nodes.)
     private func line(_ parts:[String])->some View {
-        Text(parts.joined(separator:" · ")).lineLimit(1).accessibilityLabel(parts.map(Self.sentence).joined(separator:". "))
+        Text(parts.joined(separator:" · ")).lineLimit(1).accessibilityLabel(Phrase.sentences(parts.map(Self.sentence)))
     }
     private var stacked: some View {
         VStack(spacing:2) { ForEach(Array(facts.enumerated()),id:\.offset) { _,fact in Text(Self.sentence(fact)).fixedSize(horizontal:false,vertical:true) } }

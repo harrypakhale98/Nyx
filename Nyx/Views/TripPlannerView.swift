@@ -158,7 +158,7 @@ struct TripPlannerView: View {
             Divider().overlay(palette.line)
             DatePicker("First night",selection:firstBinding,in:Date.now.addingTimeInterval(-86400)...Date.now.addingTimeInterval(365*86400),displayedComponents:.date)
             DatePicker("Last night",selection:lastBinding,in:first...first.addingTimeInterval(Double(weekendsOnly ? 69 : 13)*86400),displayedComponents:.date)
-            Toggle(isOn:$weekendsOnly) { VStack(alignment:.leading,spacing:2) { Text("Weekends only"); Text("Friday and Saturday nights").font(.caption).foregroundStyle(palette.muted) } }.tint(palette.controlTint)
+            Toggle(isOn:$weekendsOnly) { VStack(alignment:.leading,spacing:2) { Text("Weekends only"); Text("Nights before your days off").font(.caption).foregroundStyle(palette.muted) } }.tint(palette.controlTint)
             Text("\(days.count) nights, at most \(TripPlanner.maxNights)").font(.caption).foregroundStyle(palette.muted)
             Divider().overlay(palette.line)
             distancePicker(title:"Within",selection:$radius,values:SearchRadius.tripSteps(),note:"as the crow flies")
@@ -181,7 +181,7 @@ struct TripPlannerView: View {
     @ViewBuilder private var results:some View {
         if let plan {
             if plan.stops.isEmpty {
-                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? (onlyByBoatOrPlane ? "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius." : "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.") : "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.")
+                CalmState(symbol:"moon.stars",title:plan.candidates==0 ? "No parks in reach" : "No nights to plan",message:plan.candidates==0 ? (onlyByBoatOrPlane ? "The only parks inside this radius are reached by boat or plane. Turn off Parks you can drive to, or widen the radius." : "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point.") : "Weekends only leaves no night before a day off in these dates. Add a weekend or include weeknights.")
             } else {
                 Panel { VStack(alignment:.leading,spacing:12) {
                     Eyebrow(text:"The route")
@@ -252,7 +252,7 @@ struct TripPlannerView: View {
     }
     private func routeSummary(_ plan:TripPlan)->String {
         let parks=Array(NSOrderedSet(array:plan.stops.map(\.night.park.shortName))).compactMap { $0 as? String }
-        return String(localized:"Route map: \(parks.joined(separator:", ")).")
+        return String(localized:"Route map: \(Phrase.list(parks)).")
     }
 }
 /// Alone, the planner names its own page; inside Plan, Plan does.
@@ -342,7 +342,7 @@ struct TripStayRow: View {
         if let hop=first.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before")) }
         if let closure=stay.stops.compactMap(\.closure).first { parts.append(String(localized:"Closure alert: \(closure)")) }
         if let access=park.accessNote { parts.append(String(localized:"Getting there: \(access)")) }
-        return parts.joined(separator:". ")
+        return Phrase.sentences(parts)
     }
 }
 /// The system's own event editor, filled in with the night. It runs outside Nyx: the person

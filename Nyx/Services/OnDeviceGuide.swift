@@ -21,6 +21,9 @@ import Observation
     /// question; the features with no question to follow (the year's few words, a photo's
     /// description) write in the person's language, and are offered only where the model has it.
     static var speaksYourLanguage:Bool { available && languageModel.supportsLocale(.current) }
+    /// A closure, as the records say it: a fixed flag in Nyx's own words. The Park Service's title
+    /// and text never reach the model (`PlanModel.guideAccess`).
+    nonisolated static var closureRecord:String { String(localized:"closure: yes. The last park update lists a closure here. Read it in Nyx before you go.") }
     /// The person's language by its English name ("Spanish"), for instructions to the model.
     nonisolated static var yourLanguage:String {
         let code=Locale.current.language.languageCode?.identifier ?? "en"
@@ -98,7 +101,8 @@ import Observation
                 // Words appear only while every citation so far is a real record and every number
                 // so far is in the records; a number still arriving waits for its last digit.
                 let facts=context+ledger.all+[question,today]+ids.map { String($0) }
-                if let shown=Self.partial(whole,ids:ids,valid:Set(context.indices).union(ledger.ids),facts:facts) {
+                let closed=Self.hasClosure(context+ledger.all)
+                if let shown=Self.partial(whole,ids:ids,valid:Set(context.indices).union(ledger.ids),facts:facts,closed:closed) {
                     text=shown;citations=Array(Set(ids)).sorted()
                 }
             }
@@ -109,7 +113,8 @@ import Observation
             let facts=context+ledger.all+[question,today]+ids.map { String($0) }
             let valid=Set(context.indices).union(ledger.ids)
             let final=whole.trimmingCharacters(in:.whitespacesAndNewlines)
-            if ids.isEmpty || !ids.allSatisfy(valid.contains) || !Self.grounded(final,facts:facts) {
+            // And an answer never says a place is open or accessible when a record flags a closure.
+            if ids.isEmpty || !ids.allSatisfy(valid.contains) || !Self.grounded(final,facts:facts) || (Self.hasClosure(context+ledger.all) && Self.claimsAccess(final)) {
                 error=String(localized:"Nyx could not match an answer to these records. The original data is below.");text="";citations=[]
             } else { text=final;citations=Array(Set(ids)).sorted();checked=true }
         } catch {
@@ -127,11 +132,30 @@ import Observation
     /// What may be shown of an answer still streaming: nil until it cites only real records, with
     /// a trailing run of digits held back until the number is whole (a "9" on its way to "94"
     /// would pass the check alone), and only while every number shown is in the facts.
-    nonisolated static func partial(_ text:String,ids:[Int],valid:Set<Int>,facts:[String])->String? {
+    nonisolated static func partial(_ text:String,ids:[Int],valid:Set<Int>,facts:[String],closed:Bool=false)->String? {
         guard !ids.isEmpty, ids.allSatisfy(valid.contains) else { return nil }
         let held=heldBack(text)
-        guard !held.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty, grounded(held,facts:facts) else { return nil }
+        guard !held.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty, grounded(held,facts:facts), !(closed && claimsAccess(held)) else { return nil }
         return held
+    }
+    /// True when any record carries the closure flag.
+    nonisolated static func hasClosure(_ records:[String])->Bool {
+        let flag=closureRecord
+        return records.contains { $0.contains(flag) }
+    }
+    /// Words that say a place can be reached or is open, in each language Nyx speaks, matched on
+    /// whole words with case and accents folded. Deliberately broad: beside a closure even "the rest
+    /// is open" is not Nyx's to say, so such an answer gives way to the records themselves.
+    private nonisolated static let accessWords:Set<String>=["open","opened","reopened","reopens","accessible","passable","abierto","abierta","abiertos","abiertas",
+        "accesible","accesibles","transitable","geoffnet","offen","offnet","zuganglich","befahrbar","ouvert","ouverte","ouverts","ouvertes","praticable"]
+    private nonisolated static let accessPhrases=["no closure","no closures","not closed","sin cierres","no hay cierres","keine sperrung","nicht gesperrt","aucune fermeture",
+        "pas ferme","開いて","開放","通行可","通行でき","営業中","利用可能","閉鎖はありません","閉鎖されていません","オープン"]
+    nonisolated static func claimsAccess(_ text:String)->Bool {
+        let folded=text.folding(options:[.caseInsensitive,.diacriticInsensitive,.widthInsensitive],locale:nil)
+        let words=folded.split { !$0.isLetter }.map(String.init)
+        if words.contains(where:accessWords.contains) { return true }
+        let spaced=words.joined(separator:" ")
+        return accessPhrases.contains { spaced.contains($0) || folded.contains($0) }
     }
     /// The text without a trailing run of digits, which may still be growing.
     nonisolated static func heldBack(_ text:String)->String {

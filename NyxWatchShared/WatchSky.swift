@@ -106,8 +106,7 @@ nonisolated struct WatchLink: Hashable, Sendable {
               let raw = url.pathComponents.first(where: { $0 != "/" }), let id = Self.placeID(raw) else { return nil }
         parkID = id
         let date = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "date" }?.value
-        let parts = date?.split(separator: "-").compactMap { Int($0) } ?? []
-        day = parts.count == 3 ? DateComponents(year: parts[0], month: parts[1], day: parts[2]) : nil
+        day = date.flatMap(LinkDay.components)
     }
     /// A place id in its stored form, as the iPhone's links read it (`DeepLink.placeID`): a park's
     /// letters (any case), a Wikidata item (`wd:Q123456`) or a saved spot (`pin:` and a UUID, lowercase).

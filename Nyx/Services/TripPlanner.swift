@@ -38,8 +38,17 @@ nonisolated struct TripDay: Hashable, Comparable, Codable, Sendable {
     }
     /// 1 Sunday … 7 Saturday, as `Calendar` numbers them.
     var weekday: Int { noonUTC.map { Self.utc.component(.weekday,from:$0) } ?? 1 }
-    /// Friday and Saturday nights: the ones that need no day off work.
-    var isWeekendNight: Bool { weekday==6 || weekday==7 }
+    /// A night before a day off: the evening before one of the device calendar's weekend days.
+    /// Friday and Saturday nights where the weekend is Saturday and Sunday; Thursday and Friday
+    /// nights where it is Friday and Saturday (`Calendar.isDateInWeekend` reads the region's weekend).
+    var isWeekendNight: Bool { isNightBeforeDayOff() }
+    func isNightBeforeDayOff(calendar: Calendar = .current) -> Bool {
+        let next=adding(1)
+        var gregorian=Calendar(identifier:.gregorian)
+        gregorian.timeZone=calendar.timeZone
+        guard let noon=gregorian.date(from:DateComponents(year:next.year,month:next.month,day:next.day,hour:12)) else { return false }
+        return calendar.isDateInWeekend(noon)
+    }
     /// Local noon of this day in the park, the same instant `Park.evening` uses to name a night.
     func evening(in park: Park) -> Date {
         park.calendar.date(from:DateComponents(year:year,month:month,day:day,hour:12)) ?? park.evening(noonUTC ?? .now)
@@ -91,11 +100,11 @@ nonisolated enum TripPlanner {
     static let closurePenalty = 10
     /// The nights of a trip, first to last inclusive, at most `maxNights` of them (counted after the
     /// weekend filter, so "weekends only" can span seven weekends).
-    static func days(first: TripDay, last: TripDay, weekendsOnly: Bool) -> [TripDay] {
+    static func days(first: TripDay, last: TripDay, weekendsOnly: Bool, calendar: Calendar = .current) -> [TripDay] {
         guard first<=last else { return [] }
         var days:[TripDay]=[], day=first
         while day<=last && days.count<maxNights {
-            if !weekendsOnly || day.isWeekendNight { days.append(day) }
+            if !weekendsOnly || day.isNightBeforeDayOff(calendar:calendar) { days.append(day) }
             day=day.adding(1)
         }
         return days

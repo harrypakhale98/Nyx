@@ -114,11 +114,34 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     }
     private static let foldedTerms = Mutex<[String: [String]]>([:])
     nonisolated static func folded(_ text: String) -> String {
-        text.replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
-            .replacingOccurrences(of: "&", with: " and ")
+        transliterated(text.replacingOccurrences(of: "ʻ", with: "").replacingOccurrences(of: "'", with: "")
+            .replacingOccurrences(of: "&", with: " and "))
             .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
             .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.joined(separator: " ")
     }
+    /// What diacritic folding leaves alone, spelled as it is typed on any keyboard, for search on both
+    /// sides (the index and the query): Latin letters with no accent to drop ("Tromsø" as "Tromso",
+    /// "Łódź" as "Lodz", "Đà Lạt" as "Da Lat", "Þingvellir" as "Thingvellir"); full-width letters and
+    /// digits as plain ones; half-width katakana as full width, a voiced mark joined to its letter
+    /// (ｶﾞ as ガ); and hiragana as katakana, so "よせ" finds "ヨセミテ". Plain ASCII returns at once.
+    nonisolated static func transliterated(_ text: String) -> String {
+        guard text.utf8.contains(where: { $0 >= 0x80 }) else { return text }
+        var out = String.UnicodeScalarView()
+        for scalar in text.precomposedStringWithCompatibilityMapping.unicodeScalars {
+            if let latin = latinASCII[scalar] { out.append(contentsOf: latin.unicodeScalars) }
+            else if (0x3041...0x3096).contains(scalar.value) || scalar.value == 0x309D || scalar.value == 0x309E,
+                    let katakana = Unicode.Scalar(scalar.value + 0x60) { out.append(katakana) }
+            else { out.append(scalar) }
+        }
+        return String(out)
+    }
+    /// Latin letters that are letters of their own rather than a letter and an accent (ß already
+    /// folds to "ss" with case).
+    private nonisolated static let latinASCII: [Unicode.Scalar: String] = [
+        "ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D", "ð": "d", "Ð": "D", "þ": "th", "Þ": "Th", "æ": "ae", "Æ": "Ae",
+        "œ": "oe", "Œ": "Oe", "ı": "i", "ħ": "h", "Ħ": "H", "ŧ": "t", "Ŧ": "T", "ŋ": "ng", "Ŋ": "Ng", "ĸ": "k", "ſ": "s", "ƒ": "f",
+        "ŀ": "l", "Ŀ": "L", "ɨ": "i", "ƚ": "l", "ƀ": "b", "ǥ": "g", "Ǥ": "G",
+    ]
     static let aliases: [String: [String]] = [
         "grsm": ["Smokies", "Smoky Mountains"], "jeff": ["St. Louis Arch", "Gateway Arch"], "deva": ["Death Valley"],
         "wrst": ["Wrangell Saint Elias"], "havo": ["Volcanoes", "Kilauea"], "hale": ["Haleakala"], "npsa": ["American Samoa"],
@@ -470,5 +493,23 @@ nonisolated extension Place {
                      bortleEstimate: bortleEstimate, description: description, sourceURL: sourceURL, sourceNote: sourceNote,
                      viewingSpots: viewingSpots, access: access, aboveInversion: aboveInversion, website: website,
                      englishName: local == nil ? nil : name, englishRegion: area == nil ? nil : region, localShortName: local?.short ?? localShortName)
+    }
+}
+
+/// A night's day as a link carries it ("YYYY-MM-DD"), read the same way on every device: a real
+/// Gregorian day between 1900 and 2200 (the iPhone's link rule), else nil, which opens tonight.
+/// Never month 13, February 30 or a year no night is planned in.
+nonisolated enum LinkDay {
+    static func components(_ text: String) -> DateComponents? {
+        let parts = text.split(separator: "-", omittingEmptySubsequences: false)
+        guard parts.count == 3, parts[0].count == 4, parts[1].count == 2, parts[2].count == 2,
+              let year = Int(parts[0]), let month = Int(parts[1]), let day = Int(parts[2]),
+              (1900...2200).contains(year), (1...12).contains(month), (1...31).contains(day) else { return nil }
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = .gmt
+        let components = DateComponents(year: year, month: month, day: day)
+        guard let noon = gregorian.date(from: DateComponents(year: year, month: month, day: day, hour: 12)),
+              gregorian.dateComponents([.year, .month, .day], from: noon) == components else { return nil }
+        return components
     }
 }

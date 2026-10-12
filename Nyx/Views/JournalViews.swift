@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 import ImageIO
+import UniformTypeIdentifiers
 
 struct JournalView: View {
     @Environment(PlanModel.self) private var model
@@ -19,6 +20,8 @@ struct JournalView: View {
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
+    /// A journal read and checked, waiting for the person to confirm the import.
+    @State private var pendingImport:PendingImport?
     /// An export being gathered or an import being read, off the main thread (photos can be many megabytes).
     @State private var working:LocalizedStringKey?
     /// A park dropped onto the journal: a new entry for it, tonight's date.
@@ -86,6 +89,11 @@ struct JournalView: View {
             }
             .overlay { if let working { WorkingNote(title:working) } }
             .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
+            // Nothing is merged until the person has seen what the file holds.
+            .alert("Import this journal?",isPresented:Binding(get:{ pendingImport != nil },set:{ if !$0 { pendingImport=nil } }),presenting:pendingImport) { pending in
+                Button("Import") { Task { await confirmImport(pending) } }
+                Button("Cancel",role:.cancel) {}
+            } message:{ pending in Text(Self.importMessage(pending.summary)) }
             .task(id:model.journalFile) {
                 // A journal opened from Files or another app.
                 guard let url=model.journalFile else { return }
@@ -115,30 +123,50 @@ struct JournalView: View {
             else { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
         }
     }
-    /// Adds the nights the journal does not have yet; nothing already here is changed. The package
-    /// is read and its thumbnails drawn off the main thread; only the inserts happen here. A copy
-    /// another app left in Documents/Inbox is removed afterwards, imported or not.
+    /// Reads the package off the main thread (every limit checked, every photo re-encoded), then
+    /// asks before anything is merged: the counts, and that spots arrive unfollowed. A copy another
+    /// app left in Documents/Inbox is removed once it has been read, imported or not.
     private func importJournal(_ url:URL) async {
         working="Importing your journal"
         model.importingJournal=url
-        defer {
-            working=nil
-            if model.importingJournal == url { model.importingJournal=nil }
-            Task.detached(priority:.utility) { JournalInbox.remove(url) }
+        let read=await Task.detached(priority:.userInitiated) { () -> Result<JournalImport,any Error> in Result { try JournalImport.read(url) } }.value
+        working=nil
+        if model.importingJournal == url { model.importingJournal=nil }
+        Task.detached(priority:.utility) { JournalInbox.remove(url) }
+        switch read {
+        case .success(let prepared):
+            if let summary=try? prepared.summary(in:context) { pendingImport=PendingImport(prepared:prepared,summary:summary) }
+            else { importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.") }
+        case .failure(let error):
+            importResult=(error as? JournalArchive.ArchiveError) == .tooLarge ? Self.tooLargeMessage
+                : String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
         }
-        // Every photo is read, checked and scaled here, off the main thread; the merge only inserts.
-        let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data],images:Set<String>)? in
-            guard let archive=try? JournalArchive(url:url) else { return nil }
-            return (archive,archive.thumbnails(),archive.imageFiles())
-        }.value
+    }
+    /// Adds the nights the journal does not have yet; nothing already here is changed. The inserts
+    /// run in batches with a pause between, and one save makes it all or nothing.
+    private func confirmImport(_ pending:PendingImport) async {
+        working="Importing your journal"
+        defer { working=nil }
         do {
-            guard let read else { throw JournalArchive.ArchiveError.unreadable }
-            let result=try read.archive.merge(into:context,thumbnails:read.thumbnails,images:read.images)
+            let result=try await pending.prepared.merge(into:context,batch:100)
             importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
         } catch {
             context.rollback()
             importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
         }
+    }
+    /// The confirmation's words: what the file holds, what is skipped, and how spots arrive.
+    nonisolated static func importMessage(_ summary:JournalImport.Summary)->String {
+        var lines=[summary.spots>0 ? String(localized:"Nights: \(summary.nights). Photos: \(summary.photos). Spots: \(summary.spots).")
+                                   : String(localized:"Nights: \(summary.nights). Photos: \(summary.photos).")]
+        if summary.alreadyHere>0 { lines.append(String(localized:"Already in your journal, so skipped: \(summary.alreadyHere).")) }
+        if summary.spots>0 { lines.append(String(localized:"Spots arrive in Your spots unfollowed. Follow one to get its reminders.")) }
+        return lines.joined(separator:"\n")
+    }
+    /// A journal past `JournalImport`'s limits, with the limits in the reader's own numbers.
+    nonisolated static var tooLargeMessage:String {
+        let nights=JournalImport.maxEntries.formatted(), size=Int64(JournalImport.maxPackageBytes).formatted(.byteCount(style:.file))
+        return String(localized:"This journal is too large to import. Nyx imports up to \(nights) nights, \(PhotoScaling.perEntry) photos a night and \(size) in all. Nothing was changed.")
     }
     @ViewBuilder private var entryList: some View {
         // An empty journal's button sits inside the constellation, under its promise (`YourSkyPanel`).
@@ -150,10 +178,11 @@ struct JournalView: View {
     private var recordAction: (()->Void)? { entries.isEmpty && !model.journalUnavailable ? { editing=true } : nil }
     /// December (and the first days of January): the year's recap waits at the top of the journal.
     private func recapSeason(_ nights:[LoggedNight])->Bool {
-        let now=model.today, calendar=Calendar.current
+        // Gregorian months and years, whatever calendar the device uses; each night's year where it was spent.
+        let now=model.today, calendar=JournalYear.calendar(.current)
         let month=calendar.component(.month,from:now), year=calendar.component(.year,from:now)
         let recapYear=month==12 ? year : month==1 && calendar.component(.day,from:now)<=7 ? year-1 : nil
-        return recapYear.map { y in nights.contains { calendar.component(.year,from:$0.date)==y } } ?? false
+        return recapYear.map { y in nights.contains { $0.year==y } } ?? false
     }
     private var recapCard:some View {
         Button { recap=true } label:{
@@ -208,10 +237,27 @@ struct JournalCard:View {
         } }
     }
 }
+/// A journal read and checked, and what the confirmation says about it.
+struct PendingImport {
+    let prepared:JournalImport
+    let summary:JournalImport.Summary
+}
 /// Image I/O downsampling: decodes straight to the target size, never the full photo.
 nonisolated enum PhotoScaling {
-    /// The largest photo the journal accepts, from the editor or from Shortcuts.
+    /// The largest photo the journal accepts, from the editor, Shortcuts or an imported journal.
     static let maxSourceBytes=40_000_000
+    /// The most photos one entry holds, from the editor, Shortcuts or an imported journal.
+    static let perEntry=4
+    /// The image types a photo may arrive as in an imported journal; anything else is left out.
+    static let keepsakeTypes: Set<String>=[UTType.jpeg.identifier,UTType.heic.identifier,UTType.heif.identifier,UTType.png.identifier]
+    /// A photo from outside the editor as the journal keeps it: a JPEG, HEIC or PNG drawn again as
+    /// the editor's JPEG (at most 2,400 pixels on the long edge), which carries none of the
+    /// original file's metadata (location, camera, dates); nil for any other data.
+    static func keepsake(_ data:Data)->Data? {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil), CGImageSourceGetCount(source)>0,
+              let type=CGImageSourceGetType(source) as String?, keepsakeTypes.contains(type) else { return nil }
+        return jpeg(data,maxPixels:2400)
+    }
     /// True when Image I/O recognizes the data as an image (read from its header; nothing is decoded).
     static func isImage(_ data:Data)->Bool {
         guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return false }
@@ -294,7 +340,7 @@ struct JournalThumbnail:View {
     }
     func load(_ items:[PhotosPickerItem]) async {
         loadingPhotos=true;error=nil;defer { loadingPhotos=false }
-        for item in items.prefix(max(0,4-photos.count)) {
+        for item in items.prefix(max(0,PhotoScaling.perEntry-photos.count)) {
             do {
                 if let data=try await item.loadTransferable(type:Data.self), data.count<=PhotoScaling.maxSourceBytes {
                     // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded.
@@ -385,7 +431,7 @@ struct JournalEditorView:View {
                     PhotoDescriptionRow(editor:editor,index:index,data:data)
                 }
                 if editor.loadingPhotos { ProgressView("Adding photo") }
-                PhotosPicker(selection:$picker,maxSelectionCount:max(0,4-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=4 || editor.loadingPhotos)
+                PhotosPicker(selection:$picker,maxSelectionCount:max(0,PhotoScaling.perEntry-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=PhotoScaling.perEntry || editor.loadingPhotos)
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
             if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
         }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)

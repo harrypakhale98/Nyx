@@ -23,6 +23,8 @@ extension ParkDetailView {
             VStack(alignment:.leading,spacing:8) {
                 Eyebrow(text:"From the National Park Service")
                 ClampedText(text:park.description,lines:4)
+                // The Park Service writes in English: translated by iOS on this device, as alerts and programs are.
+                TranslateButton(text:park.description)
             }.frame(maxWidth:.infinity,alignment:.leading)
         }
         if park.isCatalogPlace { worldSource }

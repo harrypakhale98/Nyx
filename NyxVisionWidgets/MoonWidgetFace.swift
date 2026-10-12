@@ -28,7 +28,7 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     var percent: Int { Int((illumination*100).rounded()) }
     /// "Moon, waxing crescent, 23 percent lit. Next new moon Tuesday, October 21."
     var spoken: String {
-        String(localized: "Moon, \(phaseName.lowercased()), \(percent) percent lit. Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")
+        String(localized: "Moon, \(phaseName), \(percent) percent lit. Next new moon \(nextNewMoon.formatted(.dateTime.weekday(.wide).month(.wide).day())).")
     }
 }
 

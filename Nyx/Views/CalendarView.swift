@@ -79,7 +79,7 @@ struct NightCell: View {
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
         if highlighted, let stretchName { parts.append(stretchName) }
         if let marker { parts.append(marker.name) }
-        return parts.joined(separator:". ")
+        return Phrase.sentences(parts)
     }
 }
 /// The long-press preview: one night at a glance.
@@ -520,7 +520,7 @@ struct CalendarView: View {
     static func spokenNames(_ night:Night)->[Text] {
         var format=Date.FormatStyle.dateTime.weekday(.wide).day()
         format.timeZone=night.park.timeZone
-        return [Text(verbatim:"\(night.park.calendar.component(.day,from:night.id))"),Text(verbatim:night.id.formatted(format))]
+        return [Text(night.park.calendar.component(.day,from:night.id),format:.number),Text(verbatim:night.id.formatted(format))]
     }
     private func monthEvents(_ nights:[Night],park:Park)->[Date:String] {
         Dictionary(nights.compactMap { night in model.events(night).marker(park:park).map { (night.id,$0.name) } },uniquingKeysWith:{ first,_ in first })

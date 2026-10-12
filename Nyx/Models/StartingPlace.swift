@@ -434,7 +434,7 @@ nonisolated enum StartingPlaces {
                 if scalar=="&" { kept.append(contentsOf:" and ".unicodeScalars) } else { kept.append(scalar) }
             }
             let letters=CharacterSet.alphanumerics
-            return String(kept).folding(options:options,locale:nil).unicodeScalars.split { !letters.contains($0) }
+            return Park.transliterated(String(kept)).folding(options:options,locale:nil).unicodeScalars.split { !letters.contains($0) }
                 .map { word in let word=String(String.UnicodeScalarView(word)); return ["st":"saint","ft":"fort","mt":"mount"][word] ?? word }
                 .joined(separator:" ")
         }

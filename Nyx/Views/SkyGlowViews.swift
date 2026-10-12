@@ -105,6 +105,10 @@ nonisolated enum SpotGlow {
         }
         return parkCentre.flatMap { SkyGlow.comparison(spot:glow,park:$0) }
     }
+    /// True for a note in the Park Service's English, not one of Nyx's own catalog sentences.
+    static func fromParkService(_ lead:String)->Bool {
+        lead != String(localized:"The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.")
+    }
     /// The note a spot carries without the shared caveat, which the panel says once.
     static func lead(_ spot:ViewingSpot)->String? {
         let note=spot.localizedNote
@@ -125,7 +129,11 @@ struct ViewingSpotRow: View {
     var body: some View {
         VStack(alignment:.leading,spacing:10) {
             Text(spot.name).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)
-            if let lead=SpotGlow.lead(spot) { Text(lead).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let lead=SpotGlow.lead(spot) {
+                Text(lead).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                // The notes come from nps.gov in English (the one note Nyx writes itself is in the catalog).
+                if SpotGlow.fromParkService(lead) { TranslateButton(text:lead) }
+            }
             if let site=SkyGlow.shared.spot(spot.name,park:park.id) {
                 let level=SkyGlow.shared.level(site.glow)
                 let others=(SkyGlow.shared.park(park.id)?.spots ?? []).filter { $0.name != spot.name }.map(\.glow)
@@ -148,11 +156,12 @@ struct ViewingSpotRow: View {
                     .tint(palette.accent)
             }
         }
-        .sensoryFeedback(.success,trigger:copied) { _,new in new }
+        // A copy is a light tick: the success thump is the journal's alone.
+        .sensoryFeedback(.selection,trigger:copied) { _,new in new }
     }
     @ViewBuilder private var actions: some View {
         Button {
-            UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)"
+            PrivatePasteboard.copy("\(spot.latitude), \(spot.longitude)")
             copied=true
             Task { try? await Task.sleep(for:.seconds(3)); copied=false }
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
@@ -210,7 +219,7 @@ struct ProtectThisSky: View {
                 }
             }
             NavigationLink { EssayView(essay:.darkness) } label:{
-                HStack { Text("Read \"\(Essay.darkness.title)\"").fixedSize(horizontal:false,vertical:true); Spacer(); Image(systemName:"chevron.right").font(.footnote).accessibilityHidden(true) }.frame(minHeight:44).contentShape(Rectangle())
+                HStack { Text("Read \"\(Essay.darkness.title)\"").fixedSize(horizontal:false,vertical:true); Spacer(); Image(systemName:"chevron.forward").font(.footnote).accessibilityHidden(true) }.frame(minHeight:44).contentShape(Rectangle())
             }.font(.subheadline).foregroundStyle(palette.accent)
         }
     }

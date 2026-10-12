@@ -8,7 +8,7 @@ extension PlanModel {
         entries.map { entry in
             let id=entry.id, date=entry.date, parkID=entry.parkID
             return LoggedNight(id:id,date:date,parkID:parkID,observedBortle:entry.observedBortle,
-                               score:journalScore(id:id,date:date,parkID:parkID),notes:entry.notes)
+                               score:journalScore(id:id,date:date,parkID:parkID),notes:entry.notes,timeZone:park(parkID)?.timeZone)
         }
     }
     /// A trip plan from the cached forecasts and park updates, worked out off the main thread.

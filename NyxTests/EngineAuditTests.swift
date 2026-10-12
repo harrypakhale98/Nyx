@@ -347,8 +347,8 @@ struct FixedWeather: WeatherProviding {
     // MARK: A hostile journal file
 
     /// Out-of-range Bortle classes are clamped, a park id that is a path is never stored, spots at
-    /// impossible coordinates are left out, and one photo named twice is imported for each entry.
-    @Test func hostileJournalImportsSafely() throws {
+    /// impossible coordinates are left out, and one photo file named several times is used once.
+    @MainActor @Test func hostileJournalImportsSafely() throws {
         let opened=JournalStore.open(inMemory: true)
         let context=ModelContext(try #require(opened.container))
         let size=CGSize(width: 8, height: 8)
@@ -367,12 +367,13 @@ struct FixedWeather: WeatherProviding {
         let spots=[badSpot("f1", .nan, 10), badSpot("f2", 10, .infinity), badSpot("f3", 91, 0), badSpot("f4", 40, -105), JournalArchive.Spot(id: "../pin", name: "Bad", latitude: 1, longitude: 1,
                    timeZoneID: "UTC", countryCode: "", region: "", created: .now, note: nil, saved: true)]
         let archive=JournalArchive(manifest: JournalArchive.Manifest(format: 2, exported: .now, entries: entries, spots: spots), photos: ["same.jpg": photo])
-        let result=try archive.merge(into: context, thumbnails: archive.thumbnails(), images: archive.imageFiles())
+        let result=try archive.merge(into: context)
         #expect(result.added == 4 && result.skipped == 0)
         let stored=try context.fetch(FetchDescriptor<JournalEntry>())
         #expect(stored.allSatisfy { (1...9).contains($0.observedBortle) })
         #expect(Set(stored.map(\.parkID)) == ["", "jotr", "wd:Q24451"])
-        #expect(stored.first { $0.parkID == "jotr" }?.orderedPhotos.count == 2)
+        // The first entry to name the file has it; the second, naming it twice, has none.
+        #expect(stored.first { $0.parkID == "jotr" }?.orderedPhotos.isEmpty == true)
         #expect(stored.first { $0.notes.hasPrefix("Night ../x") }?.orderedPhotos.count == 1)
         #expect(stored.first { $0.parkID == "wd:Q24451" }?.orderedPhotos.isEmpty == true)
         // Only the spot at real coordinates arrives, in a zone that exists.

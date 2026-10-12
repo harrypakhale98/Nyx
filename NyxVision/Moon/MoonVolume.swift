@@ -89,7 +89,7 @@ nonisolated struct MoonView: Sendable, Equatable {
     }
     var percent: Int { Int((geometry.illumination*100).rounded()) }
     /// "Moon, waxing crescent, 23 percent lit".
-    var spoken: String { String(localized: "Moon, \(phaseName.lowercased()), \(percent) percent lit") }
+    var spoken: String { String(localized: "Moon, \(phaseName), \(percent) percent lit") }
     static func == (a: MoonView, b: MoonView) -> Bool { a.park.id == b.park.id && a.moment == b.moment }
 
     /// The Sun's direction as seen from the Moon, in the volume's frame (x right, y up, z toward
@@ -283,7 +283,7 @@ struct MoonControls: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 14) {
-                Button { nights -= 1 } label: { Image(systemName: "chevron.left") }
+                Button { nights -= 1 } label: { Image(systemName: "chevron.backward") }
                     .disabled(nights == 0)
                     .accessibilityLabel(Text("Previous night"))
                 VStack(spacing: 2) {
@@ -292,7 +292,7 @@ struct MoonControls: View {
                 }
                 .frame(minWidth: 200)
                 .accessibilityElement(children: .combine)
-                Button { nights += 1 } label: { Image(systemName: "chevron.right") }
+                Button { nights += 1 } label: { Image(systemName: "chevron.forward") }
                     .disabled(nights >= MoonView.lastNight)
                     .accessibilityLabel(Text("Next night"))
             }

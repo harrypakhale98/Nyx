@@ -170,7 +170,7 @@ struct AssistiveParkCard: View {
     /// "Excellent night", or "Excellent night, clouds not known yet" without a cloud forecast.
     static func word(_ night: Night) -> String {
         let word=String(localized: "\(night.score.band.label) night")
-        return night.score.hasForecast ? word : word+", "+String(localized: "clouds not known yet")
+        return night.score.hasForecast ? word : Phrase.clauses([word, String(localized: "clouds not known yet")])
     }
     /// "Dark from 8:40 PM", or the plain words for a night without true darkness.
     static func darkLine(_ night: Night) -> String {

@@ -1,8 +1,19 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 // Saved spots on screen (G3): how a spot names itself beside the parks, its own panel on its page
 // (where it is, rename, delete), and the feed that hands the store's spots to the model.
+
+/// Coordinates on the pasteboard: this device only (never Universal Clipboard on a nearby Mac or
+/// iPad) and gone after two minutes, so where someone stands under the sky does not linger.
+enum PrivatePasteboard {
+    static let lifetime: TimeInterval=120
+    static func copy(_ text: String, now: Date = .now) {
+        UIPasteboard.general.setItems([[UTType.utf8PlainText.identifier: text]],
+                                      options: [.localOnly: true, .expirationDate: now.addingTimeInterval(lifetime)])
+    }
+}
 
 extension Place {
     /// A spot's region in the reader's words: "California"; "Ontario, Canada"; "France". Empty far
@@ -80,7 +91,8 @@ struct SpotPanel: View {
                 }
             }
         }
-        .sensoryFeedback(.success,trigger:copied) { _,new in new }
+        // A copy is a light tick: the success thump is the journal's alone.
+        .sensoryFeedback(.selection,trigger:copied) { _,new in new }
         .alert("Rename spot",isPresented:$renaming) {
             TextField("Name",text:$newName).textInputAutocapitalization(.words)
             Button("Cancel",role:.cancel) {}
@@ -96,7 +108,7 @@ struct SpotPanel: View {
     }
     @ViewBuilder private var placeActions: some View {
         Button {
-            UIPasteboard.general.string="\(spot.latitude), \(spot.longitude)"
+            PrivatePasteboard.copy("\(spot.latitude), \(spot.longitude)")
             copied=true
             Task { try? await Task.sleep(for:.seconds(3)); copied=false }
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }

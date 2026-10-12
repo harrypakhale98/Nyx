@@ -265,7 +265,8 @@ struct SavedSpotTests {
     // MARK: The journal archive
 
     /// Spots travel with the journal (format 2): an entry written at a spot arrives with its place,
-    /// a followed spot is followed again, and importing twice adds nothing.
+    /// every spot arrives unfollowed (an archive never sets up reminders on its own), and importing
+    /// twice adds nothing.
     @MainActor @Test func archiveCarriesSpots() throws {
         let schema=Schema(versionedSchema: NyxSchemaV2.self)
         let phone=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
@@ -288,11 +289,11 @@ struct SavedSpotTests {
         #expect(arrived.map(\.id) == [Self.jotr, Self.other])
         let first=try #require(arrived.first)
         #expect(first.latitude == 34.0123 && first.longitude == -116.1789 && first.timeZoneID == "America/Los_Angeles" && first.note == "North pullout.")
-        #expect(try ipad.fetch(FetchDescriptor<SavedPark>()).map(\.parkID) == [Self.jotr])
+        #expect(try ipad.fetch(FetchDescriptor<SavedPark>()).isEmpty)
         #expect(try ipad.fetch(FetchDescriptor<JournalEntry>()).contains { $0.parkID == Self.jotr })
         let again=try reread.merge(into: ipad)
         #expect(again.added == 0 && again.skipped == 2)
-        #expect(try ipad.fetch(FetchDescriptor<SavedSpot>()).count == 2 && (try ipad.fetch(FetchDescriptor<SavedPark>())).count == 1)
+        #expect(try ipad.fetch(FetchDescriptor<SavedSpot>()).count == 2 && (try ipad.fetch(FetchDescriptor<SavedPark>())).isEmpty)
     }
     /// A journal without spots is written exactly as before (format 1, no spots key), and a
     /// format-1 archive from an earlier version still imports.

@@ -21,10 +21,10 @@ nonisolated struct ClearWindow: Sendable, Equatable {
         let coreAll = core.map { abs($0.start.timeIntervalSince(interval.start)) <= tolerance && abs($0.end.timeIntervalSince(interval.end)) <= tolerance } ?? false
         var parts = [String(localized: "clear")]
         if moonDown { parts.append(String(localized: "Moon down")) }
-        var text = String(localized: "Best window: \(t(interval.start)) – \(t(interval.end)) · \(parts.joined(separator: ", "))")
+        let text = String(localized: "Best window: \(t(interval.start)) – \(t(interval.end)) · \(Phrase.clauses(parts))")
         // The core in words of its own, as field mode names it: through the whole window, or for part of it.
-        if coreAll { text += "; "+String(localized: "Milky Way core up throughout") }
-        else if let core { text += "; "+String(localized: "Milky Way core up \(t(core.start)) – \(t(core.end))") }
+        if coreAll { return Phrase.addition(text, String(localized: "Milky Way core up throughout")) }
+        if let core { return Phrase.addition(text, String(localized: "Milky Way core up \(t(core.start)) – \(t(core.end))")) }
         return text
     }
 

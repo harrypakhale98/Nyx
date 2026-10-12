@@ -228,6 +228,27 @@ nonisolated struct LoggedNight: Identifiable, Sendable, Hashable {
     var score: Int?
     /// What was written that night; only the on-device recap reads it, and only on this iPhone.
     var notes: String = ""
+    /// The place's own zone; nil when the place is unknown here, and the device's zone stands in.
+    var timeZone: TimeZone? = nil
+    /// The Gregorian year of the night where it was spent.
+    var year: Int { JournalYear.year(date, zone: timeZone ?? .current) }
+}
+/// A journal's years: the Gregorian year of each night in its own place's time zone, whatever
+/// calendar the device uses (a Buddhist or Japanese calendar numbers years differently, and a
+/// night in Hawaiʻi on New Year's Eve is still the old year there), written for the reader with
+/// `Date.FormatStyle` ("2026", "2026年"), never as a bare number.
+nonisolated enum JournalYear {
+    static func calendar(_ zone: TimeZone) -> Calendar {
+        var calendar=Calendar(identifier: .gregorian)
+        calendar.timeZone=zone
+        return calendar
+    }
+    static func year(_ date: Date, zone: TimeZone) -> Int { calendar(zone).component(.year, from: date) }
+    static func label(_ year: Int, locale: Locale = .current) -> String {
+        let gregorian=calendar(.gmt)
+        guard let midyear=gregorian.date(from: DateComponents(year: year, month: 7, day: 1, hour: 12)) else { return year.formatted(.number.grouping(.never)) }
+        return midyear.formatted(Date.FormatStyle(date: .omitted, time: .omitted, locale: locale, calendar: gregorian, timeZone: .gmt).year())
+    }
 }
 /// Meteorological seasons, as most people name them: winter runs December to February and
 /// belongs to the year its January falls in.
@@ -248,10 +269,10 @@ nonisolated struct Season: Hashable, Comparable, Sendable {
     }
     var name: String {
         switch kind {
-        case .winter: String(localized:"Winter \(String(year))")
-        case .spring: String(localized:"Spring \(String(year))")
-        case .summer: String(localized:"Summer \(String(year))")
-        case .autumn: String(localized:"Autumn \(String(year))")
+        case .winter: String(localized:"Winter \(JournalYear.label(year))")
+        case .spring: String(localized:"Spring \(JournalYear.label(year))")
+        case .summer: String(localized:"Summer \(JournalYear.label(year))")
+        case .autumn: String(localized:"Autumn \(JournalYear.label(year))")
         }
     }
     static func < (a: Season, b: Season) -> Bool { (a.year,a.kind.rawValue)<(b.year,b.kind.rawValue) }
@@ -299,7 +320,7 @@ nonisolated struct ConstellationLayout: Sendable {
             let n=seen[park.id,default:0]; seen[park.id]=n+1
             let angle=Double(n)*2.399963, radius=Self.clusterSpacing*Double(n).squareRoot()
             stars.append(Star(night:night,point:CGPoint(x:base.x+radius*cos(angle),y:base.y+radius*sin(angle)),
-                              brightness:Self.brightness(bortle:night.observedBortle,score:night.score),season:Season(night.date,calendar:calendar)))
+                              brightness:Self.brightness(bortle:night.observedBortle,score:night.score),season:Season(night.date,calendar:JournalYear.calendar(park.timeZone))))
         }
         self.frame=frame
         self.stars=stars
@@ -376,7 +397,8 @@ nonisolated struct YearRecap: Sendable {
         self.year=year
         let byID=Dictionary(parks.map { ($0.id,$0) },uniquingKeysWith:{ first,_ in first })
         let known=all.filter { byID[$0.parkID] != nil }
-        func yearOf(_ night: LoggedNight) -> Int { calendar.component(.year,from:night.date) }
+        // The night's Gregorian year where it was spent; `calendar`'s zone only for a place unknown here.
+        func yearOf(_ night: LoggedNight) -> Int { JournalYear.year(night.date, zone: byID[night.parkID]?.timeZone ?? night.timeZone ?? calendar.timeZone) }
         let nights=known.filter { yearOf($0)==year }.sorted { $0.date<$1.date }
         self.nights=nights.count
         let visited=Array(Set(nights.map(\.parkID)))
@@ -425,16 +447,16 @@ nonisolated struct YearRecap: Sendable {
     static func phaseFraction(_ index: Int) -> Double { [0.0,0.125,0.25,0.375,0.5,0.625,0.75,0.875][max(0,min(7,index))] }
     /// The deterministic recap, in Nyx's voice. Every sentence is a fact from the journal.
     var template: String {
-        guard nights>0 else { return String(localized:"No nights recorded in \(String(year)) yet. Your first night will be your first star.") }
+        guard nights>0 else { return String(localized:"No nights recorded in \(JournalYear.label(year)) yet. Your first night will be your first star.") }
         var lines:[String]=[]
         let nightsText=nights==1 ? String(localized:"one night") : String(localized:"\(nights) nights")
         let parksText=allNationalParks
             ? (parkNames.count==1 ? String(localized:"one national park") : String(localized:"\(parkNames.count) national parks"))
             : (parkNames.count==1 ? String(localized:"one place") : String(localized:"\(parkNames.count) places"))
         switch newParkNames.count {
-        case 0: lines.append(String(localized:"In \(String(year)) you spent \(nightsText) under the stars in \(parksText)."))
-        case parkNames.count: lines.append(String(localized:"In \(String(year)) you spent \(nightsText) under the stars in \(parksText), each one new to you."))
-        default: lines.append(String(localized:"In \(String(year)) you spent \(nightsText) under the stars in \(parksText), \(newParkNames.count) of them new to you."))
+        case 0: lines.append(String(localized:"In \(JournalYear.label(year)) you spent \(nightsText) under the stars in \(parksText)."))
+        case parkNames.count: lines.append(String(localized:"In \(JournalYear.label(year)) you spent \(nightsText) under the stars in \(parksText), each one new to you."))
+        default: lines.append(String(localized:"In \(JournalYear.label(year)) you spent \(nightsText) under the stars in \(parksText), \(newParkNames.count) of them new to you."))
         }
         if let darkest { lines.append(String(localized:"Your darkest sky was \(darkest.parkName) on \(darkest.dateLabel): Bortle \(darkest.bortle), as you saw it.")) }
         lines.append(phases.count==8 ? String(localized:"You met all eight of the Moon's phases.") : phases.count==1 ? String(localized:"You met one of the Moon's eight phases.") : String(localized:"You met \(phases.count) of the Moon's eight phases."))
@@ -443,8 +465,8 @@ nonisolated struct YearRecap: Sendable {
     }
     /// Facts for the on-device model, one per line, never more than the template already says.
     var facts: [String] {
-        var facts=[String(localized:"Year: \(String(year))"),String(localized:"Nights recorded: \(nights)"),allNationalParks ? String(localized:"Parks: \(parkNames.joined(separator:", "))") : String(localized:"Places: \(parkNames.joined(separator:", "))")]
-        if !newParkNames.isEmpty { facts.append(allNationalParks ? String(localized:"New parks this year: \(newParkNames.joined(separator:", "))") : String(localized:"New places this year: \(newParkNames.joined(separator:", "))")) }
+        var facts=[String(localized:"Year: \(JournalYear.label(year))"),String(localized:"Nights recorded: \(nights)"),allNationalParks ? String(localized:"Parks: \(Phrase.list(parkNames))") : String(localized:"Places: \(Phrase.list(parkNames))")]
+        if !newParkNames.isEmpty { facts.append(allNationalParks ? String(localized:"New parks this year: \(Phrase.list(newParkNames))") : String(localized:"New places this year: \(Phrase.list(newParkNames))")) }
         if let darkest { facts.append(String(localized:"Darkest observed sky: \(darkest.parkName), \(darkest.dateLabel), Bortle \(darkest.bortle)")) }
         facts.append(String(localized:"Moon phases met: \(phases.count) of 8"))
         if let event { facts.append(event) }

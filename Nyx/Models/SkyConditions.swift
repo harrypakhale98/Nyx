@@ -184,3 +184,9 @@ nonisolated struct Night: Identifiable, Sendable {
     var aerosol: Double? = nil
     var basis: CloudBasis { score.basis }
 }
+
+/// A whole percentage as the reader's locale writes it ("23%"; "23 %" in French and German), for
+/// copy such as "\(Percent.text(23)) lit" whose catalog entry is then "%@ lit".
+nonisolated enum Percent {
+    static func text(_ whole: Int) -> String { whole.formatted(.percent) }
+}

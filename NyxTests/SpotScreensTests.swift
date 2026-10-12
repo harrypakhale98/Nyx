@@ -51,7 +51,7 @@ struct SpotScreensTests {
         #expect(CoordinateText.pair("-90, 180") == .point(.init(latitude: -90, longitude: 180)))
     }
     @Test(arguments: ["", "Joshua Tree", "34.01", "34.01, -116.18, 5", "34.01 N, 35.2 S", "116 W 117 E", "-34.01 S, 116 W",
-                      "34°75'N 116°W", "34.5°10'N 116°W", "34'N 116W", "NORTH 34 WEST 116", "34..01, 5", "1, 2, 3"])
+                      "34°75'N 116°W", "34.5°10'N 116°W", "34'N 116W", "LAT 34 LON 116", "34..01, 5", "1, 2, 3"])
     func unreadableTextIsRejected(_ text: String) {
         #expect(CoordinateText.pair(text) == .unreadable, "\(text)")
     }

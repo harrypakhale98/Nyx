@@ -50,7 +50,13 @@ struct StargazingFocusFilter: SetFocusFilterIntent {
     @Parameter(title:"Night vision",default:false) var nightVision: Bool
     @Parameter(title:"Offer field mode",default:false) var offerField: Bool
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title:"Stargazing",subtitle:nightVision ? "Night vision on" : offerField ? "Field mode offered" : "Nothing changes yet")
+        DisplayRepresentation(title:"Stargazing",subtitle:Self.subtitle(nightVision:nightVision,offerField:offerField))
+    }
+    /// One whole resource per state, so each is in the catalog (a nested choice of literals is not).
+    static func subtitle(nightVision:Bool,offerField:Bool)->LocalizedStringResource {
+        if nightVision { return LocalizedStringResource("Night vision on") }
+        if offerField { return LocalizedStringResource("Field mode offered") }
+        return LocalizedStringResource("Nothing changes yet")
     }
     func perform() async throws -> some IntentResult {
         StargazingFocus.apply(nightVision:nightVision,offerField:offerField)

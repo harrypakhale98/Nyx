@@ -215,7 +215,7 @@ struct TimeRiver: View {
                     Text(Self.loupeDate(night.id,locale:locale,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit()
                         .foregroundStyle(palette.muted).lineLimit(1).minimumScaleFactor(0.8)
                     // Light, or regular under Bold Text, as the strokes follow it.
-                    Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
+                    Text(night.score.value,format:.number).font(.system(size:22,weight:palette.stroke>1 ? .regular : .light,design:.serif)).monospacedDigit()
                         .foregroundStyle(palette.accent).contentTransition(.numericText(value:Double(night.score.value)))
                 }.transition(.opacity)
             }
@@ -342,7 +342,7 @@ struct TimeRiver: View {
         return ordered.first(where:{ $0>(current ?? -1) }) ?? ordered.first
     }
     @ViewBuilder private func stepperScore(_ night:Night)->some View {
-        Text(verbatim:"\(night.score.value)").font(.system(.largeTitle,design:.serif).weight(.light)).foregroundStyle(palette.accent)
+        Text(night.score.value,format:.number).font(.system(.largeTitle,design:.serif).weight(.light)).foregroundStyle(palette.accent)
             .contentTransition(.numericText(value:Double(night.score.value)))
         Text(night.score.band.label).font(.title3).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }
@@ -593,7 +593,7 @@ private struct LoupePreview: View {
     var body: some View {
         VStack(spacing:1) {
             Text(TimeRiver.loupeDate(night.id,locale:.current,timeZone:night.park.timeZone)).font(.system(size:10,weight:.semibold)).monospacedDigit().foregroundStyle(palette.muted)
-            Text(verbatim:"\(night.score.value)").font(.system(size:22,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
+            Text(night.score.value,format:.number).font(.system(size:22,weight:.light,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
         }.frame(width:56,height:56).modifier(LoupeSurface(solid:solid,lifted:true))
     }
 }

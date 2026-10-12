@@ -178,10 +178,10 @@ struct BestNightSnippetView: View {
             if let typical=night.typicalClouds { Text(typical).font(.caption).foregroundStyle(palette.muted) }
             // A place the Park Service does not run: Nyx cannot see its closures, and says so instead.
             if let unknown=DarknessAnswer.unknownClosures(night.park) {
-                Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption).foregroundStyle(palette.muted)
+                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption).foregroundStyle(palette.muted)
                 Text(unknown).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             } else {
-                Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
+                Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit. Confirm park access before you go.").font(.caption).foregroundStyle(palette.muted)
             }
             HStack(spacing:10) {
                 if total>1 {

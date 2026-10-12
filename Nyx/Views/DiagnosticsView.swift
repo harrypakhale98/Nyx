@@ -36,7 +36,7 @@ struct DiagnosticsView: View {
             }
         }
         .readableForm().navigationTitle("Diagnostics").navigationBarTitleDisplayMode(.inline)
-        .sensoryFeedback(.success,trigger:copied)
+        .sensoryFeedback(.selection,trigger:copied)
         .confirmationDialog("Delete these reports?",isPresented:$confirmClear,titleVisibility:.visible) {
             Button("Delete reports",role:.destructive) { DiagnosticsStore.removeAll(); records=[] }
         }

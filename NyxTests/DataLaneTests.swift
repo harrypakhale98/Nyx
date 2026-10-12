@@ -355,7 +355,8 @@ struct DataLaneTests {
         let result=try reread.merge(into: ipad)
         #expect(counts(result) == [2, 0])
         let imported=try #require(try ipad.fetch(FetchDescriptor<JournalEntry>()).first { $0.id == entry.id })
-        #expect(imported.photos == photos && imported.notes == "Saturn's rings.")
+        // Each photo arrives re-encoded as the editor's JPEG (no metadata of the original file).
+        #expect(imported.photos.count == photos.count && imported.photos.allSatisfy(PhotoScaling.isImage) && imported.notes == "Saturn's rings.")
         #expect(imported.orderedPhotos.first?.altText == "The Milky Way over Joshua trees.")
         #expect(counts(try reread.merge(into: ipad)) == [0, 2])
         #expect(try ipad.fetch(FetchDescriptor<JournalEntry>()).count == 3)
@@ -405,7 +406,7 @@ struct DataLaneTests {
                                                       photos: ["a.jpg": photo, "b.jpg": Data("not a photo".utf8)]))
         #expect(counts(try sound.merge(into: context)) == [1, 0])
         let kept=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
-        #expect(kept.photos == [photo] && kept.thumbnail != nil)
+        #expect(kept.photos.count == 1 && kept.thumbnail != nil)
         #expect(try context.fetch(FetchDescriptor<JournalPhoto>()).count == 1)
     }
     /// A journal another app opened in Nyx is a copy in Documents/Inbox: removed once handled, and
@@ -482,10 +483,10 @@ struct DataLaneTests {
         }.value
         let made=try #require(archive)
         #expect(made.manifest.entries.map(\.id) == [entry.id] && made.photos.values.first == photo)
-        let thumbnails=await Task.detached { made.thumbnails() }.value
-        let thumbnail=try #require(thumbnails[entry.id])
+        let prepared=try await Task.detached { try JournalImport(made) }.value
+        let thumbnail=try #require(prepared.thumbnails[entry.id])
         let other=ModelContext(try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)))
-        #expect(try made.merge(into: other, thumbnails: thumbnails).added == 1)
+        #expect(try await prepared.merge(into: other, batch: 1).added == 1)
         #expect(try other.fetch(FetchDescriptor<JournalEntry>()).first?.thumbnail == thumbnail)
     }
 

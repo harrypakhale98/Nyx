@@ -114,7 +114,7 @@ struct YourSkyPanel: View {
             HStack(alignment:.center) {
                 Eyebrow(text:"Your constellation")
                 Spacer(minLength:8)
-                if !nights.isEmpty { ConstellationShareButton(layout:layout,year:Calendar.current.component(.year,from:.now)) }
+                if !nights.isEmpty { ConstellationShareButton(layout:layout,year:JournalYear.year(.now,zone:.current)) }
             }
             SkyMapView(content:layout.content(parks:places),summary:layout.summary(unavailable:unavailable),
                        arriving:arriving,arrivalHold:hold,arrivalPaused:!onScreen || fieldOpen,drawInMemory:"journal",
@@ -215,9 +215,9 @@ struct ConstellationShareButton: View {
     let year: Int
     @State private var image: Image?
     private var title: String {
-        let years=Set(layout.stars.map { Calendar.current.component(.year,from:$0.night.date) })
-        guard let low=years.min(), let high=years.max(), low != high else { return String(localized:"My sky, \(String(years.first ?? year))") }
-        return String(localized:"My sky, \(String(low))–\(String(high))")
+        let years=Set(layout.stars.map(\.night.year))
+        guard let low=years.min(), let high=years.max(), low != high else { return String(localized:"My sky, \(JournalYear.label(years.first ?? year))") }
+        return String(localized:"My sky, \(JournalYear.label(low))–\(JournalYear.label(high))")
     }
     var body: some View {
         Group {
@@ -250,23 +250,22 @@ struct YearRecapView: View {
     @ScaledMetric(relativeTo:.largeTitle) private var yearSize=84.0
     init(nights: [LoggedNight], year: Int? = nil) {
         self.nights=nights
-        let years=nights.map { Calendar.current.component(.year,from:$0.date) }
-        _year=State(initialValue:year ?? years.max() ?? Calendar.current.component(.year,from:.now))
+        _year=State(initialValue:year ?? nights.map(\.year).max() ?? JournalYear.year(.now,zone:.current))
     }
-    private var years: [Int] { Array(Set(nights.map { Calendar.current.component(.year,from:$0.date) })).sorted(by:>) }
+    private var years: [Int] { Array(Set(nights.map(\.year))).sorted(by:>) }
     var body: some View {
-        let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
+        let yearNights=nights.filter { $0.year==year }
         let places=model.mapPlaces
         let layout=ConstellationLayout(nights:yearNights,parks:places)
         ScrollView { VStack(alignment:.leading,spacing:24) {
             Eyebrow(text:"Year under the stars")
             HStack(alignment:.firstTextBaseline) {
-                Text(String(year)).font(.system(size:min(yearSize,120),weight:.light,design:.serif)).foregroundStyle(palette.accent).kerning(2)
+                Text(JournalYear.label(year)).font(.system(size:min(yearSize,120),weight:.light,design:.serif)).foregroundStyle(palette.accent).kerning(2)
                     .lineLimit(1).minimumScaleFactor(0.5)
                 Spacer(minLength:8)
                 if years.count>1 {
-                    Menu { Picker("Year",selection:$year) { ForEach(years,id:\.self) { Text(String($0)).tag($0) } } } label:{ Label("Year",systemImage:"calendar").frame(minHeight:44) }
-                        .accessibilityLabel("Choose a year").accessibilityValue(String(year))
+                    Menu { Picker("Year",selection:$year) { ForEach(years,id:\.self) { Text(JournalYear.label($0)).tag($0) } } } label:{ Label("Year",systemImage:"calendar").frame(minHeight:44) }
+                        .accessibilityLabel("Choose a year").accessibilityValue(JournalYear.label(year))
                 }
             }
             if let recap, recap.year==year { facts(recap,layout:layout,places:places) }
@@ -276,7 +275,7 @@ struct YearRecapView: View {
         .background(NightBackground()).navigationTitle("Year under the stars").navigationBarTitleDisplayMode(.inline)
         // Again for a night logged while the page is open.
         .task(id:[year,nights.count]) {
-            let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
+            let yearNights=nights.filter { $0.year==year }
             reflection=nil
             let asked=year, all=nights, parks=model.mapPlaces
             let made=await Task.detached(priority:.userInitiated) { YearRecap(year:asked,nights:all,parks:parks) }.value
@@ -412,8 +411,8 @@ struct RecapShareButton: View {
 /// Illustrative nights for the `constellation` and `recap` scenarios: a lived-in year across the West.
 enum DebugJournal {
     static func nights(now: Date = .now) -> [LoggedNight] {
-        let year=Calendar.current.component(.year,from:now)
-        func at(_ month:Int,_ day:Int,_ yearOffset:Int=0)->Date { Calendar.current.date(from:DateComponents(year:year+yearOffset,month:month,day:day,hour:22)) ?? now }
+        let calendar=JournalYear.calendar(.current), year=calendar.component(.year,from:now)
+        func at(_ month:Int,_ day:Int,_ yearOffset:Int=0)->Date { calendar.date(from:DateComponents(year:year+yearOffset,month:month,day:day,hour:22)) ?? now }
         let rows:[(Date,String,Int,Int)]=[ // date, park, observed Bortle, score
             (at(11,14,-1),"jotr",3,72),(at(1,24),"deva",2,81),(at(2,18),"jotr",3,77),(at(2,20),"deva",2,88),
             (at(5,16),"brca",2,84),(at(5,18),"grba",1,90),(at(7,22),"grba",1,94),(at(7,24),"arch",2,86),(at(8,12),"grba",1,92),

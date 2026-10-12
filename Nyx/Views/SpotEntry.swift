@@ -6,6 +6,10 @@ import Foundation
 /// typographic minus. With hemisphere letters the pair may come in either order; without them,
 /// latitude comes first, as maps write it. A decimal comma is read where nothing else could be
 /// meant: "34,01; -116,18" (a semicolon between) or "34,01 -116,18" (a space between, no points).
+/// Full-width digits and punctuation read as plain ones ("３４．０１、－１１６．１８"), and compass
+/// words and letters in any of Nyx's languages ("34,01 Nord", "Oeste", "北緯34.01°"). The one
+/// ambiguous letter, "O", follows the app's language: west in Spanish and French (oeste, ouest),
+/// east in German (Ost); in English and Japanese it is not a compass letter, and the text is unreadable.
 nonisolated enum CoordinateText {
     struct Point: Equatable, Sendable {
         let latitude: Double
@@ -21,8 +25,8 @@ nonisolated enum CoordinateText {
     enum PairReading: Equatable, Sendable { case point(Point), outOfRange, unreadable }
 
     /// Both coordinates from one string.
-    static func pair(_ text: String) -> PairReading {
-        guard let groups=groups(text), groups.count == 2 else { return .unreadable }
+    static func pair(_ text: String, language: String = PlaceNames.appLanguage) -> PairReading {
+        guard let groups=groups(text, language: language), groups.count == 2 else { return .unreadable }
         let first=groups[0], second=groups[1]
         let latitude: Double, longitude: Double
         switch (first.axis, second.axis) {
@@ -34,14 +38,14 @@ nonisolated enum CoordinateText {
         return .point(Point(latitude: latitude, longitude: longitude))
     }
     /// The pair as a point, or nil when it is unreadable or out of range.
-    static func point(_ text: String) -> Point? {
-        if case .point(let point)=pair(text) { return point }
+    static func point(_ text: String, language: String = PlaceNames.appLanguage) -> Point? {
+        if case .point(let point)=pair(text, language: language) { return point }
         return nil
     }
     /// One coordinate from its own field. A hemisphere letter must belong to the field's axis.
-    static func reading(_ text: String, axis: Axis) -> Reading {
+    static func reading(_ text: String, axis: Axis, language: String = PlaceNames.appLanguage) -> Reading {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return .empty }
-        guard let groups=groups(text), groups.count == 1, let group=groups.first, group.axis == nil || group.axis == axis else { return .unreadable }
+        guard let groups=groups(text, language: language), groups.count == 1, let group=groups.first, group.axis == nil || group.axis == axis else { return .unreadable }
         return abs(group.value) <= axis.limit ? .value(group.value) : .outOfRange
     }
     /// A coordinate written back for a field: up to six decimals (about 10 cm), a point for the
@@ -58,8 +62,8 @@ nonisolated enum CoordinateText {
 
     /// The coordinates in the text, each with its axis when a hemisphere letter names it; nil when
     /// anything in it cannot be read.
-    private static func groups(_ text: String) -> [Group]? {
-        guard let tokens=tokens(normalized(text)) else { return nil }
+    private static func groups(_ text: String, language: String) -> [Group]? {
+        guard let tokens=tokens(normalized(text, language: language)) else { return nil }
         var groups: [Group]=[]
         var current=Partial()
         func close() -> Bool {
@@ -136,8 +140,12 @@ nonisolated enum CoordinateText {
             return Group(value: negative ? -value : value, axis: nil)
         }
     }
-    private static func normalized(_ text: String) -> String {
-        var text=text.uppercased()
+    private static func normalized(_ text: String, language: String) -> String {
+        // Marks that compatibility mapping would turn into a letter or a spacing accent are read
+        // first (º is a degree sign here, not an "o"); then full-width forms become plain ones.
+        var text=text
+        for (from, to) in [("º", "°"), ("˚", "°"), ("´", "'")] { text=text.replacingOccurrences(of: from, with: to) }
+        text=compass(text.precomposedStringWithCompatibilityMapping.replacingOccurrences(of: "、", with: ","), language: language).uppercased()
         for (from, to) in [("\u{2212}", "-"), ("\u{2013}", "-"), ("\u{2014}", "-"), ("\u{2010}", "-"), ("\u{2011}", "-"),
                            ("º", "°"), ("˚", "°"), ("′", "'"), ("’", "'"), ("‘", "'"), ("´", "'"), ("`", "'"),
                            ("″", "\""), ("“", "\""), ("”", "\""), ("''", "\""), ("\u{00A0}", " ")] {
@@ -155,6 +163,32 @@ nonisolated enum CoordinateText {
         }
         return text
     }
+    /// Each run of letters that names a compass point, in any of Nyx's languages, as its English
+    /// letter; any other word is left as it is (and is then unreadable).
+    private static func compass(_ text: String, language: String) -> String {
+        var out="", word=""
+        func flush() {
+            guard !word.isEmpty else { return }
+            out+=point(word, language: language) ?? word
+            word=""
+        }
+        for character in text {
+            if character.isLetter { word.append(character) } else { flush(); out.append(character) }
+        }
+        flush()
+        return out
+    }
+    private static func point(_ word: String, language: String) -> String? {
+        let folded=word.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil).uppercased()
+        if folded == "O" { return ["es", "fr", "it", "pt", "ca"].contains(language) ? "W" : ["de", "nl"].contains(language) ? "E" : nil }
+        return compassWords[folded]
+    }
+    private static let compassWords: [String: String]=[
+        "N": "N", "NORTH": "N", "NORTE": "N", "NORD": "N", "NORDEN": "N", "北": "N", "北緯": "N",
+        "S": "S", "SOUTH": "S", "SUR": "S", "SUD": "S", "SUDEN": "S", "南": "S", "南緯": "S",
+        "E": "E", "EAST": "E", "ESTE": "E", "EST": "E", "OST": "E", "OSTEN": "E", "東": "E", "東経": "E",
+        "W": "W", "WEST": "W", "WESTEN": "W", "OESTE": "W", "OUEST": "W", "西": "W", "西経": "W",
+    ]
     private static func tokens(_ text: String) -> [Token]? {
         var tokens: [Token]=[]
         let characters=Array(text)

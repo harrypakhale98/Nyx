@@ -239,7 +239,7 @@ struct TonightSkyView: View {
         return Button(name) { completeReveal(); turn(toward:azimuth) }
             .buttonStyle(.bordered).buttonBorderShape(.capsule).font(.footnote.weight(.medium))
             .tint(Compass.name(facing)==Compass.name(azimuth) ? palette.accent : palette.muted)
-            .accessibilityLabel(String(localized:"Face \(name.lowercased())"))
+            .accessibilityLabel(String(localized:"Face \(name)"))
             .accessibilityAddTraits(Compass.name(facing)==Compass.name(azimuth) ? .isSelected : [])
     }
     private func phase(_ sky:HorizonSky)->String {

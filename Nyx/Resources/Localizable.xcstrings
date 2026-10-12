@@ -806,6 +806,76 @@
         }
       }
     },
+    "%@ lit · down now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ beleuchtet · jetzt untergegangen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ lit · down now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ iluminada · bajo el horizonte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ éclairée · couchée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輝面比%@ · 地平線の下"
+          }
+        }
+      }
+    },
+    "%@ lit · up now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ beleuchtet · jetzt am Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ lit · up now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ iluminada · en el cielo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ éclairée · levée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輝面比%@ · 空に出ている"
+          }
+        }
+      }
+    },
     "%@ night": {
       "extractionState": "manual",
       "localizations": {
@@ -1910,6 +1980,41 @@
         }
       }
     },
+    "%@, %@ lit. Confirm park access before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ beleuchtet. Prüfe vor der Fahrt, ob der Park zugänglich ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ lit. Confirm park access before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ iluminada. Confirma el acceso al parque antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ éclairée. Vérifiez l’accès au parc avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@、輝面比%2$@。出かける前に、公園に入れるか確認してください。"
+          }
+        }
+      }
+    },
     "%@, %@, %@. %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2823,41 +2928,6 @@
         }
       }
     },
-    "%@, %lld%% lit. Confirm park access before you go.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld %% beleuchtet. Prüfe vor der Fahrt, ob der Park zugänglich ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% lit. Confirm park access before you go."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, %lld%% iluminada. Confirma el acceso al parque antes de ir."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, éclairée à %lld %%. Vérifiez l’accès au parc avant de partir."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@、輝面比%2$lld%%。出かける前に、公園に入れるか確認してください。"
-          }
-        }
-      }
-    },
     "%@, %lld, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3029,6 +3099,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、平年の雲量"
+          }
+        }
+      }
+    },
+    "%@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。"
           }
         }
       }
@@ -3694,6 +3799,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@：暗さスコアは100点中%2$lld点（%3$@）。%4$@。"
+          }
+        }
+      }
+    },
+    "%@; %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@; %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ; %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@。%@"
           }
         }
       }
@@ -8017,6 +8157,41 @@
         }
       }
     },
+    "A safety alert is listed in the last park update. Read it in Nyx before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzte Meldung des Parks enthält einen Sicherheitshinweis. Lies ihn vor der Fahrt in Nyx."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A safety alert is listed in the last park update. Read it in Nyx before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La última actualización del parque incluye una alerta de seguridad. Léela en Nyx antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La dernière mise à jour du parc signale une alerte de sécurité. Lisez-la dans Nyx avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の最新情報に安全に関するアラートがあります。出かける前にNyxで確認してください。"
+          }
+        }
+      }
+    },
     "A sky worth protecting": {
       "extractionState": "manual",
       "localizations": {
@@ -9909,6 +10084,41 @@
         }
       }
     },
+    "Already in your journal, so skipped: %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereits in deinem Journal, daher übersprungen: %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Already in your journal, so skipped: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya están en tu diario, así que se omiten: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjà dans votre journal, donc ignorées : %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すでにジャーナルにあるため省く夜：%lld。"
+          }
+        }
+      }
+    },
     "Also in the sky this night. Not part of the score.": {
       "extractionState": "manual",
       "localizations": {
@@ -11678,7 +11888,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年の秋"
+            "value": "%@の秋"
           }
         }
       }
@@ -22074,6 +22284,41 @@
         }
       }
     },
+    "Field mode offered": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feldmodus angeboten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Field mode offered"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo de campo ofrecido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode terrain proposé"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フィールドモードを提案"
+          }
+        }
+      }
+    },
     "Field mode options": {
       "extractionState": "manual",
       "localizations": {
@@ -24389,41 +24634,6 @@
         }
       }
     },
-    "Friday and Saturday nights": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Freitag- und Samstagnacht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Friday and Saturday nights"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noches de viernes y sábado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuits du vendredi et du samedi"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "金曜と土曜の夜"
-          }
-        }
-      }
-    },
     "From": {
       "extractionState": "manual",
       "localizations": {
@@ -26414,6 +26624,41 @@
         }
       }
     },
+    "Import": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importieren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読み込む"
+          }
+        }
+      }
+    },
     "Import journal": {
       "extractionState": "manual",
       "localizations": {
@@ -26445,6 +26690,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ジャーナルを読み込む"
+          }
+        }
+      }
+    },
+    "Import this journal?": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Journal importieren?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import this journal?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Importar este diario?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer ce journal ?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このジャーナルを読み込みますか？"
           }
         }
       }
@@ -26514,7 +26794,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@年、あなたは%3$@で、星空の下の%2$@を過ごしました。そのうち%4$lldか所は初めての場所でした。"
+            "value": "%1$@、あなたは%3$@で、星空の下の%2$@を過ごしました。そのうち%4$lldか所は初めての場所でした。"
           }
         }
       }
@@ -26549,7 +26829,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@年、あなたは%3$@で、星空の下の%2$@を過ごしました。どこも初めての場所でした。"
+            "value": "%1$@、あなたは%3$@で、星空の下の%2$@を過ごしました。どこも初めての場所でした。"
           }
         }
       }
@@ -26584,7 +26864,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@年、あなたは%3$@で、星空の下の%2$@を過ごしました。"
+            "value": "%1$@、あなたは%3$@で、星空の下の%2$@を過ごしました。"
           }
         }
       }
@@ -33263,7 +33543,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "私の空、%@年"
+            "value": "私の空、%@"
           }
         }
       }
@@ -33298,7 +33578,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "私の空、%@–%@年"
+            "value": "私の空、%@–%@"
           }
         }
       }
@@ -34843,6 +35123,41 @@
         }
       }
     },
+    "Nights before your days off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Nächte vor deinen freien Tagen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights before your days off"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches antes de tus días libres"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits qui précèdent vos jours de repos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "休みの前の夜"
+          }
+        }
+      }
+    },
     "Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part.": {
       "extractionState": "manual",
       "localizations": {
@@ -35109,6 +35424,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "まだ雲予報のない夜：%2$lld夜中%1$lld夜。"
+          }
+        }
+      }
+    },
+    "Nights: %lld. Photos: %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte: %lld. Fotos: %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights: %lld. Photos: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noches: %lld. Fotos: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuits : %lld. Photos : %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜：%lld。写真：%lld。"
+          }
+        }
+      }
+    },
+    "Nights: %lld. Photos: %lld. Spots: %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte: %lld. Fotos: %lld. Plätze: %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights: %lld. Photos: %lld. Spots: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noches: %lld. Fotos: %lld. Sitios: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuits : %lld. Photos : %lld. Lieux : %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜：%lld。写真：%lld。スポット：%lld。"
           }
         }
       }
@@ -36148,7 +36533,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年に記録した夜はまだありません。最初の夜が、最初の星になります。"
+            "value": "%@に記録した夜はまだありません。最初の夜が、最初の星になります。"
           }
         }
       }
@@ -37503,6 +37888,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyxが示せるものは、いま地平線の上にありません。"
+          }
+        }
+      }
+    },
+    "Nothing changes yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch ändert sich nichts"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing changes yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no cambia nada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ne change pour l’instant"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ何も変わりません"
           }
         }
       }
@@ -52199,6 +52619,41 @@
         }
       }
     },
+    "Spots arrive in Your spots unfollowed. Follow one to get its reminders.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plätze kommen unverfolgt unter „Deine Plätze“ an. Verfolge einen, um seine Erinnerungen zu bekommen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spots arrive in Your spots unfollowed. Follow one to get its reminders."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los sitios llegan a Tus sitios sin seguir. Sigue uno para recibir sus recordatorios."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les lieux arrivent dans Vos lieux sans être suivis. Suivez-en un pour recevoir ses rappels."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スポットはフォローしていない状態で「あなたのスポット」に入ります。リマインダーを受け取るには、スポットをフォローしてください。"
+          }
+        }
+      }
+    },
     "Spring %@": {
       "extractionState": "manual",
       "localizations": {
@@ -52229,7 +52684,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年の春"
+            "value": "%@の春"
           }
         }
       }
@@ -54004,7 +54459,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年の夏"
+            "value": "%@の夏"
           }
         }
       }
@@ -59412,6 +59867,41 @@
         }
       }
     },
+    "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ in all. Nothing was changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Journal ist zu groß für den Import. Nyx importiert bis zu %1$@ Nächte, %2$lld Fotos pro Nacht und insgesamt %3$@. Nichts wurde geändert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This journal is too large to import. Nyx imports up to %@ nights, %lld photos a night and %@ in all. Nothing was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este diario es demasiado grande para importarlo. Nyx importa hasta %1$@ noches, %2$lld fotos por noche y %3$@ en total. No se cambió nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce journal est trop volumineux pour être importé. Nyx importe jusqu’à %1$@ nuits, %2$lld photos par nuit et %3$@ au total. Rien n’a été modifié."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このジャーナルは大きすぎて読み込めません。Nyxが読み込めるのは、%1$@夜まで、1夜につき写真%2$lld枚まで、合計%3$@までです。何も変更されていません。"
+          }
+        }
+      }
+    },
     "This night could not be stored. Try again when space is available.": {
       "extractionState": "manual",
       "localizations": {
@@ -64597,37 +65087,37 @@
         }
       }
     },
-    "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights.": {
+    "Weekends only leaves no night before a day off in these dates. Add a weekend or include weeknights.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mit „Nur Wochenenden“ bleibt in diesem Zeitraum kein Freitag oder Samstag. Füge ein Wochenende hinzu oder nimm Wochentage dazu."
+            "value": "Mit „Nur Wochenenden“ bleibt in diesem Zeitraum keine Nacht vor einem freien Tag. Füge ein Wochenende hinzu oder nimm Wochentage dazu."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Weekends only leaves no Friday or Saturday in these dates. Add a weekend or include weeknights."
+            "value": "Weekends only leaves no night before a day off in these dates. Add a weekend or include weeknights."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Con Solo fines de semana no queda ningún viernes ni sábado en estas fechas. Agrega un fin de semana o incluye noches entre semana."
+            "value": "Con solo fines de semana no queda ninguna noche antes de un día libre en estas fechas. Agrega un fin de semana o incluye noches entre semana."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avec Week-ends seulement, il ne reste ni vendredi ni samedi dans ces dates. Ajoutez un week-end ou incluez les soirs de semaine."
+            "value": "Avec Week-ends seulement, aucune nuit avant un jour de repos ne reste dans ces dates. Ajoutez un week-end ou incluez les nuits de semaine."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「週末のみ」にすると、これらの日付には金曜日も土曜日も含まれません。週末を加えるか、平日の夜も含めてください。"
+            "value": "「週末のみ」では、この期間に休みの前の夜がありません。週末を加えるか、平日の夜も含めてください。"
           }
         }
       }
@@ -65747,7 +66237,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年の冬"
+            "value": "%@の冬"
           }
         }
       }
@@ -66617,7 +67107,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "年：%@"
+            "value": "対象の年：%@"
           }
         }
       }
@@ -68427,6 +68917,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ジャーナルを開けませんでした。ほかの機能はすべて使えます。ジャーナルには手を付けていません。"
+          }
+        }
+      }
+    },
+    "Your journal stays closed while this device is locked. Unlock it, then ask again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Journal bleibt geschlossen, solange dieses Gerät gesperrt ist. Entsperre es und frag dann noch einmal."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your journal stays closed while this device is locked. Unlock it, then ask again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu diario permanece cerrado mientras este dispositivo está bloqueado. Desbloquéalo y vuelve a preguntar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre journal reste fermé tant que cet appareil est verrouillé. Déverrouillez-le, puis redemandez."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスがロックされている間、ジャーナルは開きません。ロックを解除してから、もう一度尋ねてください。"
           }
         }
       }
@@ -70492,6 +71017,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "崖"
+          }
+        }
+      }
+    },
+    "closure: yes. The last park update lists a closure here. Read it in Nyx before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sperrung: ja. Die letzte Meldung des Parks nennt hier eine Sperrung. Lies sie vor der Fahrt in Nyx."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "closure: yes. The last park update lists a closure here. Read it in Nyx before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cierre: sí. La última actualización del parque indica un cierre aquí. Léelo en Nyx antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fermeture : oui. La dernière mise à jour du parc signale une fermeture ici. Lisez-la dans Nyx avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉鎖：あり。公園の最新情報に、ここでの閉鎖が載っています。出かける前にNyxで確認してください。"
           }
         }
       }

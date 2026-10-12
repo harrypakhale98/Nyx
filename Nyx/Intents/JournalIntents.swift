@@ -3,6 +3,7 @@ import CoreLocation
 import Foundation
 import GeoToolbox
 import SwiftData
+import UIKit
 import UniformTypeIdentifiers
 
 /// The journal for Siri and Shortcuts: "Add to my Nyx journal" asks what to remember and saves
@@ -105,8 +106,14 @@ struct AddJournalEntryIntent: AppIntent {
            near.distanceMeters(latitude: coordinate.latitude, longitude: coordinate.longitude) < 50_000 { return near.id }
         return home ?? Park.defaultID
     }
-    /// Entries newest first, as the descriptor selects and limits them.
+    /// Whether the device is unlocked (its protected data readable); the tests stand in for it.
+    static var unlocked: () -> Bool = { UIApplication.shared.isProtectedDataAvailable }
+    /// Entries newest first, as the descriptor selects and limits them. Never while the device is
+    /// locked: a shortcut or an automation run on a locked iPhone cannot read the journal's words or
+    /// photos. (Recording a night by voice stays open while locked, as it is designed to be: it adds
+    /// an entry and hands back only what was just said.)
     static func entities(_ descriptor: FetchDescriptor<JournalEntry>, photos: Bool = false) async throws -> [JournalEntryEntity] {
+        guard unlocked() else { throw NyxIntentError.journalLocked }
         var descriptor=descriptor
         descriptor.sortBy=[SortDescriptor(\.date, order: .reverse)]
         return try store().mainContext.fetch(descriptor).map { JournalEntryEntity($0, photos: photos) }
@@ -133,7 +140,7 @@ struct AddJournalEntryIntent: AppIntent {
         let parkID=defaultParkID(location: location, inProgress: inProgress, home: UserDefaults.standard.string(forKey: "homePark"))
         let notes=[title, message].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }.joined(separator: "\n\n")
         // Read and shrunk off the main thread: a photo can be tens of megabytes.
-        let scaled=await Task.detached(priority: .userInitiated) { Array(files.lazy.compactMap(keepsake).prefix(4)) }.value
+        let scaled=await Task.detached(priority: .userInitiated) { Array(files.lazy.compactMap(keepsake).prefix(PhotoScaling.perEntry)) }.value
         let entry=JournalEntry(date: date, parkID: parkID, observedBortle: park(parkID)?.bortleEstimate ?? 3, notes: notes, photos: scaled)
         entry.thumbnail=scaled.first.flatMap { PhotoScaling.jpeg($0, maxPixels: 900) }
         let context=store.mainContext

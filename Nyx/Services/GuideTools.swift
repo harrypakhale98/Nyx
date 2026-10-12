@@ -16,6 +16,9 @@ nonisolated struct NightLookup: Sendable {
     /// The places beyond the curated parks that a question may name: the saved spots and the world
     /// catalogue (national parks abroad and certified dark-sky places). Empty until the catalogue is read.
     var others: [Park] = []
+    /// Places with a closure in the last park update: their lines carry Nyx's fixed closure flag
+    /// (`OnDeviceGuide.closureRecord`), never the Park Service's words.
+    var closed: Set<String> = []
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
     /// A place by name: a curated park's exact short name, a spot's or catalogue place's exact name, then
@@ -56,8 +59,12 @@ nonisolated struct NightLookup: Sendable {
     func describe(_ night: Night) -> String {
         let park=night.park
         let basis=Self.basis(night)
-        let dark=night.sky.darkHours>0 ? String(localized: "\(String(format: "%.1f", night.sky.darkHours)) hours of true darkness") : String(localized: "no true darkness")
-        return String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
+        // In the reader's own decimal mark: the line is shown with the answer, and the grounding
+        // check reads digits whatever separates them ("7,5" and "7.5" are both 7 and 5).
+        let hours=night.sky.darkHours.formatted(.number.precision(.fractionLength(1)))
+        let dark=night.sky.darkHours>0 ? String(localized: "\(hours) hours of true darkness") : String(localized: "no true darkness")
+        let line=String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
+        return closed.contains(park.id) ? Phrase.sentences([line, OnDeviceGuide.closureRecord]) : line
     }
     /// What a record's clouds rest on, in the app's words.
     static func basis(_ night: Night) -> String {

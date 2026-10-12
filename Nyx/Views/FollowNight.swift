@@ -142,9 +142,9 @@ enum FollowNightWords {
         let name=park.shortName, day=Self.day(park,night)
         switch result {
         case .scheduled(let start):
-            return String(localized:"Following \(name) on \(day).")+" "+String(localized:"On your Lock Screen from \(park.time(start)), without opening Nyx")+"."
+            return Phrase.sentences([String(localized:"Following \(name) on \(day)."),Phrase.ended(String(localized:"On your Lock Screen from \(park.time(start)), without opening Nyx"))])
         case .started:
-            return String(localized:"Following \(name) on \(day).")+" "+String(localized:"On your Lock Screen now, until dawn")+"."
+            return Phrase.sentences([String(localized:"Following \(name) on \(day)."),Phrase.ended(String(localized:"On your Lock Screen now, until dawn"))])
         case .alreadyFollowing:
             return String(localized:"You are already following \(name) on \(day).")
         case .over:

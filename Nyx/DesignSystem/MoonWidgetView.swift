@@ -123,9 +123,9 @@ struct MoonWidgetView: View {
     }
     private var litLine: String {
         switch entry.moon.isUp {
-        case true?: String(localized: "\(entry.moon.percent)% lit · up now")
-        case false?: String(localized: "\(entry.moon.percent)% lit · down now")
-        case nil: String(localized: "\(entry.moon.percent)% lit")
+        case true?: String(localized: "\(Percent.text(entry.moon.percent)) lit · up now")
+        case false?: String(localized: "\(Percent.text(entry.moon.percent)) lit · down now")
+        case nil: String(localized: "\(Percent.text(entry.moon.percent)) lit")
         }
     }
     /// "Rises 8:12 PM · Joshua Tree", in park time.

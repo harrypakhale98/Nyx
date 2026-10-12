@@ -4,8 +4,9 @@ import Testing
 @testable import Nyx
 
 extension StubHTTP: HTTPTransport {}
+extension StubNotifications: LocalNotificationCenter {}
 
-// The conformance sits in an extension: declared on the actor itself, Swift's conformance-isolation
+// The conformances sit in extensions: declared on an actor itself, Swift's conformance-isolation
 // inference sometimes marked the actor `nonisolated` (an error) depending on which test files compiled with it.
 actor StubHTTP {
     var urls:[URL]=[]
@@ -23,7 +24,7 @@ actor StubHTTP {
         guard let data=responses[url.path] else { throw URLError(.badServerResponse) };return data
     }
 }
-actor StubNotifications:LocalNotificationCenter {
+actor StubNotifications {
     var requests:[NightReminder]=[]
     var ids:[String]
     var delivered:[String]=[]

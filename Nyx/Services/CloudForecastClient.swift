@@ -525,13 +525,20 @@ nonisolated struct SafeHTTP: HTTPTransport {
     /// One ephemeral session per transport, reused for every request: no cookies, no cache, and
     /// one TLS handshake per host instead of one per request.
     private let session: URLSession
-    init(suite: String? = nil) {
+    /// The most a response may hold. The largest answer Nyx asks for, the cloud forecast for 1,000
+    /// catalogue places in one request, is about 5.5 MB (546 KB measured for 100 places on
+    /// 2026-10-12); the NPS campgrounds for all 63 parks about 2 MB. A body past this is refused
+    /// as it arrives, never held in memory whole: no host answers Nyx with that much.
+    static let maxResponseBytes=16_000_000
+    /// `protocols`: the tests' stand-in servers (`URLProtocol`), answered without a network.
+    init(suite: String? = nil, protocols: [AnyClass] = []) {
         self.suite=suite
         let configuration=URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest=20
         configuration.timeoutIntervalForResource=30
         configuration.httpCookieStorage=nil
         configuration.urlCache=nil
+        if !protocols.isEmpty { configuration.protocolClasses=protocols }
         session=URLSession(configuration: configuration, delegate: HostGuard(), delegateQueue: nil)
     }
     func get(_ url: URL) async throws -> Data { try await get(url, headers: [:], constrained: true) }
@@ -548,8 +555,17 @@ nonisolated struct SafeHTTP: HTTPTransport {
         var request=URLRequest(url: url)
         for (field, value) in headers { request.setValue(value, forHTTPHeaderField: field) }
         request.allowsConstrainedNetworkAccess=constrained
-        let (data,response)=try await session.data(for: request)
-        guard let http=response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        let (bytes,response)=try await session.bytes(for: request)
+        guard let http=response as? HTTPURLResponse else { bytes.task.cancel(); throw URLError(.badServerResponse) }
+        // Refused by its declared length before a byte is read, else counted as it streams in.
+        let limit=Self.maxResponseBytes
+        guard response.expectedContentLength<=Int64(limit) else { bytes.task.cancel(); throw URLError(.dataLengthExceedsMaximum) }
+        var data=Data()
+        data.reserveCapacity(Int(max(0, response.expectedContentLength)))
+        for try await byte in bytes {
+            guard data.count<limit else { bytes.task.cancel(); throw URLError(.dataLengthExceedsMaximum) }
+            data.append(byte)
+        }
         guard (200..<300).contains(http.statusCode) else {
             throw HTTPStatusError(status: http.statusCode, retryAfter: HTTPStatusError.retryAfter(http.value(forHTTPHeaderField: "Retry-After"), now: .now),
                                   reason: HTTPStatusError.reason(in: data))

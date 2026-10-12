@@ -19,13 +19,14 @@ extension ParkQuery:IndexedEntityQuery {
 }
 /// What Siri and Shortcuts say when an intent cannot answer, in the same calm words as the app.
 enum NyxIntentError:Error,CustomLocalizedStringResourceConvertible {
-    case parkNotFound, noParks, noNights, journalUnavailable
+    case parkNotFound, noParks, noNights, journalUnavailable, journalLocked
     var localizedStringResource:LocalizedStringResource {
         switch self {
         case .parkNotFound: "That place could not be found in Nyx."
         case .noParks: "Choose a park, or save parks in Nyx to compare them."
         case .noNights: "Nyx could not find those nights."
         case .journalUnavailable: "Your journal could not be opened, so nothing was read or saved. The Journal tab in Nyx says more."
+        case .journalLocked: "Your journal stays closed while this device is locked. Unlock it, then ask again."
         }
     }
 }
@@ -103,7 +104,7 @@ struct DarknessSnippetView:View {
                 HStack(spacing:8) {
                     MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                         .frame(width:22,height:22).accessibilityIgnoresInvertColors()
-                    Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.caption).foregroundStyle(palette.muted)
+                    Text("\(night.sky.moon.name), \(Percent.text(Int((night.sky.moon.illumination*100).rounded()))) lit").font(.caption).foregroundStyle(palette.muted)
                 }
                 Text(night.basisLabel ?? String(localized:"Cached forecast included")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 // A place the Park Service does not run: Nyx cannot see its closures, and says so.
