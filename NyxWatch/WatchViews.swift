@@ -277,9 +277,9 @@ struct TonightFace: View {
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: wraps).layoutPriority(1).nonEssential()
             }
         }
-        // A closure stands beside the score on every surface; here it costs the gauge one line
-        // (at the large sizes, the lines it needs).
-        if let closure { ClosureLine(text: closure, lines: lines).layoutPriority(1) }
+        // A closure stands beside the score on every surface; here it costs the gauge up to two
+        // lines, so the road or trail it names is never cut off (at the large sizes, the lines it needs).
+        if let closure { ClosureLine(text: closure, lines: wraps ? nil : 2).layoutPriority(1) }
     }
     private var gauge: some View {
         WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models)
@@ -555,7 +555,9 @@ struct WeekPage: View {
                 }
                 if let best {
                     VStack(alignment: .leading, spacing: 0) {
-                        if tied.count > 1 { Text("Darkest: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
+                        // Every night alike (usual clouds all week): no night to single out.
+                        if tied.count > 1, tied.count == nights.count { Text("Darkest: every night").font(.footnote) }
+                        else if tied.count > 1 { Text("Darkest: \(park.dayLabel(best.id)) and \(tied.count-1) more").font(.footnote) }
                         else { Text("Darkest: \(park.dayLabel(best.id))").font(.footnote) }
                         Text(best.score.withBand).font(.system(.body, design: .serif)).foregroundStyle(palette.accent)
                     }

@@ -447,8 +447,8 @@ struct JournalEditorView:View {
                     Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
                 }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
-            }
-            Section("What you noticed") { TextEditor(text:$editor.notes).frame(minHeight:160).accessibilityLabel("Observation notes") }
+            }.listRowBackground(palette.panel)
+            Section("What you noticed") { TextEditor(text:$editor.notes).scrollContentBackground(.hidden).frame(minHeight:160).accessibilityLabel("Observation notes") }.listRowBackground(palette.panel)
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
                     PhotoDescriptionRow(editor:editor,index:index,data:data)
@@ -456,8 +456,9 @@ struct JournalEditorView:View {
                 if editor.loadingPhotos { ProgressView("Adding photo") }
                 PhotosPicker(selection:$picker,maxSelectionCount:max(0,PhotoScaling.perEntry-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=PhotoScaling.perEntry || editor.loadingPhotos)
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
-            if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) } }
-        }.readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+            .listRowBackground(palette.panel)
+            if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) }.listRowBackground(palette.panel) }
+        }.nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
         .onAppear {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }

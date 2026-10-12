@@ -18454,6 +18454,41 @@
         }
       }
     },
+    "Darkest: every night": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am dunkelsten: jede Nacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest: every night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más oscuras: todas las noches"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les plus noires : toutes les nuits"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いちばん暗い：どの夜も"
+          }
+        }
+      }
+    },
     "Darkness / 100": {
       "extractionState": "manual",
       "localizations": {

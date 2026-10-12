@@ -329,7 +329,7 @@ struct RootView:View {
         case "river": if let park=model.home { let nights=DebugScenario.state=="empty" ? [] : model.nights(park,from:model.tonight(park),count:30); ScrollView { Panel { DebugRiverHost(nights:nights,start:model.tonight(park),outlooks:model.outlooks(nights),markers:model.markers(nights)) }.padding(24) }.background(NightBackground()).task { await model.refreshForecasts(watching:[park]) } }
         case "location-explainer": PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx compares distances on this iPhone. Your location is never sent to a service.",action:"Use my location") {}
         case "notification-explainer": PermissionExplainer(symbol:"bell",title:"A night worth making time for",message:"Local reminders use complete cloud forecasts. They are estimates, not confirmations of access.",action:"Enable reminders") {}
-        case "loader": ConstellationLoader().background(NightBackground())
+        case "loader": ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
         case "field","field-compass": if let park=model.home { DebugField(park:park,model:model,compass:screen=="field-compass") }
         case "live-activity": if let park=model.home { FieldActivityReview(night:model.night(park)) }
         case "alarm-explainer": PermissionExplainer(symbol:"alarm",title:"An alarm for the sky",message:"Nyx can set an alarm on this iPhone for a moment in the night, like the Milky Way's core rising, so you can rest until the sky is ready. Alarms ring through Silent and Focus. Nothing leaves this phone.",action:"Allow alarms") {}

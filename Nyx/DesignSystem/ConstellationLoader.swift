@@ -34,7 +34,10 @@ struct ConstellationLoader: View {
             LoaderFigure(points:asterism.points,progress:reduceMotion ? 1 : progress,line:palette.ink.opacity(0.55),star:palette.accent)
                 .opacity(shown)
                 .frame(width:150,height:70).accessibilityHidden(true)
-            ProgressView("Reading the night").tint(palette.accent)
+            // The traced figure is the progress: no spinner beside it, two indicators at once read as
+            // noise. Under Reduce Motion the figure stands still, so the system spinner says it is working.
+            if reduceMotion { ProgressView("Reading the night").tint(palette.accent) }
+            else { ProgressView("Reading the night").progressViewStyle(LoaderWords(ink:palette.ink)) }
         }.padding(40)
             .task(id:reduceMotion) {
                 guard !reduceMotion else { progress=1; shown=1; return }
@@ -53,6 +56,13 @@ struct ConstellationLoader: View {
                     try? await Task.sleep(for:.milliseconds(250))
                 }
             }
+    }
+}
+/// The loader's words alone, centred under the figure; still a progress view to VoiceOver.
+private struct LoaderWords: ProgressViewStyle {
+    let ink:Color
+    func makeBody(configuration:Configuration)->some View {
+        configuration.label.font(.body).foregroundStyle(ink).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
     }
 }
 /// A figure traced to `progress` (0…1 of its length), each star fading in as the line reaches it.
