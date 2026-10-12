@@ -208,10 +208,12 @@ nonisolated struct NightPlanner: Sendable {
         let events: [Date: WhatsUp.Events.Glyph]
         var tonight: Night? { nights.compactMap { $0 }.first }
     }
-    func month(_ park: Park, at now: Date, cells: Int = 35, events withEvents: Bool = true, table: SkyEvents = .shared) -> Month {
+    /// `firstWeekday`: 1 Sunday … 7 Saturday, the person's own by default.
+    func month(_ park: Park, at now: Date, cells: Int = 35, events withEvents: Bool = true, table: SkyEvents = .shared,
+               firstWeekday: Int = Calendar.current.firstWeekday) -> Month {
         let tonight = park.currentNight(at: now)
         var calendar = park.calendar
-        calendar.firstWeekday = Calendar.current.firstWeekday
+        calendar.firstWeekday = firstWeekday
         let weekday = calendar.component(.weekday, from: tonight)
         let lead = (weekday - calendar.firstWeekday + 7) % 7
         let run = nights(park, from: now, count: cells - lead, now: now)

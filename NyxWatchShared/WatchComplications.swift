@@ -94,8 +94,9 @@ nonisolated enum WatchTimeline {
         guard look.choice == .automatic else { return [] }
         return (snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
     }
-    /// Entries now, at every milestone of the next day (so "next" turns over on time), and hourly
-    /// (so tonight turns over at the park's sunrise). Countdown text updates itself in between.
+    /// Entries now, at every milestone of the next day (so "next" turns over on time), a second
+    /// past each park's sunrise (so tonight turns over then, `Park.nightTurnovers`), and hourly.
+    /// Countdown text updates itself in between.
     static func entries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [WatchSkyEntry] {
         var cache: [String: SkyConditions] = [:]
         let first = entry(at: now, snapshot: snapshot, look: look, cache: &cache)
@@ -104,6 +105,7 @@ nonisolated enum WatchTimeline {
         moments.formUnion(paletteMoments(from: now, snapshot: snapshot, look: look))
         moments.formUnion(ageMoments(from: now, snapshot: snapshot))
         for park in snapshot?.parks ?? [] {
+            moments.formUnion(park.nightTurnovers(from: now, to: now.addingTimeInterval(86400)))
             for offset in 0..<2 {
                 let evening = park.date(park.currentNight(at: now), addingDays: offset)
                 let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"

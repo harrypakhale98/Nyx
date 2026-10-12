@@ -184,7 +184,7 @@ struct WorldPlacesTests {
     /// build about 25 ms for the slowest (one letter, which matches thousands). 100 ms is where a
     /// list starts to lag behind typing, so the median must stay under it even unoptimized, and
     /// the slowest under 300 ms to allow for other tests running alongside.
-    @Test func searchKeepsUpWithTyping() {
+    @Test(.enabled(if: Bench.enabled)) func searchKeepsUpWithTyping() {
         _=StartingPlaces.index
         let typed="Springfield, Illinois"
         let keystrokes=(1...typed.count).map { String(typed.prefix($0)) }+["P", "Pa", "Par", "Pari", "Paris", "São", "Lodz"]

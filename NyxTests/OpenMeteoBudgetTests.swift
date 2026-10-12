@@ -263,7 +263,7 @@ struct OpenMeteoBudgetTests {
         #expect(firstCount == parks.count && secondCount == parks.count)
         #expect(await held.urls.count == 2)
         // A catalogue tile asked for twice at once goes once.
-        let catalog=try CatalogData.load(), regions=CatalogForecast.Regions(catalog)
+        let catalog=try TestData.catalog(), regions=CatalogForecast.Regions(catalog)
         let tile=try #require(regions.requests.first?.first)
         let gate=OpenMeteoEcho(hold: true), places=WeatherService(transport: gate, persist: false)
         let a=Task { await places.catalogForecasts([tile], network: true) }
@@ -293,7 +293,7 @@ struct OpenMeteoBudgetTests {
     /// spends more than the browsing budget in any minute or hour, and tonight's parks still get
     /// their forecast at once.
     @Test func scrollingTheWorldCannotBurst() async throws {
-        let catalog=try CatalogData.load(), regions=CatalogForecast.Regions(catalog)
+        let catalog=try TestData.catalog(), regions=CatalogForecast.Regions(catalog)
         let clock=BudgetClock(Self.midnight.addingTimeInterval(9*3600)), http=OpenMeteoEcho(), ledger=CallLedger(file: nil)
         let service=WeatherService(transport: http, persist: false, ledger: ledger, clock: { clock.now })
         let caps=CallBudget.standard.browsing
@@ -322,7 +322,7 @@ struct OpenMeteoBudgetTests {
     /// a heavy day browsing Europe's parks on the list and the map stays under the device's daily
     /// ceiling of 3,000, with the world never more than 2,000.
     @Test func aSimulatedDayStaysWithinBudget() async throws {
-        let parks=try parks(), catalog=try CatalogData.load(), regions=CatalogForecast.Regions(catalog)
+        let parks=try parks(), catalog=try TestData.catalog(), regions=CatalogForecast.Regions(catalog)
         // Typical.
         do {
             let clock=BudgetClock(Self.midnight), http=OpenMeteoEcho(), ledger=CallLedger(file: nil)

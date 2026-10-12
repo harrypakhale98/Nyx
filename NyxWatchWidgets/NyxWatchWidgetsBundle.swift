@@ -206,11 +206,14 @@ struct DuskProvider: RelevanceEntriesProvider {
         let evening = configuration.evening ?? park.currentNight(at: now)
         // The usual clouds the snapshot carries, else those the iPhone sent for a place it no longer weighs.
         let climate = (snapshot?.climate ?? .shared).carrying((context?.usualClouds ?? [:]).filter { $0.key == id && snapshot?.usualClouds?[id] == nil })
-        let night = WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: now, climate: climate)
+        // Clouds and detail the same way: the snapshot's, else those the iPhone sent for a place it no longer weighs.
+        let forecast = snapshot?.forecasts[park.id] ?? context?.cloudForecasts[id]
+        let detail = snapshot?.details?[park.id] ?? context?.forecastDetails[id]
+        let night = WatchSky.night(park, evening: evening, forecast: forecast, detail: detail, now: now, climate: climate)
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
         let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : context?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
-                                              closure: closure, cloudsOld: WatchTimeline.isOld(snapshot?.forecasts[park.id]?.updated, at: now)))
+                                              closure: closure, cloudsOld: WatchTimeline.isOld(forecast?.updated, at: now)))
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]

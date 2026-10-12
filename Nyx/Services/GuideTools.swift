@@ -43,10 +43,14 @@ nonisolated struct NightLookup: Sendable {
     }
     /// "2026-11-14" in the park's time zone, or tonight for "tonight", empty or unreadable text.
     func night(_ text: String, at park: Park) -> Date {
-        let tonight=park.currentNight(at: now)
-        let parts=text.split(separator: "-").compactMap { Int($0) }
-        guard parts.count==3, let day=park.calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12)) else { return tonight }
-        return park.evening(day)
+        day(text, at: park)?.evening(in: park) ?? park.currentNight(at: now)
+    }
+    /// A real calendar day within a year of tonight; nil for anything else (February 30, month 13,
+    /// year 0, 9999), which the tools read as tonight rather than computing a night no one asked for.
+    func day(_ text: String, at park: Park) -> TripDay? {
+        guard let day=TripDay(iso: text) else { return nil }
+        let tonight=TripDay(park.currentNight(at: now), calendar: park.calendar)
+        return abs(tonight.days(to: day))<=366 ? day : nil
     }
     /// One line per night, worded like the app: score, band, what the score rests on, the Moon.
     func describe(_ night: Night) -> String {
@@ -70,7 +74,7 @@ nonisolated struct NightLookup: Sendable {
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
         guard let park=park(named: name) else { return [Self.noMatch(name)] }
         // A named day is that day's night (never one already past); anything else is tonight.
-        let ranked=TripDay(iso: first).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
+        let ranked=day(first, at: park).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
             ?? planner.bestNights([park], from: now, count: min(30, max(1, nights)), now: now, limit: limit)
         return ranked.map(describe)
     }

@@ -399,8 +399,7 @@ import Testing
 
     @Test func smokeCaveatDescribesTheSmokeTheScoreUsed() throws {
         let model = PlanModel(weather: WeatherService(persist: false), parkStore: ParkStore(persist: false),
-                              detail: ForecastDetailService(persist: false))
-        defer { model.smokeEnabled = true }
+                              detail: ForecastDetailService(persist: false), defaults: isolatedDefaults())
         model.smokeEnabled = true
         let deva = try park("deva")
         let tonight = model.night(deva)

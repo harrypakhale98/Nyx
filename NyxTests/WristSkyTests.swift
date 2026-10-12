@@ -5,7 +5,6 @@ import Testing
 /// The watch's own logic: Automatic colours, the dark-adaptation clock, the next dark moment, the
 /// Moon right now and the age of the clouds.
 struct WristSkyTests {
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     func local(_ park: Park, _ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int = 0) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)))
     }

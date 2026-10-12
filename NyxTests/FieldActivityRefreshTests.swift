@@ -71,10 +71,12 @@ import Testing
         try #require(attributes.dusk.timeIntervalSince(early)>FieldActivityAttributes.scoreAgeLimit)
         let same=scored(heading, 88, "Excellent", nil, at: early)
         let plain={ (text: String) in text.replacingOccurrences(of: "\u{202F}", with: " ") }
-        #expect(plain(attributes.scoreLine(same)) == "88 · Excellent as of 1:10 AM")
-        #expect(plain(attributes.spokenScore(same)) == "Darkness score 88, Excellent, as of 1:10 AM.")
+        // An explicit locale, so the clock and weekday read the same on any simulator's region.
+        let english=Locale(identifier: "en_US")
+        #expect(plain(attributes.scoreLine(same, locale: english)) == "88 · Excellent as of 1:10 AM")
+        #expect(plain(attributes.spokenScore(same, locale: english)) == "Darkness score 88, Excellent, as of 1:10 AM.")
         let evening=scored(heading, 88, "Excellent", nil, at: early.addingTimeInterval(-3*3600))
-        #expect(attributes.scoreLine(evening) == "88 · Excellent as of Sat")
+        #expect(attributes.scoreLine(evening, locale: english) == "88 · Excellent as of Sat")
     }
 
     /// The closure follows the state: posted after following, it appears; lifted, it goes.

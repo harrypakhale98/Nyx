@@ -6,7 +6,6 @@ import SwiftUI
 /// The river and the month under the finger: the scrub's detents, the loupe's place, directions
 /// where the night is decided, and the month pager's pages.
 @MainActor @Suite struct RiverAndMonthTests {
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
 
     // MARK: Detents
 

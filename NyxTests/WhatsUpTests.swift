@@ -6,7 +6,6 @@ import Testing
 /// Real computed nights from the bundled table; no mocked rates except where a rule is isolated.
 @Suite struct WhatsUpTests {
     let engine = AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first(where: { $0.id == id })) }
     func sky(_ park: Park, _ day: String) throws -> SkyConditions {
         engine.conditions(for: park, on: park.evening(try #require(try? Date(day+"T20:00:00Z", strategy: .iso8601))))
     }

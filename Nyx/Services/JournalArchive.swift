@@ -134,7 +134,11 @@ nonisolated struct JournalArchive: Sendable, Equatable {
     /// Thumbnails not supplied are drawn here. Saved spots (format 2) arrive first: one not on the
     /// device yet is added, and followed if it was; one already here (the same id) is left as it
     /// is. Spots are not counted.
-    @MainActor func merge(into context: ModelContext, thumbnails: [UUID: Data]?=nil) throws -> (added: Int, skipped: Int) {
+    /// The names of the photos that are images, checked off the main thread before `merge`.
+    func imageFiles() -> Set<String> { Set(photos.filter { PhotoScaling.isImage($0.value) }.keys) }
+    /// `thumbnails` and `images` (from `thumbnails()` and `imageFiles()`, worked out off the main
+    /// thread) spare the main thread every photo decode; without them they are worked out here.
+    @MainActor func merge(into context: ModelContext, thumbnails: [UUID: Data]?=nil, images: Set<String>?=nil) throws -> (added: Int, skipped: Int) {
         let existing=try context.fetch(FetchDescriptor<JournalEntry>())
         var ids=Set(existing.map(\.id))
         let same=Set(existing.map { Sameness($0.parkID, $0.date, $0.notes) })
@@ -154,10 +158,12 @@ nonisolated struct JournalArchive: Sendable, Equatable {
         for item in manifest.entries {
             // `ids` grows as entries are added, so an id repeated within the archive arrives once.
             guard !ids.contains(item.id), !same.contains(Sameness(item.parkID, item.date, item.notes)) else { skipped+=1; continue }
-            let entry=JournalEntry(date: item.date, parkID: item.parkID, observedBortle: min(9, max(1, item.observedBortle)), notes: item.notes)
+            // A park id that names no place in any form Nyx writes is kept as a night outside, never stored as given.
+            let parkID=DeepLink.placeID(item.parkID) == nil ? "" : item.parkID
+            let entry=JournalEntry(date: item.date, parkID: parkID, observedBortle: min(9, max(1, item.observedBortle)), notes: item.notes)
             entry.id=item.id
             context.insert(entry)
-            let kept=item.photos.compactMap { photo in photos[photo.file].flatMap { PhotoScaling.isImage($0) ? (photo, $0) : nil } }
+            let kept=item.photos.compactMap { photo in photos[photo.file].flatMap { (images?.contains(photo.file) ?? PhotoScaling.isImage($0)) ? (photo, $0) : nil } }
             for (index, (photo, data)) in kept.enumerated() {
                 let record=JournalPhoto(index: index, data: data, altText: photo.altText)
                 context.insert(record)

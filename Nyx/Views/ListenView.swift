@@ -55,22 +55,6 @@ struct NightListenView: View {
     }
 }
 
-/// "Feel the Moon": the selected night's Moon as a texture in the hand. Shown only where the
-/// iPhone has a Taptic Engine and the person has not switched it off.
-struct FeelMoonButton: View {
-    @Environment(\.nyx) private var palette
-    let moon: MoonPhase
-    var body: some View {
-        if MoonHaptics.enabled {
-            Button { MoonHaptics.shared.play(.moon(illumination:moon.illumination,waxing:moon.waxing)) } label:{
-                Label("Feel the Moon",systemImage:"hand.tap").font(.subheadline.weight(.medium)).frame(minHeight:44).contentShape(Rectangle())
-            }
-            .buttonStyle(.nyxAction).foregroundStyle(palette.accent)
-            .accessibilityHint("Plays the Moon's phase as a texture: sharp, sparse taps for a new moon, a broad swell for a full moon.")
-            .accessibilityInputLabels([Text("Feel the Moon"),Text("Feel")])
-        }
-    }
-}
 /// "Feel tonight": the night in the hand (`NightTouch`), with the screen dark or the phone in a
 /// pocket. A button, what each touch means, and the moments in words; VoiceOver hears each moment
 /// as it is felt.

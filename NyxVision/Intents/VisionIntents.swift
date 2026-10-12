@@ -64,7 +64,7 @@ nonisolated struct VisionDarknessAnswer: Sendable {
     init(park: Park, forecast: Forecast?, layers: HourlySeries?, forecastsOn: Bool, now: Date) {
         let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
         night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
-        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecast: forecast, forecastsOn: forecastsOn, now: now))
+        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecast: forecast, detail: VisionModel.detail(layers), forecastsOn: forecastsOn, now: now))
     }
     static func dialog(_ night: Night, caption: String) -> String {
         let park = night.park, score = night.score

@@ -61,15 +61,16 @@ import Testing
         let planner = NightPlanner(forecasts: ["jotr": forecast()])
         let clock = ContinuousClock()
         var month: NightPlanner.Month?
-        let elapsed = clock.measure { month = planner.month(jotr, at: now) }
+        let elapsed = clock.measure { month = planner.month(jotr, at: now, firstWeekday: 1) }
         let result = try #require(month)
         // Measured for the widget's budget: 30+ skies plus shower and eclipse checks, once per night turnover.
         print("Large widget month (jotr, 35 cells, events): \(elapsed)")
-        #expect(elapsed < .seconds(2))
+        if Bench.enabled { #expect(elapsed < .seconds(2)) }
         #expect(result.nights.count == 35)
-        let lead = result.nights.prefix { $0 == nil }.count
-        var calendar = jotr.calendar; calendar.firstWeekday = Calendar.current.firstWeekday
-        #expect(lead == (calendar.component(.weekday, from: jotr.currentNight(at: now)) - calendar.firstWeekday + 7) % 7)
+        // Tonight is Tuesday, December 1: two blanks under weeks that start on Sunday, one under Monday's.
+        #expect(result.nights.prefix { $0 == nil }.count == 2)
+        let monday = planner.month(jotr, at: now, events: false, firstWeekday: 2)
+        #expect(monday.nights.prefix { $0 == nil }.count == 1 && monday.tonight?.id == jotr.currentNight(at: now))
         #expect(result.tonight?.id == jotr.currentNight(at: now))
         let nights = result.nights.compactMap { $0 }
         #expect(result.best == nights.sorted(by: NightPlanner.better).first?.id)

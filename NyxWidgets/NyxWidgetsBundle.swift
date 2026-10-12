@@ -43,15 +43,16 @@ struct TonightProvider:AppIntentTimelineProvider {
         // A setting restored without its place keeps only the id: no name rather than the id itself.
         return entity.name == entity.id ? "" : entity.name
     }
-    /// Hourly entries, so "tonight" turns over at each park's own sunrise rather than hours later,
-    /// plus one at each edge of a promising dusk, where the Smart Stack relevance changes.
+    /// Hourly entries, plus one a second past each shown park's sunrise (`TonightTimeline.turnovers`),
+    /// so "tonight" turns over at the park's own sunrise rather than at the next hour, and one at
+    /// each edge of a promising dusk, where the Smart Stack relevance changes.
     func timeline(for configuration:TonightWidgetIntent,in context:Context) async -> Timeline<TonightEntry> {
         let now=Date.now
         var builder=TonightTimeline(snapshot:SharedSettings.read(),large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
         let edges=builder.duskWindows(from:now,nights:2).flatMap { [$0.start,$0.end] }.filter { $0>now && $0<end }
-        let dates=Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+edges).sorted()
+        let dates=Set([now]+(0..<24).map { hour.addingTimeInterval(Double($0)*3600) }+edges+builder.turnovers(from:now,to:end)).sorted()
         return Timeline(entries:dates.map { builder.entry(at:$0) },policy:.after(end))
     }
     /// The Smart Stack's own hints (iOS 18+): the dusk of each Good or better night in the next

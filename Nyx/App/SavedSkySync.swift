@@ -12,7 +12,9 @@ import WidgetKit
 @MainActor final class SavedSkySync {
     static let refreshTask="com.harrypakhale.nyx.refresh"
     private var running=false
-    private var again=false
+    /// A run asked for while one was under way: it goes when that one ends. Publish-only (no
+    /// request) and background only if every run asked for was.
+    private var again:(publishOnly:Bool,background:Bool)?
     /// The saved parks, once a window has read them (or, in a background launch, from the widget's snapshot).
     private(set) var parkIDs:[String]?
     /// The palette the widget's Moon pictures are drawn in; the window keeps it current.
@@ -23,8 +25,9 @@ import WidgetKit
     /// launched Nyx in the background is heard; it is answered once a run knows the model.
     init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
 
-    /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`).
-    func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false) async {
+    /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`). `publishOnly`: what is
+    /// cached is published again with no request (`republish`).
+    func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false,publishOnly:Bool=false) async {
         guard DebugScenario.screen == nil else { return }
         Self.loadSpotsIfNeeded(model)
         listenToWatch(model)
@@ -34,7 +37,10 @@ import WidgetKit
         if model.journalUnavailable { if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) } }
         else if let ids { parkIDs=ids }
         guard let current=parkIDs else { return }
-        guard !running else { again=true; return }
+        guard !running else {
+            again=(publishOnly:(again?.publishOnly ?? true) && publishOnly,background:(again?.background ?? true) && background)
+            return
+        }
         running=true
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
         // never dropped from the widget, the watch or reminders for having been asked too early.
@@ -44,17 +50,18 @@ import WidgetKit
         defer {
             running=false
             // A run cut short (background time ran out) does not start another: the next opening of Nyx runs one.
-            if again { again=false; if !Task.isCancelled { Task { await update(model) } } }
+            if let next=again { again=nil; if !Task.isCancelled { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } } }
         }
         let parks=current.compactMap { model.park($0) }
         let ids=Set(parks.map(\.id))
         let cached=model.forecasts.filter { ids.contains($0.key) }.mapValues(\.updated)
         await publish(model,parks)
+        if publishOnly { return }
         // The widget and reminders need only forecasts; park alerts follow once they are done,
         // so a quick visit still leaves both up to date.
         let started=ContinuousClock.now
         await model.refreshForecasts(watching:parks)
-        if !again, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
+        if again == nil, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
         // A followed night's Live Activity follows the new forecast.
         await Self.refreshFollowed(model)
         // In the background, alerts wait for the next run when time is up or the forecasts were
@@ -63,7 +70,7 @@ import WidgetKit
         let closures=Self.closures(model)
         await model.refreshParkUpdates(parks,alertPages:background ? 1 : ParkStore.alertPages)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
-        if !again, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); await Self.refreshFollowed(model) }
+        if again == nil, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); await Self.refreshFollowed(model) }
         Self.scheduleRefresh()
     }
     /// The system's background refresh: saved-park clouds (and alerts when due), the widget's
@@ -148,10 +155,10 @@ import WidgetKit
     }
     /// Publishes what is cached again, with no request: after a change that alters scores without
     /// new data (switching "Smoke and haze" off).
+    /// One run at a time, as any update: a republish asked for during a run follows it.
     func republish(_ model:PlanModel) async {
-        guard DebugScenario.screen == nil, let ids=parkIDs else { return }
-        if ids.contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
-        await publish(model,ids.compactMap { model.park($0) })
+        guard parkIDs != nil else { return }
+        await update(model,publishOnly:true)
     }
     /// Hands Apple Watch the saved parks (or, with the journal unavailable, the last snapshot's),
     /// the starting park, clouds, smoke and summit layers, closures and the models' ranges. Nothing is

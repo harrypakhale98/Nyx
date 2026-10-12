@@ -45,13 +45,14 @@ struct TonightView: View {
     /// Ranked once per update of the page (the body reads it into `best` and passes it down). Abroad a
     /// radius can hold hundreds of places: until their nights are worked out off the main thread
     /// (`prepared`), the page ranks a shortlist (`TonightReach.shortlist`), never hundreds at once.
-    private var best:[Park] { Array(model.ranked(pool).prefix(5)) }
-    private var pool:[Park] {
-        let all=candidates
-        return all.count<=TonightReach.shortlistSize || prepared==TonightReach.key(all) ? all : TonightReach.shortlist(all,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0)
+    private func best(_ all:[Park])->[Park] { Array(model.ranked(pool(all)).prefix(5)) }
+    private func pool(_ all:[Park])->[Park] {
+        all.count<=TonightReach.shortlistSize || prepared==TonightReach.key(all) ? all : TonightReach.shortlist(all,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0)
     }
     /// The places in reach whose tonight has been worked out in the background (`TonightReach.key`).
     @State private var prepared:String?
+    /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
+    @State private var widerPrepared:String?
     @State private var width=0.0
     /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
     @State private var riverNight:Date?
@@ -67,7 +68,9 @@ struct TonightView: View {
         return !USOutline.contains(latitude:from.latitude,longitude:from.longitude)
     }
     var body: some View {
-        let best=self.best
+        let all=candidates
+        let best=self.best(all)
+        let widerList=widerShortlist(than:best.first,inReach:all)
         let empty=best.isEmpty || DebugScenario.state=="empty"
         let worthy=worthyNight(best.first,empty:empty)
         let heroReady=best.first.map { heroSettledKey==revealKey($0) } ?? false
@@ -76,7 +79,7 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     HStack(alignment:.top,spacing:36) {
-                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { startingPoint(heading:false); more(best); fromHome; extras }.frame(maxWidth:500)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
@@ -86,10 +89,10 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil);startingPoint(heading:false);fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);startingPoint(heading:false);fromHome }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
-                        farther(than:park)
+                        farther(than:park,shortlist:widerList)
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
                         startingPoint(heading:best.count>1)
@@ -115,8 +118,16 @@ struct TonightView: View {
                 } }.nyxPresentation().presentationDetents([.large])
             }
             .sheet(isPresented:$explainLocation) { PermissionExplainer(symbol:"location",title:"Find a sky nearby",message:"Nyx uses your location once to find parks within a straight-line radius. It stays on this iPhone. You can also choose a city or a park.",action:"Use my location") { explainLocation=false;location.request() }.nyxPresentation() }
-            .task(id:model.homeID+(model.homePlace?.id ?? "")+String(model.radiusMeters)+(location.latitude?.description ?? "manual")+(model.catalog.isEmpty ? "" : "|world")) {
-                let all=candidates
+            // Keyed on the places in reach, not the raw fix: a location that moves a few metres, or a
+            // catalogue that arrives with nothing new in range, never cancels and re-sends the request.
+            // The places a wider radius would add: their nights worked out off the main thread before they are ranked.
+            .task(id:TonightReach.key(widerList)) {
+                let list=widerList
+                guard !list.isEmpty else { return }
+                await model.prepareNights(list,count:1)
+                if !Task.isCancelled { widerPrepared=TonightReach.key(list) }
+            }
+            .task(id:TonightReach.key(all)) {
                 // Hundreds of places in reach (abroad): tonight at each, worked out off the main thread, before ranking them all.
                 if all.count>TonightReach.shortlistSize {
                     await model.prepareNights(all,count:1)
@@ -188,14 +199,21 @@ struct TonightView: View {
         // The card below names where from ("From Joshua Tree", "Near me") and how it is measured.
         else { Text("\(day) · Darkest within \(radius)") }
     }
-    /// A thin answer (fewer than three parks in reach, or a bright sky at the best of them) points to
-    /// the darkest park within 500 miles (800 km) when it scores higher tonight. A tap widens the radius.
-    @ViewBuilder private func farther(than best:Park?)->some View {
+    /// The places a wider radius would add, when the answer is thin (fewer than three parks in
+    /// reach, or a bright sky at the best of them); empty otherwise. Abroad, a shortlist.
+    private func widerShortlist(than best:Park?,inReach current:[Park])->[Park] {
+        guard model.radiusMeters<SearchRadius.wider(), current.count<3 || (best?.bortleEstimate ?? 9)>=5 else { return [] }
+        let inReach=Set(current.map(\.id))
+        let wide=reach(radiusMeters:SearchRadius.wider()).places.filter { !inReach.contains($0.id) }
+        return wide.count>TonightReach.shortlistSize ? TonightReach.shortlist(wide,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0) : wide
+    }
+    /// A thin answer points to the darkest park within 500 miles (800 km) when it scores higher
+    /// tonight. A tap widens the radius. Ranked only once the shortlist's nights have been worked
+    /// out off the main thread (`widerPrepared`); until then nothing is offered.
+    @ViewBuilder private func farther(than best:Park?,shortlist:[Park])->some View {
         let wider=SearchRadius.wider()
-        if model.radiusMeters<wider, candidates.count<3 || (best?.bortleEstimate ?? 9)>=5 {
-            let inReach=Set(candidates.map(\.id)), bestScore=best.map { model.night($0).score.value } ?? -1
-            let wide=reach(radiusMeters:wider).places.filter { !inReach.contains($0.id) }
-            let shortlist=wide.count>TonightReach.shortlistSize ? TonightReach.shortlist(wide,latitude:from?.latitude ?? 0,longitude:from?.longitude ?? 0) : wide
+        if !shortlist.isEmpty, widerPrepared==TonightReach.key(shortlist) {
+            let bestScore=best.map { model.night($0).score.value } ?? -1
             if let far=model.ranked(shortlist).first,
                model.night(far).score.value>bestScore {
                 Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMeters=wider } } label:{
@@ -233,7 +251,7 @@ struct TonightView: View {
     /// all of them in the US as before; abroad, the twelve best tonight, so a radius of hundreds of
     /// places never asks for thousands of nights.
     private var aheadPool:[Park] {
-        let ranked=model.ranked(pool)
+        let ranked=model.ranked(pool(candidates))
         return reach().world ? Array(ranked.prefix(TonightReach.aheadSize)) : ranked
     }
     /// Nothing in reach. Once the catalogue is read, nothing of any kind is (from a US starting point too,
@@ -245,7 +263,7 @@ struct TonightView: View {
         return "No parks or dark-sky places fall inside this radius. Widen it or choose a different starting point."
     }
     private func stepRiver(_ delta:Int) {
-        guard let park=best.first else { return }
+        guard let park=best(candidates).first else { return }
         let tonight=model.tonight(park), current=riverNight ?? tonight
         let next=park.date(current,addingDays:delta)
         guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }

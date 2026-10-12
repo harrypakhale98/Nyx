@@ -48,6 +48,11 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
             + 0.213618*sinD(2*mp)-0.185116*sinD(m)-0.114332*sinD(2*f)
             + 0.058793*sinD(2*d-2*mp)+0.057066*sinD(2*d-m-mp)+0.053322*sinD(2*d+mp)
             + 0.045758*sinD(2*d-m)+0.041024*sinD(mp-m)-0.034718*sinD(d)-0.030465*sinD(m+mp)
+        return moonPhase(moonLongitude:moon,t:t)
+    }
+    /// The phase from the Moon's longitude (degrees) at `t` (Julian centuries from J2000), so a
+    /// caller that already has the Moon's position (`lunarPosition`) does not work it out twice.
+    private func moonPhase(moonLongitude moon: Double, t: Double) -> MoonPhase {
         let sunL=normalized(280.46646+t*(36000.76983+t*0.0003032))
         let sunM=357.52911+t*(35999.05029-0.0001537*t)
         let sunC=sinD(sunM)*(1.914602-t*(0.004817+0.000014*t))+sinD(2*sunM)*(0.019993-0.000101*t)+sinD(3*sunM)*0.000289
@@ -56,16 +61,16 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
     func conditions(for park: Park, on date: Date) -> SkyConditions {
         let start = park.evening(date)
         let end = park.date(start, addingDays: 1)
-        let sun = crossings(start: start, end: end) { solarAltitude(at: $0, park: park) + 0.833 }
-        let civil = crossings(start: start, end: end) { solarAltitude(at: $0, park: park) + 6 }
-        let nautical = crossings(start: start, end: end) { solarAltitude(at: $0, park: park) + 12 }
-        let dark = crossings(start: start, end: end) { solarAltitude(at: $0, park: park) + 18 }
-        let beginsDark = solarAltitude(at: start, park: park) < -18
+        // The four solar thresholds from one pass: each sample of the Sun's altitude serves all four.
+        let solar = crossings(start: start, end: end, offsets: [0.833, 6, 12, 18]) { solarAltitude(at: $0, park: park) }
+        let sun = solar[0], civil = solar[1], nautical = solar[2], dark = solar[3]
+        let startAltitude = solarAltitude(at: start, park: park)
+        let beginsDark = startAltitude < -18
         let darkStart = dark.down.first ?? (beginsDark ? start : nil)
         let darkEnd = darkStart.flatMap { from in dark.up.first(where: { $0 > from }) ?? (solarAltitude(at: end, park: park) < -18 ? end : nil) }
         let hours = max(0, (darkEnd?.timeIntervalSince(darkStart ?? end) ?? 0)/3600)
-        let sunAlwaysUp = sun.down.isEmpty && sun.up.isEmpty && solarAltitude(at: start, park: park) > -0.833
-        let sunAlwaysDown = sun.down.isEmpty && sun.up.isEmpty && solarAltitude(at: start, park: park) <= -0.833
+        let sunAlwaysUp = sun.down.isEmpty && sun.up.isEmpty && startAltitude > -0.833
+        let sunAlwaysDown = sun.down.isEmpty && sun.up.isEmpty && startAltitude <= -0.833
         let state: DarknessState = sunAlwaysUp ? .polarDay : hours == 0 ? .noAstronomicalDarkness : sunAlwaysDown ? .polarNight : .normal
         // The Moon's upper limb on a refracted horizon: topocentric centre at -0.833° (34' refraction
         // plus the ~16' semidiameter). A higher threshold delays rises by up to 40 min in Alaska.
@@ -128,8 +133,10 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         let steps = max(1, Int((duration/900).rounded(.up))), step = duration/Double(steps)
         var total = 0.0
         for i in 0..<steps {
-            let t = start.addingTimeInterval((Double(i)+0.5)*step)
-            total += Self.moonlight(phaseAngle: Self.phaseAngle(illumination: moonPhase(at: t).illumination), altitude: lunarAltitude(at: t, park: park))
+            // One lunar position per sample serves both the phase and the altitude.
+            let t = start.addingTimeInterval((Double(i)+0.5)*step), moon = lunarPosition(at: t)
+            let illumination = moonPhase(moonLongitude: moon.lon, t: moon.t).illumination
+            total += Self.moonlight(phaseAngle: Self.phaseAngle(illumination: illumination), altitude: lunarAltitude(at: t, park: park, moon: moon))
         }
         return min(1, max(0, total/Double(steps)))
     }
@@ -212,8 +219,8 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         }
     }
     enum Body { case sun, moon }
-    func lunarAltitude(at date: Date, park: Park) -> Double {
-        let moon = lunarPosition(at: date)
+    func lunarAltitude(at date: Date, park: Park) -> Double { lunarAltitude(at: date, park: park, moon: lunarPosition(at: date)) }
+    private func lunarAltitude(at date: Date, park: Park, moon: (lon: Double, lat: Double, ra: Double, dec: Double, distance: Double, f: Double, t: Double)) -> Double {
         let geo = altitude(date: date, park: park, ra: moon.ra, dec: moon.dec)
         return geo - asin(6378.14/moon.distance)/rad * cosD(geo)
     }
@@ -280,6 +287,30 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         return (2...10).contains(month)
             ? String(localized: "The bright center may be visible before dawn or near dusk. Timing and terrain matter.")
             : String(localized: "The bright center is out of the night sky this season. Bright constellations still reward a dark night.")
+    }
+    /// `crossings` for several thresholds of one quantity at once: `value(t) + offset` for each
+    /// offset, sampled on the same five-minute grid and bisected the same way, so every root is
+    /// exactly what a pass of its own would find, for one evaluation per sample instead of one per threshold.
+    private func crossings(start: Date, end: Date, offsets: [Double], value: (Date)->Double) -> [(up:[Date],down:[Date])] {
+        var result = offsets.map { _ in (up:[Date](), down:[Date]()) }
+        var a = start, base = value(start)
+        while a < end {
+            let b = min(end,a.addingTimeInterval(300))
+            let next = value(b)
+            for (k, offset) in offsets.enumerated() {
+                let va = base+offset, vb = next+offset
+                guard (va < 0) != (vb < 0) else { continue }
+                var lo = a, hi = b
+                for _ in 0..<12 {
+                    let mid = lo.addingTimeInterval(hi.timeIntervalSince(lo)/2)
+                    if (value(mid)+offset<0)==(va<0) { lo=mid } else { hi=mid }
+                }
+                let root = lo.addingTimeInterval(hi.timeIntervalSince(lo)/2)
+                if vb>va { result[k].up.append(root) } else { result[k].down.append(root) }
+            }
+            a=b; base=next
+        }
+        return result
     }
     private func crossings(start: Date, end: Date, value: (Date)->Double) -> (up:[Date],down:[Date]) {
         var up:[Date]=[], down:[Date]=[]

@@ -7,7 +7,6 @@ import SwiftUI
 /// drawn in starlight whatever the app's palette, and small Moons keep a visible limb.
 @MainActor @Suite struct ShareCardTests {
     let engine=AstronomyEngine()
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func night(_ park:Park,_ day:String,score:Int=94) throws -> Night {
         let date=try #require(try? Date(day+"T20:00:00Z",strategy:.iso8601))
         let sky=engine.conditions(for:park,on:park.evening(date))

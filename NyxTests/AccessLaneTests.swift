@@ -10,7 +10,6 @@ import Accessibility
 /// sky, journal photo descriptions, the Assistive Access card and the sky map's order.
 @MainActor @Suite struct AccessLaneTests {
     let engine=AstronomyEngine()
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
     func night(_ park:Park,_ day:String,score:Int=80,forecast:Bool=true) throws -> Night {
         let sky=engine.conditions(for:park,on:park.evening(try date(day+"T20:00:00Z")))
@@ -156,7 +155,7 @@ import Accessibility
 
     // MARK: PA-13 Journal photo descriptions
 
-    @Test func photoDescriptionsAreKeptInOrder() throws {
+    @Test func photoDescriptionsAreKeptInOrder() async throws {
         let opened=JournalStore.open(inMemory:true)
         let container=try #require(opened.container)
         let context=ModelContext(container)
@@ -168,7 +167,7 @@ import Accessibility
         editor.removePhoto(at:1)
         #expect(editor.descriptions==["A ridge at dusk","Two people beside a telescope"] && editor.suggestions[1]=="Suggested text")
         // A suggestion is never saved by itself.
-        #expect(editor.save(context:context,existing:nil))
+        #expect(await editor.save(context:context,existing:nil))
         let entry=try #require(try context.fetch(FetchDescriptor<JournalEntry>()).first)
         #expect(entry.orderedPhotos.map(\.altText)==["A ridge at dusk","Two people beside a telescope"])
         editor.useSuggestion(1)

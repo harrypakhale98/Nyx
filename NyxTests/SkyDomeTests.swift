@@ -9,7 +9,6 @@ import simd
     let iso = ISO8601DateFormatter()
     let engine = AstronomyEngine()
     func date(_ text: String) throws -> Date { try #require(iso.date(from: text)) }
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first(where: { $0.id == id })) }
     func degrees(between a: SIMD3<Double>, _ b: SIMD3<Double>) -> Double {
         acos(max(-1, min(1, simd_dot(simd_normalize(a), simd_normalize(b)))))*180/Double.pi
     }

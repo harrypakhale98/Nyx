@@ -248,7 +248,6 @@ nonisolated enum NightMark: Equatable, Sendable {
     /// early look stays smaller than a score-85 dot under Bold Text, as it is by default.
     static func unfilledFloor(lineWidth:Double=1.1,stroke:Double)->Double { 2.6+lineWidth*max(0,stroke-1)/2 }
     var filled: Bool { switch self { case .dot(let filled),.star(let filled): filled } }
-    var isStar: Bool { if case .star=self { true } else { false } }
     /// The mark's outline, `radius` being the dot's own radius; a star reaches a little farther so
     /// it reads as the same size.
     func path(center:CGPoint,radius:Double)->Path {

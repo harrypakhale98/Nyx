@@ -126,13 +126,14 @@ struct JournalView: View {
             if model.importingJournal == url { model.importingJournal=nil }
             Task.detached(priority:.utility) { JournalInbox.remove(url) }
         }
-        let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data])? in
+        // Every photo is read, checked and scaled here, off the main thread; the merge only inserts.
+        let read=await Task.detached(priority:.userInitiated) { () -> (archive:JournalArchive,thumbnails:[UUID:Data],images:Set<String>)? in
             guard let archive=try? JournalArchive(url:url) else { return nil }
-            return (archive,archive.thumbnails())
+            return (archive,archive.thumbnails(),archive.imageFiles())
         }.value
         do {
             guard let read else { throw JournalArchive.ArchiveError.unreadable }
-            let result=try read.archive.merge(into:context,thumbnails:read.thumbnails)
+            let result=try read.archive.merge(into:context,thumbnails:read.thumbnails,images:read.images)
             importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
         } catch {
             context.rollback()
@@ -275,6 +276,8 @@ struct JournalThumbnail:View {
     /// Photos the last request found nothing to suggest for, so the person hears why the button did nothing.
     var unsuggested:Set<Int>=[]
     var loadingPhotos=false
+    /// A save under way (its thumbnail being scaled), so Save cannot store the night twice.
+    var saving=false
     var error:String?
     var saved=false
     init(entry:JournalEntry?=nil) {
@@ -328,8 +331,12 @@ struct JournalThumbnail:View {
         guard let line=suggestions[index], descriptions.indices.contains(index) else { return }
         descriptions[index]=line; suggestions[index]=nil
     }
-    func save(context:ModelContext,existing:JournalEntry?) -> Bool {
+    /// Stores the night. The card's thumbnail is scaled off the main thread first.
+    func save(context:ModelContext,existing:JournalEntry?) async -> Bool {
         error=nil
+        saving=true; defer { saving=false }
+        let first=photos.first
+        let thumbnail=await Task.detached(priority:.userInitiated) { first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) } }.value
         let entry=existing ?? JournalEntry(date:date,parkID:parkID)
         entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
         // Only what the person wrote or chose to use is kept; a suggestion never saves itself.
@@ -337,7 +344,7 @@ struct JournalThumbnail:View {
             let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
             photo.altText=trimmed.isEmpty ? nil : trimmed
         }
-        entry.thumbnail=photos.first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) }
+        entry.thumbnail=thumbnail
         if existing==nil { context.insert(entry) }
         do { try context.save();saved=true;return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
     }
@@ -386,7 +393,7 @@ struct JournalEditorView:View {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)) }
         }
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { if editor.save(context:context,existing:existing) { saved?(); dismiss() } }.disabled(editor.loadingPhotos) } }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } };ToolbarItem(placement:.confirmationAction) { Button("Save") { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.disabled(editor.loadingPhotos || editor.saving) } }
             .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
     }

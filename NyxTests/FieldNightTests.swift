@@ -7,7 +7,6 @@ import Testing
 /// kept, a different milestone at the same moment kept too.
 @Suite struct FieldNightTests {
     let engine=AstronomyEngine()
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first(where:{ $0.id==id })) }
     func night(_ id:String,_ day:String) throws -> FieldNight {
         let park=try park(id)
         let sky=engine.conditions(for:park,on:park.evening(try #require(try? Date(day+"T20:00:00Z",strategy:.iso8601))))

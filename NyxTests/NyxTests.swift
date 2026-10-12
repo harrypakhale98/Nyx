@@ -7,7 +7,6 @@ import SwiftData
 @testable import Nyx
 
 struct NyxTests {
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func date(_ string:String,park:Park) throws -> Date {
         let f=DateFormatter(); f.dateFormat="yyyy-MM-dd HH:mm"; f.timeZone=park.timeZone
         return try #require(f.date(from:string))
@@ -281,7 +280,7 @@ struct NyxTests {
         #expect(try context.fetch(FetchDescriptor<SavedPark>()).first?.parkID=="jotr")
     }
     /// Photos are decoded straight to their stored size; the journal keeps a small list thumbnail.
-    @MainActor @Test func journalPhotosAreDownscaled() throws {
+    @MainActor @Test func journalPhotosAreDownscaled() async throws {
         let size=CGSize(width:4000,height:3000)
         let format=UIGraphicsImageRendererFormat(); format.scale=1
         let big=try #require(UIGraphicsImageRenderer(size:size,format:format).image { context in
@@ -294,7 +293,7 @@ struct NyxTests {
         let container=try ModelContainer(for:SavedPark.self,JournalEntry.self,configurations:ModelConfiguration(isStoredInMemoryOnly:true))
         let editor=JournalEditorModel()
         editor.photos=[stored]
-        #expect(editor.save(context:ModelContext(container),existing:nil))
+        #expect(await editor.save(context:ModelContext(container),existing:nil))
         let entry=try #require(try ModelContext(container).fetch(FetchDescriptor<JournalEntry>()).first)
         let thumbnail=try #require(entry.thumbnail.flatMap { UIImage(data:$0) })
         #expect(max(thumbnail.size.width,thumbnail.size.height)<=900)

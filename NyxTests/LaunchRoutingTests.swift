@@ -10,11 +10,12 @@ import Testing
 @MainActor
 struct LaunchRoutingTests {
     private static let kruger="wd:Q24451"
+    /// Settings kept in a suite of the model's own, so choosing a starting point never touches the app's.
     private static func model() -> PlanModel {
         PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
-                  detail: ForecastDetailService(transport: StubHTTP([:]), persist: false))
+                  detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())
     }
-    private static func catalogPlace(_ id: String) throws -> Park { try #require(try CatalogData.load().first { $0.id == id }) }
+    private static func catalogPlace(_ id: String) throws -> Park { try #require(try TestData.catalog().first { $0.id == id }) }
     private static let spot=Place(spotID: "pin:00000000-0000-4000-8000-0000000000ab", name: "Pullout off Pinto Basin Road", latitude: 33.92, longitude: -115.93,
                                   timeZoneID: "America/Los_Angeles", countryCode: "US", region: "California")
 
@@ -46,9 +47,6 @@ struct LaunchRoutingTests {
     /// the catalogue place nearest it as the home park, not the nearest US park an ocean away; a park
     /// chosen meanwhile is kept.
     @Test func aStartingPointAbroadChosenEarlyEndsNearIt() async throws {
-        let defaults=UserDefaults.standard, keys=["homePark", "homePlace", "startChosen"]
-        let kept=keys.map { defaults.object(forKey: $0) }
-        defer { for (key, value) in zip(keys, kept) { if let value { defaults.set(value, forKey: key) } else { defaults.removeObject(forKey: key) } } }
         let windhoek=try #require(StartingPlaces.all.first { $0.name == "Windhoek" })
         let model=Self.model()
         #expect(!model.catalogIsReady)

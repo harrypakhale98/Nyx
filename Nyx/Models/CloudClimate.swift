@@ -185,8 +185,8 @@ extension Night {
         case eventNote
         /// Siri, tonight at the park (the intent puts any closure first). Voice-only keeps the one caveat that matters.
         case siriTonight(voiceOnly: Bool)
-        /// Siri, the best of the next `count` nights.
-        case siriBest(count: Int, voiceOnly: Bool)
+        /// Siri, the best of the next `count` nights. `noDarkness`: none of them has any true darkness.
+        case siriBest(count: Int, voiceOnly: Bool, noDarkness: Bool)
         /// Siri's card, for VoiceOver: the score, the band and the Moon.
         case snippet
     }
@@ -218,10 +218,12 @@ extension Night {
             if voiceOnly { return voiceAnswer(String(localized:"Tonight")) }
             if let caption=basisCaption() { return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
             return String(localized:"\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.")
-        case .siriBest(let count,let voiceOnly):
+        case .siriBest(let count,let voiceOnly,let noDarkness):
             let day=park.programDate(park.isoDay(id))
             if voiceOnly { return voiceAnswer(day) }
-            if sky.darkHours==0 { return String(localized:"No true darkness at \(park.shortName) in the next \(count) nights. The best is \(day), \(score.value) out of 100.") }
+            // Said only when no night searched has true darkness; a best night without it among
+            // nights that have some is named as the best, as any other.
+            if noDarkness { return String(localized:"No true darkness at \(park.shortName) in the next \(count) nights. The best is \(day), \(score.value) out of 100.") }
             let basis=basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
             return String(localized:"The best of the next \(count) nights: \(day) at \(park.shortName), \(score.value) out of 100, \(score.band.label). \(basis) Confirm park access before you go.")
         case .snippet:

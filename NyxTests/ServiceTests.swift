@@ -16,7 +16,6 @@ actor StubHTTP {
     func setFailure() { fail=true }
     /// The server answers with this status (429, 503…) instead of data.
     func setStatus(_ code:Int?) { status=code }
-    func setResponse(_ path:String,_ body:String) { responses[path]=Data(body.utf8) }
     func get(_ url:URL) async throws -> Data {
         urls.append(url)
         if fail { throw URLError(.notConnectedToInternet) }
@@ -169,7 +168,7 @@ struct ServiceTests {
     /// Forecasts are always requested for every park, so the request never reflects where someone is.
     @MainActor @Test func forecastsAreRequestedForEveryPark() async throws {
         let http=StubHTTP([:])
-        let model=PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false),detail:ForecastDetailService(transport:http,persist:false))
+        let model=PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false),detail:ForecastDetailService(transport:http,persist:false),defaults:isolatedDefaults())
         model.weatherEnabled=true
         model.smokeEnabled=true
         let nearby=Array(model.parks.prefix(2))

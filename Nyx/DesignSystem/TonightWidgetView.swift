@@ -66,6 +66,11 @@ struct TonightTimeline {
                             relevance:TimelineEntryRelevance(score:relevance.score,duration:relevance.duration),
                             closure:shown.flatMap { snapshot?.closures[$0.park.id] })
     }
+    /// When each park the widget can show moves on to its next night (`Park.nightTurnovers`).
+    func turnovers(from start:Date,to end:Date)->[Date] {
+        guard unsaved == nil else { return [] }
+        return (pinned.map { [$0] } ?? snapshot?.parks ?? []).flatMap { $0.nightTurnovers(from:start,to:end) }
+    }
     /// Dusk windows of Good or better nights across the saved parks (or the set park), `nights` nights from `start`.
     mutating func duskWindows(from start:Date,nights count:Int)->[DateInterval] {
         guard unsaved == nil else { return [] }

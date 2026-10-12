@@ -68,8 +68,11 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
         climate = CloudClimate.shared.carrying(usualClouds)
     }
+    /// How far past its issue a forecast is carried: the ten days it counts for, and a day for the
+    /// last night it reaches.
+    static let forecastReach: TimeInterval = 11*86400
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
-    /// through a week ahead) and to the byte budget, saved parks first in their order. Each park's
+    /// through the forecast's last useful night) and to the byte budget, saved parks first in their order. Each park's
     /// clouds go first, then its smoke and summit layers and its models' ranges (which mean
     /// nothing without its clouds); closures, which are short, come last (the followed parks' first).
     /// A spot or world place travels first, its usual clouds (from `climate`, the iPhone's grid) right behind it.
@@ -79,7 +82,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
-        let from = now.addingTimeInterval(-24*3600), to = now.addingTimeInterval(9*86400)
+        let from = now.addingTimeInterval(-24*3600)
         // Park IDs and the envelope are small; each forecast is measured on its own.
         var used = 2_000 + ids.reduce(0) { $0 + $1.utf8.count + 4 }
         func fits(_ value: some Encodable, _ id: String) -> Bool {
@@ -97,7 +100,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             if let months = climate.months(for: place), fits(months, place.id) { sentUsual[place.id] = months }
         }
         for id in ids {
-            guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
+            // Kept to the hours that still count: a forecast weighs nothing ten days after it was made
+            // (`CloudBasis.forecastWeight`), plus a day so a night that begins before then has all its
+            // hours, as on the iPhone. Measured from the forecast, not the clock, so both score alike.
+            guard let forecast = forecasts[id] else { continue }
+            let to = forecast.updated.addingTimeInterval(Self.forecastReach)
+            guard let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
             guard fits(trimmed, id) else { break }
             compact[id] = trimmed
             // Its smoke and summit layers right behind its clouds, so the wrist scores it as the

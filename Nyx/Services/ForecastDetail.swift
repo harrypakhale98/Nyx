@@ -27,6 +27,8 @@ nonisolated enum HourlyWindow {
     static func mean(times: [Double], values: [Double?], from start: Date, to end: Date, valid: ClosedRange<Double>) -> Double? {
         guard let found=samples(times:times,values:values,from:start,to:end,valid:valid) else { return nil }
         let weight=found.reduce(0) { $0+$1.weight }
+        // A window under a second long can pass the coverage check with no hour in it: no mean, never 0/0.
+        guard weight>0 else { return nil }
         return found.reduce(0) { $0+$1.value*$1.weight }/weight
     }
 }

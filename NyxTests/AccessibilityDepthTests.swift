@@ -6,7 +6,6 @@ import Testing
 /// shapes that stand in for colour. Real computed nights throughout.
 @Suite struct AccessibilityDepthTests {
     let engine = AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first(where: { $0.id == id })) }
     func night(_ park: Park, _ day: String, clouds: Double?=nil) throws -> Night {
         let sky = engine.conditions(for: park, on: park.evening(try #require(try? Date(day+"T20:00:00Z", strategy: .iso8601))))
         return Night(park: park, sky: sky, score: ScoreEngine().score(sky: sky, bortle: park.bortleEstimate, cloudCover: clouds), cloudCover: clouds, forecastUpdated: nil)

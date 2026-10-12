@@ -39,12 +39,19 @@ nonisolated enum BestNightSearch {
         /// Best first, at most five, so the snippet can step through the runners-up.
         let ranked: [Night]
         let count: Int
+        /// No night searched has any true darkness (not only the best): only then does the answer say so.
+        let noDarkness: Bool
         var best: Night { ranked[0] }
+        /// `nights`: every night searched, best first; the answer keeps the first five.
+        init(nights: [Night], count: Int) {
+            ranked=Array(nights.prefix(5)); self.count=count
+            noDarkness=nights.allSatisfy { $0.sky.darkHours==0 }
+        }
     }
     static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date) -> Answer? {
         let count=min(30,max(1,nights))
-        let ranked=planner.bestNights(parks,from:start,count:count,now:now,limit:5)
-        return ranked.isEmpty ? nil : Answer(ranked:ranked,count:count)
+        let all=planner.bestNights(parks,from:start,count:count,now:now,limit:.max)
+        return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
     /// From the night of a picked day (the day as the person's calendar shows it, so a date
     /// picked at midnight or before a western park's sunrise never starts the night before),
@@ -52,8 +59,8 @@ nonisolated enum BestNightSearch {
     static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date) -> Answer? {
         guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now) }
         let count=min(30,max(1,nights))
-        let ranked=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:5)
-        return ranked.isEmpty ? nil : Answer(ranked:ranked,count:count)
+        let all=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:.max)
+        return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
     /// Each park's newest forecast: the one the widget shares, or the app's own cache.
     /// Smoke and cloud layers: the app's own cache, else what the widget was handed.
@@ -81,7 +88,7 @@ nonisolated enum BestNightSearch {
     /// screen in view) keeps the night, the score and the one caveat that matters. At a place the Park
     /// Service does not run, it ends by saying Nyx cannot check closures there.
     static func dialog(_ answer: Answer, voiceOnly: Bool) -> String {
-        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly)),park:answer.best.park,closure:nil)
+        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly,noDarkness:answer.noDarkness)),park:answer.best.park,closure:nil)
     }
 }
 

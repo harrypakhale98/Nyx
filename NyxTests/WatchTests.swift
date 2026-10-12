@@ -4,7 +4,6 @@ import Testing
 
 /// The iPhone → watch context and the night milestones the watch counts down to.
 struct WatchTests {
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     private let t0 = 1_791_158_400.0 // 2026-10-05 00:00 UTC
     private func forecast(hours: Int, updated: Date, gapAt gap: Int? = nil) -> Forecast {
         let times = (0..<hours).map { t0 + Double($0)*3600 + ($0 == gap ? 1800 : 0) }
@@ -30,9 +29,9 @@ struct WatchTests {
         // Missing hours travel as missing, never as a value.
         #expect(rebuilt.clouds.contains { $0 == nil })
         #expect(rebuilt.mean(from: now.addingTimeInterval(8*3600), to: now.addingTimeInterval(9*3600)) == nil)
-        // Trimmed to last night through nine days ahead.
+        // Trimmed to last night through the hours the forecast still counts for (its issue + 11 days).
         #expect(rebuilt.times.first ?? 0 >= now.timeIntervalSince1970 - 25*3600)
-        #expect(rebuilt.times.last ?? .infinity <= now.timeIntervalSince1970 + 9*86400)
+        #expect(rebuilt.times.last ?? .infinity < full.updated.timeIntervalSince1970 + WatchContext.forecastReach)
     }
 
     @Test func contextRejectsGapsOtherVersionsAndOversizedPayloads() throws {

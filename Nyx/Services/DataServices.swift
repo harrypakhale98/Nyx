@@ -89,9 +89,13 @@ actor ForecastDetailService: DetailProviding {
     }
     func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
         for park in parks { load(park.id) }
-        // A cancelled caller stops waiting and returns what is kept; the request finishes and stores itself.
-        if let running { _=await SharedRequest.value(of: running) }
-        else {
+        // Another request is on its way (perhaps for other parks): wait for it, then decide again
+        // what is due. A cancelled caller stops waiting and returns what is kept; the request
+        // finishes and stores itself.
+        while let running {
+            guard await SharedRequest.value(of: running) != nil else { return kept(parks) }
+        }
+        do {
             let now=clock()
             var jobs: [(Kind, [Park])] = []
             for kind in Kind.allCases where (kind == .air ? smoke : weather) && backoff.allows(kind.host, now: now) {
@@ -131,6 +135,9 @@ actor ForecastDetailService: DetailProviding {
                 _=await SharedRequest.value(of: task)
             }
         }
+        return kept(parks)
+    }
+    private func kept(_ parks: [Park]) -> [String: ForecastDetail] {
         var result: [String: ForecastDetail] = [:]
         for park in parks { if let detail=memory[park.id] { result[park.id]=detail } }
         return result
@@ -428,13 +435,35 @@ actor ParkStore: ParkProviding {
     /// Pages with `start` while NPS reports more than one page holds (it allows up to 500 a page).
     /// A request that fails part-way keeps the last complete set.
     private func fetchAlerts(codes: [String], parkIDs: [String], key: String, pages: Int) async -> Bool {
-        struct Record: Decodable { let id: String; let title: String; let description: String; let category: String; let parkCode: String }
-        struct Page: Decodable { let data: [Record]; let total: String? }
-        var records: [Record] = [], complete=false
+        // Only an alert's id, title and parks are needed to show it; a missing description or category
+        // reads as empty, and a record that still cannot be read costs only itself, never the page.
+        struct Record: Decodable {
+            let id: String, title: String, description: String, category: String, parkCode: String
+            enum CodingKeys: String, CodingKey { case id, title, description, category, parkCode }
+            init(from decoder: any Decoder) throws {
+                let c=try decoder.container(keyedBy: CodingKeys.self)
+                id=try c.decode(String.self, forKey: .id); title=try c.decode(String.self, forKey: .title)
+                parkCode=try c.decode(String.self, forKey: .parkCode)
+                description=(try? c.decodeIfPresent(String.self, forKey: .description)) ?? ""
+                category=(try? c.decodeIfPresent(String.self, forKey: .category)) ?? ""
+            }
+        }
+        struct Page: Decodable {
+            let data: [Lenient<Record>]; let total: String?
+            enum CodingKeys: String, CodingKey { case data, total }
+            init(from decoder: any Decoder) throws {
+                let c=try decoder.container(keyedBy: CodingKeys.self)
+                data=try c.decode([Lenient<Record>].self, forKey: .data)
+                total=try? c.decodeIfPresent(String.self, forKey: .total)
+            }
+        }
+        var records: [Record] = [], read=0, complete=false
         for _ in 0..<max(1, min(pages, Self.alertPages)) {
-            guard let page=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(records.count))]), key: key) else { return false }
-            records+=page.data
-            guard let total=page.total.flatMap(Int.init), records.count<total, !page.data.isEmpty else { complete=true; break }
+            guard let page=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key) else { return false }
+            // `start` counts every record on the page, read or not, so the next page follows on.
+            read+=page.data.count
+            records+=page.data.compactMap(\.value)
+            guard let total=page.total.flatMap(Int.init), read<total, !page.data.isEmpty else { complete=true; break }
         }
         // Allowed fewer pages than there are (a background refresh): the last complete set stays.
         if !complete, pages<Self.alertPages { return false }

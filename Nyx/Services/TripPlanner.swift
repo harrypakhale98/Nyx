@@ -7,9 +7,13 @@ nonisolated struct TripDay: Hashable, Comparable, Codable, Sendable {
     let month: Int
     let day: Int
     init(year: Int, month: Int, day: Int) { self.year=year; self.month=month; self.day=day }
-    /// The day `date` falls on in `calendar` (the person's own calendar for a date they picked).
+    /// The Gregorian day `date` falls on in `calendar`'s time zone (the person's own zone for a date
+    /// they picked). Only the zone is taken: a device set to the Buddhist or Japanese calendar
+    /// numbers its years differently, and a trip is always planned in Gregorian days.
     init(_ date: Date, calendar: Calendar = .current) {
-        let parts=calendar.dateComponents([.year,.month,.day],from:date)
+        var gregorian=Calendar(identifier:.gregorian)
+        gregorian.timeZone=calendar.timeZone
+        let parts=gregorian.dateComponents([.year,.month,.day],from:date)
         self.init(year:parts.year ?? 2000,month:parts.month ?? 1,day:parts.day ?? 1)
     }
     /// "2026-10-10"; nil for anything else, including impossible dates such as February 30.

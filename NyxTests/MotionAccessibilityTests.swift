@@ -6,7 +6,6 @@ import Testing
 /// record that keeps that tap to once per park and night.
 @MainActor @Suite struct MotionAccessibilityTests {
     let engine=AstronomyEngine()
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func nights(_ park:Park,scores:[Int],basis:CloudBasis) throws -> [Night] {
         let start=try #require(try? Date("2026-10-12T20:00:00Z",strategy:.iso8601))
         return scores.enumerated().map { index,score in

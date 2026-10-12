@@ -5,6 +5,8 @@ import Testing
 /// The bundled cloud climatology (ERA5 2015–2024) and the ranking that uses it beyond the forecast.
 struct CloudClimateTests {
     let parks = (try? ParkData.load()) ?? []
+    /// 2027-10-01 00:00 UTC: weeks before the nights these tests score, whatever day they run.
+    static let now = Date(timeIntervalSince1970: 1_822_348_800)
     func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
     func evening(_ park: Park, _ year: Int, _ month: Int, _ day: Int) throws -> Date {
         try #require(park.calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12)))
@@ -46,15 +48,15 @@ struct CloudClimateTests {
         let sky = engine.conditions(for: jotr, on: try evening(jotr, 2027, 11, 6))
         let clearNovember = CloudClimate(parks: ["jotr": .init(cloud: Array(repeating: 10, count: 12), clear: Array(repeating: 85, count: 12))])
         let cloudyNovember = CloudClimate(parks: ["jotr": .init(cloud: Array(repeating: 80, count: 12), clear: Array(repeating: 10, count: 12))])
-        let clear = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: .now, climate: clearNovember)
-        let cloudy = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: .now, climate: cloudyNovember)
+        let clear = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: Self.now, climate: clearNovember)
+        let cloudy = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: Self.now, climate: cloudyNovember)
         #expect(clear.score.value == scoring.score(sky: sky, bortle: jotr.bortleEstimate, cloud: 10, basis: .usual, aerosol: nil).value)
         #expect(cloudy.score.value == scoring.score(sky: sky, bortle: jotr.bortleEstimate, cloud: 80, basis: .usual, aerosol: nil).value)
         #expect(cloudy.score.value < clear.score.value && cloudy.score.value <= ScoreEngine.cloudCap(80))
         #expect(clear.basis == .usual && clear.cloudCover == nil && clear.usualCloud == 10)
         #expect(clear.rankScore == clear.score.value)
         // No climate data and no forecast: the guard keeps the old scaling, labelled as Moon and darkness only.
-        let none = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: .now, climate: CloudClimate(parks: [:]))
+        let none = NightPlanner.night(park: jotr, sky: sky, forecast: nil, detail: nil, now: Self.now, climate: CloudClimate(parks: [:]))
         #expect(none.score.cloudPoints == nil && none.basisCaption()?.contains(String(localized: "This score counts the Moon and darkness only.")) == true)
     }
     /// Every park has twelve months of usual clouds, so the no-cloud guard never runs for real parks.
@@ -69,8 +71,8 @@ struct CloudClimateTests {
     /// Death Valley, by more than their Bortle estimates alone explain.
     @Test func cloudyParksRankBelowDesertsBeyondTheForecast() throws {
         let deva = try park("deva"), olym = try park("olym"), planner = NightPlanner(forecasts: [:])
-        let a = planner.night(deva, on: try evening(deva, 2027, 11, 6), now: .now)
-        let b = planner.night(olym, on: try evening(olym, 2027, 11, 6), now: .now)
+        let a = planner.night(deva, on: try evening(deva, 2027, 11, 6), now: Self.now)
+        let b = planner.night(olym, on: try evening(olym, 2027, 11, 6), now: Self.now)
         #expect(!a.score.hasForecast && !b.score.hasForecast)
         #expect(a.score.value > b.score.value)
         #expect(NightPlanner.best([b, a])?.park.id == "deva")

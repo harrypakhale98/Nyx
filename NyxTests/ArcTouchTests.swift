@@ -6,7 +6,6 @@ import Testing
 /// Increase Contrast. Real computed nights throughout.
 @MainActor @Suite struct ArcTouchTests {
     let engine = AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first(where: { $0.id == id })) }
     func night(_ park: Park, _ day: String) throws -> Night {
         let sky = engine.conditions(for: park, on: park.evening(try #require(try? Date(day+"T20:00:00Z", strategy: .iso8601))))
         return Night(park: park, sky: sky, score: ScoreEngine().score(sky: sky, bortle: park.bortleEstimate, cloudCover: nil), cloudCover: nil, forecastUpdated: nil)

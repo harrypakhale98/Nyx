@@ -40,6 +40,15 @@ nonisolated protocol LocalNotificationCenter:Sendable {
     func add(_ reminder:NightReminder) async throws
 }
 nonisolated struct SystemNotifications:LocalNotificationCenter {
+    /// When a reminder fires, as the calendar trigger reads it: the park's wall clock in its zone.
+    /// Gregorian components need their calendar attached, or a device set to another calendar reads
+    /// 2026 as a different year. Seconds too: a reminder due "in a minute" rounded down to the minute
+    /// could already be past.
+    static func fireComponents(_ date:Date,in zone:TimeZone)->DateComponents {
+        var calendar=Calendar(identifier:.gregorian);calendar.timeZone=zone
+        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute,.second],from:date);components.calendar=calendar;components.timeZone=zone
+        return components
+    }
     func authorized() async -> Bool { let settings=await UNUserNotificationCenter.current().notificationSettings();return settings.authorizationStatus == .authorized }
     func request() async -> Bool { (try? await UNUserNotificationCenter.current().requestAuthorization(options:[.alert,.sound])) ?? false }
     func pendingIDs() async -> [String] { await UNUserNotificationCenter.current().pendingNotificationRequests().map(\.identifier) }
@@ -50,10 +59,7 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
         let content=UNMutableNotificationContent();content.title=reminder.title;content.body=reminder.body;content.userInfo=reminder.userInfo;content.sound = .default
         // iOS 27: the reminder is about a park Siri knows, so "open this park" works from the notification.
         if #available(iOS 27.0,*) { content.appEntityIdentifiers=[EntityIdentifier(for:ParkEntity.self,identifier:reminder.parkID)] }
-        var calendar=Calendar(identifier:.gregorian);calendar.timeZone=reminder.timeZone
-        // Gregorian components need their calendar attached, or a device set to another calendar reads 2026 as a different year.
-        // Seconds too: a reminder due "in a minute" rounded down to the minute could already be past.
-        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute,.second],from:reminder.fireDate);components.calendar=calendar;components.timeZone=reminder.timeZone
+        let components=Self.fireComponents(reminder.fireDate,in:reminder.timeZone)
         let request=UNNotificationRequest(identifier:reminder.id,content:content,trigger:UNCalendarNotificationTrigger(dateMatching:components,repeats:false))
         try await UNUserNotificationCenter.current().add(request)
     }

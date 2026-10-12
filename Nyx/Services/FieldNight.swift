@@ -231,8 +231,6 @@ nonisolated struct DarkAdaptation: Sendable, Equatable {
         let e=elapsed(at: now)
         return e<10*60 ? .cones : e<Self.full ? .rods : .adapted
     }
-    /// When the eye should be dark-adapted, if Nyx stays dark.
-    var adaptedAt: Date { start.addingTimeInterval(Self.full) }
     mutating func leave(at date: Date) { if leftAt == nil { leftAt=date } }
     /// Back in field mode. A short absence changes nothing; a longer one restarts the clock from
     /// the moment of leaving.

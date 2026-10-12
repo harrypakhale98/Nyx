@@ -7,7 +7,6 @@ import SwiftUI
 /// Vision Pro sky) matched to the iPhone's catalogue, placed over a park, and the few the full
 /// screen labels and VoiceOver reads.
 @MainActor @Suite struct SkyLoreTests {
-    func park(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
 
     @Test func loreMatchesTheAppCatalogueAsOnVisionPro() {

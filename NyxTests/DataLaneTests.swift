@@ -76,7 +76,7 @@ struct DataLaneTests {
         // Checked and clear: present with no alerts.
         #expect(cache.alerts["grba"] == [])
         // Sequoia and Kings Canyon share one NPS code and so share its alerts.
-        let model=PlanModel(weather: WeatherService(transport: http, persist: false), parkStore: store, detail: ForecastDetailService(transport: http, persist: false))
+        let model=PlanModel(weather: WeatherService(transport: http, persist: false), parkStore: store, detail: ForecastDetailService(transport: http, persist: false), defaults: isolatedDefaults())
         model.npsEnabled=true
         await model.refreshParkUpdates([])
         #expect(model.enrichments["kica"]?.alerts.first?.id == "a3" && model.enrichments["sequ"]?.alerts.first?.id == "a3")

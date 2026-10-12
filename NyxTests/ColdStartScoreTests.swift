@@ -10,7 +10,7 @@ import Testing
     let engine=AstronomyEngine()
     func named(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func model(_ http:any HTTPTransport) -> PlanModel {
-        PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false),detail:ForecastDetailService(transport:http,persist:false))
+        PlanModel(weather:WeatherService(transport:http,persist:false),parkStore:ParkStore(transport:http,persist:false),detail:ForecastDetailService(transport:http,persist:false),defaults:isolatedDefaults())
     }
     /// Hourly values across tonight's window at a park, issued now.
     func hours(_ night:Night) -> [Double] {

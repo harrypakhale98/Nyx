@@ -375,7 +375,6 @@ nonisolated struct CallBudget: Sendable, Equatable {
     /// World catalogue tiles.
     let browsing: Caps
     static let standard=CallBudget(essential: Caps(minute: 400, hour: 1_000, day: 3_000), browsing: Caps(minute: 300, hour: 700, day: 2_000))
-    static let unlimited=CallBudget(essential: Caps(minute: .infinity, hour: .infinity, day: .infinity), browsing: Caps(minute: .infinity, hour: .infinity, day: .infinity))
 }
 /// Every Open-Meteo request this device made in the last day or so: when, to which host, and what
 /// Open-Meteo counts it as (`CallWeight`). Kept in Application Support on this device and never
@@ -747,32 +746,34 @@ actor WeatherService: WeatherProviding {
     /// on (`SpotForecast`); otherwise the cached forecasts, or none, and each night falls back to
     /// the usual clouds from the world grid, as for any place.
     func spotForecasts(for spots: [Park], network: Bool, force: Bool = false) async -> [String: Forecast] {
-        let now=clock()
-        var due: [Park]=[]
-        let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
-        let asking=network && SpotForecast.isOn(defaults)
-        for spot in spots {
-            load(spot.id)
-            if asking && ForecastReuse.due(memory[spot.id]?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) { due.append(spot) }
+        func kept() -> [String: Forecast] {
+            var result: [String: Forecast]=[:]
+            for spot in spots { if let kept=memory[spot.id] { result[spot.id]=kept } }
+            return result
         }
+        for spot in spots { load(spot.id) }
+        let defaults=suite.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+        guard network && SpotForecast.isOn(defaults) else { return kept() }
+        // Another request is on its way (perhaps for other spots): wait for it, then decide again
+        // what is due. A cancelled caller stops waiting and returns what is kept.
+        while let running=spotFlight {
+            guard await SharedRequest.value(of: running) != nil else { return kept() }
+        }
+        let now=clock()
+        var due=spots.filter { ForecastReuse.due(memory[$0.id]?.updated, now: now, force: force, normal: ForecastReuse.clouds, forced: ForecastReuse.cloudsForced) }
         if !due.isEmpty && !backoff.allows(Self.host, now: now) { held=true; due=[] }
         if !due.isEmpty {
-            let task: Task<[String: Forecast], Never>
-            if let running=spotFlight { task=running } else {
-                task=Task {
-                    let fetched=await self.fetchSpots(due)
-                    // Kept by the request itself, so a forecast that arrives after its caller stopped waiting still counts.
-                    self.keep(fetched)
-                    self.spotFlight=nil
-                    return fetched
-                }
-                spotFlight=task
+            let task=Task {
+                let fetched=await self.fetchSpots(due)
+                // Kept by the request itself, so a forecast that arrives after its caller stopped waiting still counts.
+                self.keep(fetched)
+                self.spotFlight=nil
+                return fetched
             }
+            spotFlight=task
             _=await SharedRequest.value(of: task)
         }
-        var result: [String: Forecast]=[:]
-        for spot in spots { if let kept=memory[spot.id] { result[spot.id]=kept } }
-        return result
+        return kept()
     }
     /// World catalogue places' clouds (G4), by whole tiles: `requests` comes from
     /// `CatalogForecast.Regions.plan`, each one every catalogue place of a 10° tile (or of the sparse
@@ -924,9 +925,13 @@ actor SummitLayerService {
     func layers(for parks: [Park], network: Bool) async -> [String: HourlySeries] {
         let summits=parks.filter { $0.aboveInversion == true }
         for park in summits { load(park.id) }
-        // A cancelled caller stops waiting and returns what is kept; the request finishes and stores itself.
-        if let running { _=await SharedRequest.value(of: running) }
-        else if network {
+        // Another request is on its way (perhaps for other summits): wait for it, then decide again
+        // what is due. A cancelled caller stops waiting and returns what is kept; the request
+        // finishes and stores itself.
+        while network, let running {
+            guard await SharedRequest.value(of: running) != nil else { return kept(summits) }
+        }
+        if network {
             let now=clock()
             let due=summits.filter { park in (memory[park.id].map { now.timeIntervalSince($0.updated) } ?? .infinity) >= Self.freshFor }
             if !due.isEmpty, backoff.allows(WeatherService.host, now: now) {
@@ -938,6 +943,9 @@ actor SummitLayerService {
                 _=await SharedRequest.value(of: task)
             }
         }
+        return kept(summits)
+    }
+    private func kept(_ summits: [Park]) -> [String: HourlySeries] {
         var result: [String: HourlySeries] = [:]
         for park in summits { if let series=memory[park.id] { result[park.id]=series } }
         return result

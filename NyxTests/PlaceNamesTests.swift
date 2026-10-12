@@ -11,7 +11,7 @@ struct PlaceNamesTests {
     private static let fuji="wd:Q1137542"
     private static let teide="wd:Q715124"
     private static let etosha="wd:Q675633"
-    private static func catalog(_ language: String) throws -> [Park] { try CatalogData.load(language: language) }
+    private static func catalog(_ language: String) throws -> [Park] { try TestData.catalog(language: language) }
     private static func place(_ id: String, _ language: String) throws -> Park { try #require(try catalog(language).first { $0.id == id }) }
 
     // MARK: The files

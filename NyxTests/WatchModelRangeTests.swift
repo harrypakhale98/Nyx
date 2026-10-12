@@ -5,7 +5,6 @@ import Testing
 /// The forecast models' range the iPhone hands Apple Watch (`WatchContext.ranges`): the same
 /// range the iPhone's dial shows, read on the wrist only beside a score it still holds.
 struct WatchModelRangeTests {
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     private let t0 = 1_791_158_400.0 // 2026-10-05 00:00 UTC
 
     @MainActor @Test func theWatchShowsTheRangeTheIPhoneShows() throws {

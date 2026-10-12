@@ -13,6 +13,12 @@ nonisolated struct Forecast: Codable, Sendable {
         guard let start, let end else { return nil }
         return HourlyWindow.mean(times:times,values:clouds,from:start,to:end,valid:0...100)
     }
+    /// Whether `fresh` should replace `kept`: only a forecast made later. A slower refresh that
+    /// finishes after a newer one never puts its older forecast back.
+    static func replaces(_ fresh: Forecast?, _ kept: Forecast?) -> Bool {
+        guard let fresh else { return false }
+        return kept.map { fresh.updated > $0.updated } ?? true
+    }
     /// The hourly values whose half hour either side overlaps `start`…`end`, with their timestamps.
     func hours(from start: Date, to end: Date) -> [(time: Date, cloud: Double)] {
         zip(times,clouds).compactMap { t,c in

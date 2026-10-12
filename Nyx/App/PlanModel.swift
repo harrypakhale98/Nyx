@@ -98,23 +98,25 @@ import CoreLocation
     /// The parks' forecast was due but held back: the service asked Nyx to wait, or this iPhone's
     /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line.
     @ObservationIgnored private(set) var forecastsHeldBack=false
-    var homeID: String { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homeID,forKey:"homePark") } } }
+    /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own).
+    @ObservationIgnored let defaults: UserDefaults
+    var homeID: String { didSet { if DebugScenario.screen == nil { defaults.set(homeID,forKey:"homePark") } } }
     /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
     /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
-    var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
+    var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { defaults.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
     /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
     /// asks, and its answer is labelled an example. Anyone who chose a park before has.
-    var startChosen: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(startChosen,forKey:"startChosen") } } }
+    var startChosen: Bool { didSet { if DebugScenario.screen == nil { defaults.set(startChosen,forKey:"startChosen") } } }
     /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
-    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters) } } }
-    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(weatherEnabled,forKey:"weatherEnabled") } } }
-    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(npsEnabled,forKey:"npsEnabled") } } }
+    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters,defaults) } } }
+    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(weatherEnabled,forKey:"weatherEnabled") } } }
+    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:"npsEnabled") } } }
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
-    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { UserDefaults.standard.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
+    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
     var smokeEnabled: Bool {
         didSet {
-            if DebugScenario.screen == nil { UserDefaults.standard.set(smokeEnabled,forKey:"smokeEnabled") }
+            if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:"smokeEnabled") }
             guard !smokeEnabled, oldValue else { return }
             // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
             details=Self.withoutAir(details)
@@ -174,25 +176,26 @@ import CoreLocation
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
-         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil) {
+         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil, defaults: UserDefaults = .standard) {
         let loaded:[Park]
         do { loaded=try ParkData.load(); loadError=false } catch { loaded=[]; loadError=true }
         parks=loaded
         parkIndex=Dictionary(loaded.indices.map { (loaded[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
         self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
+        self.defaults=defaults
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
         // (A registered default: anyone who chose Name keeps it.)
-        UserDefaults.standard.register(defaults:["parksByScore":true])
-        homeID=UserDefaults.standard.string(forKey:"homePark") ?? Park.defaultID
-        homePlace=UserDefaults.standard.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
-        startChosen=UserDefaults.standard.object(forKey:"startChosen") as? Bool ?? (UserDefaults.standard.string(forKey:"homePark") != nil)
+        defaults.register(defaults:["parksByScore":true])
+        homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
+        homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
+        startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
         // A radius kept in miles before G1 is written once as metres, exactly.
-        if DebugScenario.screen == nil { SearchRadius.migrate() }
-        radiusMeters=SearchRadius.meters()
-        weatherEnabled=UserDefaults.standard.object(forKey:"weatherEnabled") as? Bool ?? true
-        npsEnabled=UserDefaults.standard.object(forKey:"npsEnabled") as? Bool ?? true
-        spotForecastsEnabled=SpotForecast.isOn()
-        smokeEnabled=UserDefaults.standard.object(forKey:"smokeEnabled") as? Bool ?? true
+        if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
+        radiusMeters=SearchRadius.meters(defaults)
+        weatherEnabled=defaults.object(forKey:"weatherEnabled") as? Bool ?? true
+        npsEnabled=defaults.object(forKey:"npsEnabled") as? Bool ?? true
+        spotForecastsEnabled=SpotForecast.isOn(defaults)
+        smokeEnabled=defaults.object(forKey:"smokeEnabled") as? Bool ?? true
         // The world catalogue is read in the background from the first moment; nothing waits for it.
         prepareCatalog()
         // The last forecasts and park updates are read by the services, off the main actor, while
@@ -571,6 +574,8 @@ import CoreLocation
         // Programs are asked for only on a park's page: from then on its forecast detail is wanted too.
         if programs { detailWanted=true }
         await refreshForecasts(watching:parks,force:force)
+        // Cancelled (the question changed while it was asked): the next refresh says when it last happened.
+        guard !Task.isCancelled else { return }
         lastRefresh=Date.now
         if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
     }
@@ -589,13 +594,15 @@ import CoreLocation
         await hydration?.value
         let network=weatherEnabled && live
         var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
-        for park in self.parks where forecasts[park.id]?.updated != fresh[park.id]?.updated { forecasts[park.id]=fresh[park.id] }
+        for park in self.parks where Forecast.replaces(fresh[park.id],forecasts[park.id]) { forecasts[park.id]=fresh[park.id] }
+        // Cancelled while asking: what arrived is kept, and nothing is called stale for a request cut short.
+        guard !Task.isCancelled else { return }
         // Saved spots in a request of their own, rounded to 0.1°, never mixed into the parks' (`SpotForecast`).
         let spots=self.spots
         if !spots.isEmpty {
             let spotNetwork=network && spotForecastsEnabled
             let ofSpots=await weather.spotForecasts(for:spots,network:spotNetwork,force:force)
-            for spot in spots where spotIndex[spot.id] != nil && forecasts[spot.id]?.updated != ofSpots[spot.id]?.updated { forecasts[spot.id]=ofSpots[spot.id] }
+            for spot in spots where spotIndex[spot.id] != nil && Forecast.replaces(ofSpots[spot.id],forecasts[spot.id]) { forecasts[spot.id]=ofSpots[spot.id] }
             if spotNetwork { fresh.merge(ofSpots) { park,_ in park } }
         }
         // World catalogue places by whole tiles (`CatalogForecast.Regions`), the same switch and host
@@ -608,7 +615,7 @@ import CoreLocation
             let ofCatalog=await weather.catalogForecasts(requests,network:network,force:force)
             // One assignment for the whole tile, so the kept nights are let go once, not once a place.
             var updated=forecasts, changed=false
-            for (id,forecast) in ofCatalog where updated[id]?.updated != forecast.updated { updated[id]=forecast; changed=true }
+            for (id,forecast) in ofCatalog where Forecast.replaces(forecast,updated[id]) { updated[id]=forecast; changed=true }
             if changed { forecasts=updated }
             if network { fresh.merge(ofCatalog) { park,_ in park } }
         }
@@ -628,7 +635,7 @@ import CoreLocation
         #if DEBUG
         exportWatchContext()
         #endif
-        guard network else { return }
+        guard network, !Task.isCancelled else { return }
         // A spot whose forecasts are switched off is not "stale": it was never asked about.
         // Nor is a catalogue place beyond this refresh's budget (`CatalogForecast.maxPointsPerRefresh`).
         for park in parks where (spotForecastsEnabled || !park.isSavedSpot) && (!park.isCatalogPlace || askedCatalog.contains(park.id)) {

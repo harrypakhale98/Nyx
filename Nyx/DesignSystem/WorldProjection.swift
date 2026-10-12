@@ -103,7 +103,6 @@ nonisolated struct Projector: Sendable {
             lambda0=meridian*GeoPoint.radian
         }
     }
-    var isAzimuthal: Bool { if case .azimuthal=projection { true } else { false } }
     func project(_ point: GeoPoint) -> CGPoint? {
         switch projection {
         case .azimuthal: return project(unit:point.unit)

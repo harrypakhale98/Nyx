@@ -244,6 +244,8 @@ struct YearRecapView: View {
     @State private var year: Int
     @State private var reflection: String?
     @State private var reflecting=false
+    /// The year's facts, worked out off the main thread (a night's sky for every night logged).
+    @State private var recap: YearRecap?
     /// The year, as large as the page allows, growing with Dynamic Type up to a point.
     @ScaledMetric(relativeTo:.largeTitle) private var yearSize=84.0
     init(nights: [LoggedNight], year: Int? = nil) {
@@ -253,7 +255,6 @@ struct YearRecapView: View {
     }
     private var years: [Int] { Array(Set(nights.map { Calendar.current.component(.year,from:$0.date) })).sorted(by:>) }
     var body: some View {
-        let recap=YearRecap(year:year,nights:nights,parks:model.mapPlaces)
         let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
         let places=model.mapPlaces
         let layout=ConstellationLayout(nights:yearNights,parks:places)
@@ -268,46 +269,56 @@ struct YearRecapView: View {
                         .accessibilityLabel("Choose a year").accessibilityValue(String(year))
                 }
             }
-            stats(recap)
-            if let darkest=recap.darkest, let park=model.park(darkest.parkID) {
-                Panel { HStack(alignment:.center,spacing:18) {
-                    MoonView(geometry:AstronomyEngine().moon(for:model.night(park,on:darkest.date)).geometry).frame(width:56,height:56)
-                    VStack(alignment:.leading,spacing:4) {
-                        Eyebrow(text:"Your darkest sky")
-                        Text(darkest.parkName).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                        Text("\(darkest.dateLabel) · Bortle \(darkest.bortle), as you saw it").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                    }
-                }.accessibilityElement(children:.combine) }
-            }
-            Panel { VStack(alignment:.leading,spacing:14) {
-                Text("The Moon's phases you met").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
-                MoonPhaseRow(met:recap.phases)
-                Text(String(localized:"\(recap.phases.count) of 8 · the phases you met are lit")).font(.subheadline).foregroundStyle(palette.muted)
-            } }
-            if let event=recap.event {
-                Label { Text(event).fixedSize(horizontal:false,vertical:true) } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:16,height:16) }.font(.subheadline)
-            }
-            if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:places),summary:layout.summary()) } } }
-            VStack(alignment:.leading,spacing:10) {
-                Eyebrow(text:"In a few words")
-                if reflecting { ConstellationLoader().frame(maxWidth:.infinity) }
-                else {
-                    Text(reflection ?? recap.template).font(.system(.body,design:.serif)).lineSpacing(6).fixedSize(horizontal:false,vertical:true)
-                    Text(reflection == nil ? String(localized:"From your journal, on this iPhone.") : String(localized:"Written on this iPhone from your journal. The figures above are the facts.")).font(.caption).foregroundStyle(palette.muted)
-                }
-            }
-            if recap.nights>0 { RecapShareButton(recap:recap,layout:layout) }
+            if let recap, recap.year==year { facts(recap,layout:layout,places:places) }
+            else { ConstellationLoader().frame(maxWidth:.infinity) }
         }.padding(24).readableColumn() }
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground()).navigationTitle("Year under the stars").navigationBarTitleDisplayMode(.inline)
-        .task(id:year) {
+        // Again for a night logged while the page is open.
+        .task(id:[year,nights.count]) {
             let yearNights=nights.filter { Calendar.current.component(.year,from:$0.date)==year }
             reflection=nil
-            guard recap.nights>0, OnDeviceGuide.speaksYourLanguage, DebugScenario.screen == nil else { return }
+            let asked=year, all=nights, parks=model.mapPlaces
+            let made=await Task.detached(priority:.userInitiated) { YearRecap(year:asked,nights:all,parks:parks) }.value
+            guard !Task.isCancelled else { return }
+            recap=made
+            guard made.nights>0, OnDeviceGuide.speaksYourLanguage, DebugScenario.screen == nil else { return }
             reflecting=true
-            reflection=await OnDeviceGuide.yearReflection(facts:recap.facts,notes:yearNights.map(\.notes).filter { !$0.isEmpty })
+            reflection=await OnDeviceGuide.yearReflection(facts:made.facts,notes:yearNights.map(\.notes).filter { !$0.isEmpty })
             reflecting=false
         }
+    }
+    /// Everything below the year: the figures, the darkest sky, the phases met, the constellation, the words.
+    @ViewBuilder private func facts(_ recap:YearRecap,layout:ConstellationLayout,places:[Park])->some View {
+        stats(recap)
+        if let darkest=recap.darkest, let park=model.park(darkest.parkID) {
+            Panel { HStack(alignment:.center,spacing:18) {
+                MoonView(geometry:AstronomyEngine().moon(for:model.night(park,on:darkest.date)).geometry).frame(width:56,height:56)
+                VStack(alignment:.leading,spacing:4) {
+                    Eyebrow(text:"Your darkest sky")
+                    Text(darkest.parkName).font(.system(.title2,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                    Text("\(darkest.dateLabel) · Bortle \(darkest.bortle), as you saw it").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+            }.accessibilityElement(children:.combine) }
+        }
+        Panel { VStack(alignment:.leading,spacing:14) {
+            Text("The Moon's phases you met").font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
+            MoonPhaseRow(met:recap.phases)
+            Text(String(localized:"\(recap.phases.count) of 8 · the phases you met are lit")).font(.subheadline).foregroundStyle(palette.muted)
+        } }
+        if let event=recap.event {
+            Label { Text(event).fixedSize(horizontal:false,vertical:true) } icon:{ SkyGlyph(.meteors,color:palette.accent).frame(width:16,height:16) }.font(.subheadline)
+        }
+        if !layout.stars.isEmpty { Panel { VStack(alignment:.leading,spacing:12) { Eyebrow(text:"This year's constellation"); SkyMapView(content:layout.content(parks:places),summary:layout.summary()) } } }
+        VStack(alignment:.leading,spacing:10) {
+            Eyebrow(text:"In a few words")
+            if reflecting { ConstellationLoader().frame(maxWidth:.infinity) }
+            else {
+                Text(reflection ?? recap.template).font(.system(.body,design:.serif)).lineSpacing(6).fixedSize(horizontal:false,vertical:true)
+                Text(reflection == nil ? String(localized:"From your journal, on this iPhone.") : String(localized:"Written on this iPhone from your journal. The figures above are the facts.")).font(.caption).foregroundStyle(palette.muted)
+            }
+        }
+        if recap.nights>0 { RecapShareButton(recap:recap,layout:layout) }
     }
     @ViewBuilder private func stats(_ recap:YearRecap)->some View {
         let tiles=[(recap.nights,String(localized:"Nights out")),(recap.parkNames.count,recap.allNationalParks ? String(localized:"Parks") : String(localized:"Places")),(recap.newParkNames.count,String(localized:"New to you"))]

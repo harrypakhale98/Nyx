@@ -147,6 +147,25 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         if morning, AstronomyEngine().solarAltitude(at: now, park: self) > -0.833 { return today }
         return self.date(today, addingDays: -1)
     }
+    /// The moments after `start` and before `end` at which `currentNight(at:)` moves on to the
+    /// next night: a second past the sunrise that ends it (3 AM when the Sun is already up by
+    /// then), else local noon. A widget or complication redraws at each, so "tonight" turns over
+    /// at the park's sunrise rather than at the next hourly entry.
+    func nightTurnovers(from start: Date, to end: Date) -> [Date] {
+        var moments: [Date] = [], now = start
+        while moments.count < 4 {
+            let night = currentNight(at: now), noon = date(night, addingDays: 1)
+            // The rule's own moments, earliest first: the sunrise, 3 AM (a sunrise before it, or a Sun
+            // that never sets), local noon (a Sun that never rises).
+            let sunrise = AstronomyEngine().conditions(for: self, on: night).sunrise?.addingTimeInterval(1)
+            let candidates = ([sunrise, calendar.date(bySettingHour: 3, minute: 0, second: 0, of: noon), noon].compactMap { $0 }).sorted()
+            let next = candidates.first { $0 > now && currentNight(at: $0) != night } ?? noon
+            guard next < end else { break }
+            moments.append(next)
+            now = next
+        }
+        return moments
+    }
     /// The latest night that has begun at `now`: tonight once the Sun has set, otherwise last
     /// night. A journal entry records a night already seen, so one written at 1 AM or over
     /// breakfast belongs to the evening before. Without a sunset (midnight sun), 6 PM stands in.

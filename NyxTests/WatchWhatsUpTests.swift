@@ -7,7 +7,6 @@ import Testing
 /// the iPhone answers (`WatchRequest`), and the `WhatsUp` items and layout rule the wrist page reads.
 @MainActor struct WatchWhatsUpTests {
     let engine = AstronomyEngine()
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     func sky(_ park: Park, _ day: String) throws -> SkyConditions {
         engine.conditions(for: park, on: park.evening(try #require(try? Date(day+"T20:00:00Z", strategy: .iso8601))))
     }

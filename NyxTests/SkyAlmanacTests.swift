@@ -7,7 +7,6 @@ import Testing
     let almanac = SkyAlmanac()
     let iso = ISO8601DateFormatter()
     func date(_ text: String) throws -> Date { try #require(iso.date(from: text)) }
-    func park(_ id: String) throws -> Park { try #require(try ParkData.load().first(where: { $0.id == id })) }
 
     @Test func planetsMatchPyEphem() throws {
         let fixtures: [(String, SkyAlmanac.Planet, Double, Double, Double)] = [

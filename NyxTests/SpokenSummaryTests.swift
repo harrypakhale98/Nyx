@@ -85,9 +85,9 @@ import Testing
                 #expect(DarknessAnswer.dialog(night, closure: nil, voiceOnly: voiceOnly) == body)
                 #expect(DarknessAnswer.dialog(night, closure: "Park closed.", voiceOnly: voiceOnly) == "Closure alert: Park closed. "+body)
 
-                let answer=BestNightSearch.Answer(ranked: [night], count: 14)
+                let answer=BestNightSearch.Answer(nights: [night], count: 14)
                 let best=bestOracle(answer, voiceOnly: voiceOnly)
-                #expect(night.spokenSummary(.siriBest(count: 14, voiceOnly: voiceOnly)) == best)
+                #expect(night.spokenSummary(.siriBest(count: 14, voiceOnly: voiceOnly, noDarkness: answer.noDarkness)) == best)
                 #expect(BestNightSearch.dialog(answer, voiceOnly: voiceOnly) == best)
             }
         }
@@ -100,7 +100,7 @@ import Testing
             let basis=night.score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
             return String(localized:"\(day) at \(park.shortName): \(night.score.value), \(night.score.band.label).")+basis
         }
-        if night.sky.darkHours==0 {
+        if answer.noDarkness {
             return String(localized:"No true darkness at \(park.shortName) in the next \(answer.count) nights. The best is \(day), \(night.score.value) out of 100.")
         }
         let basis=night.basisCaption(typical:true) ?? String(localized:"Includes a cached cloud forecast.")
