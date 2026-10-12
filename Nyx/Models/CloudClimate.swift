@@ -32,7 +32,7 @@ nonisolated struct CloudClimate: Decodable, Sendable {
             let tenths = Int((clear/10).rounded())
             switch tenths {
             case ...0: return estimated ? String(localized: "\(monthName) nights here are rarely clear, by an estimate.") : String(localized: "\(monthName) nights here are rarely clear.")
-            case 10...: return estimated ? String(localized: "\(monthName) nights here are nearly always clear, by an estimate.") : String(localized: "\(monthName) nights here are nearly always clear.")
+            case 10...: return estimated ? String(localized: "Nearly every \(monthName) night here is mostly clear, by an estimate.") : String(localized: "Nearly every \(monthName) night here is mostly clear.")
             default: return String(localized: "About \(tenths) in 10 \(monthName) nights here are mostly clear.")
             }
         }
@@ -242,7 +242,7 @@ extension Night {
     /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full
     /// forecast, the one caveat about the clouds.
     private nonisolated func voiceAnswer(_ day: String) -> String {
-        let caveat=score.hasForecast ? "" : " "+(basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+        let caveat=score.hasForecast ? "" : " "+(basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"No cloud forecast yet.")))
         return String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label).")+caveat
     }
 }

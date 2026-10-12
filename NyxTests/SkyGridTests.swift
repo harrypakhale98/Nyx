@@ -135,7 +135,7 @@ struct SkyGridTests {
         #expect(climate.sentence(here, on: try evening(here, 2027, 11, 15)) == "About 8 in 10 November nights here are mostly clear.")
         let extremes = place("pin:edge", 35.1, -115.1)
         #expect(climate.sentence(extremes, on: try evening(extremes, 2027, 1, 15)) == "January nights here are rarely clear, by an estimate.")
-        #expect(climate.sentence(extremes, on: try evening(extremes, 2027, 9, 15)) == "September nights here are nearly always clear, by an estimate.")
+        #expect(climate.sentence(extremes, on: try evening(extremes, 2027, 9, 15)) == "Nearly every September night here is mostly clear, by an estimate.")
         let samoa = place("pin:samoa", -14.28, -170.7, zone: "Pacific/Pago_Pago")
         #expect(climate.typical(samoa, on: try evening(samoa, 2027, 7, 1)) == CloudClimate.Typical(month: 7, cloud: 60, clear: 25, estimated: true))
         #expect(climate.typical(place("pin:sea", 35, -119.9), on: .now) == nil)

@@ -156,15 +156,19 @@ nonisolated enum WristClosure {
 /// "True darkness in 1 hr, 10 min". In a complication (`now` nil) the time updates itself; in the
 /// app it is written for `now` and refreshed by the screen's minute timeline, which keeps
 /// self-updating time text out of the app's paged views (it looped layout there on watchOS 27).
+/// A complication's line has room for about twenty characters once the duration is on it, so
+/// there the two long names give way to the short ones the inline complication already uses
+/// ("Dark in 1 hr, 10 min", "Dawn in 5 min"); the app keeps the full words.
 func countdownText(_ milestone: NightMilestone, now: Date? = nil) -> Text {
     let reference = now.map { Text(verbatim: inDuration(until: milestone.date, from: $0)) }
         ?? Text(.currentDate, format: .reference(to: milestone.date, allowedFields: [.hour, .minute]))
+    let compact = now == nil
     return switch milestone.kind {
     case .sunset: Text("Sunset \(reference)")
-    case .darkStart: Text("True darkness \(reference)")
+    case .darkStart: compact ? Text("Dark \(reference)") : Text("True darkness \(reference)")
     case .moonrise: Text("Moon rises \(reference)")
     case .moonset: Text("Moon sets \(reference)")
-    case .darkEnd: Text("Dawn twilight \(reference)")
+    case .darkEnd: compact ? Text("Dawn \(reference)") : Text("Dawn twilight \(reference)")
     case .sunrise: Text("Sunrise \(reference)")
     }
 }
@@ -202,7 +206,7 @@ struct WatchComplicationView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(entry.night.map(summary) ?? (entry.unsaved ? String(localized: "This place is no longer saved in Nyx.")+" "+String(localized: "Edit the complication to choose another place.")
-                                                          : String(localized: "Nyx. Choose a park in Nyx on Apple Watch.")))
+                                                          : String(localized: "Nyx. Choose a place in Nyx on Apple Watch.")))
         .containerBackground(for: .widget) { Color.black }
         // A tap opens this park on this night, not whatever Tonight would show.
         .widgetURL(entry.night.flatMap { WatchLink(park: $0.park, evening: $0.sky.evening).url })
@@ -308,11 +312,11 @@ struct WatchComplicationView: View {
             switch family {
             case .accessoryCircular: ZStack { AccessoryWidgetBackground(); Image(systemName: "moon.stars") }
             case .accessoryCorner: Image(systemName: "moon.stars").widgetLabel("Nyx")
-            case .accessoryInline: Text("Nyx · choose a park")
+            case .accessoryInline: Text("Nyx · choose a place")
             default:
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Nyx", systemImage: "moon.stars").font(.headline)
-                    Text("Open Nyx to choose a park.").font(.caption2).foregroundStyle(muted)
+                    Text("Open Nyx to choose a place.").font(.caption2).foregroundStyle(muted)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
         }.foregroundStyle(ink)

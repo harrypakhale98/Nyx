@@ -12,7 +12,7 @@ struct CreditsView: View {
         ("Star names", "IAU Working Group on Star Names."),
         ("Constellation figures", "Drawn for Nyx between catalog stars."),
         ("Cloud forecasts", "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx."),
-        ("Usual clouds", "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."),
+        ("Usual clouds", "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."),
         ("Park data", "National Park Service."),
     ]
     var body: some View {

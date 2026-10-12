@@ -64,7 +64,7 @@ struct FromHomePanel: View {
             }
             Divider().overlay(palette.line)
             if sky.planets.isEmpty {
-                row(title:Text("Planets"),value:nil,detail:String(localized:"No bright planets up in the dark hours tonight.")) {
+                row(title:Text("Planets"),value:nil,detail:String(localized:"No bright planets up in true darkness tonight.")) {
                     SkyGlyph(.planet,color:palette.muted)
                 }
             } else {

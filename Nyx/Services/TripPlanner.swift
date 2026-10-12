@@ -207,7 +207,7 @@ nonisolated enum TripPlanner {
         var parts:[String]=[]
         if night.sky.darkHours==0 { parts.append(String(localized:"No true darkness at this latitude")) }
         else if lit<=1 { parts.append(String(localized:"New moon")) }
-        else if night.sky.moonBelowFraction>=0.95 { parts.append(String(localized:"Moon down through the dark hours")) }
+        else if night.sky.moonBelowFraction>=0.95 { parts.append(String(localized:"Moon down through true darkness")) }
         else { parts.append(String(localized:"Moon \(lit)% lit")) }
         if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
         else if let usual=night.usualCloud { parts.append(String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud")) }

@@ -22,6 +22,12 @@ nonisolated enum CloudForecastSwitch {
 nonisolated enum SpotForecast {
     static let key = "spotForecastsEnabled"
     static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
+    /// How far the rounding can move a spot, as the reader's region writes it: "about 7 mi" in the
+    /// United States, "about 11 km" in most other places. 0.1° of latitude is 11.1 km everywhere.
+    static func roundingDistance(locale: Locale = .current) -> String {
+        Measurement(value: 11.1, unit: UnitLength.kilometers)
+            .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0)).locale(locale)).locale(locale))
+    }
     /// A point on the 0.1° grid, held as whole tenths of a degree so it is exact and compares exactly.
     nonisolated struct Point: Hashable, Sendable {
         let latitudeTenths: Int

@@ -76,7 +76,7 @@ import Testing
                 let body:String
                 if night.sky.darkHours==0 { body=String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
                 else if voiceOnly {
-                    let basis=score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+                    let basis=score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"No cloud forecast yet.")))
                     let tonight=String(localized:"Tonight")
                     body=String(localized:"\(tonight) at \(park.shortName): \(score.value), \(score.band.label).")+basis
                 }
@@ -98,7 +98,7 @@ import Testing
         let night=answer.best, park=night.park
         let day=park.programDate(park.isoDay(night.id))
         if voiceOnly {
-            let basis=night.score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"Clouds aren't forecast yet.")))
+            let basis=night.score.hasForecast ? "" : " "+(night.basis.isEarlyLook ? String(localized:"An early look at the clouds.") : night.withTypicalClouds(String(localized:"No cloud forecast yet.")))
             return String(localized:"\(day) at \(park.shortName): \(night.score.value), \(night.score.band.label).")+basis
         }
         if answer.noDarkness {

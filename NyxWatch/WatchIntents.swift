@@ -37,7 +37,7 @@ nonisolated enum WristTonightAnswer {
                            climate: context?.climate ?? .shared)
         }
         guard let night = NightPlanner.best(nights) else {
-            return String(localized: "Nyx has no park to follow yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.")
+            return String(localized: "No place chosen yet. Save one in Nyx on iPhone, or choose one in Nyx on this watch.")
         }
         return dialog(night, context: context, now: now)
     }

@@ -256,6 +256,19 @@ struct DataLaneTests {
         #expect(ReminderRoute(userInfo: ["parkID": "deva"]) == ReminderRoute(parkID: "deva"))
         #expect(ReminderRoute(userInfo: [:]) == nil)
     }
+    /// A place the Park Service does not run has no park alerts: its reminder says to check
+    /// closures and access instead.
+    @Test func reminderForAPlaceAbroadDoesNotPointToParkAlerts() throws {
+        let now=Date(timeIntervalSince1970: 1790899200)
+        let jotr=try night("jotr", daysAhead: 1, from: now, updated: now)
+        let abroad=Park(id: "wd:Q1", nps: nil, name: "Somewhere", countryCode: "AU", region: "", kind: .darkSkyPark, curated: false,
+                        latitude: jotr.park.latitude, longitude: jotr.park.longitude, timeZoneID: "America/Los_Angeles", darkSkyDesignated: false,
+                        bortleEstimate: 2, description: "", sourceURL: "", sourceNote: "", viewingSpots: [])
+        let there=Night(park: abroad, sky: jotr.sky, score: jotr.score, cloudCover: 4, forecastUpdated: now)
+        let body=NotificationScheduler.body(there)
+        #expect(body.hasPrefix("94 out of 100. ") && body.hasSuffix(". Check closures and access before you go."))
+        #expect(!body.contains("park alerts"))
+    }
 
     // MARK: Widget snapshot and watch context across versions
 

@@ -101,7 +101,7 @@ struct PlannerWindow: View {
         .alert(Text("Only national parks here"), isPresented: $model.handoffElsewhere) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad.")
+            Text("Nyx on Apple Vision Pro covers the U.S. national parks. Saved spots and places abroad stay on your iPhone and iPad.")
         }
         // And back: the park and night in this window, for Nyx on iPhone or iPad to continue.
         .modifier(VisionHandoff(park: model.park, night: model.park.map { model.night(for: $0) }))

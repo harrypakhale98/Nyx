@@ -46,7 +46,7 @@ struct WhatsUpPage: View {
             row(item)
         }
         if whatsUp.planets.isEmpty {
-            Text("No bright planets up in the dark hours tonight.").font(.caption2).foregroundStyle(palette.muted)
+            Text("No bright planets up in true darkness tonight.").font(.caption2).foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true).nonEssential()
         }
         if !layout.mentions.isEmpty {

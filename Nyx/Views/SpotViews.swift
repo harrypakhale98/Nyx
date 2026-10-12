@@ -135,7 +135,7 @@ struct SpotPanel: View {
     /// What this spot's clouds cost, as Your privacy says it.
     private var cloudLine: String {
         model.weatherEnabled && model.spotForecastsEnabled
-            ? String(localized:"Saved on this iPhone. Its clouds are asked for with its position rounded to about 11 km.")
+            ? String(localized:"Saved on this iPhone. Its clouds are asked for with its position rounded to about \(SpotForecast.roundingDistance()).")
             : String(localized:"Saved on this iPhone. Clouds at your saved spots is off in Your privacy, so this spot uses its usual clouds.")
     }
     private func rename() {

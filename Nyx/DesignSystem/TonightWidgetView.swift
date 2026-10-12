@@ -230,26 +230,26 @@ struct TonightWidgetView:View {
         } else if let name=entry.unsaved {
             UnsavedPlaceFace(name:name,family:family,muted:muted)
         } else if family == .accessoryInline {
-            Label("Save a park in Nyx",systemImage:"moon.stars")
-                .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
+            Label("Save a place in Nyx",systemImage:"moon.stars")
+                .summarized(String(localized:"Save a place in Nyx. Your next dark sky will appear here."))
         } else if family == .accessoryCircular {
             ZStack { AccessoryWidgetBackground(); Image(systemName:"moon.stars").font(.title3) }
-                .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
+                .summarized(String(localized:"Save a place in Nyx. Your next dark sky will appear here."))
         } else if family == .accessoryRectangular {
             VStack(alignment:.leading,spacing:2) {
                 Label("Nyx",systemImage:"moon.stars").font(.headline)
-                Text("Save a park in Nyx").font(.caption).lineLimit(2)
+                Text("Save a place in Nyx").font(.caption).lineLimit(2)
             }.frame(maxWidth:.infinity,alignment:.leading).dynamicTypeSize(.small ... .xxxLarge)
-                .summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
+                .summarized(String(localized:"Save a place in Nyx. Your next dark sky will appear here."))
         } else {
             ViewThatFits(in:.vertical) {
                 VStack(alignment:.leading,spacing:8) {
                     Image(systemName:"moon.stars")
-                    Text("Save a park in Nyx").font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                    Text("Save a place in Nyx").font(.system(.subheadline,design:.serif)).fixedSize(horizontal:false,vertical:true)
                     if family != .systemSmall { Text("Your next dark sky will appear here.").font(.caption).fixedSize(horizontal:false,vertical:true) }
                 }
-                Text("Save a park in Nyx").font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
-            }.summarized(String(localized:"Save a park in Nyx. Your next dark sky will appear here."))
+                Text("Save a place in Nyx").font(.caption).dynamicTypeSize(.small ... .xxxLarge).fixedSize(horizontal:false,vertical:true)
+            }.summarized(String(localized:"Save a place in Nyx. Your next dark sky will appear here."))
         }
     }
     /// "Eifel is no longer saved in Nyx.", or without a name when the setting kept none.
@@ -272,7 +272,7 @@ struct TonightWidgetView:View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain).dynamicTypeSize(.small ... .large)
-            .accessibilityLabel("Next saved park")
+            .accessibilityLabel("Next saved place")
             .accessibilityValue("Showing \(night.park.shortName), \(entry.position) of \(entry.savedCount)")
         }
     }

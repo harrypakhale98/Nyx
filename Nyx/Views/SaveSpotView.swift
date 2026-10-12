@@ -85,7 +85,7 @@ struct SaveSpotView: View {
                             .onChange(of:name) { _,new in if new.contains("\n") { name=new.replacingOccurrences(of:"\n",with:"") } }
                             .accessibilityLabel("Name")
                     } header:{ Text("Name") } footer:{
-                        Text("Leave it empty to use \u{201C}\(offeredName)\u{201D}.").foregroundStyle(palette.muted)
+                        Text("Leave it empty to use \"\(offeredName)\".").foregroundStyle(palette.muted)
                     }
                     .listRowBackground(palette.panel)
                 }
@@ -231,7 +231,7 @@ struct SaveSpotView: View {
 
     /// What saving sends, said where it is decided. Where the person stands is sent only if they save it.
     private var privacyLines: [String] {
-        var lines=[String(localized:"Nyx saves this spot on this iPhone. Its clouds are asked for with its position rounded to about 11 km.")]
+        var lines=[String(localized:"Nyx saves this spot on this iPhone. Its clouds are asked for with its position rounded to about \(SpotForecast.roundingDistance()).")]
         if source == .here { lines.append(String(localized:"This is where you are now. If you save it, its rounded position is asked about like any spot's. If you don't, nothing is sent.")) }
         if !(model.weatherEnabled && model.spotForecastsEnabled) {
             lines.append(String(localized:"Clouds at your saved spots is off in Your privacy, so nothing is sent: the spot uses its usual clouds."))

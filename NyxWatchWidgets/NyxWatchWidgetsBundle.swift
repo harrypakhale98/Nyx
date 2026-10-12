@@ -9,7 +9,7 @@ import WidgetKit
 
 /// Complications and Smart Stack: tonight's score at a park, the Moon, and the next moment of the
 /// night. Built on the watch from the snapshot the watch app wrote. The park is a setting:
-/// "Darkest saved park" (the default, what Tonight shows) or one park.
+/// "Darkest saved place" (the default, what Tonight shows) or one park.
 struct TonightComplication: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "NyxTonight", intent: TonightParkIntent.self, provider: TonightComplicationProvider()) { entry in WatchComplicationView(entry: entry) }
@@ -22,7 +22,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     /// The darkest saved park first (today's behaviour), then each park saved on iPhone.
     func recommendations() -> [AppIntentRecommendation<TonightParkIntent>] {
         let saved = WristParkQuery.savedParks().prefix(8)
-        return [AppIntentRecommendation(intent: TonightParkIntent(), description: Text("Darkest saved park"))]
+        return [AppIntentRecommendation(intent: TonightParkIntent(), description: Text("Darkest saved place"))]
             + saved.map { AppIntentRecommendation(intent: TonightParkIntent(park: WristParkEntity($0)), description: Text(verbatim: $0.wristName)) }
     }
     /// The gallery's sample sky, so the system's redacted placeholder has the complication's real shape.
@@ -64,22 +64,22 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
 /// The score complication's setting: which park it shows.
 struct TonightParkIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Tonight's sky"
-    static let description = IntentDescription("The darkness score at a park, or at your darkest saved park.")
-    @Parameter(title: "Park") var park: WristParkEntity?
+    static let description = IntentDescription("The darkness score at a place, or at your darkest saved place.")
+    @Parameter(title: "Place") var park: WristParkEntity?
     init() {}
     init(park: WristParkEntity) { self.park = park }
 }
-/// A park as the watch's settings list it. "Darkest saved park" is an entry of its own, the default.
+/// A park as the watch's settings list it. "Darkest saved place" is an entry of its own, the default.
 struct WristParkEntity: AppEntity {
     static let darkestID = "darkest"
-    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Park"
+    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Place"
     static let defaultQuery = WristParkQuery()
     let id: String
     let name: String
     var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: LocalizedStringResource(stringLiteral: name)) }
     init(_ park: Park) { id = park.id; name = park.wristName }
     init(id: String, name: String) { self.id = id; self.name = name }
-    static var darkest: WristParkEntity { WristParkEntity(id: darkestID, name: String(localized: "Darkest saved park")) }
+    static var darkest: WristParkEntity { WristParkEntity(id: darkestID, name: String(localized: "Darkest saved place")) }
 }
 struct WristParkQuery: EntityQuery {
     static func allParks() -> [Park] { ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending } }
@@ -301,7 +301,7 @@ private var closedSample: WatchSkyEntry {
     NextDarkEntry(date: .now, park: park, moment: .darkNow(until: .now.addingTimeInterval(9000), moonrise: true), nightVision: true)
     NextDarkEntry(date: .now, park: park, moment: .moonlit(from: .now.addingTimeInterval(3600), to: .now.addingTimeInterval(30000)), nightVision: true)
     NextDarkEntry(date: .now, park: park, moment: .none, nightVision: false)
-    // No park chosen yet: "Choose a park" under the empty face's mark, never a claim about the sky.
+    // No park chosen yet: "Choose a place" under the empty face's mark, never a claim about the sky.
     NextDarkEntry(date: .now, park: nil, moment: .none, nightVision: false)
 }
 #Preview("Moon • inline, southern sky", as: .accessoryInline) { MoonComplication() } timeline: {

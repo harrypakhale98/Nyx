@@ -93,12 +93,12 @@ nonisolated struct SkyMoment: Sendable {
         core = Body(id: "core", kind: .core, name: String(localized: "Milky Way core"), altitude: corePlace.altitude, azimuth: corePlace.azimuth)
         rotation = SkyDome.rotation(at: date, park: park)
     }
-    /// The sky's state in words: "True darkness", "Nautical twilight".
+    /// The sky's state in words, as the iPhone's sky says it: "True darkness", "Late twilight".
     var twilight: String {
         if sunAltitude > -0.833 { return String(localized: "The Sun is up") }
-        if sunAltitude > -6 { return String(localized: "Civil twilight") }
-        if sunAltitude > -12 { return String(localized: "Nautical twilight") }
-        if sunAltitude > -18 { return String(localized: "Astronomical twilight") }
+        if sunAltitude > -6 { return String(localized: "Twilight") }
+        if sunAltitude > -12 { return String(localized: "Late twilight") }
+        if sunAltitude > -18 { return String(localized: "Nearly dark") }
         return String(localized: "True darkness")
     }
     /// Planets worth showing: above the horizon in a sky dark enough to see them.

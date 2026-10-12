@@ -185,7 +185,7 @@ nonisolated struct HomeSky: Sendable {
         if let skyClass, let skyLine { parts.append(String(localized: "Sky brightness: \(skyClass).")+" "+skyLine) }
         if let eclipse { parts.append(eclipse.spoken) }
         if let shower { parts.append(shower.spoken) }
-        parts.append(planets.isEmpty ? String(localized: "No bright planets up in the dark hours.") : planets.map(\.spoken).joined(separator: " "))
+        parts.append(planets.isEmpty ? String(localized: "No bright planets up in true darkness.") : planets.map(\.spoken).joined(separator: " "))
         return parts.joined(separator: " ")
     }
     /// The longest moon-down stretch inside true darkness, sampled every five minutes.

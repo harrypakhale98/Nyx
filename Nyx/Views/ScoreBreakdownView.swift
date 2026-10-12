@@ -76,13 +76,13 @@ struct ScoreBreakdownView: View {
     private var shown:(moon:Int,cloud:Int?,glow:Int,length:Int) { night.score.displayedParts }
     private var cloudFact:String {
         switch night.basis {
-        case .forecast: return night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover through true darkness.") } ?? String(localized:"No forecast covers this night yet.")
+        case .forecast: return night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover through true darkness.") } ?? String(localized:"No cloud forecast yet.")
         case .blended(_, let lead):
             guard let forecast=night.cloudCover, let counted=night.score.cloudUsed else { return String(localized:"An early look at the clouds.") }
             return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(max(1,Int(lead.rounded()))) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%.")
         case .usual:
-            guard let usual=night.usualCloud else { return String(localized:"No forecast covers this night yet.") }
-            return String(localized:"No forecast covers this night yet. Usual cloud here this month: \(Int(usual.rounded()))%.")
+            guard let usual=night.usualCloud else { return String(localized:"No cloud forecast yet.") }
+            return String(localized:"No cloud forecast yet. Usual clouds here this month: \(Int(usual.rounded()))%.")
         }
     }
     private var moonFact:String {

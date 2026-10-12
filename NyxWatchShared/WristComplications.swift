@@ -218,20 +218,20 @@ struct NextDarkComplicationView: View {
     }
     @ViewBuilder private var headline: some View {
         if entry.park == nil {
-            Text("Choose a park")
+            Text("Choose a place")
         } else {
             switch entry.moment {
             case .darkNow: Text("Truly dark now")
             case .begins(let date, true): Text("Moon down \(reference(date))")
-            case .begins(let date, false): Text("True darkness \(reference(date))")
-            case .moonlit(let from, _) where from > entry.date: Text("True darkness \(reference(from))")
-            case .moonlit: Text("Moonlit darkness now")
+            case .begins(let date, false): Text("Dark \(reference(date))")
+            case .moonlit(let from, _) where from > entry.date: Text("Dark \(reference(from))")
+            case .moonlit: Text("Dark, Moon up")
             case .none: Text("No true darkness")
             }
         }
     }
     private var detail: String {
-        guard let park = entry.park else { return String(localized: "Choose a park in Nyx on Apple Watch.") }
+        guard let park = entry.park else { return String(localized: "Choose a place in Nyx on Apple Watch.") }
         switch entry.moment {
         case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.time(until))")
         case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.time(until))")
@@ -243,7 +243,7 @@ struct NextDarkComplicationView: View {
     }
     /// Clock times, never a countdown: inline text cannot update itself.
     private var inline: String {
-        guard let park = entry.park else { return String(localized: "Nyx · choose a park") }
+        guard let park = entry.park else { return String(localized: "Nyx · choose a place") }
         switch entry.moment {
         case .darkNow(let until, _): return String(localized: "Dark until \(park.time(until))")
         case .begins(let date, true): return String(localized: "Moon down at \(park.time(date))")
@@ -253,7 +253,7 @@ struct NextDarkComplicationView: View {
         }
     }
     private var summary: String {
-        guard let park = entry.park else { return String(localized: "Nyx. Choose a park in Nyx on Apple Watch.") }
+        guard let park = entry.park else { return String(localized: "Nyx. Choose a place in Nyx on Apple Watch.") }
         switch entry.moment {
         case .darkNow(let until, _): return String(localized: "\(park.wristName). Truly dark now, until \(park.time(until)).")
         case .begins(let date, true): return String(localized: "\(park.wristName). The Moon sets at \(park.time(date)); truly dark from then.")

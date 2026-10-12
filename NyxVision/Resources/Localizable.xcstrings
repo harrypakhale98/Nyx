@@ -71,76 +71,6 @@
         }
       }
     },
-    "%@ nights here are nearly always clear, by an estimate.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im %@ sind die Nächte hier fast immer klar, nach einer Schätzung."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ nights here are nearly always clear, by an estimate."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las noches de %@ aquí casi siempre están despejadas, según una estimación."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En %@, les nuits sont presque toujours dégagées ici, selon une estimation."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ここでは%@の夜はほぼいつも晴れます（推定）。"
-          }
-        }
-      }
-    },
-    "%@ nights here are nearly always clear.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im %@ sind die Nächte hier fast immer klar."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ nights here are nearly always clear."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las noches de %@ aquí casi siempre están despejadas."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En %@, les nuits sont presque toujours dégagées ici."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ここでは%@の夜はほぼいつも晴れます。"
-          }
-        }
-      }
-    },
     "%@ nights here are rarely clear, by an estimate.": {
       "extractionState": "manual",
       "localizations": {
@@ -806,37 +736,37 @@
         }
       }
     },
-    "%lld%% average cover across the dark window.": {
+    "%lld%% average cover through true darkness.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung während der Dunkelphase."
+            "value": "%lld %% mittlere Bewölkung während der echten Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld%% average cover across the dark window."
+            "value": "%lld%% average cover through true darkness."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld%% de nubosidad promedio durante el periodo de oscuridad."
+            "value": "%lld%% de nubosidad media durante la oscuridad total."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% de couverture moyenne sur la période d’obscurité."
+            "value": "%lld %% de couverture moyenne pendant l’obscurité totale."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗い時間帯の平均雲量は%lld%%。"
+            "value": "完全に暗い時間の平均雲量は%lld%%。"
           }
         }
       }
@@ -1506,41 +1436,6 @@
         }
       }
     },
-    "Astronomical twilight": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Astronomische Dämmerung"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Astronomical twilight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crepúsculo astronómico"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crépuscule astronomique"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "天文薄明"
-          }
-        }
-      }
-    },
     "At most %lld%% of the Moon's width is in shadow.": {
       "extractionState": "manual",
       "localizations": {
@@ -1747,41 +1642,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ボートルクラス%lld（9段階中、推定）。"
-          }
-        }
-      }
-    },
-    "Civil twilight": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bürgerliche Dämmerung"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Civil twilight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crepúsculo civil"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crépuscule civil"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "市民薄明"
           }
         }
       }
@@ -2521,37 +2381,37 @@
         }
       }
     },
-    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015–2024. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024. Lizenziert unter CC BY 4.0. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015–2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015–2024. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+            "value": "Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): ERA5, 2015 a 2024. Con licencia CC BY 4.0. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015–2024. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, 2015 à 2024. Sous licence CC BY 4.0. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015–2024。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
+            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含んでいます：ERA5、2015〜2024年。CC BY 4.0でライセンスされています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
           }
         }
       }
@@ -3917,6 +3777,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "下弦の月"
+          }
+        }
+      }
+    },
+    "Late twilight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Späte Dämmerung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Late twilight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Final del crepúsculo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin du crépuscule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "薄明の終わり"
           }
         }
       }
@@ -5461,37 +5356,107 @@
         }
       }
     },
-    "Nautical twilight": {
+    "Nearly dark": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nautische Dämmerung"
+            "value": "Fast dunkel"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nautical twilight"
+            "value": "Nearly dark"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crepúsculo náutico"
+            "value": "Casi oscuro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crépuscule nautique"
+            "value": "Presque noir"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "航海薄明"
+            "value": "もうすぐ暗くなる"
+          }
+        }
+      }
+    },
+    "Nearly every %@ night here is mostly clear, by an estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im %@ ist hier fast jede Nacht überwiegend klar, nach einer Schätzung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearly every %@ night here is mostly clear, by an estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casi todas las noches de %@ aquí están mayormente despejadas, según una estimación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %@, presque toutes les nuits sont ici plutôt dégagées, selon une estimation."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ここでは%@のほとんどの夜は、おおむね晴れます（推定）。"
+          }
+        }
+      }
+    },
+    "Nearly every %@ night here is mostly clear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im %@ ist hier fast jede Nacht überwiegend klar."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearly every %@ night here is mostly clear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casi todas las noches de %@ aquí están mayormente despejadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %@, presque toutes les nuits sont ici plutôt dégagées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ここでは%@のほとんどの夜は、おおむね晴れます。"
           }
         }
       }
@@ -6406,7 +6371,7 @@
         }
       }
     },
-    "Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad.": {
+    "Nyx on Apple Vision Pro covers the U.S. national parks. Saved spots and places abroad stay on your iPhone and iPad.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -6418,7 +6383,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx on Apple Vision Pro covers the US national parks. Saved spots and places abroad stay on your iPhone and iPad."
+            "value": "Nyx on Apple Vision Pro covers the U.S. national parks. Saved spots and places abroad stay on your iPhone and iPad."
           }
         },
         "es": {
@@ -9937,6 +9902,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "ウインドウと空を、暗さに慣れた目を保つ暗い赤にします"
+          }
+        }
+      }
+    },
+    "Twilight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dämmerung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twilight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crepúsculo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crépuscule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "薄明"
           }
         }
       }

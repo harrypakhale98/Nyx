@@ -118,7 +118,7 @@ import Testing
         #expect(plan.title == "Geminids at Joshua Tree tonight")
         #expect(plan.userInfo["night"] == "2026-12-13" && plan.userInfo["whatsUp"] == "1")
         // The rate is the same honest range What's up shows ("60–130 an hour"), never a single ceiling.
-        #expect(plan.body.contains("–") && plan.body.contains(" an hour") && plan.body.contains("Moon down") && plan.body.hasSuffix("check clouds and park alerts."))
+        #expect(plan.body.contains("–") && plan.body.contains(" an hour") && plan.body.contains("Moon down") && plan.body.hasSuffix("Check clouds and closures before you go."))
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = plan.timeZone
         #expect(calendar.component(.hour, from: plan.fireDate) == 16)
         // Off, overcast, or already issued: nothing.

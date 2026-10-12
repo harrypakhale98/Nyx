@@ -38,7 +38,7 @@ struct CloudClimateTests {
     @Test func sentenceSaysHowOftenNightsAreClear() {
         #expect(CloudClimate.Typical(month: 11, cloud: 12, clear: 78).sentence(monthName: "November") == "About 8 in 10 November nights here are mostly clear.")
         #expect(CloudClimate.Typical(month: 1, cloud: 90, clear: 3).sentence(monthName: "January") == "January nights here are rarely clear.")
-        #expect(CloudClimate.Typical(month: 9, cloud: 2, clear: 97).sentence(monthName: "September") == "September nights here are nearly always clear.")
+        #expect(CloudClimate.Typical(month: 9, cloud: 2, clear: 97).sentence(monthName: "September") == "Nearly every September night here is mostly clear.")
     }
     /// Beyond the forecast a night is scored with its park's usual clouds: never as if clear, and
     /// a cloudy-climate park never ties a desert. (Since score v2 the usual clouds are in the score

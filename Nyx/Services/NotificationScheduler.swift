@@ -165,9 +165,12 @@ nonisolated struct NotificationScheduler {
         return String(localized:"\(night.score.band.label) night at \(night.park.shortName), \(night.id.formatted(weekday))")
     }
     /// "94 out of 100. Moon down all night. Check park alerts before you go." Never "94/100",
-    /// which VoiceOver reads as "slash".
+    /// which VoiceOver reads as "slash". A place the Park Service does not run has no park alerts to
+    /// check: it says "closures and access" instead.
     static func body(_ night:Night,models:ModelAgreement?=nil)->String {
-        String(localized:"\(night.score.value) out of 100. \(reason(night,models:models)). Check park alerts before you go.")
+        let why=reason(night,models:models)
+        guard night.park.nps != nil else { return String(localized:"\(night.score.value) out of 100. \(why). Check closures and access before you go.") }
+        return String(localized:"\(night.score.value) out of 100. \(why). Check park alerts before you go.")
     }
     /// One thing that is true of this night and makes it dark, the most telling first; with it,
     /// when true, that all three forecast models are clear ("Moon down all night; all three
@@ -212,7 +215,7 @@ nonisolated struct NotificationScheduler {
             let identifier=Self.showerIdentifier(park:park,night:night.id)
             guard fire<darkStart, !delivered.contains(identifier) else { return nil }
             return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.localizedName) at \(park.shortName) tonight"),
-                body:String(localized:"\(WhatsUp.rateText(shower.hourlyRate).sentenceStart) \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide; check clouds and park alerts."),
+                body:String(localized:"\(WhatsUp.rateText(shower.hourlyRate).sentenceStart) \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide. Check clouds and closures before you go."),
                 fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id),whatsUp:true)
         }
     }

@@ -64,7 +64,7 @@ extension VisionModel {
         let summit = night.upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : ""
         switch night.basis {
         case .forecast:
-            let cover = night.cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover across the dark window.") } ?? ""
+            let cover = night.cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover through true darkness.") } ?? ""
             let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
             return [cover, summit, issued].filter { !$0.isEmpty }.joined(separator: " ")
         case .blended, .usual:
