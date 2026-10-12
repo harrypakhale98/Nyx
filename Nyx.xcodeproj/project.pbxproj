@@ -120,6 +120,7 @@
 		CA67A9F355C4494729B73192 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = F1549E33041F22459667C9A1 /* cloud-climate.json */; };
 		CA7BB941605B968CA2847325 /* WatchDialFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE2A68A5F28061C8A1A146B /* WatchDialFace.swift */; };
 		CBB9FF180E3F92412AA8C512 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
+		CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804E5BD1D8D8159594420977 /* ConstellationTrace.swift */; };
 		CFF0FD048B75ED80BA523F43 /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
 		D3E217DBC6AF8C81B0341403 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */; };
 		D8249FF7E498630CFFEA5576 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
@@ -268,6 +269,7 @@
 		72998C6FAFE92D4C7CE0351B /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = parks.json; path = Nyx/Resources/parks.json; sourceTree = "<group>"; };
 		7A0D0467BE8E13E5C6686DB1 /* NyxVisionWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxVisionWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F16F39BA6C42207889C3DFE /* SkyGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyGlyph.swift; path = Nyx/DesignSystem/SkyGlyph.swift; sourceTree = "<group>"; };
+		804E5BD1D8D8159594420977 /* ConstellationTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConstellationTrace.swift; path = Nyx/DesignSystem/ConstellationTrace.swift; sourceTree = "<group>"; };
 		828535E0682831644E0634EA /* constellations.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = constellations.json; path = Nyx/Resources/constellations.json; sourceTree = "<group>"; };
 		8417DA2D50522530C270A095 /* RealSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RealSky.swift; path = Nyx/DesignSystem/RealSky.swift; sourceTree = "<group>"; };
 		98F2E16F6D3215FAA0CDD1BF /* Campground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Campground.swift; path = Nyx/Models/Campground.swift; sourceTree = "<group>"; };
@@ -471,6 +473,7 @@
 				6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */,
 				48D166F2461DDF8E880670FC /* CloudForecastClient.swift */,
 				828535E0682831644E0634EA /* constellations.json */,
+				804E5BD1D8D8159594420977 /* ConstellationTrace.swift */,
 				9D319BAF3907884E43F8316F /* DataServices.swift */,
 				F709E97C95C2822EF09782FE /* DebugForecasts.swift */,
 				CD3FEF92A1A54E0F557369DF /* FieldActivity.swift */,
@@ -872,6 +875,7 @@
 				0C1211C364C7B8A2D326E7B7 /* AstronomyEngine.swift in Sources */,
 				AA62C904D4214D3E8E186221 /* CloudClimate.swift in Sources */,
 				7D88F9519780E4CDFD39EAF8 /* CloudForecastClient.swift in Sources */,
+				CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */,
 				9C670B8420ADE24EEEB7D5EE /* Forecast.swift in Sources */,
 				3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */,
 				465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */,

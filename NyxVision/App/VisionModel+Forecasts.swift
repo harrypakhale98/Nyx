@@ -23,7 +23,12 @@ extension VisionModel {
         // Asked after the forecast, so layers fetched with it are never the older of the two
         // (the score sets aside layers more than twelve hours older than the forecast).
         let layers = await summits.layers(for: parks, network: asking)
-        // Only ever newer: a failed or switched-off request never takes a forecast away.
+        merge(fresh, layers: layers)
+    }
+    /// Takes in forecasts and summit layers newer than those held; true when anything changed
+    /// (and so the night, the list and the nights ahead are being rescored). Only ever newer: a
+    /// failed or switched-off request never takes a forecast away.
+    @discardableResult func merge(_ fresh: [String: Forecast], layers: [String: HourlySeries]) -> Bool {
         var merged = forecasts, changed = false
         for park in parks {
             guard let forecast = fresh[park.id], forecast.updated > (merged[park.id]?.updated ?? .distantPast) else { continue }
@@ -35,6 +40,7 @@ extension VisionModel {
             mergedLayers[id] = series; layersChanged = true
         }
         if layersChanged { summitLayers = mergedLayers }
+        return changed || layersChanged
     }
     /// Asks while the window is open: at once, then every half hour (each park only once its
     /// forecast is six hours old, so in practice every six hours).

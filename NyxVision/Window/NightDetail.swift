@@ -36,7 +36,10 @@ struct NightDetail: View {
         } else if model.parks.isEmpty {
             ParkDataUnavailable()
         } else {
-            ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            // The iPhone's constellation loader: a figure traced star by star, its words read to
+            // VoiceOver as progress, standing still beside the system spinner under Reduce Motion.
+            ConstellationTrace(ink: palette.ink, accent: palette.accent, reduceMotion: reduceMotion)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -266,6 +269,15 @@ struct ParkDataUnavailable: View {
     model.forecasts = VisionModel.fixture(parks: model.parks, cover: 40, issued: .now)
     model.nightOffset = 6
     return NavigationStack { NightDetail() }.environment(model)
+}
+
+#Preview("Loading, and loading under Reduce Motion") {
+    let palette = VisionPalette()
+    return HStack {
+        ConstellationTrace(ink: palette.ink, accent: palette.accent, reduceMotion: false)
+        ConstellationTrace(ink: palette.ink, accent: palette.accent, reduceMotion: true)
+    }
+    .glassBackgroundEffect()
 }
 
 #Preview("Park data unavailable") {
