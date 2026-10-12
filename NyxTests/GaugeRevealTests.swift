@@ -96,6 +96,72 @@ import Testing
         #expect(face == .empty)
     }
 
+    // MARK: A numeral never stands without its word
+
+    /// The iPad glitch: a restored park's dial at "54" with no band word. The count for 55 had reached
+    /// its last frames (54) and stopped there with nothing landing it: its timer late behind a busy
+    /// launch, its frames paused. Under the old rules nothing ever settled that face.
+    @Test func aCountStrandedOnItsLastFramesRestsOnTheWholeAnswer() {
+        let stranded=Face(arc:55,shown:54,settled:false)
+        #expect(!stranded.settled && stranded.shown != 0)
+        // No count running any more (frames and timer gone), the dial in view.
+        #expect(CelestialGauge.resting(stranded,score:55,waiting:false,elapsed:nil) == .answer(55))
+        // Still counting by the clock, but past its end and the grace: the next frame or appearance lands it.
+        let late=CelestialGauge.duration(score:55)+CelestialGauge.landingGrace
+        #expect(CelestialGauge.resting(stranded,score:55,waiting:false,elapsed:late) == .answer(55))
+        #expect(CelestialGauge.resting(stranded,score:55,waiting:false,elapsed:late+30) == .answer(55))
+    }
+    @Test func aCountUnderWayKeepsItsFaceSoTheNormalRevealIsUnchanged() {
+        for score in [1,23,54,55,70,90,97,100] {
+            let end=CelestialGauge.duration(score:score)
+            for t in stride(from:0.0,to:end+CelestialGauge.landingGrace,by:0.05) {
+                let face=Face(arc:Double(score)*CelestialGauge.progress(t),shown:CelestialGauge.frameValue(score:score,at:t),settled:false)
+                #expect(CelestialGauge.resting(face,score:score,waiting:false,elapsed:t) == face)
+            }
+        }
+    }
+    @Test func emptyWaitingAndSettledDialsStandAsTheyAre() {
+        for score in [0,54,97] {
+            #expect(CelestialGauge.resting(.empty,score:score,waiting:true,elapsed:nil) == .empty)
+            #expect(CelestialGauge.resting(.answer(score),score:score,waiting:false,elapsed:nil) == .answer(score))
+            // A sweep mid-flight is settled (the word reads the travelling number): never touched.
+            #expect(CelestialGauge.resting(Face(arc:40,shown:97,settled:true),score:97,waiting:false,elapsed:nil) == Face(arc:40,shown:97,settled:true))
+            // Every plan's own face is already at rest (the odometer's empty face while it waits to count).
+            for plan:Plan in [.instant,.sweep,.settle] {
+                let face=CelestialGauge.face(after:plan,score:score)
+                #expect(CelestialGauge.resting(face,score:score,waiting:false,elapsed:nil) == face)
+            }
+            #expect(CelestialGauge.resting(CelestialGauge.face(after:.hold,score:score),score:score,waiting:true,elapsed:nil) == .empty)
+            #expect(CelestialGauge.resting(CelestialGauge.face(after:.odometer,score:score),score:score,waiting:false,elapsed:0) == .empty)
+        }
+    }
+    /// Every path the reveal can take, followed by whatever cleanup comes after it, ends on a face
+    /// that is empty and waiting, settled, or a count still under way.
+    @Test func noPathLeavesABareNumeralAtRest() {
+        let midCount=Face(arc:56,shown:54,settled:false)
+        for score in [54,55,81,97] {
+            for plan:Plan in [.instant,.sweep,.settle,.hold,.odometer] {
+                for generation in [4,5] {
+                    // The old count's cleanup after the new reveal, or before it.
+                    let after=CelestialGauge.cancelled(CelestialGauge.face(after:plan,score:score),score:81,generation:generation,mine:4)
+                    let before=CelestialGauge.face(after:plan,score:score)
+                    for face in [after,before] {
+                        let waiting = face == .empty
+                        let rest=CelestialGauge.resting(face,score:score,waiting:waiting,elapsed:nil)
+                        #expect(rest.settled || (waiting && rest == .empty))
+                    }
+                }
+            }
+            // A count cut short with no reveal after it.
+            #expect(CelestialGauge.cancelled(midCount,score:score,generation:4,mine:4).settled)
+        }
+    }
+    @Test func theGraceIsShortBesideTheCount() {
+        // The timer lands a normal count at its end; the frames take over only a quarter-second later.
+        #expect(CelestialGauge.landingGrace<=0.25)
+        #expect(CelestialGauge.duration(score:100)+CelestialGauge.landingGrace<2)
+    }
+
     // MARK: Session memory
 
     @Test func onlyALandedCountUpMarksItsKey() {

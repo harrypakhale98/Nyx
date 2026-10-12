@@ -58,6 +58,8 @@ final class AccessibilityAuditTests:XCTestCase {
             // no longer shrinks fails here rather than being audited at full size.
             XCTAssertLessThan(after.isNull ? .infinity : after.width,before.width,"The tab bar did not minimise on scrolling Tonight (\(state))")
             let shot=XCTAttachment(screenshot:app.screenshot()); shot.name="minimised-\(state)"; shot.lifetime = .keepAlways; add(shot)
+            // The scroll's deceleration and the bar's own animation done before the audit walks the screen.
+            Self.settle(app)
             failures+=try auditOpen(app,screen:"tonight",state:state,pass:"minimised")
             app.terminate()
         }
@@ -80,6 +82,7 @@ final class AccessibilityAuditTests:XCTestCase {
             app.launch()
             _=app.wait(for:.runningForeground,timeout:30)
             sleep(2)
+            Self.settle(app)
             failures+=try auditOpen(app,screen:screen,state:state,pass:pass)
             app.terminate()
         }
@@ -104,15 +107,46 @@ final class AccessibilityAuditTests:XCTestCase {
         }
         return last
     }
+    /// Waits until the screen holds still: two captures half a second apart are the same, so no
+    /// count-up, loader, scroll or bar animation is running when the audit walks the screen (an audit of
+    /// a moving screen is slower and can time out on a loaded simulator). Gives up after `timeout` and
+    /// audits anyway: a screen that never rests (a turning sky) is still audited, as before.
+    private static func settle(_ app:XCUIApplication,timeout:TimeInterval=6) {
+        let deadline=Date.now.addingTimeInterval(timeout)
+        var last=app.screenshot().pngRepresentation
+        while Date.now<deadline {
+            Thread.sleep(forTimeInterval:0.5)
+            let now=app.screenshot().pngRepresentation
+            if now == last { return }
+            last=now
+        }
+        print("AUDITSETTLE|still moving after \(Int(timeout)) s")
+    }
+    /// The audit types the full audit runs on iOS, one by one: together exactly `.all` there.
+    private static let auditParts:[(name:String,type:XCUIAccessibilityAuditType)]=[
+        ("contrast",.contrast),("elementDetection",.elementDetection),("hitRegion",.hitRegion),
+        ("sufficientElementDescription",.sufficientElementDescription),("dynamicType",.dynamicType),
+        ("textClipped",.textClipped),("trait",.trait),
+    ]
+    /// "Audit failed to complete in time": the audit itself gave up, which says nothing about the screen.
+    private static func timedOut(_ error:Error)->Bool {
+        let error=error as NSError
+        return error.domain=="com.apple.xcode.xctest.accessibilityAudit" && error.code == -56
+    }
     /// Audits the screen the app shows now; returns the findings that are not known false positives.
     /// When every finding is about an element that no longer exists by the time it is reported (no
     /// element, no frame), the screen is audited once more after it settles and that pass decides: on
     /// iOS 26.5 the minimised pass sometimes catches the system tab bar re-expanding under the audit's
     /// own probing, and the views in flight report "no description" (2026-10-09; the tree at that moment
     /// held only labelled app elements). A finding that is still there the second time fails.
+    ///
+    /// A full audit that times out (seen on a loaded simulator, never alone) is not retried whole: the
+    /// screen is left to settle and audited again one audit type at a time, every type the full audit
+    /// covers, each a smaller walk that fits the audit's time limit. A part that times out gets one more
+    /// try after the screen settles again; a second timeout fails. Findings are never retried away.
     private func auditOpen(_ app:XCUIApplication,screen:String,state:String,pass:String,retry:Bool=true) throws->[String] {
         var failures:[String]=[]
-        var unresolved=0
+        var unresolved:Set<String>=[]
         let window=app.frame
         // Field mode's milestones fade into the dark above the eye's clock and footer (a scroll-edge fade, by
         // design): the lowest 30% of the window, where cards scroll out under the clock.
@@ -126,7 +160,7 @@ final class AccessibilityAuditTests:XCTestCase {
         let footField=footInput.map { CGRect(x:0,y:$0.frame.minY-28,width:window.width,height:window.height-$0.frame.minY+28) } ?? .null
         // The bars each pass measured against, so a finding near an edge can be read in context.
         print("AUDITBARS|\(pass)|\(state)|\(screen)|tabBar \(tabBar)|navigationBar \(navigationBar)|window \(window)")
-        do { try app.performAccessibilityAudit { issue in
+        let handler:(XCUIAccessibilityAuditIssue) throws->Bool = { issue in
             let frame=issue.element?.frame ?? .null
             let label=issue.element?.label ?? ""
             let line="AUDIT|\(pass)|\(state)|\(screen)|\(issue.auditType.rawValue)|\(issue.compactDescription)|'\(label)'|\(frame)"
@@ -134,16 +168,26 @@ final class AccessibilityAuditTests:XCTestCase {
             if Self.isKnownFalsePositive(issue,screen:screen,pass:pass,frame:frame,window:window,tabBar:tabBar,navigationBar:navigationBar,footField:footField) { return true }
             if !fieldFade.isNull, frame.intersects(fieldFade), issue.auditType == .contrast || issue.auditType == .textClipped { return true }
             failures.append(line)
-            if issue.element==nil { unresolved+=1 }
+            if issue.element==nil { unresolved.insert(line) }
             return true // collect everything; fail once at the end with the full list
-        } } catch let error as NSError where retry && error.domain=="com.apple.xcode.xctest.accessibilityAudit" && error.code == -56 {
-            // "Audit failed to complete in time": the audit itself gave up (seen late in long runs on a busy Mac),
-            // which says nothing about the screen. Once more after a pause; a second timeout fails.
-            print("AUDITTIMEOUT|\(pass)|\(state)|\(screen)")
-            sleep(3)
-            return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false)
         }
-        if retry, !failures.isEmpty, unresolved==failures.count {
+        do { try app.performAccessibilityAudit(for:.all,handler) } catch where Self.timedOut(error) {
+            print("AUDITTIMEOUT|\(pass)|\(state)|\(screen)|all")
+            // What the timed-out walk reported is found again by the parts below.
+            failures=[]; unresolved=[]
+            Self.settle(app)
+            for part in Self.auditParts {
+                do { try app.performAccessibilityAudit(for:part.type,handler) } catch where Self.timedOut(error) {
+                    print("AUDITTIMEOUT|\(pass)|\(state)|\(screen)|\(part.name)")
+                    Self.settle(app)
+                    try app.performAccessibilityAudit(for:part.type,handler)
+                }
+            }
+        }
+        // A part tried twice may report the same finding twice: once each.
+        var listed:Set<String>=[]
+        failures=failures.filter { listed.insert($0).inserted }
+        if retry, !failures.isEmpty, failures.allSatisfy(unresolved.contains) {
             print("AUDITRETRY|\(pass)|\(state)|\(screen)|\(failures.count) findings without an element")
             sleep(2)
             return try auditOpen(app,screen:screen,state:state,pass:pass,retry:false)

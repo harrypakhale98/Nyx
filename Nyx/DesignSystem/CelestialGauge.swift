@@ -65,6 +65,8 @@ struct CelestialGauge: View {
     @State private var landed=0
     /// When the count-up began, while it runs: the display's frames carry it from here (`tick`).
     @State private var countStart: Date?
+    /// The key of the count-up under way, for its landing (`land`), whichever of the timer and the frames brings it.
+    @State private var countKey: String?
     /// When each milestone was crossed, for the orbiting stars' brief quickenings (each adds its
     /// turn to the orbit for good, so a later one never winds an earlier one back).
     @State private var surges: [Date]=[]
@@ -156,6 +158,9 @@ struct CelestialGauge: View {
         .accessibilityInputLabels([Text("Score"),Text("Darkness score")])
         .task(id:RevealTrigger(score:score,held:held)) { await reveal() }
         .onDisappear { if !revealedOnce { countedScore=nil } }
+        // A dial coming back into view, or Nyx coming back to the front, never finds a bare numeral.
+        .onAppear { settleIfStranded() }
+        .onChange(of:scenePhase) { _,phase in if phase == .active { settleIfStranded() } }
         // Another park or night with the score already on the dial: nothing moves, but it has settled.
         .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
         // The count's frames: one value per display frame, read from the time since it began, and
@@ -244,6 +249,19 @@ struct CelestialGauge: View {
         var settled: Bool
         static let empty=Face(arc:0,shown:0,settled:false)
         static func answer(_ score:Int)->Face { Face(arc:Double(score),shown:score,settled:true) }
+    }
+    /// How long past its end a count may wait for its own timer before a frame or an appearance lands it
+    /// (`resting`): the timer normally lands it on time, so this never changes a normal count.
+    nonisolated static let landingGrace=0.25
+    /// The dial as it may stand, whatever path led here: a numeral without its word only while a count-up
+    /// is carrying it (`elapsed`, seconds since it began, within its duration and `landingGrace`). An empty,
+    /// waiting dial and a settled one stand as they are; any other face that shows a numeral is the whole
+    /// answer. It catches a count whose landing never came on time (its timer late behind a busy launch,
+    /// as a restored iPad window can be) and a count whose frames stopped with no reveal after it.
+    nonisolated static func resting(_ face:Face,score:Int,waiting:Bool,elapsed:Double?)->Face {
+        if waiting || face.settled { return face }
+        if let elapsed, elapsed<duration(score:score)+landingGrace { return face }
+        return .answer(score)
     }
     /// Where each plan leaves the dial: the whole answer, or empty while held. The odometer starts empty.
     nonisolated static func face(after plan:RevealPlan,score:Int)->Face {
@@ -348,12 +366,20 @@ struct CelestialGauge: View {
             }
         }
         // The display's frames carry the count from here (`tick`); this task only waits for its end.
-        countStart=began
+        countStart=began; countKey=key
         try? await Task.sleep(for:.seconds(Self.duration(score:score)))
         guard !Task.isCancelled else { return }
         finished=true
-        countStart=nil
         LaunchSignposts.end(interval); LaunchSignposts.firstLanding(countStarted:began)
+        land(generation:mine)
+    }
+    /// The count's landing, once: the task's timer brings it at the count's end, or, when that timer is
+    /// late, the first frame or appearance past the end (`settleIfStranded`). Whichever comes second finds
+    /// the count already landed and does nothing.
+    private func land(generation mine:Int) {
+        guard generation==mine, countStart != nil else { return }
+        countStart=nil
+        let key=countKey
         // The final digit, the word, one haptic and the tip's amber glow in one transaction. A landing
         // that itself reaches 70 or 90 is that milestone's pulse (with its quickening), not a second tick.
         let pulse=Self.landingPulse(from:shown,score:score)
@@ -371,12 +397,25 @@ struct CelestialGauge: View {
         ScoreReveals.note(key,plan:.odometer,landed:true)
         onSettled?(key); showRange()
     }
+    /// Holds the dial to `resting`: a count past its end lands now, and a numeral left without its word
+    /// by any other path becomes the whole answer at once. Does nothing to a normal reveal.
+    private func settleIfStranded() {
+        let running=counting ? countStart : nil
+        let elapsed=running.map { Date.now.timeIntervalSince($0) }
+        let rest=Self.resting(face,score:score,waiting:waiting,elapsed:elapsed)
+        guard rest != face else { return }
+        if running != nil { land(generation:generation); return }
+        face=rest; counting=false; revealedOnce=true
+        onSettled?(revealKey); showRange()
+    }
     /// One frame of the count-up: the arc and the numeral where they are `now` seconds in.
     /// A milestone is felt and seen on the frame that reaches it: the medium pulse and the stars
     /// quickening. Only here, so a held, landed or overtaken dial never pulses.
     private func tick(_ now:Date) {
         guard counting, let countStart else { return }
         let t=now.timeIntervalSince(countStart)
+        // Past the count's end with its timer late: this frame lands it.
+        if t>=Self.duration(score:score)+Self.landingGrace { settleIfStranded(); return }
         let value=Self.frameValue(score:score,at:t)
         if !Self.milestones(from:shown,to:value).isEmpty { milestone+=1; surges.append(now) }
         arc=Double(score)*Self.progress(t)
