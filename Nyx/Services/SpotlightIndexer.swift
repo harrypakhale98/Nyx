@@ -56,12 +56,13 @@ import UniformTypeIdentifiers
     /// version of Nyx, language or iOS, or changed park data), not on every launch. Spotlight's own
     /// requests to re-index (`NyxIntents`) always index.
     static func indexIfNeeded(_ parks:[Park],defaults:UserDefaults = .standard) async throws {
-        let current=marker(parks)
+        // Encoding 63 parks and hashing them is work for a background thread, not the launch's main one.
+        let current=await Task.detached(priority:.utility) { marker(parks) }.value
         guard defaults.string(forKey:markerKey) != current else { return }
         try await index(parks)
         defaults.set(current,forKey:markerKey)
     }
-    static func marker(_ parks:[Park])->String {
+    nonisolated static func marker(_ parks:[Park])->String {
         let info=Bundle.main.infoDictionary
         let encoder=JSONEncoder()
         encoder.outputFormatting = .sortedKeys

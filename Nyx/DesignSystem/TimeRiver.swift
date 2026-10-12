@@ -43,6 +43,10 @@ struct TimeRiver: View {
     /// Activating the river (VoiceOver double-tap, Voice Control "Tap River", Switch Control's
     /// select) opens the chosen night's breakdown when the page offers one; otherwise it is spoken.
     var open:((Night)->Void)?=nil
+    /// While a finger scrubs, the night the page's heavier parts (its sky, the sky chapter) keep:
+    /// set to the night the scrub began on, cleared when the finger lifts, so they change once, on
+    /// release, rather than on every detent. Nil where nothing needs holding.
+    var hold:Binding<Date?>?=nil
     /// Whether the current drag is a horizontal scrub; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
     /// Haptic ticks follow a person's choice, never a data refresh.
@@ -57,13 +61,21 @@ struct TimeRiver: View {
     @State private var hovered: Int?
     /// The selected night's position; nil when it is not on the river, which then marks no night
     /// rather than pretending the first one is chosen.
-    private var index:Int? { nights.firstIndex(where:{$0.park.calendar.isDate($0.id,inSameDayAs:selected)}) }
+    private var index:Int? { Self.index(of:selected,in:nights) }
     private var current:Night? { index.map { nights[$0] } }
     /// The three best nights, at least Good, receive the amber glow: by score, which beyond the
     /// forecast already counts the park's usual clouds, never a clear sky.
-    private var peaks:Set<Int> {
-        let ranks=nights.map(\.rankScore)
-        return Set(nights.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
+    private var peaks:Set<Int> { Self.peaks(nights.map(\.rankScore)) }
+    /// The night on the river that `date` falls in: its evening (`Park.evening`, noon of the same
+    /// park-local day) matched against each night's own, so one calendar is made, not one per night.
+    nonisolated static func index(of date:Date,in nights:[Night])->Int? {
+        guard let park=nights.first?.park else { return nil }
+        let evening=park.evening(date)
+        return nights.firstIndex { $0.id==evening }
+    }
+    /// The (at most three) best nights at least Good, by rank; the earlier night on a tie.
+    nonisolated static func peaks(_ ranks:[Int])->Set<Int> {
+        Set(ranks.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0, lensSize=30.0
     /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may
@@ -105,7 +117,12 @@ struct TimeRiver: View {
             if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
         .sensoryFeedback(.selection,trigger:detents)
-        .onChange(of:scrubbing==true) { _,now in if !now && tipPending { tipPending=false; tip.invalidate(reason:.actionPerformed) } }
+        .onChange(of:scrubbing==true) { _,now in
+            guard !now else { return }
+            if tipPending { tipPending=false; tip.invalidate(reason:.actionPerformed) }
+            // Released: the page's sky follows to the night the finger left, cross-fading on the shared spring.
+            release()
+        }
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
         // Feel the Moon: once a scrub rests on a night, its Moon's phase as a short texture.
         .task(id:felt) {
@@ -136,7 +153,7 @@ struct TimeRiver: View {
                     let loupe=lifted ? loupeCenter(point,width:width,headroom:tipHeadroom) : point
                     let moon=lifted ? moonBeside(loupe,point:point,width:width) : CGPoint(x:point.x,y:moonSize/2)
                     let size=lifted ? loupeSize : lensSize
-                    MoonView(geometry:AstronomyEngine().moon(for:current).geometry)
+                    MoonView(geometry:MoonMoments.moon(for:current).geometry)
                         .frame(width:moonSize,height:moonSize)
                         .offset(x:moon.x-moonSize/2,y:moon.y-moonSize/2)
                         .accessibilityHidden(true)
@@ -148,7 +165,7 @@ struct TimeRiver: View {
             .simultaneousGesture(DragGesture(minimumDistance:6).updating($scrubbing) { drag,state,_ in
                 if state==nil { state=abs(drag.translation.width)>abs(drag.translation.height) }
             }.onChanged { drag in
-                if scrubbing ?? (abs(drag.translation.width)>abs(drag.translation.height)) { choose(nearest(drag.location.x,width:width)) }
+                if scrubbing ?? (abs(drag.translation.width)>abs(drag.translation.height)) { choose(nearest(drag.location.x,width:width),scrub:true) }
             })
             .onTapGesture { location in choose(nearest(location.x,width:width)) }
             .onContinuousHover { phase in
@@ -383,10 +400,15 @@ struct TimeRiver: View {
         guard nights.count>1 else { return 0 }
         return Int(((location-inset)/((width-2*inset)/Double(nights.count-1))).rounded())
     }
-    private func choose(_ value:Int) {
+    /// `scrub`: chosen by a finger dragging along the river. The loupe, hairline and Moon then follow
+    /// on the quick tracking spring, and the page's sky holds its night until release (`hold`); a tap,
+    /// a step or VoiceOver moves everything on the shared spring.
+    private func choose(_ value:Int) { choose(value,scrub:false) }
+    private func choose(_ value:Int,scrub:Bool) {
         guard nights.indices.contains(value), value != index else { return }
         let from=index
-        withAnimation(reduceMotion ? nil : NyxMotion.spring) { selected=nights[value].id }
+        if scrub, let hold, hold.wrappedValue == nil { hold.wrappedValue=selected }
+        withAnimation(reduceMotion ? nil : scrub ? NyxMotion.tracking : NyxMotion.spring) { selected=nights[value].id }
         // The detent sharpens with the night's score where Core Haptics can say so. A fast scrub that
         // skips nights feels each one it crossed (at most three, 40 ms apart); a tap, a step or
         // VoiceOver's adjustment is one choice and one detent.
@@ -398,7 +420,16 @@ struct TimeRiver: View {
         if scrubbing==true { tipPending=true } else { tip.invalidate(reason:.actionPerformed) }
     }
 
+    /// The page's sky follows the river again (`hold`), on the shared spring.
+    private func release() {
+        guard let hold, hold.wrappedValue != nil else { return }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { hold.wrappedValue=nil }
+    }
+
     private func draw(in context:inout GraphicsContext,size:CGSize) {
+        // Read once per drawing, not once per night: each is a search of the thirty nights.
+        let index=self.index, peaks=self.peaks
+        let calendar=nights.first?.park.calendar
         let top=moonSize+12, bottom=size.height-22, span=bottom-top
         func point(_ i:Int)->CGPoint { CGPoint(x:x(i,width:size.width),y:bottom-span*Double(nights[i].score.value)/100) }
         let lastForecast=nights.lastIndex { $0.score.hasForecast }
@@ -483,8 +514,9 @@ struct TimeRiver: View {
         // Sparse date labels: the selected night first, then the first night, then the first night
         // of each week. A label that would touch one already placed is left out.
         var placed:[CGRect]=[]
-        for i in [index].compactMap({ $0 })+[0]+nights.indices.filter({ startsWeek($0) }) {
-            let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : "\(nights[i].park.calendar.component(.day,from:nights[i].id))"
+        let weekStarts=calendar.map { calendar in nights.indices.filter { calendar.component(.weekday,from:nights[$0].id)==calendar.firstWeekday } } ?? []
+        for i in [index].compactMap({ $0 })+[0]+weekStarts {
+            let label=i==0 && startsTonight ? String(localized:"Tonight") : i==0 ? nights[i].park.dayLabel(nights[i].id) : "\((calendar ?? nights[i].park.calendar).component(.day,from:nights[i].id))"
             let text=context.resolve(Text(label).font(.caption2.weight(i==index ? .semibold : .regular)).foregroundStyle(i==index ? palette.ink : palette.muted))
             let measured=text.measure(in:size)
             let cx=min(max(x(i,width:size.width),measured.width/2),size.width-measured.width/2)
@@ -493,10 +525,6 @@ struct TimeRiver: View {
             placed.append(frame)
             context.draw(text,at:CGPoint(x:cx,y:size.height-measured.height/2))
         }
-    }
-    private func startsWeek(_ i:Int)->Bool {
-        let park=nights[i].park
-        return park.calendar.component(.weekday,from:nights[i].id)==park.calendar.firstWeekday
     }
 }
 /// The river's VoiceOver extras: its Audio Graph, jumps to the best nights (a rotor needs one

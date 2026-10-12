@@ -14,6 +14,7 @@ struct RealSky: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
     @Environment(\.skyResting) private var resting
+    @Environment(\.scenePhase) private var scenePhase
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// When the system asks for less, the sky holds still: no twinkle, no tilt.
     private var still: Bool { reduceMotion || access.reducedResources }
@@ -62,8 +63,9 @@ struct RealSky: View {
         let showDomes=domes && !sky.domes.isEmpty
         // The stars' colours over this ink, resolved once per sky rather than mixed again each frame.
         let tints=SkyProjection.shared.tints(sky,ink:palette.ink)
-        // Rests in Low Power Mode and while the device is hot, as the sensors do.
-        TimelineView(.animation(minimumInterval:1/30,paused:still || resting || PowerState.shared.lowPower || PowerState.shared.thermalSerious)) { timeline in
+        // At `Decoration.rate`, resting by its one rule (`Decoration.rests`): still, covered, in the
+        // background, in Low Power Mode and while the device is hot, as the sensors do.
+        TimelineView(.animation(minimumInterval:Decoration.interval,paused:Decoration.rests(still:still,covered:resting,offscreen:scenePhase == .background))) { timeline in
             let t=still ? 0 : timeline.date.timeIntervalSinceReferenceDate
             let tilt=still ? (x:0.0,y:0.0) : (x:MotionTilt.shared.x,y:MotionTilt.shared.y)
             ZStack {
@@ -274,7 +276,6 @@ private struct DomeLayer: View, Equatable {
         tintCache[sky.id]=(ink,tints)
         return tints
     }
-    private var catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)] { Self.catalogue }
     /// Read once per process, on whichever thread asks first (the app warms it off the main thread at launch).
     nonisolated static let catalogue:[(ra:Double,dec:Double,mag:Double,bv:Double)]={
         guard let url=Bundle.main.url(forResource:"stars",withExtension:"json"),let data=try? Data(contentsOf:url),
@@ -282,22 +283,45 @@ private struct DomeLayer: View, Equatable {
         return rows.compactMap { $0.count==4 ? (ra:$0[0]*Double.pi/180,dec:$0[1]*Double.pi/180,mag:$0[2],bv:$0[3]) : nil }
     }()
     /// The catalogue's stars brighter than `magnitude` (positions in radians), for field mode's compass.
-    func stars(brighterThan magnitude:Double)->[(ra:Double,dec:Double,mag:Double,bv:Double)] { catalogue.filter { $0.mag<magnitude } }
+    func stars(brighterThan magnitude:Double)->[(ra:Double,dec:Double,mag:Double,bv:Double)] { Self.catalogue.filter { $0.mag<magnitude } }
     /// Map projection units to a screen: the vertical field spans about 125°, the horizontal
     /// about 60° on a phone, close to what you take in standing under the sky.
     nonisolated static func screen(_ p:SIMD2<Double>,size:CGSize)->CGPoint {
         let scale=size.height/2.6
         return CGPoint(x:size.width/2+p.x*scale,y:size.height*0.5-p.y*scale)
     }
+    /// The cache key: park, night and (for a particular moment) the five-minute slot.
+    nonisolated static func key(park:Park,night:Date,at instant:Date?=nil)->String {
+        let slot=instant.map { "-\(Int($0.timeIntervalSince1970/300))" } ?? ""
+        return "\(park.id)-\(Int(park.evening(night).timeIntervalSince1970))"+slot
+    }
     /// `at`: a particular moment of the night (first light shows the sky as it is right now, to the
     /// nearest five minutes); otherwise the middle of true darkness.
     func sky(for park:Park,night:Date,at instant:Date?=nil)->Sky {
         // Looked up before any astronomy: this runs whenever a screen behind the stars redraws.
-        let slot=instant.map { "-\(Int($0.timeIntervalSince1970/300))" } ?? ""
-        let key="\(park.id)-\(Int(park.evening(night).timeIntervalSince1970))"+slot
+        let key=Self.key(park:park,night:night,at:instant)
         if let cached=cache[key] { return cached }
+        let sky=Self.build(park:park,night:night,at:instant,lights:lightSources(park))
+        store(sky)
+        return sky
+    }
+    /// Whether a sky is already kept, so work done ahead skips it.
+    func holds(_ key:String)->Bool { cache[key] != nil }
+    /// Keeps a sky built elsewhere (ahead of time, off the main thread), as `sky(for:night:at:)` would.
+    /// One already kept stays: both were built from the same inputs.
+    func store(_ sky:Sky) {
+        guard cache[sky.id] == nil else { return }
+        cache[sky.id]=sky
+        recent.append(sky.id)
+        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
+    }
+    /// Builds a sky on any thread. `conditions`: the night's astronomy when the caller already has it
+    /// (`PlanModel`'s, from the same engine), so it is not worked out again; `lights`: the park's
+    /// light sources (`lightSources`). Pure: the same inputs give the same sky wherever it is built.
+    nonisolated static func build(park:Park,night:Date,at instant:Date?=nil,conditions:SkyConditions?=nil,lights:[LightSource])->Sky {
+        let key=Self.key(park:park,night:night,at:instant)
         let engine=AstronomyEngine()
-        let sky=engine.conditions(for:park,on:night)
+        let sky=conditions ?? engine.conditions(for:park,on:night)
         // The middle of true darkness; otherwise the night's darkest moment, when the Sun is lowest
         // (in Alaska's summer about two hours after local midnight).
         let moment:Date
@@ -321,8 +345,11 @@ private struct DomeLayer: View, Equatable {
             let k=2/(1+sin(centreAltitude)*sin(alt)+cos(centreAltitude)*cos(alt)*cos(dAz))
             return SIMD2(k*cos(alt)*sin(dAz), k*(cos(centreAltitude)*sin(alt)-sin(centreAltitude)*cos(alt)*cos(dAz)))
         }
+        // Sidereal time once for the moment, not once per star (identical results).
+        let sidereal=engine.localSidereal(date:moment,park:park)
+        func horizontal(_ ra:Double,_ dec:Double)->(altitude:Double,azimuth:Double) { engine.horizontal(localSidereal:sidereal,latitude:park.latitude,ra:ra,dec:dec) }
         func project(_ ra:Double,_ dec:Double)->SIMD2<Double>? {
-            let h=engine.horizontal(date:moment,park:park,ra:ra,dec:dec)
+            let h=horizontal(ra,dec)
             guard h.altitude > -2 else { return nil }
             return project(altitude:h.altitude,azimuth:h.azimuth)
         }
@@ -355,7 +382,7 @@ private struct DomeLayer: View, Equatable {
             let almanac=SkyAlmanac()
             for planet in SkyAlmanac.Planet.allCases {
                 let position=almanac.position(of:planet,at:moment)
-                guard engine.horizontal(date:moment,park:park,ra:position.ra,dec:position.dec).altitude>2, let p=project(position.ra,position.dec) else { continue }
+                guard horizontal(position.ra,position.dec).altitude>2, let p=project(position.ra,position.dec) else { continue }
                 planets.append(Mark(position:p,name:planet.name,magnitude:position.magnitude))
             }
             // The radiant of a shower worth looking for that night (fixed J2000 position; its drift is under a degree a day).
@@ -368,7 +395,7 @@ private struct DomeLayer: View, Equatable {
         // its width grows with its share of the light. Too faint to see (share × glow tiny): left out.
         var domes:[Dome]=[]
         if dark {
-            for dome in lightSources(park) {
+            for dome in lights {
                 let amount=dome.share*dome.glow
                 guard amount>=0.01 else { continue }
                 let half=10+20*dome.share
@@ -376,11 +403,7 @@ private struct DomeLayer: View, Equatable {
                 domes.append(Dome(base:project(altitude:0,azimuth:dome.bearing),top:project(altitude:14,azimuth:dome.bearing),horizon:horizon,intensity:min(1,(amount/4).squareRoot())))
             }
         }
-        let result=Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,sunAltitude:sunAltitude,planets:planets,radiant:radiant,domes:domes)
-        cache[key]=result
-        recent.append(key)
-        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
-        return result
+        return Sky(id:key,faint:faint,middle:middle,bright:bright,galaxy:segments,dark:dark,sunAltitude:sunAltitude,planets:planets,radiant:radiant,domes:domes)
     }
 }
 

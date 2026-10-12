@@ -3,6 +3,8 @@ import SwiftUI
 struct NightCell: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     let night:Night
     var highlighted:Bool=false
     /// What the ring means, for VoiceOver: "In the best stretch" or "In the darkest moon stretch".
@@ -18,6 +20,7 @@ struct NightCell: View {
     var selected=false
     /// Whether the ring has drawn in: false until the month first settles after launch, then the
     /// ring traces itself from 0 to 1 on the shared spring after `ringDelay` (the landing beat).
+    /// Under Reduce Motion every ring is simply there, together.
     var ringDrawn=true
     var ringDelay=0.0
     /// The score line's height, held open on a past night so its date lines up with the rest of the week.
@@ -69,7 +72,7 @@ struct NightCell: View {
             Circle().trim(from:0,to:ringDrawn ? 1 : 0).stroke(palette.accent.opacity(0.65),lineWidth:0.7*palette.stroke)
                 .rotationEffect(.degrees(-90)).frame(width:25*scale,height:25*scale)
         }
-        .animation(NyxMotion.spring.delay(ringDelay),value:ringDrawn)
+        .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring.delay(ringDelay),value:ringDrawn)
     }
     private var spoken:String {
         if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
@@ -149,6 +152,11 @@ struct CalendarView: View {
     @State private var prepared:Set<String>=[]
     /// Months whose rings have drawn in since launch (`MonthLanding`).
     @State private var landed:Set<String>=MonthLanding.seen
+    /// The way the last month change went: the ringed nights light one after another in that
+    /// direction (later nights first when going back a month).
+    @State private var forward=true
+    /// One light tick as the last ringed night lights.
+    @State private var ringsLit=0
     /// The night in the inspector on a wide iPad; tonight (or the month's first night) until one is
     /// chosen. Kept for the window, like its park.
     @SceneStorage("planNight") private var focusedID:Date?
@@ -255,9 +263,17 @@ struct CalendarView: View {
                 try? await Task.sleep(for:.milliseconds(150))
                 guard !Task.isCancelled else { return }
                 MonthLanding.seen.insert(key); landed.insert(key)
+                // The last of the ringed nights lights `ringStagger` after the one before it: a light tick then.
+                guard !reduceMotion else { return }
+                let lit=month(park,offset:monthOffset).inWindow.count
+                guard lit>0 else { return }
+                try? await Task.sleep(for:.seconds(Double(lit-1)*Self.ringStagger))
+                if !Task.isCancelled { ringsLit+=1 }
             }
+            .onChange(of:monthOffset) { old,new in if new != old { forward=new>old } }
             // One tick for each month that settles, never for a slide that springs back.
             .sensoryFeedback(.selection,trigger:monthOffset)
+            .sensoryFeedback(.impact(weight:.light),trigger:ringsLit)
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
@@ -403,7 +419,7 @@ struct CalendarView: View {
     /// chosen night, so a neighbouring page never peeks in with a second selection.
     private func grid(_ park:Park,_ data:Month,scale:Double,current:Bool,weeks:Int)->some View {
         let focusedNight=wide && current ? focused(data)?.id : nil
-        let ringed=data.stretch.nights.map(\.id).filter { data.inWindow.contains($0) }
+        let ringed=Self.lightingOrder(data.stretch.nights.map(\.id).filter { data.inWindow.contains($0) },forward:forward)
         let drawn = !paging || landed.contains(Self.pageKey(park,Self.monthOffset(park,tonight:model.tonight(park),to:data.date)))
         let trailing=max(0,weeks*7-data.lead-data.nights.count)
         return LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:2),count:7),spacing:6) {
@@ -413,7 +429,7 @@ struct CalendarView: View {
             ForEach(data.nights) { night in
                 let events=model.events(night)
                 let cell=NightCell(night:night,highlighted:data.inWindow.contains(night.id),stretchName:data.stretch.kind.spoken,isTonight:night.id==data.tonight,isPast:night.id<data.tonight,marker:events.marker(park:park),scale:scale,selected:night.id==focusedNight,
-                                   ringDrawn:drawn,ringDelay:Double(ringed.firstIndex(of:night.id) ?? 0)*0.06)
+                                   ringDrawn:drawn,ringDelay:Double(ringed.firstIndex(of:night.id) ?? 0)*Self.ringStagger)
                 if current {
                     Button { choose(night) } label:{ cell }.buttonStyle(.plain)
                         .hoverEffect(.highlight)
@@ -565,6 +581,11 @@ struct CalendarView: View {
         commit()
         withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { position=offset } completion:{ commit() }
     }
+    /// The pause between one ringed night lighting and the next as a month lands.
+    nonisolated static let ringStagger=0.06
+    /// The ringed nights in the order they light: along the way the month moved (date order going
+    /// forward, latest first going back).
+    nonisolated static func lightingOrder(_ nights:[Date],forward:Bool)->[Date] { forward ? nights : nights.reversed() }
     /// The five nights the ring marks.
     struct Stretch {
         enum Kind {

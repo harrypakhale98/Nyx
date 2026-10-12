@@ -25,7 +25,7 @@ struct MoonHero: View {
     @State private var detents=0
     /// Whether the current drag is a sideways scrub, decided once per drag; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
-    private var target: (geometry:MoonGeometry,moment:Date) { AstronomyEngine().moon(for:night) }
+    private var target: (geometry:MoonGeometry,moment:Date) { MoonMoments.moon(for:night) }
     var body: some View {
         let target=target
         let shown=MoonGeometry(phaseAngle:phase ?? target.geometry.phaseAngle,brightLimb:limb ?? target.geometry.brightLimb,north:north ?? target.geometry.north,

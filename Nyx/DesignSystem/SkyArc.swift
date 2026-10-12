@@ -238,7 +238,7 @@ private struct SkyArcPicture: View, Equatable {
         Canvas { context,size in draw(in:&context,size:size) } symbols: {
             // Added as light, so an unlit Moon near new vanishes into a bright twilight as it does
             // in the sky, instead of punching a black disc in it; opaque under Increase Contrast.
-            MoonView(geometry:AstronomyEngine().moon(for:night).geometry).blendMode(palette.highContrast ? .normal : .plusLighter)
+            MoonView(geometry:MoonMoments.moon(for:night).geometry).blendMode(palette.highContrast ? .normal : .plusLighter)
                 .frame(width:moonSize,height:moonSize).tag("moon")
         }
     }

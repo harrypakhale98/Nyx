@@ -89,7 +89,8 @@ struct ParksView: View {
     }
     /// The scrolling list itself.
     @ViewBuilder private var list: some View {
-        let abroad:Bool=self.abroad, waiting:Bool=awaitingWorld
+        // Also while the offline caches are still being read after the first frame (`cachesPending`).
+        let abroad:Bool=self.abroad, waiting:Bool=awaitingWorld || model.cachesPending
         let shown:[Park]=abroad || waiting ? [] : filtered, spots=shownSpots
         let savedWorld:[Park]=self.savedWorld, groups:[CountryGroup]=shownGroups
         let found:[Park]=worldShown && !search.isEmpty ? self.found.filter { ParkFilter(darkOnly:darkOnly).includes($0) } : []

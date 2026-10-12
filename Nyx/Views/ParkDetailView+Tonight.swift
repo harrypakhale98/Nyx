@@ -43,6 +43,7 @@ extension ParkDetailView {
                 .padding(.bottom,typeSize.isAccessibilitySize ? 0 : -28)
                 .scrollTransition { [motionReduced = reduceMotion] view,phase in view.scaleEffect(motionReduced || phase.isIdentity ? 1 : 0.95).opacity(motionReduced || phase.isIdentity ? 1 : 0.8) }
                 .modifier(DepthParallax(depth:0.1))
+                .environment(\.nyxRevealHeld,heroHeld)
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(align) }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(align) }
             if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) {
@@ -75,7 +76,7 @@ extension ParkDetailView {
     private var river: some View {
         Panel {
             let river=model.nights(park,from:riverStart,count:30)
-            TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() })
+            TimeRiver(nights:river,selected:Binding(get:{selected ?? initialDate ?? model.tonight(park)},set:{selected=$0}),startsTonight:riverStart==model.tonight(park),outlooks:model.outlooks(river),markers:model.markers(river),open:{ _ in showBreakdown() },hold:$heldNight)
             if model.detailPausedForLowData { Label("Forecast detail paused in Low Data Mode.",systemImage:"antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true).padding(.top,8) }
             Divider().overlay(palette.line).padding(.top,10)
             AddNightToCalendar(night:night)

@@ -27,6 +27,8 @@ struct RootView:View {
     /// Cold launch: the launch screen's starfield paints first, then the app settles in.
     /// Never blocks input; skipped under Reduce Motion and in screenshot scenarios.
     @State private var revealed=DebugScenario.screen != nil
+    /// The launch reveal has (logically) landed: Tonight's first count plays after it, not under it.
+    @State private var launchSettled=DebugScenario.screen != nil
     /// The park a link, reminder or Spotlight opened, with its night: one value, so a later link
     /// presented above it never changes the night on this sheet.
     @State private var launch:LaunchPark?
@@ -45,6 +47,8 @@ struct RootView:View {
     @State private var lampCover=0.0
     @State private var lampMotion=NightVisionLamp.Cover()
     @State private var lampTask:Task<Void,Never>?
+    /// Where the lamp's dark grows from (the switch), while it grows; nil for an even fade.
+    @State private var lampOrigin:CGPoint?
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -82,8 +86,9 @@ struct RootView:View {
                 .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
                 // Tonight's first answer waits for the person: not behind onboarding (from the first
-                // frame, before the sheet rises) or first light. Swiping the sheet away releases it too.
-                .environment(\.nyxRevealHeld,(!onboarded && DebugScenario.screen == nil) || intro || firstLight != nil || promoHold)
+                // frame, before the sheet rises) or first light, and not until the launch reveal has
+                // landed, so the count never runs under the tabs' own fade-in. Swiping the sheet away releases it too.
+                .environment(\.nyxRevealHeld,(!onboarded && DebugScenario.screen == nil) || intro || firstLight != nil || promoHold || !launchSettled)
                 }
             }
         }
@@ -103,8 +108,8 @@ struct RootView:View {
         // The lamp turns the palette under its cover, at once; every other path (Control Center, Siri, a
         // Focus, onboarding, Reduce Motion) crossfades on the shared spring.
         .animation(systemReduceMotion || DebugScenario.isEnabled("reduce-motion") || lampCover>0 ? nil : NyxMotion.spring,value:palette.nightVision)
-        .overlay { Color.black.opacity(lampCover).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
-        .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on,announce:request.announce) } }
+        .overlay { LampCover(cover:lampCover,origin:lampOrigin).ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true) }
+        .onChange(of:commands.lampRequest) { _,request in if let request { runLamp(request.on,announce:request.announce,origin:request.origin) } }
         // One soft tap at the turn, on every path (the lamp writes the setting under its cover), however
         // many switches are loaded: each visited tab's toolbar and onboarding have one.
         .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
@@ -155,8 +160,8 @@ struct RootView:View {
             }
             #endif
             intro = !onboarded && DebugScenario.screen == nil
-            if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true }
-            else { withAnimation(.spring(response:0.9,dampingFraction:0.9)) { revealed=true } }
+            if systemReduceMotion || DebugScenario.isEnabled("reduce-motion") { revealed=true; launchSettled=true }
+            else { withAnimation(NyxMotion.launch,completionCriteria:.logicallyComplete) { revealed=true } completion:{ launchSettled=true } }
             openRequestedField(); openRequestedPark()
             // Every park's week, worked out off the main thread once the first frame is up, so Parks opens ready.
             Task(priority:.utility) { await model.prepareNights(model.parks,count:7) }
@@ -234,19 +239,24 @@ struct RootView:View {
     }
     /// The toolbar switch's lamp: down to black over the rest of ~0.2 s, the palette turned under the
     /// cover with one soft tap and the state announced (unless VoiceOver was on the switch, which says
-    /// its own value), then revealed on the shared spring. A tap that lands mid-way starts again from
-    /// wherever the cover is, toward the state now asked for.
-    private func runLamp(_ on:Bool,announce:Bool) {
+    /// its own value), then revealed on the shared spring. From a clear window the dark grows as a
+    /// circle from the switch (`LampCover`), reaching every corner by the same moment the even fade
+    /// would be black. A tap that lands mid-way starts again from wherever the cover is, toward the
+    /// state now asked for, in the cover's present shape.
+    private func runLamp(_ on:Bool,announce:Bool,origin:CGPoint?) {
         lampTask?.cancel()
         lampTask=Task { @MainActor in
             if on != nightVision {
                 let now=Date.now, time=NightVisionLamp.dimTime(from:lampMotion.value(at:now))
+                // The circle only from a clear window: a cover already partly down keeps its shape.
+                if lampMotion.value(at:now)<=0.001 { lampOrigin=origin }
                 lampMotion=NightVisionLamp.Cover(from:lampMotion.value(at:now),to:1,start:now,duration:time)
                 withAnimation(.easeIn(duration:time)) { lampCover=1 }
                 try? await Task.sleep(for:.seconds(time))
                 guard !Task.isCancelled else { return }
                 var quiet=Transaction(); quiet.disablesAnimations=true
-                withTransaction(quiet) { nightVision=on }
+                // Wholly black either way now; the reveal is the even fade.
+                withTransaction(quiet) { nightVision=on; lampOrigin=nil }
                 if announce { NightVisionLamp.announce(on) }
             }
             let start=Date.now
@@ -254,7 +264,7 @@ struct RootView:View {
             withAnimation(NyxMotion.spring) { lampCover=0 }
             try? await Task.sleep(for:.seconds(NightVisionLamp.reveal))
             guard !Task.isCancelled else { return }
-            commands.lampTarget=nil
+            commands.lampTarget=nil; lampOrigin=nil
         }
     }
     /// Widgets, Spotlight, Live Activities, calendar events Nyx drafted and In-App Events all land here.

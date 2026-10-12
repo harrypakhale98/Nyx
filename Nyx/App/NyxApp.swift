@@ -11,7 +11,10 @@ import UserNotifications
         LaunchSignposts.start()
         let launch=LaunchSignposts.begin("App init")
         // The offline caches start loading on background threads at once.
-        let preload=DebugScenario.screen == nil ? CachePreload.start() : nil
+        // Tonight's skies near the starting point are built there too, light domes included.
+        let preload=DebugScenario.screen == nil ? CachePreload.start(lights:SkyGlow.lightSources) : nil
+        // Before the model takes the skies built at launch: setting it later would let them go.
+        SkyProjection.shared.lightSources=SkyGlow.lightSources
         BundledData.warm()
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
@@ -42,7 +45,6 @@ import UserNotifications
         UNUserNotificationCenter.current().delegate=NotificationRouter.shared
         // Registers park names as Siri / Shortcuts phrase parameters.
         NyxShortcuts.updateAppShortcutParameters()
-        SkyProjection.shared.lightSources=SkyGlow.lightSources
         DiagnosticsStore.shared.start()
         LaunchSignposts.end(launch)
     }

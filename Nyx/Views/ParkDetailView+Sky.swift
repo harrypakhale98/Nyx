@@ -9,7 +9,9 @@ extension ParkDetailView {
             Text(chapter.title).font(.system(.title,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
         }.frame(maxWidth:.infinity,alignment:.leading).padding(.top,typeSize.isAccessibilitySize ? 8 : 18)
     }
+    /// The sky chapter shows `skyNight`: the river's night, held while it is scrubbed (`heldNight`).
     @ViewBuilder var skyChapter: some View {
+        let night=skyNight, isTonight=night.id==model.tonight(park), outlook=model.outlook(night)
         chapterHeading(.sky,detail:park.dayLabel(night.id))
         SkyWindowCard(night:night,isTonight:isTonight) { showsSky=true }
         Panel { VStack(alignment:.leading,spacing:16) {
@@ -66,11 +68,13 @@ extension ParkDetailView {
     }
     /// Agreement and the cloud layer, under the cloud figure.
     private var cloudContext:[String] {
-        guard let outlook else { return [] }
-        return [outlook.agreement?.sentence(tonight:isTonight),night.upperCloudOnly ? nil : outlook.layers?.note].compactMap { $0 }
+        let night=skyNight
+        guard let outlook=model.outlook(night) else { return [] }
+        return [outlook.agreement?.sentence(tonight:night.id==model.tonight(park)),night.upperCloudOnly ? nil : outlook.layers?.note].compactMap { $0 }
     }
     /// The cloud figure beside "Clouds": the forecast's average, else the park's usual cloud.
     private var cloudValue:String {
+        let night=skyNight
         if let cloud=night.cloudCover { return String(localized:"\(Int(cloud.rounded()))% average") }
         if let usual=night.usualCloud { return String(localized:"Usually \(Int(usual.rounded()))%") }
         return String(localized:"Unavailable")
@@ -78,7 +82,7 @@ extension ParkDetailView {
     /// What to bring, one short line each: the coldest hour, dew on optics, and wind. Lines with
     /// no data are left out; with none, the section is not shown.
     private var nightItself:[(symbol:String,text:String)] {
-        guard let outlook else { return [] }
+        guard let outlook=model.outlook(skyNight) else { return [] }
         let cold=outlook.coldest.map { cold in
             outlook.coldestAt.map { String(localized:"Down to \(NightOutlook.temperature(cold)) around \(park.time($0))") } ?? String(localized:"Down to \(NightOutlook.temperature(cold))")
         }

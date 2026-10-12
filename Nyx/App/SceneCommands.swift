@@ -42,9 +42,10 @@ import SwiftUI
     private(set) var lampRequest:NightVisionLamp.Request?
     /// The state the switch shows while the lamp runs, so it answers the tap at once; nil at rest.
     var lampTarget:Bool?
-    func requestNightVision(_ on:Bool,announce:Bool=true) {
+    /// `origin`: where the switch is in the window, which the lamp's dark grows from; nil dims evenly.
+    func requestNightVision(_ on:Bool,announce:Bool=true,origin:CGPoint?=nil) {
         lampTarget=on
-        lampRequest=NightVisionLamp.Request(id:(lampRequest?.id ?? 0)+1,on:on,announce:announce)
+        lampRequest=NightVisionLamp.Request(id:(lampRequest?.id ?? 0)+1,on:on,announce:announce,origin:origin)
     }
     /// Bumped by ⌘F: the Parks list focuses its search field.
     private(set) var searchRequest=0

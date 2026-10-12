@@ -61,7 +61,9 @@ struct TonightView: View {
     @State private var scrubbing=false
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    private var loading:Bool { DebugScenario.state=="loading" || awaitingWorld }
+    /// The world catalogue abroad, or the offline caches still being read after the first frame
+    /// (`PlanModel.cachesPending`): the loader, never a score those reads are about to change.
+    private var loading:Bool { DebugScenario.state=="loading" || awaitingWorld || model.cachesPending }
     /// From outside the US the answer weighs the world catalogue, read off the main thread from launch:
     /// until it is ready the page shows the loader, never the national parks' empty state or a US-only
     /// answer that would change a moment later.

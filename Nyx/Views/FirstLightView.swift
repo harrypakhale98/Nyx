@@ -54,7 +54,7 @@ struct FirstLightView: View {
             if reduceMotion { withAnimation(.easeInOut(duration:1)) { visible=true } }
             else {
                 try? await Task.sleep(for:.seconds(reveal*0.7))
-                withAnimation(.spring(response:1.6,dampingFraction:1)) { visible=true }
+                withAnimation(NyxMotion.arrival) { visible=true }
             }
             AccessibilityNotification.Announcement(String(localized:"First light at \(park.shortName). The stars above you now.")).post()
             guard !reduceMotion else { return }

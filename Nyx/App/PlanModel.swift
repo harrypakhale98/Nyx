@@ -202,17 +202,23 @@ import CoreLocation
         // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
         if DebugScenario.screen == nil {
             if let preload {
-                // Read in the background since launch began; taken now, before the first frame.
-                let cached=preload.wait()
-                forecasts=cached.forecasts; details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
-                seed(cached.conditions)
-                apply(AlertsUpdate(cache:cached.alerts,busy:false))
-                LaunchSignposts.note("Caches ready")
-                let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
-                hydration=Task {
-                    await weather.seed(cached.forecasts,parks:parks)
-                    await detailService.seed(cached.details,parks:parks)
-                    await parkStore.seed(cached.alerts)
+                // Read in the background since launch began; taken now, before the first frame, when
+                // they are done within `preloadWait`. Otherwise the first frame does not wait for them:
+                // the screens that would show a score show their loading state (`cachesPending`) until
+                // the same reads land, so no first frame shows a score the caches would change.
+                if let cached=preload.wait(timeout:Self.preloadWait) {
+                    take(cached,replacing:true)
+                    hydration=seedServices(cached)
+                } else {
+                    cachesPending=true
+                    LaunchSignposts.note("Caches late")
+                    hydration=Task { [weak self] in
+                        let cached=await preload.contents()
+                        guard let self else { return }
+                        self.take(cached,replacing:false)
+                        self.cachesPending=false
+                        await self.seedServices(cached).value
+                    }
                 }
             } else { hydration=Task { await hydrate() } }
         }
@@ -231,6 +237,37 @@ import CoreLocation
                 let example=await Task.detached(priority:.userInitiated) { StartingPlaces.example() }.value
                 self?.showExample(from:example)
             }
+        }
+    }
+    /// How long the first frame may wait for the offline caches read since launch (`CachePreload`).
+    static let preloadWait=0.15
+    /// The offline caches are still being read after the first frame (`preloadWait` passed): Tonight
+    /// and Parks show their loading states rather than a score the caches are about to change.
+    private(set) var cachesPending=false
+    /// What the launch reads found: forecasts, forecast detail, alerts, the week's astronomy near the
+    /// starting point and tonight's skies there. `replacing`: before the first frame, nothing newer
+    /// exists; later, anything already newer is kept.
+    private func take(_ cached:CachePreload.Contents,replacing:Bool) {
+        let details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
+        if replacing { forecasts=cached.forecasts; self.details=details }
+        else {
+            for (id,forecast) in cached.forecasts where forecasts[id] == nil { forecasts[id]=forecast }
+            for (id,detail) in details where self.details[id] == nil { self.details[id]=detail }
+        }
+        seed(cached.conditions)
+        if astronomy is AstronomyEngine { for sky in cached.skies { SkyProjection.shared.store(sky) } }
+        if replacing || alertsCache == nil { apply(AlertsUpdate(cache:cached.alerts,busy:false)) }
+        LaunchSignposts.note("Caches ready")
+    }
+    /// Returns once the offline caches read at launch are in the model (at once, almost always).
+    func cachesReady() async { await hydration?.value }
+    /// The services start from what the launch reads found, so no file is read twice.
+    private func seedServices(_ cached:CachePreload.Contents)->Task<Void,Never> {
+        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+        return Task {
+            await weather.seed(cached.forecasts,parks:parks)
+            await detailService.seed(cached.details,parks:parks)
+            await parkStore.seed(cached.alerts)
         }
     }
     var home: Park? { park(homeID) ?? parks.first }
@@ -444,6 +481,9 @@ import CoreLocation
         let computed=await Task.detached(priority:.utility) { wanted.map { ($0.0.id,$0.1,astronomy.conditions(for:$0.0,on:$0.1)) } }.value
         for (id,evening,sky) in computed where conditions[id]?[evening] == nil { conditions[id,default:[:]][evening]=sky }
     }
+    /// The nights' astronomy is the engine's own (always, outside tests that hand in another), so
+    /// work done ahead with it (`SkyAhead`) is the work a screen would do.
+    var astronomyIsEngine: Bool { astronomy is AstronomyEngine }
     /// Conditions worked out at launch for the parks near the starting point (`CachePreload`).
     private func seed(_ prepared:[String:[Date:SkyConditions]]) {
         guard astronomy is AstronomyEngine else { return }

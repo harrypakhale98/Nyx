@@ -69,11 +69,14 @@ struct NightVisionToggle: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyxAccess) private var access
     private var shown:Bool { commands?.lampTarget ?? nightVision }
+    /// The switch's centre in its window, for the lamp's dark to grow from.
+    @State private var center:CGPoint?
     var body: some View {
         Toggle(isOn:Binding(get:{ shown },set:{ turn($0) })) {
             Label("Night vision",systemImage:shown ? "flashlight.on.circle.fill" : "flashlight.off.circle")
         }
         .toggleStyle(.button).labelStyle(.iconOnly)
+        .onGeometryChange(for:CGPoint.self) { proxy in let frame=proxy.frame(in:.global); return CGPoint(x:frame.midX,y:frame.midY) } action:{ center=$0 }
         .accessibilityLabel("Night vision")
         // "Flashlight" too: it is the glyph on screen.
         .accessibilityInputLabels([Text("Night vision"),Text("Red light"),Text("Red screen"),Text("Flashlight")])
@@ -83,7 +86,7 @@ struct NightVisionToggle: View {
     private func turn(_ on:Bool) {
         // Read at the tap, before the lamp's cover could move VoiceOver anywhere.
         let announce = !NightVisionLamp.voiceOverOnSwitch()
-        if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce); return }
+        if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce,origin:center); return }
         nightVision=on
         if announce { NightVisionLamp.announce(on) }
     }
@@ -93,9 +96,19 @@ struct NightVisionToggle: View {
 /// wherever the cover is, so no frame is ever brighter than the one before on the way into the red.
 enum NightVisionLamp {
     /// One tap on the switch: the state asked for, and whether to say it (`voiceOverOnSwitch`).
-    struct Request: Equatable { let id:Int; let on:Bool; var announce=true }
+    struct Request: Equatable { let id:Int; let on:Bool; var announce=true; var origin:CGPoint?=nil }
     static let dim=0.2
     static let reveal=0.45
+    /// The soft rim of the dark as it grows from the switch, in points.
+    static let feather=60.0
+    /// The dark's radius as it grows from `center` (0 clear, 1 covering): at 1 its solid part, inside
+    /// the feathered rim, reaches the farthest corner of `size`, so the whole window is black at the
+    /// moment the palette turns, exactly as the even fade is.
+    static func radius(cover:Double,center:CGPoint,size:CGSize)->Double {
+        let corners=[CGPoint.zero,CGPoint(x:size.width,y:0),CGPoint(x:0,y:size.height),CGPoint(x:size.width,y:size.height)]
+        let farthest=corners.map { hypot($0.x-center.x,$0.y-center.y) }.max() ?? 0
+        return max(0,min(1,cover))*(farthest+feather)
+    }
     /// Where the cover is between frames, as far as the lamp needs to know: a straight line from one
     /// value to another over a duration. The drawn curve is eased; this only sets how long is left.
     struct Cover: Equatable {
@@ -121,6 +134,28 @@ enum NightVisionLamp {
     /// Said after the setting is written, politely, after anything VoiceOver is already saying.
     @MainActor static func announce(_ on:Bool) {
         NightListener.announce(on ? String(localized:"Night vision on") : String(localized:"Night vision off"),priority:.default)
+    }
+}
+/// The lamp's cover over the window: black growing as a circle from the switch (`origin`, in the
+/// window's coordinates) while it dims, or an even black at `cover`'s opacity (the reveal, and every
+/// dim that does not start from a clear window or from the switch). Animatable, so the circle grows
+/// on the same eased timing as the even fade it replaces.
+struct LampCover: View, Animatable {
+    var cover: Double
+    let origin: CGPoint?
+    var animatableData: Double { get { cover } set { cover=newValue } }
+    var body: some View {
+        if let origin {
+            GeometryReader { proxy in
+                let frame=proxy.frame(in:.global), center=CGPoint(x:origin.x-frame.minX,y:origin.y-frame.minY)
+                let r=NightVisionLamp.radius(cover:cover,center:center,size:proxy.size)
+                let solid=r>0 ? max(0,1-NightVisionLamp.feather/r) : 0
+                Circle().fill(RadialGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:solid),.init(color:.black.opacity(0),location:1)],center:.center,startRadius:0,endRadius:max(r,0.001)))
+                    .frame(width:2*r,height:2*r).position(center)
+            }
+        } else {
+            Color.black.opacity(cover)
+        }
     }
 }
 #Preview("Tab root toolbar") {

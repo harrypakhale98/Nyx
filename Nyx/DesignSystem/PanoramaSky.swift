@@ -53,7 +53,8 @@ nonisolated struct HorizonSky: Sendable {
     }
     /// 2,600 faint stars from a fixed seed: half spread evenly over the sky, half within about 12°
     /// of the galactic plane, magnitudes weighted toward the faint end as real star counts are.
-    private lazy var dustField:[(ra:Double,dec:Double,mag:Double)]={
+    /// Made once per process, on whichever thread asks first.
+    nonisolated private static let dustField:[(ra:Double,dec:Double,mag:Double)]={
         var state:UInt64=0x9E3779B97F4A7C15
         func next()->Double { state=state &* 6364136223846793005 &+ 1442695040888963407; return Double(state>>11)/Double(1<<53) }
         return (0..<2600).map { index in
@@ -61,18 +62,41 @@ nonisolated struct HorizonSky: Sendable {
             let b:Double
             if index%2==0 { b=asin(2*next()-1) }
             else { let u=max(1e-9,next()), v=next(); b=12*Double.pi/180*sqrt(-2*log(u))*cos(2*Double.pi*v) }
-            let place=Self.equatorial(l:l,b:max(-Double.pi/2,min(Double.pi/2,b)))
+            let place=HorizonSkies.equatorial(l:l,b:max(-Double.pi/2,min(Double.pi/2,b)))
             return (place.ra,place.dec,4.5+3.3*pow(next(),0.45))
         }
     }()
+    /// The moment's five-minute slot, which the sky is kept by.
+    nonisolated static func slot(_ instant:Date)->Date { Date(timeIntervalSince1970:(instant.timeIntervalSince1970/300).rounded(.down)*300) }
+    nonisolated static func key(park:Park,at instant:Date)->String { "\(park.id)-\(Int(slot(instant).timeIntervalSince1970))" }
     func sky(park:Park,night:Date,at instant:Date)->HorizonSky {
-        let slot=Date(timeIntervalSince1970:(instant.timeIntervalSince1970/300).rounded(.down)*300)
-        let key="\(park.id)-\(Int(slot.timeIntervalSince1970))"
+        let key=Self.key(park:park,at:instant)
         if let cached=cache[key] { return cached }
-        let engine=AstronomyEngine(), conditions=engine.conditions(for:park,on:park.evening(night)), rad=Double.pi/180
-        func horizontal(_ ra:Double,_ dec:Double)->(altitude:Double,azimuth:Double) { engine.horizontal(date:slot,park:park,ra:ra,dec:dec) }
+        let sky=Self.build(park:park,night:night,at:instant,lights:SkyProjection.shared.lightSources(park))
+        store(sky)
+        return sky
+    }
+    /// Whether a sky is already kept, so work done ahead skips it.
+    func holds(_ key:String)->Bool { cache[key] != nil }
+    /// Keeps a sky built elsewhere (ahead of time, off the main thread); one already kept stays.
+    func store(_ sky:HorizonSky) {
+        guard cache[sky.id] == nil else { return }
+        cache[sky.id]=sky
+        recent.append(sky.id)
+        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
+    }
+    /// Builds a sky on any thread. `conditions`: the night's astronomy when the caller already has it
+    /// (`PlanModel`'s, from the same engine); `lights`: the park's light sources. Pure: the same
+    /// inputs give the same sky wherever it is built.
+    nonisolated static func build(park:Park,night:Date,at instant:Date,conditions:SkyConditions?=nil,lights:[SkyProjection.LightSource])->HorizonSky {
+        let slot=Self.slot(instant)
+        let key=Self.key(park:park,at:instant)
+        let engine=AstronomyEngine(), conditions=conditions ?? engine.conditions(for:park,on:park.evening(night)), rad=Double.pi/180
+        // Sidereal time once for the slot, not once per star (identical results).
+        let sidereal=engine.localSidereal(date:slot,park:park)
+        func horizontal(_ ra:Double,_ dec:Double)->(altitude:Double,azimuth:Double) { engine.horizontal(localSidereal:sidereal,latitude:park.latitude,ra:ra,dec:dec) }
         var stars:[HorizonSky.Star]=[]
-        for (index,star) in SkyProjection.shared.stars(brighterThan:9).enumerated() {
+        for (index,star) in SkyProjection.catalogue.filter({ $0.mag<9 }).enumerated() {
             let h=horizontal(star.ra,star.dec)
             guard h.altitude > -2 else { continue }
             stars.append(.init(altitude:h.altitude,azimuth:h.azimuth,magnitude:star.mag,colorIndex:max(-0.4,min(2,star.bv)),seed:Double(index%97)/97))
@@ -109,7 +133,7 @@ nonisolated struct HorizonSky: Sendable {
         }
         let lunar=engine.equatorial(of:.moon,at:slot), m=horizontal(lunar.ra,lunar.dec), phase=engine.moonPhase(at:slot)
         let moon:HorizonSky.Mark? = m.altitude > -0.5 ? .init(altitude:m.altitude,azimuth:m.azimuth,name:String(localized:"Moon"),magnitude:-12) : nil
-        let domes=SkyProjection.shared.lightSources(park).compactMap { source -> HorizonSky.Dome? in
+        let domes=lights.compactMap { source -> HorizonSky.Dome? in
             let amount=source.share*source.glow
             guard amount>=0.01 else { return nil }
             return .init(bearing:source.bearing,intensity:min(1,(amount/4).squareRoot()),halfWidth:10+20*source.share)
@@ -133,12 +157,8 @@ nonisolated struct HorizonSky: Sendable {
             guard let a=place(line.0), let b=place(line.1), a.altitude>0, b.altitude>0 else { return nil }
             return (a,b)
         }
-        let sky=HorizonSky(id:key,moment:slot,stars:stars,dust:dust,galaxy:segments,core:core,planets:planets,radiant:radiant,moon:moon,
-                           moonIllumination:phase.illumination,moonWaxing:phase.waxing,domes:domes,sunAltitude:sun,named:named,figures:figures)
-        cache[key]=sky
-        recent.append(key)
-        if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
-        return sky
+        return HorizonSky(id:key,moment:slot,stars:stars,dust:dust,galaxy:segments,core:core,planets:planets,radiant:radiant,moon:moon,
+                          moonIllumination:phase.illumination,moonWaxing:phase.waxing,domes:domes,sunAltitude:sun,named:named,figures:figures)
     }
     /// Star colours by sky, for the ink they were resolved over; let go with their sky.
     private var tintCache:[String:(ink:Color,tints:[Color])]=[:]
@@ -149,6 +169,31 @@ nonisolated struct HorizonSky: Sendable {
         let tints=SkyTint.resolved(sky.stars.map(\.colorIndex),ink:ink)
         tintCache[sky.id]=(ink,tints)
         return tints
+    }
+}
+
+/// A park page's two skies for a run of nights (the real sky behind the page, `RealSky`, and the
+/// sky window's picture, `SkyWindowCard`), built off the main thread before they are asked for, so
+/// a night chosen on the river finds both ready instead of building about 4,600 stars on the main
+/// thread. Built by the same functions, from the same inputs, as on demand: the skies are identical.
+@MainActor enum SkyAhead {
+    /// `trusted`: the nights' astronomy comes from `AstronomyEngine` (always, outside tests), so it
+    /// can stand in for working it out again. Nearest nights first; stops when the page goes.
+    static func prepare(_ nights:[Night],trusted:Bool) async {
+        let projection=SkyProjection.shared, horizon=HorizonSkies.shared
+        for night in nights {
+            guard !Task.isCancelled else { return }
+            let park=night.park, moment=SkyWindowCard.moment(night.sky)
+            let real = !projection.holds(SkyProjection.key(park:park,night:night.id)), window = !horizon.holds(HorizonSkies.key(park:park,at:moment))
+            guard real || window else { continue }
+            let id=night.id, conditions=trusted ? night.sky : nil, lights=projection.lightSources(park)
+            let built=await Task.detached(priority:.utility) {
+                (real ? SkyProjection.build(park:park,night:id,conditions:conditions,lights:lights) : nil,
+                 window ? HorizonSkies.build(park:park,night:id,at:moment,conditions:conditions,lights:lights) : nil)
+            }.value
+            if let sky=built.0 { projection.store(sky) }
+            if let sky=built.1 { horizon.store(sky) }
+        }
     }
 }
 

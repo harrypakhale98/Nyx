@@ -549,22 +549,28 @@ nonisolated final class CachePreload: @unchecked Sendable {
         /// The week ahead's astronomy at the parks within reach of the starting point: what the
         /// first screen (Tonight) draws, worked out on several threads instead of the main one.
         var conditions: [String: [Date: SkyConditions]]=[:]
+        /// Tonight's real sky (`SkyProjection`) at the starting park and the parks in reach: the sky
+        /// behind the first screen, built here so the first frame does not build it on the main thread.
+        var skies: [SkyProjection.Sky]=[]
     }
     private let group=DispatchGroup()
     private let lock=NSLock()
     /// Written on the reading threads under `lock`, read only after `group` has finished.
     private var contents=Contents()
-    static func start() -> CachePreload {
+    /// `lights`: a park's light sources for its sky's light domes (`SkyProjection.lightSources`).
+    static func start(lights: @escaping @Sendable (Park) -> [SkyProjection.LightSource] = SkyProjection.noLight) -> CachePreload {
         let preload=CachePreload()
         preload.group.enter()
         // The main thread waits on this at launch, so it runs at the waiting thread's own priority.
         DispatchQueue.global(qos: .userInteractive).async {
-            preload.read()
+            preload.read(lights: lights)
             preload.group.leave()
         }
         return preload
     }
-    private func read() {
+    /// The most skies built ahead: the starting park and the nearest parks in reach.
+    static let skyLimit=16
+    private func read(lights: @Sendable (Park) -> [SkyProjection.LightSource]) {
         guard let parks=try? ParkData.load() else { return }
         DispatchQueue.concurrentPerform(iterations: parks.count) { index in
             let id=parks[index].id
@@ -579,6 +585,24 @@ nonisolated final class CachePreload: @unchecked Sendable {
             let (park, evening)=nights[index], sky=engine.conditions(for: park, on: evening)
             lock.withLock { contents.conditions[park.id, default: [:]][evening]=sky }
         }
+        // Tonight's sky at the starting park (behind every screen) and at the parks in reach (behind
+        // Tonight's answer), from the conditions just worked out: the same sky `SkyProjection` builds.
+        let skyParks=Self.skyParks(parks)
+        let known=lock.withLock { contents.conditions }
+        DispatchQueue.concurrentPerform(iterations: skyParks.count) { index in
+            let park=skyParks[index], night=park.currentNight(at: now)
+            let sky=SkyProjection.build(park: park, night: night, conditions: known[park.id]?[park.evening(night)], lights: lights(park))
+            lock.withLock { contents.skies.append(sky) }
+        }
+    }
+    /// The starting park, then the parks in reach nearest first, at most `skyLimit`.
+    static func skyParks(_ parks: [Park], defaults: UserDefaults = .standard, locale: Locale = .current) -> [Park] {
+        let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? Park.defaultID) } ?? parks.first
+        let area=homeArea(parks, defaults: defaults, locale: locale)
+        let near=home.map { home in area.sorted { $0.distanceMeters(latitude: home.latitude, longitude: home.longitude)<$1.distanceMeters(latitude: home.latitude, longitude: home.longitude) } } ?? area
+        var chosen:[Park]=home.map { [$0] } ?? []
+        for park in near where chosen.count<skyLimit && !chosen.contains(where: { $0.id == park.id }) { chosen.append(park) }
+        return chosen
     }
     /// The parks within the chosen radius of the starting point, as `PlanModel` reads them from
     /// the same settings (a place's coordinates, else the starting park's; the locale's standard
@@ -595,5 +619,17 @@ nonisolated final class CachePreload: @unchecked Sendable {
     func wait() -> Contents {
         group.wait()
         return lock.withLock { contents }
+    }
+    /// Waits at most `timeout` seconds; nil if the reads are still going (a slow disk, a cold
+    /// device), so the first frame never waits longer than that for them.
+    func wait(timeout: Double) -> Contents? {
+        guard group.wait(timeout: .now()+timeout) == .success else { return nil }
+        return lock.withLock { contents }
+    }
+    /// The reads' contents once they finish, without holding any thread meanwhile.
+    func contents() async -> Contents {
+        await withCheckedContinuation { continuation in
+            group.notify(queue: .global(qos: .userInitiated)) { continuation.resume(returning: self.lock.withLock { self.contents }) }
+        }
     }
 }

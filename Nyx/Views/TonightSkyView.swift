@@ -372,10 +372,17 @@ struct SkyWindowCard: View {
     let night: Night
     var isTonight=true
     let open: ()->Void
+    /// The moment the window shows: where the full sky opens (`TonightSkyView.defaultMinutes`).
+    nonisolated static func moment(_ sky:SkyConditions)->Date { SkyAlmanac.nightWindow(sky).start.addingTimeInterval(TonightSkyView.defaultMinutes(sky)*60) }
     var body: some View {
-        let sky=HorizonSkies.shared.sky(park:night.park,night:night.id,at:SkyAlmanac.nightWindow(night.sky).start.addingTimeInterval(TonightSkyView.defaultMinutes(night.sky)*60))
+        let sky=HorizonSkies.shared.sky(park:night.park,night:night.id,at:Self.moment(night.sky))
         let shape=RoundedRectangle(cornerRadius:24)
-        let picture=PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:night.park),centreAltitude:32,span:1.7,labels:false,bortle:Double(night.park.bortleEstimate)))
+        // Keyed by the sky, so another night cross-fades in on the transaction that chose it (the
+        // shared spring) rather than cutting; without an animation it simply changes.
+        let picture=ZStack {
+            PanoramaCanvas(sky:sky,options:PanoramaOptions(facing:SkyDome.facing(for:night.park),centreAltitude:32,span:1.7,labels:false,bortle:Double(night.park.bortleEstimate)))
+                .id(sky.id).transition(.opacity)
+        }
         Button(action:open) {
             Group {
                 if typeSize.isAccessibilitySize {

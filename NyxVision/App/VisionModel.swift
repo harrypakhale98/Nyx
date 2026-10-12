@@ -162,7 +162,6 @@ nonisolated struct SkyMoment: Sendable {
     }
     let weather: any WeatherProviding
     let summits: SummitLayerService
-    private var sweep: Task<Void, Never>?
     private var planTask: Task<Void, Never>?
     private var listTask: Task<Void, Never>?
     private var aheadTask: Task<Void, Never>?
@@ -300,57 +299,78 @@ nonisolated struct SkyMoment: Sendable {
     /// when the sky jumps straight there. While the immersive sky is open the sweep eases in and
     /// out and lasts long enough that the sky never turns faster than `comfortableTurn`.
     func move(to target: Double, reduceMotion: Bool) {
-        sweep?.cancel(); chase?.cancel(); chase = nil
+        cancelSweep()
         let start = fraction, goal = min(1, max(0, target))
         guard !reduceMotion, abs(goal-start) > 0.002 else { fraction = goal; return }
         let immersive = immersiveOpen
         // Sidereal rate: 15.04° of sky per hour of clock. A cosine ease peaks at π/2 times its mean speed.
         let degrees = abs(goal-start)*(plan?.span.duration ?? 0)/3600*15.04
         let duration = immersive ? max(1.1, degrees/Self.comfortableTurn*Double.pi/2) : 1.1
-        sweep = Task {
-            let began = Date.now
-            while !Task.isCancelled {
-                let t = min(1, Date.now.timeIntervalSince(began)/duration)
-                // In the window, a critically damped ease-out like the app's spring; in the sky, a
-                // gentle ease in and out, so the stars never lurch into motion.
-                let eased = immersive ? (1-cos(Double.pi*t))/2 : (1 - (1 + 6*t)*exp(-6*t))/(1 - 7*exp(-6))
-                fraction = start + (goal-start)*(t >= 1 ? 1 : eased)
-                if t >= 1 { break }
-                try? await Task.sleep(for: .milliseconds(11))
-            }
-        }
+        sweeping = ClockSweep(start: start, goal: goal, began: .now, duration: duration, immersive: immersive)
+        drive()
     }
     func darkest(reduceMotion: Bool) {
         guard let plan else { return }
         move(to: SkyDome.fraction(of: SkyDome.darkest(plan.sky), in: plan.span), reduceMotion: reduceMotion)
     }
-    func cancelSweep() { sweep?.cancel(); chase?.cancel(); chase = nil }
+    func cancelSweep() { sweeping = nil; chasing = nil; driver?.cancel(); driver = nil }
 
     // MARK: Turning the sky by hand
 
     /// Constellation figures in the immersive sky (the window's toggle). On by default; not
     /// stored: of the planner's choices, Nyx on Vision Pro remembers only the park.
     var constellations = true
-    private var chase: Task<Void, Never>?
-    private var chaseGoal = 0.0
     /// For a drag across the immersive sky: the clock follows the hand toward `target`, but the
     /// sky never turns faster than `comfortableTurn`, however fast the hand moves.
     func turn(toward target: Double) {
-        sweep?.cancel()
-        chaseGoal = min(1, max(0, target))
-        guard chase == nil else { return }
-        chase = Task {
-            var last = Date.now
+        sweeping = nil
+        let goal = min(1, max(0, target))
+        if chasing == nil { chasing = ClockChase(goal: goal, last: .now) } else { chasing?.goal = goal }
+        drive()
+    }
+
+    // MARK: The clock's motion, frame by frame
+
+    /// A sweep to `goal`, `duration` seconds from `began`: in the window a critically damped ease-out
+    /// like the app's spring; in the sky a gentle ease in and out, so the stars never lurch into motion.
+    private struct ClockSweep { let start: Double; let goal: Double; let began: Date; let duration: Double; let immersive: Bool }
+    /// The clock following a hand, as of the last frame.
+    private struct ClockChase { var goal: Double; var last: Date }
+    @ObservationIgnored private var sweeping: ClockSweep?
+    @ObservationIgnored private var chasing: ClockChase?
+    /// Drives the motion while only the window shows it; the immersive sky drives it from its own
+    /// frames (`SceneEvents.Update`, `SkySpace`), in step with what is drawn.
+    @ObservationIgnored private var driver: Task<Void, Never>?
+    /// Whether the clock is moving on its own (a sweep, or a chase after the hand).
+    var clockMoving: Bool { sweeping != nil || chasing != nil }
+    /// One frame of the clock's motion at `now`, from whichever display is drawing it. Time-based, so
+    /// a frame from the sky and one from the window in the same instant agree. False once at rest.
+    @discardableResult func advance(to now: Date) -> Bool {
+        if let sweep = sweeping {
+            let t = min(1, max(0, now.timeIntervalSince(sweep.began)/sweep.duration))
+            let eased = sweep.immersive ? (1-cos(Double.pi*t))/2 : (1 - (1 + 6*t)*exp(-6*t))/(1 - 7*exp(-6))
+            fraction = sweep.start + (sweep.goal-sweep.start)*(t >= 1 ? 1 : eased)
+            if t >= 1 { sweeping = nil }
+        }
+        if var chase = chasing {
+            let step = now.timeIntervalSince(chase.last)
+            chase.last = now
+            let degrees = (plan?.span.duration ?? 0)/3600*15.04
+            fraction = SkyDome.chaseStep(from: fraction, toward: chase.goal, seconds: step, degreesPerNight: degrees, limit: Self.comfortableTurn)
+            chasing = abs(chase.goal-fraction) < 0.0001 ? nil : chase
+        }
+        return clockMoving
+    }
+    /// The window's driver: about 90 steps a second until the clock rests or the immersive sky opens
+    /// (whose frames then carry it).
+    private func drive() {
+        guard !immersiveOpen, driver == nil else { return }
+        driver = Task { [weak self] in
             while !Task.isCancelled {
-                let now = Date.now, step = now.timeIntervalSince(last)
-                last = now
-                let degrees = (plan?.span.duration ?? 0)/3600*15.04
-                fraction = SkyDome.chaseStep(from: fraction, toward: chaseGoal, seconds: step, degreesPerNight: degrees, limit: Self.comfortableTurn)
-                if abs(chaseGoal-fraction) < 0.0001 { break }
+                guard let self, !self.immersiveOpen, self.advance(to: .now) else { break }
                 try? await Task.sleep(for: .milliseconds(11))
             }
-            // A cancelled chase may already have been replaced; only a finished one clears itself.
-            if !Task.isCancelled { chase = nil }
+            if !Task.isCancelled { self?.driver = nil }
         }
     }
 }

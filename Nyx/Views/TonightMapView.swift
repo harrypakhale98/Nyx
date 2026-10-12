@@ -134,7 +134,8 @@ struct TonightMapView: View {
             .task { await WorldLandStore.shared.load() }
     }
     private var drawing: some View {
-        TimelineView(.animation(minimumInterval:1/60,paused:reduceMotion || done || started == nil)) { timeline in
+        // The display's own rate (120 Hz on ProMotion) while it draws in; paused, nothing redrawn, once drawn.
+        TimelineView(.animation(minimumInterval:nil,paused:reduceMotion || done || started == nil)) { timeline in
             TonightMapCanvas(map:map,ring:ring,origin:origin,progress:progress(at:timeline.date),highlighted:focused ?? hovered).accessibilityHidden(true)
         }
     }

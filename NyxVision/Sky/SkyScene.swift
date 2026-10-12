@@ -92,6 +92,9 @@ import UIKit
     var activation: EventSubscription?
     /// VoiceOver's increment and decrement on the sky, kept alive with the scene.
     var adjustments: [EventSubscription] = []
+    /// Each rendered frame of the immersive sky, which carries the clock's sweeps and chases
+    /// (`VisionModel.advance`), kept alive with the scene.
+    var frames: EventSubscription?
 
     init() {
         root.name = "sky"

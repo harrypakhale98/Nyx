@@ -156,14 +156,24 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
     private func cosD(_ a: Double) -> Double { cos(a*rad) }
     /// Local hour angle (radians) of a body at right ascension `ra` (radians).
     private func hourAngle(date: Date, park: Park, ra: Double) -> Double {
+        localSidereal(date: date, park: park) - ra
+    }
+    /// The local sidereal angle (radians) at a place and moment: the part of every hour angle that
+    /// does not depend on the body. A sky of a thousand stars at one moment works it out once
+    /// (`horizontal(localSidereal:latitude:ra:dec:)`), with results identical to `horizontal(date:park:ra:dec:)`.
+    func localSidereal(date: Date, park: Park) -> Double {
         let jd = julian(date)
         let t = (jd-2451545)/36525
         let sidereal = normalized(280.46061837 + 360.98564736629*(jd-2451545) + 0.000387933*t*t - t*t*t/38710000)
-        return (sidereal + park.longitude)*rad - ra
+        return (sidereal + park.longitude)*rad
     }
     /// Altitude and azimuth (degrees; azimuth from north through east) of an equatorial position.
     func horizontal(date: Date, park: Park, ra: Double, dec: Double) -> (altitude: Double, azimuth: Double) {
-        let h = hourAngle(date: date, park: park, ra: ra), lat = park.latitude*rad
+        horizontal(localSidereal: localSidereal(date: date, park: park), latitude: park.latitude, ra: ra, dec: dec)
+    }
+    /// `horizontal(date:park:ra:dec:)` from a local sidereal angle already worked out for the moment.
+    func horizontal(localSidereal: Double, latitude: Double, ra: Double, dec: Double) -> (altitude: Double, azimuth: Double) {
+        let h = localSidereal - ra, lat = latitude*rad
         let alt = asin(max(-1,min(1,sin(lat)*sin(dec)+cos(lat)*cos(dec)*cos(h))))
         let az = atan2(-sin(h)*cos(dec), cos(lat)*sin(dec)-sin(lat)*cos(dec)*cos(h))
         return (alt/rad, normalized(az/rad))

@@ -47,6 +47,8 @@ import WidgetKit
         if current.contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
         // "Tonight" as of now, even in a background launch whose model last looked at the clock hours ago.
         model.tick()
+        // Never a snapshot from before the launch's cache reads land (`PlanModel.cachesPending`).
+        await model.cachesReady()
         defer {
             running=false
             if let next=Self.followUp(again,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }

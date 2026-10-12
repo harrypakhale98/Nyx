@@ -30,6 +30,15 @@ struct ParkDetailView: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) var typeSize
+    @Environment(\.nyxAccess) private var access
+    /// The root's hold on an unseen score reveal (onboarding, first light), passed on to the hero.
+    @Environment(\.nyxRevealHeld) private var revealHeld
+    /// The page has finished arriving (the zoom or the sheet), so the score's first count plays on a
+    /// still page rather than under the transition. At once under Reduce Motion and Cross-Fade.
+    @State private var arrived=false
+    /// The hero's own hold: the root's, the page still arriving, or (a page opened in the first
+    /// moments of a slow launch) the offline caches still being read, whose forecast would change the score.
+    var heroHeld:Bool { revealHeld || !arrived || model.cachesPending }
     @Query private var saved:[SavedPark]
     /// The place the page was opened with. A saved spot is read again from the model (`park`), so a
     /// rename shows at once; once deleted, the page keeps what it opened with until it closes.
@@ -52,6 +61,10 @@ struct ParkDetailView: View {
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @State private var persistenceError=false
     @State private var scrubbing=false
+    /// The night the sky behind the page and the sky chapter keep while the river is scrubbed: the
+    /// last one the finger rested on. Nil otherwise, when they follow the river's night. Released
+    /// (with a cross-fade on the shared spring) when the finger lifts (`TimeRiver.hold`).
+    @State var heldNight:Date?
     /// A finger holds the sky arc: the page holds still, the Moon keeps its relief.
     @State private var holdingArc=false
     @State private var width=0.0
@@ -64,6 +77,9 @@ struct ParkDetailView: View {
     /// What's up has been scrolled to for a link that asked for it (`focusWhatsUp`).
     @State private var focusedWhatsUp=false
     var night:Night { model.night(park,on:selected ?? initialDate ?? model.tonight(park)) }
+    /// The night the sky chapter and the background show: the river's, except while it is scrubbed,
+    /// when they hold the night the scrub began on and change once, on release.
+    var skyNight:Night { heldNight.map { model.night(park,on:$0) } ?? night }
     var isTonight:Bool { night.id==model.tonight(park) }
     private var isSaved:Bool { saved.contains{$0.parkID==park.id} }
     var outlook:NightOutlook? { model.outlook(night) }
@@ -107,7 +123,11 @@ struct ParkDetailView: View {
                     .safeAreaBar(edge:.top) { if showsIndex { index(proxy) } }
                 }
             }
-            .onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+            .onPreferenceChange(RiverScrubbingKey.self) { now in
+                scrubbing=now
+                // The river releases its hold when the finger lifts; a scrub cut short by the system releases it here.
+                if !now, heldNight != nil { withAnimation(reduceMotion ? nil : NyxMotion.spring) { heldNight=nil } }
+            }
             .onPreferenceChange(ArcHoldingKey.self) { holdingArc=$0 }
             // The Moon hero drops its relief while the river or the Moon is scrubbed.
             .environment(\.moonRelief,!scrubbing)
@@ -165,7 +185,7 @@ struct ParkDetailView: View {
         .onAppear { KeepThisNight.container=context.container }
         // Handoff to another device, and the park Siri sees on screen.
         .parkHandoff(park,night:night.id)
-        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:night.score.value,park:park,night:night.id))
+        .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).background(NightBackground(seed:park.id,score:skyNight.score.value,park:park,night:skyNight.id))
             // Under the full-screen sky the page's own stars and dial rest, so the turning sky has the frames.
             .environment(\.skyResting,showsSky)
             .navigationTitle(park.shortName).navigationBarTitleDisplayMode(.inline)
@@ -185,10 +205,21 @@ struct ParkDetailView: View {
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
             // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it).
-            .task(id:riverStart) { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
+            .task(id:riverStart) {
+                let nights=model.nights(park,from:riverStart,count:30)
+                await model.prepareWhatsUp(nights)
+                // Both skies for the river's nights, off the main thread, so a night chosen on release finds them ready.
+                await SkyAhead.prepare(nights,trusted:model.astronomyIsEngine)
+            }
             // Park alerts and ranger programs only where the Park Service runs the place: a saved spot asks it nothing.
             // A place abroad: its forecast by its whole 10° tile (the model's), and a place in Spotlight (`SpotlightIndexer.remember`).
             // Keyed by the place, so a page handed another place in place (a restored or routed page) asks for that one's forecast too.
+            .task {
+                guard !arrived else { return }
+                // The zoom settles in about 0.38 s on the shared spring; the count follows it.
+                if !(reduceMotion || access.crossFade) { try? await Task.sleep(for:.milliseconds(380)) }
+                if !Task.isCancelled { arrived=true }
+            }
             .task(id:park.id) {
                 if park.isCatalogPlace { await SpotlightIndexer.remember(park,followed:Set(saved.map(\.parkID))) }
                 await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil)

@@ -82,7 +82,12 @@ struct NightBackground: View {
         ZStack {
             Color.black
             // No light domes on the wallpaper: with no horizon drawn, a dome's clipped foot reads as a seam.
-            if let place=park ?? home { RealSky(park:place,night:night ?? place.currentNight(at:.now),twinkle:twinkle,domes:false) }
+            // Keyed by the park and night, so a night chosen with an animation (the river's shared
+            // spring) cross-fades its sky in rather than cutting; without one it simply changes.
+            if let place=park ?? home {
+                let shown=night ?? place.currentNight(at:.now)
+                RealSky(park:place,night:shown,twinkle:twinkle,domes:false).id(SkyProjection.key(park:place,night:shown)).transition(.opacity)
+            }
             else { Starfield(seed:seed,twinkle:twinkle) }
             Color.black.opacity(veil)
         }.animation(.easeInOut(duration:0.6),value:palette.highContrast)

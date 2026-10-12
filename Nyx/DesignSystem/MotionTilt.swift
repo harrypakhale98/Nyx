@@ -102,3 +102,21 @@ private struct MotionTiltClient: ViewModifier {
     }
     nonisolated static func serious(_ state: ProcessInfo.ThermalState) -> Bool { state == .serious || state == .critical }
 }
+/// One rule for when Nyx's decoration rests, shared by every decorative timeline (the dial's
+/// orbiting stars and glint, the starfield, the real sky behind each screen): it redraws at most
+/// `rate` times a second, and not at all while it is held still (Reduce Motion, reduced
+/// resources), covered (a full-screen sky over the page, `skyResting`), out of view (scrolled
+/// away, Nyx in the background), in Low Power Mode, or while the device is hot (thermal state
+/// serious or critical). Resting keeps the frame on screen; it only stops redrawing it.
+@MainActor enum Decoration {
+    /// 30 Hz: twinkle and drift read as continuous at this rate, at a quarter of ProMotion's frames.
+    static let rate=30.0
+    static var interval: Double { 1/rate }
+    static func rests(still:Bool,covered:Bool=false,offscreen:Bool=false)->Bool {
+        rests(still:still,covered:covered,offscreen:offscreen,lowPower:PowerState.shared.lowPower,hot:PowerState.shared.thermalSerious)
+    }
+    /// The rule itself, from its inputs (tested).
+    nonisolated static func rests(still:Bool,covered:Bool,offscreen:Bool,lowPower:Bool,hot:Bool)->Bool {
+        still || covered || offscreen || lowPower || hot
+    }
+}

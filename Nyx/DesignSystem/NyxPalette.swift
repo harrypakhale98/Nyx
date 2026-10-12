@@ -64,4 +64,17 @@ enum NyxMotion {
     nonisolated static let response=0.65, dampingFraction=0.82
     nonisolated static let model=Spring(response:response,dampingRatio:dampingFraction)
     static let spring=Animation.spring(response:response,dampingFraction:dampingFraction)
+    /// Under a finger: the same kind of spring, quick enough that what a scrub moves (the river's
+    /// loupe, its hairline and Moon) stays under the finger rather than trailing it. Released, the
+    /// shared spring takes over.
+    nonisolated static let trackingResponse=0.15, trackingDamping=0.86
+    static let tracking=Animation.spring(response:trackingResponse,dampingFraction:trackingDamping)
+    /// A short settle, for an answer already seen (the dial's 0.35 s landing, its band word).
+    nonisolated static let settleDuration=0.35
+    static let settle=Animation.spring(duration:settleDuration)
+    /// The cold launch: the app settling in over the launch screen's stars, slower and calmer than a change on a screen.
+    static let launch=Animation.spring(response:0.9,dampingFraction:0.9)
+    /// A line drawing itself or words arriving: critically damped, so a pen never overshoots its star.
+    static let trace=Animation.spring(response:1.4,dampingFraction:1)
+    static let arrival=Animation.spring(response:1.6,dampingFraction:1)
 }

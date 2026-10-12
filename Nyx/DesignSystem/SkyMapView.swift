@@ -154,7 +154,8 @@ struct SkyMapView: View {
     private var drawKey: String { drawInMemory == nil ? "\(content.figures.count)" : "\(signature.figures)-\(signature.edges)" }
     private var arrivalRunning: Bool { arriving != nil && arrivalHold == nil && arrivalStart != nil && arrivedID != arriving }
     var body: some View {
-        TimelineView(.animation(minimumInterval:1/60,paused:reduceMotion ? !arrivalRunning : ((done || started == nil) && !arrivalRunning))) { timeline in
+        // The display's own rate (120 Hz on ProMotion) while it draws in; paused, nothing redrawn, once drawn.
+        TimelineView(.animation(minimumInterval:nil,paused:reduceMotion ? !arrivalRunning : ((done || started == nil) && !arrivalRunning))) { timeline in
             let elapsed=started.map { timeline.date.timeIntervalSince($0) } ?? 0
             // Already drawn this launch (or a star arriving into figures already drawn): no pen at all.
             let drawn=started == nil && (arriving != nil || drawInMemory.map { !signature.grows(from:SkyMapDrawIns.drawn[$0]) } == true)

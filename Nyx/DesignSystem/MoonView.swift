@@ -113,6 +113,23 @@ extension AstronomyEngine {
         return (moonGeometry(for:night.park,at:at),at)
     }
 }
+/// `AstronomyEngine.moon(for:)` kept per place and night, so the screens that draw one night's Moon
+/// (the river's, the Moon at size, the sky arc's) search the night for its highest point once
+/// between them, not once each on every redraw of a scrub.
+@MainActor enum MoonMoments {
+    private static var kept:[String:(geometry:MoonGeometry,moment:Date)]=[:]
+    private static var order:[String]=[]
+    private static let capacity=96
+    static func moon(for night:Night)->(geometry:MoonGeometry,moment:Date) {
+        let park=night.park
+        let key="\(park.id)|\(park.latitude)|\(park.longitude)|\(night.id.timeIntervalSince1970)"
+        if let moon=kept[key] { return moon }
+        let moon=AstronomyEngine().moon(for:night)
+        kept[key]=moon; order.append(key)
+        if order.count>capacity { kept[order.removeFirst()]=nil }
+        return moon
+    }
+}
 #Preview("Phases at Joshua Tree") {
     let engine=AstronomyEngine()
     if let park=try? ParkData.load().first(where:{ $0.id=="jotr" }) {

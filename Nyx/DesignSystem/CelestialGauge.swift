@@ -9,8 +9,10 @@ import SwiftUI
 /// The same park and night seen again settles in 0.35 s with one light tick; later changes
 /// (scrubbing nights) sweep on the shared spring. While the reveal is unseen and nobody can see it
 /// (onboarding over the tabs, first light, another tab, the background), the dial waits empty.
-/// The count-up runs at the display's rate and then stops; the ambient stars and the glint redraw
-/// at 30 Hz at most.
+/// The count-up runs at the display's rate, one value per frame from the time since it began, and
+/// then stops; the ambient stars and the glint redraw at `Decoration.rate` at most. Crossing 70 and
+/// 90, the orbiting stars quicken for a moment on the frame of the medium pulse; the landing's light
+/// tick comes with one amber glow at the arc's tip. Under Reduce Motion the dial shows the answer still.
 ///
 /// Only the drawing scales with the dial, the glass rim included (`DialMetrics`). The numeral is
 /// part of the drawing; the band and "DARKNESS / 100" keep their own text styles and move below
@@ -57,8 +59,16 @@ struct CelestialGauge: View {
     @State private var arc=0.0
     /// The numeral shown.
     @State private var shown=0
+    /// Bumped once for each milestone (70, 90) a count-up crosses: the medium pulse.
     @State private var milestone=0
     @State private var landed=0
+    /// When the count-up began, while it runs: the display's frames carry it from here (`tick`).
+    @State private var countStart: Date?
+    /// When each milestone was crossed, for the orbiting stars' brief quickenings (each adds its
+    /// turn to the orbit for good, so a later one never winds an earlier one back).
+    @State private var surges: [Date]=[]
+    /// The landing, for the one amber glow at the arc's tip.
+    @State private var glow: Date?
     /// The band word shows: the count has landed, was cut short, or never ran.
     @State private var settled=false
     /// The dial waits empty: before the first reveal, and while an unseen reveal is held.
@@ -147,6 +157,13 @@ struct CelestialGauge: View {
         .onDisappear { if !revealedOnce { countedScore=nil } }
         // Another park or night with the score already on the dial: nothing moves, but it has settled.
         .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
+        // The count's frames: one value per display frame, read from the time since it began.
+        .background { if countStart != nil && !still { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } } }
+        // A milestone is felt and seen on the same frame: the medium pulse and the stars quickening.
+        .onChange(of:shown) { old,new in
+            guard counting, !Self.milestones(from:old,to:new).isEmpty else { return }
+            milestone+=1; surges.append(.now)
+        }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone) { _,_ in haptics }
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
@@ -175,8 +192,18 @@ struct CelestialGauge: View {
     nonisolated static func milestones(from old:Int,to new:Int)->[Int] { [70,90].filter { old<$0 && new>=$0 } }
     /// How long the count-up runs for a score: until the numeral rounds to it.
     nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2.2*Double(score))+numeralLag }
+    /// How far (radians) a milestone's quickening has carried the orbiting stars `t` seconds after it:
+    /// a brief extra turn of about 20° that is fastest at once and settled within about a second.
+    /// It is the integral of a decaying speed, so the stars speed up and slow down without jumping.
+    nonisolated static let surgeAngle=0.35, surgeSettle=0.3
+    nonisolated static func surgeTurn(_ t:Double)->Double { t<=0 ? 0 : surgeAngle*(1-exp(-t/surgeSettle)) }
+    /// The landing's amber glow `t` seconds in: how strong and how far it has spread, both 0 to 1.
+    nonisolated static func landingGlow(_ t:Double)->(strength:Double,spread:Double) {
+        guard t>=0, t<1.2 else { return (0,t<0 ? 0 : 1) }
+        return (exp(-t/0.35)*min(1,t/0.04),1-exp(-t/0.25))
+    }
     /// How long a score already seen this session takes to settle.
-    nonisolated static let settleDuration=0.35
+    nonisolated static let settleDuration=NyxMotion.settleDuration
 
     /// What a reveal does, decided before anything moves:
     /// - `instant`: Reduce Motion and exported images show the score at once, even while held.
@@ -246,7 +273,7 @@ struct CelestialGauge: View {
             let start=Self.sweepStart(from:face,to:score,carrying:sweeping ? leavingBands : [])
             let rangeWaits = !rangeShown
             counting=false; leavingBands=start.leaving; sweeping=true
-            withAnimation(plan == .settle ? .spring(duration:Self.settleDuration) : NyxMotion.spring,completionCriteria:.logicallyComplete) {
+            withAnimation(plan == .settle ? NyxMotion.settle : NyxMotion.spring,completionCriteria:.logicallyComplete) {
                 face=start.face; waiting=false
             } completion: {
                 // A later reveal owns the dial now: its own landing ticks and brings the range.
@@ -302,31 +329,31 @@ struct CelestialGauge: View {
                 ScoreReveals.note(key,plan:.odometer,landed:false)
                 // Cut short: the whole answer if nothing followed, otherwise the next reveal's dial.
                 face=Self.cancelled(face,score:score,generation:generation,mine:mine)
-                if generation==mine { counting=false }
+                if generation==mine { counting=false; countStart=nil }
             }
         }
-        let clock=ContinuousClock(), start=clock.now, total=Self.duration(score:score)
-        while !Task.isCancelled {
-            let elapsed=start.duration(to:clock.now)
-            let t=Double(elapsed.components.seconds)+Double(elapsed.components.attoseconds)/1e18
-            let value=Self.countValue(score:score,at:t)
-            if let crossed=Self.milestones(from:shown,to:value).last { milestone=crossed }
-            arc=Double(score)*Self.progress(t)
-            shown=value
-            if t>=total || value>=score { break }
-            try? await Task.sleep(for:.milliseconds(8))
-        }
+        // The display's frames carry the count from here (`tick`); this task only waits for its end.
+        countStart=began
+        try? await Task.sleep(for:.seconds(Self.duration(score:score)))
         guard !Task.isCancelled else { return }
         finished=true
+        countStart=nil
         LaunchSignposts.end(interval); LaunchSignposts.firstLanding(countStarted:began)
-        // The final digit, the word and the light tick in one transaction.
-        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { face = .answer(score); landed+=1 } completion: {
+        // The final digit, the word, the light tick and the tip's amber glow in one transaction.
+        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { face = .answer(score); landed+=1; glow = .now } completion: {
             // At rest the numeral is the sweep's, so a later score travels with the arc.
             if generation==mine { counting=false }
         }
         revealedOnce=true
         ScoreReveals.note(key,plan:.odometer,landed:true)
         onSettled?(key); showRange()
+    }
+    /// One frame of the count-up: the arc and the numeral where they are `now` seconds in.
+    private func tick(_ now:Date) {
+        guard counting, let countStart else { return }
+        let t=now.timeIntervalSince(countStart)
+        arc=Double(score)*Self.progress(t)
+        shown=Self.countValue(score:score,at:t)
     }
     /// Uncertainty comes last: the model range fades in a beat after the word.
     private func showRange() {
@@ -384,12 +411,14 @@ struct CelestialGauge: View {
             ambient(displayed)
         }.accessibilityHidden(true)
     }
-    /// The glint, the leading star's pulse and the orbiting stars: decoration, at 30 Hz at most,
-    /// still under Reduce Motion, reduced resources, Low Power Mode and in exported images, and
-    /// resting while the dial is scrolled out of view.
+    /// The glint, the leading star's pulse and the orbiting stars: decoration, at `Decoration.rate` at
+    /// most, still under Reduce Motion, reduced resources and in exported images, and resting by the
+    /// one rule (`Decoration.rests`): covered, scrolled out of view, Low Power Mode, a hot device.
     private func ambient(_ displayed:Double)->some View {
-        let still=reduceMotion || export || access.reducedResources || PowerState.shared.lowPower
-        return TimelineView(.animation(minimumInterval:1/30,paused:still || resting || !onScreen)) { timeline in
+        let still=reduceMotion || export || access.reducedResources
+        let rests=Decoration.rests(still:still,covered:resting,offscreen:!onScreen || scenePhase == .background)
+        let surges=self.surges, glow=self.glow
+        return TimelineView(.animation(minimumInterval:Decoration.interval,paused:rests)) { timeline in
             Canvas { context,size in
                 let dial=min(size.width,size.height), k=DialMetrics.scale(side:dial)
                 let center=CGPoint(x:size.width/2,y:size.height/2), radius=dial/2-DialMetrics.inset(side:dial)
@@ -408,15 +437,24 @@ struct CelestialGauge: View {
                     let point=CGPoint(x:center.x+cos(tip.radians)*radius,y:center.y+sin(tip.radians)*radius)
                     let pulse=still ? 1 : 0.85+0.15*sin(t*2.4)
                     context.fill(Path(ellipseIn:CGRect(x:point.x-10,y:point.y-10,width:20,height:20)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.6*pulse*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:10))
+                    // The landing: one amber bloom at the tip, gone in about a second. Only while the
+                    // stars are moving, so a resting dial never holds it on screen.
+                    let age=glow.map { timeline.date.timeIntervalSince($0) } ?? -1
+                    if !rests, !access.reduceHighlighting, age>=0, age<1.2 {
+                        let bloom=Self.landingGlow(age), r=10+14*bloom.spread
+                        context.fill(Path(ellipseIn:CGRect(x:point.x-r,y:point.y-r,width:2*r,height:2*r)),with:.radialGradient(Gradient(colors:[palette.accent.opacity(0.55*bloom.strength*access.glow),palette.accent.opacity(0)]),center:point,startRadius:0,endRadius:r))
+                    }
                     context.fill(Path(ellipseIn:CGRect(x:point.x-3.2,y:point.y-3.2,width:6.4,height:6.4)),with:.color(palette.ink))
                 }
-                // Orbiting stars: a loose ring that swirls faster and twinkles harder as the score rises.
+                // Orbiting stars: a loose ring that swirls faster and twinkles harder as the score rises,
+                // and quickens for a moment as the count crosses 70 and 90 (`surgeTurn`).
                 let energy=pow(Double(score)/100,3)
+                let extra=surges.reduce(0) { $0+Self.surgeTurn(timeline.date.timeIntervalSince($1)) }
                 for i in 0..<28 {
                     let seed=Double(i)*12.9898
                     let jitter=sin(seed)*43758.5453; let unit=jitter-floor(jitter)
                     let speed=(0.02+0.22*energy)*(i%2==0 ? 1 : 0.72)
-                    let a=Double(i)*2*Double.pi/28+unit*0.4+t*speed
+                    let a=Double(i)*2*Double.pi/28+unit*0.4+t*speed+extra*(i%2==0 ? 1 : 0.72)
                     let orbit=radius+(9+unit*9)*k
                     let twinkle=still ? 0.8 : 0.55+0.45*sin(t*(1.2+2.6*energy)+seed)
                     let big=i%4==0
@@ -464,7 +502,7 @@ private struct DialBandWord: View, Animatable {
             // Only the fade animates: a word changing in place must not slide as its width changes.
             .transaction { $0.animation=nil }
             .opacity(word == nil ? 0 : 1)
-            .animation(word == nil || still ? nil : .spring(duration:CelestialGauge.settleDuration),value:word)
+            .animation(word == nil || still ? nil : NyxMotion.settle,value:word)
     }
 }
 /// The dial's well, track, glow, arc and ticks for a value 0…100. Animatable, so a new night's
