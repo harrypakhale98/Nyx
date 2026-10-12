@@ -333,12 +333,15 @@ private struct RefreshNote: View {
 /// Each tab's content keeps the amber tint; the tab chrome around it learns whether it is a sidebar.
 /// The sidebar marks its selected row with white text on the tint, which amber cannot carry
 /// (about 1.8:1), so there the chrome takes the deeper control tint (about 5:1).
+/// Every tab's content waits behind the launch's score gate (`ScoreGate`) unless that tab is one
+/// the gate lists as carrying no score from the caches, so a tab added later waits by default.
 struct TabChrome: ViewModifier {
     @Environment(\.tabBarPlacement) private var placement
     @Environment(SceneCommands.self) private var commands: SceneCommands?
+    let tab: Int
     let tint: Color
     func body(content:Content)->some View {
-        content.tint(tint).onChange(of:placement == .sidebar,initial:true) { _,sidebar in
+        content.scoreGate(ScoreGate.gates(tab:tab)).environment(\.nyxTab,tab).tint(tint).onChange(of:placement == .sidebar,initial:true) { _,sidebar in
             if commands?.sidebar != sidebar { commands?.sidebar=sidebar }
         }
     }

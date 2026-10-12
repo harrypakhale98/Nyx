@@ -249,8 +249,6 @@ private struct DomeLayer: View, Equatable {
         var radiant: Mark?=nil
         var domes: [Dome]=[]
     }
-    /// Skies by park and night, oldest first out: each holds about 45 KB of stars, and scrubbing
-    /// thirty nights across several parks would otherwise keep every one of them.
     /// A source of artificial light around a park: bearing (degrees from north), its share of the
     /// park's modelled glow, and that glow (median park = 1).
     nonisolated struct LightSource: Sendable { let bearing: Double; let share: Double; let glow: Double }
@@ -260,9 +258,17 @@ private struct DomeLayer: View, Equatable {
         didSet { cache=[:]; recent=[]; tintCache=[:] }
     }
     nonisolated static func noLight(_ park:Park)->[LightSource] { [] }
+    /// Skies by park and night, the least recently used first out: each holds about 45 KB of stars
+    /// (with its tints, under 50), and scrubbing thirty nights across several parks would otherwise
+    /// keep every one of them. Reading a sky keeps it, so the river's thirty skies built ahead never
+    /// push out the launch's sixteen (`CachePreload.skyLimit`) while Tonight is still drawing them.
     private var cache:[String:Sky]=[:]
+    /// Keys from the least to the most recently used.
     private var recent:[String]=[]
-    private let capacity=40
+    private let capacity:Int
+    /// Room for the launch's skies, a river's thirty and a few more: about 3 MB at most.
+    nonisolated static let capacity=64
+    init(capacity:Int=SkyProjection.capacity) { self.capacity=capacity }
     /// A sky's star colours over one ink, band by band, in the order of its stars.
     nonisolated struct Tints: Sendable { let faint: [Color]; let middle: [Color]; let bright: [Color] }
     /// Tints by sky, for the ink they were resolved over; let go with their sky.
@@ -300,20 +306,25 @@ private struct DomeLayer: View, Equatable {
     func sky(for park:Park,night:Date,at instant:Date?=nil)->Sky {
         // Looked up before any astronomy: this runs whenever a screen behind the stars redraws.
         let key=Self.key(park:park,night:night,at:instant)
-        if let cached=cache[key] { return cached }
+        if let cached=cache[key] { touch(key); return cached }
         let sky=Self.build(park:park,night:night,at:instant,lights:lightSources(park))
         store(sky)
         return sky
     }
-    /// Whether a sky is already kept, so work done ahead skips it.
+    /// Whether a sky is already kept, so work done ahead skips it. Asking does not count as a use.
     func holds(_ key:String)->Bool { cache[key] != nil }
     /// Keeps a sky built elsewhere (ahead of time, off the main thread), as `sky(for:night:at:)` would.
-    /// One already kept stays: both were built from the same inputs.
+    /// One already kept stays (both were built from the same inputs) and counts as just used.
     func store(_ sky:Sky) {
-        guard cache[sky.id] == nil else { return }
+        guard cache[sky.id] == nil else { touch(sky.id); return }
         cache[sky.id]=sky
         recent.append(sky.id)
         if recent.count>capacity { let gone=recent.removeFirst(); cache[gone]=nil; tintCache[gone]=nil }
+    }
+    /// Marks a kept sky as the most recently used. A screen redrawing the same sky finds it last already.
+    private func touch(_ key:String) {
+        guard recent.last != key, let index=recent.firstIndex(of:key) else { return }
+        recent.remove(at:index); recent.append(key)
     }
     /// Builds a sky on any thread. `conditions`: the night's astronomy when the caller already has it
     /// (`PlanModel`'s, from the same engine), so it is not worked out again; `lights`: the park's

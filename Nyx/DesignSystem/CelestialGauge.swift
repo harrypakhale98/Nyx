@@ -12,7 +12,8 @@ import SwiftUI
 /// The count-up runs at the display's rate, one value per frame from the time since it began, and
 /// then stops; the ambient stars and the glint redraw at `Decoration.rate` at most. Crossing 70 and
 /// 90, the orbiting stars quicken for a moment on the frame of the medium pulse; the landing's light
-/// tick comes with one amber glow at the arc's tip. Under Reduce Motion the dial shows the answer still.
+/// tick comes with one amber glow at the arc's tip (a landing that is itself the step to 70 or 90 is
+/// that milestone's pulse instead, never both). Under Reduce Motion the dial shows the answer still.
 ///
 /// Only the drawing scales with the dial, the glass rim included (`DialMetrics`). The numeral is
 /// part of the drawing; the band and "DARKNESS / 100" keep their own text styles and move below
@@ -157,13 +158,9 @@ struct CelestialGauge: View {
         .onDisappear { if !revealedOnce { countedScore=nil } }
         // Another park or night with the score already on the dial: nothing moves, but it has settled.
         .onChange(of:revealKey) { _,key in if settled && !waiting && shown==score { onSettled?(key) } }
-        // The count's frames: one value per display frame, read from the time since it began.
-        .background { if countStart != nil && !still { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } } }
-        // A milestone is felt and seen on the same frame: the medium pulse and the stars quickening.
-        .onChange(of:shown) { old,new in
-            guard counting, !Self.milestones(from:old,to:new).isEmpty else { return }
-            milestone+=1; surges.append(.now)
-        }
+        // The count's frames: one value per display frame, read from the time since it began, and
+        // no frames at all once no count runs (landed, cut short, overtaken or held).
+        .background { if Self.framesRun(countStart:countStart,counting:counting,still:still) { TimelineView(.animation) { timeline in Color.clear.onChange(of:timeline.date,initial:true) { _,now in tick(now) } } } }
         .sensoryFeedback(.impact(weight:.medium),trigger:milestone) { _,_ in haptics }
         .sensoryFeedback(.impact(weight:.light),trigger:landed) { _,_ in haptics }
         .onScrollVisibilityChange(threshold:0.02) { onScreen=$0 }
@@ -190,6 +187,17 @@ struct CelestialGauge: View {
     nonisolated static func countValue(score:Int,at t:Double)->Int { min(score,Int((Double(score)*progress(t-numeralLag)).rounded())) }
     /// The milestones a step of the count from `old` to `new` crosses (70 and 90), for the medium ticks.
     nonisolated static func milestones(from old:Int,to new:Int)->[Int] { [70,90].filter { old<$0 && new>=$0 } }
+    /// The display's frames drive the dial only while a count-up runs: started, not yet landed, cut
+    /// short or overtaken, and not drawn still.
+    nonisolated static func framesRun(countStart:Date?,counting:Bool,still:Bool)->Bool { countStart != nil && counting && !still }
+    /// Whether a reveal leaves a count running: only the odometer starts one; every other plan
+    /// stops whatever count an earlier reveal left behind.
+    nonisolated static func counts(after plan:RevealPlan)->Bool { plan == .odometer }
+    /// The one haptic a landing plays: the medium pulse when the landing's own step reaches 70 or
+    /// 90 (a score of exactly 70 or 90 whose last frame stopped short of it), else the light tick.
+    /// Never both at once.
+    nonisolated enum LandingPulse: Equatable, Sendable { case light, milestone }
+    nonisolated static func landingPulse(from shown:Int,score:Int)->LandingPulse { milestones(from:shown,to:score).isEmpty ? .light : .milestone }
     /// How long the count-up runs for a score: until the numeral rounds to it.
     nonisolated static func duration(score:Int)->Double { score<=0 ? 0 : 0.28*log(2.2*Double(score))+numeralLag }
     /// How far (radians) a milestone's quickening has carried the orbiting stars `t` seconds after it:
@@ -255,16 +263,20 @@ struct CelestialGauge: View {
     }
     private func reveal() async {
         generation+=1
+        // A count this reveal overtakes stops here, whatever its own cleanup does later: its frames end
+        // with it, and only the odometer below starts the next.
+        countStart=nil
         let mine=generation, key=revealKey
         let plan=Self.plan(seen:key.map { ScoreReveals.seen.contains($0) } ?? false,held:held,reduceMotion:reduceMotion,export:export,
                            alreadyRevealed:Self.alreadyRevealed(revealedOnce:revealedOnce,countedScore:countedScore,score:score))
+        if !Self.counts(after:plan) { counting=false }
         let end=Self.face(after:plan,score:score)
         switch plan {
         case .instant:
             face=end; waiting=false; rangeShown=true; counting=false; leavingBands=[]; sweeping=false
             onSettled?(key)
         case .hold:
-            face=end; waiting=true; rangeShown=false; countedScore=nil; leavingBands=[]; sweeping=false
+            face=end; waiting=true; rangeShown=false; countedScore=nil; leavingBands=[]; sweeping=false; counting=false
         case .sweep, .settle:
             // The numeral and the arc travel on one spring (`DialNumeral`, `DialFace`), and the word
             // reads the same travelling number (`DialBandWord`, `wordShown`): the old word only while
@@ -339,8 +351,16 @@ struct CelestialGauge: View {
         finished=true
         countStart=nil
         LaunchSignposts.end(interval); LaunchSignposts.firstLanding(countStarted:began)
-        // The final digit, the word, the light tick and the tip's amber glow in one transaction.
-        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) { face = .answer(score); landed+=1; glow = .now } completion: {
+        // The final digit, the word, one haptic and the tip's amber glow in one transaction. A landing
+        // that itself reaches 70 or 90 is that milestone's pulse (with its quickening), not a second tick.
+        let pulse=Self.landingPulse(from:shown,score:score)
+        withAnimation(NyxMotion.spring,completionCriteria:.logicallyComplete) {
+            face = .answer(score); glow = .now
+            switch pulse {
+            case .light: landed+=1
+            case .milestone: milestone+=1; surges.append(.now)
+            }
+        } completion: {
             // At rest the numeral is the sweep's, so a later score travels with the arc.
             if generation==mine { counting=false }
         }
@@ -349,11 +369,15 @@ struct CelestialGauge: View {
         onSettled?(key); showRange()
     }
     /// One frame of the count-up: the arc and the numeral where they are `now` seconds in.
+    /// A milestone is felt and seen on the frame that reaches it: the medium pulse and the stars
+    /// quickening. Only here, so a held, landed or overtaken dial never pulses.
     private func tick(_ now:Date) {
         guard counting, let countStart else { return }
         let t=now.timeIntervalSince(countStart)
+        let value=Self.countValue(score:score,at:t)
+        if !Self.milestones(from:shown,to:value).isEmpty { milestone+=1; surges.append(now) }
         arc=Double(score)*Self.progress(t)
-        shown=Self.countValue(score:score,at:t)
+        shown=value
     }
     /// Uncertainty comes last: the model range fades in a beat after the word.
     private func showRange() {

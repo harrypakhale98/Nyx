@@ -174,6 +174,9 @@ struct ParkDetailView: View {
                 withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("whatsup",anchor:.top) }
             }
         }
+        // A page opened in the first moments of a slow launch (a link, a restored window) waits for
+        // the offline caches with the loader over its own sky, never a score they would change.
+        .scoreGate(background:false)
         .measuringWidth($width)
         // iPad keyboard: ⌘← and ⌘→ move along the river, as dragging it does.
         .nightKeys { delta in step(delta) }
@@ -204,8 +207,9 @@ struct ParkDetailView: View {
             .modifier(ReportsVisiblePark(parkID:park.id))
             .fullScreenCover(isPresented:$showsSky) { TonightSkyView(night:night,isTonight:isTonight).environment(\.nyx,palette).nyxPresentation().modifier(DebugTypeSize()) }
             .alert("Unable to save",isPresented:$persistenceError) { Button("OK",role:.cancel) {} } message:{ Text(model.journalUnavailable ? "Saved parks are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.") }
-            // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it).
-            .task(id:riverStart) {
+            // Again whenever the river moves on (left open past sunrise, or a night chosen beyond it), or the
+            // page is handed another place, which cancels the old place's build.
+            .task(id:RiverPrep(park:park.id,start:riverStart)) {
                 let nights=model.nights(park,from:riverStart,count:30)
                 await model.prepareWhatsUp(nights)
                 // Both skies for the river's nights, off the main thread, so a night chosen on release finds them ready.
@@ -261,7 +265,8 @@ struct ParkDetailView: View {
         if #available(iOS 27.0,*) {
             ToolbarItem(placement:.topBarPinnedTrailing) { saveButton }
         } else { ToolbarItem(placement:.topBarTrailing) { saveButton } }
-        ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night) }
+        // Nothing to share until the page has its score (`ScoreGate`).
+        ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
         // iPad: this park in a window of its own, beside another (not in a park's own window).
         if multipleWindows, commands?.parkWindow != true {
             ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
@@ -272,6 +277,8 @@ struct ParkDetailView: View {
             .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace))
     }
 }
+/// What the river's skies are built ahead for: the place and the river's first night.
+private struct RiverPrep: Hashable { let park: String; let start: Date }
 /// The bookmark's words. For a park, saving it; for a spot (always kept in Your spots until it is
 /// deleted), following it: a followed spot is in the widgets, reminders and on Apple Watch. A place
 /// abroad is saved as a place: a town or a reserve is not a park.

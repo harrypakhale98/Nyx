@@ -224,6 +224,12 @@ import WidgetKit
         NotificationCenter.default.post(name:changed,object:nil)
     }
     static func present(park: Park, model: PlanModel, from controller: UIViewController?) {
+        // Field mode keeps the night's score for the whole session: opened from Control Center on a slow
+        // launch, it waits for the offline caches (`ScoreGate`) rather than keeping a score they would change.
+        if model.cachesPending {
+            Task { [weak controller] in await model.cachesReady(); present(park: park, model: model, from: controller) }
+            return
+        }
         guard supported, var top=controller else { return }
         while let next=top.presentedViewController { top=next }
         if let open=top as? FieldHostingController {

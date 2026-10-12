@@ -71,11 +71,11 @@ struct RootView:View {
                 // Four tabs: where (Tonight, Parks), when (Plan: the month, or the nights you are free),
                 // and remember (Journal). Learn lives in Settings › About the sky and beside the sky it explains.
                 TabView(selection:$commands.tab) {
-                    Tab(value:0) { NavigationStack { TonightView() }.environment(\.nyxTab,0).modifier(TabChrome(tint:palette.accent)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
+                    Tab(value:0) { NavigationStack { TonightView() }.modifier(TabChrome(tab:0,tint:palette.accent)) } label:{ Label { Text("Tonight") } icon:{ moonIcon } }
                     // Parks becomes a list beside the park on a wide iPad; a stack in narrow windows and on iPhone.
-                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().environment(\.nyxTab,1).modifier(TabChrome(tint:palette.accent)) }
-                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.environment(\.nyxTab,2).modifier(TabChrome(tint:palette.accent)) }
-                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.environment(\.nyxTab,3).modifier(TabChrome(tint:palette.accent)) }
+                    Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.accent)) }
+                    Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.accent)) }
+                    Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.accent)) }
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)

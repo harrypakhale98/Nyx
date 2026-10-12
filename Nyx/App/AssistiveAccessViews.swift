@@ -17,7 +17,8 @@ struct AssistiveAccessRoot: View {
     var body: some View {
         // High contrast throughout: amber and starlight at full strength, and the brighter red.
         let palette=NyxPalette(nightVision:nightVision,highContrast:true,boldText:legibility == .bold)
-        NavigationStack { AssistiveHome() }
+        // Each card names the night's band: it waits for the launch's cache reads as the full app's tabs do (`ScoreGate`).
+        NavigationStack { AssistiveHome() }.scoreGate()
             .environment(\.nyx,palette)
             .preferredColorScheme(.dark)
             .background(AssistiveSavedSync())

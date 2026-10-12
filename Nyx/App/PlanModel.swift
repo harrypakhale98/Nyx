@@ -220,6 +220,12 @@ import CoreLocation
                         await self.seedServices(cached).value
                     }
                 }
+                // Tonight's skies are built after the reads, so neither the first frame nor the scores wait
+                // on them; kept as soon as they are done (one the first frame already has stays as it is).
+                Task { [weak self] in
+                    let skies=await preload.skies()
+                    self?.keep(skies)
+                }
             } else { hydration=Task { await hydrate() } }
         }
         #if DEBUG
@@ -241,9 +247,13 @@ import CoreLocation
     }
     /// How long the first frame may wait for the offline caches read since launch (`CachePreload`).
     static let preloadWait=0.15
-    /// The offline caches are still being read after the first frame (`preloadWait` passed): Tonight
-    /// and Parks show their loading states rather than a score the caches are about to change.
+    /// The offline caches are still being read after the first frame (`preloadWait` passed): every
+    /// surface with a score waits behind `ScoreGate` rather than show a score the caches are about to change.
     private(set) var cachesPending=false
+    /// Skies built ahead at launch, kept only when they come from the same astronomy as the screens'.
+    private func keep(_ skies:[SkyProjection.Sky]) {
+        if astronomy is AstronomyEngine { for sky in skies { SkyProjection.shared.store(sky) } }
+    }
     /// What the launch reads found: forecasts, forecast detail, alerts, the week's astronomy near the
     /// starting point and tonight's skies there. `replacing`: before the first frame, nothing newer
     /// exists; later, anything already newer is kept.
@@ -255,7 +265,7 @@ import CoreLocation
             for (id,detail) in details where self.details[id] == nil { self.details[id]=detail }
         }
         seed(cached.conditions)
-        if astronomy is AstronomyEngine { for sky in cached.skies { SkyProjection.shared.store(sky) } }
+        keep(cached.skies)
         if replacing || alertsCache == nil { apply(AlertsUpdate(cache:cached.alerts,busy:false)) }
         LaunchSignposts.note("Caches ready")
     }
