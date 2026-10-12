@@ -1,14 +1,12 @@
 # Nyx
 
-A calm, offline-first dark-sky planner for the darkest nights, wherever you are: the 63 US national parks, checked by hand, about 3,400 national parks and certified dark-sky places in 172 countries, and any spot you save. Nyx weighs moonlight, clouds, estimated sky glow and the length of true darkness into one darkness score (0–100) per place per night, so you can choose where to go and which night to take off. No accounts, advertising, tracking, backend or third-party runtime packages.
+A calm, offline-first dark-sky planner for the darkest nights, wherever you are: the 63 US national parks, checked by hand, about 3,400 national parks and certified dark-sky places in 172 countries, and any spot you save. Nyx weighs moonlight, clouds, estimated sky glow and the length of true darkness into one darkness score (0–100) per place per night, so you can choose where to go and which night to take off. No accounts, advertising, tracking, backend or third-party runtime packages. It runs on iPhone, iPad, Apple Watch and Apple Vision Pro, in English, Spanish, German, French and Japanese.
 
-Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served from `docs/` by a Cloudflare Worker that deploys on every push to `main` (`wrangler.jsonc`: 404 page and clean URLs; `docs/_headers`: security headers) (GitHub Pages still serves the same folder at harrypakhale98.github.io/Nyx for links in older builds).
+Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served from `docs/` by a Cloudflare Worker that deploys on every push to `main` (`wrangler.jsonc`: 404 page and clean URLs; `docs/_headers`: security headers). GitHub Pages still serves the same folder at harrypakhale98.github.io/Nyx for links in older builds. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## Version
 
-**2.0 (16)** in `project.yml`, the next release, from `main`. The App Store goes from 1.1 straight to 2.0 (the owner's decision, `DECISIONS.md` "2.0 — the release"), so 2.0 carries everything since 1.1: the score's caps and usual clouds, Plan, field mode's Live Activity, Assistive Access (1.2); the Moon's relief, named stars and the models' range (1.3); the review fixes (1.3.1); Siri, widgets and controls across the watch, Vision Pro and iPad (1.4); speed and structure (1.4.1); and the global work (G1 to G5): places around the world, saved spots, the world catalogue and German, French and Japanese. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` live in `project.yml` and every target inherits them.
-
-History: **1.1 (7)** has been live on the App Store since 2026-10-07 (ID 6818817800); it added What's up tonight, an honest forecast, field mode, Apple Watch, Apple Vision Pro, iPad, measured sky glow, audio graphs, Spanish, the trip planner and your constellation. **1.2 (8)** was approved on 2026-10-09 and never released; **1.3 (10)** and **1.3 (11)** were uploaded on 2026-10-09 and 2026-10-10 and never submitted; **1.3.1 (12)** was never uploaded; **1.4 (13)** and **1.4.1 (14)** were built on branches and merged into `main` on 2026-10-11 without an upload. All of them reach people as 2.0. 1.0 (5) was only uploaded and never public.
+The current version and build are in `project.yml` (`MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; every target inherits them). The release in progress is **2.0**. The App Store goes from 1.1 (live since 2026-10-07, ID 6818817800) straight to 2.0 (the owner's decision, `DECISIONS.md` "2.0 — the release"), so 2.0 carries everything since 1.1: the score's caps and usual clouds, Plan, field mode's Live Activity and Assistive Access (1.2); the Moon's relief, named stars and the models' range (1.3); the review fixes (1.3.1); Siri, widgets and controls across the watch, Vision Pro and iPad (1.4); speed and structure (1.4.1); and the global work (G1 to G5): places around the world, saved spots, the world catalogue, and German, French and Japanese. The versions between 1.1 and 2.0 were never released on their own; their handoffs are in [Research/history/handoffs.md](Research/history/handoffs.md).
 
 Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md). Archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json` and never prints the NPS key); `python3 Scripts/verify_release.py --source-only` runs the repository checks alone, with no archive.
 
@@ -22,13 +20,13 @@ Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED
 | `NyxVision/` | Apple Vision Pro planner window and immersive sky |
 | `NyxTests/`, `NyxUITests/` | Swift Testing suite; XCTest UI, launch and accessibility-audit tests |
 | `Config/` | Info.plists, entitlements, `Nyx.xcconfig` (and your git-ignored `Secrets.xcconfig`) |
-| `Scripts/` | Data builders, catalog sync, translation merge, screenshot capture, store frames, release verification, the promo video |
-| `Research/` | Sources and evidence behind the bundled data: accuracy against USNO, sky glow, cloud climate, contrast, performance, localization memory, review screenshots |
-| `Store/` | App Store metadata, screenshots (raw and captioned), In-App Event media, social posts |
+| `Scripts/` | Data builders, catalog sync, translation merge, screenshot capture, store frames, release verification |
+| `Research/` | Sources and evidence behind the bundled data: accuracy against USNO, sky glow, cloud climate, contrast, performance, localization memory; `history/` holds the archived decisions, handoffs, 1.0 audit and superseded store text; `device-pass.md` records the physical device pass |
+| `Store/` | App Store metadata and screenshots for 2.0 (`2.0/`), In-App Event media, social posts |
 | `docs/` | The public website: landing, support, privacy, case study and press pages (get-nyx.com, served by a Cloudflare Worker) |
 | `project.yml` | XcodeGen spec for every target; `Nyx.xcodeproj` is generated from it |
 
-Project documents: [DECISIONS.md](DECISIONS.md) (every decision with its reason), [PHASE_STATUS.md](PHASE_STATUS.md) (latest handoff), [AUDIT.md](AUDIT.md) (design, accessibility and device-gate evidence), [PRIVACY.md](PRIVACY.md) (privacy review), [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md) (release checklist and the owner's tasks).
+Project documents: [DECISIONS.md](DECISIONS.md) (the standing rules and an index of every decision, with its reason; the dated sections are in `Research/history/decisions/`), [PHASE_STATUS.md](PHASE_STATUS.md) (latest handoff), [Research/history/AUDIT-1.0.md](Research/history/AUDIT-1.0.md) (the 1.0 design, accessibility and device-gate evidence) and [Research/device-pass.md](Research/device-pass.md) (device-pass results), [PRIVACY.md](PRIVACY.md) (privacy review), [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md) (release checklist and the owner's tasks).
 
 ## Run
 
@@ -100,32 +98,32 @@ The scheme runs the Swift Testing suite and the XCTest UI tests, including `NyxU
 
 ```sh
 xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
-  -destination 'platform=iOS Simulator,id=4B98F460-8228-4B8B-8626-2BE43641E876' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' \
   -derivedDataPath /tmp/NyxBuild CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
 ```
 
 ```sh
 xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
-  -destination 'platform=iOS Simulator,id=5BB44DBD-DBE4-4FA3-84C8-8E92D3B3F0B3' \
+  -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0' \
   -derivedDataPath /tmp/NyxBuild CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
 ```
 
-These are this machine's iPhone 17 Pro / iOS 26.5 and iPhone 18 Pro / iOS 27.0. On another machine, substitute IDs from `xcrun simctl list devices available`. App Group simulation needs the ad-hoc signed simulator build. For an unsigned device Release archive:
+The first runs on iOS 26.5, the second on iOS 27.0; on another machine, use names and versions from `xcrun simctl list devices available`. App Group simulation needs the ad-hoc signed simulator build. For an unsigned device Release archive:
 
 ```sh
 xcodebuild archive -project Nyx.xcodeproj -scheme Nyx -configuration Release \
   -destination 'generic/platform=iOS' -archivePath /tmp/Nyx.xcarchive CODE_SIGNING_ALLOWED=NO
 ```
 
-Development signatures have get-task-allow enabled and need App Store distribution export or re-signing. Only Organizer validation and processing through the publisher's account establish distribution readiness. Real-device accessibility and performance review are release gates, not completed certifications ([AUDIT.md](AUDIT.md), [Research/performance.md](Research/performance.md)).
+Development signatures have get-task-allow enabled and need App Store distribution export or re-signing. Only Organizer validation and processing through the publisher's account establish distribution readiness. Real-device accessibility and performance review are release gates, not completed certifications ([Research/history/AUDIT-1.0.md](Research/history/AUDIT-1.0.md), [Research/device-pass.md](Research/device-pass.md), [Research/performance.md](Research/performance.md)).
 
-`Scripts/capture_system_accessibility.py SIMULATOR_ID 26` captures real Simulator AX5 and contrast settings and restores the previous ones afterwards. `Scripts/capture_store.py` and `Scripts/make_store_frames.swift` produce the iPhone store artwork (see `Store/1.2 v10/README.md`).
+`Scripts/capture_system_accessibility.py SIMULATOR_ID 26` captures real Simulator AX5 and contrast settings and restores the previous ones afterwards. `Scripts/capture_store.py`, `Scripts/make_store_frames.swift` and `Scripts/make_device_frames.swift` produce the store artwork (iPhone, iPad, Apple Watch, Apple Vision Pro; see `Store/2.0/Screenshots/README.md`).
 
 `swift -O Scripts/build_moon_atlas.swift SOURCE_FOLDER Nyx/Resources/MoonRelief.xcassets/MoonAtlas.imageset/MoonAtlas.jpg` rebuilds the large Moon's 4096×3072 atlas (the LROC colour map above, local relief from LOLA elevation below) from two public-domain NASA SVS CGI Moon Kit files, `lroc_color_poles_4k.tif` and `ldem_16_uint.tif`; their URLs, the layout and the relief step that `Moon.metal` uses are in the script's header. The atlas lives in an asset catalog that only the iPhone app and the Vision Pro app (for the window's Moon from 120 pt) include, so the widgets, the watch and the visionOS widget keep the smaller `MoonMap.jpg`. `swift -O Scripts/build_moon_globe.swift SOURCE_FOLDER NyxVision/Resources/MoonGlobe` rebuilds the Vision Pro Moon volume's globe textures from the same two files: the 4096×2048 colour map and a 2048×1024 tangent-space normal map baked from LOLA elevation, both compressed to ASTC in KTX with Xcode's TextureConverter (about 8 MB of texture memory in place of some 53 MB).
 
 ### Screenshot scenarios (DEBUG only)
 
-Launch with arguments such as `-nyx-screen detail -nyx-state offline`, or run `python3 Scripts/capture_screens.py SIMULATOR_ID 26`. Nothing on the simulator is changed by these routes. Scenarios use an in-memory journal, and sample journal content is DEBUG only. Offline scenarios may use a real cached forecast; `no-forecast` guarantees unknown clouds. Normal app behavior reads actual data, and scores are never mocked.
+Launch with arguments such as `-nyx-screen detail -nyx-state offline`, or run `python3 Scripts/capture_screens.py SIMULATOR_ID 26` (it writes the capture matrix to `Research/Screenshots/`, which Git ignores). Nothing on the simulator is changed by these routes. Scenarios use an in-memory journal, and sample journal content is DEBUG only. Offline scenarios may use a real cached forecast; `no-forecast` guarantees unknown clouds. Normal app behavior reads actual data, and scores are never mocked.
 
 - **Screens** (`-nyx-screen`): the four tabs (`tonight`, `parks`, `plan` (`calendar` still works), `journal`), `learn` (the Learn index), `trip` (My free nights alone), `credits`, `places` (the starting-point picker; `-nyx-place <text>` prefills), `detail`, `editor`, `entry`, `settings`, `privacy`, `data`, `article`, `breakdown`, `share`, `ask`, `onboarding`, `skyarc`, `river`, `whatsup`, `light` (the Sky glow panel: what city light takes, light pollution and Protect this sky, then viewing spots with sky glow and step-free access; for example with `-nyx-park deva | grca | sequ`, and `-nyx-glow-compare city`), `loader`, `widgets` (small, medium with "2 of 3", Lock Screen, StandBy at night simulated), `widgets-empty`, `widgets-large` (full colour, night vision, tinted), `widgets-xl` (iPad), `snippet` (the "Find the best night" dialog and snippet, voice-only wording), `metric` (About the data with the labelled DEBUG luminance fixture), `listen` (the sonification panel and its transcript), `accessibility` (Sound and touch), and both permission explainers.
 - **States** (`-nyx-state`): `live`, `offline`, `no-forecast`, `agree`, `disagree`, `smoke` (fixture forecast detail: models agreeing and cold with dew, models disagreeing with high cloud, smoke at AOD 0.38), `no-location`, `loading`, `empty`, `error`, `polar`, `polar-night`, `populated`, `photo`, `night-vision`, `step-free` (Parks with the "Step-free viewing" filter on), `privacy` (with `metric`), `access` (with `article`, a named essay), `first-run` (Tonight before a starting point is chosen).
