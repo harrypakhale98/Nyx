@@ -29,10 +29,12 @@ nonisolated struct NightPlanner: Sendable {
     /// **Clouds.** cloud = w·forecast + (1 − w)·usual, with `usual` the park's ERA5 cloud for the
     /// month and w = `CloudBasis.forecastWeight` of the lead from the forecast's issue to the
     /// middle of the night's cloud window. No forecast covering the window: the usual clouds
-    /// alone. A park flagged `aboveInversion` (Haleakalā's summit) counts mid and high cloud only
-    /// when the layer forecast covers the night and is no more than `layerLag` older than the
-    /// total-cloud forecast (`layersCurrent`): low cloud there lies below the observer, but a stale
-    /// layer forecast never stands in for a fresher total.
+    /// alone. A park flagged `aboveInversion` (Haleakalā's summit) counts mid and high cloud only,
+    /// from the layer forecast, and never its total cloud: the low cloud of the trade-wind
+    /// inversion, which dominates the total there, lies below the observer, so the total would
+    /// score a clear summit night as overcast. Layers that cover the night are weighed by their own
+    /// issue, as any forecast (an older one eases toward the usual clouds); with none covering it
+    /// (not asked for yet, failed, or past their seven days), the usual clouds alone.
     /// **Smoke.** The aerosol forecast's average over the window, whenever it covers it (it can
     /// only lower a score, so its age never hides it); kept on the night (`aerosol`) so the
     /// outlook's smoke words always describe the smoke the score used. **Ties.** The three models'
@@ -42,11 +44,15 @@ nonisolated struct NightPlanner: Sendable {
         let window = sky.cloudWindow
         let usual = climate.typical(park, on: sky.evening)?.cloud
         var predicted = forecast?.mean(from: window.start, to: window.end), issued = forecast?.updated, upper = false
-        if park.aboveInversion == true, let layers = detail?.layers, layersCurrent(layers, forecast: forecast),
-           let mid = layers.mean("cloud_cover_mid", from: window.start, to: window.end, valid: 0...100),
-           let high = layers.mean("cloud_cover_high", from: window.start, to: window.end, valid: 0...100) {
-            // Random overlap of the two layers above the summit.
-            predicted = 100*(1-(1-mid/100)*(1-high/100)); issued = layers.updated; upper = true
+        if park.aboveInversion == true {
+            // The summit's total cloud is never its cloud: the layers when they cover the night, else nothing.
+            predicted = nil; issued = nil
+            if let layers = detail?.layers,
+               let mid = layers.mean("cloud_cover_mid", from: window.start, to: window.end, valid: 0...100),
+               let high = layers.mean("cloud_cover_high", from: window.start, to: window.end, valid: 0...100) {
+                // Random overlap of the two layers above the summit.
+                predicted = 100*(1-(1-mid/100)*(1-high/100)); issued = layers.updated; upper = true
+            }
         }
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
         let lead = issued.map { middle.timeIntervalSince($0)/86400 } ?? .infinity
@@ -67,22 +73,29 @@ nonisolated struct NightPlanner: Sendable {
         return Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
                      usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
     }
-    /// How much older than the total-cloud forecast a summit's layer forecast may be and still be used.
-    static let layerLag: TimeInterval = 12*3600
-    /// The layer forecast is used for a summit only when it is not much older than the total-cloud
-    /// forecast (or there is none): a two-day-old layer forecast never replaces this morning's clouds.
-    static func layersCurrent(_ layers: HourlySeries, forecast: Forecast?) -> Bool {
-        guard let forecast else { return true }
-        return layers.updated >= forecast.updated.addingTimeInterval(-layerLag)
-    }
+    /// How many days of hours a layer forecast holds (`forecast_days=7`, from 00:00 UTC on the day
+    /// it is asked for), on iPhone (forecast detail) and on Vision Pro (`SummitLayerService`).
+    static let layerDays = 7
     /// True when a night scored on the usual clouds simply lies beyond what a cloud forecast
     /// reaches: past the forecast's last hour, or so far ahead of a recent forecast (or, with none
     /// recent, of `now`) that it counts for nothing (`CloudBasis.forecastWeight` is 0, ten days
     /// out). False when a forecast should have reached the night but could not be read or is too
     /// old, which the captions call "Cloud forecast unavailable". One rule for iPhone, iPad and Vision Pro.
-    static func beyondForecast(_ night: Night, forecast: Forecast?, now: Date) -> Bool {
+    /// A summit above the inversion reads its layers (`detail`), never its total cloud: with them
+    /// unknown, a night past the seven days they would reach is "not yet", a nearer one "unavailable".
+    static func beyondForecast(_ night: Night, forecast: Forecast?, detail: ForecastDetail? = nil, now: Date) -> Bool {
         guard night.basis == .usual else { return false }
         let window = night.sky.cloudWindow
+        var forecast = forecast
+        if night.park.aboveInversion == true {
+            guard let upper = detail?.layers?.upperCloud else {
+                var utc = Calendar(identifier: .gregorian)
+                utc.timeZone = TimeZone(identifier: "UTC") ?? .gmt
+                let reach = utc.startOfDay(for: now).addingTimeInterval(Double(layerDays)*86400)
+                return window.end > reach
+            }
+            forecast = upper
+        }
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
         // A recent forecast is measured from its issue, as the score measures it; a stale one from now.
         let reference = forecast.map { now.timeIntervalSince($0.updated) < 36*3600 ? $0.updated : now } ?? now
@@ -207,5 +220,18 @@ nonisolated struct NightPlanner: Sendable {
             for night in run { if let glyph = WhatsUp.Events(park: park, sky: night.sky, table: table).glyph { marks[night.id] = glyph } }
         }
         return Month(nights: Array(repeating: nil, count: lead) + run.map { Optional($0) }, best: Self.best(run)?.id, events: marks)
+    }
+}
+nonisolated extension HourlySeries {
+    /// Mid and high cloud combined hour by hour as the score combines their averages (random
+    /// overlap), as a cloud forecast issued when the layers were: what the sky over a summit above
+    /// the inversion draws. Nil without both layers for every hour.
+    var upperCloud: Forecast? {
+        guard let mid=values["cloud_cover_mid"], let high=values["cloud_cover_high"], mid.count == times.count, high.count == times.count else { return nil }
+        let clouds=zip(mid, high).map { m, h -> Double? in
+            guard let m, let h, (0...100).contains(m), (0...100).contains(h) else { return nil }
+            return 100*(1-(1-m/100)*(1-h/100))
+        }
+        return Forecast(updated: updated, times: times, clouds: clouds)
     }
 }

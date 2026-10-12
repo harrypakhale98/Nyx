@@ -271,7 +271,9 @@ struct RootView:View {
     @ViewBuilder private func debugScreen(_ screen:String)->some View {
         #if DEBUG
         switch screen {
-        case "detail": if let park=model.home { ParkDetailView(park:park) }
+        // Keyed by the place: a catalogue place named by `-nyx-park` arrives once the catalogue is read
+        // (the first park stands in until then), and its page must be its own, asking for its own tile.
+        case "detail": if let park=model.home { ParkDetailView(park:park).id(park.id) }
         // G3 captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
         case "save-spot": NavigationStack { SaveSpotView(source: DebugScenario.state == "coordinates" ? .coordinates : .here) }
         case "spot":

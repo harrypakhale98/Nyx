@@ -223,6 +223,104 @@ struct WorldMapTests {
         #expect(havo.point.x<acad.point.x && world.frame.shows(havo.point) && world.frame.shows(acad.point))
     }
 
+    // MARK: Marks on their land
+
+    /// Every mark sits on the land drawn under it, on every kind of map the Parks map opens: the world
+    /// (from starting points in California, Hawaiʻi, Berlin, Ishigaki and Wellington, both central
+    /// meridians), the circle around a starting point, and the US areas. Each mark comes through
+    /// `TonightMap` exactly as the screen places it, is drawn within 3 points of the land under the
+    /// same coordinate (small islands are simplified), and lies wholly inside the canvas.
+    @Test @MainActor func marksSitOnTheirLand() throws {
+        let land=try #require(Self.land)
+        let now=try #require(ISO8601DateFormatter().date(from:"2026-10-11T18:00:00Z")), engine=AstronomyEngine()
+        let hale=try park("hale"), noca=try park("noca")
+        let kruger=place("wd:Q24451",-24.01139,31.48528), iriomote=place("wd:Q703967",24.31667,123.88333)
+        let torres=place("wd:Q901646",-50.98306,-72.96639), tatra=place("wd:Q1080683",49.18028,19.91944)
+        let rhon=place("wd:Q20850",50.5,10.0)
+        func night(_ park: Park) -> Night {
+            NightPlanner.night(park:park,sky:engine.conditions(for:park,on:park.evening(park.currentNight(at:now))),forecast:nil,detail:nil,now:now)
+        }
+        let size=CGSize(width:329,height:329*SkyMap.aspect)
+        func check(_ places: [Park], on frame: MapFrame, _ name: String) {
+            let map=TonightMap(nights:places.map(night),frame:frame)
+            #expect(map.marks.count==places.count,"\(name): every place has a mark")
+            let placement=WorldLand.Placement(frame,in:size), fill=land.shapes(frame,at:placement).fill
+            let canvas=CGRect(x:placement.dx,y:placement.dy,width:placement.scale,height:placement.scale*frame.aspect)
+            let scale=TonightMapCanvas.markScale(width:size.width,frame:frame)
+            for mark in map.marks {
+                let p=placement.screen(mark.point)
+                // The same coordinate on the land's own projection: the mark is drawn exactly there.
+                let ground=placement.screen(frame.canvas(plane:frame.projection.project(GeoPoint(latitude:mark.latitude,longitude:mark.longitude)) ?? .zero))
+                #expect(hypot(p.x-ground.x,p.y-ground.y)<1e-6,"\(name): \(mark.name)")
+                let reach=mark.radius*scale
+                #expect(canvas.insetBy(dx:reach,dy:reach).contains(p),"\(name): \(mark.name) at \(p) is cut by the canvas \(canvas)")
+                // The NPS coordinate for American Samoa lies at sea between Tutuila and Ofu, and is drawn there.
+                guard mark.id != "npsa" else { continue }
+                let near=[CGPoint.zero]+(0..<12).map { i in CGPoint(x:3*cos(Double(i)*Double.pi/6),y:3*sin(Double(i)*Double.pi/6)) }
+                #expect(near.contains { fill.contains(CGPoint(x:p.x+$0.x,y:p.y+$0.y),eoFill:true) },"\(name): \(mark.name) at \(p) is off its land")
+            }
+        }
+        let everywhere=[hale,noca,kruger,iriomote,torres,tatra]
+        for origin in [nil,g(34.13,-116.04),g(21.31,-157.86),g(52.52,13.4),g(24.34,124.16),g(-41.29,174.78)] as [GeoPoint?] {
+            check(everywhere,on:SkyMap.frame(.world,origin:origin,radiusMeters:0),"world from \(String(describing:origin))")
+        }
+        check([kruger],on:SkyMap.frame(.around,origin:g(-25.47,30.97),radiusMeters:320_000),"around Mbombela")
+        check([iriomote],on:SkyMap.frame(.around,origin:g(24.34,124.16),radiusMeters:320_000),"around Ishigaki")
+        check([torres],on:SkyMap.frame(.around,origin:g(-53.16,-70.91),radiusMeters:320_000),"around Punta Arenas")
+        check([tatra,rhon],on:SkyMap.frame(.around,origin:g(52.52,13.4),radiusMeters:482_803),"around Berlin, 300 miles")
+        check([noca],on:SkyMap.frame(.lower48,origin:nil,radiusMeters:0),"lower 48")
+        check([hale],on:SkyMap.frame(.hawaii,origin:nil,radiusMeters:0),"Hawaiʻi")
+        check(parks.filter { SkyMap.region($0) == .alaska },on:SkyMap.frame(.alaska,origin:nil,radiusMeters:0),"Alaska")
+        check(parks.filter { SkyMap.region($0) == .virginIslands },on:SkyMap.frame(.virginIslands,origin:nil,radiusMeters:0),"Virgin Islands")
+        check(parks.filter { SkyMap.region($0) == .samoa },on:SkyMap.frame(.samoa,origin:nil,radiusMeters:0),"American Samoa")
+    }
+    /// The world opens on Greenwich from the Americas (California included, so its own continent
+    /// is not pushed against the right edge with Brazil cut off) and on the Pacific from East Asia,
+    /// Oceania, Hawaiʻi and Alaska; either way the world's sides leave room for a whole mark.
+    @Test @MainActor func worldMapKeepsItsStartAndEdgesWhole() throws {
+        for (longitude,meridian) in [(-116.04,0.0),(-122.42,0),(-73.99,0),(-46.6,0),(13.4,0),(-157.86,150),(-149.9,150),(-170.7,150),(124.16,150),(174.78,150),(151.2,150)] {
+            #expect(MapFrame.worldMeridian(for:longitude)==meridian,"\(longitude)")
+        }
+        let world=SkyMap.frame(.world,origin:g(34.13,-116.04),radiusMeters:0)
+        // From California: the Americas on the map's western half, the eastern tip of Brazil well inside it.
+        #expect(parks.filter { SkyMap.region($0) == .lower48 }.allSatisfy { (world.point($0)?.x ?? 1)<0.4 })
+        #expect(try #require(world.point(g(-7.15,-34.8))).x<0.45)
+        let size=CGSize(width:329,height:329*SkyMap.aspect)
+        for meridian in [0.0,150] {
+            let frame=MapFrame.world(centralMeridian:meridian,aspect:SkyMap.aspect), placement=WorldLand.Placement(frame,in:size)
+            // The largest mark whole on the west; on the east, its closure triangle too (drawn 0.8 r + 7 points to its right).
+            let radius=TonightMap.radius(score:100)*TonightMapCanvas.markScale(width:size.width,frame:frame)
+            let west=placement.screen(try #require(frame.point(g(0,meridian-180)))), east=placement.screen(try #require(frame.point(g(0,meridian+179.999))))
+            #expect(west.x>=radius && east.x+0.8*radius+7<=size.width,"\(meridian): \(west.x) \(east.x)")
+        }
+    }
+
+    // MARK: Names on the map
+
+    /// A name always lies inside the map, clear of the names before it and of its own mark: beside the
+    /// mark where a side fits, slid back inside from a corner (Tatra in the corner of "Around
+    /// Berlin"), and left out when it cannot fit at all.
+    @Test @MainActor func namesStayInsideTheMap() throws {
+        let area=CGRect(x:0,y:0,width:329,height:207).insetBy(dx:2,dy:2), text=CGSize(width:52,height:14), gap=17.0
+        func inside(_ o: CGPoint?) -> Bool { o.map { area.contains(CGRect(origin:$0,size:text)) } ?? false }
+        // Room on the right: the right-hand side, as before.
+        let free=try #require(TonightMapLabels.origin(text:text,beside:CGPoint(x:100,y:100),gap:gap,in:area,avoiding:[]))
+        #expect(free == CGPoint(x:117,y:93))
+        // Every corner, and hard against every edge: inside the map, never on the mark.
+        for p in [CGPoint(x:322,y:200),CGPoint(x:6,y:6),CGPoint(x:322,y:6),CGPoint(x:6,y:200),CGPoint(x:300,y:204),CGPoint(x:164,y:205),CGPoint(x:327,y:100)] {
+            let o=TonightMapLabels.origin(text:text,beside:p,gap:gap,in:area,avoiding:[])
+            #expect(inside(o),"\(p): \(String(describing:o))")
+            if let o { #expect(!CGRect(origin:o,size:text).intersects(CGRect(x:p.x-gap+4,y:p.y-gap+4,width:2*gap-8,height:2*gap-8)),"\(p) covers its mark") }
+        }
+        // Clear of an earlier name.
+        let taken=[CGRect(x:200,y:150,width:129,height:57)]
+        let o=TonightMapLabels.origin(text:text,beside:CGPoint(x:322,y:200),gap:gap,in:area,avoiding:taken)
+        #expect(o.map { inside($0) && !taken[0].intersects(CGRect(origin:$0,size:text)) } ?? true)
+        // No room anywhere: left out, never drawn past the edge.
+        #expect(TonightMapLabels.origin(text:CGSize(width:400,height:14),beside:CGPoint(x:160,y:100),gap:gap,in:area,avoiding:[]) == nil)
+        #expect(TonightMapLabels.origin(text:text,beside:CGPoint(x:160,y:100),gap:gap,in:area,avoiding:[area]) == nil)
+    }
+
     // MARK: Your constellation
 
     /// A journal in the lower 48 keeps the lower 48's map (no visible change); a night abroad moves

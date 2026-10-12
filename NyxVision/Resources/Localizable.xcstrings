@@ -2486,6 +2486,41 @@
         }
       }
     },
+    "Darkness at ${park} tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkelheit heute Nacht in ${park}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkness at ${park} tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuridad en ${park} esta noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obscurité à ${park} ce soir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜の${park}の暗さ"
+          }
+        }
+      }
+    },
     "Darkness score": {
       "extractionState": "manual",
       "localizations": {
@@ -7977,6 +8012,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜の空の下に立つ"
+          }
+        }
+      }
+    },
+    "Stand under tonight's sky at ${park}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unter den Himmel von heute Nacht in ${park} treten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand under tonight's sky at ${park}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar en el cielo de esta noche en ${park}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se placer sous le ciel de ce soir à ${park}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${park}の今夜の空の下に立つ"
           }
         }
       }

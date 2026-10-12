@@ -195,15 +195,23 @@ nonisolated struct MapFrame: Hashable, Sendable {
         let ρ=WorldProjection.azimuthalRadius(meters:max(1000,radiusMeters))*(1+padding)
         return MapFrame(projection:.azimuthal(centre),plane:CGRect(x:-ρ,y:-ρ,width:2*ρ,height:2*ρ),aspect:aspect)
     }
-    /// The whole world on Equal Earth, centred on `centralMeridian`.
+    /// The whole world on Equal Earth, centred on `centralMeridian`. The sides keep `worldSideMargin`
+    /// of plane beside the outline, so a place on the seam (Fiji, the Aleutians, Samoa) shows its
+    /// whole mark and closure triangle inside the canvas rather than cut at its edge.
     static func world(centralMeridian: Double = 0, aspect: Double) -> MapFrame {
-        MapFrame(projection:.equalEarth(centralMeridian:centralMeridian),plane:WorldProjection.equalEarthBounds.insetBy(dx:-0.03,dy:-0.03),aspect:aspect)
+        MapFrame(projection:.equalEarth(centralMeridian:centralMeridian),plane:WorldProjection.equalEarthBounds.insetBy(dx:-worldSideMargin,dy:-0.03),aspect:aspect)
     }
-    /// The world centred on the Pacific (150° E) for places in or beside it, so New Zealand, Hawaiʻi
-    /// and Japan sit inside the map rather than at its edge; otherwise on Greenwich, as most atlases.
+    /// About 12 points on a phone-wide world map: the largest mark's reach with its closure triangle.
+    static let worldSideMargin = 0.22
+    /// The world centred on the Pacific (150° E) for a starting point in or across it (East Asia,
+    /// Australia, New Zealand, Hawaiʻi, Alaska, Polynesia), so it sits inside the map rather than at
+    /// its edge; otherwise on Greenwich, as most atlases. The Americas' Pacific coast (110° to 140° W)
+    /// stays on Greenwich, so a start in California opens on the map most people know rather than one
+    /// with its own continent pushed against the right edge and the Atlantic split.
     static func worldMeridian(for longitude: Double?) -> Double {
         guard let longitude else { return 0 }
-        return abs(GeoPoint.wrapped(longitude))>=110 ? 150 : 0
+        let λ=GeoPoint.wrapped(longitude)
+        return λ>=110 || λ <= -140 ? 150 : 0
     }
     /// Places too far apart for one Lambert map (more than this from their middle) go on Equal Earth.
     static let azimuthalLimit = 70*GeoPoint.radian

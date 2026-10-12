@@ -317,8 +317,10 @@ import Testing
 
     // MARK: Haleakalā's layers (J)
 
-    /// A layer forecast much older than the total-cloud forecast never replaces it.
-    @Test func staleSummitLayersGiveWayToTheFresherForecast() throws {
+    /// The summit's clouds are its layers, whatever their age beside the total-cloud forecast: an
+    /// older layer forecast is eased toward the usual clouds by its own lead, as any forecast is,
+    /// and the total cloud (the inversion's low cloud below the summit) never stands in for it.
+    @Test func summitLayersCountByTheirOwnAge() throws {
         let hale = try park("hale")
         let night = try evening(hale, "2026-12-09")
         let s = engine.conditions(for: hale, on: night)
@@ -329,9 +331,18 @@ import Testing
             return NightPlanner.night(park: hale, sky: s, forecast: total, detail: detail, now: now)
         }
         let recent = scored(layersAge: 6*3600)
-        #expect(recent.upperCloudOnly && abs((recent.cloudCover ?? 0)-19) < 0.01)
-        let stale = scored(layersAge: 2*86400)
-        #expect(!stale.upperCloudOnly && stale.cloudCover == 90 && stale.score.value <= recent.score.value)
+        #expect(recent.upperCloudOnly && abs((recent.cloudCover ?? 0)-19) < 0.01 && recent.basis == .forecast)
+        // Two days older than the total cloud: still a forecast two days ahead, counted in full.
+        let older = scored(layersAge: 2*86400)
+        #expect(older.upperCloudOnly && abs((older.cloudCover ?? 0)-19) < 0.01 && older.score.value == recent.score.value)
+        // Five days old: an early look, eased toward the usual clouds, never toward the 90% total.
+        let old = scored(layersAge: 5*86400)
+        #expect(old.upperCloudOnly && old.basis.isEarlyLook && old.cloudCover.map { abs($0-19) < 0.01 } == true)
+        // No layers at all: the usual clouds, labelled as such, never the total.
+        let none = NightPlanner.night(park: hale, sky: s, forecast: total, detail: nil, now: now)
+        #expect(!none.upperCloudOnly && none.cloudCover == nil && none.basis == .usual && none.usualCloud != nil)
+        let usual = NightPlanner.night(park: hale, sky: s, forecast: nil, detail: nil, now: now)
+        #expect(none.score.value == usual.score.value && none.score.cloudPoints == usual.score.cloudPoints)
     }
 
     /// The watch scores Haleakalā's summit from the same mid and high cloud as the iPhone, and every

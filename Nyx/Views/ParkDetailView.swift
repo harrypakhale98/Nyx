@@ -183,7 +183,8 @@ struct ParkDetailView: View {
             .task(id:riverStart) { await model.prepareWhatsUp(model.nights(park,from:riverStart,count:30)) }
             // Park alerts and ranger programs only where the Park Service runs the place: a saved spot asks it nothing.
             // A place abroad: its forecast by its whole 10° tile (the model's), and a place in Spotlight (`SpotlightIndexer.remember`).
-            .task {
+            // Keyed by the place, so a page handed another place in place (a restored or routed page) asks for that one's forecast too.
+            .task(id:park.id) {
                 if park.isCatalogPlace { await SpotlightIndexer.remember(park,followed:Set(saved.map(\.parkID))) }
                 await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil)
             }

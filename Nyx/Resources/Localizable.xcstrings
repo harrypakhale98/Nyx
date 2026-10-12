@@ -56702,6 +56702,41 @@
         }
       }
     },
+    "The cloud layers above Haleakalā's summit may also be asked for on their own, with that park's coordinates only: the same request in every copy of Nyx.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wolkenschichten über dem Gipfel des Haleakalā können auch einzeln abgefragt werden, nur mit den Koordinaten dieses Parks: dieselbe Anfrage in jeder Kopie von Nyx."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cloud layers above Haleakalā's summit may also be asked for on their own, with that park's coordinates only: the same request in every copy of Nyx."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las capas de nubes sobre la cumbre de Haleakalā también pueden pedirse por separado, solo con las coordenadas de ese parque: la misma solicitud en cada copia de Nyx."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les couches nuageuses au-dessus du sommet du Haleakalā peuvent aussi être demandées seules, avec les seules coordonnées de ce parc : la même requête dans chaque copie de Nyx."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ハレアカラ山頂の上空の雲の層は、その公園の座標だけで単独に問い合わせることがあります。どのNyxでも同じリクエストです。"
+          }
+        }
+      }
+    },
     "The core rises into the glow of %@.": {
       "extractionState": "manual",
       "localizations": {

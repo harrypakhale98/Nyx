@@ -84,7 +84,8 @@ import CoreLocation
     /// The last forecast detail request was held back by Low Data Mode.
     var detailPausedForLowData=false
     /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
-    /// in this session: Tonight and the park list need only clouds.
+    /// in this session: Tonight and the park list need only clouds, apart from a summit above the
+    /// inversion, whose clouds are its layers (`refreshForecasts`).
     @ObservationIgnored private var detailWanted=false
     @ObservationIgnored private var alertsCache: ParkAlertsCache?
     @ObservationIgnored private var programs: [String:ProgramsCache] = [:]
@@ -220,6 +221,14 @@ import CoreLocation
         if DebugScenario.state=="polar-night" { homeID="gaar" }
         if let park=DebugScenario.park { homeID=park }
         #endif
+        // Until a starting point is chosen, the example night is measured from a town in this
+        // device's time zone (Toronto, Mumbai), worked out from settings alone, off the main thread.
+        if DebugScenario.screen == nil, !startChosen {
+            Task { [weak self] in
+                let example=await Task.detached(priority:.userInitiated) { StartingPlaces.example() }.value
+                self?.showExample(from:example)
+            }
+        }
     }
     var home: Park? { park(homeID) ?? parks.first }
     /// The park-local night in progress (or about to begin) right now.
@@ -467,7 +476,7 @@ import CoreLocation
     /// True when a night without clouds simply lies beyond the forecast's reach (past its last
     /// hour, or ten days or more ahead, where a forecast counts for nothing), rather than having a
     /// forecast that failed (`NightPlanner.beyondForecast`).
-    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],now:present) }
+    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],detail:details[night.park.id],now:present) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {
         guard let origin else { return [] }
@@ -482,8 +491,18 @@ import CoreLocation
     func choose(parkID:String) { homePlace=nil; homeID=parkID; startChosen=true }
     /// Start from a city or town: distances from it, and the park nearest to it as the home park
     /// (the sky behind the app, the calendar's first park, the widget before anything is saved).
-    func choose(_ place:StartingPlace) {
-        homePlace=place; startChosen=true
+    func choose(_ place:StartingPlace) { startChosen=true; start(from:place) }
+    /// The example starting point until one is chosen (`StartingPlaces.example`): a town in this
+    /// device's time zone, or the starting park in the US. Never counts as a choice.
+    func showExample(from place:StartingPlace?) {
+        guard !startChosen else { return }
+        if let place { if place != homePlace { start(from:place) } }
+        else if homePlace != nil { homePlace=nil; homeID=Park.defaultID }
+        // Written out, so the home park kept for the example never reads as one chosen (`init`).
+        startChosen=false
+    }
+    private func start(from place:StartingPlace) {
+        homePlace=place
         let curated=Self.nearestPark(to:place,in:parks)
         if let curated { homeID=curated.id }
         // Far from every curated park (abroad), the nearest world catalogue place is the home park
@@ -596,6 +615,12 @@ import CoreLocation
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
         if !smokeEnabled { await detailService.forgetAir() }
         forecastsHeldBack=network ? await weather.heldBack() : false
+        // A summit above the inversion (Haleakalā) is scored from its mid and high cloud, which come
+        // with forecast detail: asked for with the clouds from the first refresh, page or no page, so
+        // Tonight never waits for a park page to score it. Every copy of Nyx asks for that one public
+        // park whatever its whereabouts; once a page is open, the summit rides with every park.
+        let summits=self.parks.filter { $0.aboveInversion == true }
+        if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         let paused=await detailService.pausedForLowData()

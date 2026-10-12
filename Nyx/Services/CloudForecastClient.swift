@@ -893,14 +893,14 @@ actor WeatherService: WeatherProviding {
 /// score it the same way. One small request, at most every twelve hours, carrying only the
 /// summit's public viewing-spot coordinates: same host, same switch, same guarded transport and
 /// backoff as the cloud forecast. Seven days ahead plus yesterday, as the iPhone's layer forecast,
-/// so nights past its reach fall back to total cloud on both. Kept on disk beside the forecast; a
-/// failed request keeps the last layers, and without any the score counts total cloud as before.
+/// so nights past its reach use the summit's usual clouds on both. Kept on disk beside the forecast;
+/// a failed request keeps the last layers, and without any the score counts the usual clouds (never
+/// the total cloud, which the low inversion cloud below the summit dominates).
 /// The iPhone never asks for these: its layers come with forecast detail (DataServices.swift).
 actor SummitLayerService {
     static let keys=["cloud_cover_mid","cloud_cover_high"]
-    /// The iPhone's layer freshness (`ForecastDetailService.freshFor`). The score uses layers no
-    /// more than `NightPlanner.layerLag` (also twelve hours) older than the total-cloud forecast,
-    /// so asking whenever they reach this age keeps them in use beside each new forecast.
+    /// The iPhone's layer freshness (`ForecastDetailService.freshFor`): the layers are the summit's
+    /// clouds, eased toward its usual clouds as they age, so they are asked for again at this age.
     static let freshFor: TimeInterval=12*3600
     private let transport: any HTTPTransport
     private let persist: Bool
@@ -986,18 +986,5 @@ actor SummitLayerService {
             }
             return (park.id, HourlySeries(updated: now, times: times, values: values))
         }
-    }
-}
-nonisolated extension HourlySeries {
-    /// Mid and high cloud combined hour by hour as the score combines their averages (random
-    /// overlap), as a cloud forecast issued when the layers were: what the sky over a summit above
-    /// the inversion draws. Nil without both layers for every hour.
-    var upperCloud: Forecast? {
-        guard let mid=values["cloud_cover_mid"], let high=values["cloud_cover_high"], mid.count == times.count, high.count == times.count else { return nil }
-        let clouds=zip(mid, high).map { m, h -> Double? in
-            guard let m, let h, (0...100).contains(m), (0...100).contains(h) else { return nil }
-            return 100*(1-(1-m/100)*(1-h/100))
-        }
-        return Forecast(updated: updated, times: times, clouds: clouds)
     }
 }

@@ -20,9 +20,17 @@ struct StartingPointPicker: View {
     @FocusState private var searchFocused:Bool
     /// "Save a spot", open from here: empty, or with the town whose row asked for it.
     @State private var savingSpot:SpotRequest?
+    /// Before a search, outside the US: the largest towns of the starting point's country, else of
+    /// this device's region, so a first start in Toronto or Mumbai is one tap away.
+    @State private var suggestions:[StartingPlace]=[]
+    private var suggestionCountry:String? {
+        let code=(model.homePlace?.countryCode ?? Locale.current.region?.identifier)?.uppercased()
+        return code == "US" ? nil : code
+    }
     struct SpotRequest: Identifiable { let id=UUID(); var place:StartingPlace? }
     var body: some View {
         let places=StartingPlaces.search(search,limit:12)
+        let towns=search.isEmpty ? suggestions : places
         let parks=model.parks.filter { search.isEmpty || $0.matches(search) }
         List {
             // The bar's search field fails at accessibility sizes on iOS 27 (see `SystemSearch`).
@@ -33,9 +41,10 @@ struct StartingPointPicker: View {
             }
             if search.isEmpty {
                 Section { Text("Search for your city or town, such as Paris or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)
-            } else if !places.isEmpty {
+            }
+            if !towns.isEmpty {
                 Section("Cities and towns") {
-                    ForEach(places) { place in
+                    ForEach(towns) { place in
                         row(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() }
                             // A town can be kept as a spot of its own too: scored and followed like a park.
                             .contextMenu { Button("Save as a spot",systemImage:"mappin.and.ellipse") { savingSpot=SpotRequest(place:place) } }
@@ -60,6 +69,10 @@ struct StartingPointPicker: View {
         .nightForm()
         .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"City, town or park",enabled:!typeSize.isAccessibilitySize))
         .navigationTitle("Starting point").navigationBarTitleDisplayMode(.inline)
+        .task(id:suggestionCountry) {
+            guard let country=suggestionCountry else { suggestions=[]; return }
+            suggestions=await Task.detached(priority:.userInitiated) { StartingPlaces.largest(in:country,limit:5) }.value
+        }
         .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
         .sheet(item:$savingSpot) { request in SaveSpotView(source:request.place == nil ? .here : .place,place:request.place,search:request.place == nil ? search : "").nyxPresentation() }
     }

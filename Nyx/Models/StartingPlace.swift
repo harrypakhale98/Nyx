@@ -166,6 +166,26 @@ nonisolated enum StartingPlaces {
         places.count==all.count && places.withUnsafeBufferPointer { mine in all.withUnsafeBufferPointer { $0.baseAddress==mine.baseAddress } }
     }
 
+    // MARK: Before a starting point is chosen
+
+    /// The town Tonight's example night is measured from until a starting point is chosen: the most
+    /// populous bundled place in this device's time zone (in the device's region when the zone spans
+    /// more than one country), else the largest in its region. Read from settings alone: no location,
+    /// no request. Nil in the United States, whose example stays a national park (`Park.defaultID`).
+    static func example(timeZone: TimeZone = .current, region: String? = Locale.current.region?.identifier, in places: [StartingPlace] = all) -> StartingPlace? {
+        let region=region?.uppercased()
+        let zoned=places.filter { $0.timeZoneID==timeZone.identifier }
+        let local=zoned.filter { $0.countryCode==region }
+        let pool=zoned.isEmpty ? places.filter { $0.countryCode==region } : local.isEmpty ? zoned : local
+        guard let best=pool.max(by: { ($0.population ?? 0)<($1.population ?? 0) }), best.countryCode != "US" else { return nil }
+        return best
+    }
+    /// A country's most populous places, largest first: the picker's suggestions before a search.
+    static func largest(in country: String, limit: Int, in places: [StartingPlace] = all) -> [StartingPlace] {
+        let country=country.uppercased()
+        return Array(places.filter { $0.countryCode==country }.sorted { ($0.population ?? 0)>($1.population ?? 0) }.prefix(limit))
+    }
+
     // MARK: Nearest place
 
     /// The bundled place nearest a point, for a saved spot's region and, offline, its time zone.

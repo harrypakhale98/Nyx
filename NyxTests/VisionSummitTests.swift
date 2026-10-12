@@ -108,14 +108,15 @@ struct VisionSummitTests {
         #expect(vision.upperCloudOnly && iPhone.upperCloudOnly)
         #expect(vision.score.value == iPhone.score.value && vision.basis == iPhone.basis && vision.score.limit == iPhone.score.limit)
         #expect(vision.cloudCover == iPhone.cloudCover && vision.forecastUpdated == iPhone.forecastUpdated)
+        // Before the layers arrive, both score the summit's usual clouds, never its 92% total cloud.
         let before = NightPlanner.night(park: hale, sky: sky, forecast: total, detail: nil, now: issued)
-        #expect(!before.upperCloudOnly && before.cloudCover == 92 && before.score.value <= vision.score.value)
+        #expect(!before.upperCloudOnly && before.cloudCover == nil && before.basis == .usual && before.score.value <= vision.score.value)
         let upper = try #require(vision.cloudCover)
         #expect(upper < 50)
-        // Layers far older than the forecast are set aside on both, never mixed with fresh total cloud.
+        // Layers older than a newer total-cloud forecast still score the summit on both: the total is never its cloud.
         let newer = Forecast(updated: issued.addingTimeInterval(2*86400), times: times, clouds: total.clouds)
-        let stale = NightPlanner.night(park: hale, sky: sky, forecast: newer, detail: ForecastDetail(layers: fetched), now: issued)
-        #expect(!stale.upperCloudOnly && stale.cloudCover == 92)
+        let older = NightPlanner.night(park: hale, sky: sky, forecast: newer, detail: ForecastDetail(layers: fetched), now: issued)
+        #expect(older.upperCloudOnly && older.cloudCover == vision.cloudCover && older.score.value == vision.score.value)
     }
     /// The immersive sky over the summit draws the layers as the score combines them.
     @Test func upperCloudCombinesLikeTheScore() throws {

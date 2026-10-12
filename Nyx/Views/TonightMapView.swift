@@ -23,8 +23,7 @@ struct TonightMapCanvas: View {
         Canvas { context,size in
             let place=WorldLand.Placement(map.frame,in:size)
             func screen(_ p:CGPoint)->CGPoint { place.screen(p) }
-            // Room for bigger marks on a wide iPad, never smaller than a phone's.
-            let size1=max(1,min(1.8,size.width/360))
+            let size1=Self.markScale(width:size.width,frame:map.frame)
             // The land, faint: coasts so the marks read as places.
             if landLoaded {
                 MapLand.draw(context,frame:map.frame,in:size,palette:palette,fill:palette.nightVision ? 0.05 : 0.035,
@@ -76,6 +75,14 @@ struct TonightMapCanvas: View {
             }
         }
         .accessibilityIgnoresInvertColors()
+    }
+    /// How much larger than the night cell's a mark is drawn. Room for bigger marks on a wide iPad, never
+    /// smaller than a phone's; on the world map, 0.7 of that: some 200 places over every continent at
+    /// full size and glow hid the coasts they sit on, so the marks read as off their land.
+    static func markScale(width:Double,frame:MapFrame)->Double {
+        let scale=max(1,min(1.8,width/360))
+        if case .equalEarth=frame.projection { return scale*0.7 }
+        return scale
     }
     /// The closure mark: a small hollow warning triangle, the shape of the alert symbol beside every score.
     static func triangle(at center:CGPoint,size:Double)->Path {
@@ -161,13 +168,17 @@ struct TonightMapView: View {
     private func tags(size:CGSize)->some View {
         let fixed=map.labelled()
         let extra=(focused ?? hovered).flatMap { id in fixed.contains { $0.id==id } ? nil : map.marks.first { $0.id==id } }
-        let size1=max(1,min(1.8,size.width/360))
+        let size1=TonightMapCanvas.markScale(width:size.width,frame:map.frame)
         // The darkest three first, so a name shown for a pointer or VoiceOver never moves them.
         return ForEach(fixed+(extra.map { [$0] } ?? [])) { mark in
-            Text("\(mark.name) \(mark.score)").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink)
-                // The plate reaches past the words, fills its corners and starts clear of the mark (the gap below),
-                // so nothing bright shows beside the words.
-                .background(RoundedRectangle(cornerRadius:4,style:.continuous).fill(Color.black).padding(.horizontal,-TonightMapLabels.plate.width).padding(.vertical,-TonightMapLabels.plate.height))
+            // Offered no room (no place for it inside the map), the tag falls to nothing, plate and all.
+            ViewThatFits {
+                Text("\(mark.name) \(mark.score)").font(.caption2.weight(.semibold)).foregroundStyle(palette.ink)
+                    // The plate reaches past the words, fills its corners and starts clear of the mark (the gap below),
+                    // so nothing bright shows beside the words.
+                    .background(RoundedRectangle(cornerRadius:4,style:.continuous).fill(Color.black).padding(.horizontal,-TonightMapLabels.plate.width).padding(.vertical,-TonightMapLabels.plate.height))
+                Color.clear.frame(width:0,height:0)
+            }
                 .opacity(namesShown ? 1 : 0)
                 .accessibilityHidden(true)
                 .layoutValue(key:TonightMapLabels.Key.self,value:.tag(id:mark.id,point:point(mark,size:size),gap:mark.radius*size1+4+TonightMapLabels.plate.width,holds:fixed.contains { $0.id==mark.id }))
@@ -233,7 +244,11 @@ struct TonightMapLabels: Layout {
         for subview in subviews {
             guard case .tag(let id,let point,let gap,let holds)=subview[Key.self] else { continue }
             let text=subview.sizeThatFits(.unspecified)
-            let rect=CGRect(origin:Self.origin(text:text,beside:point,gap:gap,in:area,avoiding:taken),size:text)
+            // A name with no room inside the map is left out: proposed no space, its tag draws nothing.
+            guard let origin=Self.origin(text:text,beside:point,gap:gap,in:area,avoiding:taken) else {
+                put(subview,CGRect(origin:point,size:.zero)); continue
+            }
+            let rect=CGRect(origin:origin,size:text)
             let plated=rect.insetBy(dx:-Self.plate.width,dy:-Self.plate.height)
             taken.append(plated)
             if holds { held[id]=plated }
@@ -245,15 +260,28 @@ struct TonightMapLabels: Layout {
             put(subview,held[id].map { mark.union($0) } ?? mark)
         }
     }
-    /// Where a name of this size goes beside a mark: the first side that stays inside `area` and
-    /// clear of every name already placed, or the right-hand side when none does.
-    static func origin(text:CGSize,beside p:CGPoint,gap:Double,in area:CGRect,avoiding taken:[CGRect])->CGPoint {
+    /// Where a name of this size goes beside a mark, always inside `area` and clear of every name
+    /// already placed: the first side (right, left, above, below) that fits as it is; then the first
+    /// side that fits once slid back inside the map (a mark in a corner), still clear of the mark
+    /// itself; nil when none does, and the name is left out (the list below the map names the place).
+    static func origin(text:CGSize,beside p:CGPoint,gap:Double,in area:CGRect,avoiding taken:[CGRect])->CGPoint? {
         let options=[CGPoint(x:p.x+gap,y:p.y-text.height/2),CGPoint(x:p.x-gap-text.width,y:p.y-text.height/2),
                      CGPoint(x:p.x-text.width/2,y:p.y-gap-text.height),CGPoint(x:p.x-text.width/2,y:p.y+gap)]
-        return options.first { o in
-            let r=CGRect(origin:o,size:text).insetBy(dx:-3,dy:-1)
-            return area.contains(r) && !taken.contains { $0.intersects(r) }
-        } ?? options[0]
+        // The words and their plate's margin.
+        func plated(_ o:CGPoint)->CGRect { CGRect(origin:o,size:text).insetBy(dx:-3,dy:-1) }
+        func clear(_ r:CGRect)->Bool { !taken.contains { $0.intersects(r) } }
+        if let fits=options.first(where:{ area.contains(plated($0)) && clear(plated($0)) }) { return fits }
+        // The mark (and the gap kept around it) stays uncovered.
+        let mark=CGRect(x:p.x-gap+4,y:p.y-gap+4,width:2*gap-8,height:2*gap-8)
+        let slid=options.compactMap { o -> CGPoint? in
+            let r=plated(o)
+            guard r.width<=area.width, r.height<=area.height else { return nil }
+            let dx=r.minX<area.minX ? area.minX-r.minX : r.maxX>area.maxX ? area.maxX-r.maxX : 0
+            let dy=r.minY<area.minY ? area.minY-r.minY : r.maxY>area.maxY ? area.maxY-r.maxY : 0
+            let moved=r.offsetBy(dx:dx,dy:dy)
+            return clear(moved) && !moved.intersects(mark) ? CGPoint(x:o.x+dx,y:o.y+dy) : nil
+        }
+        return slid.first
     }
 }
 
@@ -277,7 +305,8 @@ struct ParksMapView: View {
     @State private var warmed:String?
     let open: (Park)->Void
     private var area: SkyMap.Region {
-        let chosen=SkyMap.Region(rawValue:areaChoice)
+        // DEBUG captures: `-nyx-map-area world` opens that area (nil in Release).
+        let chosen=SkyMap.Region(rawValue:areaChoice) ?? DebugScenario.text("-nyx-map-area").flatMap(SkyMap.Region.init(rawValue:))
         return chosen ?? SkyMap.defaultRegion(origin:model.mapOrigin,countryCode:model.mapOriginCountry)
     }
     private var aroundTitle: String { model.originName.isEmpty ? SkyMap.Region.around.name : String(localized:"Around \(model.originName)") }
