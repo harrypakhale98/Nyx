@@ -56,9 +56,15 @@ private struct EssayIcon:View {
 /// phone shows most of them at once; two or three columns on a wide iPad.
 struct LearnView:View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// One column at accessibility text sizes: three 300 pt cards on a wide iPad broke the titles mid-word at AX5
+    /// ("Watchi / ng a / mete- / or", 2026-10-13); one card across the column keeps whole words.
+    private var columns:[GridItem] {
+        typeSize.isAccessibilitySize ? [GridItem(.flexible(),alignment:.top)] : [GridItem(.adaptive(minimum:300),spacing:18,alignment:.top)]
+    }
     var body:some View {
         ScrollView { VStack(alignment:.leading,spacing:24) {
-            LazyVGrid(columns:[GridItem(.adaptive(minimum:300),spacing:18,alignment:.top)],spacing:18) { ForEach(Essay.allCases) { essay in
+            LazyVGrid(columns:columns,spacing:18) { ForEach(Essay.allCases) { essay in
                 NavigationLink { EssayView(essay:essay) } label:{ Panel { HStack(alignment:.top,spacing:14) {
                     EssayIcon(essay:essay,size:24)
                     VStack(alignment:.leading,spacing:6) {

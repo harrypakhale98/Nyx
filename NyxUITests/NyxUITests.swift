@@ -141,12 +141,16 @@ final class NyxUITests:XCTestCase {
             sleep(1)
             return month()
         }
-        /// A quick horizontal drag across the month's middle row, most of the screen's width.
+        /// A quick horizontal drag across the month's middle row, most of the month's width. The month bar's
+        /// arrows mark the month's column: on a wide iPad the column is centred and the night's breakdown
+        /// stands beside it in an inspector, so a drag across the window's width would start in the inspector.
         func drag(left:Bool) {
             let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@"," 15")).firstMatch
+            let column=app.buttons["Previous month"].firstMatch.frame.union(next.frame)
             let y=row.frame.midY/app.frame.height
-            let from=app.coordinate(withNormalizedOffset:CGVector(dx:left ? 0.85 : 0.15,dy:y))
-            from.press(forDuration:0.05,thenDragTo:app.coordinate(withNormalizedOffset:CGVector(dx:left ? 0.15 : 0.85,dy:y)),withVelocity:.fast,thenHoldForDuration:0)
+            func x(_ share:Double)->Double { (column.minX+column.width*share)/app.frame.width }
+            let from=app.coordinate(withNormalizedOffset:CGVector(dx:x(left ? 0.85 : 0.15),dy:y))
+            from.press(forDuration:0.05,thenDragTo:app.coordinate(withNormalizedOffset:CGVector(dx:x(left ? 0.15 : 0.85),dy:y)),withVelocity:.fast,thenHoldForDuration:0)
         }
         let first=month()
         pageMatches(first)
