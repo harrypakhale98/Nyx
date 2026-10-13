@@ -32,20 +32,34 @@ private struct SingleControlBar: ViewModifier {
 
 /// The fold of a partially opened iPhone Duo, in a view's own coordinates. Pure numbers, so they are
 /// tested; `readingFold` fills them from the view's geometry.
+///
+/// Only what layout reads is kept: whether the fold runs top to bottom, and then its left and right
+/// edges in whole points. Its vertical extent is dropped, so a page that scrolls past the fold (whose
+/// region moves in the page's coordinates with every frame) does not change its fold, re-lay its
+/// columns and start an animation on each frame of the scroll.
 nonisolated struct Fold: Equatable, Sendable {
-    /// The region the display bends through, mirrored for right-to-left layouts by SwiftUI.
-    var frame: CGRect
-
     /// A fold that runs top to bottom divides the width (a Duo held open like a book); one that runs
     /// side to side divides the height (a Duo standing like a laptop).
-    var dividesWidth: Bool { frame.height >= frame.width }
+    let dividesWidth: Bool
+    /// The fold's left and right edges (mirrored for right-to-left layouts by SwiftUI); zero for a
+    /// side-to-side fold, whose place no layout reads.
+    let minX: Double
+    let maxX: Double
+    var width: Double { maxX-minX }
+
+    /// From the reserved region's frame in the view's coordinates.
+    init(frame: CGRect) {
+        dividesWidth=frame.height >= frame.width
+        minX=dividesWidth ? frame.minX.rounded(.down) : 0
+        maxX=dividesWidth ? frame.maxX.rounded(.up) : 0
+    }
 
     /// Where a two-column page should end its leading column so the fold falls in the gap between
     /// the columns: nil when the fold does not run top to bottom through this width, or would leave a
     /// column narrower than `minimum`.
     func leadingWidth(in width: Double, minimum: Double = 300) -> Double? {
-        guard dividesWidth, frame.minX >= minimum, width - frame.maxX >= minimum else { return nil }
-        return frame.minX
+        guard dividesWidth, minX >= minimum, width - maxX >= minimum else { return nil }
+        return minX
     }
 }
 
@@ -68,7 +82,7 @@ private struct FoldReader: ViewModifier {
                 let frame=proxy.frame(in: .named(space))
                 let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
                 let local=band.offsetBy(dx: -frame.minX, dy: -frame.minY).intersection(CGRect(origin: .zero, size: frame.size))
-                return local.isNull || local.isEmpty ? nil : Fold(frame: local.integral)
+                return local.isNull || local.isEmpty ? nil : Fold(frame: local)
             } action: { fold=$0 }
         } else {
             hardware(content)
@@ -81,8 +95,9 @@ private struct FoldReader: ViewModifier {
         #if canImport(SwiftUI, _version: 8.0.85)
         if #available(iOS 27.1, *) {
             content.onGeometryChange(for: Fold?.self) { proxy in
-                // Whole points, so a layout placed by the fold never chases its own rounding.
-                proxy.reservedRegions(kind: .division).first(where: \.isActive).map { Fold(frame: $0.frame.integral) }
+                // `Fold` keeps whole points of the side-to-side extent only, so a layout placed by the
+                // fold never chases its own rounding, and scrolling never changes it.
+                proxy.reservedRegions(kind: .division).first(where: \.isActive).map { Fold(frame: $0.frame) }
             } action: { fold=$0 }
         } else {
             content
@@ -135,7 +150,7 @@ nonisolated struct ColumnSplit: Layout {
     static func widths(total: Double, narrow: Narrow, narrowMax: Double, spacing: Double, fold: Fold?) -> (leading: Double, gap: Double, trailing: Double) {
         if let fold, let edge=fold.leadingWidth(in: total, minimum: 260+spacing/2) {
             let leading=(edge-spacing/2).rounded(.down)
-            let trailing=(total-fold.frame.maxX-spacing/2).rounded(.down)
+            let trailing=(total-fold.maxX-spacing/2).rounded(.down)
             return (leading, max(0, total-leading-trailing), trailing)
         }
         let narrowWidth=min(narrowMax, max(0, (total-spacing)/2)).rounded(.down)

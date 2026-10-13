@@ -106,7 +106,7 @@ struct ParkDetailView: View {
                     let side=WideLayout.twoColumnSide(width)
                     // iPhone Duo half open like a book: tonight on one side of the fold, the sky and the
                     // place on the other, each column's own padding keeping its words off the crease.
-                    let folded=fold.flatMap { f in f.leadingWidth(in:width).map { (leading:$0,gap:f.frame.width) } }
+                    let folded=fold.flatMap { f in f.leadingWidth(in:width).map { (leading:$0,gap:f.width) } }
                     HStack(alignment:.top,spacing:folded?.gap ?? 0) {
                         ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding(24) }
                             .contentMargins(.leading,side,for:.scrollContent)

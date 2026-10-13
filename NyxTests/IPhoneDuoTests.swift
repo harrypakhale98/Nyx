@@ -51,6 +51,18 @@ import Testing
         #expect(split.gap==64)
         #expect(split.leading+split.gap+split.trailing==880)
     }
+    @Test func scrollingPastTheFoldLeavesItUnchanged() {
+        // In a scrolling page the fold's region moves up and down the page's coordinates with every
+        // frame; the fold the columns read must not change, or they would re-lay on each frame.
+        let atTop=Fold(frame:CGRect(x:426.3,y:0,width:27.6,height:669))
+        let scrolled=Fold(frame:CGRect(x:426.3,y:-1840.5,width:27.6,height:3200))
+        #expect(atTop==scrolled)
+        // Whole points, rounded outward so the gap always covers the crease.
+        #expect(atTop.minX==426)
+        #expect(atTop.maxX==454)
+        // A side-to-side fold keeps no position at all, so it is equal wherever it is.
+        #expect(Fold(frame:CGRect(x:0,y:466,width:669,height:28))==Fold(frame:CGRect(x:0,y:-300,width:669,height:28)))
+    }
     @Test func tableFoldAndNarrowSidesLeaveColumnsAlone() {
         // A fold side to side (a Duo standing like a laptop) does not divide the width.
         let table=Fold(frame:CGRect(x:0,y:466,width:669,height:28))

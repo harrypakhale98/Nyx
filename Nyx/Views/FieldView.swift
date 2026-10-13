@@ -39,7 +39,7 @@ struct FieldView: View {
     @State private var fold: Fold?
     private var foldSplit: (leading: CGFloat, gap: CGFloat)? {
         guard sideBySide, let fold, let leading=fold.leadingWidth(in:size.width,minimum:320) else { return nil }
-        return (CGFloat(leading), fold.frame.width)
+        return (CGFloat(leading), CGFloat(fold.width))
     }
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     private var basisNote: String? {
