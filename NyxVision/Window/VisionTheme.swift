@@ -121,10 +121,10 @@ struct VisionMoon: View {
         }
         return ShaderLibrary.nyxMoon(size, lighting, frame, .image(Image("MoonMap")))
     }
-    /// The phase the geometry shows: the cycle's fraction from the phase angle (0 is full, π is new).
+    /// The phase the geometry shows, named as on the iPhone (`MoonGeometry.phase`); a geometry built
+    /// without its direction (previews, the offscreen renderer) is read as waxing.
     static func phase(_ geometry: MoonGeometry) -> MoonPhase {
-        let lit = (1-geometry.phaseAngle/Double.pi)/2
-        return MoonPhase(fraction: geometry.waxing ?? true ? lit : 1-lit)
+        geometry.phase ?? MoonPhase(fraction: (1-geometry.phaseAngle/Double.pi)/2)
     }
     static func describe(_ geometry: MoonGeometry) -> String {
         String(localized: "Moon, \(VisionMoon.phase(geometry).name), \(Int((geometry.illumination*100).rounded())) percent lit")

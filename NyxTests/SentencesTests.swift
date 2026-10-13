@@ -35,5 +35,7 @@ struct SentencesTests {
         #expect(Sentences.end("一晩中月なし。", language: "ja") == "一晩中月なし。")
         #expect(Sentences.end("Road closed", language: "ja") == "Road closed.")
         #expect(Sentences.end("", language: "ja") == "")
+        #expect(Sentences.end("月の輝面比82%", language: "ja") == "月の輝面比82%。")
+        #expect(Sentences.end("82% lit", language: "en") == "82% lit.")
     }
 }
