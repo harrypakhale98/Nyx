@@ -63,6 +63,45 @@ import Testing
         // A side-to-side fold keeps no position at all, so it is equal wherever it is.
         #expect(Fold(frame:CGRect(x:0,y:466,width:669,height:28))==Fold(frame:CGRect(x:0,y:-300,width:669,height:28)))
     }
+    #if DEBUG
+    @Test func columnsScrolledOffKeepTheFold() throws {
+        // The stand-in fold (and perhaps hardware's) is clipped to what is on screen. Read inside the
+        // scrolling content, columns nearly scrolled off the top see a sliver wider than tall (a
+        // side-to-side fold), and columns wholly off see none: either way they sprang back mid-scroll.
+        let window=CGSize(width:880,height:669)
+        let band=CGRect(x:426,y:0,width:28,height:669)
+        let sliver=Fold.standIn(band:band,viewFrame:CGRect(x:24,y:-890,width:832,height:900),window:window)
+        #expect(sliver?.dividesWidth==false)
+        #expect(Fold.standIn(band:band,viewFrame:CGRect(x:24,y:-1900,width:832,height:900),window:window)==nil)
+        // Read on the scroll view's own frame (`foldSource`), which never leaves the screen, the fold is
+        // whole at every scroll offset; the columns move it by their leading edge only.
+        let page=try #require(Fold.standIn(band:band,viewFrame:CGRect(origin:.zero,size:window),window:window))
+        #expect(page.dividesWidth)
+        let inColumns=page.seen(fromX:24)
+        #expect(inColumns.minX==402)
+        #expect(inColumns.maxX==430)
+        let split=ColumnSplit.widths(total:832,narrow:.trailing,narrowMax:500,spacing:36,fold:inColumns)
+        #expect(split.leading==384)
+        #expect(split.trailing==384)
+        #expect(split.gap==64)
+        // A side-to-side fold has no place to move.
+        let table=Fold(frame:CGRect(x:0,y:320,width:880,height:28))
+        #expect(table.seen(fromX:24)==table)
+    }
+    #endif
+    @Test func parkBesideTheListStartsPastTheFold() {
+        // Half open like a book: the floating sidebar starts 10 points in from the tab, so the list is 10
+        // narrower than the fold's near edge and ends on it; the park column starts there and keeps the
+        // fold's width clear, so neither its margin nor its Back button sits on the crease.
+        let fold=Fold(frame:CGRect(x:426,y:0,width:28,height:669))
+        let list=ParksTab.listWidth(fold:fold,width:880,sidebarMargin:10)
+        #expect(list==416)
+        #expect((list ?? 0)+10==fold.minX)
+        #expect(ParksTab.listWidth(fold:fold,width:880,sidebarMargin:0)==426)
+        // Flat, or a fold too near an edge for the list to reach: the column keeps its usual widths.
+        #expect(ParksTab.listWidth(fold:nil,width:880,sidebarMargin:10)==nil)
+        #expect(ParksTab.listWidth(fold:Fold(frame:CGRect(x:300,y:0,width:28,height:669)),width:880,sidebarMargin:10)==nil)
+    }
     @Test func tableFoldAndNarrowSidesLeaveColumnsAlone() {
         // A fold side to side (a Duo standing like a laptop) does not divide the width.
         let table=Fold(frame:CGRect(x:0,y:466,width:669,height:28))

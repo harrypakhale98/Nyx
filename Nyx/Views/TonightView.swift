@@ -107,6 +107,8 @@ struct TonightView: View {
                 }.padding(24).readableColumn()
             }
         }.scrollDisabled(scrubbing).onPreferenceChange(RiverScrubbingKey.self) { scrubbing=$0 }
+        // The fold, read on the scroll view itself so the columns keep it however far the page scrolls.
+        .foldSource()
         // `-nyx-scroll 0…1` (DEBUG) opens partway down, for review captures of the starting point.
         .defaultScrollAnchor(DebugScenario.number("-nyx-scroll").map { UnitPoint(x:0.5,y:$0) } ?? (DebugScenario.isEnabled("bottom") ? .bottom : .top))
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }

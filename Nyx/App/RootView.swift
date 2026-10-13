@@ -458,13 +458,16 @@ enum FirstLightDebug {
 /// iPad screenshot scenarios: `-nyx-narrow` draws the app in a 390-point compact column, as in a
 /// narrow window beside another app. (Landscape: `ScreenshotTests` turns the simulator.)
 private struct DebugWindow: ViewModifier {
+    /// The simulated window's origin on screen, for the stand-in fold (`debugWindowOrigin`).
+    @State private var origin:CGPoint?
     @ViewBuilder func body(content:Content)->some View {
         if DebugScenario.isEnabled("narrow") {
             content.environment(\.horizontalSizeClass,.compact).frame(maxWidth:390).frame(maxWidth:.infinity).background(Color(white:0.12).ignoresSafeArea())
         } else if let window=DebugScenario.window {
             // iPhone Duo's inner display on an iPad simulator: regular both ways, at the display's size.
             content.environment(\.horizontalSizeClass,.regular).environment(\.verticalSizeClass,.regular)
-                .coordinateSpace(.named(DebugWindowSpace.name)).frame(width:window.width,height:window.height).clipped()
+                .environment(\.debugWindowOrigin,origin).frame(width:window.width,height:window.height).clipped()
+                .onGeometryChange(for:CGPoint.self) { $0.frame(in:.global).origin } action:{ origin=$0 }
                 .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color(white:0.12).ignoresSafeArea())
         } else { content }
     }

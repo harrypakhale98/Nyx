@@ -16,8 +16,19 @@ struct ParksTab: View {
     @State private var path: [Park]=[]
     /// iPhone Duo's fold while it is half open (`readingFold`); nil everywhere else.
     @State private var fold: Fold?
+    /// The tab's and the list's leading edges on screen, in whole points: the floating sidebar starts a
+    /// margin in from the tab, and the list must end at the fold measured from the tab's edge.
+    @State private var tabMinX=0.0
+    @State private var listMinX=0.0
     /// The list's width that puts its edge on the fold, when the fold leaves room for both columns.
-    private var listAtFold: Double? { fold?.leadingWidth(in:width,minimum:330) }
+    private var listAtFold: Double? { ParksTab.listWidth(fold:fold,width:width,sidebarMargin:listMinX-tabMinX) }
+    /// The list column's width when iPhone Duo is half open like a book: from the sidebar's own margin to
+    /// the fold's near edge, so the park column starts there (and keeps the fold's width clear of its
+    /// content). Nil when there is no such fold or it leaves either side narrower than 330 points.
+    nonisolated static func listWidth(fold:Fold?,width:Double,sidebarMargin:Double)->Double? {
+        guard let edge=fold?.leadingWidth(in:width,minimum:330) else { return nil }
+        return edge-min(40,max(0,sidebarMargin))
+    }
     /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` (or the `parks-map` route) opens the map.
     @SceneStorage(ParksTab.mapKey) private var showsMap=DebugScenario.parksMap
     /// A screen route (DEBUG captures and the accessibility audit) keeps its own restored state, so a run of
@@ -27,15 +38,20 @@ struct ParksTab: View {
         Group {
             if split && !showsMap {
                 NavigationSplitView {
-                    ParksView(selection:$selection).modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
+                    ParksView(selection:$selection).onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }.modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
                         // iPhone Duo half open like a book: the list ends at the fold, so the park beside it
-                        // starts on the other half (the column's usual 390 points could not reach it).
-                        .navigationSplitViewColumnWidth(min:330,ideal:listAtFold ?? 390,max:max(460,listAtFold ?? 0))
+                        // starts on the other half (the column's usual 390 points could not reach it). Held at
+                        // that width: the split keeps a column's first width while it stays within the range.
+                        .navigationSplitViewColumnWidth(min:listAtFold ?? 330,ideal:listAtFold ?? 390,max:listAtFold ?? 460)
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
                         else { CalmState(symbol:"mountain.2",title:"Choose a park",message:"Its sky tonight, and the nights ahead, will open here.").frame(maxHeight:.infinity).background(NightBackground()) }
                     }
+                    // The list ends at the fold's near edge; the park starts past its far edge, so its margin,
+                    // its index and its bar (Back among it) sit on the other half rather than on the crease.
+                    // Padding rather than safe area: bars and the park's pinned index extend into a safe area.
+                    .padding(.leading,listAtFold == nil ? 0 : fold?.width ?? 0)
                 }
                 .navigationSplitViewStyle(.balanced)
             } else {
@@ -52,6 +68,7 @@ struct ParksTab: View {
         }
         .measuringWidth($width)
         .readingFold($fold)
+        .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ tabMinX=$0 }
         // The page never opens empty: the starting park until another is chosen.
         .onAppear {
             if selection == nil { selection=path.last?.id ?? model.home?.id }

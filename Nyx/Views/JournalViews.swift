@@ -59,7 +59,7 @@ struct JournalView: View {
                     entryList
                 }
             }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
-        }.measuringWidth($width).background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+        }.measuringWidth($width).foldSource().background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
                 // Export and import are rare: on iOS 27 they live in the system's own overflow menu (the

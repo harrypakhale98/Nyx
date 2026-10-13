@@ -53,6 +53,30 @@ nonisolated struct Fold: Equatable, Sendable {
         minX=dividesWidth ? frame.minX.rounded(.down) : 0
         maxX=dividesWidth ? frame.maxX.rounded(.up) : 0
     }
+    private init(dividesWidth: Bool, minX: Double, maxX: Double) {
+        self.dividesWidth=dividesWidth
+        self.minX=minX
+        self.maxX=maxX
+    }
+
+    /// The same fold seen from a view whose leading edge is `x` points from this fold's view (whole
+    /// points in, whole points out). A side-to-side fold has no place to move.
+    func seen(fromX x: Double) -> Fold {
+        dividesWidth ? Fold(dividesWidth: true, minX: minX-x, maxX: maxX-x) : self
+    }
+
+    #if DEBUG
+    /// The DEBUG stand-in: `band` (the fold in the simulated window) as a view at `viewFrame` (in the
+    /// window) reads it. Clipped to the part of the view inside the window, as hardware may clip it too,
+    /// so a view scrolled most of the way off screen reads a sliver, or nothing (why scrolling pages read
+    /// their fold on the scroll view's own frame, `foldSource`).
+    static func standIn(band: CGRect, viewFrame: CGRect, window: CGSize) -> Fold? {
+        let onScreen=viewFrame.intersection(CGRect(origin: .zero, size: window))
+        guard !onScreen.isNull else { return nil }
+        let local=band.intersection(onScreen).offsetBy(dx: -viewFrame.minX, dy: -viewFrame.minY)
+        return local.isNull || local.isEmpty ? nil : Fold(frame: local)
+    }
+    #endif
 
     /// Where a two-column page should end its leading column so the fold falls in the gap between
     /// the columns: nil when the fold does not run top to bottom through this width, or would leave a
@@ -73,17 +97,25 @@ extension View {
 
 private struct FoldReader: ViewModifier {
     @Binding var fold: Fold?
+    #if DEBUG
+    @Environment(\.debugWindowOrigin) private var windowOrigin
+    @State private var globalFrame: CGRect?
+    /// The stand-in fold through the middle of the simulated window, as this view reads it.
+    private func standIn(kind: String, window: CGSize) -> Fold? {
+        guard let globalFrame, let windowOrigin else { return nil }
+        let w=DebugScenario.foldWidth
+        let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
+        return Fold.standIn(band: band, viewFrame: globalFrame.offsetBy(dx: -windowOrigin.x, dy: -windowOrigin.y), window: window)
+    }
+    #endif
     func body(content: Content) -> some View {
         #if DEBUG
         if let kind=DebugScenario.fold, let window=DebugScenario.window {
-            // DEBUG captures: a fold through the middle of the simulated window (`-nyx-window`).
-            let space=DebugWindowSpace.name, w=DebugScenario.foldWidth
-            content.onGeometryChange(for: Fold?.self) { proxy in
-                let frame=proxy.frame(in: .named(space))
-                let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
-                let local=band.offsetBy(dx: -frame.minX, dy: -frame.minY).intersection(CGRect(origin: .zero, size: frame.size))
-                return local.isNull || local.isEmpty ? nil : Fold(frame: local)
-            } action: { fold=$0 }
+            // DEBUG captures: a fold through the middle of the simulated window (`-nyx-window`). Read in
+            // screen coordinates less the window's own origin: a named coordinate space does not reach
+            // through the tab view's and split view's hosted columns.
+            content.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { globalFrame=$0 }
+                .onChange(of: standIn(kind: kind, window: window), initial: true) { _, new in fold=new }
         } else {
             hardware(content)
         }
@@ -131,9 +163,10 @@ private struct HalfOpenReader: ViewModifier {
     }
 }
 
-/// The DEBUG window's coordinate space, so a simulated fold sits where the hardware's would.
-nonisolated enum DebugWindowSpace {
-    static let name="nyx.debugWindow"
+extension EnvironmentValues {
+    /// The DEBUG simulated window's origin on screen (`-nyx-window`), so a stand-in fold sits where the
+    /// hardware's would; nil everywhere else.
+    @Entry var debugWindowOrigin: CGPoint?=nil
 }
 
 /// Two top-aligned columns, the narrower one at most `narrowMax` wide, `spacing` apart. When iPhone
@@ -172,18 +205,46 @@ nonisolated struct ColumnSplit: Layout {
     }
 }
 
-/// `ColumnSplit` with its own fold reader: two columns (the content's two views) that meet at the fold.
+extension EnvironmentValues {
+    /// The fold as a scrolling page reads it on its scroll view's own frame (`foldSource`), in that
+    /// frame's coordinates (`FoldSource.space`); nil outside such a page and wherever there is no fold.
+    @Entry var pageFold: Fold?=nil
+}
+
+extension View {
+    /// Reads the fold on this scroll view's own frame, which stays on screen however far the page
+    /// scrolls, and hands it to the `FoldColumns` inside. A fold read inside the scrolling content could
+    /// be clipped to the sliver still on screen (the DEBUG stand-in does this, and hardware may), so
+    /// columns scrolled nearly or wholly out of view would lose it and spring back mid-scroll.
+    func foldSource() -> some View {
+        modifier(FoldSource())
+    }
+}
+
+struct FoldSource: ViewModifier {
+    nonisolated static let space="nyx.foldSource"
+    @State private var fold: Fold?
+    func body(content: Content) -> some View {
+        content.coordinateSpace(.named(Self.space)).environment(\.pageFold, fold).readingFold($fold)
+    }
+}
+
+/// `ColumnSplit` fed by its page's `foldSource`: two columns (the content's two views) that meet at the
+/// fold. The page's fold is moved into the columns' own coordinates by their leading edge in the page,
+/// in whole points, which a vertical scroll never changes.
 struct FoldColumns<Content: View>: View {
     var narrow: ColumnSplit.Narrow
     var narrowMax: Double
     var spacing: Double
     @ViewBuilder var content: Content
-    @State private var fold: Fold?
+    @Environment(\.pageFold) private var pageFold
+    @State private var leadingEdge=0.0
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    private var fold: Fold? { pageFold?.seen(fromX: leadingEdge) }
     var body: some View {
         ColumnSplit(narrow: narrow, narrowMax: narrowMax, spacing: spacing, fold: fold) { content }
-            .readingFold($fold)
+            .onGeometryChange(for: Double.self) { $0.frame(in: .named(FoldSource.space)).minX.rounded() } action: { leadingEdge=$0 }
             // The columns ease to the fold as the hinge turns (small moves, on the shared spring).
             .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring, value: fold)
     }

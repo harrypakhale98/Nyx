@@ -80,6 +80,7 @@ struct TripPlannerView: View {
         .onChange(of:plan?.best?.id) { _,_ in if DebugScenario.isEnabled("trip-route") { Task { try? await Task.sleep(for:.milliseconds(400)); proxy.scrollTo("route",anchor:.top) } } }
         }
         .measuringWidth($width)
+        .foldSource()
         .defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
         .modifier(StandaloneTitle(embedded:embedded))
