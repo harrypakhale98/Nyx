@@ -73,7 +73,7 @@ struct StartingPointPicker: View {
             guard let country=suggestionCountry else { suggestions=[]; return }
             suggestions=await Task.detached(priority:.userInitiated) { StartingPlaces.largest(in:country,limit:5) }.value
         }
-        .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } } }
+        .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { dismiss() } } }.singleControlBar()
         .sheet(item:$savingSpot) { request in SaveSpotView(source:request.place == nil ? .here : .place,place:request.place,search:request.place == nil ? search : "").nyxPresentation() }
     }
     private func row(title:String,detail:String,selected:Bool,action:@escaping ()->Void)->some View {

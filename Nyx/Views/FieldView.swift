@@ -33,7 +33,14 @@ struct FieldView: View {
     /// The window's size, for the side-by-side layout.
     @State private var size=CGSize.zero
     /// A wide landscape window: "The night" and "Where to look" side by side, with no switch between them.
-    private var sideBySide: Bool { WideLayout.sideBySide(width:size.width,height:size.height,largeText:typeSize.isAccessibilitySize) }
+    private var sideBySide: Bool { WideLayout.sideBySide(width:size.width,height:size.height,largeText:typeSize.isAccessibilitySize,compactHeight:verticalSize == .compact) }
+    @Environment(\.verticalSizeClass) private var verticalSize
+    /// iPhone Duo half open like a book (`readingFold`): the night on one side of the fold, the sky on the other.
+    @State private var fold: Fold?
+    private var foldSplit: (leading: CGFloat, gap: CGFloat)? {
+        guard sideBySide, let fold, let leading=fold.leadingWidth(in:size.width,minimum:320) else { return nil }
+        return (CGFloat(leading), fold.frame.width)
+    }
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     private var basisNote: String? {
         guard !session.score.hasForecast else { return nil }
@@ -55,9 +62,11 @@ struct FieldView: View {
             Group {
                 if sideBySide {
                     // The night on the left, the sky on the right; the eye's clock stays with the night.
+                    // Half open like a book, the hairline is the fold itself and each page keeps to its side.
+                    let split=foldSplit
                     HStack(spacing:0) {
-                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil).frame(maxWidth:.infinity)
-                        Rectangle().fill(palette.line).frame(width:0.5).padding(.vertical,24).accessibilityHidden(true)
+                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil).frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
+                        Rectangle().fill(palette.line).frame(width:split == nil ? 0.5 : 0).padding(.vertical,24).frame(width:split?.gap).accessibilityHidden(true)
                         FieldCompassView(session:session,fixedPose:fixedPose).frame(maxWidth:.infinity)
                     }
                 } else {
@@ -67,6 +76,8 @@ struct FieldView: View {
                     }
                 }
             }.frame(maxHeight:.infinity)
+            .readingFold($fold)
+            .animation(reduceMotion ? nil : NyxMotion.spring,value:fold)
             footer
         }
         .background(Color.black.ignoresSafeArea())
@@ -93,7 +104,7 @@ struct FieldView: View {
             NavigationStack {
                 ScrollView { FieldAlarmRows(park:session.park,options:session.night.alarmOptions(at:session.now)).padding(24) }
                     .background(Color.black).navigationTitle("Wake me").navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { alarms.wrappedValue=false } } }
+                    .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { alarms.wrappedValue=false } } }.singleControlBar()
             }
             // The palette goes outside, so the red presentation style reads it (a sheet does not inherit it from here).
             .nyxPresentation().environment(\.nyx,palette).presentationDetents([.medium,.large])

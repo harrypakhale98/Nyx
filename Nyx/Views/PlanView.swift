@@ -28,7 +28,7 @@ struct PlanView: View {
             // Ask Nyx plans over the same nights, on this device; only where the model is available.
             if OnDeviceGuide.available {
                 ToolbarItem(placement:.topBarTrailing) {
-                    NavigationLink { GuideView(mode:.planning) } label:{ Image(systemName:"sparkles") }
+                    NavigationLink { GuideView(mode:.planning) } label:{ Label("Ask Nyx",systemImage:"sparkles") }
                         .accessibilityLabel("Ask Nyx").accessibilityInputLabels([Text("Ask Nyx"),Text("Ask")])
                 }
             }

@@ -52,6 +52,8 @@ struct RootView:View {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.accessibilitySwitchControlEnabled) private var switchControl
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSize
+    @Environment(\.verticalSizeClass) private var verticalSize
     /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
     /// moves would cost someone their place: VoiceOver, Switch Control and accessibility text sizes.
     private var tabBarMinimize:TabBarMinimizeBehavior {
@@ -76,10 +78,10 @@ struct RootView:View {
                     Tab("Parks",systemImage:"mountain.2",value:1) { ParksTab().modifier(TabChrome(tab:1,tint:palette.accent)) }
                     Tab("Plan",systemImage:"calendar",value:2) { NavigationStack { PlanView() }.modifier(TabChrome(tab:2,tint:palette.accent)) }
                     Tab("Journal",systemImage:"book.closed",value:3) { NavigationStack { JournalView() }.modifier(TabChrome(tab:3,tint:palette.accent)) }
-                        // iPad: a night from Plan's month or a park held over the Journal's tab item or sidebar
+                        // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
-                        .springLoadingBehavior(UIDevice.current.userInterfaceIdiom == .pad ? .enabled : .automatic)
+                        .springLoadingBehavior(NightDragPolicy.drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
@@ -439,7 +441,7 @@ private struct ParkSheet:View {
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     var body:some View {
         NavigationStack {
-            ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button("Done") { dismiss() } } }
+            ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }
         }
         .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)).nyxPresentation().nyxAccessibility()
     }
@@ -459,6 +461,11 @@ private struct DebugWindow: ViewModifier {
     @ViewBuilder func body(content:Content)->some View {
         if DebugScenario.isEnabled("narrow") {
             content.environment(\.horizontalSizeClass,.compact).frame(maxWidth:390).frame(maxWidth:.infinity).background(Color(white:0.12).ignoresSafeArea())
+        } else if let window=DebugScenario.window {
+            // iPhone Duo's inner display on an iPad simulator: regular both ways, at the display's size.
+            content.environment(\.horizontalSizeClass,.regular).environment(\.verticalSizeClass,.regular)
+                .coordinateSpace(.named(DebugWindowSpace.name)).frame(width:window.width,height:window.height).clipped()
+                .frame(maxWidth:.infinity,maxHeight:.infinity).background(Color(white:0.12).ignoresSafeArea())
         } else { content }
     }
 }

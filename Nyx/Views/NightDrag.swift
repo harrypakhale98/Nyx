@@ -74,8 +74,8 @@ extension JournalPrefill {
     }
 }
 /// A calendar night that has begun, offered to the journal: "Record this night" in its menu and
-/// as a VoiceOver action on every device, and on iPad a drag onto the Journal (its tab or its
-/// screen). Nights still ahead offer neither: a journal keeps nights that happened.
+/// as a VoiceOver action on every device, and on iPad and iPhone Duo's inner display a drag onto
+/// the Journal (its tab or its screen). Nights still ahead offer neither: a journal keeps nights that happened.
 struct RecordableNight: ViewModifier {
     let night: Night
     let enabled: Bool
@@ -90,11 +90,21 @@ struct RecordableNight: ViewModifier {
         }
     }
 }
-/// The drag itself, on iPad only: on iPhone a long press stays the night's menu alone.
+/// The drag itself, where there is room to drag to: on iPad, and on iPhone Duo's open inner display
+/// (regular in both directions, where Split View can sit another app beside Nyx). On an iPhone's
+/// single screen a long press stays the night's menu alone.
 private struct NightDragSource: ViewModifier {
     let night: Night
+    @Environment(\.horizontalSizeClass) private var horizontal
+    @Environment(\.verticalSizeClass) private var vertical
     func body(content: Content) -> some View {
-        if UIDevice.current.userInterfaceIdiom == .pad { content.draggable(NightTransfer(night)) }
+        if NightDragPolicy.drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontal,vertical:vertical) { content.draggable(NightTransfer(night)) }
         else { content }
+    }
+}
+/// Where a night (or a park, held over the Journal's tab) is dragged rather than only long-pressed.
+nonisolated enum NightDragPolicy {
+    static func drags(pad:Bool,horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
+        pad || (horizontal == .regular && vertical == .regular)
     }
 }

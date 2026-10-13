@@ -41926,6 +41926,100 @@
         }
       }
     },
+    "Open your iPhone flat to point it at the sky.": {
+      "localizations": {
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Klappe dein iPad ganz auf, um es auf den Himmel zu richten."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Klappe dein iPhone ganz auf, um es auf den Himmel zu richten."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open your iPad flat to point it at the sky."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open your iPhone flat to point it at the sky."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Abre el iPad del todo para apuntarlo al cielo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Abre el iPhone del todo para apuntarlo al cielo."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Dépliez entièrement votre iPad pour le pointer vers le ciel."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Dépliez entièrement votre iPhone pour le pointer vers le ciel."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "空に向けるには、iPadを完全に開いてください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "空に向けるには、iPhoneを完全に開いてください。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
       "extractionState": "manual",
       "localizations": {

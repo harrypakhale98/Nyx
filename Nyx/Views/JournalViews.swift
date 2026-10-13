@@ -45,9 +45,10 @@ struct JournalView: View {
                 let season=recapSeason(nights)
                 if season { recapCard }
                 if wide && !entries.isEmpty {
-                    HStack(alignment:.top,spacing:28) {
+                    // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                    FoldColumns(narrow:.trailing,narrowMax:min(440,(width*0.4).rounded()),spacing:28) {
                         YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
-                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(width:min(440,(width*0.4).rounded()))
+                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                 } else if wide {
                     // No nights yet: the constellation alone, centred, with its promise and the button inside.
@@ -61,14 +62,21 @@ struct JournalView: View {
         }.measuringWidth($width).background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
             .toolbar {
-                ToolbarItem(placement:.topBarTrailing) { Menu {
-                    Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
-                        .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
-                    Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
-                } label:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
+                // Export and import are rare: on iOS 27 they live in the system's own overflow menu (the
+                // ellipsis is reserved for it), on iOS 26 in a menu of their own.
+                if #available(iOS 27.0,*) {
+                    ToolbarOverflowMenu { journalFileActions }
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { Menu { journalFileActions } label:{ Label { Text("Journal options") } icon:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) } }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
+                }
                 // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since
                 // the app's ink foreground style (`RootView`) holds bar symbols at full strength when disabled.
-                ToolbarItem(placement:.topBarTrailing) { Button { editing=true } label:{ Image(systemName:"plus").opacity(model.journalUnavailable ? 0.35 : 1) }.accessibilityLabel("Record a night").disabled(model.journalUnavailable) }
+                // Recording a night is the Journal's everyday action, so on iPhone Duo's side bar it overflows last.
+                if #available(iOS 27.0,*) {
+                    ToolbarItem(placement:.topBarTrailing) { recordButton }.visibilityPriority(.high)
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { recordButton }
+                }
             }
             .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
             .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
@@ -186,6 +194,16 @@ struct JournalView: View {
         }
     }
     /// The empty constellation's "Record a night", never into a journal that could not open.
+    /// Export and import, in the system overflow menu (iOS 27) or the Journal's own (iOS 26).
+    @ViewBuilder private var journalFileActions: some View {
+        Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
+            .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
+        Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
+    }
+    private var recordButton: some View {
+        Button { editing=true } label:{ Label { Text("Record a night") } icon:{ Image(systemName:"plus").opacity(model.journalUnavailable ? 0.35 : 1) } }
+            .disabled(model.journalUnavailable)
+    }
     private var recordAction: (()->Void)? { entries.isEmpty && !model.journalUnavailable ? { editing=true } : nil }
     /// December (and the first days of January): the year's recap waits at the top of the journal.
     private func recapSeason(_ nights:[LoggedNight])->Bool {
@@ -467,7 +485,7 @@ struct JournalEditorView:View {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }
         }
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button("Cancel") { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button("Save") { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.disabled(editor.loadingPhotos || editor.saving) } }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Done")]).disabled(editor.loadingPhotos || editor.saving) } }
             // A swipe down never throws away what was written; Cancel asks first.
             .interactiveDismissDisabled(editor.hasChanges)
             .confirmationDialog(existing==nil ? "Discard this night?" : "Discard your changes?",isPresented:$confirmDiscard,titleVisibility:.visible) {
@@ -576,8 +594,8 @@ struct JournalDetailView:View {
     var body:some View {
         ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.orderedPhotos.enumerated()),id:\.offset) { i,photo in PhotoView(data:photo.data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel(JournalPhotoLabel.text(photo.altText,index:i)) };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement:.topBarTrailing) { Button("Edit") { editing=true } }
-                ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Image(systemName:"trash") }.accessibilityLabel("Delete entry") }
+                ToolbarItem(placement:.topBarTrailing) { Button("Edit",systemImage:"pencil") { editing=true } }
+                ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Label("Delete entry",systemImage:"trash") } }
             }
             .confirmationDialog("Delete this night?",isPresented:$confirmDelete,titleVisibility:.visible) {
                 Button("Delete entry",role:.destructive) {

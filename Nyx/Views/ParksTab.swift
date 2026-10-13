@@ -65,8 +65,8 @@ struct ParksTab: View {
         // ⌘F returns to the list.
         .onChange(of:commands?.searchRequest) { _,_ in path.removeAll(); showsMap=false }
     }
-    /// The list beside the park from the width where a page takes two columns (`WideLayout`, 900 pt,
-    /// 1180 at accessibility text sizes): narrower, the park beside a 390-point list would be cramped,
+    /// The list beside the park from the width where a page takes two columns (`WideLayout`, 860 pt,
+    /// 1180 at accessibility text sizes; iPhone Duo's inner display in landscape, as Mail does): narrower, the park beside a 390-point list would be cramped,
     /// so an 11-inch iPad in portrait or a 700-point window keeps the list and pushes the park.
     /// Unmeasured (0) is a stack, so the first measurement never pushes the chosen park.
     nonisolated static func split(width:Double,largeText:Bool)->Bool { width>0 && WideLayout.columns(width:width,largeText:largeText)==2 }

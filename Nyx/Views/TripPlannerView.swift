@@ -58,8 +58,9 @@ struct TripPlannerView: View {
     var body: some View {
         ScrollViewReader { proxy in ScrollView {
             if wide {
-                HStack(alignment:.top,spacing:32) {
-                    VStack(alignment:.leading,spacing:22) { intro; Panel { controls } }.frame(maxWidth:420)
+                // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
+                    VStack(alignment:.leading,spacing:22) { intro; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
                         if let best=plan?.best { hero(best) }
                         results
@@ -83,7 +84,7 @@ struct TripPlannerView: View {
         .background(NightBackground(seed:"trip",park:plan?.best?.night.park,night:plan?.best?.night.id))
         .modifier(StandaloneTitle(embedded:embedded))
         .toolbar { if let plan, !plan.stops.isEmpty { ToolbarItem(placement:.topBarTrailing) {
-            ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Image(systemName:"square.and.arrow.up") }.accessibilityLabel("Share plan")
+            ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.accessibilityLabel("Share plan")
         } } }
         .sheet(isPresented:$choosingStart) {
             NavigationStack { StartingPointPicker(nearMe:nil,selectedParkID:originPlace == nil ? origin?.id : nil,selectedPlace:originPlace) { choice in

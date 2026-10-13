@@ -29,6 +29,9 @@ struct CelestialGauge: View {
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// Landscape on iPhone (and iPhone Duo's outer display turned): a shorter dial, so the whole
+    /// score sits in the window's height rather than under its bars.
+    @Environment(\.verticalSizeClass) private var verticalSize
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.nyxAccess) private var access
     @Environment(\.scenePhase) private var scenePhase
@@ -135,7 +138,7 @@ struct CelestialGauge: View {
                 VStack(spacing:6) {
                     ZStack { bezel; drawing }
                         .overlay { VStack(spacing:5) { numeral(size:side*0.36); if labelsInside { band; units.padding(.top,side<270 ? 2 : 8) } } }
-                        .frame(maxWidth:300).aspectRatio(1,contentMode:.fit)
+                        .frame(maxWidth:verticalSize == .compact ? 220 : 300).aspectRatio(1,contentMode:.fit)
                         .onGeometryChange(for:CGFloat.self) { min($0.size.width,$0.size.height) } action:{ side=$0 }
                         // No taller than on the widest iPhone, so a wide column does not open a gap around the dial.
                         .frame(maxWidth:354)

@@ -5,8 +5,10 @@ import SwiftUI
 /// gets the layout that fits it. Pure numbers, so they are tested.
 nonisolated enum WideLayout {
     /// Two columns from this width up: a full-screen iPad in either orientation (11-inch portrait
-    /// is 834 pt and stays single), or a large window. Narrower windows keep the phone's column.
-    static let twoColumnWidth=900.0
+    /// is 834 pt and stays single), iPhone Duo's inner display in landscape (951 pt less its side bar,
+    /// about 880), or a large window. Narrower windows keep the phone's column, and so does a large
+    /// iPhone in landscape (956 pt less both sides' safe areas, about 832).
+    static let twoColumnWidth=860.0
     /// At accessibility text sizes a column needs about twice the room, so the split waits longer.
     static let twoColumnWidthLargeText=1180.0
     /// A comfortable line: about 70 characters of body text with the page's own padding.
@@ -40,9 +42,13 @@ nonisolated enum WideLayout {
         return width>=(open ? inspectorPageMinimum : inspectorWindow)
     }
     /// Field mode in a wide landscape window: the night and "Where to look" side by side, each about
-    /// the width of a phone's column or more. Portrait and narrow windows keep one page at a time.
-    static func sideBySide(width:Double,height:Double,largeText:Bool)->Bool {
-        width>height && columns(width:width,largeText:largeText)==2
+    /// the width of a phone's column or more. An iPhone in landscape (compact height) does the same
+    /// from 600 points, since one page at a time would leave it a strip between header and footer.
+    /// Portrait and narrow windows keep one page at a time, and so do accessibility text sizes.
+    static let compactHeightSideBySide=600.0
+    static func sideBySide(width:Double,height:Double,largeText:Bool,compactHeight:Bool=false)->Bool {
+        guard width>height else { return false }
+        return columns(width:width,largeText:largeText)==2 || (compactHeight && !largeText && width>=compactHeightSideBySide)
     }
     /// The side margin that centres a column of at most `measure` points in `width`.
     static func margin(width:Double,measure:Double)->Double { max(0,(width-measure)/2) }

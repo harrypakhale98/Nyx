@@ -2,6 +2,10 @@ import SwiftUI
 
 struct OnboardingView:View {
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// Landscape on iPhone (and iPhone Duo's outer display turned): the art beside the words, so the
+    /// words are never pushed under the page's controls.
+    @Environment(\.verticalSizeClass) private var verticalSize
+    private var beside:Bool { verticalSize == .compact && !typeSize.isAccessibilitySize }
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -29,12 +33,15 @@ struct OnboardingView:View {
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {
-                        VStack(spacing:index==1 && !typeSize.isAccessibilitySize ? 16 : 28) {
-                            art(index)
-                            Text(titles[index]).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                            Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
-                            if index==2 { redToggle }
-                        }.padding(.horizontal,28).padding(.vertical,index==1 || typeSize.isAccessibilitySize ? 12 : 28).frame(maxWidth:560).frame(maxWidth:.infinity)
+                        let layout=beside ? AnyLayout(HStackLayout(spacing:36)) : AnyLayout(VStackLayout(spacing:index==1 && !typeSize.isAccessibilitySize ? 16 : 28))
+                        layout {
+                            art(index).frame(maxWidth:beside ? 320 : nil)
+                            VStack(spacing:beside ? 16 : (index==1 && !typeSize.isAccessibilitySize ? 16 : 28)) {
+                                Text(titles[index]).font(.system(beside ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                                Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
+                                if index==2 { redToggle }
+                            }
+                        }.padding(.horizontal,28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy taller than the page shows its scroll indicator once, so "more below" is never only a fade.
                     .scrollIndicatorsFlash(onAppear:true)
@@ -68,10 +75,10 @@ struct OnboardingView:View {
     /// of the message sit above the page dots rather than behind the fade.
     @ViewBuilder private func art(_ index:Int)->some View {
         switch index {
-        case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:moonSize,height:moonSize).padding(.vertical,24) }
+        case 0: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:3).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
         case 1: ScoreAnatomy(active:page==1)
         // The last page ends bright: a waxing gibbous Moon, which turns red with the switch below it.
-        default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:moonSize,height:moonSize).padding(.vertical,24) }
+        default: if !typeSize.isAccessibilitySize { OnboardingMoon(daysAfterNew:11).frame(width:beside ? 130 : moonSize,height:beside ? 130 : moonSize).padding(.vertical,beside ? 8 : 24) }
         }
     }
     /// The real night-vision switch: the whole app, this page included, turns red on the shared spring.

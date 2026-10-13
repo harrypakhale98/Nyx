@@ -93,6 +93,8 @@ struct ParkDetailView: View {
     /// Two columns on a wide iPad: tonight (gauge, river, access) stays in view on the left while
     /// the sky and the place scroll on the right. One readable column otherwise.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    /// iPhone Duo's fold while it is half open (`readingFold`); nil everywhere else.
+    @State private var fold:Fold?
     /// The pinned index: one column, standard text sizes (segments do not grow with the text).
     private var showsIndex:Bool { !wide && !typeSize.isAccessibilitySize }
     var body: some View {
@@ -102,10 +104,13 @@ struct ParkDetailView: View {
                     // Both columns within a readable width, centred in a very wide window: the room
                     // beyond it is each scroll view's own margin, so both still scroll from the window's edges.
                     let side=WideLayout.twoColumnSide(width)
-                    HStack(alignment:.top,spacing:0) {
+                    // iPhone Duo half open like a book: tonight on one side of the fold, the sky and the
+                    // place on the other, each column's own padding keeping its words off the crease.
+                    let folded=fold.flatMap { f in f.leadingWidth(in:width).map { (leading:$0,gap:f.frame.width) } }
+                    HStack(alignment:.top,spacing:folded?.gap ?? 0) {
                         ScrollView { VStack(spacing:26) { tonightChapter(proxy) }.padding(24) }
                             .contentMargins(.leading,side,for:.scrollContent)
-                            .scrollDisabled(scrubbing || holdingArc).frame(width:WideLayout.leadingWidth(width)+side)
+                            .scrollDisabled(scrubbing || holdingArc).frame(width:folded?.leading ?? WideLayout.leadingWidth(width)+side)
                         // The sky arc lives here, so its held finger holds this column still too.
                         ScrollView { VStack(spacing:26) { skyChapter; placeChapter }.padding(24) }
                             .contentMargins(.trailing,side,for:.scrollContent)
@@ -178,6 +183,9 @@ struct ParkDetailView: View {
         // the offline caches with the loader over its own sky, never a score they would change.
         .scoreGate(background:false)
         .measuringWidth($width)
+        // The fold of a half-open iPhone Duo, in the page's coordinates; the columns ease to it.
+        .readingFold($fold)
+        .animation(reduceMotion ? nil : NyxMotion.spring,value:fold)
         // iPad keyboard: ⌘← and ⌘→ move along the river, as dragging it does.
         .nightKeys { delta in step(delta) }
         // Left open past sunrise, the river moves on to the new tonight; a chosen night that has
@@ -269,11 +277,16 @@ struct ParkDetailView: View {
         ToolbarItem(placement:.topBarTrailing) { ShareNightMenu(night:night).disabled(model.cachesPending) }
         // iPad: this park in a window of its own, beside another (not in a park's own window).
         if multipleWindows, commands?.parkWindow != true {
-            ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
+            // A window of its own is a convenience: the first to overflow when a side bar runs short.
+            if #available(iOS 27.0,*) {
+                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }.visibilityPriority(.low)
+            } else {
+                ToolbarItem(placement:.topBarTrailing) { OpenParkWindowButton(park:park,night:selected).labelStyle(.iconOnly).help("Open in New Window") }
+            }
         }
     }
     private var saveButton:some View {
-        Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Image(systemName:isSaved ? "bookmark.fill" : "bookmark") }
+        Button { guard !model.journalUnavailable else { persistenceError=true; return }; if let item=saved.first(where:{$0.parkID==park.id}) { context.delete(item) } else { context.insert(SavedPark(parkID:park.id)) }; do { try context.save() } catch { context.rollback();persistenceError=true } } label:{ Label(SaveWords.title(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace),systemImage:isSaved ? "bookmark.fill" : "bookmark") }
             .modifier(SaveButtonWords(saved:isSaved,spot:park.isSavedSpot,place:park.isCatalogPlace))
     }
 }

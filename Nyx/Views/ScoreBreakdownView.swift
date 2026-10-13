@@ -16,7 +16,7 @@ struct ScoreBreakdownView: View {
         else {
             ScrollView { content.padding(24).readableColumn() }
                 .background(NightBackground(score:night.score.value,park:night.park,night:night.id)).foregroundStyle(palette.ink).navigationTitle("Score breakdown").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+                .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }.singleControlBar()
         }
     }
     private var scoreNumeral: some View {

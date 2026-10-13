@@ -50,6 +50,26 @@ enum DebugScenario {
         return nil
         #endif
     }
+    /// `-nyx-window 878x669`: the app's root drawn at that size, regular in both directions, so an iPad
+    /// simulator stands in for iPhone Duo's open inner display (which Device Hub cannot always open).
+    static var window: CGSize? {
+        #if DEBUG
+        guard let parts=argument("-nyx-window")?.split(separator:"x").compactMap({ Double($0) }), parts.count==2 else { return nil }
+        return CGSize(width:parts[0],height:parts[1])
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-fold book` (top to bottom) or `-nyx-fold table` (side to side): a simulated fold through the
+    /// middle of `-nyx-window`, `foldWidth` points wide, read by `readingFold` in place of the hardware's.
+    static var fold: String? {
+        #if DEBUG
+        return window == nil ? nil : argument("-nyx-fold")
+        #else
+        return nil
+        #endif
+    }
+    nonisolated static let foldWidth=28.0
     static var onboardingPage:Int {
         #if DEBUG
         return min(2,max(0,Int(argument("-nyx-onboarding-page") ?? "0") ?? 0))

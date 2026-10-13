@@ -15,6 +15,8 @@ struct FieldCompassView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var frozen: SkyCompass.Pose?
+    /// iPhone Duo's hinge part way open (`readingHalfOpen`).
+    @State private var halfOpen=false
     @State private var listed: Bool?
     @State private var targets: [FieldSkyTarget]=[]
     @State private var stars: [CompassStar]=[]
@@ -119,8 +121,11 @@ struct FieldCompassView: View {
                 Text(motion.trueNorth ? String(localized:"Directions use true north.") : String(localized:"Directions use magnetic north, which can differ from true north by several degrees."))
                     .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 if motion.needsCalibration { Text("Move your iPhone in a slow figure eight to steady the compass.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                // iPhone Duo part way open: its two halves face different ways, so the sky follows one of them.
+                if halfOpen { Text("Open your iPhone flat to point it at the sky.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
         }.frame(maxWidth:.infinity,alignment:.leading)
+        .readingHalfOpen($halfOpen)
     }
     @ViewBuilder private var buttons: some View {
         if sensing && !showsList {

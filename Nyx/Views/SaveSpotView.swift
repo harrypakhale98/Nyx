@@ -99,9 +99,9 @@ struct SaveSpotView: View {
             .nightForm().readableForm()
             .navigationTitle("Save a spot").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement:.cancellationAction) { Button("Cancel") { dismiss() } }
-                // Dimmed until there is a place to save: the app's starlight foreground would otherwise keep it as bright as Cancel.
-                ToolbarItem(placement:.confirmationAction) { Button("Save") { save() }.disabled(point == nil).foregroundStyle(point == nil ? palette.ink.opacity(palette.highContrast ? 0.55 : 0.38) : palette.ink) }
+                ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { dismiss() } }
+                // iOS 26's confirm glyph, which the system dims until there is a place to save.
+                ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { save() }.accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Save a spot")]).disabled(point == nil) }
             }
             .sheet(isPresented:$explainLocation) {
                 PermissionExplainer(symbol:"location",title:"Save where you are",message:"Nyx reads where you are once, to save this spot. Nothing is sent unless you save it.",action:"Use my location") {

@@ -13,7 +13,7 @@ import Testing
         // 13-inch portrait, 11-inch landscape, 13-inch landscape: the list beside the park.
         for width in [1032.0,1194,1376] { #expect(ParksTab.split(width:width,largeText:false)) }
         // The boundary is WideLayout's.
-        #expect(!ParksTab.split(width:899,largeText:false))
+        #expect(!ParksTab.split(width:WideLayout.twoColumnWidth-1,largeText:false))
         #expect(ParksTab.split(width:WideLayout.twoColumnWidth,largeText:false))
         // At accessibility text sizes the split waits for twice the room.
         #expect(!ParksTab.split(width:1032,largeText:true))

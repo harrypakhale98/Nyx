@@ -396,7 +396,8 @@ enum FieldAlarmError: Error { case unsupported }
         MotionTilt.shared.suspend(false)
         pose=nil
     }
-    /// How far the interface is turned from the device's portrait (always 0 on iPhone, which is portrait only).
+    /// How far the interface is turned from the device's portrait: an iPad or an iPhone in landscape, and
+    /// iPhone Duo's inner display, whose interface turns with the device rather than with a lock.
     private static func quarterTurns() -> Int {
         let scenes=UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         return switch (scenes.first { $0.activationState == .foregroundActive } ?? scenes.first)?.effectiveGeometry.interfaceOrientation {

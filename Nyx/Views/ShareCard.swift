@@ -210,7 +210,7 @@ struct ShareNightMenu:View {
                 }
                 .accessibilityHint(ShareCard.hint(palette))
             }
-        } label:{ Image(systemName:"square.and.arrow.up") }
+        } label:{ Label("Share this night",systemImage:"square.and.arrow.up") }
         .accessibilityLabel("Share this night")
         .accessibilityValue(card.summary)
         .accessibilityHint(ShareCard.hint(palette))

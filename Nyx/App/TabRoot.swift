@@ -12,10 +12,17 @@ struct TabRootToolbar: ViewModifier {
     func body(content:Content)->some View {
         content
             .toolbar {
-                ToolbarItemGroup(placement:.topBarLeading) {
-                    NightVisionToggle()
-                    Button { settings=true } label:{ Image(systemName:"gearshape") }
-                        .accessibilityLabel("Settings").accessibilityInputLabels([Text("Settings"),Text("Preferences")])
+                // Night vision is the control reached for in the dark: on iPhone Duo's side bar, where
+                // items overflow as space runs short, it stays out longest. Settings keeps its title for
+                // the overflow menu; the bar shows its symbol.
+                if #available(iOS 27.0,*) {
+                    ToolbarItem(placement:.topBarLeading) { NightVisionToggle() }.visibilityPriority(.high)
+                } else {
+                    ToolbarItem(placement:.topBarLeading) { NightVisionToggle() }
+                }
+                ToolbarItem(placement:.topBarLeading) {
+                    Button("Settings",systemImage:"gearshape") { settings=true }
+                        .accessibilityInputLabels([Text("Settings"),Text("Preferences")])
                 }
             }
             .sheet(isPresented:$settings) { SettingsSheet() }
@@ -51,7 +58,8 @@ struct SettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {
-            SettingsView().toolbar { ToolbarItem(placement:.confirmationAction) { Button("Done") { dismiss() } } }
+            // Settings apply as they change, so the sheet closes rather than confirms (iOS 26's close glyph).
+            SettingsView().toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }.singleControlBar()
         }.nyxPresentation()
     }
 }
