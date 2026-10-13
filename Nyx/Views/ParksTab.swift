@@ -27,7 +27,9 @@ struct ParksTab: View {
     @State private var returningFlat=false
     /// Whether the list is beside the park; the person can hide it with the sidebar button.
     /// (`-nyx-list-hidden`, DEBUG: opens with the list hidden.)
-    @State private var columnVisibility:NavigationSplitViewVisibility=DebugScenario.isEnabled("list-hidden") ? .detailOnly : .automatic
+    // The split appears only where two columns fit (`split`), so the list starts beside the park there:
+    // `.automatic` left it hidden on iPhone Duo's inner display, which the system treats as narrow.
+    @State private var columnVisibility:NavigationSplitViewVisibility=DebugScenario.isEnabled("list-hidden") ? .detailOnly : .all
     /// The list's width that puts its edge on the fold, when the fold leaves room for both columns.
     private var listAtFold: Double? { ParksTab.listWidth(fold:fold,width:width,sidebarMargin:listMinX-tabMinX) }
     /// The list column's width when iPhone Duo is half open like a book: from the sidebar's own margin to
