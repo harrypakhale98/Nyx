@@ -42,8 +42,24 @@ struct VisionPalette: Equatable {
     /// The iPhone's night-vision filter applied to a colour in the sky (`NightTint.filtered`, one
     /// copy): desaturated, then multiplied by this palette's red, so the sky leaks no more green
     /// or blue than the iPhone's screen does.
+    /// For a colour that goes to a material as it is (a tint: sRGB display values).
     func sky(_ rgb: SIMD3<Double>) -> SIMD3<Double> {
         nightVision ? base.red.filtered(rgb) : rgb
+    }
+    /// For a colour in linear light that is encoded to sRGB afterwards (the dome, the Moon's disc,
+    /// the clouds, the land): filtered as the screen would show it, in display values, then back to
+    /// linear, so the encoded result has the iPhone's red-to-green-to-blue proportions.
+    func skyLinear(_ linear: SIMD3<Double>) -> SIMD3<Double> {
+        guard nightVision else { return linear }
+        let shown = base.red.filtered(SIMD3(Self.encode(linear.x), Self.encode(linear.y), Self.encode(linear.z)))
+        return SIMD3(Self.decode(shown.x), Self.decode(shown.y), Self.decode(shown.z))
+    }
+    private static func encode(_ linear: Double) -> Double {
+        let c = min(1, max(0, linear))
+        return c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
+    }
+    private static func decode(_ srgb: Double) -> Double {
+        srgb <= 0.04045 ? srgb/12.92 : pow((srgb+0.055)/1.055, 2.4)
     }
 }
 private struct VisionPaletteKey: EnvironmentKey { static let defaultValue = VisionPalette() }
@@ -105,8 +121,13 @@ struct VisionMoon: View {
         }
         return ShaderLibrary.nyxMoon(size, lighting, frame, .image(Image("MoonMap")))
     }
+    /// The phase the geometry shows: the cycle's fraction from the phase angle (0 is full, π is new).
+    static func phase(_ geometry: MoonGeometry) -> MoonPhase {
+        let lit = (1-geometry.phaseAngle/Double.pi)/2
+        return MoonPhase(fraction: geometry.waxing ?? true ? lit : 1-lit)
+    }
     static func describe(_ geometry: MoonGeometry) -> String {
-        String(localized: "Moon, \(Int((geometry.illumination*100).rounded())) percent lit")
+        String(localized: "Moon, \(VisionMoon.phase(geometry).name), \(Int((geometry.illumination*100).rounded())) percent lit")
     }
 }
 

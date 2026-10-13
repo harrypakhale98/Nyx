@@ -4936,41 +4936,6 @@
         }
       }
     },
-    "Moon, %lld percent lit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, zu %lld Prozent beleuchtet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %lld percent lit"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %lld por ciento iluminada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, éclairée à %lld pour cent"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、輝面比%lldパーセント"
-          }
-        }
-      }
-    },
     "Moon-free from %@ to %@.": {
       "extractionState": "manual",
       "localizations": {

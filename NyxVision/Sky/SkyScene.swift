@@ -270,7 +270,7 @@ import UIKit
         let changed = domeLight.map { abs($0.sunAltitude-light.sunAltitude) > 0.3 || abs($0.moonGlare-light.moonGlare) > 0.01 } ?? true
         if changed || abs(moment.sunAzimuth-sunAzimuth) > 2 || self.palette != palette || domePark != park.id {
             domePark = park.id; domeLight = light; sunAzimuth = moment.sunAzimuth
-            let paint = palette.sky
+            let paint = palette.skyLinear
             if let image = SkyTextures.dome(light, color: paint), let texture = try? TextureResource(image: image, options: .init(semantic: .color)) {
                 dome.model?.materials = [Self.plain(texture)]
             }
@@ -346,7 +346,7 @@ import UIKit
         billboard(moonShadow, altitude: moment.moon.altitude, azimuth: moment.moon.azimuth, facing: facing, radius: Self.bodyRadius+0.2, degrees: size*0.985)
         if let discTexture {
             let fromSun = abs((moment.moon.azimuth-moment.sunAzimuth+540).truncatingRemainder(dividingBy: 360)-180)
-            let c = palette.sky(SkyTextures.skyColor(altitude: moment.moon.altitude, fromSun: fromSun, light))
+            let c = palette.skyLinear(SkyTextures.skyColor(altitude: moment.moon.altitude, fromSun: fromSun, light))
             var material = Self.plain(discTexture)
             // The dome's texture is sRGB-encoded; a tint is given in sRGB too, so encode to match.
             let e = SIMD3(Self.srgb(c.x), Self.srgb(c.y), Self.srgb(c.z))
@@ -461,7 +461,7 @@ import UIKit
             return
         }
         let tenths = min(10, max(3, Int((cloud*10).rounded())))
-        cloudWanted = (tenths, Self.smooth((cloud-SkyDome.cloudLayerFrom)/0.1), palette.sky(SkyClouds.color(light)))
+        cloudWanted = (tenths, Self.smooth((cloud-SkyDome.cloudLayerFrom)/0.1), palette.skyLinear(SkyClouds.color(light)))
         if cloudTextures[tenths] == nil && cloudPending.insert(tenths).inserted {
             Task { [weak self] in
                 let image = await Task.detached(priority: .userInitiated) { SkyClouds.image(tenths: tenths) }.value
@@ -536,7 +536,7 @@ import UIKit
         labelKeys = [:]
         // The textures keep their natural colours; night vision is the materials' red tint.
         var groundMaterial = UnlitMaterial(applyPostProcessToneMap: false)
-        let ground = palette.sky(Self.land*0.8)
+        let ground = palette.skyLinear(Self.land*0.8)
         groundMaterial.color = .init(tint: UIColor(red: Self.srgb(ground.x), green: Self.srgb(ground.y), blue: Self.srgb(ground.z), alpha: 1))
         self.ground.model?.materials = [groundMaterial]
     }
