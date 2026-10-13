@@ -82,7 +82,7 @@ struct SaveSpotView: View {
                     Section {
                         TextField("Name",text:$name,prompt:Text(offeredName),axis:.vertical)
                             .lineLimit(1...3).textInputAutocapitalization(.words).submitLabel(.done).focused($focus,equals:.name)
-                            .onChange(of:name) { _,new in if new.contains("\n") { name=new.replacingOccurrences(of:"\n",with:"") } }
+                            .onChange(of:name) { old,new in if new.contains("\n") { name=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus=nil } } }
                             .accessibilityLabel("Name")
                     } header:{ Text("Name") } footer:{
                         Text("Leave it empty to use \"\(offeredName)\".").foregroundStyle(palette.muted)
@@ -97,6 +97,8 @@ struct SaveSpotView: View {
                 .listRowBackground(palette.panel)
             }
             .nightForm().readableForm()
+            // Over half an iPhone's screen in landscape is keyboard: a drag down the form puts it away.
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Save a spot").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { dismiss() } }

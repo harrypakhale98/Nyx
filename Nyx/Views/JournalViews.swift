@@ -442,6 +442,11 @@ struct JournalEditorView:View {
     @Environment(PlanModel.self) private var model
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    /// An iPhone in landscape, where the keyboard leaves about a hundred points of form.
+    @Environment(\.verticalSizeClass) private var verticalSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @FocusState private var writingNotes:Bool
     @State private var editor:JournalEditorModel
     @State private var picker:[PhotosPickerItem]=[]
     /// Cancel with words or photos in the form: "Discard this night?" first.
@@ -449,6 +454,11 @@ struct JournalEditorView:View {
     var existing:JournalEntry?
     /// Called once the entry is saved (a kept night tells the rating request).
     var saved:(()->Void)?=nil
+    private static let notesID="notes"
+    private func showNotes(_ proxy:ScrollViewProxy) {
+        guard writingNotes, verticalSize == .compact else { return }
+        withAnimation(reduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
+    }
     init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
     /// A new entry for a night being kept (field mode at dawn, a park's page the morning after):
     /// the park, the night it began on, the observed-Bortle default and a first line, all editable.
@@ -461,6 +471,7 @@ struct JournalEditorView:View {
     }
     var body:some View {
         @Bindable var editor=editor
+        ScrollViewReader { proxy in
         Form {
             Section("The night") {
                 DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
@@ -470,7 +481,14 @@ struct JournalEditorView:View {
                 }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
             }.listRowBackground(palette.panel)
-            Section("What you noticed") { TextEditor(text:$editor.notes).scrollContentBackground(.hidden).frame(minHeight:160).accessibilityLabel("Observation notes") }.listRowBackground(palette.panel)
+            // On an iPhone in landscape the keyboard leaves about a hundred points: the notes are short
+            // enough to sit whole above it and scroll within themselves, so the line being written stays
+            // in sight (at 160 points it went behind the keyboard by the third line).
+            Section("What you noticed") {
+                TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
+                    .frame(minHeight:verticalSize == .compact ? 80 : 160,maxHeight:verticalSize == .compact ? 80 : nil)
+                    .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
+            }.listRowBackground(palette.panel)
             Section {
                 ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
                     PhotoDescriptionRow(editor:editor,index:index,data:data)
@@ -480,7 +498,14 @@ struct JournalEditorView:View {
             } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
             .listRowBackground(palette.panel)
             if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) }.listRowBackground(palette.panel) }
-        }.nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top).navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+        }.nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+        // The notes take Return as a new line, so a drag down the form is how the keyboard goes away.
+        .scrollDismissesKeyboard(.interactively)
+        // In landscape, once the keyboard is up, the form shows the notes from their top edge rather than
+        // only the first line above the keyboard.
+        .onReceive(NotificationCenter.default.publisher(for:UIResponder.keyboardDidShowNotification)) { _ in showNotes(proxy) }
+        }
+        .navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
         .onAppear {
             // A new entry starts on the night just seen, not the calendar day it is written on.
             if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }

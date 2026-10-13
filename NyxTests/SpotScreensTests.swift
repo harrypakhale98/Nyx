@@ -13,6 +13,16 @@ struct SpotScreensTests {
     private static func point(_ text: String) -> CoordinateText.Point? { CoordinateText.point(text) }
     private static func close(_ a: Double?, _ b: Double) -> Bool { a.map { abs($0-b) < 1e-9 } ?? false }
 
+    /// Return in a wrapping one-line field (a spot's name, search at accessibility sizes) puts the
+    /// keyboard away; a pasted line break does not.
+    @Test func returnKeyEndsAOneLineField() {
+        #expect(ReturnKey.pressed(old:"Ridge",new:"Ridge\n"))
+        #expect(ReturnKey.pressed(old:"Ridgepullout",new:"Ridge\npullout"))
+        #expect(!ReturnKey.pressed(old:"Ridge",new:"Ridge\npullout"))
+        #expect(!ReturnKey.pressed(old:"Ridge",new:"Ridges"))
+        #expect(!ReturnKey.pressed(old:"",new:""))
+    }
+
     // MARK: Coordinates
 
     @Test(arguments: ["34.01, -116.18", "34.01,-116.18", "34.01 -116.18", "  34.01 ,  -116.18  ", "34.01°, -116.18°",

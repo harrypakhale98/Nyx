@@ -67,6 +67,8 @@ struct StartingPointPicker: View {
             .listRowBackground(palette.panel)
         }
         .nightForm()
+        // On an iPhone in landscape the keyboard hides all but the first place: a drag down puts it away.
+        .scrollDismissesKeyboard(.interactively)
         .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:"City, town or park",enabled:!typeSize.isAccessibilitySize))
         .navigationTitle("Starting point").navigationBarTitleDisplayMode(.inline)
         .task(id:suggestionCountry) {
@@ -98,7 +100,7 @@ private struct PlaceSearchField: View {
             Image(systemName:"magnifyingglass").foregroundStyle(palette.muted).accessibilityHidden(true)
             TextField("City, town or park",text:$text,axis:.vertical).lineLimit(1...3).submitLabel(.search).focused(focus)
                 .autocorrectionDisabled().textInputAutocapitalization(.words)
-                .onChange(of:text) { _,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:"") } }
+                .onChange(of:text) { old,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus.wrappedValue=false } } }
                 .accessibilityLabel("Search cities, towns and parks")
             if !text.isEmpty {
                 Button { text="" } label:{ Image(systemName:"xmark.circle.fill").foregroundStyle(palette.muted).frame(minWidth:44,minHeight:44) }

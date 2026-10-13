@@ -23,6 +23,14 @@ struct SystemSearch: ViewModifier {
         if enabled { content.searchable(text:$text,placement:.navigationBarDrawer(displayMode:.always),prompt:prompt).searchFocused(focused) } else { content }
     }
 }
+/// A one-line field that wraps (`axis: .vertical`) takes Return as a newline, which the field strips,
+/// so its Done or Search key would otherwise leave the keyboard up: over half the screen on an iPhone
+/// in landscape. Return is one new "\n" typed; a pasted line break is only stripped.
+enum ReturnKey {
+    nonisolated static func pressed(old:String,new:String)->Bool {
+        new.count == old.count+1 && new.filter { $0 == "\n" }.count == old.filter { $0 == "\n" }.count+1
+    }
+}
 /// A search field in the page itself, for accessibility text sizes: it grows and wraps with the text.
 struct InlineSearchField: View {
     @Environment(\.nyx) private var palette
@@ -34,7 +42,7 @@ struct InlineSearchField: View {
             Image(systemName:"magnifyingglass").foregroundStyle(palette.muted).accessibilityHidden(true)
             TextField(prompt,text:$text,axis:.vertical).lineLimit(1...3).submitLabel(.search).focused(focus)
                 .autocorrectionDisabled().textInputAutocapitalization(.words)
-                .onChange(of:text) { _,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:"") } }
+                .onChange(of:text) { old,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus.wrappedValue=false } } }
                 .accessibilityLabel("Search parks")
             if !text.isEmpty {
                 Button { text="" } label:{ Image(systemName:"xmark.circle.fill").foregroundStyle(palette.muted).frame(minWidth:44,minHeight:44) }

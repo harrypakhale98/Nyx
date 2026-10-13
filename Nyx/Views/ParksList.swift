@@ -121,7 +121,10 @@ struct ParksView: View {
             .accessibilityRotor(Text("Pristine nights"),entries:rotor(spots,shown) { park in
                 let night=model.night(park); return night.score.value>=90 ? String(localized:"\(park.shortName), \(night.score.value)") : nil
             },entryID:\.id,entryLabel:\.label)
-        }.background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
+        }
+        // On an iPhone in landscape the keyboard hides all but the first result: a drag down puts it away.
+        .scrollDismissesKeyboard(.interactively)
+        .background(NightBackground(veil:0.45)).navigationTitle("Parks").navigationBarTitleDisplayMode(.inline)
             .modifier(SystemSearch(text:$search,focused:$searchFocused,prompt:searchPrompt,enabled:!typeSize.isAccessibilitySize))
     }
     var body: some View {
