@@ -103,6 +103,7 @@
 		A4EA59659DF0EF4DDB4BB951 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
 		A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53D0C95B34F3513BFD765F3B /* AppIntents.framework */; };
 		AA62C904D4214D3E8E186221 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */; };
+		ABB41DEEA4FFF1D9A64E2CED /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
 		AE963C213E538BEFE9895049 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */; };
 		B00E3E3717F8A9536639A020 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
 		B2BCC9A5769EC83274D79A02 /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D319BAF3907884E43F8316F /* DataServices.swift */; };
@@ -860,6 +861,7 @@
 				0FE35656AA49598D7396AA03 /* constellations.json in Resources */,
 				F86C0DCF2F4503A99D43473B /* parks.json in Resources */,
 				9555B130DCFE14678D83272D /* sky-events.json in Resources */,
+				ABB41DEEA4FFF1D9A64E2CED /* skyglow.json in Resources */,
 				72CC113DC95BBDD8BB37CE0E /* star-names.json in Resources */,
 				898A5A3875E14084294BB08C /* stars.json in Resources */,
 			);

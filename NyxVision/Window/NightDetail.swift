@@ -70,6 +70,9 @@ struct NightDetail: View {
             // What the clouds rest on, in the iPhone's words.
             Text(model.cloudCaption(plan.night))
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+            // Smoke is not scored here (no air-quality request is made on this headset), so say so.
+            Text("Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.")
+                .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: 380, alignment: .leading)
         // A new score rolls in on the shared spring; under Reduce Motion it simply changes.
@@ -84,7 +87,7 @@ struct NightDetail: View {
     private func moon(_ plan: NightPlan) -> some View {
         VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: String(localized: "Moon, \(Int((plan.moon.illumination*100).rounded())) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
+                       label: String(localized: "Moon, \(plan.sky.moon.name), \(Int((plan.moon.illumination*100).rounded())) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
                 .frame(width: moonSide, height: moonSide)
                 .background {
                     // A piece of night behind the Moon, so even a new moon reads as a disc against the sky.

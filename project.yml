@@ -437,6 +437,9 @@ targets:
         group: Shared
       - path: Nyx/Resources/cloud-climate.json
         group: Shared
+      # The sky-glow ranking `NightPlanner.glowRank` breaks equal scores with, so parks order as on the iPhone and watch.
+      - path: Nyx/Resources/skyglow.json
+        group: Shared
       - path: Nyx/Services/SkyAlmanac.swift
         group: Shared
       - path: Nyx/Services/WhatsUp.swift

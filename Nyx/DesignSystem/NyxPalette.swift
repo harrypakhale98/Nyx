@@ -55,6 +55,13 @@ nonisolated enum NightTint: String, Sendable, CaseIterable {
     /// The multiplier, gamma-encoded sRGB.
     var rgb: SIMD3<Double> { self == .standard ? SIMD3(1,0.27,0.23) : SIMD3(1,0.36,0.31) }
     var color: Color { Color(red:rgb.x,green:rgb.y,blue:rgb.z) }
+    /// What `NightVisionFilter` does to a colour (`saturation(0)` then `colorMultiply(color)`): its
+    /// Rec. 709 luminance times the multiplier. For the places no view filter reaches, such as
+    /// Vision Pro's immersive sky, so they leak exactly as little green and blue as the iPhone.
+    func filtered(_ rgb: SIMD3<Double>) -> SIMD3<Double> {
+        let luminance = 0.2126*rgb.x + 0.7152*rgb.y + 0.0722*rgb.z
+        return luminance*self.rgb
+    }
     /// The setting's key in the shared defaults (the widgets and Control Center read the same suite).
     static let key="brighterRed"
 }

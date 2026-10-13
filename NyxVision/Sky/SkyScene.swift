@@ -370,7 +370,7 @@ import UIKit
         }
         tint(moon, texture: moonTexture, level: 1, color: Self.ink(palette))
         let percent = Int((moment.moonIllumination*100).rounded())
-        moon.components.set(Self.access(String(localized: "Moon, \(percent) percent lit"), moment.moon.place))
+        moon.components.set(Self.access(String(localized: "Moon, \(plan.sky.moon.name), \(percent) percent lit"), moment.moon.place))
     }
 
     private func placePlanets(moment: SkyMoment, facing: Double, palette: VisionPalette) {
@@ -801,7 +801,7 @@ import UIKit
         return c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
     }
     /// The tint over grey sky textures: white, or night vision's red.
-    static func ink(_ palette: VisionPalette) -> SIMD3<Double> { palette.nightVision ? SIMD3(1, 0.2, 0.16) : SIMD3(1, 1, 1) }
+    static func ink(_ palette: VisionPalette) -> SIMD3<Double> { palette.sky(SIMD3(1, 1, 1)) }
     static func planetColor(_ id: String) -> SIMD3<Double> {
         switch id {
         case "mars": SIMD3(1, 0.62, 0.45)

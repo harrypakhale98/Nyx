@@ -4866,6 +4866,41 @@
         }
       }
     },
+    "Moon, %@, %lld percent lit, as seen at %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mond, %@, zu %lld Prozent beleuchtet, gesehen in %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon, %@, %lld percent lit, as seen at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna, %@, %lld por ciento iluminada, vista en %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lune, %@, éclairée à %lld pour cent, vue à %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月、%1$@、輝面比%2$lldパーセント、%3$@の時点の見え方"
+          }
+        }
+      }
+    },
     "Moon, %@, %lld percent lit. Next new moon %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -4932,41 +4967,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "月、輝面比%lldパーセント"
-          }
-        }
-      }
-    },
-    "Moon, %lld percent lit, as seen at %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mond, zu %lld Prozent beleuchtet, gesehen in %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moon, %lld percent lit, as seen at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Luna, %lld por ciento iluminada, vista en %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lune, éclairée à %lld pour cent, vue à %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "月、輝面比%1$lldパーセント、%2$@の時点の見え方"
           }
         }
       }
@@ -8047,6 +8047,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%2$@の%1$@の空"
+          }
+        }
+      }
+    },
+    "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch und Dunst fließen auf der Vision Pro nicht ein. An verrauchten Tagen wirf einen Blick in die iPhone-App."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El humo y la bruma no se cuentan en Vision Pro. En días de humo, consulta la app del iPhone."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fumée et la brume ne sont pas comptées sur Vision Pro. Les jours de fumée, consultez l’app iPhone."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vision Proでは、煙ともやは計算に入れていません。煙の多い日は、iPhoneアプリで確認してください。"
           }
         }
       }

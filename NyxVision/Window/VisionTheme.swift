@@ -38,12 +38,12 @@ struct VisionPalette: Equatable {
     /// the iPhone's night panel.
     var nightPanel: Color { NyxPalette(nightVision: true, highContrast: highContrast).panel }
     /// Behind words under Reduce Transparency, in place of glass: a near-opaque deep indigo.
-    var solidPanel: Color { Color(red: 0.07, green: 0.08, blue: 0.14) }
-    /// The same red mapping as the iPhone's night-vision filter, for linear colours in the sky.
+    var solidPanel: Color { NyxPalette.indigo }
+    /// The iPhone's night-vision filter applied to a colour in the sky (`NightTint.filtered`, one
+    /// copy): desaturated, then multiplied by this palette's red, so the sky leaks no more green
+    /// or blue than the iPhone's screen does.
     func sky(_ rgb: SIMD3<Double>) -> SIMD3<Double> {
-        guard nightVision else { return rgb }
-        let luminance = 0.2126*rgb.x + 0.7152*rgb.y + 0.0722*rgb.z
-        return SIMD3(luminance, 0.2*luminance, 0.16*luminance)*1.2
+        nightVision ? base.red.filtered(rgb) : rgb
     }
 }
 private struct VisionPaletteKey: EnvironmentKey { static let defaultValue = VisionPalette() }

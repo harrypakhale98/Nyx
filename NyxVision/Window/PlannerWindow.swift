@@ -147,12 +147,13 @@ struct PlannerWindow: View {
 private struct NightVisionWindow: ViewModifier {
     let enabled: Bool
     let palette: VisionPalette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func body(content: Content) -> some View {
         content
             .saturation(enabled ? 0 : 1)
             .colorMultiply(enabled ? palette.red : .white)
             .background { if enabled { palette.nightPanel } }
-            .animation(VisionMotion.spring, value: enabled)
+            .animation(reduceMotion ? nil : VisionMotion.spring, value: enabled)
     }
 }
 struct DebugTypeSize: ViewModifier {
