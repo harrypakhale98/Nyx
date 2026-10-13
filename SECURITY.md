@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report a security problem privately, not in a public issue. Email [harry.pakhale98@gmail.com](mailto:harry.pakhale98@gmail.com?subject=Nyx%20security) with the subject "Nyx security".
+Please report a security problem privately, not in a public issue. Email [harry.pakhale98@gmail.com](mailto:harry.pakhale98@gmail.com?subject=Nyx%20security) with the subject "Nyx security". You can also use GitHub's private reporting: [Report a vulnerability](https://github.com/harrypakhale98/Nyx/security/advisories/new) on the repository's Security tab.
 
 Include what you found, the steps to reproduce it, the device and software version (iPhone, iPad, Apple Watch or Apple Vision Pro), and the version and build number if you have them. Please do not send private journal entries or photos.
 
