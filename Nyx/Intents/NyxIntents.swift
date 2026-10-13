@@ -85,7 +85,7 @@ nonisolated struct DarknessAnswer:Sendable {
         return Sentences.join([sentence(String(localized:"Closure alert: \(closure)")), body])
     }
     /// An NPS headline usually ends without a full stop; one is added so the score reads as its own sentence.
-    static func sentence(_ text:String)->String { text.last.map { ".!?…".contains($0) } == true ? text : text+"." }
+    static func sentence(_ text:String)->String { Sentences.end(text) }
 }
 /// Siri's card for tonight's score: the score on a still dial (Siri shows a snapshot, so nothing
 /// counts up), the Moon as it is tonight, and what the clouds rest on.

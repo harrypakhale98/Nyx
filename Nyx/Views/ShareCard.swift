@@ -117,9 +117,9 @@ struct ShareCard:View {
     var summary:String {
         var parts=[String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label).")]
         if let range { parts.append(String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")) }
-        parts.append(moonPhrase+".")
-        if let why { parts.append(why+".") }
-        parts.append(basis+".")
+        parts.append(Sentences.end(moonPhrase))
+        if let why { parts.append(Sentences.end(why)) }
+        parts.append(Sentences.end(basis))
         return Sentences.join(parts)
     }
     /// The Moon as the card shows it: its phase and how much is lit, or in words when not drawn.

@@ -28,4 +28,12 @@ struct SentencesTests {
         #expect(Sentences.join([], language: "en") == "")
         #expect(Sentences.join(["Only."], language: "ja") == "Only.")
     }
+    @Test func phrasesEndAsSentencesInTheirOwnScript() {
+        #expect(Sentences.end("Moon-free all night", language: "en") == "Moon-free all night.")
+        #expect(Sentences.end("Road closed.", language: "en") == "Road closed.")
+        #expect(Sentences.end("一晩中月なし", language: "ja") == "一晩中月なし。")
+        #expect(Sentences.end("一晩中月なし。", language: "ja") == "一晩中月なし。")
+        #expect(Sentences.end("Road closed", language: "ja") == "Road closed.")
+        #expect(Sentences.end("", language: "ja") == "")
+    }
 }

@@ -9,6 +9,15 @@ nonisolated enum Sentences {
 
     static func join(_ parts: [String]) -> String { join(parts, language: language) }
 
+    static func end(_ text: String) -> String { end(text, language: language) }
+
+    /// A phrase closed as a sentence, unless it already is: "。" in Japanese after Japanese text,
+    /// "." otherwise (an English closure headline keeps its own full stop in any language).
+    static func end(_ text: String, language: String) -> String {
+        guard let last=text.last, !".!?…。！？".contains(last) else { return text }
+        return language.hasPrefix("ja") && !last.isASCII ? text+"。" : text+"."
+    }
+
     /// Empty parts are dropped. In Japanese no space follows a sentence that ends in a Japanese
     /// character or full-width mark; one that ends in plain ASCII (a closure headline from the
     /// Park Service, a figure) keeps its space so the next sentence does not stick to it.

@@ -49,7 +49,7 @@ nonisolated enum WristTonightAnswer {
             : String(localized: "\(park.shortName), \(score.value) out of 100, \(score.band.label). \(clouds(night, context: context, now: now))")
         guard let closure = context?.closures[park.id]?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
         let alert = WristClosure.spoken(closure)
-        return Sentences.join([alert.last.map { ".!?…".contains($0) } == true ? alert : alert + ".", body])
+        return Sentences.join([Sentences.end(alert), body])
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {
