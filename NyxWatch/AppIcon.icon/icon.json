@@ -1,12 +1,86 @@
 {
-  "fill" : { "linear-gradient" : [ "srgb:0.16471,0.10588,0.30588,1.00000", "srgb:0.00000,0.00000,0.00000,1.00000" ] },
-  "groups" : [
-    { "layers" : [ { "glass" : false, "image-name" : "Star.svg", "name" : "Leading star" } ],
-      "shadow" : { "kind" : "none", "opacity" : 0.5 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
-    { "layers" : [ { "glass" : false, "image-name" : "Arc.svg", "name" : "Arc" } ],
-      "shadow" : { "kind" : "layer-color", "opacity" : 0.6 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
-    { "layers" : [ { "glass" : true, "image-name" : "Moon.svg", "name" : "Moon" }, { "glass" : true, "image-name" : "Disc.svg", "name" : "Earthshine" } ],
-      "shadow" : { "kind" : "neutral", "opacity" : 0.6 }, "translucency" : { "enabled" : true, "value" : 0.15 } }
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.20000,0.12941,0.36078,1.00000",
+      "srgb:0.07843,0.10196,0.23529,1.00000"
+    ]
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Moon",
+          "image-name": "4-Moon.svg",
+          "glass": true
+        },
+        {
+          "name": "Earthshine",
+          "image-name": "3-Earthshine.svg",
+          "glass": true
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "name": "Leading star",
+          "image-name": "2-Star.svg",
+          "glass": true
+        },
+        {
+          "name": "Dial",
+          "image-name": "1-Dial.svg",
+          "glass": true
+        },
+        {
+          "name": "Track",
+          "image-name": "0-Track.svg",
+          "glass": false,
+          "opacity": 0.13
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "name": "Field stars",
+          "image-name": "0-Field.svg",
+          "glass": false,
+          "opacity": 0.7
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
   ],
-  "supported-platforms" : { "circles" : [ "watchOS" ] }
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ]
+  }
 }

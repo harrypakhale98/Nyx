@@ -1,12 +1,145 @@
 {
-  "fill" : { "linear-gradient" : [ "srgb:0.16471,0.10588,0.30588,1.00000", "srgb:0.00000,0.00000,0.00000,1.00000" ] },
-  "groups" : [
-    { "layers" : [ { "glass" : false, "image-name" : "Star.svg", "name" : "Leading star" } ],
-      "shadow" : { "kind" : "none", "opacity" : 0.5 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
-    { "layers" : [ { "glass" : false, "image-name" : "Arc.svg", "name" : "Arc" } ],
-      "shadow" : { "kind" : "layer-color", "opacity" : 0.6 }, "translucency" : { "enabled" : false, "value" : 0.5 } },
-    { "layers" : [ { "glass" : true, "image-name" : "Moon.svg", "name" : "Moon" }, { "glass" : true, "image-name" : "Disc.svg", "name" : "Earthshine" } ],
-      "shadow" : { "kind" : "neutral", "opacity" : 0.6 }, "translucency" : { "enabled" : true, "value" : 0.15 } }
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "srgb:0.16471,0.10588,0.30588,1.00000",
+          "srgb:0.04314,0.06275,0.14902,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.10980,0.07059,0.21176,1.00000",
+          "srgb:0.01176,0.01569,0.04706,1.00000"
+        ]
+      }
+    }
   ],
-  "supported-platforms" : { "squares" : "shared" }
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Moon",
+          "image-name": "4-Moon.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Earthshine",
+          "image-name": "3-Earthshine.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:0.40000,0.40000,0.40000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "name": "Leading star",
+          "image-name": "2-Star.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:0.85000,0.85000,0.85000,1.00000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dial",
+          "image-name": "1-Dial.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:0.60000,0.60000,0.60000,1.00000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Track",
+          "image-name": "0-Track.svg",
+          "glass": false,
+          "opacity": 0.13,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:0.22000,0.22000,0.22000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "name": "Field stars",
+          "image-name": "0-Field.svg",
+          "glass": false,
+          "opacity": 0.7,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:0.50000,0.50000,0.50000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "lighting": "combined",
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
 }
