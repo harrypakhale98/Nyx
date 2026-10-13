@@ -14,6 +14,10 @@ struct ParksTab: View {
     /// The park beside the list, kept for the window (and restored with it).
     @SceneStorage("parksPark") private var selection: String?
     @State private var path: [Park]=[]
+    /// iPhone Duo's fold while it is half open (`readingFold`); nil everywhere else.
+    @State private var fold: Fold?
+    /// The list's width that puts its edge on the fold, when the fold leaves room for both columns.
+    private var listAtFold: Double? { fold?.leadingWidth(in:width,minimum:330) }
     /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` (or the `parks-map` route) opens the map.
     @SceneStorage(ParksTab.mapKey) private var showsMap=DebugScenario.parksMap
     /// A screen route (DEBUG captures and the accessibility audit) keeps its own restored state, so a run of
@@ -23,7 +27,10 @@ struct ParksTab: View {
         Group {
             if split && !showsMap {
                 NavigationSplitView {
-                    ParksView(selection:$selection).modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar().navigationSplitViewColumnWidth(min:330,ideal:390,max:460)
+                    ParksView(selection:$selection).modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
+                        // iPhone Duo half open like a book: the list ends at the fold, so the park beside it
+                        // starts on the other half (the column's usual 390 points could not reach it).
+                        .navigationSplitViewColumnWidth(min:330,ideal:listAtFold ?? 390,max:max(460,listAtFold ?? 0))
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
@@ -44,6 +51,7 @@ struct ParksTab: View {
             }
         }
         .measuringWidth($width)
+        .readingFold($fold)
         // The page never opens empty: the starting park until another is chosen.
         .onAppear {
             if selection == nil { selection=path.last?.id ?? model.home?.id }
