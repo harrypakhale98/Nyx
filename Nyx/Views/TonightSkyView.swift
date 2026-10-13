@@ -33,8 +33,14 @@ struct TonightSkyView: View {
     @State private var size: CGSize = .zero
     /// The header's lower edge on screen: names stay below it and figures fade out above it.
     @State private var headerBottom: Double=0
-    /// The whole screen's height, so the controls never take more than half of it at large sizes.
-    @State private var screenHeight: Double=800
+    /// The whole screen, so the controls never take more than half of its height at large sizes
+    /// and the side column (`beside`) takes its share of the width.
+    @State private var screen=CGSize(width:390,height:800)
+    private var screenHeight: Double { screen.height }
+    /// An iPhone in landscape (compact height): the title and the controls stand in a column beside
+    /// the sky, so the sky keeps the screen's whole height instead of a strip between them.
+    @Environment(\.verticalSizeClass) private var verticalSize
+    private var beside: Bool { verticalSize == .compact }
     /// Accessibility text sizes: the header keeps only its title (the time and facing are in the
     /// controls, and the reveal's caption is decoration), and the controls scroll within half the screen.
     private var large: Bool { typeSize.isAccessibilitySize }
@@ -71,7 +77,8 @@ struct TonightSkyView: View {
     }
     private var moment: Date { window.start.addingTimeInterval(minutes*60) }
     private var park: Park { night.park }
-    private var options: PanoramaOptions { PanoramaOptions(facing:facing,bortle:Double(park.bortleEstimate),nightVision:palette.nightVision,labelTop:headerBottom) }
+    /// Beside the column nothing stands over the sky, so names may use its whole height.
+    private var options: PanoramaOptions { PanoramaOptions(facing:facing,bortle:Double(park.bortleEstimate),nightVision:palette.nightVision,labelTop:beside ? 0 : headerBottom) }
     private func adapted(_ adaptation:Double)->PanoramaOptions { var adapted=options; adapted.adaptation=adaptation; return adapted }
     var body: some View {
         let sky=HorizonSkies.shared.sky(park:park,night:night.id,at:moment)
@@ -80,7 +87,8 @@ struct TonightSkyView: View {
         TimelineView(.animation(minimumInterval:1/30,paused:!adapting || SkyAdaptation.frozen != nil)) { timeline in
             TurningPanorama(sky:sky,options:adapted(adapting ? SkyAdaptation.progress(since:revealStart,now:timeline.date) : 1))
         }
-            .ignoresSafeArea(edges:.top)
+            // Beside the column the sky also runs under the home indicator and the Dynamic Island's side.
+            .ignoresSafeArea(edges:beside ? [.top,.bottom,.leading] : .top)
             .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
             .gesture(turn)
             .accessibilityElement()
@@ -94,10 +102,9 @@ struct TonightSkyView: View {
                 @unknown default: break
                 }
             }
-            .safeAreaInset(edge:.top) { header }
-            .safeAreaInset(edge:.bottom) { controls(sky:sky) }
+            .modifier(SkyChrome(beside:beside,header:header,controls:controls(sky:sky),column:column(sky:sky)))
             .background(Color.black)
-            .onGeometryChange(for:Double.self) { $0.size.height } action:{ screenHeight=$0 }
+            .onGeometryChange(for:CGSize.self) { CGSize(width:$0.size.width.rounded(),height:$0.size.height.rounded()) } action:{ screen=$0 }
             .statusBarHidden(palette.nightVision)
             .sensoryFeedback(.selection,trigger:Int(minutes/30))
             .onChange(of:minutes) { completeReveal() }
@@ -148,39 +155,71 @@ struct TonightSkyView: View {
     }
     private var header: some View {
         HStack(alignment:.top,spacing:12) {
-            VStack(alignment:.leading,spacing:4) {
-                Text(title).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-                    .accessibilityAddTraits(.isHeader)
-                if !large {
-                    Text("\(park.dayLabel(night.id)) · \(park.time(moment)) · facing \(Compass.name(facing))").font(.caption).foregroundStyle(palette.muted)
-                        .fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
-                }
-                // Visual only: VoiceOver hears the sky's summary, unchanged.
-                if captionShown && revealAllowed && !large {
-                    // One slot: the landing sentence crossfades over the caption, never under it.
-                    ZStack(alignment:.topLeading) {
-                        if landedNaturally {
-                            Text("Outdoors, this takes about 30 minutes.").transition(.opacity)
-                        } else {
-                            Text("As your eyes adapt").transition(.opacity)
-                        }
-                    }
-                    .font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.muted)
-                    .fixedSize(horizontal:false,vertical:true)
-                    .padding(.top,6).transition(.opacity).accessibilityHidden(true)
-                }
-            }
+            titleBlock
             Spacer(minLength:8)
-            Button { dismiss() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(width:44,height:44) }
-                .modifier(FloatingGlass(shape:Circle()))
-                .accessibilityLabel("Close")
+            closeButton
         }
         .padding(.horizontal,20).padding(.top,8)
         .shadow(color:.black.opacity(0.8),radius:8)
         .onGeometryChange(for:Double.self) { $0.frame(in:.global).maxY } action:{ headerBottom=$0+6 }
     }
+    private var closeButton: some View {
+        Button { dismiss() } label:{ Image(systemName:"xmark").font(.body.weight(.semibold)).frame(width:44,height:44) }
+            .modifier(FloatingGlass(shape:Circle()))
+            .accessibilityLabel("Close")
+    }
+    private var titleBlock: some View {
+        VStack(alignment:.leading,spacing:4) {
+            Text(title).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                .accessibilityAddTraits(.isHeader)
+            if !large {
+                Text("\(park.dayLabel(night.id)) · \(park.time(moment)) · facing \(Compass.name(facing))").font(.caption).foregroundStyle(palette.muted)
+                    .fixedSize(horizontal:false,vertical:true).accessibilityHidden(true)
+            }
+            // Visual only: VoiceOver hears the sky's summary, unchanged.
+            if captionShown && revealAllowed && !large {
+                // One slot: the landing sentence crossfades over the caption, never under it.
+                ZStack(alignment:.topLeading) {
+                    if landedNaturally {
+                        Text("Outdoors, this takes about 30 minutes.").transition(.opacity)
+                    } else {
+                        Text("As your eyes adapt").transition(.opacity)
+                    }
+                }
+                .font(.system(.footnote,design:.serif)).italic().foregroundStyle(palette.muted)
+                .fixedSize(horizontal:false,vertical:true)
+                .padding(.top,6).transition(.opacity).accessibilityHidden(true)
+            }
+        }
+    }
+    /// Beside the sky at compact height: the title and close button, then the same controls, in one
+    /// glass column that scrolls when the text is large. A third of the width, half at accessibility sizes.
+    private func column(sky:HorizonSky)->some View {
+        ScrollView {
+            VStack(alignment:.leading,spacing:4) {
+                HStack(alignment:.top,spacing:8) { titleBlock; Spacer(minLength:4); closeButton }
+                    .padding(.horizontal,16).padding(.top,12)
+                controlRows(sky:sky).padding(16)
+            }
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .frame(width:large ? (screen.width*0.5).rounded() : min(360,max(320,(screen.width*0.38).rounded())))
+        .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
+        .padding(.vertical,8).padding(.trailing,8)
+    }
     private func controls(sky:HorizonSky)->some View {
-        let stack=VStack(alignment:.leading,spacing:12) {
+        let stack=controlRows(sky:sky).padding(16)
+        return Group {
+            if large {
+                ScrollView { stack }.scrollBounceBehavior(.basedOnSize).frame(maxHeight:max(240,screenHeight*0.5)).fixedSize(horizontal:false,vertical:true)
+            } else { stack }
+        }
+        .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
+        .padding(.horizontal,12).padding(.bottom,8)
+        .readableColumn(WideLayout.proseWidth)
+    }
+    private func controlRows(sky:HorizonSky)->some View {
+        VStack(alignment:.leading,spacing:12) {
             if large {
                 // A part to a line: the time, then the phase, never truncated side by side.
                 VStack(alignment:.leading,spacing:4) {
@@ -214,20 +253,19 @@ struct TonightSkyView: View {
                 .accessibilityValue(park.time(moment))
                 ViewThatFits(in:.horizontal) {
                     HStack(spacing:8) { directions }
-                    VStack(alignment:.leading,spacing:8) { directions }
+                    // The column beside the sky: two by two, as at large sizes, rather than four rows.
+                    if beside {
+                        Grid(alignment:.leading,horizontalSpacing:8,verticalSpacing:8) {
+                            GridRow { direction(0); direction(1) }
+                            GridRow { direction(2); direction(3) }
+                        }
+                    } else {
+                        VStack(alignment:.leading,spacing:8) { directions }
+                    }
                 }
             }
             Text("Drawn for an estimated Bortle \(park.bortleEstimate) sky. Clouds are not shown; the score covers them.").font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
-        .padding(16)
-        return Group {
-            if large {
-                ScrollView { stack }.scrollBounceBehavior(.basedOnSize).frame(maxHeight:max(240,screenHeight*0.5)).fixedSize(horizontal:false,vertical:true)
-            } else { stack }
-        }
-        .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
-        .padding(.horizontal,12).padding(.bottom,8)
-        .readableColumn(WideLayout.proseWidth)
     }
     @ViewBuilder private var directions: some View {
         ForEach(0..<4,id:\.self) { index in direction(index) }
@@ -352,6 +390,18 @@ nonisolated enum SkyTurn {
 }
 /// Liquid Glass for a floating control; a solid panel under Reduce Transparency, Increase
 /// Contrast and night vision.
+/// Where the full-screen sky's title and controls stand: over the top and under the bottom of the
+/// sky, or, at compact height, together in a column at its side.
+private struct SkyChrome<Header: View, Controls: View, Column: View>: ViewModifier {
+    let beside: Bool
+    let header: Header
+    let controls: Controls
+    let column: Column
+    @ViewBuilder func body(content:Content)->some View {
+        if beside { content.safeAreaInset(edge:.trailing,spacing:0) { column } }
+        else { content.safeAreaInset(edge:.top) { header }.safeAreaInset(edge:.bottom) { controls } }
+    }
+}
 struct FloatingGlass<S: Shape>: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -517,6 +567,14 @@ enum EssayFigure {
     if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).environment(\.nyxReduceMotion,true).preferredColorScheme(.dark) }
 }
 #Preview("Sky over the park • AX5") {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • landscape",traits:.landscapeLeft) {
+    let m=PlanModel()
+    if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).preferredColorScheme(.dark) }
+}
+#Preview("Sky over the park • landscape • AX5",traits:.landscapeLeft) {
     let m=PlanModel()
     if let p=m.home { TonightSkyView(night:m.night(p)).environment(m).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
 }

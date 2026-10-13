@@ -12,6 +12,11 @@ struct FieldCompassView: View {
     var eyeClock: Binding<Bool>?=nil
     /// At accessibility sizes, what the score's clouds rest on opens the list (the header leaves it to the page).
     var note: String?=nil
+    /// At accessibility sizes and at compact height, "Your eyes started over" opens the list; over
+    /// the drawn sky it stands above it, scrolling within part of the height, so the controls stay on screen.
+    var showsReset=false
+    /// The view's height, which bounds the notice over the drawn sky.
+    @State private var height: CGFloat=600
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var frozen: SkyCompass.Pose?
@@ -37,11 +42,19 @@ struct FieldCompassView: View {
     private var controlsInList: Bool { showsList && typeSize.isAccessibilitySize }
     var body: some View {
         VStack(spacing:12) {
-            if showsList { list } else { sky }
+            if showsList { list } else {
+                if showsReset, let reset=session.reset {
+                    ScrollView { FieldResetNotice(session:session,reset:reset).padding(.horizontal,16) }
+                        .scrollBounceBehavior(.basedOnSize).frame(maxHeight:height*0.45).fixedSize(horizontal:false,vertical:true)
+                        .transition(.opacity)
+                }
+                sky
+            }
             // At accessibility sizes the list's controls scroll with it: pinned under it, they left the
             // list a sliver between the header and the page switch.
             if !controlsInList { controls.padding(.horizontal,20).readableColumn(WideLayout.proseWidth) }
         }
+        .onGeometryChange(for:CGFloat.self) { $0.size.height.rounded() } action:{ height=$0 }
         .task(id:session.park.id) {
             // Stars move a quarter of a degree a minute: positions are refreshed twice a minute.
             while !Task.isCancelled {
@@ -94,6 +107,7 @@ struct FieldCompassView: View {
     private var list: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:16) {
+                if showsReset, let reset=session.reset { FieldResetNotice(session:session,reset:reset).transition(.opacity) }
                 if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true) }
                 if controlsInList { controls.padding(.bottom,8) }
                 let sorted=targets.sorted { ($0.altitude > -0.5 ? 0 : 1,-$0.altitude)<($1.altitude > -0.5 ? 0 : 1,-$1.altitude) }

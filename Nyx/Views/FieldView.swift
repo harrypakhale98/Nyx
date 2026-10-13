@@ -30,6 +30,10 @@ struct FieldView: View {
     /// At accessibility sizes the eye's clock scrolls with the page instead of standing in the
     /// footer, so the countdown keeps the room it needs.
     private var inline: Bool { typeSize.isAccessibilitySize }
+    /// "Your eyes started over" scrolls with the page at accessibility sizes and at compact height
+    /// (an iPhone in landscape), where standing above the page it would push the page, its own
+    /// buttons and the footer off the screen.
+    private var resetInPage: Bool { inline || verticalSize == .compact }
     /// The window's size, for the side-by-side layout.
     @State private var size=CGSize.zero
     /// A wide landscape window: "The night" and "Where to look" side by side, with no switch between them.
@@ -58,21 +62,21 @@ struct FieldView: View {
                     .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.leading,68).padding(.trailing,20)
             }
             // In the flow, not over it: the countdown under it stays readable.
-            if let reset=session.reset { resetNotice(reset).padding(.horizontal,16).padding(.top,8).transition(.opacity.combined(with:.move(edge:.top))) }
+            if let reset=session.reset, !resetInPage { FieldResetNotice(session:session,reset:reset).padding(.horizontal,16).padding(.top,8).transition(.opacity.combined(with:.move(edge:.top))) }
             Group {
                 if sideBySide {
                     // The night on the left, the sky on the right; the eye's clock stays with the night.
                     // Half open like a book, the hairline is the fold itself and each page keeps to its side.
                     let split=foldSplit
                     HStack(spacing:0) {
-                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil).frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
+                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage).frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
                         Rectangle().fill(palette.line).frame(width:split == nil ? 0.5 : 0).padding(.vertical,24).frame(width:split?.gap).accessibilityHidden(true)
                         FieldCompassView(session:session,fixedPose:fixedPose).frame(maxWidth:.infinity)
                     }
                 } else {
                     switch current {
-                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil)
-                    case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil)
+                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage)
+                    case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage)
                     }
                 }
             }.frame(maxHeight:.infinity)
@@ -163,14 +167,23 @@ struct FieldView: View {
         // At accessibility sizes a menu, which never clips its labels; segments do not grow.
         if inline { picker.pickerStyle(.menu).frame(maxWidth:.infinity,alignment:.leading) } else { picker.pickerStyle(.segmented) }
     }
-    private func resetNotice(_ reset:DarkAdaptation.Reset)->some View {
+}
+
+/// "Your eyes started over": after time away from field mode, the eye's clock starts again unless
+/// the person says the screen stayed dark. Above the page at standard sizes in portrait; in the
+/// page itself at accessibility sizes and at compact height (`FieldView.resetInPage`).
+struct FieldResetNotice: View {
+    let session: FieldSession
+    let reset: DarkAdaptation.Reset
+    var body: some View {
         VStack(alignment:.leading,spacing:12) {
             Text("Your eyes started over at \(session.park.time(reset.at)).").font(.system(.headline,design:.serif))
+                .fixedSize(horizontal:false,vertical:true)
             Text("Nyx can't see what you looked at while you were away. Bright light resets dark adaptation.").font(.subheadline)
                 .fixedSize(horizontal:false,vertical:true)
             ViewThatFits(in:.horizontal) {
-                HStack(spacing:12) { resetButtons }
-                VStack(alignment:.leading,spacing:8) { resetButtons }
+                HStack(spacing:12) { buttons }
+                VStack(alignment:.leading,spacing:8) { buttons }
             }
         }
         .padding(18).frame(maxWidth:.infinity,alignment:.leading)
@@ -178,7 +191,7 @@ struct FieldView: View {
         .overlay(RoundedRectangle(cornerRadius:20).stroke(Color.white.opacity(0.3),lineWidth:0.5))
         .accessibilityElement(children:.contain)
     }
-    @ViewBuilder private var resetButtons: some View {
+    @ViewBuilder private var buttons: some View {
         Button("Start over") { session.reset=nil }.buttonStyle(.bordered)
         Button("My screen stayed dark") { session.keepAdaptation() }.buttonStyle(.bordered)
     }
@@ -195,6 +208,8 @@ struct FieldNightPager: View {
     var eyeClock: Binding<Bool>?=nil
     /// At accessibility sizes, what the score's clouds rest on scrolls here, above "Now", instead of under the header.
     var note: String?=nil
+    /// At accessibility sizes and at compact height, "Your eyes started over" opens the page.
+    var showsReset=false
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -207,6 +222,7 @@ struct FieldNightPager: View {
             ScrollView(.vertical) {
                 LazyVStack(alignment:.leading,spacing:44) {
                     VStack(alignment:.leading,spacing:20) {
+                        if showsReset, let reset=session.reset { FieldResetNotice(session:session,reset:reset).transition(.opacity) }
                         if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading) }
                         nowCard(now)
                     }.id("now")
@@ -544,4 +560,19 @@ struct FieldCountdownSchedule: TimelineSchedule {
         FieldCountdown(target:.now.addingTimeInterval(90*60+10))
         FieldCountdown(target:.now.addingTimeInterval(100))
     }.padding().foregroundStyle(.white).background(.black)
+}
+/// Field mode with its eyes started over: the notice above the page in portrait; in the page itself
+/// at compact height (an iPhone in landscape) and at accessibility sizes, so every control stays reachable.
+@MainActor private func resetPreviewSession()->FieldSession? {
+    let model=PlanModel()
+    guard let park=model.home else { return nil }
+    let session=FieldSession(park:park,model:model,changesPhone:false,adaptedFor:120)
+    session.reset=DarkAdaptation.Reset(at:session.now.addingTimeInterval(-120),previousStart:session.now.addingTimeInterval(-26*60))
+    return session
+}
+#Preview("Eyes started over • portrait") { if let session=resetPreviewSession() { FieldView(session:session) {} } }
+#Preview("Eyes started over • landscape",traits:.landscapeLeft) { if let session=resetPreviewSession() { FieldView(session:session) {} } }
+#Preview("Eyes started over • landscape • AX5",traits:.landscapeLeft) { if let session=resetPreviewSession() { FieldView(session:session) {}.dynamicTypeSize(.accessibility5) } }
+#Preview("Eyes started over • notice") {
+    if let session=resetPreviewSession(), let reset=session.reset { FieldResetNotice(session:session,reset:reset).padding().foregroundStyle(.red).background(.black) }
 }

@@ -15,6 +15,14 @@ import SwiftUI
     private(set) var x=0.0
     /// Forward tilt, about -1 … 1. Smoothed.
     private(set) var y=0.0
+    /// How far the interface is turned from the device's own portrait, in quarter turns (as field
+    /// mode's compass reads it): set by the iPhone app, whose windows can turn; nil leaves the
+    /// device's axes (the watch). Gravity is read in the device's axes, so without it an iPhone in
+    /// landscape would tip the dial's glint and drift the stars along the wrong side of the screen.
+    var interfaceTurns: (@MainActor ()->Int)?
+    /// The last turn read, refreshed about twice a second rather than on every sample.
+    private var turns=0
+    private var samples=0
 
     /// Field mode's compass needs Core Motion's attitude to itself; the tilt pauses meanwhile.
     private var suspended=false
@@ -35,13 +43,28 @@ import SwiftUI
     private func begin() {
         guard !suspended,!manager.isDeviceMotionActive,!PowerState.shared.lowPower,manager.isDeviceMotionAvailable else { return }
         manager.deviceMotionUpdateInterval=1/30
+        samples=0
         manager.startDeviceMotionUpdates(to:.main) { [weak self] motion,_ in
             guard let gravity=motion?.gravity else { return }
             MainActor.assumeIsolated {
                 guard let self else { return }
-                self.x+=(max(-1,min(1,gravity.x))-self.x)*0.2
-                self.y+=(max(-1,min(1,gravity.y+0.6))-self.y)*0.2
+                if self.samples%15==0 { self.turns=self.interfaceTurns?() ?? 0 }
+                self.samples+=1
+                let screen=Self.screenGravity(x:gravity.x,y:gravity.y,quarterTurns:self.turns)
+                self.x+=(max(-1,min(1,screen.x))-self.x)*0.2
+                self.y+=(max(-1,min(1,screen.y+0.6))-self.y)*0.2
             }
+        }
+    }
+    /// Gravity's device-frame x and y as the screen sees them, with the interface turned
+    /// `quarterTurns` from the device's portrait (1: the device's top at the screen's left, interface
+    /// landscape right; 2: upside down; 3: landscape left), the same turns as `SkyCompass.Pose.turned`.
+    nonisolated static func screenGravity(x:Double,y:Double,quarterTurns:Int)->(x:Double,y:Double) {
+        switch (quarterTurns%4+4)%4 {
+        case 1: (-y,x)
+        case 2: (-x,-y)
+        case 3: (y,-x)
+        default: (x,y)
         }
     }
     func stop() {

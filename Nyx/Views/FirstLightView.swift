@@ -23,27 +23,43 @@ struct FirstLightView: View {
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// Seconds for the stars to arrive; the name follows as the last of them do.
     private let reveal=7.0
+    /// The words' viewport: they sit low on the screen and scroll when they do not fit it (an
+    /// iPhone in landscape at accessibility sizes), so Continue is always reachable.
+    @State private var viewport: CGFloat=0
+    /// An iPhone in landscape: tighter margins, so the words keep more of the short screen.
+    @Environment(\.verticalSizeClass) private var verticalSize
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night,at:moment)
+        let compact=verticalSize == .compact
         ZStack {
-            Color.black
+            Color.black.ignoresSafeArea()
             TimelineView(.animation(minimumInterval:1/30,paused:reduceMotion || done || started == nil || leaving)) { timeline in
                 let elapsed=started.map { timeline.date.timeIntervalSince($0) } ?? 0
                 let progress=reduceMotion || done ? 1 : min(1,elapsed/reveal)
                 Canvas { context,size in draw(sky,progress:progress,in:&context,size:size) }
             }
             .opacity(reduceMotion ? (visible ? 1 : 0) : 1)
-            VStack(spacing:14) {
-                Spacer()
-                Eyebrow(text:"First light")
-                Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
-                Text("Your first night under this sky. These are the stars above you now, facing \(park.latitude<0 ? String(localized:"north") : String(localized:"south")).").font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
-                Button("Continue",action:dismiss).buttonStyle(.bordered).padding(.top,10).keyboardShortcut(.cancelAction)
-                Spacer().frame(height:40)
-            }.padding(32)
+            .ignoresSafeArea()
+            // The sky runs edge to edge; the words keep clear of the Dynamic Island and the rounded
+            // corners at the sides (top and bottom keep the full-screen margins they always had).
+            ScrollView {
+                VStack(spacing:14) {
+                    Eyebrow(text:"First light")
+                    Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title : .largeTitle,design:.serif)).multilineTextAlignment(.center).foregroundStyle(palette.ink)
+                        .fixedSize(horizontal:false,vertical:true)
+                    Text("Your first night under this sky. These are the stars above you now, facing \(park.latitude<0 ? String(localized:"north") : String(localized:"south")).").font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                    Button("Continue",action:dismiss).buttonStyle(.bordered).padding(.top,10).keyboardShortcut(.cancelAction)
+                }
+                .padding(.horizontal,32).padding(.top,compact ? 20 : 32).padding(.bottom,compact ? 28 : 86)
+                .frame(maxWidth:.infinity,minHeight:viewport,alignment:.bottom)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            // When the words outgrow the screen, it opens on Continue, the only way on.
+            .defaultScrollAnchor(.bottom)
+            .ignoresSafeArea(edges:.vertical)
+            .onGeometryChange(for:CGFloat.self) { $0.size.height.rounded() } action:{ viewport=$0 }
             .opacity(visible ? 1 : 0).offset(y:visible || reduceMotion ? 0 : 12)
         }
-        .ignoresSafeArea()
         .accessibilityIgnoresInvertColors()
         .opacity(leaving ? 0 : 1)
         .accessibilityElement(children:.contain)
@@ -120,3 +136,4 @@ struct FirstLightView: View {
     }
 }
 #Preview("First light") { let m=PlanModel(); if let p=m.home { FirstLightView(park:p,night:m.tonight(p),moment:m.tonight(p).addingTimeInterval(11*3600)) {} } }
+#Preview("First light • landscape • AX5",traits:.landscapeLeft) { let m=PlanModel(); if let p=m.home { FirstLightView(park:p,night:m.tonight(p),moment:m.tonight(p).addingTimeInterval(11*3600)) {}.dynamicTypeSize(.accessibility5) } }

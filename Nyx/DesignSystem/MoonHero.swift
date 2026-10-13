@@ -10,6 +10,10 @@ struct MoonHero: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// An iPhone in landscape (compact height): the Moon beside its words, so the whole panel fits
+    /// the short screen and its phase can be read while the Moon is scrubbed.
+    @Environment(\.verticalSizeClass) private var verticalSize
+    private var beside: Bool { verticalSize == .compact && !typeSize.isAccessibilitySize }
     /// Off while the page's time river is scrubbed (set by the park page).
     @Environment(\.moonRelief) private var relief
     private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
@@ -30,25 +34,31 @@ struct MoonHero: View {
         let target=target
         let shown=MoonGeometry(phaseAngle:phase ?? target.geometry.phaseAngle,brightLimb:limb ?? target.geometry.brightLimb,north:north ?? target.geometry.north,
                                librationLongitude:target.geometry.librationLongitude,librationLatitude:target.geometry.librationLatitude)
-        VStack(spacing:18) {
+        let layout=beside ? AnyLayout(HStackLayout(spacing:28)) : AnyLayout(VStackLayout(spacing:18))
+        layout {
             MorphingMoon(geometry:shown)
                 // Relief while still; a smooth sphere while scrubbed, so the drag holds 120 Hz.
                 .environment(\.moonRelief,relief && scrubbing != true)
-                .frame(maxWidth:280).aspectRatio(1,contentMode:.fit)
+                .frame(width:beside ? 200 : nil,height:beside ? 200 : nil)
+                .frame(maxWidth:beside ? nil : 280).aspectRatio(1,contentMode:.fit)
                 .padding(.horizontal,8)
                 .contentShape(Circle())
                 // Simultaneous, and only for drags that start sideways, so the page still scrolls through the Moon.
                 .simultaneousGesture(scrub)
                 .accessibilityHidden(true)
-            VStack(spacing:6) {
-                Text(night.sky.moon.name).font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).contentTransition(.opacity)
-                Text("\(Self.percent(night))% lit").font(.subheadline).foregroundStyle(palette.muted).contentTransition(.numericText())
-            }.multilineTextAlignment(.center)
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:28) { times }
-                VStack(spacing:10) { times }
+            // Its own stack, so the words keep their spacing whether under the Moon or beside it.
+            VStack(spacing:18) {
+                VStack(spacing:6) {
+                    Text(night.sky.moon.name).font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).contentTransition(.opacity)
+                    Text("\(Self.percent(night))% lit").font(.subheadline).foregroundStyle(palette.muted).contentTransition(.numericText())
+                }.multilineTextAlignment(.center)
+                ViewThatFits(in:.horizontal) {
+                    HStack(spacing:28) { times }
+                    VStack(spacing:10) { times }
+                }
+                Text(Self.tiltLine(night:night,moment:target.moment)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             }
-            Text(Self.tiltLine(night:night,moment:target.moment)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+            .frame(maxWidth:beside ? .infinity : nil)
         }
         .frame(maxWidth:.infinity)
         .accessibilityElement(children:.ignore)
@@ -131,6 +141,10 @@ private struct MorphingMoon: View, Animatable {
     var body: some View { MoonView(geometry:geometry) }
 }
 #Preview("Moon hero") {
+    let m=PlanModel()
+    if let p=m.home { ScrollView { MoonHero(night:m.night(p)).padding(24) }.background(.black).preferredColorScheme(.dark) }
+}
+#Preview("Moon hero • landscape",traits:.landscapeLeft) {
     let m=PlanModel()
     if let p=m.home { ScrollView { MoonHero(night:m.night(p)).padding(24) }.background(.black).preferredColorScheme(.dark) }
 }

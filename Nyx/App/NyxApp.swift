@@ -16,6 +16,8 @@ import UserNotifications
         // Before the model takes the skies built at launch: setting it later would let them go.
         SkyProjection.shared.lightSources=SkyGlow.lightSources
         BundledData.warm()
+        // The tilt behind the dial's glint and the stars' drift follows the interface as it turns.
+        MotionTilt.shared.interfaceTurns={ FieldMotion.quarterTurns() }
         let store=LaunchSignposts.begin("Open store")
         let opened=JournalStore.open(inMemory:DebugScenario.screen != nil)
         container=opened.container

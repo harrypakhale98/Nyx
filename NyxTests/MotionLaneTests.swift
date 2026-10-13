@@ -158,6 +158,23 @@ import Testing
         }
         #expect(Decoration.rate == 30)
     }
+    /// The tilt is read as the screen sees it: held at the reading angle in either landscape, the
+    /// dial's glint rests where it does in portrait, and tipping the screen's right edge down reads as
+    /// right in every orientation (the same quarter turns as the compass's `Pose.turned`).
+    @Test func tiltFollowsTheInterfaceOrientation() {
+        // Portrait, held up: gravity toward the device's bottom.
+        #expect(MotionTilt.screenGravity(x:0,y:-0.6,quarterTurns:0) == (0,-0.6))
+        // Landscape right (the device's top at the screen's left), held up: gravity toward the device's left edge,
+        // which is the screen's bottom.
+        #expect(MotionTilt.screenGravity(x:-0.6,y:0,quarterTurns:1) == (0,-0.6))
+        // Landscape left: the device's right edge is the screen's bottom.
+        #expect(MotionTilt.screenGravity(x:0.6,y:0,quarterTurns:3) == (0,-0.6))
+        // The screen's right edge down: toward the device's bottom in landscape right, its top in landscape left.
+        #expect(MotionTilt.screenGravity(x:0,y:-0.5,quarterTurns:1).x == 0.5)
+        #expect(MotionTilt.screenGravity(x:0,y:0.5,quarterTurns:3).x == 0.5)
+        #expect(MotionTilt.screenGravity(x:0.3,y:-0.6,quarterTurns:2) == (-0.3,0.6))
+        #expect(MotionTilt.screenGravity(x:0.3,y:-0.6,quarterTurns:-1) == MotionTilt.screenGravity(x:0.3,y:-0.6,quarterTurns:3))
+    }
     @Test func lampDarkCoversTheWindowWhenThePaletteTurns() {
         let size=CGSize(width: 390, height: 844)
         for center in [CGPoint(x: 360, y: 60), CGPoint(x: 20, y: 820), CGPoint(x: 195, y: 422), CGPoint(x: -10, y: -10)] {

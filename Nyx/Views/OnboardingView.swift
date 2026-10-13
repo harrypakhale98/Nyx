@@ -6,6 +6,9 @@ struct OnboardingView:View {
     /// words are never pushed under the page's controls.
     @Environment(\.verticalSizeClass) private var verticalSize
     private var beside:Bool { verticalSize == .compact && !typeSize.isAccessibilitySize }
+    /// Compact height at any text size: Skip joins the dots and Continue in one row at the bottom and
+    /// the margins tighten, so the page keeps most of the height.
+    private var compactHeight:Bool { verticalSize == .compact }
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
@@ -29,7 +32,9 @@ struct OnboardingView:View {
     var body:some View {
         VStack(spacing:0) {
             // Tracking trails the X, so the wordmark is inset by one tracking step to sit on centre.
-            HStack { Spacer();Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.horizontal,28).padding(.top,28)
+            if !compactHeight {
+                HStack { Spacer();skip }.overlay { if !typeSize.isAccessibilitySize { Text("NYX").font(.caption).tracking(8).padding(.leading,8).accessibilityHidden(true) } }.padding(.horizontal,28).padding(.top,28)
+            }
             TabView(selection:$page) {
                 ForEach(0..<3,id:\.self) { index in
                     ScrollView {
@@ -41,34 +46,47 @@ struct OnboardingView:View {
                                 Text(messages[index]).font(.body).foregroundStyle(palette.muted).multilineTextAlignment(.center).lineSpacing(4).fixedSize(horizontal:false,vertical:true)
                                 if index==2 { redToggle }
                             }
-                        }.padding(.horizontal,28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
+                        }.padding(.horizontal,compactHeight ? 20 : 28).padding(.vertical,index==1 || typeSize.isAccessibilitySize || beside ? 12 : 28).frame(maxWidth:beside ? 760 : 560).frame(maxWidth:.infinity)
                     }.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.center,for:.alignment)
                     // Copy taller than the page shows its scroll indicator once, so "more below" is never only a fade.
                     .scrollIndicatorsFlash(onAppear:true)
                     // Copy that runs past the controls fades out instead of being cut mid-line.
-                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:fade) } }
+                    // At compact height the fade stays short, so a large line is not lost in it.
+                    .mask { VStack(spacing:0) { Color.black;LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom).frame(height:compactHeight ? min(fade,32) : fade) } }
                     .tag(index)
                 }
             }.tabViewStyle(.page(indexDisplayMode:.never))
-            VStack(spacing:20) {
-                HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
-                    .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
-                    .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
-                    // Swipe up or down with VoiceOver to turn the page, as the dots suggest.
-                    .accessibilityElement().accessibilityLabel("Introduction").accessibilityValue("Page \(page+1) of 3")
-                    .accessibilityAdjustableAction { direction in
-                        let next=switch direction {
-                        case .increment: min(page+1,2)
-                        case .decrement: max(page-1,0)
-                        @unknown default: page
-                        }
-                        guard next != page else { return }
-                        withAnimation(reduceMotion ? nil : NyxMotion.spring) { page=next }
-                    }
-                Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
-                    .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
-            }.padding(.bottom,28)
+            if compactHeight {
+                // Dots, Skip and Continue in one row; at the largest sizes, Continue goes under the other two.
+                ViewThatFits(in:.horizontal) {
+                    HStack(spacing:20) { dots;Spacer(minLength:8);skip;proceed }
+                    VStack(spacing:8) { HStack { dots;Spacer(minLength:8);skip };proceed }
+                }.padding(.horizontal,20).padding(.top,4).padding(.bottom,8)
+            } else {
+                VStack(spacing:20) { dots;proceed }.padding(.bottom,28)
+            }
         }.background(NightBackground(score:page==1 ? 94 : nil)).foregroundStyle(palette.ink)
+    }
+    private var skip:some View { Button("Skip") { finish() }.frame(minWidth:44,minHeight:44).contentShape(Rectangle()) }
+    private var dots:some View {
+        HStack(spacing:12) { ForEach(0..<3,id:\.self) { i in Capsule().fill(i==page ? palette.accent : palette.line).frame(width:i==page ? 18 : 5,height:5) } }
+            .animation(reduceMotion ? nil : NyxMotion.spring,value:page)
+            .frame(minWidth:88,minHeight:44).contentShape(Rectangle())
+            // Swipe up or down with VoiceOver to turn the page, as the dots suggest.
+            .accessibilityElement().accessibilityLabel("Introduction").accessibilityValue("Page \(page+1) of 3")
+            .accessibilityAdjustableAction { direction in
+                let next=switch direction {
+                case .increment: min(page+1,2)
+                case .decrement: max(page-1,0)
+                @unknown default: page
+                }
+                guard next != page else { return }
+                withAnimation(reduceMotion ? nil : NyxMotion.spring) { page=next }
+            }
+    }
+    private var proceed:some View {
+        Button(page==2 ? "Show me tonight" : "Continue") { if page==2 { finish() } else { withAnimation(reduceMotion ? nil : NyxMotion.spring) { page+=1 } } }
+            .buttonStyle(.borderedProminent).foregroundStyle(Color.black).controlSize(.large)
     }
     private let moonSize:CGFloat=170
     /// At accessibility sizes the decorative Moon is left out, so the headline and the first lines
@@ -113,3 +131,5 @@ private struct OnboardingMoon:View {
     }
 }
 #Preview("Onboarding") { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Onboarding • landscape",traits:.landscapeLeft) { OnboardingView {}.environment(PlanModel()).preferredColorScheme(.dark) }
+#Preview("Onboarding • landscape • AX5",traits:.landscapeLeft) { OnboardingView {}.environment(PlanModel()).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
