@@ -481,12 +481,14 @@ struct JournalEditorView:View {
                 }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
                 Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
             }.listRowBackground(palette.panel)
-            // On an iPhone in landscape the keyboard leaves about a hundred points: the notes are short
-            // enough to sit whole above it and scroll within themselves, so the line being written stays
-            // in sight (at 160 points it went behind the keyboard by the third line).
+            // On an iPhone in landscape the keyboard leaves about a hundred points: while the notes are
+            // being written they are short enough to sit whole above it and scroll within themselves, so
+            // the line being written stays in sight (at 160 points it went behind the keyboard by the
+            // third line). Read without the keyboard, they keep their full height, as the form scrolls.
             Section("What you noticed") {
+                let aboveKeyboard=verticalSize == .compact && writingNotes
                 TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
-                    .frame(minHeight:verticalSize == .compact ? 80 : 160,maxHeight:verticalSize == .compact ? 80 : nil)
+                    .frame(minHeight:aboveKeyboard ? 80 : 160,maxHeight:aboveKeyboard ? 80 : nil)
                     .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
             }.listRowBackground(palette.panel)
             Section {

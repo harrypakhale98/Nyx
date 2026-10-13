@@ -9,6 +9,10 @@ import Testing
 struct WorldPlacesTests {
     let places=StartingPlaces.all
     var us: [StartingPlace] { places.filter { $0.countryCode=="US" } }
+    /// The 1,008 Census rows, first in the file.
+    var census: [StartingPlace] { Array(places.prefix(1008)) }
+    /// The parks' gateway towns, last in the file (after the world, so the names files' indices hold).
+    var gateways: [StartingPlace] { Array(places.reversed().prefix { $0.countryCode=="US" }.reversed()) }
 
     // MARK: The file
 
@@ -25,9 +29,9 @@ struct WorldPlacesTests {
         let digest=SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
         #expect(digest == "ed7e062443cbc9c65ea0a42332f2fff9b034ca89234ca259a86f11946c102a08")
         #expect(data[open.upperBound+length] == UInt8(ascii: ","))
-        // Decoded: the first 1,008 places are those rows, and the only US ones.
-        #expect(us.count == 1008 && places.prefix(1008).allSatisfy { $0.countryCode=="US" })
-        #expect(Set(us.map(\.label)).count == 1008)
+        // Decoded: the first 1,008 places are those rows; the only other US places are the gateway towns at the end.
+        #expect(census.allSatisfy { $0.countryCode=="US" } && gateways.count>=80 && us.count == 1008+gateways.count)
+        #expect(Set(us.map(\.label)).count == us.count)
         #expect(places.count>25_000)
     }
     /// Every row: a zone this OS knows (checked once per zone), a two-letter country, a point on
@@ -48,7 +52,8 @@ struct WorldPlacesTests {
         // Largest first in each part, so ranking by population keeps the Census order in the US.
         let ranks=places.map { $0.population ?? 0 }
         #expect(zip(ranks.prefix(1008), ranks.prefix(1008).dropFirst()).allSatisfy { $0 >= $1 })
-        #expect(zip(ranks.dropFirst(1008), ranks.dropFirst(1009)).allSatisfy { $0 >= $1 })
+        let world=Array(ranks.dropFirst(1008).dropLast(gateways.count)), towns=Array(ranks.suffix(gateways.count))
+        #expect(zip(world, world.dropFirst()).allSatisfy { $0 >= $1 } && zip(towns, towns.dropFirst()).allSatisfy { $0 >= $1 })
         // Names that fold to letters outside ASCII carry a plain spelling ("Lodz").
         let unspelled=places.filter { !StartingPlaces.normalized($0.name).allSatisfy(\.isASCII) && $0.asciiName.map { StartingPlaces.normalized($0).allSatisfy(\.isASCII) } != true }
         #expect(unspelled.isEmpty, "\(unspelled.prefix(20).map(\.id))")
@@ -77,13 +82,14 @@ struct WorldPlacesTests {
         }
         return places.enumerated().compactMap { index, place in score(place).map { (place.label, $0, index) } }.sorted { ($0.1, $0.2) < ($1.1, $1.2) }.map(\.0)
     }
-    /// US places come in the same order as before among themselves; the rest of the world is
-    /// interleaved by population. (The one deliberate change, a word start such as "New York" for
-    /// "York" before a match inside a word, does not touch these queries.)
+    /// The Census places come in the same order as before among themselves; the rest of the world
+    /// and the gateway towns are interleaved by population. (The one deliberate change, a word start
+    /// such as "New York" for "York" before a match inside a word, does not touch these queries.)
     @Test func usPlacesRankAsBefore() {
+        let censusLabels=Set(census.map(\.label))
         for query in ["Spring", "Springfield", "Springfield, Illinois", "Columbus", "Chicago", "chicago il", "St. Paul", "Saint", "Lake", "Fort", "York", "Denver, CO", "Portland"] {
-            let now=StartingPlaces.search(query, limit: 10_000).filter { $0.countryCode=="US" }.map(\.label)
-            #expect(now == Self.oldSearch(query, in: us), "\(query)")
+            let now=StartingPlaces.search(query, limit: 10_000).map(\.label).filter(censusLabels.contains)
+            #expect(now == Self.oldSearch(query, in: census), "\(query)")
         }
         // The picker shows 12: Springfield, Illinois is still among them.
         let spring=StartingPlaces.search("Spring", limit: 12).map(\.label)
@@ -119,6 +125,28 @@ struct WorldPlacesTests {
         let cordoba=StartingPlaces.search("Cordoba").filter { $0.name=="Córdoba" }
         #expect(Set(cordoba.map(\.countryCode)).isSuperset(of: ["AR", "ES", "MX"]))
         #expect(StartingPlaces.search("").isEmpty && StartingPlaces.search("zzqx").isEmpty && StartingPlaces.named("Brigadoon") == nil)
+    }
+    /// A park's gateway town is a starting point, though it is far below the Census cut: Moab for
+    /// Arches, Springdale for Zion, Estes Park for Rocky Mountain, each on its own state's time.
+    @Test func gatewayTownsAreFound() throws {
+        let moab=try #require(StartingPlaces.search("Moab").first)
+        #expect(moab.label == "Moab, UT" && moab.timeZoneID == "America/Denver" && moab.countryCode == "US" && moab.regionName == "Utah")
+        #expect(Park.distance(moab.latitude, moab.longitude, 38.573, -109.550) < 2_000)
+        // Springdale, Arkansas is the larger town and comes first; Zion's is in the list beside it.
+        #expect(StartingPlaces.search("Springdale", limit: 12).map(\.label).contains("Springdale, UT"))
+        #expect(StartingPlaces.search("springdale utah").first?.label == "Springdale, UT")
+        #expect(StartingPlaces.search("Estes Park").first?.label == "Estes Park, CO")
+        #expect(StartingPlaces.named("Estes Park")?.timeZoneID == "America/Denver")
+        #expect(StartingPlaces.search("West Yellowstone").first?.label == "West Yellowstone, MT")
+        // A saved gateway town reads back as the bundled row.
+        let saved=try JSONDecoder().decode(StartingPlace.self, from: JSONEncoder().encode(moab))
+        #expect(saved == moab && saved.id == "Moab, UT")
+        // Added after the world, so every translated town keeps its index: Tokyo is still 東京 in
+        // Japanese, and Moab, which has no Japanese name in the file, keeps its own.
+        let japanese=StartingPlaces.load(language: "ja")
+        #expect(japanese.count == places.count)
+        #expect(japanese.first { $0.countryCode=="JP" && $0.savedName=="Tokyo" }?.name.hasPrefix("東京") == true)
+        #expect(japanese.first { $0.savedName=="Moab" && $0.state=="UT" }?.name == "Moab")
     }
     @Test func worldPlacesReadInTheReadersLanguage() throws {
         let france=StartingPlaces.countryName("FR")

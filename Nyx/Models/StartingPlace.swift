@@ -4,8 +4,9 @@ import Foundation
 /// the offline source of a saved spot's time zone and region (`StartingPlaces.nearest`).
 /// From the bundled list (`places.json`, built by `Scripts/build_places.py`): in the US the 1,000
 /// most populous incorporated places and every state capital (Census); everywhere else every place
-/// of 15,000 people or more (GeoNames, CC BY 4.0), each with its own time zone. Searched on this
-/// device; never fetched.
+/// of 15,000 people or more (GeoNames, CC BY 4.0); then the national parks' gateway towns the
+/// population cut leaves out (Moab, Springdale, Estes Park; Census). Each has its own time zone.
+/// Searched on this device; never fetched.
 nonisolated struct StartingPlace: Codable, Hashable, Sendable, Identifiable {
     /// The name shown: in the app's language where Wikidata has one ("東京" in Japanese, `PlaceNames`),
     /// else as bundled ("Tokyo"). Identity and what is saved use `savedName`.
@@ -101,8 +102,9 @@ nonisolated struct StartingPlace: Codable, Hashable, Sendable, Identifiable {
 }
 
 nonisolated enum StartingPlaces {
-    /// Every bundled place: the US first in Census order, then the rest of the world, largest first.
-    /// About 31,500 places; decoding takes a few tens of milliseconds, so `prepare()` does it early.
+    /// Every bundled place: the US first in Census order, then the rest of the world, largest first,
+    /// then the parks' gateway towns, largest first (last, so the names files' indices hold). About
+    /// 31,600 places; decoding takes a few tens of milliseconds, so `prepare()` does it early.
     static let all: [StartingPlace] = file.places
     /// US places the Census list leaves out, for `nearest` only (never searched), so a spot near the
     /// Canadian or Mexican border finds a US town before a foreign one.
@@ -190,7 +192,7 @@ nonisolated enum StartingPlaces {
 
     /// The bundled place nearest a point, for a saved spot's region and, offline, its time zone.
     /// Searches the whole-degree cells around the point outward and stops once no unsearched cell
-    /// can hold anything closer, so it reads a few dozen places, not 31,500.
+    /// can hold anything closer, so it reads a few dozen places, not 31,600.
     /// Limits: this is the nearest *town*, not the zone map. A spot near a time-zone or national
     /// border can take the neighbouring town's zone and country (an hour wrong on one side of the
     /// Indiana or Arizona lines, for example), and far from any town of 15,000 (the open ocean,
@@ -246,8 +248,9 @@ nonisolated enum StartingPlaces {
     /// US `["Chicago","IL",41.837,-87.685,"America/Chicago"]` (exactly as before G3; a sixth element,
     /// when present, is the country code) and elsewhere
     /// `["Paris","Île-de-France",48.853,2.349,"Europe/Paris","FR",2138551]`, with an eighth element,
-    /// a plain-letter spelling, only where folding accents is not enough. `usPopulation` holds one
-    /// number per row that has no population, in order.
+    /// a plain-letter spelling, only where folding accents is not enough. The gateway towns at the end
+    /// take the second shape with "US" and their own population: `["Moab","UT",38.57,-109.548,
+    /// "America/Denver","US",5206]`. `usPopulation` holds one number per row that has no population, in order.
     private struct File: Decodable {
         let places: [StartingPlace]
         let nearbyOnly: [StartingPlace]
