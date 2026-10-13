@@ -126,14 +126,16 @@ struct FieldCompassView: View {
                     if !sensing { Text("This iPhone can't sense where it is pointing, so the sky is listed instead.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                     if let eyeClock { EyeClock(session:session,expanded:eyeClock).padding(.top,12) }
                 }.padding(.horizontal,24).padding(.vertical,12).readableColumn(WideLayout.proseWidth)
+                // The list's own top, margin included, so a list already there does not move.
+                .id("listTop")
             }
             // Back from time away with the clock started over: the list returns to the notice at its top.
-            .onChange(of:session.reset) { old,reset in
-                guard showsReset, old == nil, reset != nil else { return }
+            .onChange(of:session.reset) { _,reset in
+                guard showsReset, reset != nil else { return }
                 // Once the notice is laid out, so there is somewhere to scroll to.
                 Task { @MainActor in
                     try? await Task.sleep(for:.milliseconds(60))
-                    withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("reset",anchor:.top) }
+                    withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("listTop",anchor:.top) }
                 }
             }
         }

@@ -94,8 +94,9 @@ struct FieldView: View {
         .animation(reduceMotion ? nil : NyxMotion.spring,value:session.reset)
         // Back from time away with the clock started over: where the notice opens the page, the page
         // returns to it (it may have been scrolled to a later milestone), and VoiceOver hears it either way.
-        .onChange(of:session.reset) { old,reset in
-            guard old == nil, let reset else { return }
+        // Every new start-over (a second return while the notice still shows makes a new one) brings it back.
+        .onChange(of:session.reset) { _,reset in
+            guard let reset else { return }
             if resetInPage { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focused="now" } }
             AccessibilityNotification.Announcement(String(localized:"Your eyes started over at \(session.park.time(reset.at)).")).post()
         }

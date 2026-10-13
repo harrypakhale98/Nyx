@@ -35,9 +35,11 @@ struct JournalEntryEntity: AppEntity {
     var message: AttributedString?
     var mediaItems: [IntentFile]
     var entryDate: Date?
+    /// The night's date as the Journal shows it: in the park's own time zone, not the device's.
+    var dateLabel: String?
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: "\(title ?? String(localized: "Journal entry"))",
-                              subtitle: entryDate.map { "\($0.formatted(date: .abbreviated, time: .omitted))" })
+                              subtitle: dateLabel.map { "\($0)" })
     }
 }
 extension JournalEntryEntity {
@@ -49,6 +51,7 @@ extension JournalEntryEntity {
         message=entry.notes.isEmpty ? nil : AttributedString(entry.notes)
         mediaItems=photos ? entry.orderedPhotos.enumerated().map { IntentFile(data: $1.data, filename: "night-\($0+1).jpg", type: .jpeg) } : []
         entryDate=entry.date
+        dateLabel=park?.dateLabel(entry.date) ?? entry.date.formatted(date: .abbreviated, time: .omitted)
     }
 }
 
