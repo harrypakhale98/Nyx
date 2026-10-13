@@ -92,11 +92,11 @@ nonisolated struct HomeSky: Sendable {
             if night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr {
                 let reason=WhatsUp.poorReason(night, park: place, sky: sky)
                 // The fallback sentence names a park; under city lights the next sentence already says why.
-                if reason != String(localized: "A weak return from this park; a rough guide.") { poor=" "+reason }
+                if reason != String(localized: "A weak return from this park; a rough guide.") { poor=reason }
             }
             let observer=light == .assumed ? String(localized: "For one observer under a suburban sky; a rough guide. A darker yard shows more.")
                 : String(localized: "For one observer under a Bortle \(place.bortleEstimate) sky, estimated from satellite data; a rough guide.")
-            lead=String(localized: "Best \(WhatsUp.whenPhrase(best, sky: sky, park: place)), \(moon).")+poor+" "+observer
+            lead=Sentences.join([String(localized: "Best \(WhatsUp.whenPhrase(best, sky: sky, park: place)), \(moon)."), poor, observer])
         } else {
             value=String(localized: "No true darkness")
             lead=String(localized: "Without true darkness at this latitude, few meteors will show.")

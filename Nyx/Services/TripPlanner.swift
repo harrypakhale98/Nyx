@@ -220,11 +220,11 @@ nonisolated enum TripPlanner {
         var lines=[String(localized:"A dark-sky trip, planned with Nyx")]
         for stop in plan.stops {
             let park=stop.night.park
-            var line=stop.night.spokenSummary(.tripLine(reason:stop.reason))
-            if let hop=stop.hopMeters, hop>1000 { line+=" "+String(localized:"\(distance(hop)) from the night before.") }
-            if let closure=stop.closure { line+=" "+String(localized:"Closure alert: \(closure)") }
-            if let access=park.accessNote { line+=" "+access }
-            lines.append(line)
+            var parts=[stop.night.spokenSummary(.tripLine(reason:stop.reason))]
+            if let hop=stop.hopMeters, hop>1000 { parts.append(String(localized:"\(distance(hop)) from the night before.")) }
+            if let closure=stop.closure { parts.append(String(localized:"Closure alert: \(closure)")) }
+            if let access=park.accessNote { parts.append(access) }
+            lines.append(Sentences.join(parts))
         }
         if let best=plan.best { lines.append(String(localized:"Best night: \(best.night.park.dayLabel(best.night.id)), \(best.night.park.shortName).")) }
         lines.append(String(localized:"Distances are straight lines, not driving routes. Scores are estimates. Check closures and the forecast before you go."))

@@ -114,7 +114,7 @@ struct TimeRiver: View {
             if DebugScenario.isEnabled("activate-river") { Button { _=DebugAccessibility.activate(label:String(localized:"Thirty-night darkness timeline")) } label:{ Text(verbatim:"Activate the river") } }
             #endif
             // Shapes stand in for colour under Differentiate Without Color; they need their key.
-            if access.differentiate && !typeSize.isAccessibilitySize { Text(NightMark.legend+" "+String(localized:"Small triangles beneath mark the three best nights.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if access.differentiate && !typeSize.isAccessibilitySize { Text(Sentences.join([NightMark.legend,String(localized:"Small triangles beneath mark the three best nights.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
         .sensoryFeedback(.selection,trigger:detents)
         .onChange(of:scrubbing==true) { _,now in

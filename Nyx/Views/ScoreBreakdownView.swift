@@ -39,7 +39,7 @@ struct ScoreBreakdownView: View {
             // The weakest link, said beside the number it sets, before the parts that add up to more.
             if let limit=night.score.limit, limit.cap<partsSum {
                 if case .darkness = limit {} else {
-                    Text(limit.sentence(tonight:isTonight)+" "+String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
+                    Text(Sentences.join([limit.sentence(tonight:isTonight),String(localized:"The four parts add up to \(partsSum); the score takes the lowest cap that applies.")])).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true)
                 }
             }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
@@ -49,7 +49,7 @@ struct ScoreBreakdownView: View {
                     : String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."))
             row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
-            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(caption+" "+String(localized:"The score will change as a forecast arrives.")).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
             else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
             if let event=model.events(night).item(park:night.park,sky:night.sky,isTonight:isTonight) {
@@ -66,7 +66,7 @@ struct ScoreBreakdownView: View {
                 .accessibilityElement(children:.ignore).accessibilityLabel(event.spoken+" "+String(localized:"Also in the sky this night. Not part of the score."))
             }
             // Dates and the night's hours here are the park's own, wherever this phone is.
-            Text(String(localized:"Each park uses its own local date.")+" "+String(localized:"The score is a planning guide, not a guarantee of visibility or safe access.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            Text(Sentences.join([String(localized:"Each park uses its own local date."),String(localized:"The score is a planning guide, not a guarantee of visibility or safe access.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             ShareCardButton(night:night)
         }
     }
@@ -88,7 +88,7 @@ struct ScoreBreakdownView: View {
     private var moonFact:String {
         let lit=String(localized:"\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit.")
         guard let line=night.sky.moonBelowLine else { return lit }
-        return lit+" "+line
+        return Sentences.join([lit,line])
     }
     /// Model agreement, the cloud layer and the air, each one sentence with a quiet symbol, so the
     /// context reads as a step below the fact the score was computed from.

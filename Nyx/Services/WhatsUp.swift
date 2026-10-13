@@ -134,8 +134,8 @@ nonisolated struct WhatsUp: Sendable {
         var detail=peak.date.timeIntervalSince(dark.start)<600 && dark.duration>1800 ? String(localized: "\(degrees)° up in the \(direction) as true darkness begins, then sinking.")
             : dark.end.timeIntervalSince(peak.date)<600 && dark.duration>1800 ? String(localized: "Still climbing: \(degrees)° up in the \(direction) as true darkness ends.")
             : String(localized: "Highest at \(park.time(peak.date)), \(degrees)° up in the \(direction).")
-        if peak.altitude<20 { detail+=" "+String(localized: "Low: an open view toward the horizon matters.") }
-        detail+=" "+moonSentence(dark: dark, free: core.moonFree, sky: sky, park: park)
+        if peak.altitude<20 { detail=Sentences.join([detail, String(localized: "Low: an open view toward the horizon matters.")]) }
+        detail=Sentences.join([detail, moonSentence(dark: dark, free: core.moonFree, sky: sky, park: park)])
         let spokenRange=String(localized: "up in true darkness from \(park.time(dark.start)) to \(park.time(dark.end))")
         return Item(id: "core", kind: .core, title: title, value: range, detail: detail, spoken: "\(title): \(spokenRange). \(detail)", timed: true)
     }
@@ -240,8 +240,8 @@ nonisolated struct WhatsUp: Sendable {
             value=rateText(night.hourlyRate)
             let moon=night.moonDownAtBest ? String(localized: "Moon down") : String(localized: "Moon up, \(Int((sky.moon.illumination*100).rounded()))% lit")
             // A peak night far below the published rate says why, plainly.
-            let poor=night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr ? " "+poorReason(night, park: park, sky: sky) : ""
-            lead=String(localized: "Best \(whenPhrase(best, sky: sky, park: park)), \(moon).")+poor+" "+String(localized: "For one observer under this park's sky; a rough guide.")
+            let poor=night.isPeakNight && Double(night.hourlyRate)<0.25*shower.zhr ? poorReason(night, park: park, sky: sky) : ""
+            lead=Sentences.join([String(localized: "Best \(whenPhrase(best, sky: sky, park: park)), \(moon)."), poor, String(localized: "For one observer under this park's sky; a rough guide.")])
         } else {
             value=String(localized: "No true darkness")
             lead=String(localized: "Without true darkness at this latitude, few meteors will show.")
@@ -299,14 +299,14 @@ nonisolated struct WhatsUp: Sendable {
         // The figure carries the times; the sentence says what and where. VoiceOver hears both.
         let spokenStage=String(localized: "\(stage) from \(park.time(visible.start)) to \(park.time(visible.end)), \(place).")
         var detail=String(localized: "\(stage), \(place).")
-        var extra=""
+        var extras: [String]=[]
         let full=[eclipse.u2 ?? eclipse.u1 ?? eclipse.p1, eclipse.u3 ?? eclipse.u4 ?? eclipse.p4]
-        if let start=full[0], visible.start.timeIntervalSince(start)>120 { extra+=" "+String(localized: "The Moon rises already eclipsed.") }
-        if let end=full[1], end.timeIntervalSince(visible.end)>120 { extra+=" "+String(localized: "The Moon sets before it ends.") }
-        if eclipse.type=="partial" { extra+=" "+String(localized: "At most \(Int((eclipse.umbralMagnitude*100).rounded()))% of the Moon's width is in shadow.") }
-        if eclipse.type=="penumbral" { extra+=" "+String(localized: "Subtle: the Moon's edge darkens slightly.") }
-        detail+=extra
-        return Item(id: "eclipse", kind: .eclipse, title: title, value: range, detail: detail, spoken: "\(title). \(spokenStage)\(extra)", timed: true)
+        if let start=full[0], visible.start.timeIntervalSince(start)>120 { extras.append(String(localized: "The Moon rises already eclipsed.")) }
+        if let end=full[1], end.timeIntervalSince(visible.end)>120 { extras.append(String(localized: "The Moon sets before it ends.")) }
+        if eclipse.type=="partial" { extras.append(String(localized: "At most \(Int((eclipse.umbralMagnitude*100).rounded()))% of the Moon's width is in shadow.")) }
+        if eclipse.type=="penumbral" { extras.append(String(localized: "Subtle: the Moon's edge darkens slightly.")) }
+        detail=Sentences.join([detail]+extras)
+        return Item(id: "eclipse", kind: .eclipse, title: title, value: range, detail: detail, spoken: "\(title). \(Sentences.join([spokenStage]+extras))", timed: true)
     }
 
     /// A time rounded to ten minutes, for moments that are only ever "around".

@@ -53,31 +53,31 @@ nonisolated enum DarkWindowAnswer {
     /// Voice-only (iOS 27, no screen in view) keeps the window alone. Times are the park's; when
     /// they are not this device's, the answer names the park's time zone.
     static func dialog(park: Park, sky: SkyConditions, closure: String?, voiceOnly: Bool, device: TimeZone = .current) -> String {
-        var body: String
+        var sentences: [String]=[]
         if sky.darkHours>0, let start=sky.darkStart, let end=sky.darkEnd {
             if voiceOnly {
-                body=String(localized:"Tonight at \(park.shortName): true darkness from \(park.time(start)) to \(park.time(end)).")
+                sentences=[String(localized:"Tonight at \(park.shortName): true darkness from \(park.time(start)) to \(park.time(end)).")]
             } else {
-                body=String(localized:"True darkness tonight at \(park.shortName): from \(park.time(start)) to \(park.time(end)).")
-                if let sunset=sky.sunset { body+=" "+String(localized:"Sunset is at \(park.time(sunset)).") }
+                sentences=[String(localized:"True darkness tonight at \(park.shortName): from \(park.time(start)) to \(park.time(end)).")]
+                if let sunset=sky.sunset { sentences.append(String(localized:"Sunset is at \(park.time(sunset)).")) }
             }
-            body+=zoneNote(park:park,at:start,device:device)
+            sentences.append(zoneNote(park:park,at:start,device:device))
         } else {
-            body=String(localized:"\(park.shortName) has no true darkness tonight at this latitude.")
+            sentences=[String(localized:"\(park.shortName) has no true darkness tonight at this latitude.")]
             if !voiceOnly {
                 if let sunset=sky.sunset, let sunrise=sky.sunrise {
-                    body+=" "+String(localized:"The sky stays in twilight from sunset at \(park.time(sunset)) to sunrise at \(park.time(sunrise)).")
-                    body+=zoneNote(park:park,at:sunset,device:device)
+                    sentences.append(String(localized:"The sky stays in twilight from sunset at \(park.time(sunset)) to sunrise at \(park.time(sunrise))."))
+                    sentences.append(zoneNote(park:park,at:sunset,device:device))
                 } else if sky.state == .polarDay {
-                    body+=" "+String(localized:"The Sun stays up all night.")
+                    sentences.append(String(localized:"The Sun stays up all night."))
                 }
             }
         }
-        return DarknessAnswer.withClosures(body,park:park,closure:closure)
+        return DarknessAnswer.withClosures(Sentences.join(sentences),park:park,closure:closure)
     }
-    /// " Times are Pacific Time." only when the park's clock differs from this device's.
+    /// "Times are Pacific Time." only when the park's clock differs from this device's.
     static func zoneNote(park: Park, at date: Date, device: TimeZone) -> String {
-        park.timeZone.secondsFromGMT(for:date)==device.secondsFromGMT(for:date) ? "" : " "+String(localized:"Times are \(park.timeZoneName).")
+        park.timeZone.secondsFromGMT(for:date)==device.secondsFromGMT(for:date) ? "" : String(localized:"Times are \(park.timeZoneName).")
     }
 }
 
@@ -112,7 +112,7 @@ nonisolated enum WhatsUpAnswer {
         let lines=whatsUp.items.prefix(limit).map { line($0,core:whatsUp.coreNight,park:park,voiceOnly:voiceOnly) }
         let lead=String(localized:"Tonight at \(park.shortName)")+"."
         let zone=DarkWindowAnswer.zoneNote(park:park,at:whatsUp.coreNight.highest,device:device)
-        return DarknessAnswer.withClosures(([lead]+lines).joined(separator:" ")+zone,park:park,closure:closure)
+        return DarknessAnswer.withClosures(Sentences.join([lead]+lines+[zone]),park:park,closure:closure)
     }
     /// One item, briefly: the core's dark hours, a shower's rate, a planet's times. The panel's
     /// longer notes (the published rate, the Moon's share of the core's hours) stay in the app.

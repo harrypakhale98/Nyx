@@ -49,7 +49,7 @@ nonisolated enum WristTonightAnswer {
             : String(localized: "\(park.shortName), \(score.value) out of 100, \(score.band.label). \(clouds(night, context: context, now: now))")
         guard let closure = context?.closures[park.id]?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
         let alert = WristClosure.spoken(closure)
-        return (alert.last.map { ".!?…".contains($0) } == true ? alert : alert + ".") + " " + body
+        return Sentences.join([alert.last.map { ".!?…".contains($0) } == true ? alert : alert + ".", body])
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {
@@ -62,10 +62,10 @@ nonisolated enum WristTonightAnswer {
             let sent = Calendar.current.isDate(context.sent, inSameDayAs: now)
                 ? String(localized: "From the cloud forecast your iPhone sent at \(time).")
                 : String(localized: "From the cloud forecast your iPhone sent on \(context.sent.formatted(.dateTime.weekday(.wide))) at \(time).")
-            return [sent, source.isStale ? source.line(for: night.park) : nil].compactMap { $0 }.joined(separator: " ")
+            return Sentences.join([sent, source.isStale ? source.line(for: night.park) : nil].compactMap { $0 })
         }
         let fix = source.isStale || source == .missing(followed: false) ? source.line(for: night.park) : nil
-        return [night.basisCaption(), fix].compactMap { $0 }.joined(separator: " ")
+        return Sentences.join([night.basisCaption(), fix].compactMap { $0 })
     }
 }
 

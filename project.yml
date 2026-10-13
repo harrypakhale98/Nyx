@@ -147,6 +147,8 @@ targets:
         group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared
       - path: Nyx/Services/AstronomyEngine.swift
@@ -241,6 +243,8 @@ targets:
       - path: NyxWatchShared
       - path: Nyx/Models/Park.swift
         group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
@@ -329,6 +333,8 @@ targets:
       - path: NyxWatchShared
       - path: Nyx/Models/Park.swift
         group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
@@ -410,6 +416,8 @@ targets:
     sources:
       - path: NyxVision
       - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
         group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared
@@ -518,6 +526,8 @@ targets:
       - path: Nyx/Services/MoonWeek.swift
         group: Shared
       - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
         group: Shared
       - path: Nyx/Models/SkyConditions.swift
         group: Shared

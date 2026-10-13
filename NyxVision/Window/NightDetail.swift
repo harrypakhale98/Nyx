@@ -130,7 +130,7 @@ struct NightDetail: View {
         // The iPhone's words (`ScoreBreakdownView`): the class on its scale, called an estimate, and what it means.
         let glow = String(localized: "Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement.")
         Fact(title: "Sky glow", value: String(localized: "Bortle class \(park.bortleEstimate) of 9, estimated."),
-             note: park.darkSkyDesignated ? glow+" "+String(localized: "An International Dark Sky Park.") : glow)
+             note: park.darkSkyDesignated ? Sentences.join([glow, String(localized: "An International Dark Sky Park.")]) : glow)
     }
 
     private func whatsUp(_ plan: NightPlan) -> some View {

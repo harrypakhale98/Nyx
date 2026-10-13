@@ -271,7 +271,7 @@ nonisolated struct ViewingSpot: Codable, Hashable, Sendable {
         let lead=String(note.dropLast(caveat.count)).trimmingCharacters(in:.whitespaces)
         if lead.isEmpty { return local }
         let northUnit="The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park."
-        return (lead==northUnit ? String(localized:"The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.") : lead)+" "+local
+        return Sentences.join([lead==northUnit ? String(localized:"The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.") : lead, local])
     }
 }
 nonisolated struct ParkAlert: Codable, Identifiable, Sendable, Equatable {

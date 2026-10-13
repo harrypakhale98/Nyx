@@ -70,7 +70,7 @@ nonisolated struct DarknessAnswer:Sendable {
     /// so, so silence never reads as "nothing is closed".
     static func withClosures(_ body:String,park:Park,closure:String?)->String {
         let answer=closureFirst(body,closure:closure)
-        return unknownClosures(park).map { answer+" "+$0 } ?? answer
+        return unknownClosures(park).map { Sentences.join([answer, $0]) } ?? answer
     }
     /// What the place's own page says where the Park Service has no alerts (`Place.unknownClosuresLine`):
     /// a place abroad points to its own site, a saved spot to local checks. Nil for a national park.
@@ -82,7 +82,7 @@ nonisolated struct DarknessAnswer:Sendable {
     /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
     static func closureFirst(_ body:String,closure:String?)->String {
         guard let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty else { return body }
-        return sentence(String(localized:"Closure alert: \(closure)"))+" "+body
+        return Sentences.join([sentence(String(localized:"Closure alert: \(closure)")), body])
     }
     /// An NPS headline usually ends without a full stop; one is added so the score reads as its own sentence.
     static func sentence(_ text:String)->String { text.last.map { ".!?…".contains($0) } == true ? text : text+"." }

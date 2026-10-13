@@ -115,11 +115,12 @@ struct ShareCard:View {
     /// "Joshua Tree, Fri, Oct 9, darkness score 94 out of 100. Pristine. Forecast models: 88 to 96.
     /// Waxing crescent, 12% lit. Moon-free all night. Forecast included…"
     var summary:String {
-        var line=String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label).")
-        if let range { line+=" "+String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).") }
-        line+=" "+moonPhrase+"."
-        if let why { line+=" "+why+"." }
-        return line+" "+basis+"."
+        var parts=[String(localized:"\(night.park.shortName), \(night.park.dayLabel(night.id)), darkness score \(night.score.value) out of 100. \(night.score.band.label).")]
+        if let range { parts.append(String(localized:"Forecast models: \(range.lowerBound) to \(range.upperBound).")) }
+        parts.append(moonPhrase+".")
+        if let why { parts.append(why+".") }
+        parts.append(basis+".")
+        return Sentences.join(parts)
     }
     /// The Moon as the card shows it: its phase and how much is lit, or in words when not drawn.
     private var moonPhrase:String {
@@ -128,7 +129,7 @@ struct ShareCard:View {
         return String(localized:"Moon \(Self.percent(night))% lit")
     }
     /// What travels beside the image: the summary, then where it came from.
-    var message:String { summary+" "+String(localized:"Planned with Nyx.")+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
+    var message:String { Sentences.join([summary,String(localized:"Planned with Nyx.")])+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
     /// The App Store page (`SupportLink.storePage`), nil if the app ID is ever unset, so no link is guessed.
     static var storeURL:URL? { SupportLink.storePage }
     private var basis:String {

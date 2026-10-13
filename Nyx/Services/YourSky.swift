@@ -461,7 +461,7 @@ nonisolated struct YearRecap: Sendable {
         if let darkest { lines.append(String(localized:"Your darkest sky was \(darkest.parkName) on \(darkest.dateLabel): Bortle \(darkest.bortle), as you saw it.")) }
         lines.append(phases.count==8 ? String(localized:"You met all eight of the Moon's phases.") : phases.count==1 ? String(localized:"You met one of the Moon's eight phases.") : String(localized:"You met \(phases.count) of the Moon's eight phases."))
         if let event { lines.append(event) }
-        return lines.joined(separator:" ")
+        return Sentences.join(lines)
     }
     /// Facts for the on-device model, one per line, never more than the template already says.
     var facts: [String] {

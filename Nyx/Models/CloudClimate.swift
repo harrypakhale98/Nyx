@@ -127,7 +127,7 @@ extension Night {
     /// "About 8 in 10 November nights here are mostly clear." for a night without a forecast.
     nonisolated var typicalClouds: String? { basis == .usual ? CloudClimate.shared.sentence(park, on: id) : nil }
     /// A caption followed by the month's typical clouds, for a night without a forecast.
-    nonisolated func withTypicalClouds(_ caption: String) -> String { typicalClouds.map { caption+" "+$0 } ?? caption }
+    nonisolated func withTypicalClouds(_ caption: String) -> String { typicalClouds.map { Sentences.join([caption, $0]) } ?? caption }
     /// The short label for what a night's clouds rest on: nil with a forecast, else "Early look"
     /// or "No cloud forecast yet".
     nonisolated var basisLabel: String? {
@@ -159,8 +159,8 @@ extension Night {
             format.timeZone = park.timeZone
             let first = unavailable ? String(localized: "Cloud forecast unavailable.") : String(localized: "No cloud forecast yet.")
             // Never "Arches's": the park follows the month rather than taking a possessive.
-            let line = first+" "+(usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
-                : String(localized: "This score uses the usual \(id.formatted(format)) clouds at \(park.shortName)."))
+            let line = Sentences.join([first, usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
+                : String(localized: "This score uses the usual \(id.formatted(format)) clouds at \(park.shortName).")])
             return typical ? withTypicalClouds(line) : line
         }
     }
@@ -225,7 +225,7 @@ extension Night {
         case .eventNote:
             return score.hasForecast
                 ? String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)), with the cloud forecast as Nyx last saw it.")
-                : String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label)).")+" "+(basisCaption(typical:true) ?? "")
+                : Sentences.join([String(localized:"Darkness score \(score.value) out of 100 (\(score.band.label))."), basisCaption(typical:true) ?? ""])
         case .siriTonight(let voiceOnly):
             if sky.darkHours==0 { return String(localized:"No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
             if voiceOnly { return voiceAnswer(String(localized:"Tonight")) }
@@ -246,8 +246,8 @@ extension Night {
     /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full
     /// forecast, the one caveat about the clouds.
     private nonisolated func voiceAnswer(_ day: String) -> String {
-        let caveat=score.hasForecast ? "" : " "+(basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"No cloud forecast yet.")))
-        return String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label).")+caveat
+        let caveat=score.hasForecast ? "" : (basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"No cloud forecast yet.")))
+        return Sentences.join([String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label)."), caveat])
     }
 }
 #endif

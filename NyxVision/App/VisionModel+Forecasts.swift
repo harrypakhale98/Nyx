@@ -72,12 +72,12 @@ extension VisionModel {
         case .forecast:
             let cover = night.cloudCover.map { String(localized: "\(Int($0.rounded()))% average cover through true darkness.") } ?? ""
             let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
-            return [cover, summit, issued].filter { !$0.isEmpty }.joined(separator: " ")
+            return Sentences.join([cover, summit, issued])
         case .blended, .usual:
             let unavailable = !NightPlanner.beyondForecast(night, forecast: forecast, detail: detail, now: now)
             let caption = night.basisCaption(unavailable: unavailable, typical: true) ?? ""
             let off = unavailable && !forecastsOn ? String(localized: "Cloud forecasts are off in Your privacy.") : ""
-            return [caption, summit, off].filter { !$0.isEmpty }.joined(separator: " ")
+            return Sentences.join([caption, summit, off])
         }
     }
 

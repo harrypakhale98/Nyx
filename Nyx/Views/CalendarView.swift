@@ -503,7 +503,7 @@ struct CalendarView: View {
     }
     @ViewBuilder private var legend: some View {
         Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
-        if access.differentiate { Text(NightMark.legend+" "+String(localized:"A line through the date marks a night that has passed.")).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+        if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
     }
     /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
     /// page here or in a window of its own, and Calendar for nights still ahead).
