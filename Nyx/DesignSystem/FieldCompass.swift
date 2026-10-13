@@ -18,6 +18,9 @@ struct FieldCompassView: View {
     /// The view's height, which bounds the notice over the drawn sky.
     @State private var height: CGFloat=600
     @Environment(\.nyx) private var palette
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var frozen: SkyCompass.Pose?
     /// iPhone Duo's hinge part way open (`readingHalfOpen`).
@@ -105,23 +108,34 @@ struct FieldCompassView: View {
         .accessibilityIgnoresInvertColors(true)
     }
     private var list: some View {
-        ScrollView {
-            VStack(alignment:.leading,spacing:16) {
-                if showsReset, let reset=session.reset { FieldResetNotice(session:session,reset:reset).transition(.opacity) }
-                if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true) }
-                if controlsInList { controls.padding(.bottom,8) }
-                let sorted=targets.sorted { ($0.altitude > -0.5 ? 0 : 1,-$0.altitude)<($1.altitude > -0.5 ? 0 : 1,-$1.altitude) }
-                ForEach(sorted) { target in
-                    VStack(alignment:.leading,spacing:4) {
-                        Text(target.name).font(.system(.title3,design:.serif))
-                        Text(SkyCompass.spoken(altitude:target.altitude,azimuth:target.azimuth)).font(.body).foregroundStyle(palette.muted)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment:.leading,spacing:16) {
+                    if showsReset, let reset=session.reset { FieldResetNotice(session:session,reset:reset).transition(.opacity).id("reset") }
+                    if let note { Text(note).font(.caption).fixedSize(horizontal:false,vertical:true) }
+                    if controlsInList { controls.padding(.bottom,8) }
+                    let sorted=targets.sorted { ($0.altitude > -0.5 ? 0 : 1,-$0.altitude)<($1.altitude > -0.5 ? 0 : 1,-$1.altitude) }
+                    ForEach(sorted) { target in
+                        VStack(alignment:.leading,spacing:4) {
+                            Text(target.name).font(.system(.title3,design:.serif))
+                            Text(SkyCompass.spoken(altitude:target.altitude,azimuth:target.azimuth)).font(.body).foregroundStyle(palette.muted)
+                        }
+                        .frame(maxWidth:.infinity,alignment:.leading)
+                        .accessibilityElement(children:.ignore).accessibilityLabel(target.spoken)
                     }
-                    .frame(maxWidth:.infinity,alignment:.leading)
-                    .accessibilityElement(children:.ignore).accessibilityLabel(target.spoken)
+                    if !sensing { Text("This iPhone can't sense where it is pointing, so the sky is listed instead.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                    if let eyeClock { EyeClock(session:session,expanded:eyeClock).padding(.top,12) }
+                }.padding(.horizontal,24).padding(.vertical,12).readableColumn(WideLayout.proseWidth)
+            }
+            // Back from time away with the clock started over: the list returns to the notice at its top.
+            .onChange(of:session.reset) { old,reset in
+                guard showsReset, old == nil, reset != nil else { return }
+                // Once the notice is laid out, so there is somewhere to scroll to.
+                Task { @MainActor in
+                    try? await Task.sleep(for:.milliseconds(60))
+                    withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo("reset",anchor:.top) }
                 }
-                if !sensing { Text("This iPhone can't sense where it is pointing, so the sky is listed instead.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
-                if let eyeClock { EyeClock(session:session,expanded:eyeClock).padding(.top,12) }
-            }.padding(.horizontal,24).padding(.vertical,12).readableColumn(WideLayout.proseWidth)
+            }
         }
     }
     private var controls: some View {

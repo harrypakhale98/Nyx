@@ -30,6 +30,9 @@ struct TonightSkyView: View {
     @State private var facing: Double
     @State private var minutes: Double
     @State private var dragFrom: Double?
+    /// A drag is under way; resets by itself when the system cancels one (a rotation, the home
+    /// indicator's gesture), which never reaches `onEnded`, so the next drag starts where the sky is.
+    @GestureState private var dragging=false
     @State private var size: CGSize = .zero
     /// The header's lower edge on screen: names stay below it and figures fade out above it.
     @State private var headerBottom: Double=0
@@ -91,6 +94,7 @@ struct TonightSkyView: View {
             .ignoresSafeArea(edges:beside ? [.top,.bottom,.leading] : .top)
             .onGeometryChange(for:CGSize.self) { $0.size } action:{ size=$0 }
             .gesture(turn)
+            .onChange(of:dragging) { _,now in if !now { dragFrom=nil } }
             .accessibilityElement()
             .accessibilityLabel(title)
             .accessibilityValue(PanoramaCanvas.summary(sky:sky,facing:facing,park:park,bortle:Double(park.bortleEstimate),size:size == .zero ? CGSize(width:390,height:800) : size))
@@ -306,7 +310,7 @@ struct TonightSkyView: View {
     /// Drag sideways to turn: the sky follows the finger, so dragging right turns to the left. A
     /// fling coasts on (not under Reduce Motion), and a finger on a turning sky catches it where it is.
     private var turn: some Gesture {
-        DragGesture(minimumDistance:4).onChanged { drag in
+        DragGesture(minimumDistance:4).updating($dragging) { _,state,_ in state=true }.onChanged { drag in
             completeReveal()
             if dragFrom == nil {
                 if let turning { face(turning.position(at:.now)) }
@@ -388,20 +392,24 @@ nonisolated enum SkyTurn {
     }
     nonisolated static func eased(_ t:Double)->Double { let t=max(0,min(1,t)); return t*t*(3-2*t) }
 }
-/// Liquid Glass for a floating control; a solid panel under Reduce Transparency, Increase
-/// Contrast and night vision.
 /// Where the full-screen sky's title and controls stand: over the top and under the bottom of the
-/// sky, or, at compact height, together in a column at its side.
+/// sky, or, at compact height, together in a column at its side. One structure in both, with only
+/// the insets' contents changing, so turning the iPhone keeps the sky itself (its VoiceOver focus,
+/// its gesture) rather than building a new one.
 private struct SkyChrome<Header: View, Controls: View, Column: View>: ViewModifier {
     let beside: Bool
     let header: Header
     let controls: Controls
     let column: Column
-    @ViewBuilder func body(content:Content)->some View {
-        if beside { content.safeAreaInset(edge:.trailing,spacing:0) { column } }
-        else { content.safeAreaInset(edge:.top) { header }.safeAreaInset(edge:.bottom) { controls } }
+    func body(content:Content)->some View {
+        content
+            .safeAreaInset(edge:.top,spacing:beside ? 0 : nil) { if !beside { header } }
+            .safeAreaInset(edge:.bottom,spacing:beside ? 0 : nil) { if !beside { controls } }
+            .safeAreaInset(edge:.trailing,spacing:0) { if beside { column } }
     }
 }
+/// Liquid Glass for a floating control; a solid panel under Reduce Transparency, Increase
+/// Contrast and night vision.
 struct FloatingGlass<S: Shape>: ViewModifier {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency

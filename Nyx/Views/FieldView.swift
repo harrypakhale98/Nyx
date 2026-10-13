@@ -92,6 +92,23 @@ struct FieldView: View {
         .accessibilityElement(children:.contain)
         .accessibilityAction(.escape) { NightListener.shared.stop(); close() }
         .animation(reduceMotion ? nil : NyxMotion.spring,value:session.reset)
+        // Back from time away with the clock started over: where the notice opens the page, the page
+        // returns to it (it may have been scrolled to a later milestone), and VoiceOver hears it either way.
+        .onChange(of:session.reset) { old,reset in
+            guard old == nil, let reset else { return }
+            if resetInPage { withAnimation(reduceMotion ? nil : NyxMotion.spring) { focused="now" } }
+            AccessibilityNotification.Announcement(String(localized:"Your eyes started over at \(session.park.time(reset.at)).")).post()
+        }
+        #if DEBUG
+        // `-nyx-state reset-later`: scrolled to the night's last milestone, then the eyes start over, as after a return.
+        .task {
+            guard DebugScenario.state == "reset-later" else { return }
+            try? await Task.sleep(for:.seconds(1))
+            focused=session.night.cards(after:session.now,status:session.night.status(at:session.now)).last?.id
+            try? await Task.sleep(for:.seconds(3))
+            session.reset=DarkAdaptation.Reset(at:session.now.addingTimeInterval(-60),previousStart:session.now.addingTimeInterval(-26*60))
+        }
+        #endif
         .environment(\.nyx,palette)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent)
         .modifier(NightVisionFilter(enabled:true,red:palette.red))
