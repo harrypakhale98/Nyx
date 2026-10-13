@@ -99,23 +99,27 @@ private struct FoldReader: ViewModifier {
     @Binding var fold: Fold?
     #if DEBUG
     @Environment(\.debugWindowOrigin) private var windowOrigin
-    @State private var globalFrame: CGRect?
-    /// The stand-in fold through the middle of the simulated window, as this view reads it.
-    private func standIn(kind: String, window: CGSize) -> Fold? {
-        guard let globalFrame, let windowOrigin else { return nil }
-        let w=DebugScenario.foldWidth
-        let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
-        return Fold.standIn(band: band, viewFrame: globalFrame.offsetBy(dx: -windowOrigin.x, dy: -windowOrigin.y), window: window)
-    }
+    /// `-nyx-fold-for <seconds>`: the stand-in fold goes away after that long, as when the Duo is opened flat.
+    @State private var openedFlat=false
     #endif
     func body(content: Content) -> some View {
         #if DEBUG
         if let kind=DebugScenario.fold, let window=DebugScenario.window {
             // DEBUG captures: a fold through the middle of the simulated window (`-nyx-window`). Read in
             // screen coordinates less the window's own origin: a named coordinate space does not reach
-            // through the tab view's and split view's hosted columns.
-            content.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { globalFrame=$0 }
-                .onChange(of: standIn(kind: kind, window: window), initial: true) { _, new in fold=new }
+            // through the tab view's and split view's hosted columns. The origin and the flat state are
+            // captured, so the reading is redone when either changes, and reported only when it changes.
+            let origin=windowOrigin, gone=openedFlat, w=DebugScenario.foldWidth
+            let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
+            content.onGeometryChange(for: Fold?.self) { proxy in
+                guard let origin, !gone else { return nil }
+                return Fold.standIn(band: band, viewFrame: proxy.frame(in: .global).offsetBy(dx: -origin.x, dy: -origin.y), window: window)
+            } action: { fold=$0 }
+            .task {
+                guard let seconds=DebugScenario.number("-nyx-fold-for") else { return }
+                try? await Task.sleep(for: .seconds(seconds))
+                openedFlat=true
+            }
         } else {
             hardware(content)
         }

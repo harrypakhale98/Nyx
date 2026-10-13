@@ -101,6 +101,21 @@ import Testing
         // Flat, or a fold too near an edge for the list to reach: the column keeps its usual widths.
         #expect(ParksTab.listWidth(fold:nil,width:880,sidebarMargin:10)==nil)
         #expect(ParksTab.listWidth(fold:Fold(frame:CGRect(x:300,y:0,width:28,height:669)),width:880,sidebarMargin:10)==nil)
+        // The park keeps the fold's width clear while the list is shown; hidden, the park spans the
+        // window and places its own columns at the fold, so no strip is left.
+        #expect(ParksTab.parkInset(fold:fold,listAtFold:list,listShown:true)==28)
+        #expect(ParksTab.parkInset(fold:fold,listAtFold:list,listShown:false)==0)
+        #expect(ParksTab.parkInset(fold:nil,listAtFold:nil,listShown:true)==0)
+    }
+    @Test func listReturnsTo390WhenOpenedFlat() {
+        // Half open, the list is held at the fold. The split keeps a column's width while it lies inside
+        // the range, and 416 lies inside 330...460, so opened flat it is held at 390 until laid out there,
+        // then let go within its usual range.
+        #expect(ParksTab.listColumn(atFold:416,returningFlat:false)==(416,416,416))
+        #expect(ParksTab.listColumn(atFold:nil,returningFlat:true)==(390,390,390))
+        #expect(ParksTab.listColumn(atFold:nil,returningFlat:false)==(330,390,460))
+        // A fold again while returning: the fold wins.
+        #expect(ParksTab.listColumn(atFold:416,returningFlat:true)==(416,416,416))
     }
     @Test func tableFoldAndNarrowSidesLeaveColumnsAlone() {
         // A fold side to side (a Duo standing like a laptop) does not divide the width.

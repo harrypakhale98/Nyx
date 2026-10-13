@@ -20,6 +20,14 @@ struct ParksTab: View {
     /// margin in from the tab, and the list must end at the fold measured from the tab's edge.
     @State private var tabMinX=0.0
     @State private var listMinX=0.0
+    /// The list's width as laid out, in whole points: once it is back at 390 after the fold, it is let go.
+    @State private var listWidthSeen=0.0
+    /// The fold has just gone (the Duo opened flat): the list is held at 390 until it is laid out there,
+    /// since the split keeps a column's width while it stays within the range (`listColumn`).
+    @State private var returningFlat=false
+    /// Whether the list is beside the park; the person can hide it with the sidebar button.
+    /// (`-nyx-list-hidden`, DEBUG: opens with the list hidden.)
+    @State private var columnVisibility:NavigationSplitViewVisibility=DebugScenario.isEnabled("list-hidden") ? .detailOnly : .automatic
     /// The list's width that puts its edge on the fold, when the fold leaves room for both columns.
     private var listAtFold: Double? { ParksTab.listWidth(fold:fold,width:width,sidebarMargin:listMinX-tabMinX) }
     /// The list column's width when iPhone Duo is half open like a book: from the sidebar's own margin to
@@ -29,6 +37,19 @@ struct ParksTab: View {
         guard let edge=fold?.leadingWidth(in:width,minimum:330) else { return nil }
         return edge-min(40,max(0,sidebarMargin))
     }
+    /// The list column's range. Held at the fold's width while half open, and at 390 just after (the
+    /// split keeps a column's current width while it is inside the range, so the fold's width would
+    /// otherwise outlast the fold); otherwise 330 to 460 from 390.
+    nonisolated static func listColumn(atFold:Double?,returningFlat:Bool)->(min:Double,ideal:Double,max:Double) {
+        if let atFold { return (atFold,atFold,atFold) }
+        return returningFlat ? (390,390,390) : (330,390,460)
+    }
+    /// How far the park keeps from its column's leading edge: the fold's width while the list ends at the
+    /// fold and is shown; nothing when the person hides the list (the park then reads the fold itself).
+    nonisolated static func parkInset(fold:Fold?,listAtFold:Double?,listShown:Bool)->Double {
+        guard listShown, listAtFold != nil, let fold else { return 0 }
+        return fold.width
+    }
     /// List or map, kept for the window (and across a relaunch, like Plan's mode). `-nyx-parks-map` (or the `parks-map` route) opens the map.
     @SceneStorage(ParksTab.mapKey) private var showsMap=DebugScenario.parksMap
     /// A screen route (DEBUG captures and the accessibility audit) keeps its own restored state, so a run of
@@ -37,12 +58,16 @@ struct ParksTab: View {
     var body: some View {
         Group {
             if split && !showsMap {
-                NavigationSplitView {
-                    ParksView(selection:$selection).onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }.modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
+                let column=ParksTab.listColumn(atFold:listAtFold,returningFlat:returningFlat)
+                NavigationSplitView(columnVisibility:$columnVisibility) {
+                    ParksView(selection:$selection)
+                        .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }
+                        .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ listWidthSeen=$0 }
+                        .modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
                         // iPhone Duo half open like a book: the list ends at the fold, so the park beside it
                         // starts on the other half (the column's usual 390 points could not reach it). Held at
-                        // that width: the split keeps a column's first width while it stays within the range.
-                        .navigationSplitViewColumnWidth(min:listAtFold ?? 330,ideal:listAtFold ?? 390,max:listAtFold ?? 460)
+                        // that width, and at 390 once the fold has gone until the list is back there (`listColumn`).
+                        .navigationSplitViewColumnWidth(min:column.min,ideal:column.ideal,max:column.max)
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
@@ -51,7 +76,7 @@ struct ParksTab: View {
                     // The list ends at the fold's near edge; the park starts past its far edge, so its margin,
                     // its index and its bar (Back among it) sit on the other half rather than on the crease.
                     // Padding rather than safe area: bars and the park's pinned index extend into a safe area.
-                    .padding(.leading,listAtFold == nil ? 0 : fold?.width ?? 0)
+                    .padding(.leading,ParksTab.parkInset(fold:fold,listAtFold:listAtFold,listShown:columnVisibility != .detailOnly))
                 }
                 .navigationSplitViewStyle(.balanced)
             } else {
@@ -69,6 +94,9 @@ struct ParksTab: View {
         .measuringWidth($width)
         .readingFold($fold)
         .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ tabMinX=$0 }
+        // Opened flat, the list returns to 390 and is then let go within its usual range.
+        .onChange(of:listAtFold) { old,new in returningFlat=old != nil && new == nil && abs(listWidthSeen-390)>=1 }
+        .onChange(of:listWidthSeen) { _,seen in if returningFlat, abs(seen-390)<1 { returningFlat=false } }
         // The page never opens empty: the starting park until another is chosen.
         .onAppear {
             if selection == nil { selection=path.last?.id ?? model.home?.id }
