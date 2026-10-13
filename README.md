@@ -6,7 +6,7 @@ Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served 
 
 ## Version
 
-The current version and build are in `project.yml` (`MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; every target inherits them). The release in progress is **2.0**. The App Store goes from 1.1 (live since 2026-10-07, ID 6818817800) straight to 2.0 (the owner's decision, `DECISIONS.md` "2.0 — the release"), so 2.0 carries everything since 1.1: the score's caps and usual clouds, Plan, field mode's Live Activity and Assistive Access (1.2); the Moon's relief, named stars and the models' range (1.3); the review fixes (1.3.1); Siri, widgets and controls across the watch, Vision Pro and iPad (1.4); speed and structure (1.4.1); and the global work (G1 to G5): places around the world, saved spots, the world catalogue, and German, French and Japanese. The versions between 1.1 and 2.0 were never released on their own; their handoffs are in [Research/history/handoffs.md](Research/history/handoffs.md).
+The current version and build are in `project.yml` (`MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; every target inherits them). On the App Store (ID 6818817800): **2.1** (18), live on iPhone and iPad since 2026-10-13. `main` is numbered **2.2** (19): iPhone landscape, iPhone Duo and the redrawn icon, not yet uploaded. The App Store went from 1.1 (live since 2026-10-07) straight to 2.0 (the owner's decision, `DECISIONS.md` "2.0 — the release"), so 2.0 carries everything since 1.1: the score's caps and usual clouds, Plan, field mode's Live Activity and Assistive Access (1.2); the Moon's relief, named stars and the models' range (1.3); the review fixes (1.3.1); Siri, widgets and controls across the watch, Vision Pro and iPad (1.4); speed and structure (1.4.1); and the global work (G1 to G5): places around the world, saved spots, the world catalogue, and German, French and Japanese. The versions between 1.1 and 2.0 were never released on their own; their handoffs are in [Research/history/handoffs.md](Research/history/handoffs.md).
 
 Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md). Archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json` and never prints the NPS key); `python3 Scripts/verify_release.py --source-only` runs the repository checks alone, with no archive.
 
@@ -94,7 +94,7 @@ Renditions: `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight`, `Clear
 
 ## Verify
 
-The scheme runs the Swift Testing suite and the XCTest UI tests, including `NyxUITests/AccessibilityAuditTests`, Apple's automated accessibility audit on 17 screens in both palettes (set `TEST_RUNNER_NYX_AUDIT_SCREENS=parks,detail` to audit a few). Run one simulator at a time; parallel simulators can overload the Mac.
+The scheme runs the Swift Testing suite and the XCTest UI tests, including `NyxUITests/AccessibilityAuditTests`, Apple's automated accessibility audit on 32 screens in both palettes and on 10 key screens at the largest text size (set `TEST_RUNNER_NYX_AUDIT_SCREENS=parks,detail` to audit a few). Run one simulator at a time; parallel simulators can overload the Mac.
 
 ```sh
 xcodebuild test -project Nyx.xcodeproj -scheme Nyx \

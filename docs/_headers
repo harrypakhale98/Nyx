@@ -11,3 +11,6 @@
 
 /images/*
   Cache-Control: public, max-age=604800
+
+/press/images/*
+  Cache-Control: public, max-age=604800
