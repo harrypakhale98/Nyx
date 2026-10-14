@@ -17,8 +17,9 @@ nonisolated struct IPhoneAsk: Equatable, Sendable {
     let state: State
     let at: Date
     init(_ state: State, at: Date) { self.state = state; self.at = at }
-    /// The message, spelled as the iPhone reads it (`WatchRequest` in Nyx/Services/WatchBridge.swift).
-    static var message: [String: Any] { ["request": "context"] }
+    /// The message, spelled as the iPhone reads it (`WatchRequest` in Nyx/Services/WatchBridge.swift),
+    /// naming the places this watch wants clouds for (`WatchSky.wantedPlaces`).
+    static func message(places: [String]) -> [String: Any] { ["request": "context", "places": places] }
     static let replyKey = "reply"
     /// The iPhone's answer: "refreshing" or "resending". Anything else is an iPhone that does not
     /// know the request (an older Nyx), which cannot help either.

@@ -571,6 +571,8 @@ struct WeekPage: View {
                     .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
                 }
                 Group {
+                    // Why Tonight shows this place, where nothing on screen says so: nothing is saved on iPhone.
+                    if isHome, let line = WatchSky.caption(store.rule) { Text(line) }
                     if !typeSize.isAccessibilitySize, nights.contains(where: { !$0.score.hasForecast }) {
                         Text("Hollow nights have no full cloud forecast yet.")
                     }

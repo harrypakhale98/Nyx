@@ -141,4 +141,15 @@ import Testing
             }
         }
     }
+
+    /// "Update from iPhone" names the watch's own places (its kept park, its complications'): the
+    /// iPhone follows the valid ones, once each and at most eight; an older watch names none, and
+    /// what an earlier request asked for stays followed.
+    @Test func theWatchsRequestNamesItsPlaces() {
+        let message: [String: Any] = ["request": "context", "places": ["yell", "wd:Q123", "YELL", "not a place", "pin:../x"] + (0..<12).map { "p" + String(repeating: "a", count: $0 % 6 + 1) }]
+        let places = WatchRequest.places(in: message) ?? []
+        #expect(places.prefix(2) == ["yell", "wd:Q123"] && places.count == WatchRequest.maxPlaces && Set(places).count == places.count)
+        #expect(WatchRequest.places(in: ["request": "context"]) == nil)
+        #expect(WatchRequest.reply(to: message, forecastsOn: true) == .refreshing)
+    }
 }

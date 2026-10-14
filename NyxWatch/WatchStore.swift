@@ -68,7 +68,7 @@ import WidgetKit
             return
         }
         ask = IPhoneAsk(.asking, at: now)
-        session.sendMessage(IPhoneAsk.message, replyHandler: { @Sendable reply in
+        session.sendMessage(IPhoneAsk.message(places: WatchSky.wantedPlaces(pinned: pinned)), replyHandler: { @Sendable reply in
             let state = IPhoneAsk.state(reply: reply[IPhoneAsk.replyKey] as? String)
             Task { @MainActor in self.answered(state) }
         }, errorHandler: { @Sendable _ in
@@ -106,15 +106,24 @@ import WidgetKit
     }
     var savedParks: [Park] { (context?.savedParkIDs ?? []).compactMap(park) }
     /// The park on Tonight: the one kept on the watch, else the darkest saved park tonight (ties
-    /// broken as everywhere, `NightPlanner.best`), else the iPhone's starting park.
+    /// broken as everywhere, `NightPlanner.best`), else Tonight's answer on the iPhone, else its starting park.
     func featured(at now: Date) -> Park? {
         NightPlanner.best(WatchSky.candidates(in: parks, context: context, pinned: pinned).map { tonight($0, at: now) })?.park
     }
+    /// Which rule Tonight follows (`WatchSky.choice`), for its caption.
+    var rule: WatchSky.Rule? { WatchSky.choice(in: parks, context: context, pinned: pinned).rule }
     func pin(_ park: Park?) {
         guard park?.id != pinned else { return }
         pinned = park?.id
         WatchSky.pinnedPark = park?.id
         publish()
+        tellIPhone()
+    }
+    /// A newly kept place has clouds only once the iPhone follows it: when it can be reached, it is
+    /// told at once, quietly, as "Update from iPhone" would tell it. Otherwise the next request does.
+    private func tellIPhone() {
+        guard WCSession.isSupported(), WCSession.default.activationState == .activated, WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(IPhoneAsk.message(places: WatchSky.wantedPlaces(pinned: pinned)), replyHandler: { @Sendable _ in }, errorHandler: { @Sendable _ in })
     }
     func tonight(_ park: Park, at now: Date) -> Night { night(park, offset: 0, at: now) }
     func night(_ park: Park, offset: Int, at now: Date) -> Night {
