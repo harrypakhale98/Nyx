@@ -403,6 +403,15 @@ import Testing
         let stale = forecast(updated: now.addingTimeInterval(-11*86400), cover: 20)
         let tomorrow = NightPlanner(forecasts: ["jotr": stale]).night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 1), now: now)
         #expect(tomorrow.basis == .usual && !NightPlanner.beyondForecast(tomorrow, forecast: stale, now: now))
+        // A stale forecast that ended days ago: tonight should have a newer one, so it is
+        // "unavailable", never "not yet" for having passed that old forecast's last hour.
+        let ended = forecast(updated: now.addingTimeInterval(-6*86400), cover: 20, days: 3)
+        let tonight = NightPlanner(forecasts: ["jotr": ended]).night(jotr, on: jotr.currentNight(at: now), now: now)
+        #expect(tonight.basis == .usual && !NightPlanner.beyondForecast(tonight, forecast: ended, now: now) && !tonight.beyondForecast)
+        // A recent forecast that stops short of a night it would count for: that night is "not yet".
+        let short = forecast(updated: now, cover: 20, days: 3)
+        let later = NightPlanner(forecasts: ["jotr": short]).night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 4), now: now)
+        #expect(later.basis == .usual && NightPlanner.beyondForecast(later, forecast: short, now: now) && later.beyondForecast)
         // No forecast at all: a week out should have had one; twelve nights out could not.
         let none = NightPlanner(forecasts: [:])
         #expect(!NightPlanner.beyondForecast(none.night(jotr, on: jotr.date(jotr.currentNight(at: now), addingDays: 5), now: now), forecast: nil, now: now))
