@@ -76,7 +76,7 @@ nonisolated enum SkyClouds {
             let w = SkyTextures.smooth((a-3)/14)
             let alpha = peak*(w*(cover >= 1 ? 1 : body)+(1-w)*through)
             // Premultiplied white: encoded, its colour equals its alpha, so it un-premultiplies to white.
-            return (SIMD3(repeating: SkyTextures.linear(alpha)), alpha)
+            return (SIMD3(repeating: SRGB.linear(alpha)), alpha)
         }
     }
     /// The deck's colour (linear): clouds hide the stars and airglow above them and are lit from

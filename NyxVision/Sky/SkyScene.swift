@@ -253,7 +253,7 @@ import UIKit
         // quarter Moon high takes about half of it, a full Moon nearly all) and by the park's glow.
         let washed = 1-0.97*Self.smooth(glare/0.4)
         let milkyWayLight = 0.4*SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude)*washed*dark*boost
-        tint(milkyWay, texture: milkyWayTexture, level: Self.srgb(milkyWayLight), color: Self.ink(palette))
+        tint(milkyWay, texture: milkyWayTexture, level: SRGB.encoded(milkyWayLight), color: Self.ink(palette))
 
         // The skyline, seeded by the park (built before its colour is set below).
         if ridgePark != park.id {
@@ -349,7 +349,7 @@ import UIKit
             let c = palette.skyLinear(SkyTextures.skyColor(altitude: moment.moon.altitude, fromSun: fromSun, light))
             var material = Self.plain(discTexture)
             // The dome's texture is sRGB-encoded; a tint is given in sRGB too, so encode to match.
-            let e = SIMD3(Self.srgb(c.x), Self.srgb(c.y), Self.srgb(c.z))
+            let e = SIMD3(SRGB.encoded(c.x), SRGB.encoded(c.y), SRGB.encoded(c.z))
             material.color = .init(tint: UIColor(red: e.x, green: e.y, blue: e.z, alpha: 1), texture: .init(discTexture))
             material.opacityThreshold = 0.5
             moonShadow.model?.materials = [material]
@@ -359,7 +359,7 @@ import UIKit
         let moonColor = palette.sky(SIMD3(0.85, 0.88, 0.95))
         let low = max(0, min(1, moment.moon.altitude/5+0.5))
         tint(moonHalo, texture: glowTexture, level: (0.12+0.4*sqrt(light.moonGlare))*moment.moonIllumination.squareRoot()*low, color: moonColor)
-        tint(moonAureole, texture: aureoleTexture, level: Self.srgb(0.1*light.moonGlare), color: palette.sky(SIMD3(0.75, 0.83, 1)))
+        tint(moonAureole, texture: aureoleTexture, level: SRGB.encoded(0.1*light.moonGlare), color: palette.sky(SIMD3(0.75, 0.83, 1)))
         // The disc is re-rendered when its look changes by more than a couple of degrees of tilt.
         let geometry = AstronomyEngine().moonGeometry(for: plan.park, at: moment.date)
         // Added light over the disc behind it: the lit limb and earthshine, nothing outside the limb.
@@ -493,7 +493,7 @@ import UIKit
                 ?? cloudTextures.min(by: { abs($0.key-wanted.tenths) < abs($1.key-wanted.tenths) })?.value else { clouds.isEnabled = false; return }
         var material = UnlitMaterial(applyPostProcessToneMap: false)
         let c = wanted.color
-        material.color = .init(tint: UIColor(red: Self.srgb(c.x), green: Self.srgb(c.y), blue: Self.srgb(c.z), alpha: 1), texture: .init(texture))
+        material.color = .init(tint: UIColor(red: SRGB.encoded(c.x), green: SRGB.encoded(c.y), blue: SRGB.encoded(c.z), alpha: 1), texture: .init(texture))
         material.blending = .transparent(opacity: .init(floatLiteral: Float(wanted.presence)))
         material.writesDepth = false
         material.faceCulling = .none
@@ -537,7 +537,7 @@ import UIKit
         // The textures keep their natural colours; night vision is the materials' red tint.
         var groundMaterial = UnlitMaterial(applyPostProcessToneMap: false)
         let ground = palette.skyLinear(Self.land*0.8)
-        groundMaterial.color = .init(tint: UIColor(red: Self.srgb(ground.x), green: Self.srgb(ground.y), blue: Self.srgb(ground.z), alpha: 1))
+        groundMaterial.color = .init(tint: UIColor(red: SRGB.encoded(ground.x), green: SRGB.encoded(ground.y), blue: SRGB.encoded(ground.z), alpha: 1))
         self.ground.model?.materials = [groundMaterial]
     }
     /// The land's colour, linear: far darker than the darkest sky, so the skyline always reads.
@@ -545,7 +545,7 @@ import UIKit
     /// An opaque, unlit colour (linear RGB).
     private func solid(_ entity: ModelEntity, _ color: SIMD3<Double>) {
         var material = UnlitMaterial(applyPostProcessToneMap: false)
-        material.color = .init(tint: UIColor(red: Self.srgb(color.x), green: Self.srgb(color.y), blue: Self.srgb(color.z), alpha: 1))
+        material.color = .init(tint: UIColor(red: SRGB.encoded(color.x), green: SRGB.encoded(color.y), blue: SRGB.encoded(color.z), alpha: 1))
         material.faceCulling = .none
         entity.model?.materials = [material]
     }
@@ -796,10 +796,6 @@ import UIKit
         return component
     }
     static func smooth(_ x: Double) -> Double { SkyTextures.smooth(x) }
-    static func srgb(_ linear: Double) -> Double {
-        let c = min(1, max(0, linear))
-        return c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
-    }
     /// The tint over grey sky textures: white, or night vision's red.
     static func ink(_ palette: VisionPalette) -> SIMD3<Double> { palette.sky(SIMD3(1, 1, 1)) }
     static func planetColor(_ id: String) -> SIMD3<Double> {

@@ -135,6 +135,8 @@ targets:
         group: Shared
       - path: Nyx/DesignSystem/NyxTheme.swift
         group: Shared
+      - path: Nyx/DesignSystem/NightLook.swift
+        group: Shared
       - path: Nyx/DesignSystem/NyxPalette.swift
         group: Shared
       - path: Nyx/DesignSystem/Starfield.swift
@@ -281,6 +283,8 @@ targets:
         group: Shared
       - path: Nyx/DesignSystem/NyxTheme.swift
         group: Shared
+      - path: Nyx/DesignSystem/NightLook.swift
+        group: Shared
       - path: Nyx/DesignSystem/NyxPalette.swift
         group: Shared
       - path: Nyx/DesignSystem/Starfield.swift
@@ -360,29 +364,21 @@ targets:
         group: Shared
       - path: Nyx/Services/WatchContext.swift
         group: Shared
-      - path: Nyx/DesignSystem/MoonDisc.swift
-        group: Shared
       - path: Nyx/DesignSystem/MoonSymbol.swift
         group: Shared
       - path: Nyx/Services/WristSky.swift
         group: Shared
-      - path: Nyx/DesignSystem/NyxTheme.swift
+      # Night vision on the face (`NightLook`), without the app's views and sky in NyxTheme.swift.
+      - path: Nyx/DesignSystem/NightLook.swift
         group: Shared
       - path: Nyx/DesignSystem/NyxPalette.swift
         group: Shared
-      - path: Nyx/DesignSystem/Starfield.swift
-        group: Shared
-      - path: Nyx/DesignSystem/RealSky.swift
-        group: Shared
+      # `NightPlanner.month` reads the shower and eclipse table (the iPhone's large widget asks for it).
       - path: Nyx/Services/SkyAlmanac.swift
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
       - path: Nyx/Resources/sky-events.json
-        group: Shared
-      - path: Nyx/DesignSystem/MotionTilt.swift
-        group: Shared
-      - path: Nyx/Resources/stars.json
         group: Shared
       - path: Nyx/Resources/parks.json
         group: Shared
@@ -466,7 +462,7 @@ targets:
       - path: Nyx/DesignSystem/ConstellationTrace.swift
         group: Shared
       # The large Moon's atlas (colour and LOLA relief), for the window's Moon from 120 pt. The app
-      # only: the visionOS widget keeps the small MoonMap.
+      # only: the visionOS widget keeps the small MoonMap (SharedAssets.xcassets).
       - path: Nyx/Resources/MoonRelief.xcassets
         group: Shared
       - path: Nyx/Resources/stars.json
@@ -482,7 +478,9 @@ targets:
         group: Shared
       - path: Nyx/Resources/sky-events.json
         group: Shared
-      - path: Nyx/Resources/Assets.xcassets
+      # `MoonMap` and the accent colour, and nothing else of the iPhone's catalogue (its icon
+      # previews and launch art stay on the iPhone).
+      - path: Nyx/Resources/SharedAssets.xcassets
         group: Shared
       # The widget's faces, compiled into the app too for its DEBUG renders of them.
       - path: NyxVisionWidgets/MoonWidgetFace.swift
@@ -535,8 +533,8 @@ targets:
         group: Shared
       - path: Nyx/DesignSystem/Moon.metal
         group: Shared
-      # For `MoonMap` (the catalogue is small and holds no app icon).
-      - path: Nyx/Resources/Assets.xcassets
+      # For `MoonMap` (the catalogue holds it and the accent colour, no app icon).
+      - path: Nyx/Resources/SharedAssets.xcassets
         group: Shared
       # Starlight, amber and indigo from the one palette.
       - path: Nyx/DesignSystem/NyxPalette.swift

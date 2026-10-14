@@ -51,15 +51,8 @@ struct VisionPalette: Equatable {
     /// linear, so the encoded result has the iPhone's red-to-green-to-blue proportions.
     func skyLinear(_ linear: SIMD3<Double>) -> SIMD3<Double> {
         guard nightVision else { return linear }
-        let shown = base.red.filtered(SIMD3(Self.encode(linear.x), Self.encode(linear.y), Self.encode(linear.z)))
-        return SIMD3(Self.decode(shown.x), Self.decode(shown.y), Self.decode(shown.z))
-    }
-    private static func encode(_ linear: Double) -> Double {
-        let c = min(1, max(0, linear))
-        return c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
-    }
-    private static func decode(_ srgb: Double) -> Double {
-        srgb <= 0.04045 ? srgb/12.92 : pow((srgb+0.055)/1.055, 2.4)
+        let shown = base.red.filtered(SIMD3(SRGB.encoded(linear.x), SRGB.encoded(linear.y), SRGB.encoded(linear.z)))
+        return SIMD3(SRGB.linear(shown.x), SRGB.linear(shown.y), SRGB.linear(shown.z))
     }
 }
 private struct VisionPaletteKey: EnvironmentKey { static let defaultValue = VisionPalette() }

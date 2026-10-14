@@ -1,8 +1,9 @@
 import SwiftUI
 
-// Nyx's colours, its night-vision red and its one spring: plain values, with nothing from the
-// app around them, so every target draws from this one copy (the iPhone and iPad app, the widgets,
-// Apple Watch and Apple Vision Pro). Views, environment keys and the sky stay in NyxTheme.swift.
+// Nyx's colours, its night-vision red, its lettering rule, the sRGB curve and its one spring: plain
+// values, with nothing from the app around them, so every target draws from this one copy (the
+// iPhone and iPad app, the widgets, Apple Watch and Apple Vision Pro). Views, environment keys and
+// the sky stay in NyxTheme.swift; night vision outside the app's windows is in NightLook.swift.
 
 nonisolated struct NyxPalette: Equatable, Sendable {
     let nightVision: Bool
@@ -64,6 +65,20 @@ nonisolated enum NightTint: String, Sendable, CaseIterable {
     }
     /// The setting's key in the shared defaults (the widgets and Control Center read the same suite).
     static let key="brighterRed"
+}
+/// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read
+/// as broken words, so spaced labels set solid when Nyx speaks Japanese.
+nonisolated enum Lettering {
+    static let spaced = !(Bundle.main.preferredLocalizations.first ?? "en").hasPrefix("ja")
+}
+/// The sRGB transfer function, one copy: gamma-encoded display values to linear light and back.
+nonisolated enum SRGB {
+    static func linear(_ encoded: Double) -> Double { encoded <= 0.04045 ? encoded/12.92 : pow((encoded+0.055)/1.055, 2.4) }
+    /// Clamped to 0…1 first.
+    static func encoded(_ linear: Double) -> Double {
+        let c = min(1, max(0, linear))
+        return c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
+    }
 }
 enum NyxMotion {
     /// The shared spring's constants, for the few places that need the spring itself (a fling

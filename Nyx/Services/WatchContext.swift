@@ -317,16 +317,11 @@ extension SkyConditions {
     }
 }
 
-/// Night-vision red as it reaches the eye: the app multiplies white by this colour. Kept here,
-/// in one place, so the contrast of every red text level can be measured in tests.
+/// Night-vision red as it reaches the eye: the app multiplies white by the standard red
+/// (`NightTint.standard`). The watch's red text levels live here, so each can be measured in tests.
 nonisolated enum NightRed {
-    static let red = 1.0, green = 0.27, blue = 0.23
     /// Text opacities the watch uses on black in red: primary, secondary, tertiary.
     static let levels = [1.0, 0.96, 0.86]
     /// WCAG 2 contrast of red at an opacity, composited over black.
-    static func contrastOnBlack(opacity: Double) -> Double {
-        func linear(_ value: Double) -> Double { value <= 0.04045 ? value/12.92 : pow((value+0.055)/1.055, 2.4) }
-        let luminance = 0.2126*linear(red*opacity) + 0.7152*linear(green*opacity) + 0.0722*linear(blue*opacity)
-        return (luminance+0.05)/0.05
-    }
+    static func contrastOnBlack(opacity: Double) -> Double { ColorVision.typical.contrast(NightTint.standard.rgb*opacity, .zero) }
 }
