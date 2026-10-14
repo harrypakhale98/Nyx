@@ -110,9 +110,8 @@ nonisolated struct NightLookup: Sendable {
         if let place=StartingPlaces.named(name, in: places) { return (place.label, place.latitude, place.longitude) }
         return park(named: name).map { ($0.shortName, $0.latitude, $0.longitude) }
     }
-    /// Parks and places within a straight-line radius of a starting park or town, best tonight first:
-    /// a closure counts against its place, as wherever a best night is picked
-    /// (`NightPlanner.better(_:_:closures:)`), and its line says so. Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
+    /// Parks and places within a straight-line radius of a starting park or town, darkest tonight first,
+    /// as on Tonight: a closure never moves a place down the list, its line says so. Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
     func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
         guard let origin=origin(named: name) else { return [String(localized: "No park, dark-sky place or town matched \"\(name.prefix(60))\".")] }
         let radius=Self.toolRadius(asked, system)
@@ -134,10 +133,10 @@ nonisolated struct NightLookup: Sendable {
             near=pool.compactMap { park in distances[park.id].map { (park, $0) } }
         }
         let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: now), now: now)) }, uniquingKeysWith: { a, _ in a })
-        let closures=Dictionary(closed.map { ($0, OnDeviceGuide.closureRecord) }, uniquingKeysWith: { a, _ in a })
+        // Darkest first, by the sky alone as on Tonight: a closed park keeps its place and its record says it is closed.
         let ranked=near.sorted { a, b in
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }
-            return NightPlanner.better(x, y, closures: closures)
+            return NightPlanner.better(x, y)
         }.prefix(limit)
         guard !ranked.isEmpty else {
             return [system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
