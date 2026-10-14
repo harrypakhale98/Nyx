@@ -100,9 +100,11 @@ nonisolated struct NightPlanner: Sendable {
         }
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
         // A recent forecast is measured from its issue, as the score measures it; a stale one from now.
-        let reference = forecast.map { now.timeIntervalSince($0.updated) < 36*3600 ? $0.updated : now } ?? now
-        if CloudBasis.forecastWeight(leadDays: middle.timeIntervalSince(reference)/86400) == 0 { return true }
-        if let last = forecast?.times.last { return window.end.timeIntervalSince1970 > last+3600 }
+        let recent = forecast.flatMap { now.timeIntervalSince($0.updated) < 36*3600 ? $0 : nil }
+        if CloudBasis.forecastWeight(leadDays: middle.timeIntervalSince(recent?.updated ?? now)/86400) == 0 { return true }
+        // Past the last hour of a recent forecast only: a stale one that ends before the night should
+        // have been replaced by now, so a night within reach of today's is "unavailable".
+        if let last = recent?.times.last { return window.end.timeIntervalSince1970 > last+3600 }
         return false
     }
     /// `count` nights from the park-local night that contains `start` (clamped to 1...60).
