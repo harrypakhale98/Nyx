@@ -11,10 +11,7 @@ struct NightVisionIntent:SetValueIntent,LiveActivityIntent {
     init() {}
     init(value:Bool) { self.value=value }
     func perform() async throws -> some IntentResult {
-        SharedSettings.defaults.set(value,forKey:"nightVision")
-        WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadAllControls()
-        await NightVisionFollowers.changed?(value)
+        await NightVisionFollowers.set(value)
         return .result()
     }
 }
@@ -24,4 +21,14 @@ struct NightVisionIntent:SetValueIntent,LiveActivityIntent {
 /// neither the Live Activity nor the watch.
 enum NightVisionFollowers {
     static var changed:(@MainActor (Bool) async -> Void)?
+    /// Sets night vision, reloads the widgets and controls, and tells the followers. False when
+    /// there were none to tell (the app's hook is not set).
+    @discardableResult static func set(_ value:Bool) async -> Bool {
+        SharedSettings.defaults.set(value,forKey:"nightVision")
+        WidgetCenter.shared.reloadAllTimelines()
+        ControlCenter.shared.reloadAllControls()
+        guard let changed else { return false }
+        await changed(value)
+        return true
+    }
 }

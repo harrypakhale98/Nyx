@@ -36,7 +36,7 @@ import UniformTypeIdentifiers
     }
     @Test func theTypeIsDeclaredInTheApp() {
         #expect(UTType.nyxPark.identifier=="com.harrypakhale.nyx.park")
-        #expect(ParkCatalog.parks.count==Self.parks.count && ParkCatalog.park("acad") != nil)
+        #expect(ParkLibrary.place("acad",snapshot:nil) != nil && ParkLibrary.place("pin:abc",snapshot:nil) == nil)
     }
     @Test func aDroppedParkStartsAnEntryForTonightNeverAhead() throws {
         let jotr=try #require(park("jotr"))

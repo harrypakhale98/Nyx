@@ -1,5 +1,4 @@
 import AppIntents
-import WidgetKit
 
 /// "Turn on night vision" by voice. The Control Center toggle's `NightVisionIntent` sets a value
 /// the control passes in; a spoken shortcut cannot fix that value, so this one only ever turns night
@@ -10,11 +9,8 @@ struct NightVisionOnIntent: AppIntent {
     static let description=IntentDescription("Turns on Nyx's red night-vision palette, for eyes adapted to the dark. Widgets and the Lock Screen follow.")
     init() {}
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
-        SharedSettings.defaults.set(true,forKey:"nightVision")
-        WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadAllControls()
         // The watch and a followed night follow, as with the control (the app's hook when it is running).
-        if let changed=NightVisionFollowers.changed { await changed(true) } else { await FieldActivities.refresh(nightVision:true) }
+        if !(await NightVisionFollowers.set(true)) { await FieldActivities.refresh(nightVision:true) }
         return .result(dialog:"Night vision is on.")
     }
 }
