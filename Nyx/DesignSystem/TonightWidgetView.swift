@@ -119,7 +119,9 @@ struct TonightControlValue:Sendable {
     init(parkID:String?,name:String?,score:Int?,symbol:String) { self.parkID=parkID; self.name=name; self.score=score; self.symbol=symbol }
     /// The set park's night, else the darkest saved park's (`NightPlanner.best`, as everywhere);
     /// no score before any park is saved. Never the park the widget's "next" button moved to: the
-    /// control answers "where is darkest tonight", whatever a widget is showing.
+    /// control answers "where is darkest tonight", whatever a widget is showing. Darkest is the sky
+    /// alone: a closure there never moves the answer, and takes the Moon's place as the symbol, as
+    /// on the Lock Screen's inline widget.
     /// Set to a place no longer saved: it says so, and a tap opens Nyx.
     static let unsaved=TonightControlValue(parkID:nil,name:String(localized:"No longer saved"),score:nil,symbol:"mappin.slash")
     init(snapshot:SavedSkySnapshot?,pinned:Park?,now:Date) {
@@ -128,7 +130,9 @@ struct TonightControlValue:Sendable {
         guard let night=NightPlanner.best(parks.map { planner.night($0,on:$0.currentNight(at:now),now:now) }) else {
             self.init(parkID:nil,name:nil,score:nil,symbol:"moon.stars"); return
         }
-        self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,symbol:night.sky.moon.symbolName(southern:night.park.latitude<0))
+        let closed=snapshot?.closures[night.park.id] != nil
+        self.init(parkID:night.park.id,name:night.park.shortName,score:night.score.value,
+                  symbol:closed ? "exclamationmark.triangle.fill" : night.sky.moon.symbolName(southern:night.park.latitude<0))
     }
 }
 /// A widget set to a place no longer saved (a spot deleted, a place abroad unsaved): it names the

@@ -1,8 +1,10 @@
 import SwiftUI
 
 /// Tonight and the six nights after it at the parks in reach: the "when" beside Tonight's "where",
-/// for a wide window with room to spare. Rows are parks, ordered by their best night of the week
-/// (ranked as everywhere, `NightPlanner.better`); columns are nights. Pure, so it is tested.
+/// for a wide window with room to spare. Rows are parks, darkest week first: ordered by their
+/// darkest night of the week (the sky alone, `NightPlanner.better`); columns are nights. The ring
+/// marks the week's best night, where a closure counts against its park as wherever a best night is
+/// picked (`NightPlanner.better(_:_:closures:)`); a closed park's row says so. Pure, so it is tested.
 nonisolated struct WeekAcrossParks: Sendable {
     struct Row: Identifiable, Sendable {
         var id: String { park.id }
@@ -17,17 +19,19 @@ nonisolated struct WeekAcrossParks: Sendable {
     let total: Int
     /// The week's best night among the rows shown, marked with the calendar's ring.
     let best: Cell?
+    /// Each row's park's closure from the last park update, said beside its name.
+    var closures: [String: String] = [:]
     /// `weeks`: each park's next seven nights, starting tonight, in the order to keep on a tie
-    /// (Tonight passes them darkest tonight first). `closures` count against their parks' nights,
-    /// as wherever a best night is picked (`NightPlanner.better(_:_:closures:)`).
+    /// (Tonight passes them darkest tonight first). `closures` count against their parks' nights
+    /// for the ring only, as wherever a best night is picked; the rows stay darkest first.
     static func make(_ weeks:[[Night]],closures:[String:String]=[:],limit:Int=rowLimit)->WeekAcrossParks {
         let usable=weeks.filter { !$0.isEmpty }
         func better(_ a:Night,_ b:Night)->Bool { NightPlanner.better(a,b,closures:closures) }
-        func top(_ week:[Night])->Night? { week.min { better($0,$1) } }
+        func top(_ week:[Night])->Night? { week.min { NightPlanner.better($0,$1) } }
         let ordered=usable.enumerated().sorted { a,b in
             guard let x=top(a.element), let y=top(b.element) else { return a.offset<b.offset }
-            if better(x,y) { return true }
-            if better(y,x) { return false }
+            if NightPlanner.better(x,y) { return true }
+            if NightPlanner.better(y,x) { return false }
             return a.offset<b.offset
         }.map(\.element)
         let rows=ordered.prefix(max(0,limit)).compactMap { week in week.first.map { Row(park:$0.park,nights:Array(week.prefix(nights))) } }
@@ -37,12 +41,14 @@ nonisolated struct WeekAcrossParks: Sendable {
                 best=Cell(row:r,night:n); bestNight=night
             }
         }
-        return WeekAcrossParks(rows:rows,total:usable.count,best:best)
+        let shown=Set(rows.map(\.park.id))
+        return WeekAcrossParks(rows:rows,total:usable.count,best:best,closures:closures.filter { shown.contains($0.key) })
     }
     /// What VoiceOver says for one cell: the row and the column, as a table would, then the night.
-    static func spoken(_ night:Night,isBest:Bool)->String {
+    static func spoken(_ night:Night,isBest:Bool,closure:String?=nil)->String {
         var parts=[night.park.shortName,night.park.dayLabel(night.id),String(localized:"\(night.score.value), \(night.score.band.label)")]
         parts+=night.basisLabels
+        if let closure { parts.append(String(localized:"Closure: \(closure)")) }
         if isBest { parts.append(String(localized:"The best night this week")) }
         return parts.joined(separator:". ")
     }
@@ -75,9 +81,13 @@ struct WeekAcrossParksPanel: View {
                 }
                 ForEach(Array(week.rows.enumerated()),id:\.element.id) { r,row in
                     HStack(spacing:2) {
-                        Text(row.park.shortName).font(.system(.subheadline,design:.serif)).foregroundStyle(palette.ink)
-                            .fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
-                            .accessibilityAddTraits(.isHeader)
+                        // A closed park's name carries the closure mark; its cells say the closure.
+                        HStack(alignment:.firstTextBaseline,spacing:4) {
+                            Text(row.park.shortName).font(.system(.subheadline,design:.serif)).foregroundStyle(palette.ink)
+                            if week.closures[row.park.id] != nil { Image(systemName:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                        }
+                        .fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
+                        .accessibilityElement(children:.combine).accessibilityAddTraits(.isHeader)
                         ForEach(Array(row.nights.enumerated()),id:\.offset) { n,night in
                             cell(night,at:WeekAcrossParks.Cell(row:r,night:n))
                         }
@@ -91,17 +101,18 @@ struct WeekAcrossParksPanel: View {
             .accessibilityRotor("Best nights this week") {
                 ForEach(rotorCells,id:\.self) { cell in
                     let night=week.rows[cell.row].nights[cell.night]
-                    AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:week.best == cell)),id:cell,in:rotor)
+                    AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:week.best == cell,closure:week.closures[night.park.id])),id:cell,in:rotor)
                 }
             }
             Text(access.differentiate ? "\(NightMark.legend) The ring marks the week's best night." : "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")
                 .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         } }
     }
-    /// The nights scoring Excellent or better, best first; at least the week's three best.
+    /// The nights scoring Excellent or better, best first (a closure counting against its park, so
+    /// the ringed night leads); at least the week's three best.
     private var rotorCells:[WeekAcrossParks.Cell] {
         let all=week.rows.enumerated().flatMap { r,row in row.nights.indices.map { WeekAcrossParks.Cell(row:r,night:$0) } }
-        let sorted=all.sorted { NightPlanner.better(week.rows[$0.row].nights[$0.night],week.rows[$1.row].nights[$1.night]) }
+        let sorted=all.sorted { NightPlanner.better(week.rows[$0.row].nights[$0.night],week.rows[$1.row].nights[$1.night],closures:week.closures) }
         let excellent=sorted.filter { week.rows[$0.row].nights[$0.night].score.value>=75 }
         return excellent.count>=3 ? excellent : Array(sorted.prefix(3))
     }
@@ -139,7 +150,7 @@ struct WeekAcrossParksPanel: View {
         }
         .buttonStyle(.plain).hoverEffect(.highlight)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(WeekAcrossParks.spoken(night,isBest:isBest))
+        .accessibilityLabel(WeekAcrossParks.spoken(night,isBest:isBest,closure:week.closures[night.park.id]))
         .accessibilityAddTraits(.isButton)
         .accessibilityHint("Opens that night at the park.")
         .accessibilityRotorEntry(id:position,in:rotor)

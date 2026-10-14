@@ -45,6 +45,31 @@ import Testing
         #expect(same(answer.best, NightPlanner.ranked(all, closures: ["\(all[0].park.id)": "Closed"]).first))
     }
 
+    /// Joshua Tree 90 with a closure against Death Valley 84, open: whatever claims the darkest says
+    /// Joshua Tree 90 with its closure beside it; whatever recommends the best says Death Valley.
+    @Test func darkestIsTheSkyBestCountsTheClosure() throws {
+        let jotr = try park("jotr"), deva = try park("deva")
+        func night(_ park: Park, _ score: Int) -> Night {
+            let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
+            return Night(park: park, sky: sky, score: DarknessScore(value: score, moonPoints: 30, cloudPoints: 24, bortlePoints: 16, lengthPoints: 10), cloudCover: 5, forecastUpdated: now)
+        }
+        let closed = night(jotr, 90), open = night(deva, 84), closures = ["jotr": "Park Boulevard closed"]
+        // Darkest: Tonight's ranking, the map's list and summary, the week's rows.
+        #expect(NightPlanner.ranked([open, closed]).first?.park.id == "jotr")
+        let map = TonightMap(nights: [open, closed], closures: closures)
+        #expect(map.darkest.first?.id == "jotr" && map.darkest.first?.score == 90 && map.darkest.first?.closure == "Park Boulevard closed")
+        #expect(map.summary.contains("Park Boulevard closed"))
+        let week = WeekAcrossParks.make([[open], [closed]], closures: closures)
+        #expect(week.rows.first?.park.id == "jotr" && week.closures["jotr"] == "Park Boulevard closed")
+        #expect(WeekAcrossParks.spoken(closed, isBest: false, closure: week.closures["jotr"]).contains("Park Boulevard closed"))
+        // Best: the week's ring, the trip planner, Siri's ranking.
+        #expect(week.best.map { week.rows[$0.row].nights[$0.night].park.id } == "deva")
+        let day = TripDay(closed.id, calendar: jotr.calendar)
+        let trip = TripPlanner.plan(days: [day], grid: [[closed, open]], closures: closures, maxHopMeters: .infinity)
+        #expect(trip.best?.night.park.id == "deva" && trip.best?.night.score.value == 84)
+        #expect(NightPlanner.ranked([closed, open], closures: closures).first?.park.id == "deva")
+    }
+
     /// A world place's usual clouds, carried to the widgets and the watch as whole percents, score
     /// its nights exactly as the iPhone's grid does: the grid holds whole percents itself.
     @Test func carriedUsualCloudsScoreAsOnTheIPhone() throws {

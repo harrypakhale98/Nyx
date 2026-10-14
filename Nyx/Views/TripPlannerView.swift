@@ -147,7 +147,7 @@ struct TripPlannerView: View {
     private static func miles(_ meters:Double)->String { Measurement(value:meters,unit:UnitLength.meters).formatted(.measurement(width:.abbreviated,usage:.road)) }
     /// One plain line on what this mode answers; Plan's bar already names the page.
     private var intro:some View {
-        Text("The darkest park in reach for each night you are free.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        Text("The best park in reach for each night you are free.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
     }
     @ViewBuilder private var controls:some View {
         VStack(alignment:.leading,spacing:16) {

@@ -23194,37 +23194,37 @@
         }
       }
     },
-    "Finds the darkest night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. Clouds count only where a cached forecast reaches.": {
+    "Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Findet die kommende dunkelste Nacht in einem Park oder Dunkelort oder unter deinen gespeicherten Parks, mit dem auf dem Gerät berechneten Dunkelheitswert von Nyx. Wolken zählen nur, soweit eine gespeicherte Vorhersage reicht."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finds the darkest night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. Clouds count only where a cached forecast reaches."
+            "value": "Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Findet die beste kommende Nacht in einem Park oder Dunkelort oder unter deinen gespeicherten Parks, mit dem auf dem Gerät berechneten Dunkelheitswert von Nyx. Eine Sperrung im letzten Park-Update zählt gegen einen Park. Wolken zählen nur, soweit eine gespeicherte Vorhersage reicht."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encuentra la próxima noche más oscura en un parque o lugar de cielo oscuro, o entre tus parques guardados, con el índice de oscuridad que Nyx calcula en el dispositivo. Las nubes solo cuentan hasta donde llega un pronóstico guardado."
+            "value": "Encuentra la mejor noche próxima en un parque o lugar de cielo oscuro, o entre tus parques guardados, con el índice de oscuridad que Nyx calcula en el dispositivo. Un cierre en la última actualización del parque cuenta en contra de ese parque. Las nubes solo cuentan hasta donde llega un pronóstico guardado."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trouve la prochaine nuit la plus noire dans un parc ou un site de ciel étoilé, ou parmi vos parcs enregistrés, avec l’indice d’obscurité que Nyx calcule sur l’appareil. Les nuages ne comptent que là où une prévision en cache existe."
+            "value": "Trouve la meilleure nuit à venir dans un parc ou un site de ciel étoilé, ou parmi vos parcs enregistrés, avec l’indice d’obscurité que Nyx calcule sur l’appareil. Une fermeture dans la dernière mise à jour du parc compte contre ce parc. Les nuages ne comptent que là où une prévision en cache existe."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyxがデバイス上で計算する暗さスコアを使って、公園や暗い空の場所、または保存した公園の中から、この先いちばん暗い夜を探します。雲は、保存済みの予報が届く範囲でだけ計算に入ります。"
+            "value": "Nyxがデバイス上で計算する暗さスコアを使って、公園や暗い空の場所、または保存した公園の中から、この先いちばんよい夜を探します。最新の公園情報に閉鎖があると、その公園は不利になります。雲は、保存済みの予報が届く範囲でだけ計算に入ります。"
           }
         }
       }
@@ -57636,6 +57636,41 @@
         }
       }
     },
+    "The best park in reach for each night you are free.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The best park in reach for each night you are free."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der beste Park in Reichweite für jede Nacht, in der du frei hast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mejor parque a tu alcance para cada noche que tienes libre."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le meilleur parc à portée pour chaque nuit où vous êtes libre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空いている夜ごとに、行ける範囲でいちばんよい公園。"
+          }
+        }
+      }
+    },
     "The bright Moon, for nights you spend with it.": {
       "extractionState": "manual",
       "localizations": {
@@ -58087,41 +58122,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "最も暗い夜。月面には地球照だけが見えます。"
-          }
-        }
-      }
-    },
-    "The darkest park in reach for each night you are free.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der dunkelste Park in Reichweite für jede Nacht, in der du frei hast."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The darkest park in reach for each night you are free."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El parque más oscuro a tu alcance para cada noche que tienes libre."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le parc le plus sombre à portée pour chaque nuit où vous êtes libre."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空いている夜ごとに、行ける範囲でいちばん暗い公園。"
           }
         }
       }

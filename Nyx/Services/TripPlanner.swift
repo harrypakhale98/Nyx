@@ -190,13 +190,11 @@ nonisolated enum TripPlanner {
             let park=chosen[d], backToBack=d>0 && days[d-1].adding(1)==days[d]
             return TripStop(day:days[d],night:grid[d][park],closure:closures[parks[park].id],hopMeters:backToBack ? hop[chosen[d-1]][park] : nil)
         }
-        // The single best night: highest value (closures count against it here too), then
-        // `NightPlanner.better`'s tie-breaks (darker sky, longer darkness), then the earliest.
+        // The single best night, as every best night is picked (`NightPlanner.better(_:_:closures:)`:
+        // a closure counts against it, then the darker sky and longer darkness), then the earliest.
         if let best=stops.indices.max(by:{ a,b in
-            let va=stops[a].night.rankScore-(stops[a].closure == nil ? 0 : closurePenalty), vb=stops[b].night.rankScore-(stops[b].closure == nil ? 0 : closurePenalty)
-            if va != vb { return va<vb }
-            if NightPlanner.better(stops[a].night,stops[b].night) { return false }
-            if NightPlanner.better(stops[b].night,stops[a].night) { return true }
+            if NightPlanner.better(stops[a].night,stops[b].night,closures:closures) { return false }
+            if NightPlanner.better(stops[b].night,stops[a].night,closures:closures) { return true }
             return a>b
         }) { stops[best].isBest=true }
         return TripPlan(stops:stops,candidates:n)
