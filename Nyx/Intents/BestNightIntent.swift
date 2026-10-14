@@ -128,7 +128,8 @@ struct BestNightSnippetIntent: SnippetIntent {
         let night=answer.ranked[rank]
         // "Follow this night" where Live Activities are on and the night is still ahead.
         let follow: Bool?=FieldActivities.enabled && !FieldNight.isOver(night.sky,at:now) ? FieldActivities.isFollowing(park:night.park,night:night.id) : nil
-        return .result(view:BestNightSnippetView(night:night,rank:rank,total:answer.ranked.count,nights:answer.count,following:follow))
+        return .result(view:BestNightSnippetView(night:night,rank:rank,total:answer.ranked.count,nights:answer.count,following:follow,
+                                                 closure:IntentClosure.closure(night.park,shared:shared)))
     }
 }
 /// "Next best": steps the snippet to the next of the ranked nights, then back to the best.
@@ -152,6 +153,8 @@ struct BestNightSnippetView: View {
     let nights: Int
     /// Whether this night is followed on the Lock Screen; nil where following is not offered.
     var following: Bool?=nil
+    /// The shown night's park's closure, as the spoken answer says it first.
+    var closure: String?=nil
     @Environment(\.colorSchemeContrast) private var contrast
     /// The hero numeral follows Dynamic Type, held to a size the card can carry.
     @ScaledMetric(relativeTo:.largeTitle) private var numeral=56.0
@@ -169,6 +172,12 @@ struct BestNightSnippetView: View {
                 Spacer(minLength:8)
                 MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                     .frame(width:44,height:44).accessibilityIgnoresInvertColors()
+            }
+            // A closure is the one line that must never be lost: beside the score, as on the park's page.
+            if let closure {
+                Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent)
+                    .fixedSize(horizontal:false,vertical:true)
+                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
             }
             HStack(alignment:.firstTextBaseline,spacing:10) {
                 Text("\(night.score.value)").font(.system(size:min(numeral,76),weight:.light,design:.serif)).foregroundStyle(palette.accent)
