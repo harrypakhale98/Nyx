@@ -10,7 +10,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// Bumped when the shape changes. Watch apps update on their own schedule, so a watch reads any
     /// context from `minimumVersion` on: fields added later are optional and unknown ones ignored.
     /// (Details and closures were added that way: a 1.2 watch reads a context without them, and an
-    /// older watch ignores them. So were the models' ranges, in 1.3.)
+    /// older watch ignores them. So were the models' ranges, in 1.3, and Tonight's answer, the
+    /// watch's own places and the places left out, in 2.2.)
     static let currentVersion = 1
     static let minimumVersion = 1
     /// WatchConnectivity rejects large contexts; forecasts that would pass this are left out
@@ -45,6 +46,16 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// spot or world place with no usual clouds where the forecast does not reach. Empty from an
     /// iPhone before 2.0 (15); an older watch ignores it.
     let usualClouds: [String: CloudClimate.Months]
+    /// The place Tonight on the iPhone last answered with (the darkest within its reach), when it
+    /// had one: the wrist falls back to it when nothing is kept on the watch or saved. Nil from an
+    /// iPhone before 2.2; an older watch ignores it.
+    let tonightParkID: String?
+    /// The places this watch asked the iPhone to follow (the one kept on Tonight and those its
+    /// complications are set to), which the iPhone now carries clouds for. Empty from an older iPhone.
+    let watchParkIDs: [String]
+    /// Followed places whose clouds, or smoke and summit layers, did not fit the byte budget: the
+    /// wrist scores them with less than the iPhone has and says why (`CloudSource.dropped`).
+    let droppedParkIDs: [String]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
@@ -53,21 +64,25 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The climate the watch scores with: the bundled one plus `usualClouds`. Not sent.
     let climate: CloudClimate
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
-    enum CodingKeys: String, CodingKey { case version, sent, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds }
+    enum CodingKeys: String, CodingKey {
+        case version, sent, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs
+    }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
         a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.brighterRed == b.brighterRed && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
+            && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
-         usualClouds: [String: CloudClimate.Months] = [:]) {
+         usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = []) {
         self.version = Self.currentVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.brighterRed = brighterRed; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
         self.places = places; self.usualClouds = usualClouds
+        self.tonightParkID = tonightParkID; self.watchParkIDs = watchParkIDs; self.droppedParkIDs = droppedParkIDs
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
         climate = CloudClimate.shared.carrying(usualClouds)
     }
@@ -75,21 +90,27 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// last night it reaches.
     static let forecastReach: TimeInterval = 11*86400
     /// The context for these saved parks, trimmed to the hours the watch can show (last night
-    /// through the forecast's last useful night) and to the byte budget, saved parks first in their order.
+    /// through the forecast's last useful night) and to the byte budget. The followed places are the
+    /// saved ones in their order, then the starting park, the iPhone's Tonight answer and the places
+    /// the watch asked for (`followed(saved:home:tonight:watch:)`).
     /// A spot or world place travels first, its usual clouds (from `climate`, the iPhone's grid) right behind it.
-    /// The followed parks' closures come next, before any forecast: a closure is safety, and it is
-    /// the forecasts that give way when room runs short. Then each park's clouds, its smoke and
-    /// summit layers and its models' ranges (which mean nothing without its clouds); the other
-    /// parks' closures (a complication can be set to any park) fill what room is left.
+    /// The followed places' closures come next, before any forecast: a closure is safety, and it is
+    /// the forecasts that give way when room runs short. Then every followed place's clouds, in order,
+    /// so the starting park and Tonight's answer are never left out for a place after them; then
+    /// their smoke and summit layers, then the models' ranges (which mean nothing without clouds); the
+    /// other parks' closures (a complication can be set to any park) fill what room is left. A place
+    /// whose clouds or layers did not fit is named in `droppedParkIDs`, and once one place's clouds
+    /// do not fit, no place after it gets any.
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
-                     ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared, now: Date = .now) -> WatchContext {
+                     ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
+                     tonightParkID: String? = nil, watchParkIDs: [String] = [], now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
-        let ids = savedParkIDs + (savedParkIDs.contains(homeParkID) ? [] : [homeParkID])
+        let ids = followed(saved: savedParkIDs, home: homeParkID, tonight: tonightParkID, watch: watchParkIDs)
         let from = now.addingTimeInterval(-24*3600)
         // Park IDs and the envelope are small; each forecast is measured on its own.
-        var used = 2_000 + ids.reduce(0) { $0 + $1.utf8.count + 4 }
+        var used = 2_000 + (ids+watchParkIDs).reduce(0) { $0 + $1.utf8.count + 4 } + (tonightParkID?.utf8.count ?? 0)
         func fits(_ value: some Encodable, _ id: String) -> Bool {
             guard let size = (try? JSONEncoder().encode(value))?.count, used + size + id.utf8.count + 4 <= byteBudget else { return false }
             used += size + id.utf8.count + 4
@@ -110,29 +131,40 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             for (id, closure) in closures where fits(closure, id) { sentClosures[id] = closure }
         }
         pack(closures.filter { followed.contains($0.key) }.sorted { (ids.firstIndex(of: $0.key) ?? 0) < (ids.firstIndex(of: $1.key) ?? 0) })
+        // Kept to the hours that still count: a forecast weighs nothing ten days after it was made
+        // (`CloudBasis.forecastWeight`), plus a day so a night that begins before then has all its
+        // hours, as on the iPhone. Measured from the forecast, not the clock, so both score alike.
+        func reach(_ forecast: Forecast) -> Date { forecast.updated.addingTimeInterval(Self.forecastReach) }
+        var dropped: [String] = [], full = false
         for id in ids {
-            // Kept to the hours that still count: a forecast weighs nothing ten days after it was made
-            // (`CloudBasis.forecastWeight`), plus a day so a night that begins before then has all its
-            // hours, as on the iPhone. Measured from the forecast, not the clock, so both score alike.
-            guard let forecast = forecasts[id] else { continue }
-            let to = forecast.updated.addingTimeInterval(Self.forecastReach)
-            guard let trimmed = CompactForecast(forecast, from: from, to: to) else { continue }
-            guard fits(trimmed, id) else { break }
+            guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: reach(forecast)) else { continue }
+            guard !full, fits(trimmed, id) else { full = true; dropped.append(id); continue }
             compact[id] = trimmed
-            // Its smoke and summit layers right behind its clouds, so the wrist scores it as the
-            // iPhone does; they are left out only once the budget is spent.
-            if let detail = details[id], let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: to), fits(small, id) {
-                compactDetails[id] = small
-            }
-            if let nights = ranges[id]?.filter({ (0...100).contains($0.value.lowerBound) && $0.value.upperBound <= 100 }), !nights.isEmpty {
-                let pairs = nights.mapValues { [$0.lowerBound, $0.upperBound] }
-                if fits(pairs, id) { sentRanges[id] = pairs }
-            }
+        }
+        // Smoke and summit layers, only beside clouds that travel, so the wrist scores as the iPhone does.
+        for id in ids {
+            guard let forecast = forecasts[id], compact[id] != nil, let detail = details[id],
+                  let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: reach(forecast)) else { continue }
+            if fits(small, id) { compactDetails[id] = small } else { dropped.append(id) }
+        }
+        for id in ids where compact[id] != nil {
+            guard let nights = ranges[id]?.filter({ (0...100).contains($0.value.lowerBound) && $0.value.upperBound <= 100 }), !nights.isEmpty else { continue }
+            let pairs = nights.mapValues { [$0.lowerBound, $0.upperBound] }
+            if fits(pairs, id) { sentRanges[id] = pairs }
         }
         pack(closures.filter { !followed.contains($0.key) }.sorted { $0.key < $1.key })
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: compact,
-                            details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual)
+                            details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual,
+                            tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, droppedParkIDs: ids.filter(dropped.contains))
     }
+    /// The places the watch is handed, in the order their clouds are packed, once each: the saved
+    /// places, the starting park, the iPhone's Tonight answer, then the places the watch asked for.
+    static func followed(saved: [String], home: String, tonight: String?, watch: [String]) -> [String] {
+        var seen = Set<String>()
+        return (saved + [home] + (tonight.map { [$0] } ?? []) + watch).filter { !$0.isEmpty && seen.insert($0).inserted }
+    }
+    /// Every place this context follows: what the iPhone sends clouds for when it can.
+    var followedParkIDs: [String] { Self.followed(saved: savedParkIDs, home: homeParkID, tonight: tonightParkID, watch: watchParkIDs) }
     var data: Data? { try? JSONEncoder().encode(self) }
     var dictionary: [String: Any] { data.map { [Self.key: $0] } ?? [:] }
     init?(dictionary: [String: Any]) {
@@ -146,7 +178,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The same context stamped at another moment, for comparing what it says rather than when.
     func sent(at date: Date) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
-                     closures: closures, ranges: ranges, places: places, usualClouds: usualClouds)
+                     closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
+                     droppedParkIDs: droppedParkIDs)
     }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
@@ -186,6 +219,10 @@ nonisolated extension WatchContext {
         places = ((try? container.decodeIfPresent([Lenient<Place>].self, forKey: .places)) ?? []).compactMap(\.value)
         // Absent before 2.0 (15); one place's months that no longer decode cost only that place's usual clouds.
         usualClouds = ((try? container.decodeIfPresent([String: Lenient<CloudClimate.Months>].self, forKey: .usualClouds)) ?? [:]).compactMapValues(\.value)
+        // Absent before 2.2: no Tonight answer, nothing asked for by the watch, nothing known to be left out.
+        tonightParkID = (try? container.decodeIfPresent(String.self, forKey: .tonightParkID)) ?? nil
+        watchParkIDs = (try? container.decodeIfPresent([String].self, forKey: .watchParkIDs)) ?? []
+        droppedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .droppedParkIDs)) ?? []
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
         climate = CloudClimate.shared.carrying(usualClouds)
     }
