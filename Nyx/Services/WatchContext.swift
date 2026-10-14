@@ -19,6 +19,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     static let byteBudget = 48_000
     let version: Int
     let sent: Date
+    /// The iPhone's count of hand-overs, stamped as each is sent (`nextSequence`) and never lower
+    /// than the last, even when the iPhone's clock is set back: the watch applies only a higher one
+    /// (`isNewer`). Nil from an iPhone before 2.3, and before a context is sent; an older watch ignores it.
+    let sequence: Int64?
     let savedParkIDs: [String]
     let homeParkID: String
     let nightVision: Bool
@@ -70,11 +74,11 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let climate: CloudClimate
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
     enum CodingKeys: String, CodingKey {
-        case version, sent, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion
+        case version, sent, sequence, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion
     }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
-        a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
+        a.version == b.version && a.sent == b.sent && a.sequence == b.sequence && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.brighterRed == b.brighterRed && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
             && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs && a.dataVersion == b.dataVersion
@@ -83,8 +87,9 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
          usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = [],
-         dataVersion: String? = WatchContext.bundledData) {
+         dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil) {
         self.version = Self.currentVersion
+        self.sequence = sequence
         self.dataVersion = dataVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.brighterRed = brighterRed; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
@@ -182,11 +187,31 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard let decoded = try? JSONDecoder().decode(WatchContext.self, from: data), decoded.version >= Self.minimumVersion else { return nil }
         self = decoded
     }
-    /// The same context stamped at another moment, for comparing what it says rather than when.
-    func sent(at date: Date) -> WatchContext {
+    /// The same context stamped at another moment, with no sequence, for comparing what it says rather than when.
+    func sent(at date: Date) -> WatchContext { stamped(sent: date, sequence: nil) }
+    /// The same context as the hand-over numbered `sequence`.
+    func numbered(_ sequence: Int64) -> WatchContext { stamped(sent: sent, sequence: sequence) }
+    private func stamped(sent date: Date, sequence: Int64?) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
                      closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
-                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion)
+                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence)
+    }
+    /// The number for the next hand-over: one past the last, or the clock in milliseconds when that
+    /// is higher. A clock set back never lowers it, and a reinstall that forgot the last number still
+    /// starts above every number sent before (unless the clock was also set back past them).
+    static func nextSequence(after last: Int64?, now: Date = .now) -> Int64 {
+        let clock = Int64((now.timeIntervalSince1970*1000).rounded(.down))
+        return max((last ?? 0) &+ 1, clock)
+    }
+    /// Whether the watch should apply `context` over `previous`, the one it holds. Each send can
+    /// arrive twice (application context, and a complication transfer), activation hands the stored
+    /// one over again, and a queued transfer may arrive late: only a newer one counts. Newer by the
+    /// iPhone's sequence when both carry one, so an iPhone clock set back never holds a new context
+    /// out; else by when it was sent, as before.
+    static func isNewer(_ context: WatchContext, than previous: WatchContext?) -> Bool {
+        guard let previous else { return true }
+        if let next = context.sequence, let last = previous.sequence { return next > last }
+        return context.sent > previous.sent
     }
     /// The bundled data every score rests on (the parks, their usual clouds and their measured sky
     /// glow) as a short fingerprint: 64-bit FNV-1a over the three files' bytes, in hex. Read once;
@@ -233,6 +258,8 @@ nonisolated extension WatchContext {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         version = try container.decode(Int.self, forKey: .version)
         sent = try container.decode(Date.self, forKey: .sent)
+        // Absent before 2.3: compared by `sent`, as before.
+        sequence = (try? container.decodeIfPresent(Int64.self, forKey: .sequence)) ?? nil
         homeParkID = try container.decode(String.self, forKey: .homeParkID)
         savedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .savedParkIDs)) ?? []
         nightVision = (try? container.decodeIfPresent(Bool.self, forKey: .nightVision)) ?? false

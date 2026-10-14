@@ -46,11 +46,11 @@ import WidgetKit
         publish(force: false)
     }
     func apply(_ context: WatchContext) {
-        // Each send arrives twice with the same `sent` (application context, and a complication
-        // transfer while a Nyx complication is on the face), activation hands the stored one over
-        // again at launch, and a queued transfer may arrive late: only a newer context is applied.
+        // Each send arrives twice (application context, and a complication transfer while a Nyx
+        // complication is on the face), activation hands the stored one over again at launch, and a
+        // queued transfer may arrive late: only a newer context is applied (`WatchContext.isNewer`).
         let previous = self.context
-        if let previous, previous.sent >= context.sent { return }
+        guard WatchContext.isNewer(context, than: previous) else { return }
         self.context = context
         WatchSky.save(context)
         // The faces read the context too, so they reload when what it says changed, not only when it was sent again.
