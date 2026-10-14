@@ -132,4 +132,15 @@ import Testing
         #expect(WeekStrip.pitch(17) == 17)
         #expect(abs(WeekStrip.pitch(40) - 23.4) < 1e-9)
     }
+    @Test func theNowMarkerStepsByTheMinuteInsideTheNight() {
+        let start=Date(timeIntervalSinceReferenceDate:799_999_980), end=start.addingTimeInterval(12*3600)
+        let window=(start:start,end:end)
+        // Rounded down to its minute, so the picture redraws once a minute at most.
+        let marked=SkyArc.nowMarker(at:start.addingTimeInterval(3600+42),window:window)
+        #expect(marked==start.addingTimeInterval(3600))
+        #expect(SkyArc.nowMarker(at:start.addingTimeInterval(3600+59),window:window)==marked)
+        // Outside the night's window there is no marker, so the time never redraws the picture.
+        #expect(SkyArc.nowMarker(at:start.addingTimeInterval(-60),window:window)==nil)
+        #expect(SkyArc.nowMarker(at:end.addingTimeInterval(30),window:window)==nil)
+    }
 }
