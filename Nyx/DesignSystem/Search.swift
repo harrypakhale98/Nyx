@@ -31,19 +31,26 @@ enum ReturnKey {
         new.count == old.count+1 && new.filter { $0 == "\n" }.count == old.filter { $0 == "\n" }.count+1
     }
 }
+extension View {
+    /// Keeps a wrapping field to one line: line breaks are stripped, and Return (`ReturnKey`) runs `done`.
+    func strippingReturn(_ text:Binding<String>,done:@escaping ()->Void)->some View {
+        onChange(of:text.wrappedValue) { old,new in if new.contains("\n") { text.wrappedValue=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { done() } } }
+    }
+}
 /// A search field in the page itself, for accessibility text sizes: it grows and wraps with the text.
 struct InlineSearchField: View {
     @Environment(\.nyx) private var palette
     @Binding var text: String
     let prompt: LocalizedStringKey
     var focus: FocusState<Bool>.Binding
+    var label: LocalizedStringKey = "Search parks"
     var body: some View {
         HStack(alignment:.center,spacing:10) {
             Image(systemName:"magnifyingglass").foregroundStyle(palette.muted).accessibilityHidden(true)
             TextField(prompt,text:$text,axis:.vertical).lineLimit(1...3).submitLabel(.search).focused(focus)
                 .autocorrectionDisabled().textInputAutocapitalization(.words)
-                .onChange(of:text) { old,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus.wrappedValue=false } } }
-                .accessibilityLabel("Search parks")
+                .strippingReturn($text) { focus.wrappedValue=false }
+                .accessibilityLabel(label)
             if !text.isEmpty {
                 Button { text="" } label:{ Image(systemName:"xmark.circle.fill").foregroundStyle(palette.muted).frame(minWidth:44,minHeight:44) }
                     .buttonStyle(.plain).accessibilityLabel("Clear search")

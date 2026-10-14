@@ -82,7 +82,7 @@ struct SaveSpotView: View {
                     Section {
                         TextField("Name",text:$name,prompt:Text(offeredName),axis:.vertical)
                             .lineLimit(1...3).textInputAutocapitalization(.words).submitLabel(.done).focused($focus,equals:.name)
-                            .onChange(of:name) { old,new in if new.contains("\n") { name=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus=nil } } }
+                            .strippingReturn($name) { focus=nil }
                             .accessibilityLabel("Name")
                     } header:{ Text("Name") } footer:{
                         Text("Leave it empty to use \"\(offeredName)\".").foregroundStyle(palette.muted)
@@ -206,19 +206,7 @@ struct SaveSpotView: View {
             TextField("City or town",text:$search,prompt:Text("City or town"))
                 .autocorrectionDisabled().textInputAutocapitalization(.words).submitLabel(.search).focused($focus,equals:.search)
             ForEach(results) { place in
-                let selected=place == chosen
-                Button { chosen=place; focus=nil } label:{
-                    HStack {
-                        VStack(alignment:.leading,spacing:2) {
-                            Text(place.name).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
-                            Text(place.regionName).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-                        }
-                        Spacer(minLength:8)
-                        if selected { Image(systemName:"checkmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
-                    }.frame(minHeight:44).contentShape(Rectangle())
-                }
-                .accessibilityElement(children:.combine)
-                .accessibilityAddTraits(selected ? .isSelected : [])
+                PlaceRow(title:place.name,detail:place.regionName,selected:place == chosen) { chosen=place; focus=nil }
             }
             if !search.trimmingCharacters(in:.whitespaces).isEmpty, results.isEmpty {
                 Text("No city or town by that name. Try a nearby larger one.").font(.subheadline).foregroundStyle(palette.muted)
