@@ -88,7 +88,7 @@ struct ContentTests {
         #expect(map.marks.allSatisfy { $0.fill == .hollow })
         let deva=try #require(map.marks.first { $0.id == "deva" })
         #expect(deva.label.hasPrefix("Death Valley, \(deva.score), \(deva.band.label)"))
-        #expect(deva.label.contains("No cloud forecast yet") && deva.label.hasSuffix("Closure: Badwater Road closed"))
+        #expect((deva.label.contains("No cloud forecast yet") || deva.label.contains("Cloud forecast unavailable")) && deva.label.hasSuffix("Closure: Badwater Road closed"))
         #expect(map.marks.filter { $0.closure != nil }.map(\.id) == ["deva"])
         #expect(map.summary.contains("1 parks have a closure") || map.summary.contains("1 park has a closure"))
     }

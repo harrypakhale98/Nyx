@@ -609,7 +609,7 @@ struct WeekPage: View {
     }
     private func label(_ night: Night) -> String {
         let base = String(localized: "\(park.dayLabel(night.id)), \(night.score.value), \(night.score.band.label)")
-        return night.basisLabel.map { base + ", " + $0 } ?? base
+        return ([base]+night.basisLabels).joined(separator: ", ")
     }
 }
 

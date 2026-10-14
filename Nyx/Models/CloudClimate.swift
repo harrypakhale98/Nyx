@@ -108,14 +108,20 @@ nonisolated struct CloudClimate: Decodable, Sendable {
 extension DarknessScore {
     /// The band with what its clouds rest on, wherever a score stands without room for a caption
     /// (a widget, the Live Activity, a spoken summary): "Excellent", "Excellent, early look",
-    /// "Excellent, usual clouds". One place, so the basis never drops off a surface again.
+    /// "Excellent, usual clouds", or "Good, Moon and darkness only" where no usual clouds are known,
+    /// then ", haze or smoke" when smoke or haze holds the score down. One place, so the basis
+    /// never drops off a surface again.
     nonisolated var bandWithBasis: String {
-        switch basis {
+        let base = switch basis {
         case .forecast: band.label
         case .blended: String(localized: "\(band.label), early look")
-        case .usual: String(localized: "\(band.label), usual clouds")
+        // Without usual clouds the score counts no clouds at all, and never claims it does.
+        case .usual: cloudPoints == nil ? String(localized: "\(band.label), Moon and darkness only") : String(localized: "\(band.label), usual clouds")
         }
+        return isSmokeLimited ? String(localized: "\(base), haze or smoke") : base
     }
+    /// True when smoke or haze is what holds the score down (`ScoreLimit.smoke`).
+    nonisolated var isSmokeLimited: Bool { if case .smoke = limit { true } else { false } }
     /// "94 · Excellent, early look": the score and its band with basis, for one short line.
     nonisolated var withBand: String { String(localized: "\(value) · \(bandWithBasis)") }
 }
@@ -128,15 +134,37 @@ extension Night {
     nonisolated var typicalClouds: String? { basis == .usual ? CloudClimate.shared.sentence(park, on: id) : nil }
     /// A caption followed by the month's typical clouds, for a night without a forecast.
     nonisolated func withTypicalClouds(_ caption: String) -> String { typicalClouds.map { Sentences.join([caption, $0]) } ?? caption }
-    /// The short label for what a night's clouds rest on: nil with a forecast, else "Early look"
-    /// or "No cloud forecast yet".
+
+    // MARK: What a score rests on, said one way everywhere
+
+    /// The short label for what a night's clouds rest on: nil with a forecast, else "Early look";
+    /// on the usual clouds, "No cloud forecast yet" beyond the forecast's reach and "Cloud forecast
+    /// unavailable" within it (`beyondForecast`). Every caption below starts from these words.
     nonisolated var basisLabel: String? {
         switch basis {
         case .forecast: nil
         case .blended: String(localized: "Early look")
-        case .usual: String(localized: "No cloud forecast yet")
+        case .usual: beyondForecast ? String(localized: "No cloud forecast yet") : String(localized: "Cloud forecast unavailable")
         }
     }
+    /// `basisLabel` as a sentence, for a night on the usual clouds: "No cloud forecast yet." or
+    /// "Cloud forecast unavailable."; nil otherwise.
+    nonisolated var noForecastSentence: String? {
+        guard basis == .usual else { return nil }
+        return beyondForecast ? String(localized: "No cloud forecast yet.") : String(localized: "Cloud forecast unavailable.")
+    }
+    /// "Haze or smoke" (or "Heavy smoke or haze") when smoke or haze holds the score down; nil otherwise.
+    nonisolated var smokeLabel: String? {
+        guard case .smoke(let cap) = score.limit else { return nil }
+        return cap < 60 ? String(localized: "Heavy smoke or haze") : String(localized: "Haze or smoke")
+    }
+    /// "Smoke or haze limits this night to 59." when smoke or haze holds the score down.
+    nonisolated func smokeSentence(tonight: Bool = false) -> String? {
+        guard score.isSmokeLimited else { return nil }
+        return score.limit?.sentence(tonight: tonight)
+    }
+    /// The short parts a list says beside a score: `basisLabel`, then `smokeLabel`.
+    nonisolated var basisLabels: [String] { [basisLabel, smokeLabel].compactMap { $0 } }
     /// The band where room is short: "Excellent", "Excellent, early look", "Excellent, usual clouds".
     nonisolated var bandWithBasis: String { score.bandWithBasis }
     /// The word under a score where one word fits: the band, "Early look" or "Estimate".
@@ -147,9 +175,26 @@ extension Night {
         case .usual: String(localized: "Estimate")
         }
     }
-    /// The long form; nil with a forecast. `unavailable` is for a forecast that should reach this
-    /// night but could not be read. `typical` adds "About 8 in 10 … nights here are mostly clear."
-    nonisolated func basisCaption(unavailable: Bool = false, typical: Bool = false) -> String? {
+    /// One short line where a phrase fits but a caption does not (the share card, Ask Nyx's
+    /// records): "No cloud forecast yet · usual clouds for the month", "Cloud forecast unavailable ·
+    /// Moon and darkness only"; nil with a forecast.
+    nonisolated var basisLine: String? {
+        switch basis {
+        case .forecast: return nil
+        case .blended: return String(localized: "Early look · forecast eased toward usual clouds")
+        case .usual:
+            switch (beyondForecast, usualCloud == nil) {
+            case (true, false): return String(localized: "No cloud forecast yet · usual clouds for the month")
+            case (false, false): return String(localized: "Cloud forecast unavailable · usual clouds for the month")
+            case (true, true): return String(localized: "No cloud forecast yet · Moon and darkness only")
+            case (false, true): return String(localized: "Cloud forecast unavailable · Moon and darkness only")
+            }
+        }
+    }
+    /// The long form; nil with a forecast: "No cloud forecast yet." or "Cloud forecast
+    /// unavailable." (`noForecastSentence`), then what the score uses instead. `typical` adds
+    /// "About 8 in 10 … nights here are mostly clear."
+    nonisolated func basisCaption(typical: Bool = false) -> String? {
         switch basis {
         case .forecast: return nil
         case .blended(_, let lead):
@@ -157,9 +202,8 @@ extension Night {
         case .usual:
             var format = Date.FormatStyle().month(.wide)
             format.timeZone = park.timeZone
-            let first = unavailable ? String(localized: "Cloud forecast unavailable.") : String(localized: "No cloud forecast yet.")
             // Never "Arches's": the park follows the month rather than taking a possessive.
-            let line = Sentences.join([first, usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
+            let line = Sentences.join([noForecastSentence ?? "", usualCloud == nil ? String(localized: "This score counts the Moon and darkness only.")
                 : String(localized: "This score uses the usual \(id.formatted(format)) clouds at \(park.shortName).")])
             return typical ? withTypicalClouds(line) : line
         }
@@ -201,7 +245,18 @@ extension Night {
         /// Siri's card, for VoiceOver: the score, the band and the Moon.
         case snippet
     }
+    /// Smoke or haze that holds the score down is said wherever the score is said in full; the
+    /// styles that say `bandWithBasis` already carry it.
     nonisolated func spokenSummary(_ style: SpokenSummary) -> String {
+        let text = spokenText(style)
+        switch style {
+        case .river, .calendar, .eventNote, .siriBest: return Sentences.join([text, smokeSentence() ?? ""])
+        case .widget, .siriTonight: return Sentences.join([text, smokeSentence(tonight: true) ?? ""])
+        case .widgetNight: return Sentences.join([text, smokeSentence() ?? ""])
+        case .chartBest, .dayWithBasis, .scoreWithBasis, .tripLine, .stayNote, .snippet: return text
+        }
+    }
+    private nonisolated func spokenText(_ style: SpokenSummary) -> String {
         switch style {
         case .river:
             let clouds=basisCaption(typical:true) ?? String(localized:"Forecast included")
@@ -246,7 +301,7 @@ extension Night {
     /// Siri with no screen in view: "Tonight at Arches: 94, Pristine." and, without a full
     /// forecast, the one caveat about the clouds.
     private nonisolated func voiceAnswer(_ day: String) -> String {
-        let caveat=score.hasForecast ? "" : (basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(String(localized:"No cloud forecast yet.")))
+        let caveat=score.hasForecast ? "" : (basis.isEarlyLook ? String(localized:"An early look at the clouds.") : withTypicalClouds(noForecastSentence ?? ""))
         return Sentences.join([String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label)."), caveat])
     }
 }

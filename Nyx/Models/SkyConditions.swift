@@ -182,6 +182,10 @@ nonisolated struct Night: Identifiable, Sendable {
     /// The aerosol optical depth the score counted (the smoke forecast's average over the cloud
     /// window), so the smoke caveat and the score never describe different air.
     var aerosol: Double? = nil
+    /// For a night scored on the usual clouds: true when it simply lies beyond what a cloud forecast
+    /// reaches ("No cloud forecast yet"), false when a forecast should reach it but could not be read
+    /// ("Cloud forecast unavailable"). Set once, by `NightPlanner.night`, so every surface says the same.
+    var beyondForecast = true
     var basis: CloudBasis { score.basis }
 }
 

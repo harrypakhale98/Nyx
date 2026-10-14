@@ -132,12 +132,10 @@ struct ShareCard:View {
     var message:String { Sentences.join([summary,String(localized:"Planned with Nyx.")])+(Self.storeURL.map { " "+$0.absoluteString } ?? "") }
     /// The App Store page (`SupportLink.storePage`), nil if the app ID is ever unset, so no link is guessed.
     static var storeURL:URL? { SupportLink.storePage }
-    private var basis:String {
-        switch night.basis {
-        case .forecast: String(localized:"Forecast included · conditions may change")
-        case .blended: String(localized:"Early look · forecast eased toward usual clouds")
-        case .usual: String(localized:"No cloud forecast yet · usual clouds for the month")
-        }
+    /// What the score rests on, in the words every surface uses (`Night.basisLine`), then smoke or
+    /// haze when it holds the score down.
+    var basis:String {
+        ([night.basisLine ?? String(localized:"Forecast included · conditions may change")]+[night.smokeLabel].compactMap { $0 }).joined(separator:" · ")
     }
     /// The night's one reason, in a few words: the Moon gone through true darkness, else the
     /// Milky Way's core and its hours, else how much of true darkness is Moon-free.
@@ -174,7 +172,7 @@ nonisolated struct ShareArtwork: Transferable {
     /// for a preview the palette's red and contrast.
     @MainActor var key: String {
         let look=palette.map { ["preview",String($0.nightVision),String($0.highContrast),String($0.brighterRed)] } ?? ["export"]
-        return ([night.park.id,night.id.description,String(night.score.value),String(describing:night.basis),String(ShareCard.percent(night)),String(describing:shape),
+        return ([night.park.id,night.id.description,String(night.score.value),String(describing:night.basis),String(night.beyondForecast),night.smokeLabel ?? "",String(ShareCard.percent(night)),String(describing:shape),
                  why ?? "",range.map { "\($0.lowerBound)-\($0.upperBound)" } ?? "",String(Double(scale))]+look).joined(separator:"|")
     }
     @MainActor func png() throws -> Data {

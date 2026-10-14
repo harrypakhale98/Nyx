@@ -64,13 +64,15 @@ nonisolated struct VisionDarknessAnswer: Sendable {
     init(park: Park, forecast: Forecast?, layers: HourlySeries?, forecastsOn: Bool, now: Date) {
         let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
         night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
-        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecast: forecast, detail: VisionModel.detail(layers), forecastsOn: forecastsOn, now: now))
+        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecastsOn: forecastsOn))
     }
+    /// Smoke is not scored on this headset, so the answer says so, as the night view does.
     static func dialog(_ night: Night, caption: String) -> String {
         let park = night.park, score = night.score
         if night.sky.darkHours == 0 { return String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        if caption.isEmpty { return String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
-        return String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.")
+        let smoke = String(localized: "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.")
+        if caption.isEmpty { return Sentences.join([String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling."), smoke]) }
+        return Sentences.join([String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling."), smoke])
     }
 }
 

@@ -53,7 +53,7 @@ nonisolated enum WristTonightAnswer {
     }
     /// What the clouds rest on, honestly: the forecast and when the iPhone sent it, or why there is none.
     static func clouds(_ night: Night, context: WatchContext?, now: Date) -> String {
-        guard let context else { return String(localized: "No cloud forecast yet. Open Nyx on iPhone for clouds.") }
+        guard let context else { return Sentences.join([night.basisCaption() ?? String(localized: "Includes cloud forecast."), WatchSky.unsyncedNote(night, context: nil) ?? ""]) }
         let source = CloudSource.of(context: context, park: night.park, now: now)
         if night.score.hasForecast {
             // The iPhone resends a context unchanged (offline, forecasts off, "Update from iPhone"), so a

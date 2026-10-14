@@ -37,7 +37,7 @@ nonisolated struct NightChart: Sendable {
         let labels=nights.map { $0.park.dayLabel($0.id) }
         let points=nights.indices.map { i in
             let night=nights[i]
-            var parts=[night.score.band.label]+[night.basisLabel].compactMap { $0 }
+            var parts=[night.score.band.label]+night.basisLabels
             if let event=events[night.id] { parts.append(event) }
             return Point(x:Double(i),y:Double(night.score.value),label:parts.joined(separator:". "))
         }

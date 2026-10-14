@@ -386,6 +386,41 @@
         }
       }
     },
+    "%@, Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、月と暗さのみ"
+          }
+        }
+      }
+    },
     "%@, early look": {
       "extractionState": "manual",
       "localizations": {

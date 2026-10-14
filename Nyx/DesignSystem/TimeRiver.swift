@@ -218,7 +218,7 @@ struct TimeRiver: View {
     /// the range is the shorter "models 62–88", which fits one line at AX5 on a 6.3-inch iPhone, so
     /// it is read as one phrase (`lineCaptionView`).
     func caption(_ night:Night,separator:String=" · ")->String {
-        var parts=[night.basisLabel ?? String(localized:"Cloud forecast")]
+        var parts=[night.basisLabel ?? String(localized:"Cloud forecast")]+[night.smokeLabel].compactMap { $0 }
         if let outlook=outlooks[night.id], outlook.agreement.map({ $0.band != .agree }) == true, let range=outlook.scoreRange, range.upperBound>range.lowerBound {
             parts.append(separator == "\n" ? String(localized:"models \(range.lowerBound)–\(range.upperBound)") : String(localized:"models range \(range.lowerBound)–\(range.upperBound)"))
         }

@@ -287,7 +287,7 @@ struct TonightView: View {
                 .foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
             // The park as a glass pill; the other parks in reach grow out of it (`ParkPillPicker`).
             ParkPillPicker(park:park,others:others,score:{ model.night($0).score.value },zoom:zoom)
-            let basis=night.basisCaption(unavailable:!model.beyondForecast(night))
+            let basis=night.basisCaption()
             let range=CelestialGauge.modelRange(model.outlook(night),basis:night.basis)
             CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:basis,
                            revealKey:revealKey(park),range:range) { heroSettledKey=$0 }

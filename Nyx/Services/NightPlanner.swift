@@ -70,8 +70,10 @@ nonisolated struct NightPlanner: Sendable {
         }
         let used = weight > 0
         let score = scoring.score(sky: sky, bortle: park.bortleEstimate, cloud: counted, basis: CloudBasis.from(weight: weight, leadDays: lead), aerosol: aerosol)
-        return Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
-                     usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
+        var night = Night(park: park, sky: sky, score: score, cloudCover: used ? predicted : nil, forecastUpdated: used ? issued : nil,
+                          usualCloud: usual, upperCloudOnly: upper && used, modelSpread: spread, aerosol: aerosol)
+        night.beyondForecast = beyondForecast(night, forecast: forecast, detail: detail, now: now)
+        return night
     }
     /// How many days of hours a layer forecast holds (`forecast_days=7`, from 00:00 UTC on the day
     /// it is asked for), on iPhone (forecast detail) and on Vision Pro (`SummitLayerService`).

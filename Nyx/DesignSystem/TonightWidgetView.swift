@@ -345,6 +345,12 @@ struct TonightWidgetView:View {
     }
     /// "Excellent" with a forecast; "Excellent, early look" or "Excellent, usual clouds" without, as on the watch.
     private func forecastLabel(_ night:Night)->String { night.bandWithBasis }
+    /// The month grid's key for its hollow nights, in the words the app gives the first of them
+    /// (`Night.basisLabel`): "Cloud forecast unavailable" when a forecast should reach it, else
+    /// "No cloud forecast yet". Nil when every night has clouds.
+    private func hollowLabel(_ month:NightPlanner.Month)->String? {
+        month.nights.compactMap { $0 }.first { $0.basis == .usual }?.basisLabel
+    }
     /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it,
     /// then a closure's mark. `closureBesideScore` puts the mark in the band's place, for two lines.
     private func lockHero(_ night:Night,numeral:Font.TextStyle,closureBesideScore:Bool=false)->some View {
@@ -534,9 +540,9 @@ struct TonightWidgetView:View {
                         Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
                     }
                     Spacer(minLength:4)
-                    if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
+                    if let hollow=hollowLabel(month) {
                         Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
-                        Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
+                        Text(hollow).font(.caption2).foregroundStyle(muted).lineLimit(1)
                     }
                 }
             }.summarized(summary(night))
@@ -571,8 +577,8 @@ struct TonightWidgetView:View {
                 // Room for the "2 of 3" button laid over the top corner.
                 Color.clear.frame(height:entry.savedCount>1 ? 18 : 0)
                 monthGrid(night.park,month:month)
-                if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
-                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted) }
+                if let hollow=hollowLabel(month) {
+                    HStack(spacing:6) { Circle().stroke(accent,lineWidth:1).frame(width:6,height:6); Text(hollow).font(.caption2).foregroundStyle(muted) }
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
@@ -609,9 +615,9 @@ struct TonightWidgetView:View {
                     Text("Best: \(top.park.dayLabel(top.id)) · \(top.score.value)").font(.caption).lineLimit(1).minimumScaleFactor(0.8)
                 }
                 Spacer(minLength:4)
-                if month.nights.contains(where:{ $0.map { $0.basis == .usual } ?? false }) {
+                if let hollow=hollowLabel(month) {
                     Circle().stroke(accent,lineWidth:1).frame(width:6,height:6)
-                    Text("No cloud forecast yet").font(.caption2).foregroundStyle(muted).lineLimit(1)
+                    Text(hollow).font(.caption2).foregroundStyle(muted).lineLimit(1)
                 }
             }
         }.dynamicTypeSize(.small ... .xLarge)
