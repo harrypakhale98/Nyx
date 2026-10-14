@@ -33106,10 +33106,34 @@
     "Moonrise %@.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mondaufgang %@."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Moonrise %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salida de la Luna: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lever de la Lune à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の出%@。"
           }
         }
       }
@@ -33222,10 +33246,34 @@
     "Moonset %@.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monduntergang %@."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Moonset %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puesta de la Luna: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucher de la Lune à %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の入り%@。"
           }
         }
       }
@@ -55073,10 +55121,34 @@
     "Sun and Moon paths for %@.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bahnen von Sonne und Mond für %@."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Sun and Moon paths for %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trayectorias del Sol y la Luna para %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trajectoires du Soleil et de la Lune pour %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の太陽と月の通り道。"
           }
         }
       }

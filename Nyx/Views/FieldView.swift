@@ -45,9 +45,9 @@ struct FieldView: View {
         guard sideBySide, let fold, let leading=fold.leadingWidth(in:size.width,minimum:320) else { return nil }
         return (CGFloat(leading), CGFloat(fold.width))
     }
-    /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     /// The night's pages, beside the sky or on their own.
     private var nightPager: some View { FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage) }
+    /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     private var basisNote: String? {
         guard !session.score.hasForecast else { return nil }
         return session.score.basis.isEarlyLook ? String(localized:"Early look: the forecast is eased toward usual clouds.") : String(localized:"No cloud forecast yet. This score uses the park's usual clouds.")
