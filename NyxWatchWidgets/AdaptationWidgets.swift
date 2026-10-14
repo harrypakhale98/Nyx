@@ -41,13 +41,18 @@ nonisolated struct AdaptationEntry: TimelineEntry, Sendable {
 
 nonisolated enum AdaptationTimeline {
     /// Running: now and every whole minute to 30 (so the spoken minutes stay true; the ring and the
-    /// time move on their own), then idle when the clock is forgotten. Idle: now and wherever
-    /// Automatic changes colour at the followed park over the next day.
-    static func entries(from now: Date, start: Date?, look: WristLook, park: Park?) -> [AdaptationEntry] {
-        func idle(_ date: Date) -> AdaptationEntry { AdaptationEntry(date: date, start: nil, nightVision: look.nightVision(park: park, at: date)) }
+    /// time move on their own), then idle when the clock is forgotten. Idle: now and, under
+    /// Automatic, wherever it changes colour at the snapshot's parks or the followed park may change
+    /// over the next day; the park is picked again at each entry, as on every Nyx face.
+    static func entries(from now: Date, start: Date?, look: WristLook, snapshot: SavedSkySnapshot?) -> [AdaptationEntry] {
+        var cache: [String: SkyConditions] = [:]
+        func idle(_ date: Date) -> AdaptationEntry {
+            AdaptationEntry(date: date, start: nil, nightVision: look.nightVision(park: WristTimeline.park(at: date, snapshot: snapshot, cache: &cache), at: date))
+        }
         guard let clock = AdaptationRequest.running(at: now, start: start) else {
-            let changes = look.choice == .automatic ? park.map { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) } ?? [] : []
-            return ([now] + changes).map(idle)
+            guard look.choice == .automatic else { return [idle(now)] }
+            let changes = WatchTimeline.followMoments(from: now, snapshot: snapshot).union(WatchTimeline.paletteMoments(from: now, snapshot: snapshot, look: look))
+            return ([now] + changes.sorted()).map(idle)
         }
         let minutes = (1...AdaptationClock.minutes).map { clock.start.addingTimeInterval(Double($0*60)) }.filter { $0 > now }
         return ([now] + minutes).map { AdaptationEntry(date: $0, start: clock.start, nightVision: true) }
@@ -71,9 +76,7 @@ struct AdaptationProvider: TimelineProvider {
         completion(Timeline(entries: entries, policy: .after(max(entries.last?.date ?? now, now.addingTimeInterval(3600)))))
     }
     static func entries(from now: Date) -> [AdaptationEntry] {
-        var cache: [String: SkyConditions] = [:]
-        let park = WristTimeline.park(at: now, snapshot: SharedSettings.read(), cache: &cache)
-        return AdaptationTimeline.entries(from: now, start: WatchSky.adaptationStart, look: .current, park: park)
+        AdaptationTimeline.entries(from: now, start: WatchSky.adaptationStart, look: .current, snapshot: SharedSettings.read())
     }
 }
 

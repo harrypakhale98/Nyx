@@ -98,23 +98,30 @@ nonisolated enum WatchTimeline {
         guard look.choice == .automatic else { return [] }
         return (snapshot?.parks ?? []).flatMap { WristSky.paletteChanges(at: $0, from: now, to: now.addingTimeInterval(86400)) }
     }
-    /// Entries now, at every milestone of the next day (so "next" turns over on time), a second
-    /// past each park's sunrise (so tonight turns over then, `Park.nightTurnovers`), and hourly.
-    /// Countdown text updates itself in between.
+    /// The moments over the next day at which the park a face follows may change: every hour, and a
+    /// second past each park's sunrise, when its night turns over (`Park.nightTurnovers`). Every
+    /// timeline here starts from these and picks the park again at each entry, so faces never mix parks.
+    static func followMoments(from now: Date, snapshot: SavedSkySnapshot?) -> Set<Date> {
+        let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
+        var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
+        for park in snapshot?.parks ?? [] { moments.formUnion(park.nightTurnovers(from: now, to: now.addingTimeInterval(86400))) }
+        return moments
+    }
+    /// A timeline asked for again after its last entry (an hour from now, should it have none).
+    static func timeline<Entry: TimelineEntry>(_ entries: [Entry], now: Date) -> Timeline<Entry> {
+        Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600)))
+    }
+    /// Entries now, at every milestone of the next day (so "next" turns over on time), whenever the
+    /// followed park may change (`followMoments`), and hourly. Countdown text updates itself in between.
     static func entries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [WatchSkyEntry] {
         var cache: [String: SkyConditions] = [:]
         let first = entry(at: now, snapshot: snapshot, look: look, cache: &cache)
-        let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
-        var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
+        var moments = followMoments(from: now, snapshot: snapshot)
         moments.formUnion(paletteMoments(from: now, snapshot: snapshot, look: look))
         moments.formUnion(ageMoments(from: now, snapshot: snapshot))
         for park in snapshot?.parks ?? [] {
-            moments.formUnion(park.nightTurnovers(from: now, to: now.addingTimeInterval(86400)))
             for offset in 0..<2 {
-                let evening = park.date(park.currentNight(at: now), addingDays: offset)
-                let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
-                let sky = cache[key] ?? AstronomyEngine().conditions(for: park, on: evening)
-                cache[key] = sky
+                let sky = Self.sky(park, evening: park.date(park.currentNight(at: now), addingDays: offset), cache: &cache)
                 for milestone in NightMilestone.list(for: sky) where milestone.date > now && milestone.date < now.addingTimeInterval(86400) {
                     moments.insert(milestone.date)
                 }
@@ -296,7 +303,7 @@ struct WatchComplicationView: View {
             }
             if showsNext, let next = entry.next {
                 Group {
-                    if clockTimes { Text("\(next.title) at \(night.park.time(next.date))") } else { countdownText(next) }
+                    if clockTimes { Text("\(next.title) at \(night.park.wristTime(next.date))") } else { countdownText(next) }
                 }.font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
             }
         }
@@ -343,7 +350,11 @@ struct WatchComplicationView: View {
         if let caption = night.basisCaption() { text += " " + caption }
         // In every family, though only the rectangular one has room to show it.
         if entry.cloudsOld { text += " " + String(localized: "No recent forecast. Open Nyx on iPhone to refresh.") }
-        if let next = entry.next { text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).") }
+        if let next = entry.next {
+            text += " " + String(localized: "\(next.title) at \(night.park.time(next.date)).")
+            // The time is the park's: where its clock is not this watch's, say whose.
+            if let zone = night.park.spokenZone(at: next.date) { text += " " + zone }
+        }
         return text
     }
 }

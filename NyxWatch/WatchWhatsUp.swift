@@ -53,7 +53,7 @@ struct WhatsUpPage: View {
             divider
             ForEach(layout.mentions) { item in mention(item) }
         }
-        if night.park.timeZone.secondsFromGMT(for: now) != TimeZone.current.secondsFromGMT(for: now) {
+        if night.park.keepsOtherTime(at: now) {
             Text("Times in \(night.park.timeZoneName)").font(.caption2).foregroundStyle(palette.muted).nonEssential()
         }
     }

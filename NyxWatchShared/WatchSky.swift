@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import WidgetKit
 
 /// Everything the watch app and its complications agree on: which park the wrist follows,
 /// which palette it wears, and how a night is scored. Shared through the watch's own App Group;
@@ -28,6 +29,13 @@ nonisolated enum WatchSky {
     static var palette: PaletteChoice {
         get { PaletteChoice(rawValue: defaults.string(forKey: paletteKey) ?? "") ?? .automatic }
         set { defaults.set(newValue.rawValue, forKey: paletteKey) }
+    }
+    /// Sets the palette from outside the app (Siri, the Control Center control), then asks the
+    /// complications and the control to look again; the app reads it on return (`reloadSettings`).
+    static func setPalette(_ choice: PaletteChoice) {
+        palette = choice
+        WidgetCenter.shared.reloadAllTimelines()
+        ControlCenter.shared.reloadControls(ofKind: redLightKind)
     }
     static let adaptationKey = "watchAdaptationStart"
     /// The Control Center control's kind, reloaded whenever the palette changes.
@@ -69,7 +77,8 @@ nonisolated enum WatchSky {
     }
     /// Write what the complications read: the candidate parks, their forecasts, smoke and layers,
     /// and the usual clouds the iPhone sent for spots and world places.
-    static func publish(parks: [Park], context: WatchContext?) {
+    /// True when the snapshot on disk changed.
+    @discardableResult static func publish(parks: [Park], context: WatchContext?) -> Bool {
         SharedSettings.write(snapshot(parks: parks, context: context))
     }
     /// The candidate parks with what the iPhone sent for them, as the complications read it.

@@ -10,7 +10,13 @@ import WidgetKit
 @Observable final class WatchStore {
     let parks: [Park]
     private(set) var context: WatchContext?
-    var palette: PaletteChoice { didSet { WatchSky.palette = palette; publish() } }
+    var palette: PaletteChoice {
+        didSet {
+            guard palette != oldValue else { return }
+            WatchSky.palette = palette
+            publish()
+        }
+    }
     private(set) var pinned: String?
     /// The dark-adaptation clock, if one is running; it survives relaunches for one night.
     private(set) var adaptation: AdaptationClock?
@@ -36,17 +42,21 @@ import WidgetKit
         receiver.activate()
     }
     func apply(_ context: WatchContext) {
-        // An older context arriving late (a queued transfer) never replaces a newer one.
-        if let current = self.context, current.sent > context.sent { return }
+        // Each send arrives twice with the same `sent` (application context, and a complication
+        // transfer while a Nyx complication is on the face), activation hands the stored one over
+        // again at launch, and a queued transfer may arrive late: only a newer context is applied.
+        let previous = self.context
+        if let previous, previous.sent >= context.sent { return }
         self.context = context
         WatchSky.save(context)
-        publish()
+        // The faces read the context too, so they reload when what it says changed, not only when it was sent again.
+        publish(force: previous?.sent(at: .distantPast) != context.sent(at: .distantPast))
     }
     /// Asks Nyx on iPhone, when it can be reached, to refresh and hand over the context again
     /// (`WatchRequest` on the iPhone). The answer comes at once; the context follows by the usual
     /// path. The watch itself still makes no network request.
     func askIPhone(at now: Date = .now) {
-        guard ask?.state != .asking else { return }
+        guard ask?.current(at: now) != .asking else { return }
         guard WCSession.isSupported(), WCSession.default.activationState == .activated else { ask = IPhoneAsk(.unreachable, at: now); return }
         let session = WCSession.default
         guard session.isReachable else {
@@ -97,6 +107,7 @@ import WidgetKit
         NightPlanner.best(WatchSky.candidates(in: parks, context: context, pinned: pinned).map { tonight($0, at: now) })?.park
     }
     func pin(_ park: Park?) {
+        guard park?.id != pinned else { return }
         pinned = park?.id
         WatchSky.pinnedPark = park?.id
         publish()
@@ -104,17 +115,18 @@ import WidgetKit
     func tonight(_ park: Park, at now: Date) -> Night { night(park, offset: 0, at: now) }
     func night(_ park: Park, offset: Int, at now: Date) -> Night {
         let evening = park.date(park.currentNight(at: now), addingDays: offset)
-        let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
-        let sky = skies[key] ?? AstronomyEngine().conditions(for: park, on: evening)
         if skies.count > 120 { skies.removeAll() }
-        skies[key] = sky
+        let sky = WatchTimeline.sky(park, evening: evening, cache: &skies)
         return WatchSky.night(park, evening: evening, forecast: context?.cloudForecasts[park.id], detail: context?.forecastDetails[park.id], now: now, sky: sky,
                               climate: context?.climate ?? .shared)
     }
     func week(_ park: Park, at now: Date) -> [Night] { (0..<7).map { night(park, offset: $0, at: now) } }
-    /// Hand the complications what Tonight shows, then ask them and the Smart Stack to look again.
-    func publish() {
-        WatchSky.publish(parks: WatchSky.candidates(in: parks, context: context, pinned: pinned), context: context)
+    /// Hand the complications what Tonight shows, then ask them and the Smart Stack to look again:
+    /// always when `force` (the palette, the pin or the context's contents changed), else only when
+    /// what they read was rewritten.
+    func publish(force: Bool = true) {
+        let written = WatchSky.publish(parks: WatchSky.candidates(in: parks, context: context, pinned: pinned), context: context)
+        guard force || written else { return }
         WidgetCenter.shared.reloadAllTimelines()
         WidgetCenter.shared.invalidateRelevance(ofKind: "NyxDusk")
         WidgetCenter.shared.invalidateConfigurationRecommendations()
