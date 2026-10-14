@@ -446,7 +446,7 @@ struct TonightWidgetView:View {
         }
     }
     private func moonImage(_ night:Night)->UIImage? {
-        // The night's own picture, else the nearest night the app drew (it draws a week ahead).
+        // The night's own picture (the app draws a week ahead), else the vector Moon: never another night's phase.
         if let url=SharedSettings.moonImage(park:night.park.id,night:night.id),let image=UIImage(contentsOfFile:url.path) { return image }
         let renderer=ImageRenderer(content:MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
             .environment(\.nyx,palette).frame(width:34,height:34))

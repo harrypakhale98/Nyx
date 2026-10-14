@@ -180,7 +180,22 @@ import Testing
         #expect(IntentClosure.closure(jotr, shared: nil, enabled: false, cached: { _ in cache }) == nil)
         var saved = SavedSkySnapshot(parks: [jotr], forecasts: [:])
         saved.closures = ["jotr": "Park road closed"]
+        saved.closuresUpdated = now
         #expect(IntentClosure.closure(jotr, shared: saved, enabled: true, cached: { _ in cache }) == "Park road closed")
+        // Whichever is newer wins: alerts fetched after the widgets' copy that no longer list the
+        // closure clear it, and a newer copy stands over older alerts on disk.
+        let cleared = ParkAlertsCache(updated: now.addingTimeInterval(3600), alerts: ["jotr": [ParkAlert(id: "1", title: "Heat Danger", description: "", category: "Danger")]])
+        #expect(IntentClosure.closure(jotr, shared: saved, enabled: true, cached: { _ in cleared }) == nil)
+        saved.closuresUpdated = now.addingTimeInterval(7200)
+        #expect(IntentClosure.closure(jotr, shared: saved, enabled: true, cached: { _ in cleared }) == "Park road closed")
+        // A copy from before the time was kept defers to the alerts on disk.
+        saved.closuresUpdated = nil
+        #expect(IntentClosure.closure(jotr, shared: saved, enabled: true, cached: { _ in cleared }) == nil)
+        // The time travels with the snapshot.
+        var stamped = SavedSkySnapshot(parks: [jotr], forecasts: [:])
+        stamped.closuresUpdated = now
+        let decoded = try JSONDecoder().decode(SavedSkySnapshot.self, from: try JSONEncoder().encode(stamped))
+        #expect(decoded.closuresUpdated == now && decoded.version == SavedSkySnapshot.currentVersion)
         if let abroad = ParkLibrary.catalog().first { #expect(IntentClosure.closure(abroad, shared: nil, enabled: true, cached: { _ in cache }) == nil) }
         let best = try #require(BestNightSearch.answer(parks: [jotr], planner: NightPlanner(forecasts: [:]), from: now, nights: 3, now: now))
         #expect(BestNightSearch.dialog(best, voiceOnly: true, closure: closure).contains(try #require(closure)))

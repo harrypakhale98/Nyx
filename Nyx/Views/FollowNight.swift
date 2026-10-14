@@ -89,7 +89,7 @@ struct FollowNightIntent: LiveActivityIntent {
         let shared=SharedSettings.read()
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:[chosen],shared:shared),details:BestNightSearch.details(for:[chosen],shared:shared))
         let found=planner.night(chosen,on:night.map { FollowNightWords.evening(of:$0,at:chosen) } ?? chosen.currentNight(at:now),now:now)
-        let result=await FieldActivities.follow(night:found,closure:shared?.closures[chosen.id],nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),now:now)
+        let result=await FieldActivities.follow(night:found,closure:IntentClosure.closure(chosen,shared:shared),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),now:now)
         BestNightSnippetIntent.reload()
         return .result(dialog:IntentDialog(stringLiteral:FollowNightWords.followed(result,park:chosen,night:found.id)))
     }

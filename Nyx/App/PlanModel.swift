@@ -89,6 +89,8 @@ import CoreLocation
     /// inversion, whose clouds are its layers (`refreshForecasts`).
     @ObservationIgnored private var detailWanted=false
     @ObservationIgnored private var alertsCache: ParkAlertsCache?
+    /// When the park alerts every closure here comes from were fetched; nil before any.
+    var alertsUpdated: Date? { alertsCache?.updated }
     @ObservationIgnored private var programs: [String:ProgramsCache] = [:]
     /// The cached forecasts and alerts, read off the main actor once at launch.
     @ObservationIgnored private var hydration: Task<Void,Never>?
