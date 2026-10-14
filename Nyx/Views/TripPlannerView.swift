@@ -58,7 +58,7 @@ struct TripPlannerView: View {
     var body: some View {
         ScrollViewReader { proxy in ScrollView {
             if wide {
-                // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                 FoldColumns(narrow:.leading,narrowMax:420,spacing:32) {
                     VStack(alignment:.leading,spacing:22) { intro; Panel { controls } }.frame(maxWidth:.infinity,alignment:.leading)
                     VStack(alignment:.leading,spacing:24) {
