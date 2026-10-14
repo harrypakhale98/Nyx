@@ -110,8 +110,9 @@ nonisolated struct NightLookup: Sendable {
         if let place=StartingPlaces.named(name, in: places) { return (place.label, place.latitude, place.longitude) }
         return park(named: name).map { ($0.shortName, $0.latitude, $0.longitude) }
     }
-    /// Parks and places within a straight-line radius of a starting park or town, best tonight first.
-    /// Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
+    /// Parks and places within a straight-line radius of a starting park or town, best tonight first:
+    /// a closure counts against its place, as wherever a best night is picked
+    /// (`NightPlanner.better(_:_:closures:)`), and its line says so. Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
     func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
         guard let origin=origin(named: name) else { return [String(localized: "No park, dark-sky place or town matched \"\(name.prefix(60))\".")] }
         let radius=Self.toolRadius(asked, system)
@@ -133,9 +134,10 @@ nonisolated struct NightLookup: Sendable {
             near=pool.compactMap { park in distances[park.id].map { (park, $0) } }
         }
         let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: now), now: now)) }, uniquingKeysWith: { a, _ in a })
+        let closures=Dictionary(closed.map { ($0, OnDeviceGuide.closureRecord) }, uniquingKeysWith: { a, _ in a })
         let ranked=near.sorted { a, b in
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }
-            return NightPlanner.better(x, y)
+            return NightPlanner.better(x, y, closures: closures)
         }.prefix(limit)
         guard !ranked.isEmpty else {
             return [system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
@@ -146,7 +148,8 @@ nonisolated struct NightLookup: Sendable {
             let region=Self.locality(park)
             let line=system == .miles ? String(localized: "\(park.shortName), \(region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
                                       : String(localized: "\(park.shortName), \(region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
-            return line+(basis.isEmpty ? "" : "; "+basis)+access(park)
+            let record=line+(basis.isEmpty ? "" : "; "+basis)+access(park)
+            return closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record
         }
     }
     /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.

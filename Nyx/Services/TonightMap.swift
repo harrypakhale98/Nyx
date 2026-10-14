@@ -30,7 +30,8 @@ nonisolated struct TonightMap: Sendable {
     /// Geographic reading order: the five US areas in turn (lower 48, Alaska, Hawaiʻi, American
     /// Samoa, the Virgin Islands), each west to east, then everywhere else west to east.
     let marks: [Mark]
-    /// The same marks ranked as every list ranks nights: score, then the darker measured sky.
+    /// The same marks ranked as every list ranks nights: score, then the darker measured sky. Darkest
+    /// means the sky alone, so a closure never moves a place down here; it is marked beside the score.
     let darkest: [Mark]
     /// How many places lay in view before a crowded map was thinned (`SkyMap.shown`).
     let inView: Int
@@ -51,7 +52,7 @@ nonisolated struct TonightMap: Sendable {
                                score:night.score.value,band:night.score.band,fill:night.basis.fill,closure:closure,label:parts.joined(separator:". ")))
         }
         marks=Self.geographic(built.map(\.1))
-        darkest=built.sorted { NightPlanner.better($0.0,$1.0,closures:closures) }.map(\.1)
+        darkest=built.sorted { NightPlanner.better($0.0,$1.0) }.map(\.1)
         self.inView=max(inView ?? built.count,built.count)
         let across=built.map(\.1).sorted { $0.point.x != $1.point.x ? $0.point.x<$1.point.x : $0.id<$1.id }
         let count=Double(max(1,across.count))
@@ -75,6 +76,8 @@ nonisolated struct TonightMap: Sendable {
         guard let best=darkest.first else { return String(localized:"No parks to show.") }
         let closed=marks.filter { $0.closure != nil }.count
         var line=String(localized:"Map of \(marks.count) places by tonight's score. Darkest: \(best.name), \(best.score), \(best.band.label).")
+        // The darkest place's closure is said with it, as beside every score.
+        if let closure=best.closure { line+=" "+String(localized:"Closure: \(closure)")+"." }
         if closed>0 { line+=" "+String(localized:"\(closed) parks have a closure.") }
         if inView>marks.count { line+=" "+String(localized:"Showing \(marks.count) of \(inView) places in view, the darkest where they crowd together.") }
         return line

@@ -1,12 +1,13 @@
 import AppIntents
 import SwiftUI
 
-/// "Find the best night at Joshua Tree" from Siri, Shortcuts or Spotlight: the darkest night in a
-/// range of up to 30 nights, at one park or across the saved parks, from the on-device score.
+/// "Find the best night at Joshua Tree" from Siri, Shortcuts or Spotlight: the best night in a
+/// range of up to 30 nights, at one park or across the saved parks, from the on-device score (a
+/// closure counting against its park, `NightPlanner.better(_:_:closures:)`).
 /// Answers with a short dialog and an interactive snippet (iOS 26).
 struct FindBestNightIntent: AppIntent {
     static let title: LocalizedStringResource="Find the best night"
-    static let description=IntentDescription("Finds the darkest night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. Clouds count only where a cached forecast reaches.")
+    static let description=IntentDescription("Finds the best night ahead at a park or dark-sky place, or across your saved parks, using Nyx's on-device darkness score. A closure in the last park update counts against a park. Clouds count only where a cached forecast reaches.")
     @Parameter(title:"Park",description:"Leave empty to compare your saved parks.") var park: ParkEntity?
     @Parameter(title:"Nights",description:"How many nights ahead to look, up to 30.",default:14,inclusiveRange:(1,30)) var nights: Int
     @Parameter(title:"Starting",description:"The first night to consider. Tonight if empty.") var start: Date?

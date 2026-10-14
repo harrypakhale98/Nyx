@@ -435,6 +435,12 @@ struct TonightView: View {
             } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
             // A darker night somewhere the car cannot go says so before the tap, not after.
             if !ahead.park.drivable { AccessNoteLabel(park:ahead.park,alignment:.center).padding(.horizontal,12) }
+            // Darker is the sky alone: a closure there is said beside it, never weighed into it.
+            if let closure=model.closure(ahead.park) {
+                Label(closure,systemImage:"exclamationmark.triangle").font(.footnote).foregroundStyle(palette.accent).multilineTextAlignment(.center)
+                    .fixedSize(horizontal:false,vertical:true).padding(.horizontal,12)
+                    .accessibilityLabel(String(localized:"Closure alert: \(closure)"))
+            }
         }
     }
     private func capsule<Destination:View,Icon:View>(text:String,hint:LocalizedStringKey,@ViewBuilder destination:@escaping ()->Destination,@ViewBuilder icon:()->Icon)->some View {
