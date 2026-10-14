@@ -119,6 +119,14 @@ import Testing
         #expect(ParksTab.parkInset(fold:fold,listAtFold:list,listShown:false)==0)
         #expect(ParksTab.parkInset(fold:nil,listAtFold:nil,listShown:true)==0)
     }
+    @Test func parkColumnMayBeAsNarrowAsTheOtherHalf() {
+        // Open flat on a 951-point inner display, the list held at the fold leaves the park 496 points; the
+        // park column may be that narrow, so the split sets them side by side rather than floating the list.
+        #expect(ParksTab.parkColumn(atFold:455,width:951)! == (330,496,496))
+        #expect(ParksTab.parkColumn(atFold:416.5,width:880)! == (330,463,463))
+        // Without the fold the split keeps its own widths.
+        #expect(ParksTab.parkColumn(atFold:nil,width:951)==nil)
+    }
     @Test func listReturnsTo390WhenOpenedFlat() {
         // Half open, the list is held at the fold. The split keeps a column's width while it lies inside
         // the range, and 416 lies inside 330...460, so opened flat it is held at 390 until laid out there,
