@@ -170,7 +170,7 @@ import WidgetKit
         return (WatchContext.followed(saved:saved,home:home,tonight:tonight,watch:watch)+widgets).filter { !$0.isEmpty && seen.insert($0).inserted }
     }
     func followedIDs(_ model:PlanModel)->[String] {
-        Self.followedIDs(saved:parkIDs ?? [],home:model.homeID,tonight:model.tonightPickID,watch:WatchBridge.requestedParkIDs,widgets:widgetIDs ?? [])
+        Self.followedIDs(saved:parkIDs ?? [],home:model.homeID,tonight:model.tonightPick,watch:WatchBridge.requestedParkIDs,widgets:widgetIDs ?? [])
     }
     func followed(_ model:PlanModel)->[Park] { followedIDs(model).compactMap { model.park($0) } }
     func followedData(_ model:PlanModel)->FollowedData {
@@ -251,7 +251,7 @@ import WidgetKit
         let asked=WatchBridge.requestedParkIDs
         // A followed catalogue place goes to the watch whole, so the catalogue must be read first:
         // until then the hand-over waits rather than leaving the place out.
-        if !model.catalogIsReady, (ids+[model.homeID]+(model.tonightPickID.map { [$0] } ?? [])+asked).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) {
+        if !model.catalogIsReady, (ids+[model.homeID]+(model.tonightPick.map { [$0] } ?? [])+asked).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) {
             Task { [weak self, weak model] in
                 await model?.catalogReady()
                 if let self, let model { self.pushWatch(model,watchSeen:watchSeen) }
@@ -259,7 +259,8 @@ import WidgetKit
             return
         }
         // Tonight's answer and the watch's own places travel only when this iPhone knows them.
-        let tonight=model.tonightPickID.flatMap { model.park($0)?.id }, watchIDs=asked.filter { model.park($0) != nil }
+        // Only while the night it was picked for is still tonight there (`PlanModel.tonightPick`).
+        let tonight=model.tonightPick.flatMap { model.park($0)?.id }, watchIDs=asked.filter { model.park($0) != nil }
         let all=WatchContext.followed(saved:ids,home:model.homeID,tonight:tonight,watch:watchIDs)
         let bridge=WatchBridge.shared, watch=watchSeen || bridge.hasWatchApp
         let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:all) : nil

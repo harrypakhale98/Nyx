@@ -18279,41 +18279,6 @@
         }
       }
     },
-    "Darkest near your iPhone tonight": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute Nacht am dunkelsten nahe deinem iPhone"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Darkest near your iPhone tonight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Más oscuro esta noche cerca de tu iPhone"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le plus sombre ce soir près de votre iPhone"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今夜iPhoneの近くでいちばん暗い"
-          }
-        }
-      }
-    },
     "Darkest observed sky: %@, %@, Bortle %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -61956,6 +61921,41 @@
         }
       }
     },
+    "Tonight's pick on iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonight's pick on iPhone"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wahl für heute Nacht auf dem iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La elección de esta noche en el iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le choix de ce soir sur l’iPhone"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhoneでの今夜のおすすめ"
+          }
+        }
+      }
+    },
     "Tonight's score": {
       "extractionState": "manual",
       "localizations": {
@@ -62096,37 +62096,37 @@
         }
       }
     },
-    "Too many saved places to send this whole forecast.": {
+    "Too many places to send all their forecasts.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zu viele gespeicherte Orte, um diese Vorhersage ganz zu senden."
+            "value": "Too many places to send all their forecasts."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Too many saved places to send this whole forecast."
+            "value": "Zu viele Orte, um alle ihre Vorhersagen zu senden."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hay demasiados lugares guardados para enviar este pronóstico completo."
+            "value": "Hay demasiados lugares para enviar todos sus pronósticos."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trop de lieux enregistrés pour envoyer cette prévision en entier."
+            "value": "Trop de lieux pour envoyer toutes leurs prévisions."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存した場所が多すぎるため、この予報をすべては送れません。"
+            "value": "場所が多すぎるため、すべての予報は送れません。"
           }
         }
       }

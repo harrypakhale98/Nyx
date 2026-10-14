@@ -79,7 +79,8 @@ nonisolated enum WatchSky {
     /// the iPhone, or its starting park. Nil for a kept or saved place.
     static func caption(_ rule: Rule?) -> String? {
         switch rule {
-        case .iPhoneTonight: String(localized: "Darkest near your iPhone tonight")
+        // Tonight's answer may be measured from a chosen city or park, not from where the iPhone is.
+        case .iPhoneTonight: String(localized: "Tonight's pick on iPhone")
         case .start: String(localized: "Starting park on iPhone")
         case .pinned, .saved, nil: nil
         }

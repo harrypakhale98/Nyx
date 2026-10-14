@@ -53,8 +53,9 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The places this watch asked the iPhone to follow (the one kept on Tonight and those its
     /// complications are set to), which the iPhone now carries clouds for. Empty from an older iPhone.
     let watchParkIDs: [String]
-    /// Followed places whose clouds, or smoke and summit layers, did not fit the byte budget: the
-    /// wrist scores them with less than the iPhone has and says why (`CloudSource.dropped`).
+    /// Followed places whose clouds did not fit the byte budget: the wrist scores them with their
+    /// usual clouds and says why (`CloudSource.dropped`). Smoke and summit layers that did not fit
+    /// beside clouds that did are not listed: those clouds still say where they came from and when.
     let droppedParkIDs: [String]
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
@@ -99,8 +100,8 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// so the starting park and Tonight's answer are never left out for a place after them; then
     /// their smoke and summit layers, then the models' ranges (which mean nothing without clouds); the
     /// other parks' closures (a complication can be set to any park) fill what room is left. A place
-    /// whose clouds or layers did not fit is named in `droppedParkIDs`, and once one place's clouds
-    /// do not fit, no place after it gets any.
+    /// whose clouds did not fit is named in `droppedParkIDs`, and once one place's clouds do not
+    /// fit, no place after it gets any.
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
@@ -145,7 +146,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         for id in ids {
             guard let forecast = forecasts[id], compact[id] != nil, let detail = details[id],
                   let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: reach(forecast)) else { continue }
-            if fits(small, id) { compactDetails[id] = small } else { dropped.append(id) }
+            if fits(small, id) { compactDetails[id] = small }
         }
         for id in ids where compact[id] != nil {
             guard let nights = ranges[id]?.filter({ (0...100).contains($0.value.lowerBound) && $0.value.upperBound <= 100 }), !nights.isEmpty else { continue }
