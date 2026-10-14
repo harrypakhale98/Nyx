@@ -13,7 +13,7 @@ extension UTType {
 /// on the device (the same id, or the same park, moment and words) is never duplicated, and two
 /// different entries from one night are both kept.
 ///
-/// Format 2 adds the saved spots (G3), so a journal moved to a new device keeps the places its
+/// Format 2 adds the saved spots, so a journal moved to a new device keeps the places its
 /// entries were written at. A journal with no spots is still written as format 1, byte for byte as
 /// before, so a version without spots can open it; every format-1 archive still imports.
 nonisolated struct JournalArchive: Sendable, Equatable {

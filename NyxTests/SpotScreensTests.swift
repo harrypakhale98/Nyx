@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The screens of saved spots (G3): reading coordinates as people type and paste them, the name a new
+/// The screens of saved spots: reading coordinates as people type and paste them, the name a new
 /// spot is offered, how a spot names itself beside the parks, and Siri's and the widgets' list of places.
 @MainActor
 struct SpotScreensTests {

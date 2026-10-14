@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The world's land under Nyx's maps: Natural Earth 1:50m (public domain), simplified for a phone
-/// (`Research/world-map.md`, `world-land.json`). Decoded once, off the main thread, into rings kept
+/// (`world-land.json`). Decoded once, off the main thread, into rings kept
 /// both as degrees and as unit vectors, so a map is one cheap pass of dot products per layout.
 /// A picture of coasts drawn faintly under the stars, never a land-or-sea test below about 10 km.
 nonisolated final class WorldLand: Sendable {

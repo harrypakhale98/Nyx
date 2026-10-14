@@ -296,7 +296,7 @@ struct TonightView: View {
             if let range { Text(ShareCard.rangeLine(range)).font(.caption).monospacedDigit().foregroundStyle(palette.muted).multilineTextAlignment(.center).accessibilityHidden(true) }
             // A forecast more than six hours old says when it is from.
             let stale=night.score.hasForecast ? night.forecastUpdated.flatMap { Date.now.timeIntervalSince($0)>6*3600 ? $0 : nil } : nil
-            // A place the Park Service does not run: Nyx cannot see its closures, and says so (G4).
+            // A place the Park Service does not run: Nyx cannot see its closures, and says so.
             if park.nps == nil {
                 if let stale { forecastAsOf(park,stale) }
                 UnknownClosuresNote(park:park,compact:true).padding(.horizontal,12)
@@ -572,7 +572,7 @@ struct PermissionExplainer: View {
 #Preview("Caveat • old forecast, wraps at the last dot") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).preferredColorScheme(.dark) }
 #Preview("Caveat • old forecast, AX5") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) }
 #Preview("Caveat • night vision") { CaveatLine(facts:[String(localized:"No closures listed"),String(localized:"check alerts before you go"),"forecast from Oct 8, 1:51 PM"]).padding(24).frame(width:402).background(.black).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) }
-/// Which places Tonight weighs, apart from the view so it can be tested (G4).
+/// Which places Tonight weighs, apart from the view so it can be tested.
 nonisolated enum TonightReach {
     /// Beyond this many places in reach, the first ranking is of a shortlist until every night is ready.
     static let shortlistSize=40

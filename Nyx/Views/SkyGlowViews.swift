@@ -226,7 +226,7 @@ struct ProtectThisSky: View {
 }
 
 /// Pages Nyx opens in Safari when the person taps a `Link`. The app never requests them itself,
-/// so they are not network hosts of Nyx's (`Scripts/verify_release.py` checks this list).
+/// so they are not network hosts of Nyx's.
 enum BrowserLink {
     static let globeAtNight=page(host:"globeatnight.org")
     /// The credit Open-Meteo's licence asks for, and the licence itself (About the data).

@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// G1, one kind of place: the parks read as places, and a record written before G1 still reads.
+/// One kind of place: the parks read as places, and a record written before 2.0 still reads.
 struct PlaceModelTests {
     /// A shared snapshot or a transfer from 1.4.1 and earlier carries `apiCode`, `state` and `hemisphere`.
     @Test func aRecordFromBeforeG1StillReads() throws {

@@ -5,7 +5,7 @@ import Testing
 /// What Siri says for the 1.4 shortcuts: when it is dark, what's up, following a night, and which
 /// park an unnamed question is about. Real computed nights from the bundled parks; the words are
 /// the pure functions the intents call, since Siri itself is not reachable from unit tests.
-@MainActor struct ShortcutsLaneTests {
+@MainActor struct ShortcutsTests {
     let parks: [Park]
     let engine=AstronomyEngine()
     init() throws { parks=try ParkData.load() }

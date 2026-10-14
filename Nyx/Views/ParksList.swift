@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 /// The Parks tab's list. From a US starting point it is the 63 national parks exactly as before the
-/// world catalogue (G4), with one quiet "Around the world" row at the foot that opens the rest of the
+/// world catalogue, with one quiet "Around the world" row at the foot that opens the rest of the
 /// world by country. From anywhere else the person's own country leads, then the world by country
 /// (the US parks among them). Search finds any place by name, region or country, accents folded.
 /// Places abroad are scored only as their rows appear, and their forecasts are asked for only for

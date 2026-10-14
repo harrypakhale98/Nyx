@@ -8,13 +8,13 @@ import CoreLocation
     let parks: [Park]
     /// Each park's place in `parks` (the first, should an id repeat), for `park(_:)`.
     private let parkIndex: [String:Int]
-    /// The places the person saved themselves (`SavedSpot`, G3), scored, forecast and followed like
+    /// The places the person saved themselves (`SavedSpot`), scored, forecast and followed like
     /// parks. Set from the store by `setSpots`; `park(_:)` finds them by their `pin:` id.
     private(set) var spots: [Park] = []
     @ObservationIgnored private var spotIndex: [String:Int] = [:]
     /// Every place Nyx scores here: the catalogue, then the saved spots.
     var places: [Park] { parks+spots }
-    /// The world catalogue (`catalog.json`, G4): national parks worldwide and certified dark-sky places,
+    /// The world catalogue (`catalog.json`): national parks worldwide and certified dark-sky places,
     /// never one of the 63 curated parks. Empty until `prepareCatalog` has read it off the main thread
     /// (it starts at launch); screens simply show more once it is ready, and never wait for it.
     private(set) var catalog: [Park] = []
@@ -189,7 +189,7 @@ import CoreLocation
         homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
         homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
         startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
-        // A radius kept in miles before G1 is written once as metres, exactly.
+        // A radius kept in miles before 2.0 is written once as metres, exactly.
         if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
         radiusMeters=SearchRadius.meters(defaults)
         weatherEnabled=defaults.object(forKey:"weatherEnabled") as? Bool ?? true
@@ -305,7 +305,7 @@ import CoreLocation
         guard id.hasPrefix(SavedSpots.prefix) else { return nil }
         return spotIndex[id].flatMap { spots.indices.contains($0) ? spots[$0] : nil }
     }
-    // MARK: The world catalogue (G4)
+    // MARK: The world catalogue
 
     /// Starts reading the world catalogue off the main thread, once: decoding about 3,400 places,
     /// their 1° spatial index, search terms and forecast regions. Called at launch; safe to call again.

@@ -316,7 +316,7 @@ struct OpenMeteoBudgetTests {
         #expect(await service.forecasts(for: try parks(), network: true).count == 63)
         #expect(await http.urls.count == before+2)
     }
-    /// One day for two people, against the budgets this file justifies (Research/open-meteo-usage.md):
+    /// One day for two people, against the budgets this file justifies:
     /// a typical US day (Tonight three times, a park page twice, a pull to refresh, Background App
     /// Refresh every six hours) stays under 700 calls to the forecast host and 130 to the smoke host;
     /// a heavy day browsing Europe's parks on the list and the map stays under the device's daily

@@ -2,15 +2,14 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// G1: a starting place's time zone is data stored with the place (`places.json`, worked out by
-/// `Scripts/build_places.py`), its region has a display name in any country, and links name any
-/// kind of place.
+/// A starting place's time zone is data stored with the place (`places.json`), its region has a
+/// display name in any country, and links name any kind of place.
 struct PlaceZoneTests {
     let parks=(try? ParkData.load()) ?? []
     let places=StartingPlaces.all
     static func date(_ iso: String) throws -> Date { try Date(iso+"T21:00:00Z", strategy: .iso8601) }
 
-    /// The state table the app used before G1 (`HomeSky.timeZone`), kept here only as the oracle
+    /// The state table the app used before 2.0 (`HomeSky.timeZone`), kept here only as the oracle
     /// for the stored zones: the split states divided by rough longitude and latitude lines.
     static func oldZone(state: String, latitude: Double, longitude: Double) -> String {
         switch state {
@@ -91,7 +90,7 @@ struct PlaceZoneTests {
         #expect(StartingPlace(name: "Nowhere", state: "", latitude: 10, longitude: 10, countryCode: "ZZ", timeZoneID: "Mars/Olympus").timeZone == .current)
         #expect(HomeSky.origin(location: nil, place: bare, park: nil)?.timeZone == .current)
     }
-    /// A home place saved before G1 (`{name, state, latitude, longitude}`) reads with its zone and
+    /// A home place saved before 2.0 (`{name, state, latitude, longitude}`) reads with its zone and
     /// still equals the list's row, so the picker's checkmark stays; a new record round-trips.
     @Test func aSavedHomeFromBeforeG1StillReads() throws {
         let chicago=try #require(StartingPlaces.named("Chicago, IL"))

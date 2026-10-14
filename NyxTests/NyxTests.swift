@@ -320,7 +320,7 @@ struct NyxTests {
             for event in ref.reference.properties.data.moondata where ["Rise","Set"].contains(event.phen) {
                 let actual=try date(ref.date+" "+event.time,park:p)
                 let predictions=(event.phen=="Rise" ? [previous.moonrise,sky.moonrise] : [previous.moonset,sky.moonset]).compactMap{$0}
-                // Measured at most 3.7 minutes at these mid-latitude parks (Research/accuracy.md); USNO rounds to the minute.
+                // Measured at most 3.7 minutes at these mid-latitude parks; USNO rounds to the minute.
                 #expect(predictions.contains { abs($0.timeIntervalSince(actual))<240 },"Moon \(p.id) \(ref.date) \(event.phen)")
             }
         }

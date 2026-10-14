@@ -163,7 +163,7 @@ targets:
         group: Shared
       - path: Nyx/Services/DataServices.swift
         group: Shared
-      # The search radius the launch preload reads (CachePreload.homeArea), in metres since G1.
+      # The search radius the launch preload reads (CachePreload.homeArea), in metres.
       - path: Nyx/Services/SearchRadius.swift
         group: Shared
       # The campground types `ParkStore` reads and caches (the widget never asks for them).
@@ -270,7 +270,7 @@ targets:
         group: Shared
       - path: Nyx/Services/WatchContext.swift
         group: Shared
-      # DEBUG only (the whole file): the iPhone's forecast fixture, for the watch's models' range review route.
+      # DEBUG only (the whole file): the iPhone's forecast fixture, for the watch's models' range debug screen.
       - path: Nyx/App/DebugForecasts.swift
         group: Shared
       - path: Nyx/DesignSystem/MoonDisc.swift
@@ -408,7 +408,7 @@ targets:
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
   # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
   # bundled data by listing files. Its one network request is the cloud forecast from
-  # api.open-meteo.com, behind its own switch (approved 2026-10-07): CloudForecastClient.swift only,
+  # api.open-meteo.com, behind its own switch: CloudForecastClient.swift only,
   # never DataServices.swift (park updates, smoke), so no other host is compiled in (see PRIVACY.md).
   NyxVision:
     type: application

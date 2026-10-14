@@ -17,7 +17,7 @@ struct AccessNoteLabel: View {
         }
     }
 }
-/// How a place from the world catalogue (G4, `catalog.json`, from Wikidata) names itself on screen:
+/// How a place from the world catalogue (`catalog.json`, from Wikidata) names itself on screen:
 /// what it is, in DarkSky International's own designation names, and where it is, in the reader's
 /// language. The curated parks and saved spots keep their own words (`regionLine`, `placeEyebrow`).
 extension Place {

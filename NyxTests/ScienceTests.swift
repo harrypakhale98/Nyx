@@ -24,7 +24,7 @@ struct ScienceTests {
                       moonBelowFraction: 1, darkHours: sky.darkHours, moonlight: 0, lowestSun: sky.lowestSun)
     }
 
-    // MARK: Eclipses (S6, AS-7)
+    // MARK: Eclipses
 
     /// Virgin Islands, 2026-03-03: totality comes after moonset, but the partial phase is up from
     /// 5:50 to 6:36 AM. It used to read "Not visible".
@@ -52,7 +52,7 @@ struct ScienceTests {
         #expect(WhatsUp.eclipseItem(night, park: badl).detail.hasPrefix("Rises already in Earth's shadow; partial phase visible"))
     }
 
-    // MARK: Planets and meteors (AS-11, AS-14)
+    // MARK: Planets and meteors
 
     @Test func planetsNeedTwilightForTheirBrightness() throws {
         #expect(SkyAlmanac.twilightLimit(magnitude: -4) == -6 && SkyAlmanac.twilightLimit(magnitude: -1) == -9 && SkyAlmanac.twilightLimit(magnitude: 0.5) == -12)
@@ -75,7 +75,7 @@ struct ScienceTests {
         #expect(WhatsUp.rateText(0) == "fewer than 1 an hour")
     }
 
-    // MARK: The clear window (AS-5)
+    // MARK: The clear window
 
     /// Joshua Tree, the night clocks fall back (2027-11-06, with the Moon set aside): clear until
     /// 1:30 AM PST, then overcast. The window ends at 1:30 standard time, not daylight time.
@@ -119,14 +119,14 @@ struct ScienceTests {
         #expect(window.interval.duration > 6*3600)
     }
 
-    // MARK: Observer's notes (AS-12)
+    // MARK: Observer's notes
 
     @Test func auroraSeasonInAlaskaOnly() throws {
         let dena = try park("dena"), jotr = try park("jotr")
         #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-10-15"))?.contains("Nyx does not forecast aurora") == true)
         #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-06-15")) == nil)
         #expect(SkyNotes.aurora(park: jotr, evening: try evening(jotr, "2026-10-15")) == nil)
-        // 18 on the corrected-latitude grid (G4): every park in the three tiers, all dark enough on Dec 1.
+        // 18 on the corrected-latitude grid: every park in the three tiers, all dark enough on Dec 1.
         let noted = parks.filter { SkyNotes.aurora(park: $0, evening: (try? evening($0, "2026-12-01")) ?? .now) != nil }
         #expect(Set(noted.map(\.id)) == ["gaar", "kova", "dena", "wrst", "glba", "katm", "voya", "isro", "lacl", "kefj",
                                           "glac", "thro", "noca", "olym", "mora", "badl", "wica", "yell"])
@@ -180,7 +180,7 @@ struct ScienceTests {
         #expect(SkyNotes.coreGlow(park: jotr, sky: sky, core: core, glow: SkyGlow(parks: sites)) == nil)
     }
 
-    // MARK: Rise and set against the U.S. Naval Observatory (AS-15)
+    // MARK: Rise and set against the U.S. Naval Observatory
 
     /// Polar, tropical and Caribbean parks: the Moon within 180 seconds and the Sun within 60.
     @Test func polarAndTropicalReferences() throws {

@@ -198,8 +198,8 @@ nonisolated struct SkyAlmanac: Sendable {
         let code: String
         /// The IMO's English name, as bundled. Display `localizedName`.
         let name: String
-        /// The name in the reader's language: catalog key `shower.<code>` (written by
-        /// Scripts/apply_translations.py from sky-events.json), falling back to the bundled English.
+        /// The name in the reader's language: catalog key `shower.<code>`, falling back to the
+        /// bundled English.
         var localizedName: String { Bundle.main.localizedString(forKey: "shower.\(code)", value: name, table: nil) }
         /// Activity window, "MM-dd".
         let start: String
@@ -451,7 +451,7 @@ nonisolated struct SkyAlmanac: Sendable {
     private static func normalizedRadians(_ a: Double) -> Double { let t = 2*Double.pi; return a - floor(a/t)*t }
 }
 
-/// The bundled table of meteor showers and lunar eclipses (sources in Research/sky-events.md).
+/// The bundled table of meteor showers and lunar eclipses.
 nonisolated struct SkyEvents: Decodable, Sendable {
     let meteorShowers: [SkyAlmanac.MeteorShower]
     let lunarEclipses: [SkyAlmanac.LunarEclipse]

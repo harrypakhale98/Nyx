@@ -18,7 +18,7 @@ struct ParkEntity:IndexedEntity {
     /// "Urban Night Sky Place". Empty without one.
     var designationName=""
     var bortle=0
-    /// A place from the world catalogue (`wd:`, G4): its ISO country code, so Siri and Spotlight can
+    /// A place from the world catalogue (`wd:`): its ISO country code, so Siri and Spotlight can
     /// say where it is ("Catalonia, Spain"). Empty for the curated parks and saved spots.
     var country:String=""
     /// Whether "national park" describes it (a Dark Sky community or reserve abroad is not one).

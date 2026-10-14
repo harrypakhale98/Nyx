@@ -255,7 +255,7 @@ final class AccessibilityAuditTests:XCTestCase {
         guard let glyphs=counts.filter({ (luminance($0.key)+0.05)/floor>=1.5 }).max(by:{ $0.value<$1.value }), glyphs.value>=24 else { return nil }
         return (luminance(glyphs.key)+0.05)/floor
     }
-    /// Each exclusion was checked by hand; see DECISIONS.md (accessibility audit).
+    /// Each exclusion was checked by hand.
     private static func isKnownFalsePositive(_ issue:XCUIAccessibilityAuditIssue,screen:String,pass:String,frame:CGRect,window:CGRect,tabBar:CGRect,navigationBar:CGRect,barLabels:Set<String>,footField:CGRect)->Bool {
         // The tab bar plus the scroll-edge fade the system draws just above it (about 56 pt): content
         // scrolling through that band is dimmed by design, whatever the app's colours.

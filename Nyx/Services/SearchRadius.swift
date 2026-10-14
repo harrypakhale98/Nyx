@@ -6,7 +6,7 @@ import Foundation
 /// Nonisolated, so the widget's preload reads it off the main actor.
 nonisolated enum SearchRadius {
     static let key="radiusMeters"
-    /// Before G1 the radius was kept in miles under this key. It is converted exactly, once, and left
+    /// Before 2.0 the radius was kept in miles under this key. It is converted exactly, once, and left
     /// in place, so an older build installed again still finds the person's choice.
     static let legacyKey="radiusMiles"
     static let metersPerMile=1609.344
@@ -48,7 +48,7 @@ nonisolated enum SearchRadius {
         guard defaults.object(forKey: key) == nil, let miles=defaults.object(forKey: legacyKey) as? Double, miles.isFinite, miles>0 else { return }
         defaults.set(miles*metersPerMile, forKey: key)
     }
-    /// Also in miles under the old key, so a build from before G1, installed again, keeps the latest choice.
+    /// Also in miles under the old key, so a build from before 2.0, installed again, keeps the latest choice.
     static func store(_ meters: Double, _ defaults: UserDefaults = .standard) {
         defaults.set(meters, forKey: key); defaults.set(meters/metersPerMile, forKey: legacyKey)
     }

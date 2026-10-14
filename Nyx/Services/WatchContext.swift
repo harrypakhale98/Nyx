@@ -35,9 +35,9 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// [lowest, highest]. Two small numbers a night, and only for the nights that have one: the
     /// watch cannot work it out itself, since the three models' clouds stay on the iPhone.
     let ranges: [String: [String: [Int]]]
-    /// Saved spots (G3) and world catalogue places (G4, `wd:` ids) among the saved parks and the
+    /// Saved spots and world catalogue places (`wd:` ids) among the saved parks and the
     /// starting park, whole: the watch bundles only the curated parks, never a place the person saved
-    /// or the world catalogue. Empty from an iPhone without either; a watch from before G3 ignores it
+    /// or the world catalogue. Empty from an iPhone without either; a watch from before 2.0 ignores it
     /// and simply leaves those places out, as any id it does not know.
     let places: [Place]
     /// The usual clouds of each place in `places`, month by month, from the iPhone's world grid
@@ -182,7 +182,7 @@ nonisolated extension WatchContext {
         closures = (try? container.decodeIfPresent([String: String].self, forKey: .closures)) ?? [:]
         // Absent from a 1.2 iPhone's context; a malformed one costs only the ranges.
         ranges = (try? container.decodeIfPresent([String: [String: [Int]]].self, forKey: .ranges)) ?? [:]
-        // Absent before G3; a spot that no longer decodes is left out, never the context.
+        // Absent before 2.0; a spot that no longer decodes is left out, never the context.
         places = ((try? container.decodeIfPresent([Lenient<Place>].self, forKey: .places)) ?? []).compactMap(\.value)
         // Absent before 2.0 (15); one place's months that no longer decode cost only that place's usual clouds.
         usualClouds = ((try? container.decodeIfPresent([String: Lenient<CloudClimate.Months>].self, forKey: .usualClouds)) ?? [:]).compactMapValues(\.value)

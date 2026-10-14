@@ -2,8 +2,8 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// Place names in the app's language (G5): Wikidata's labels for world catalogue places, their
-/// regions and the starting towns (`names-<lang>.json`, `Scripts/build_place_names.py`). Each test
+/// Place names in the app's language: Wikidata's labels for world catalogue places, their
+/// regions and the starting towns (`names-<lang>.json`). Each test
 /// names its language, so none depends on the simulator's.
 struct PlaceNamesTests {
     private static let eifel="wd:Q705097"
@@ -77,8 +77,8 @@ struct PlaceNamesTests {
             #expect((try? Self.place(id, language))?.shortName == short, "\(language)")
         }
     }
-    /// Labels that name another place or an older name are not used (Scripts/build_place_names.py's
-    /// NAME_OVERRIDES and its rule for renamed places): the place keeps its English name there.
+    /// Labels that name another place or an older name are not used (the build's
+    /// name overrides and its rule for renamed places): the place keeps its English name there.
     @Test func wrongAndOutdatedLabelsAreLeftOut() throws {
         let spanish=PlaceNames.load(language: "es"), german=PlaceNames.load(language: "de"), french=PlaceNames.load(language: "fr")
         // Jerusalem Walls is not the City of David; Migdal Afek is not the lordship of Mirabel.

@@ -2,7 +2,7 @@ import Foundation
 
 /// A city or town to measure distances from, when location is off or someone plans from home, and
 /// the offline source of a saved spot's time zone and region (`StartingPlaces.nearest`).
-/// From the bundled list (`places.json`, built by `Scripts/build_places.py`): in the US the 1,000
+/// From the bundled list (`places.json`): in the US the 1,000
 /// most populous incorporated places and every state capital (Census); everywhere else every place
 /// of 15,000 people or more (GeoNames, CC BY 4.0); then the national parks' gateway towns the
 /// population cut leaves out (Moab, Springdale, Estes Park; Census). Each has its own time zone.
@@ -245,7 +245,7 @@ nonisolated enum StartingPlaces {
     // MARK: The file
 
     /// `{"usPopulation":[…],"places":[…]}`, compact rows, each part largest first:
-    /// US `["Chicago","IL",41.837,-87.685,"America/Chicago"]` (exactly as before G3; a sixth element,
+    /// US `["Chicago","IL",41.837,-87.685,"America/Chicago"]` (exactly as before 2.0; a sixth element,
     /// when present, is the country code) and elsewhere
     /// `["Paris","Île-de-France",48.853,2.349,"Europe/Paris","FR",2138551]`, with an eighth element,
     /// a plain-letter spelling, only where folding accents is not enough. The gateway towns at the end

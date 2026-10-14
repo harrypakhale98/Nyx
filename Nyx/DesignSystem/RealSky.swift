@@ -46,14 +46,14 @@ struct RealSky: View {
             middle=sunAltitude < -6 ? 1 : 0
             bright=sunAltitude < -6 ? 1 : sunAltitude < -2 ? 0.5 : 0.5*max(0,min(1,(Self.horizon-sunAltitude)/(Self.horizon+2)))
             // Night vision keeps the lift at 60%, as it keeps the stars faint: the brighter red's
-            // muted captions stay above 4.5:1 over it for protan eyes too (`Scripts/contrast.py`).
+            // muted captions stay above 4.5:1 over it for protan eyes too.
             lift=liftAllowed ? max(0,min(1,(sunAltitude+18)/12))*(nightVision ? 0.6 : 1) : 0
             // Increase Contrast: the faint set goes and the middle set (magnitude 2.2–3.6) dims.
             if highContrast { faint=0; middle=min(middle,0.35) }
         }
     }
     /// The lift's colour at its brightest, at the bottom of the screen: deep indigo, low enough that
-    /// muted captions keep about 8:1 over it (`Scripts/contrast.py`, "Twilight lift").
+    /// muted captions keep about 8:1 over it.
     nonisolated static let liftColor=Color(red:0.078,green:0.106,blue:0.227)
     var body: some View {
         let sky=SkyProjection.shared.sky(for:park,night:night)

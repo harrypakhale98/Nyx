@@ -2,7 +2,7 @@ import Foundation
 import Synchronization
 
 /// A place Nyx scores: today the 63 US national parks, later any catalogue place or a spot someone
-/// saves (`Research/global-plan.md`, G1). `Park` stays as the name most code uses during the move.
+/// saves. `Park` stays as the name most code uses during the move.
 typealias Park = Place
 
 nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
@@ -38,7 +38,7 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     /// linked. Nil for the curated parks, whose closures come from the NPS.
     var website: URL?
     /// The name and region as the bundle writes them (English), kept when `name` and `region` show a
-    /// world catalogue place in the app's language (`PlaceNames`, G5); nil when they are the same.
+    /// world catalogue place in the app's language (`PlaceNames`); nil when they are the same.
     /// Search reads both, so "Eifel National Park" still finds "Nationalpark Eifel".
     var englishName: String? = nil
     var englishRegion: String? = nil
@@ -69,7 +69,7 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     static let defaultID = "jotr"
     /// A world catalogue place's id begins with this (`wd:Q123456`, a Wikidata item; `catalog.json`).
     static let catalogPrefix = "wd:"
-    /// True for a world catalogue place (`catalog.json`, G4), as opposed to a curated park or a saved spot.
+    /// True for a world catalogue place (`catalog.json`), as opposed to a curated park or a saved spot.
     /// The watch and the widgets bundle no catalogue, so such a place travels to them whole.
     var isCatalogPlace: Bool { id.hasPrefix(Self.catalogPrefix) }
     /// South of the equator the Milky Way's core rides high and the Moon is seen turned over.
@@ -80,8 +80,8 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
         let road: Bool
         let sourceURL: String
     }
-    /// The access note in the reader's language (catalog `access.<id>`, written by
-    /// Scripts/apply_translations.py), falling back to the bundled English.
+    /// The access note in the reader's language (catalog `access.<id>`), falling back to the
+    /// bundled English.
     var accessNote: String? { access.map { Bundle.main.localizedString(forKey: "access.\(id)", value: $0.note, table: nil) } }
     /// Whether a car reaches somewhere in the park to watch the sky. Parks without a note are.
     var drivable: Bool { access?.road ?? true }
@@ -308,7 +308,7 @@ nonisolated extension Place {
         case id, nps, name, countryCode, region, kind, curated, latitude, longitude, timeZoneID, darkSkyDesignated,
              bortleEstimate, description, sourceURL, sourceNote, viewingSpots, access, aboveInversion, website
         case englishName, englishRegion, localShortName
-        // Before G1 (1.4.1 and earlier): kept so a shared snapshot written by an older build still reads.
+        // 1.4.1 and earlier: kept so a shared snapshot written by an older build still reads.
         case apiCode, state, hemisphere
     }
     init(from decoder: Decoder) throws {
@@ -354,7 +354,7 @@ nonisolated extension Place {
         try c.encodeIfPresent(aboveInversion, forKey: .aboveInversion); try c.encodeIfPresent(website?.absoluteString, forKey: .website)
         try c.encodeIfPresent(englishName, forKey: .englishName); try c.encodeIfPresent(englishRegion, forKey: .englishRegion)
         try c.encodeIfPresent(localShortName, forKey: .localShortName)
-        // Written for a release or two so a build from before G1, installed again, still reads the shared snapshot.
+        // Written for a release or two so a build from before 2.0, installed again, still reads the shared snapshot.
         try c.encodeIfPresent(nps, forKey: .apiCode); try c.encode(region, forKey: .state)
         try c.encode(southern ? "south" : "north", forKey: .hemisphere)
     }
@@ -373,7 +373,7 @@ nonisolated enum ParkData {
     }
     private static let bundled = Mutex<[Park]?>(nil)
 }
-/// The world catalogue (`catalog.json`, G4): national parks worldwide and the certified dark-sky
+/// The world catalogue (`catalog.json`): national parks worldwide and the certified dark-sky
 /// places, from Wikidata, never repeating a curated park. Only the iPhone app bundles it; elsewhere
 /// (the widgets, the watch, Vision Pro) it is absent and a catalogue place arrives whole instead.
 nonisolated enum CatalogData {
@@ -394,10 +394,10 @@ nonisolated enum CatalogData {
     private static let bundled = Mutex<[Park]?>(nil)
 }
 
-// MARK: Place names in the app's language (G5)
+// MARK: Place names in the app's language
 
 /// Names of world catalogue places, their regions and the starting towns in one language, from
-/// Wikidata's labels (CC0), as `Scripts/build_place_names.py` writes them (`names-<lang>.json`, only
+/// Wikidata's labels (CC0), bundled as `names-<lang>.json` (only
 /// the names that differ from the English). The language is the app's own (`appLanguage`), so a
 /// per-app language choice in Settings is followed. English, or a language without a file, has none.
 /// The curated US parks are never renamed. Only the iPhone app bundles the files.

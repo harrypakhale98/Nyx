@@ -145,7 +145,7 @@ nonisolated struct DarknessScore: Sendable {
         let raw = [moonPoints, cloudPoints ?? 0, bortlePoints, lengthPoints].map { max(0, $0) }
         var whole = raw.map { Int($0.rounded(.down)) }
         let short = max(0, min(raw.count, partsSum-whole.reduce(0, +)))
-        // The largest fractions take the missing points; on a tie, the earlier part (the brief's order).
+        // The largest fractions take the missing points; on a tie, the earlier part (moon, clouds, Bortle, duration).
         let fraction = raw.map { $0-$0.rounded(.down) }
         let order = raw.indices.sorted { fraction[$0] != fraction[$1] ? fraction[$0] > fraction[$1] : $0 < $1 }
         // A part never shows more than its own maximum ("53 of 53" with no cloud figure, never 54).

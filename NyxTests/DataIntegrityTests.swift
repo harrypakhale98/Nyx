@@ -43,7 +43,7 @@ private func jpeg(_ color: UIColor) throws -> Data {
 private func counts(_ result: (added: Int, skipped: Int)) -> [Int] { [result.added, result.skipped] }
 private func query(_ url: URL, _ name: String) -> String? { URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == name }?.value }
 
-struct DataLaneTests {
+struct DataIntegrityTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
     func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }

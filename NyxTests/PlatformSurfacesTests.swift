@@ -6,11 +6,11 @@ import SwiftUI
 import Testing
 @testable import Nyx
 
-/// Wave 2 platform surfaces: a followed night's Live Activity (when it starts, heading out, the
+/// Platform surfaces: a followed night's Live Activity (when it starts, heading out, the
 /// stale face), the tab bar's night in progress, the widgets' park setting and Moon pictures, the
 /// Tonight control, Siri's values, Handoff, the journal by voice, the alarms' "Open sky" and the
 /// reminders' forecast-model reason.
-@MainActor struct PlatformLaneTests {
+@MainActor struct PlatformSurfacesTests {
     let parks: [Park]
     let engine=AstronomyEngine()
     init() throws { parks=try ParkData.load() }
@@ -84,7 +84,7 @@ import Testing
         later.nightVision=false
         #expect(FieldActivities.changed(state, later, attributes: attributes))
     }
-    /// MP-02: three hours after the moment the activity was counting down to, with no update, the
+    /// Three hours after the moment the activity was counting down to, with no update, the
     /// face names no moment next: it lists the night's remaining times and when it was updated.
     @Test func staleFaceListsTimesThreeHoursLater() throws {
         let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
@@ -231,7 +231,7 @@ import Testing
     @Test func onlyTheCoreAlarmOpensTheSky() {
         #expect(FieldAlarms.opensSky(.core) && !FieldAlarms.opensSky(.darkness) && !FieldAlarms.opensSky(.moonset))
     }
-    /// NA-1: a reminder says all three forecast models are clear only when they are.
+    /// A reminder says all three forecast models are clear only when they are.
     @Test func reminderCitesTheModelsOnlyWhenAllThreeAreClear() throws {
         let jotr=try park("jotr"), sky=try self.sky(jotr, "2026-12-13")
         let night=Night(park: jotr, sky: sky, score: DarknessScore(value: 94, moonPoints: 40, cloudPoints: 25, bortlePoints: 17, lengthPoints: 12), cloudCover: 5, forecastUpdated: now)

@@ -2,7 +2,7 @@
 #include <SwiftUI/SwiftUI_Metal.h>
 using namespace metal;
 
-/// The atlas's bands (`Scripts/build_moon_atlas.swift`): colour in the top two thirds (4096×2048),
+/// The atlas's bands: colour in the top two thirds (4096×2048),
 /// local relief in the bottom-left (2048×1024). One texel of the relief is 2π/2048 radians of arc.
 constant float atlasWidth = 4096.0, atlasHeight = 3072.0;
 constant float colourBand = 2048.0 / 3072.0;

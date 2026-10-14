@@ -93,7 +93,7 @@ final class NyxUITests:XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for:[XCTNSPredicateExpectation(predicate:gone,object:nil)],timeout:5),.completed,"Search did not narrow the list")
         XCTAssertTrue(app.descendants(matching:.any).matching(NSPredicate(format:"label BEGINSWITH 'Zion'")).firstMatch.exists,"Zion is not in the results")
     }
-    /// AX-03: activating the river the way VoiceOver, Voice Control ("Tap River") and Switch Control
+    /// Activating the river the way VoiceOver, Voice Control ("Tap River") and Switch Control
     /// do (`accessibilityActivate`, through a DEBUG button, since XCTest's `tap()` is a real touch)
     /// keeps the chosen night. A real touch at the far end still moves it, so the check can fail.
     func testRiverActivationKeepsTheNight() {

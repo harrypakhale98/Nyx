@@ -1,166 +1,116 @@
 # Nyx
 
-A calm, offline-first dark-sky planner for the darkest nights, wherever you are: the 63 US national parks, checked by hand, about 3,400 national parks and certified dark-sky places in 172 countries, and any spot you save. Nyx weighs moonlight, clouds, estimated sky glow and the length of true darkness into one darkness score (0–100) per place per night, so you can choose where to go and which night to take off. No accounts, advertising, tracking, backend or third-party runtime packages. It runs on iPhone, iPad, Apple Watch and Apple Vision Pro, in English, Spanish, German, French and Japanese.
+A dark-sky planner for iPhone, iPad, Apple Watch and Apple Vision Pro.
 
-Website, support and privacy pages: [get-nyx.com](https://get-nyx.com/), served from `docs/` by a Cloudflare Worker that deploys on every push to `main` (`wrangler.jsonc`: 404 page and clean URLs; `docs/_headers`: security headers). GitHub Pages still serves the same folder at harrypakhale98.github.io/Nyx for links in older builds. To report a vulnerability, see [SECURITY.md](SECURITY.md).
+Nyx gives every night a darkness score from 0 to 100 so you can pick where to go and which night to take off. It looks at the Moon, cloud cover, sky glow and how long true darkness lasts. It covers the 63 US national parks, about 3,400 national parks and dark-sky places around the world, and any spot you save.
 
-## Version
+No account, no ads, no tracking, no backend. Everything is computed on the device and the core app works offline.
 
-The current version and build are in `project.yml` (`MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; every target inherits them). On the App Store (ID 6818817800): **2.1** (18), live on iPhone and iPad since 2026-10-13. `main` is numbered **2.2** (19): iPhone landscape, iPhone Duo and the redrawn icon, not yet uploaded. The App Store went from 1.1 (live since 2026-10-07) straight to 2.0 (the owner's decision, `DECISIONS.md` "2.0 — the release"), so 2.0 carries everything since 1.1: the score's caps and usual clouds, Plan, field mode's Live Activity and Assistive Access (1.2); the Moon's relief, named stars and the models' range (1.3); the review fixes (1.3.1); Siri, widgets and controls across the watch, Vision Pro and iPad (1.4); speed and structure (1.4.1); and the global work (G1 to G5): places around the world, saved spots, the world catalogue, and German, French and Japanese. The versions between 1.1 and 2.0 were never released on their own; their handoffs are in [Research/history/handoffs.md](Research/history/handoffs.md).
+[App Store](https://apps.apple.com/app/id6818817800) · [Website](https://get-nyx.com) · [Privacy](https://get-nyx.com/privacy) · [Support](https://get-nyx.com/support)
 
-Release steps: [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md). Archive checks: `python3 Scripts/verify_release.py IOS_ARCHIVE [VISION_ARCHIVE]` (writes `Research/release-verification.json` and never prints the NPS key); `python3 Scripts/verify_release.py --source-only` runs the repository checks alone, with no archive.
+## Features
 
-## Repository
+- **Tonight** – the darkest places near you, with the score and what it's made of.
+- **Parks** – every park with tonight's score, a map, alerts and closures from the NPS, viewing spots and ranger night-sky programs.
+- **Plan** – a month of nights per park, with the best new-moon window marked.
+- **Journal** – nights you've been out, with notes and photos. Stays on the device.
+- **Field mode** – a red, full-screen view for the night itself: countdown to true darkness, moonrise and moonset, where the Milky Way core is, a dark-adaptation clock.
+- **Widgets, Live Activity, Siri and Shortcuts**, Control Center controls.
+- **Apple Watch** app and complications. **Vision Pro** app with an immersive sky.
+- English, Spanish, German, French and Japanese.
 
-| Path | What it holds |
+## How the score works
+
+| Part | Points |
 |---|---|
-| `Nyx/` | The iPhone and iPad app: `App` (entry, tab shell, deep links, DEBUG scenarios), `DesignSystem` (gauge, moon disc and shader, sky arc, time river, starfield, theme), `Models`, `Services` (astronomy, score, forecasts, notifications, watch bridge), `Views`, `Intents`, `Resources` (bundled data, String Catalogs, Learn essays, app icons) |
-| `NyxWidgets/` | Home Screen, Lock Screen and StandBy widgets, Control Center controls, the field-mode Live Activity |
+| Moon: how much moonlight falls during true darkness (phase and height) | 40 |
+| Clouds: average cover over the dark window, inverted | 25 |
+| Sky darkness: Bortle class | 20 |
+| Length of astronomical darkness, up to 10 hours | 15 |
+
+90+ Pristine, 75+ Excellent, 60+ Good, 40+ Fair, below that Poor.
+
+The weakest condition then caps the total, so a moonless night under heavy cloud or next to a city can't score well just because the other parts are good. No true darkness (Alaska in summer) caps a night at 39, and smoke caps it at Good or Fair. Past the ~16 day forecast, clouds come from each place's usual cover for the month (ERA5, 2015–2024) and the night is labelled that way. The details are in [`ScoreEngine.swift`](Nyx/Services/ScoreEngine.swift).
+
+The astronomy runs on the device: NOAA solar equations for sunrise, sunset and twilight, and a low-precision Meeus lunar model for the Moon. Moonrise and moonset are good to about ±15 minutes, more at difficult horizons. Results were checked against USNO data, including polar and tropical cases.
+
+## Privacy
+
+Nyx only talks to three hosts, each with its own switch in Settings › Your privacy:
+
+- `developer.nps.gov` – park alerts, events and campgrounds
+- `api.open-meteo.com` – cloud forecasts
+- `air-quality-api.open-meteo.com` – smoke and haze
+
+Your location isn't sent anywhere. A saved spot's coordinates are rounded to 0.1° (about 11 km) before its forecast is requested. Notifications are local. The App Store privacy label is "Data Not Collected". Full details in [PRIVACY.md](PRIVACY.md).
+
+## Building
+
+You need Xcode 27 and an iOS 26 simulator or device.
+
+1. Open `Nyx.xcodeproj` and run the **Nyx** scheme.
+2. For a device, change the team and register the bundle IDs and the App Group `group.com.harrypakhale.nyx` under your account.
+
+The project file is generated with [XcodeGen](https://github.com/yonaskolb/XcodeGen) from `project.yml`. Source folders are synchronized, so adding files doesn't need a project change. To change targets or settings, edit `project.yml` and run `xcodegen generate`.
+
+### NPS API key (optional)
+
+The app works without a key using the bundled park data. To get live alerts and events, get a free key at [developer.nps.gov](https://developer.nps.gov/) and create `Config/Secrets.xcconfig` (it's git-ignored):
+
+```
+NPS_API_KEY = your_key
+```
+
+### Other targets
+
+- **NyxWatch** – watchOS 26. It's embedded in the iOS app, so the Nyx scheme builds it too. The watch never uses the network; it gets saved parks and forecasts from the iPhone.
+- **NyxVision** – visionOS 26. Its only network request is the optional cloud forecast.
+
+### Tests
+
+```sh
+xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
+
+Unit tests use Swift Testing. The UI tests include Apple's accessibility audit across the main screens, in both palettes and at the largest text size.
+
+DEBUG builds accept launch arguments that open a screen in a fixed state, e.g. `-nyx-screen detail -nyx-park deva -nyx-state offline`. See `Nyx/App/DebugScenario.swift`.
+
+## Project layout
+
+| Path | |
+|---|---|
+| `Nyx/` | iPhone and iPad app: `App`, `DesignSystem` (gauge, moon, sky arc, time river, starfield), `Models`, `Services` (astronomy, score, forecasts, notifications), `Views`, `Intents`, `Resources` |
+| `NyxWidgets/` | Widgets, controls and the field-mode Live Activity |
 | `NyxWatch/`, `NyxWatchWidgets/`, `NyxWatchShared/` | Apple Watch app and complications |
-| `NyxVision/` | Apple Vision Pro planner window and immersive sky |
-| `NyxTests/`, `NyxUITests/` | Swift Testing suite; XCTest UI, launch and accessibility-audit tests |
-| `Config/` | Info.plists, entitlements, `Nyx.xcconfig` (and your git-ignored `Secrets.xcconfig`) |
-| `Scripts/` | Data builders, catalog sync, translation merge, screenshot capture, store frames, release verification |
-| `Research/` | Sources and evidence behind the bundled data: accuracy against USNO, sky glow, cloud climate, contrast, performance, localization memory; `history/` holds the archived decisions, handoffs, 1.0 audit and superseded store text; `device-pass.md` records the physical device pass |
-| `Store/` | App Store metadata and screenshots for 2.0 (`2.0/`), In-App Event media, social posts |
-| `docs/` | The public website: landing, support, privacy, case study and press pages (get-nyx.com, served by a Cloudflare Worker) |
-| `project.yml` | XcodeGen spec for every target; `Nyx.xcodeproj` is generated from it |
+| `NyxVision/`, `NyxVisionWidgets/` | Vision Pro app and widget |
+| `NyxTests/`, `NyxUITests/` | Unit and UI tests |
+| `Config/` | Info.plists, entitlements, xcconfig |
+| `docs/` | The website, get-nyx.com |
 
-Project documents: [DECISIONS.md](DECISIONS.md) (the standing rules and an index of every decision, with its reason; the dated sections are in `Research/history/decisions/`), [PHASE_STATUS.md](PHASE_STATUS.md) (latest handoff), [Research/history/AUDIT-1.0.md](Research/history/AUDIT-1.0.md) (the 1.0 design, accessibility and device-gate evidence) and [Research/device-pass.md](Research/device-pass.md) (device-pass results), [PRIVACY.md](PRIVACY.md) (privacy review), [SUBMISSION.md](SUBMISSION.md) and [INPUT_NEEDED.md](INPUT_NEEDED.md) (release checklist and the owner's tasks).
+No third-party packages.
 
-## Run
+## Data sources
 
-Requires the installed Xcode 27 (Swift 6), an iOS 26+ iPhone or iPad (or simulator), and [XcodeGen](https://github.com/yonaskolb/XcodeGen) only when changing project settings. Open `Nyx.xcodeproj`, select the **Nyx** scheme and run. The signing team is `DUHVN68KBA`; for a device, register the app and extension identifiers and the App Group `group.com.harrypakhale.nyx` in your Apple developer account.
+- Weather: [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Smoke and haze contain modified Copernicus Atmosphere Monitoring Service information, via Open-Meteo.
+- Usual cloud cover: ERA5 reanalysis 2015–2024 (Hersbach et al. 2020), modified Copernicus Climate Change Service information, CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use of it.
+- Sky glow: NASA Black Marble nighttime lights (VNP46A4), public domain.
+- Parks, alerts, events: National Park Service.
+- World parks and dark-sky places: [Wikidata](https://www.wikidata.org/) (CC0).
+- Towns: [GeoNames](https://www.geonames.org/) (CC BY 4.0) and the US Census Bureau.
+- World map: Natural Earth. US outline: US Census Bureau.
+- Stars: Yale Bright Star Catalogue; star names from the IAU Working Group on Star Names.
+- Moon: NASA LRO colour map and LOLA elevation (CGI Moon Kit).
+- Meteor showers: International Meteor Organization 2026 calendar. Lunar eclipses: Fred Espenak, NASA/GSFC.
+- Planets: Paul Schlyter's orbital elements. Aurora: IGRF-14 geomagnetic latitude (IAGA, via NOAA NCEI).
 
-The project is generated from `project.yml`. Source folders are synchronized, so new files need no project change. For targets, capabilities or settings, edit the YAML, run `xcodegen generate`, and commit the YAML and the generated project together. Never edit `project.pbxproj` by hand.
-
-Core planning, the calendar, saved parks, Learn and the journal work on first launch without a network or an API key. Cloud forecasts improve scores when they are available; without them the remaining weights are renormalized and the uncertainty is shown. A score never confirms safe access.
-
-### Optional NPS key
-
-Register a free public-app key at [developer.nps.gov](https://developer.nps.gov/). Create `Config/Secrets.xcconfig` (git-ignored) with one line, `NPS_API_KEY = your_key`, then build. `Config/Nyx.xcconfig` includes it, and the app's Info.plist carries it as `NPS_API_KEY`. Without the file the key is empty and Nyx says plainly that park access was not checked. The key ships inside the app binary, so use a public-app key and treat it as identifiable, not secret.
-
-### iPad
-
-The same app target runs on iPad (iPadOS 26+, every orientation, resizable windows). Wide windows (≥ 900 pt) get two-column pages: Parks as a list beside the park, park detail with the gauge and river beside the sky's detail, Tonight with the answer beside the choices, Calendar with the chosen night's breakdown beside a larger month, Journal with the constellation beside the entries. Narrow windows and Slide Over use the iPhone layout. Keyboard: ⌘1–⌘4 for the tabs (Tonight, Parks, Plan, Journal; Learn is in Settings › About the sky), ⌘F find a park, ⌘← ⌘→ previous and next night. An extra-large Tonight's sky widget is iPad only. See DECISIONS.md "iPad".
-
-### Apple Watch
-
-`NyxWatch` (watchOS 26+, single-target app) and its complications, `NyxWatchWidgets`, are embedded in the iOS app, so the **Nyx** scheme builds them for the matching watch simulator or device. Run the watch alone with the **NyxWatch** scheme on a watch simulator (`Nyx Watch S11 42`, `Nyx Watch Ultra 3`). The watch makes no network requests: it computes the sky itself and receives saved parks, night vision and cloud forecasts from the iPhone over WatchConnectivity (`WatchBridge` → `WatchContext`). Without a paired iPhone it asks for a park and scores moon and darkness only. Where the iPhone's dial shows the forecast models' range for a followed park's night, the iPhone sends that range too (`WatchContext.ranges`, worked out only once a paired watch has Nyx), and the watch shows it beside a score it holds itself: on the dial's rim, in words where they fit whole, and in Milestones.
-
-### Apple Vision Pro
-
-The **NyxVision** scheme builds the visionOS 26+ app: a planner window (every park's moon-and-darkness score for a night, one park's night in full, a night stepper and a sunset-to-sunrise clock in the ornament) and an immersive space, "Stand under this sky", that places the 903 catalogue stars, the Milky Way, the Moon (the iPhone's shader), the planets and the galactic core around you for that park and moment. South is ahead (north in American Samoa); it is not aligned to your room's real north. The window's Moon draws with the iPhone's crater relief from 120 pt (`MoonAtlas`, shared `MoonShading` rules), and the Moon on your table is a RealityKit globe wearing the LROC colour map and a LOLA normal map (`NyxVision/Resources/MoonGlobe`), lit by the true Sun and flat near full Moon. Its only network request is the optional cloud forecast from `api.open-meteo.com` (shared `CloudForecastClient`, its own switch); `-nyx-vision-clouds <percent>`, `-nyx-vision-night <n>` and `-nyx-vision-privacy` are its DEBUG routes for clouds, a night offset and the privacy sheet.
-
-```sh
-xcodebuild build -project Nyx.xcodeproj -scheme NyxVision \
-  -destination 'generic/platform=visionOS Simulator' -derivedDataPath /tmp/NyxVisionBuild
-python3 Scripts/sync_vision_catalog.py /tmp/NyxVisionBuild
-```
-
-The second command merges the build's strings into `NyxVision/Resources/Localizable.xcstrings`.
-
-## Features in brief
-
-**Privacy.** Three independent network toggles (forecasts, smoke and haze, park updates) live in Tonight → Settings → Your privacy. They stop new requests without deleting cached data. Only `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com` are reachable through the transport (`SafeHTTP`), and redirects are rejected. Location stays on the device unless you save where you stand as a spot, and then only rounded to 0.1° (about 11 km), for that spot's clouds, behind its own switch. Places abroad are asked for by whole 10° regions. PhotosPicker sees only the photos you pick, and reminders are local. Details: [PRIVACY.md](PRIVACY.md).
-
-**Field mode.** "I'm here tonight" on a park's detail (tonight only), Tonight after sunset when the iPhone is already known to be in or near a park, the Control Center "Field mode" control, the "Start field mode at <park>" shortcut, the night's Live Activity, or a Stargazing Focus opens a full-screen red view of the night. It shows a live countdown to true darkness and each milestone in turn: moonrise and moonset, the core clearing 10°, its highest and sinking, a shower's best hour, planets rising and setting, dawn. It also has a dark-adaptation clock that restarts (undoably) when you leave Nyx, and "Where to look", the real sky turned to the phone's attitude (Core Motion; true north when location is already allowed, magnetic otherwise, and it says which), with a VoiceOver list. Night vision, a dim screen and no auto-lock last only while field mode is open. The Live Activity carries the night's milestones in its attributes, so it needs no push; it refreshes when Nyx is open and ends at dawn the next time Nyx opens. Alarms (AlarmKit, iOS 26.1+) wake you for true darkness, the core, or 30 minutes before a moonset in true darkness. The Stargazing Focus filter does nothing until its switches (night vision, offer field mode) are on in the Focus's settings; with both off it counts as no Focus, which is how the system reports a Focus ending.
-
-**Sound, touch and accessibility.** A park's detail can play the night as twelve seconds of sound ("Listen to tonight", under the shape of the night): a tone that falls as the sky darkens, quiets while the Moon is up, pulses at moonrise and moonset, and chimes when the Milky Way's core rises, with a transcript beside it. "Feel the Moon" plays the Moon's phase as a Core Haptics texture, and the time river's ticks sharpen with each night's score. VoiceOver gets audio graphs on the time river, calendar month and sky arc, and rotors for best nights, closures, Pristine nights and field milestones. Nyx also follows Differentiate Without Color, Reduce Highlighting Effects and Prefer Cross-Fade Transitions (iOS 26.4) and reduced resource usage (iOS 27). Tonight → Settings → Accessibility → Sound and touch explains each one and lets you try it.
-
-**Widgets, Siri and Spotlight.** Widgets and intents compute locally from the shared cached snapshot and never fetch. The Tonight's sky widget comes in small, medium (with a "next saved park" button), large (the coming month as small skies with shower and eclipse marks) and two Lock Screen sizes. It rises in the Smart Stack around dusk on Good or better nights, and it draws in white only in StandBy at night and in tinted modes. Siri and Shortcuts offer "Find the best night" (one park or the saved parks, up to 30 nights, an interactive snippet). Parks are semantic Spotlight entities. Ask Nyx's on-device model can call the engine through three tools (best nights, what's up, parks nearby) and cites what they return. MetricKit's average pixel luminance, once iOS delivers a report, appears in About the data; it never leaves the phone.
-
-**Links** (`DeepLink`, tested): `nyx://park/<id>`, `nyx://tonight`, `nyx://field/<id>`, `nyx://whatsup?date=YYYY-MM-DD&park=<id>` (that night at the park, scrolled to What's up; App Store In-App Events and the calendar events Nyx drafts use it) and `nyx://calendar/<id>?month=YYYY-MM` (the park's month in Calendar).
-
-**Delight.** A trip planner (Tonight → Plan a trip; `TripPlanner`, dynamic programming over nights × parks with a straight-line hop limit), your constellation and "skies you've seen" in the Journal (`SkyMap`, `ConstellationLayout`, `SkiesSeen`), a year recap (`YearRecap`, Journal menu), four Liquid Glass app icons (`AppIcon*.icon`, Settings → App icon), and first light (`FirstLightView`).
-
-## Implementation
-
-SwiftUI with `@Observable` state; injectable astronomy, weather, park and notification services; SwiftData for the journal and saved parks, with selected photos in external storage. Canvas draws the seeded stars, gauge, solar and lunar paths, and calendar and timeline marks; a Metal shader draws the Moon from NASA's lunar map, with crater relief from NASA's LOLA elevation along the terminator on Moons of 120 pt and up. Native navigation, glass controls, sheets, search and the system accessibility adjustments carry the rest.
-
-On iOS 27, Save uses the pinned trailing toolbar placement; iOS 26 keeps a complete native fallback. Foundation Models entry points appear only when the model is actually available and use only injected source records. AI never computes astronomy and never blocks core planning or reminders.
-
-### App icon
-
-The shipping icon is the Icon Composer document `Nyx/Resources/AppIcon.icon` (Xcode compiles it; `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon`). Its layers, front to back: the leading star, the score arc (not glass, so its amber stays luminous), and the sphere-shaded crescent over an earthshine disc (glass), on a nebula-violet-to-black gradient. `AppIconFull`, `AppIconNew` and `AppIconQuarter` are the alternate Moon-phase icons. Edit any of them in Icon Composer (Xcode → Open Developer Tool → Icon Composer) and save in place. To preview from the command line:
-
-```sh
-"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool" \
-  Nyx/Resources/AppIcon.icon --export-image --output-file /tmp/nyx-icon.png \
-  --platform iOS --rendition Default --width 1024 --height 1024 --scale 1
-```
-
-Renditions: `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight`, `ClearDark`. Check that the crescent stays recognizable at 60 px.
-
-## Verify
-
-The scheme runs the Swift Testing suite and the XCTest UI tests, including `NyxUITests/AccessibilityAuditTests`, Apple's automated accessibility audit on 32 screens in both palettes and on 10 key screens at the largest text size (set `TEST_RUNNER_NYX_AUDIT_SCREENS=parks,detail` to audit a few). Run one simulator at a time; parallel simulators can overload the Mac.
-
-```sh
-xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' \
-  -derivedDataPath /tmp/NyxBuild CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
-```
-
-```sh
-xcodebuild test -project Nyx.xcodeproj -scheme Nyx \
-  -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0' \
-  -derivedDataPath /tmp/NyxBuild CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
-```
-
-The first runs on iOS 26.5, the second on iOS 27.0; on another machine, use names and versions from `xcrun simctl list devices available`. App Group simulation needs the ad-hoc signed simulator build. For an unsigned device Release archive:
-
-```sh
-xcodebuild archive -project Nyx.xcodeproj -scheme Nyx -configuration Release \
-  -destination 'generic/platform=iOS' -archivePath /tmp/Nyx.xcarchive CODE_SIGNING_ALLOWED=NO
-```
-
-Development signatures have get-task-allow enabled and need App Store distribution export or re-signing. Only Organizer validation and processing through the publisher's account establish distribution readiness. Real-device accessibility and performance review are release gates, not completed certifications ([Research/history/AUDIT-1.0.md](Research/history/AUDIT-1.0.md), [Research/device-pass.md](Research/device-pass.md), [Research/performance.md](Research/performance.md)).
-
-`Scripts/capture_system_accessibility.py SIMULATOR_ID 26` captures real Simulator AX5 and contrast settings and restores the previous ones afterwards. `Scripts/capture_store.py`, `Scripts/make_store_frames.swift` and `Scripts/make_device_frames.swift` produce the store artwork (iPhone, iPad, Apple Watch, Apple Vision Pro; see `Store/2.0/Screenshots/README.md`).
-
-`swift -O Scripts/build_moon_atlas.swift SOURCE_FOLDER Nyx/Resources/MoonRelief.xcassets/MoonAtlas.imageset/MoonAtlas.jpg` rebuilds the large Moon's 4096×3072 atlas (the LROC colour map above, local relief from LOLA elevation below) from two public-domain NASA SVS CGI Moon Kit files, `lroc_color_poles_4k.tif` and `ldem_16_uint.tif`; their URLs, the layout and the relief step that `Moon.metal` uses are in the script's header. The atlas lives in an asset catalog that only the iPhone app and the Vision Pro app (for the window's Moon from 120 pt) include, so the widgets, the watch and the visionOS widget keep the smaller `MoonMap.jpg`. `swift -O Scripts/build_moon_globe.swift SOURCE_FOLDER NyxVision/Resources/MoonGlobe` rebuilds the Vision Pro Moon volume's globe textures from the same two files: the 4096×2048 colour map and a 2048×1024 tangent-space normal map baked from LOLA elevation, both compressed to ASTC in KTX with Xcode's TextureConverter (about 8 MB of texture memory in place of some 53 MB).
-
-### Screenshot scenarios (DEBUG only)
-
-Launch with arguments such as `-nyx-screen detail -nyx-state offline`, or run `python3 Scripts/capture_screens.py SIMULATOR_ID 26` (it writes the capture matrix to `Research/Screenshots/`, which Git ignores). Nothing on the simulator is changed by these routes. Scenarios use an in-memory journal, and sample journal content is DEBUG only. Offline scenarios may use a real cached forecast; `no-forecast` guarantees unknown clouds. Normal app behavior reads actual data, and scores are never mocked.
-
-- **Screens** (`-nyx-screen`): the four tabs (`tonight`, `parks`, `plan` (`calendar` still works), `journal`), `learn` (the Learn index), `trip` (My free nights alone), `credits`, `places` (the starting-point picker; `-nyx-place <text>` prefills), `detail`, `editor`, `entry`, `settings`, `privacy`, `data`, `article`, `breakdown`, `share`, `ask`, `onboarding`, `skyarc`, `river`, `whatsup`, `light` (the Sky glow panel: what city light takes, light pollution and Protect this sky, then viewing spots with sky glow and step-free access; for example with `-nyx-park deva | grca | sequ`, and `-nyx-glow-compare city`), `loader`, `widgets` (small, medium with "2 of 3", Lock Screen, StandBy at night simulated), `widgets-empty`, `widgets-large` (full colour, night vision, tinted), `widgets-xl` (iPad), `snippet` (the "Find the best night" dialog and snippet, voice-only wording), `metric` (About the data with the labelled DEBUG luminance fixture), `listen` (the sonification panel and its transcript), `accessibility` (Sound and touch), and both permission explainers.
-- **States** (`-nyx-state`): `live`, `offline`, `no-forecast`, `agree`, `disagree`, `smoke` (fixture forecast detail: models agreeing and cold with dew, models disagreeing with high cloud, smoke at AOD 0.38), `no-location`, `loading`, `empty`, `error`, `polar`, `polar-night`, `populated`, `photo`, `night-vision`, `step-free` (Parks with the "Step-free viewing" filter on), `privacy` (with `metric`), `access` (with `article`, a named essay), `first-run` (Tonight before a starting point is chosen).
-- **Flags:** `-nyx-night-vision` (combines with any state), `-nyx-ax5`, `-nyx-bold` (Bold Text, which the simulator cannot switch from the command line), `-nyx-reduce-motion`, `-nyx-contrast`, `-nyx-differentiate`, `-nyx-reduce-highlighting`, `-nyx-crossfade`, `-nyx-reduced-resources`, `-nyx-bottom` (also the end of a Learn essay), `-nyx-loupe` (the time river's scrub loupe held up), `-nyx-river-tip` (the river's first-visit tip, shown again), `-nyx-arc-touch` (the sky arc's touch exploration without VoiceOver, with a finger resting at 55%), `-nyx-sky-adapt 0…1` (Tonight's sky held partway through its "As your eyes adapt" reveal; with `-nyx-sky-view`), `-nyx-glow-compare city` (the Sky glow illustration on the city's sky, on the `light` route and the park page, for example `-nyx-screen detail -nyx-chapter place -nyx-glow-compare city`), `-nyx-scroll 0…1` (Tonight, About the data and Ask Nyx open partway down), `-nyx-following` (Tonight with tonight's night at the starting park followed and under way, for the tab bar's strip and the "Following this night" rows), `-nyx-onboarding-page 1|2`, `-nyx-share-night 7` (the share card for the night that many days ahead; with `-nyx-state disagree -nyx-date 2026-10-13` it shows the models' range), `-nyx-chapter moon` (park detail opens at the Moon), `-nyx-date 2026-12-13` ("now" is that afternoon, 21:00 UTC, so every computed sky is real for that date), `-nyx-park ever` (starting park), `-nyx-place "Chicago, IL"` (a city as the starting point), `-nyx-plan-trip` (Plan opens on My free nights), `-nyx-narrow` (iPad: the app in a 390 pt compact column), `-nyx-link <nyx:// URL>` (opens a link once the app is up, for example `-nyx-screen tonight -nyx-link "nyx://whatsup?date=2026-12-13&park=grba"`).
-- **Field mode:** `-nyx-screen field` (states `adapting`, `adapted`, `reset`, `alarms`; `-nyx-field-minutes N` after sunset), `field-compass` (fixed pose 10° above the core, or south; under `-nyx-state live` both field routes refresh the forecast as detail does and re-read the score, so the two match), `live-activity` (Lock Screen and Dynamic Island; `-nyx-state stale-score` puts a three-day-old score and a lifted closure first), `alarm-explainer`; Tonight's Focus offer is `-nyx-screen tonight -nyx-state stargazing`.
-- **Ask Nyx:** `-nyx-screen ask` (states `streaming` and `answered`: real tool lookups with sample words built from those records, mid-stream or checked; `-nyx-scroll 0…1` or `-nyx-bottom` to position the page).
-- **Delight:** `-nyx-screen trip` (states `agree` for fixture forecasts, `weekends`, `boats` for boat-and-plane parks within 100 mi, for example with `-nyx-park chis`), `constellation` (`-nyx-state empty` for the first-star state, `skies` to open the list), `recap`, `icons`, `first-light`.
-- **What's up:** Geminid peak `-nyx-screen whatsup -nyx-date 2026-12-13`; total lunar eclipse `-nyx-screen whatsup -nyx-date 2029-06-25 -nyx-park ever`; core below the horizon `-nyx-screen whatsup -nyx-park dena`; Tonight's shower line `-nyx-screen tonight -nyx-date 2026-12-11`.
-- **Landscape (iPad):** `TEST_RUNNER_NYX_SHOTS_DIR=/tmp/shots TEST_RUNNER_NYX_SHOTS="parks:landscape:-nyx-screen parks -nyx-state live" xcodebuild test-without-building … -only-testing:NyxUITests/ScreenshotTests` (each item `name:portrait|landscape:arguments`, separated by `;`).
-- **Apple Watch:** `-nyx-watch-screen tonight | milestones | week | dark | parks | chooser | credits | complications`, `-nyx-watch-state synced | unsynced | polar | samoa | closure | expired | models` (`models`: the iPhone's disagreeing-models forecast fixture and its ranges, handed over as a paired iPhone would), `-nyx-watch-night 0…6`, `-nyx-watch-palette red | phone | standard`, `-nyx-watch-ax` (the largest accessibility size), `-nyx-watch-xxxl` (the largest size short of them), `-nyx-watch-scroll bottom`, `-nyx-watch-info` (with `dark`: the dark-adaptation info sheet), `-nyx-watch-face` (with `complications`: the full-colour renders alone, unlabelled, for the store frame). The watch simulator has no paired iPhone; for live store captures, the iPhone's `-nyx-screen detail -nyx-state live -nyx-watch-export deva,jotr,…` writes the context it would send (live clouds, models' ranges) to its App Group as `watch-context.json`, which is copied into the watch's App Group.
-- **Vision Pro:** `-nyx-vision-immersive`, `-nyx-vision-skyonly`, `-nyx-vision-look yaw,pitch`, `-nyx-vision-time 0…1`, `-nyx-vision-body saturn`, `-nyx-vision-moon` (the Moon volume; `-nyx-vision-moon-only` closes the planner behind it), with `-nyx-date`, `-nyx-park`, `-nyx-night-vision` and `-nyx-ax5`.
-
-Capture scripts wait eight seconds for settled frames by default (`NYX_CAPTURE_WAIT` overrides it for the QA runner).
-
-## Localization
-
-Nyx ships in English, Spanish (`es`, written for US and Mexican Spanish; tú, calm ranger voice), German (`de`), French (`fr`) and Japanese (`ja`). The four translations are drafts: Spanish has shipped since 1.1, and German, French and Japanese ship in 2.0 by the owner's decision; each native review lands in a 2.0.x (`INPUT_NEEDED.md` steps 11 and 11a). `Scripts/verify_release.py` holds the shipping list (`SHIPPING_LANGUAGES`). The String Catalogs (`Nyx/Resources/Localizable.xcstrings`, shared by the app, widgets and watch; `InfoPlist.xcstrings`; `NyxVision/Resources/Localizable.xcstrings`) are generated. English comes from the code via `python3 Scripts/sync_catalog.py /tmp/NyxBuild` (after a build; build again after syncing) or `sync_vision_catalog.py`. The translations come from the translation memory in `Research/localization/` via `python3 Scripts/apply_translations.py` (both sync scripts run it at the end; `--check` reports any key without a translation and exits 1). Edit them there, never in the catalogs ([Research/localization/README.md](Research/localization/README.md)).
-
-The Learn essays are the catalog keys `essay.*` (English Markdown sources in `Nyx/Resources/learn`, Spanish in `Research/localization/learn-es/`). Meteor shower names are `shower.<IMO code>` and park access notes `access.<park id>`, whose English comes from `sky-events.json` and `parks.json`. Park names, viewing-spot names, and NPS alerts and programs stay in English, as nps.gov's own Spanish pages keep park names. Try it with `-AppleLanguages "(es)" -AppleLocale es_MX` (or `de`, `fr`, `ja`). XcodeGen 2.46 cannot list the languages in the project's known regions with synchronized folders, so the project still shows `en`; the build compiles each `.lproj` from the catalogs and iOS offers the languages from that.
-
-## Data and accuracy
-
-- NOAA/Meeus solar coordinates; nights run local noon to noon through DST. Polar results are explicit.
-- Truncated Meeus lunar position with parallax; illumination corrects the mean synodic epoch cycle with calculated elongation.
-- USNO reference results are in [Research/accuracy.md](Research/accuracy.md). Rise and set approximations exclude terrain and refraction variation; allow roughly ±15 minutes for lunar timing and more at difficult horizons.
-- Open-Meteo hourly clouds: the 63 parks together in two requests of up to 50 (comma-separated coordinates, plus the previous day so eastern nights stay covered), saved spots rounded to 0.1° in a request of their own, world catalogue places by whole 10° tiles; a complete overlap-weighted dark-window average, six-hour reuse (an hour at the earliest when pulled), 36-hour expiry, and partial coverage is never treated as clear. Requests are paced per device and host (`Research/open-meteo-usage.md`). Beyond the forecast, nights are ranked with each park's usual clouds from ERA5 (2015–2024, `cloud-climate.json`).
-- Forecast context, never in the score except Haleakalā's cloud layers (seven days): three models' clouds (`gfs_seamless`, `ecmwf_ifs025`, `icon_seamless`) for agreement, cloud layers, coldest hour, dew risk, gusts and visibility (one request each for all parks), and the CAMS aerosol forecast from `air-quality-api.open-meteo.com` (about five days) for smoke and haze. Same overlap rules; each part has its own six-hour refresh and cache (`nyx-detail-<park>.json`).
-- Light pollution context: NASA Black Marble nighttime lights (VNP46A4, Román et al. 2018), public domain, reduced offline to `Nyx/Resources/skyglow.json` (method and limits in [Research/skyglow.md](Research/skyglow.md)). Shown as a rank among parks, light domes and a growth rank. Away from the 63 parks, the same satellite data gives each place its estimated Bortle class (`grid-sky-*.bin`, [Research/skyglow-world.md](Research/skyglow-world.md)), and ERA5 its usual clouds (`grid-clouds-*.bin`).
-- The world catalogue (`catalog.json`): national parks and DarkSky-designated places from Wikidata, built by `Scripts/build_catalog.py` ([Research/catalog.md](Research/catalog.md)). Starting towns (`places.json`): GeoNames cities and the US Census.
-- Step-free notes per viewing spot from nps.gov accessibility pages, retrieved 2026-10-05 (`Nyx/Resources/accessible-spots.json`, [Research/accessible-spots.md](Research/accessible-spots.md)). Access notes for 17 parks a car cannot simply reach (boat, plane or a limited road) from nps.gov directions pages, retrieved 2026-10-06 (`access` in `parks.json`, [Research/park-access.md](Research/park-access.md)).
-- Bundled NPS inventory and sourced viewing spots. Bortle values are conservative planning estimates, not measurements. Some parks have no verified viewing spot and say so.
-- Development-only scripts (`Scripts/fetch_references.py` and the data builders) contact research hosts; none of them are in the app's networking path.
-
-### Attribution
-
-Weather: [Open-Meteo](https://open-meteo.com/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Usual clouds: contains modified Copernicus Climate Change Service information (2026), ERA5 reanalysis 2015–2024 (Hersbach et al. 2020), CC BY 4.0; neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. Night lights: NASA Black Marble (VNP46A4), public domain. Places around the world: [Wikidata](https://www.wikidata.org/), CC0. Starting towns: [GeoNames](https://www.geonames.org/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and the US Census Bureau (public domain). World map: Natural Earth, public domain. Geomagnetic latitude for aurora notes: IGRF-14 (IAGA, via NOAA NCEI). Stars: the Yale Bright Star Catalogue (Hoffleit and Warren, via NASA HEASARC); star names: IAU Working Group on Star Names. Moon: NASA's LRO colour map and LOLA elevation (CGI Moon Kit). Meteor showers: International Meteor Organization (IMO) 2026 Meteor Shower Calendar. Lunar eclipse predictions: Fred Espenak, NASA/GSFC. Planet positions: Paul Schlyter's low-precision orbital elements, computed on the device. US outline: US Census Bureau cb_2023_us_nation_20m (public domain), simplified. Park descriptions and data: National Park Service. No NPS, NASA or DarkSky International endorsement is implied.
+No endorsement by the NPS, NASA or DarkSky International is implied.
 
 ## Licence
 
-Copyright © 2026 Hardik Pakhale. All rights reserved. The source is public so anyone can check how Nyx works and what it does with data; it is not licensed for reuse or redistribution. The bundled third-party data keeps its own licences and credits, listed under "Data and accuracy" above.
+Copyright © 2026 Hardik Pakhale. All rights reserved.
+
+The source is public so people can see how Nyx works and what it does with data. It isn't licensed for reuse or redistribution. Bundled third-party data keeps its own licence.
+
+Security issues: see [SECURITY.md](SECURITY.md).

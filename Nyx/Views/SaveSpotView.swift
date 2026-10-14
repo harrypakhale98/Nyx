@@ -7,7 +7,7 @@ import CoreLocation
 /// for here, in context, after Nyx's own explainer), typed or pasted coordinates, or a city or town
 /// from the bundled list. Then a name, offered from the nearest town, and Save. Nothing is looked up
 /// on a server: the spot's time zone and region come from the nearest bundled town (`SavedSpots.make`).
-/// No map to pick from: MapKit would ask Apple's servers, a host Nyx does not use (the world map is G4).
+/// No map to pick from: MapKit would ask Apple's servers, a host Nyx does not use.
 struct SaveSpotView: View {
     enum Source: String, CaseIterable, Identifiable, Hashable {
         case here, coordinates, place

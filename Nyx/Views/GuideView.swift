@@ -28,7 +28,7 @@ struct GuideView:View {
     /// The uncited records under a checked answer, folded until opened.
     @State private var othersOpen=false
     @FocusState private var typing:Bool
-    /// The tools find the curated parks, saved spots and the world catalogue by name (G5).
+    /// The tools find the curated parks, saved spots and the world catalogue by name.
     private var lookup:NightLookup { NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.today,details:model.details,others:model.spots+model.catalog,closed:model.closedParks) }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range, a shortlist of the

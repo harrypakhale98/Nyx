@@ -1,5 +1,5 @@
 {
-  "source": "U.S. Naval Observatory, Astronomical Applications API (aa.usno.navy.mil/api/rstt/oneday), queried 2026-10-07 at each park's parks.json coordinates; times are park-local, to the minute. Recorded in Research/audit-2026-10-07/astronomy-score.md, Numeric evidence.",
+  "source": "U.S. Naval Observatory, Astronomical Applications API (aa.usno.navy.mil/api/rstt/oneday), queried 2026-10-07 at each park's parks.json coordinates; times are park-local, to the minute.",
   "night": "Each case names the park-local night (local noon to the next local noon) its events fall in.",
   "cases": [
     { "park": "dena", "night": "2026-10-15", "event": "sunset", "local": "2026-10-15 18:46" },

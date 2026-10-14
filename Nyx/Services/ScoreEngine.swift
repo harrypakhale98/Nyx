@@ -12,7 +12,7 @@ extension ScoreProviding {
 nonisolated struct ScoreEngine: ScoreProviding {
     /// Four parts are added, then the weakest link caps the sum.
     ///
-    /// **Parts** (the product brief's weights): 40 moon + 25 clouds + 20 Bortle + 15 duration.
+    /// **Parts**: 40 moon + 25 clouds + 20 Bortle + 15 duration.
     /// - Moon: 40 × (1 − moonlight), where moonlight is the Krisciunas–Schaefer moonlight over
     ///   true darkness (`SkyConditions.moonlight`, 0 with no Moon, 1 for a full Moon high all
     ///   through it). With no true darkness there is no horizon credit: 40 × (1 − illumination).

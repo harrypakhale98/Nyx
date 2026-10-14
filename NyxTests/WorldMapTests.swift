@@ -3,7 +3,7 @@ import SwiftUI
 import Testing
 @testable import Nyx
 
-/// G4: the maps draw the world's land on equal-area projections (Lambert azimuthal for a region,
+/// The maps draw the world's land on equal-area projections (Lambert azimuthal for a region,
 /// Equal Earth for the world), place every curated park on the lower 48's map or its own US area's,
 /// and thin a crowded catalogue so a map never carries thousands of marks.
 struct WorldMapTests {

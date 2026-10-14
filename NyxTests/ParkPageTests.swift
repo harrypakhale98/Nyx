@@ -3,10 +3,10 @@ import Testing
 import SwiftUI
 @testable import Nyx
 
-/// The park page's wave-2 pieces: the gauge's count-up and sizes, the field countdown, keeping a
+/// The park page's pieces: the gauge's count-up and sizes, the field countdown, keeping a
 /// night, the Moon hero, the sky renderer and Bortle model, viewing spots, programs, What's up's
 /// order, chapters and sharing.
-@MainActor @Suite struct ParkLaneTests {
+@MainActor @Suite struct ParkPageTests {
     let engine=AstronomyEngine()
     func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
     func night(_ park:Park,_ day:String,score:Int=80) throws -> Night {
@@ -33,7 +33,7 @@ import SwiftUI
         #expect(CelestialGauge.milestones(from:65,to:95)==[70,90])
         #expect(CelestialGauge.milestones(from:70,to:89).isEmpty)
     }
-    /// AX-05/DX-10: at accessibility sizes the numeral stays well above the band label, within the width.
+    /// At accessibility sizes the numeral stays well above the band label, within the width.
     @Test func accessibleNumeralOutranksTheBand() {
         for band in [20.0,28,38,47,53] {
             let side=CelestialGauge.accessibleSide(band:band,width:345)
@@ -43,7 +43,7 @@ import SwiftUI
         }
     }
 
-    // MARK: Field countdown (DX-02)
+    // MARK: Field countdown
 
     @Test func countdownRoundsUpToWholeMinutes() {
         #expect(FieldCountdown.parts(22*60+39)==(0,23))
@@ -60,7 +60,7 @@ import SwiftUI
         #expect(late.map { target.timeIntervalSince($0).rounded() }==[90,89,88])
     }
 
-    // MARK: Keep this night (PC-1)
+    // MARK: Keep this night
 
     @Test func morningAfterOfferIsForTheLastNightOnly() throws {
         let jotr=try park("jotr")
@@ -90,7 +90,7 @@ import SwiftUI
         #expect(prefill.notes.contains("94") && prefill.notes.contains(night.sky.moon.name))
     }
 
-    // MARK: Moon hero (DX-05)
+    // MARK: Moon hero
 
     @Test func moonTurnsTheShortWayRound() {
         let a=MoonHero.nearest(0.1,to:2*Double.pi-0.1)
@@ -108,7 +108,7 @@ import SwiftUI
         for event in events { #expect(spoken.contains(event.time)) }
     }
 
-    // MARK: The sky as a view (DX-06)
+    // MARK: The sky as a view
 
     @Test func projectionPutsTheHorizonLowAndHidesTheSkyBehind() {
         let frame=SkyFrame(options:PanoramaOptions(facing:180),size:CGSize(width:390,height:800))
@@ -150,7 +150,7 @@ import SwiftUI
         #expect(abs(opened.timeIntervalSince(middle))<=150)
     }
 
-    // MARK: Viewing spots (DX-12, PC-1)
+    // MARK: Viewing spots
 
     @Test func spotGlowComparesWithinThePark() {
         #expect(SpotGlow.comparison(10,others:[4,5],parkCentre:nil)=="Brighter than this park's other spots")
@@ -180,7 +180,7 @@ import SwiftUI
         #expect(program.time==nil && program.location==nil)
     }
 
-    // MARK: What's up order (DX-18)
+    // MARK: What's up order
 
     @Test func weakShowersBecomeAMentionStrongOnesARow() throws {
         let jotr=try park("jotr")

@@ -25,10 +25,10 @@ struct FixedWeather: WeatherProviding {
     func seed(_ cached: [String: Forecast], parks: [Park]) async {}
 }
 
-/// The engine audit's regressions: dates in any calendar, forecasts that never go backwards, the
+/// The engine's edge cases: dates in any calendar, forecasts that never go backwards, the
 /// watch scoring as the iPhone does, honest Siri words, malformed data from either service, odd
 /// time zones, the poles, and a hostile journal file.
-@MainActor struct EngineAuditTests {
+@MainActor struct EngineEdgeCaseTests {
     static func zone(_ id: String) throws -> TimeZone { try #require(TimeZone(identifier: id)) }
     static func spot(_ suffix: String, _ latitude: Double, _ longitude: Double, _ zone: String) -> Park {
         Place(spotID: "pin:00000000-0000-4000-8000-0000000000\(suffix)", name: "Test spot \(suffix)", latitude: latitude, longitude: longitude,

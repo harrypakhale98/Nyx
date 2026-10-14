@@ -43,7 +43,7 @@ import Testing
         #expect(lookup.origin(named:"Mesa Verde")?.label=="Mesa Verde")
         #expect(lookup.parksNear(park:"Brigadoon",radius:300,system:.miles).first?.hasPrefix("No park, dark-sky place or town matched") == true)
     }
-    /// Ask Nyx's tools know the world catalogue (G5): a place abroad by name, places near a town abroad,
+    /// Ask Nyx's tools know the world catalogue: a place abroad by name, places near a town abroad,
     /// never a place found only by its country, and from a US town the national parks exactly as before.
     @Test func askNyxKnowsTheWorld() throws {
         let catalog=ParkLibrary.catalog()

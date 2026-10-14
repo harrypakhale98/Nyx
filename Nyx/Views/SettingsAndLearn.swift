@@ -146,7 +146,7 @@ struct PrivacyView:View {
             Section {
                 Text("Nyx has no account, no ads, no tracking. Your journal never leaves this phone.").font(.system(.title3,design:.serif))
                 Text("Saved parks and spots, journal entries and selected photos are stored on this iPhone. iCloud sync is not used. Your device backup settings may include app data.")
-                // 2.0: saved spots are the one place of the person's own that a request carries (G3).
+                // 2.0: saved spots are the one place of the person's own that a request carries.
                 Text("The one place of yours that Nyx sends anywhere is a spot you save: only its position, rounded to about \(SpotForecast.roundingDistance()), for its cloud forecast. You can turn that off below.")
             }.listRowBackground(palette.panel)
             Section("Optional data updates") {
@@ -154,9 +154,9 @@ struct PrivacyView:View {
                 Text("Requests go to api.open-meteo.com for all \(model.parks.count) U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 // Haleakalā scores from its summit's cloud layers, which may be asked for before any park page opens.
                 Text("The cloud layers above Haleakalā's summit may also be asked for on their own, with that park's coordinates only: the same request in every copy of Nyx.").font(.caption).foregroundStyle(palette.muted)
-                // The world catalogue (G4, owner's decision D3): asked for by whole 10° squares, never one place.
+                // The world catalogue: asked for by whole 10° squares, never one place.
                 Text("The parks and dark-sky places beyond the U.S. national parks are never asked about one at a time. The world is divided into squares of 10° of latitude and longitude, and a request carries the public coordinates of every listed place in one square, at most 1,000; squares with only a few places are asked about together. The service can tell which part of the world interests you, a region about the size of a country, but never the place you look at or where you are.").font(.caption).foregroundStyle(palette.muted)
-                // Saved spots (G3): the one request that carries a place the person chose, so it says exactly what it sends.
+                // Saved spots: the one request that carries a place the person chose, so it says exactly what it sends.
                 Toggle("Clouds at your saved spots",isOn:$model.spotForecastsEnabled).tint(palette.controlTint).disabled(!model.weatherEnabled)
                 Text("For each spot you save, Nyx asks api.open-meteo.com for its clouds with the spot's coordinates rounded to 0.1°, about \(SpotForecast.roundingDistance()). The service learns roughly where your spots are, never the exact point and never their names. Spots are asked about in a request of their own, never mixed with the parks. Your current location is sent only if you save it as a spot. With this off, nothing is sent for spots: they keep their last forecast, then use their usual clouds. The service receives network information such as your IP address.").font(.caption).foregroundStyle(palette.muted)
                 Toggle("Smoke and haze",isOn:$model.smokeEnabled).tint(palette.controlTint)

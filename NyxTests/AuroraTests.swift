@@ -3,8 +3,8 @@ import Testing
 @testable import Nyx
 
 /// The aurora note follows geomagnetic latitude, in both hemispheres, on nights when the Sun gets at
-/// least 12° down; not a US state. G4: corrected geomagnetic latitude from the bundled IGRF-14 grid
-/// (Research/geomagnetic.md); the centred dipole (G1, pole 80.8° N 72.8° W) is the fallback.
+/// least 12° down; not a US state. Corrected geomagnetic latitude comes from the bundled IGRF-14
+/// grid; the centred dipole (pole 80.8° N 72.8° W) is the fallback.
 struct AuroraTests {
     let parks: [Park]
     init() throws { parks = try ParkData.load() }
@@ -98,9 +98,9 @@ struct AuroraTests {
         #expect(SkyNotes.aurora(park: macquarie, evening: try evening(macquarie, "2026-06-21"))?.hasPrefix("Aurora is often seen here") == true)
     }
 
-    // MARK: The corrected-latitude grid (G4)
+    // MARK: The corrected-latitude grid
 
-    /// Against the validation table in Research/geomagnetic.md (grid column: CGM for 2025, the
+    /// Against a validation table (grid column: CGM for 2025, the
     /// 110 km field line mapped to the ground), within 0.1°.
     @Test func gridMatchesTheValidationTable() throws {
         #expect(Geomagnetic.bundledGrid != nil)

@@ -8,7 +8,7 @@ nonisolated protocol AstronomyProviding: Sendable {
 /// Solar coordinates: NOAA / Meeus equations (geometric altitude; -0.833° rise/set).
 /// Lunar position: truncated Meeus periodic series plus topocentric parallax.
 /// Roots bracketed every 5 minutes, bisected to <1 second. Terrain/refraction are
-/// not modeled. Target: Sun ±2 min, Moon ±15 min; see Research/accuracy.md.
+/// not modeled. Target: Sun ±2 min, Moon ±15 min.
 /// The Moon as seen from one place and moment. Angles are radians; screen angles are measured
 /// counterclockwise from "up", where up is the observer's zenith.
 nonisolated struct MoonGeometry: Sendable, Equatable {

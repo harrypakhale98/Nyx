@@ -2,9 +2,9 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The world catalogue (G4): every place decodes with a unique id, resolves by its `wd:` id, is
+/// The world catalogue: every place decodes with a unique id, resolves by its `wd:` id, is
 /// found by its 1° index exactly as by brute force and by a folded search, and is forecast only by
-/// whole 10° tiles (owner's decision D3), never alone and never with the device's position.
+/// whole 10° tiles, never alone and never with the device's position.
 struct CatalogTests {
     private static let kruger="wd:Q24451"
     private static let torres="wd:Q901646"
@@ -40,7 +40,7 @@ struct CatalogTests {
         }
         #expect(parks.allSatisfy { !$0.isCatalogPlace && $0.curated && $0.website == nil })
     }
-    /// The build's rules (Scripts/build_catalog.py, Research/catalog.md): one record per place, a
+    /// The catalogue build's rules: one record per place, a
     /// point of its own, an English name in the Latin script, and the corrections it lists.
     @Test func everyPlaceIsOnePlaceAtItsOwnPoint() throws {
         let catalog=try Self.catalog()
@@ -85,7 +85,7 @@ struct CatalogTests {
         #expect(linked.count == 548)
         #expect(linked.allSatisfy { $0.scheme == "https" && $0.host() != nil })
         #expect(Place.website("http://dilijanpark.am/") == nil && Place.website("https://example.org/a") != nil && Place.website("not a url") == nil)
-        // A catalogue place round-trips whole, website included, and still writes G1's legacy keys.
+        // A catalogue place round-trips whole, website included, and still writes the legacy keys.
         let linkedPlace=try #require(catalog.first { $0.website != nil })
         let data=try JSONEncoder().encode(linkedPlace)
         #expect(try JSONDecoder().decode(Park.self, from: data) == linkedPlace)
@@ -159,7 +159,7 @@ struct CatalogTests {
         #expect(spanish.search(Park.folded("Sudáfrica")).contains { $0.0.id == Self.kruger })
     }
 
-    // MARK: Forecasts by whole tiles (D3)
+    // MARK: Forecasts by whole tiles
 
     @Test func tilesAreFixedAndCoverTheWorld() {
         #expect(CatalogForecast.Tile(latitude: -24.0, longitude: 31.5) == CatalogForecast.Tile(row: 6, column: 21))

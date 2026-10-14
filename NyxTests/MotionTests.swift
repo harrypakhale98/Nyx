@@ -3,12 +3,12 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The motion lane: skies built ahead (off the main thread, from the nights' own astronomy, with
+/// Motion: skies built ahead (off the main thread, from the nights' own astronomy, with
 /// sidereal time worked out once) are the skies a screen builds on demand; the river finds its
 /// night and best nights as before; the dial's count is a function of time alone and crosses each
 /// milestone once at any frame rate; decoration rests by one rule; the lamp's growing dark covers
 /// the whole window at the moment the palette turns; a month's rings light along the way it moved.
-@MainActor struct MotionLaneTests {
+@MainActor struct MotionTests {
     private static func park(_ id: String) throws -> Park { try #require(try ParkData.load().first { $0.id == id }) }
     /// A fixed autumn night (October 15, 2026), so every run checks the same sky.
     private static let date=Date(timeIntervalSince1970: 1_792_080_000)

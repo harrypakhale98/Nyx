@@ -43,7 +43,7 @@ nonisolated struct NyxPalette: Equatable, Sendable {
     static func markRamp(score:Int)->Double { 0.45+Double(min(100,max(0,score)))/200 }
     /// The ramp held at 3:1 against black and the panel (WCAG 1.4.11), as `line` is: amber from 50%, and
     /// from 70% through night vision's red, which dims it. A poor night's mark stays smaller, never fainter
-    /// than a graphic may be (`Scripts/contrast.py`, "Night marks").
+    /// than a graphic may be.
     func markOpacity(score:Int)->Double { max(nightVision ? 0.7 : 0.5,Self.markRamp(score:score)) }
 }
 /// Night vision's red: everything drawn in grey, then multiplied by one red. The standard red is

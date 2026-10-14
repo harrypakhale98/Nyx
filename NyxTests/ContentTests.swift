@@ -3,7 +3,7 @@ import Testing
 @testable import Nyx
 
 /// Learn essays, the map of tonight, campgrounds and From home tonight.
-struct ContentLaneTests {
+struct ContentTests {
     let parks: [Park]
     init() throws { parks=try ParkData.load() }
     func park(_ id: String) throws -> Park { try #require(parks.first { $0.id == id }) }
@@ -207,7 +207,7 @@ struct ContentLaneTests {
     @Test func fromHomeTonightInDenverOnGeminidNight() throws {
         let denver=try #require(StartingPlaces.named("Denver, CO"))
         let origin=try #require(HomeSky.origin(location: nil, place: denver, park: nil))
-        // Without the world grids, as before G2: an assumed suburban sky (the next test reads the bundled grid).
+        // Without the world grids, as before 2.0: an assumed suburban sky (the next test reads the bundled grid).
         let home=HomeSky(origin: origin, now: try Self.date("2026-12-13"), grid: SkyGrid(bundle: .main, layers: []))
         #expect(home.place.bortleEstimate == HomeSky.assumedBortle && home.place.timeZoneID == "America/Denver")
         #expect(home.hasDarkness && home.sky.darkHours>10 && home.sky.darkHours<13)

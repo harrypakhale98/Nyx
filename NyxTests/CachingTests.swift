@@ -3,11 +3,11 @@ import Testing
 import SwiftUI
 @testable import Nyx
 
-/// The speed lane's caches give exactly what the uncached work gives: a kept night equals the
+/// The caches give exactly what the uncached work gives: a kept night equals the
 /// planner's, a change of forecast or detail is seen at once, a kept calendar equals a fresh one,
 /// the bundled parks read once equal a fresh read, the journal's kept scores equal a fresh scoring,
 /// and the resolved star colours equal the mix they replace.
-@MainActor @Suite struct SpeedLaneTests {
+@MainActor @Suite struct CachingTests {
     let engine=AstronomyEngine()
     func named(_ id:String) throws -> Park { try #require(try ParkData.load().first { $0.id==id }) }
     func offline() -> PlanModel {

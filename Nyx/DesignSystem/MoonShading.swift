@@ -10,7 +10,7 @@ nonisolated enum MoonShading {
     static let atlasSide = 120.0
     /// The terrain's slopes, exaggerated 2.5 times: at 280 pt one texel of relief is about a point,
     /// and real slopes at that scale only show at the very edge of the terminator. The globe's
-    /// normal map is baked with the same factor (`Scripts/build_moon_globe.swift`).
+    /// normal map is baked with the same factor.
     static let reliefStrength = 2.5
     static func usesAtlas(side: Double) -> Bool { side >= atlasSide }
     /// The Sun's direction in screen space (x right, y up, z toward the viewer).

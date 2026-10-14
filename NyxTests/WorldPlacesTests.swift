@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// G3: the starting places cover the world (GeoNames cities15000 outside the US, CC BY 4.0) while
+/// The starting places cover the world (GeoNames cities15000 outside the US, CC BY 4.0) while
 /// the 1,008 US rows stay exactly as they were, search stays fast and ranks US places as before,
 /// and the nearest place gives a saved spot its zone and region offline.
 struct WorldPlacesTests {
@@ -16,7 +16,7 @@ struct WorldPlacesTests {
 
     // MARK: The file
 
-    /// The US rows, as bytes: the body of `"places":[…]` in places.json before G3 (commit c3dd33d,
+    /// The US rows, as bytes: the body of `"places":[…]` in places.json before 2.0 (commit c3dd33d,
     /// `git show c3dd33d:Nyx/Resources/places.json`), 54,110 bytes, must open the new array
     /// unchanged. A saved starting place matches its row by name and state, so not one byte moves.
     @Test func theUSRowsAreByteForByteUnchanged() throws {
@@ -61,7 +61,7 @@ struct WorldPlacesTests {
 
     // MARK: Search
 
-    /// The search before G3 (`StartingPlace.score`), kept only as the oracle for US ranking.
+    /// The search before 2.0 (`StartingPlace.score`), kept only as the oracle for US ranking.
     static func oldSearch(_ query: String, in places: [StartingPlace]) -> [String] {
         func normalized(_ text: String) -> String {
             Park.folded(text).split(separator: " ").map { ["st": "saint", "ft": "fort", "mt": "mount"][String($0)] ?? String($0) }.joined(separator: " ")
@@ -99,7 +99,7 @@ struct WorldPlacesTests {
         #expect(StartingPlaces.search("Columbus").first?.label == "Columbus, OH")
         #expect(StartingPlaces.search("St. Paul").first?.label == "Saint Paul, MN")
         #expect(StartingPlaces.named("Denver")?.label == "Denver, CO")
-        // "Helena, MT" read "mt" as "mount" and found nothing before G3; it finds Helena now.
+        // "Helena, MT" read "mt" as "mount" and found nothing before 2.0; it finds Helena now.
         #expect(StartingPlaces.search("Helena, MT").first?.label == "Helena, MT")
     }
     @Test func theWorldIsSearchable() throws {

@@ -44,7 +44,7 @@ private struct AssistiveSavedSync: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Query private var saved: [SavedPark]
-    /// Saved spots (G3) are saved places too: the model resolves their `pin:` ids from these.
+    /// Saved spots are saved places too: the model resolves their `pin:` ids from these.
     @Query private var spots: [SavedSpot]
     @AppStorage("notificationsEnabled") private var reminders=false
     var body: some View {

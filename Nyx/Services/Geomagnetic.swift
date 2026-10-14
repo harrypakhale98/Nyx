@@ -5,7 +5,7 @@ import Foundation
 ///
 /// `latitude` reads corrected geomagnetic latitude from the bundled 1° grid (`geomagnetic.bin`),
 /// traced along the field lines of IGRF-14 at epoch 2025.0 from the aurora's lower edge (110 km);
-/// it agrees with NASA's calculator to about 0.02° (Research/geomagnetic.md). When the file is
+/// it agrees with NASA's calculator to about 0.02°. When the file is
 /// absent or fails any check (a target that bundles no grid), it falls back to the centred dipole,
 /// `dipoleLatitude`. Only the fallback carries the dipole's regional bias: good across North
 /// America, about 3–5° too high in Europe and 4–5° too low in Australasia (Hobart near −49°).

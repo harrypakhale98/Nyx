@@ -2,9 +2,9 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// 1.4.1 structure lane: counts said from the catalogue rather than a literal 63, and the park row's
+/// Counts said from the catalogue rather than a literal 63, and the park row's
 /// "More content" with room for everything a row can say.
-@MainActor @Suite struct StructureLaneTests {
+@MainActor @Suite struct CountsAndRowsTests {
     let engine=AstronomyEngine()
     func parks() throws -> [Park] { try ParkData.load() }
     func park(_ id:String) throws -> Park { try #require(try parks().first { $0.id==id }) }
@@ -28,7 +28,7 @@ import Testing
     }
 
     /// The lower 48's map draws the national parks there and says so, with no count it cannot keep;
-    /// any other map names the parks and dark-sky places around (G5).
+    /// any other map names the parks and dark-sky places around.
     @Test func emptyConstellationNamesWhatItDraws() throws {
         let all=try parks()
         let empty=ConstellationLayout(nights:[],parks:all)

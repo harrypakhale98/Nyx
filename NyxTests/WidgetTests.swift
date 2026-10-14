@@ -7,7 +7,7 @@ import WidgetKit
 /// What the widgets and the field alarm's Live Activity say outside the app: a park's closure in
 /// every Tonight family (the Lock Screen and the small widget show only its mark, so VoiceOver
 /// must say it whole), the Moon's Lock Screen rectangle, and a snoozed alarm's states.
-@MainActor @Suite struct WidgetLaneTests {
+@MainActor @Suite struct WidgetTests {
     private let now = Date(timeIntervalSince1970: 1_791_158_400) // 2026-10-05 00:00 UTC
     private let closure = "Keys View Road closed at night"
 

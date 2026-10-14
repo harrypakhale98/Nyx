@@ -179,8 +179,7 @@ nonisolated struct NightLook: Equatable, Sendable {
     var muted: Color { ink.opacity(mutedOpacity) }
 }
 /// How text contrast holds up for the commonest colour-vision deficiencies: Machado, Oliveira and
-/// Fernandes (2009) full-severity matrices, applied in linear RGB, then WCAG 2 contrast. Mirrors
-/// `Scripts/contrast.py`, so `Research/contrast.json` and the unit tests agree.
+/// Fernandes (2009) full-severity matrices, applied in linear RGB, then WCAG 2 contrast.
 nonisolated enum ColorVision: String, Sendable, CaseIterable {
     case typical, protan, deutan
     private var matrix: [[Double]] {

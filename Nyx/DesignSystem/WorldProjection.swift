@@ -42,7 +42,7 @@ nonisolated struct GeoPoint: Hashable, Sendable {
     }
 }
 
-/// The two equal-area projections Nyx draws Earth with (Research/world-map.md), on a unit sphere,
+/// The two equal-area projections Nyx draws Earth with, on a unit sphere,
 /// with x east and y north on the plane:
 /// - **Lambert azimuthal equal-area**, centred on a place: every regional map. Areas are true
 ///   everywhere, shapes near-true for a few thousand kilometres, and its only seam is the antipode.

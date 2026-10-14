@@ -253,7 +253,7 @@ nonisolated struct MoonView: Sendable, Equatable {
 
 /// The globe's two textures, read from the app bundle when the volume opens and held by the globe
 /// (its material, and `MoonGlobe.relief` for the normal map), so they go when the volume closes
-/// and its `MoonGlobe` is released. Built by `Scripts/build_moon_globe.swift`
+/// and its `MoonGlobe` is released. Built offline
 /// and stored already GPU-compressed (ASTC in KTX, with their mipmaps), so they load as they are,
 /// with nothing decoded or cached on the way: `MoonGlobeColour.ktx` (4096×2048 LROC colour, ASTC
 /// 6×6, about 5 MB) and `MoonGlobeNormal.ktx` (2048×1024 LOLA normals, ASTC 4×4 with renormalised mips, about 2.8 MB),

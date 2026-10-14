@@ -1518,7 +1518,7 @@
     "bortleEstimate": 5,
     "description": "Tucson, Arizona is home to the nation's largest cacti. The giant saguaro is the universal symbol of the American west. These majestic plants, found only in a small portion of the United States, are protected by Saguaro National Park, to the east and west of the modern city of Tucson. Here you have a chance to see these enormous cacti, silhouetted by the beauty of a magnificent desert sunset.",
     "sourceURL": "https://www.nps.gov/sagu/index.htm",
-    "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16). Bortle 5 rather than 4: NASA Black Marble night lights put the park at 5.1, beside Tucson (Research/skyglow.md).",
+    "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16). Bortle 5 rather than 4: NASA Black Marble night lights put the park at 5.1, beside Tucson.",
     "viewingSpots": [
       {
         "name": "Red Hills Visitor Center (Tucson Mountain District)",

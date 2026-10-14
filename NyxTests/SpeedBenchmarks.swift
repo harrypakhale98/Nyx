@@ -5,7 +5,7 @@ import Testing
 /// What the screens ask of the engine, timed: a Parks keystroke, a calendar's month, a 200-night journal,
 /// the bundled parks read and a park's calendar, and one night for 3,000 places (the size the global plan
 /// would reach). Off by default; `TEST_RUNNER_NYX_BENCH=1` runs it. Each prints milliseconds as
-/// `BENCH|name|ms`. Uses only what the app already had before the speed lane, so the same file times both.
+/// `BENCH|name|ms`. Uses only what the app already had before its caches, so the same file times both.
 @MainActor
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["NYX_BENCH"] != nil), .serialized)
 struct SpeedBenchmarks {

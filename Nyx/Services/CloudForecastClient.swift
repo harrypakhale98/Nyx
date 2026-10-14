@@ -13,12 +13,11 @@ nonisolated enum CloudForecastSwitch {
     static let key = "weatherEnabled"
     static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
 }
-/// Saved spots' cloud forecasts (G3): their own switch in Your privacy, on unless turned off, and
+/// Saved spots' cloud forecasts: their own switch in Your privacy, on unless turned off, and
 /// effective only while `CloudForecastSwitch` is on too. A saved spot is the one request that
 /// carries a place the person chose rather than a public park, so it carries less: the spot's
 /// coordinates rounded to 0.1° (about 11 km), clouds only, in a request of its own that never
 /// mixes spots with the parks. Never the device's location, unless the person saved it as a spot.
-/// Approved by the owner on 2026-10-11.
 nonisolated enum SpotForecast {
     static let key = "spotForecastsEnabled"
     static func isOn(_ defaults: UserDefaults = .standard) -> Bool { defaults.object(forKey: key) as? Bool ?? true }
@@ -72,7 +71,7 @@ nonisolated enum SpotForecast {
     /// A place's forecast cache file: "weather-jotr" for a park, as always; "weather-pin-<uuid>" for a spot (no colon in a file name).
     static func cacheName(_ id: String) -> String { "weather-"+id.replacingOccurrences(of: ":", with: "-") }
 }
-/// World catalogue places' cloud forecasts (G4; owner's decision D3, 2026-10-11). A catalogue
+/// World catalogue places' cloud forecasts. A catalogue
 /// place is never asked about alone: its forecast comes with every other catalogue place in the
 /// same 10° × 10° tile of latitude and longitude, so a request names a region about the size of a
 /// country, never the place being looked at, and never the device's position (only catalogue
@@ -83,7 +82,7 @@ nonisolated enum SpotForecast {
 /// which stays as it was.
 nonisolated enum CatalogForecast {
     static let tileDegrees = 10.0
-    /// Owner's cap (D3): never more than 1,000 coordinates in one request.
+    /// Never more than 1,000 coordinates in one request.
     static let maxPointsPerRequest = 1_000
     /// At most this many catalogue points in one refresh: whole tiles, in the order their places were
     /// asked for, until the next tile would pass it (the first tile always goes). A very wide radius in
@@ -349,7 +348,7 @@ nonisolated final class HostBackoff: Sendable {
 /// number of weather variables times the number of models and `d` the days of data (forecast plus
 /// past days). So every place in a request is at least one call, and a request for 63 parks is 63
 /// calls. Read from Open-Meteo's server source (`ForecastApiResult.calculateQueryWeight`) on
-/// 2026-10-11; see Research/open-meteo-usage.md.
+/// 2026-10-11.
 nonisolated enum CallWeight {
     static func of(_ url: URL) -> Double {
         let items=URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
@@ -506,8 +505,8 @@ nonisolated enum ForecastRequest {
     }
 }
 /// A redirect is never followed. Runtime requests can reach exactly three hosts, each behind its
-/// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05, with the owner's
-/// approval) the aerosol forecast that warns of smoke. Nyx on Vision Pro reaches only the
+/// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05)
+/// the aerosol forecast that warns of smoke. Nyx on Vision Pro reaches only the
 /// forecast host (`SafeHTTP.preferences`).
 nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
@@ -517,8 +516,8 @@ nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
 }
 nonisolated struct SafeHTTP: HTTPTransport {
     /// Each host and the preference that must not be off before it is contacted. On Vision Pro
-    /// (approved 2026-10-07) only the cloud forecast: the other two hosts are not even compiled
-    /// into that app, so no code path there can name them (`Scripts/verify_release.py` checks).
+    /// only the cloud forecast: the other two hosts are not even compiled into that app, so no
+    /// code path there can name them.
     #if os(visionOS)
     static let preferences: [String: String] = ["api.open-meteo.com": CloudForecastSwitch.key]
     #else
@@ -763,7 +762,7 @@ actor WeatherService: WeatherProviding {
         }
         return result
     }
-    /// Saved spots' clouds (G3), kept and refreshed as the parks' are (`ForecastReuse`, the same
+    /// Saved spots' clouds, kept and refreshed as the parks' are (`ForecastReuse`, the same
     /// cache, backoff, budget and guarded transport), but never in the parks' request: one request
     /// of their own (two past fifty distinct points) carrying only each spot's coordinates rounded
     /// to 0.1°, the same rounded point asked once. Asked only with `network` and the spots' switch
@@ -808,7 +807,7 @@ actor WeatherService: WeatherProviding {
         }
         return kept()
     }
-    /// World catalogue places' clouds (G4), by whole tiles: `requests` comes from
+    /// World catalogue places' clouds, by whole tiles: `requests` comes from
     /// `CatalogForecast.Regions.plan`, each one every catalogue place of a 10° tile (or of the sparse
     /// tiles together, or a part of a dense region), never a place alone. Cached and kept as the
     /// parks' are (`ForecastReuse`, the same cache files by id, backoff and guarded transport). A

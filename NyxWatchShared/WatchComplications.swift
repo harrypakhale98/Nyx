@@ -127,7 +127,7 @@ nonisolated enum WatchTimeline {
     /// Deliberately not `NightPlanner.duskWindow` (the iPhone's: 90 minutes before sunset to an hour
     /// into true darkness). Both share `NightPlanner.worthSurfacing`, so they agree on which nights;
     /// only the hours differ, because the iPhone is for setting out and the wrist stays useful at the
-    /// park all night (DECISIONS.md, team review 2026-10-08, score consistency).
+    /// park all night.
     static func duskWindow(sky: SkyConditions) -> DateInterval? {
         guard let begin = sky.sunset ?? sky.darkStart else { return nil }
         let start = begin.addingTimeInterval(-45*60)

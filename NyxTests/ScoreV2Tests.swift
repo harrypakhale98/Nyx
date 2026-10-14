@@ -25,7 +25,7 @@ import Testing
     }
     let scoring = ScoreEngine()
 
-    // MARK: Band calibration (S1, S2, S4)
+    // MARK: Band calibration
 
     @Test func overcastIsNeverGoodAndMostlyCloudyNeverGood() {
         for light in stride(from: 0.0, through: 1, by: 0.1) { for bortle in 1...9 { for dark in [0.0, 1, 3, 6, 10, 14] {
@@ -63,7 +63,7 @@ import Testing
         #expect(scoring.score(sky: s, bortle: 2, cloud: 0, basis: .forecast, aerosol: 0.2).value > 74)
         #expect(scoring.score(sky: s, bortle: 2, cloud: 0, basis: .forecast, aerosol: nil).limit == nil)
     }
-    /// Death Valley, December new moon, total overcast: the audit's 73 "Good" is now 10, and the
+    /// Death Valley, December new moon, total overcast: version 1's 73 "Good" is now 10, and the
     /// breakdown says why in plain words.
     @Test func bindingCapIsNamed() throws {
         let deva = try park("deva")
@@ -81,7 +81,7 @@ import Testing
         #expect(parks.filter { $0.aboveInversion == true }.map(\.id) == ["hale"])
     }
 
-    // MARK: Monotonicity (AS-15)
+    // MARK: Monotonicity
 
     @Test func scoreIsMonotonic() {
         for light in stride(from: 0.0, through: 1, by: 0.25) { for dark in [0.5, 2, 5, 9, 12] { for bortle in 1...9 {
@@ -94,7 +94,7 @@ import Testing
         } } }
     }
 
-    // MARK: Moonlight (AS-10)
+    // MARK: Moonlight
 
     @Test func moonlightFollowsKrisciunasSchaefer() {
         #expect(abs(AstronomyEngine.moonlight(phaseAngle: 0, altitude: 90)-1) < 1e-9)
@@ -128,7 +128,7 @@ import Testing
         #expect((newMoon.moonlight ?? 1) < 0.05 && (fullMoon.moonlight ?? 0) > 0.75)
     }
 
-    // MARK: Clouds by lead time (S3, AS-4, AS-8)
+    // MARK: Clouds by lead time
 
     func forecast(updated: Date, cover: Double, days: Int = 17) -> Forecast {
         let first = (floor(updated.timeIntervalSince1970/3600)-24)*3600
@@ -166,7 +166,7 @@ import Testing
         #expect(none.basisCaption(unavailable: true)?.hasPrefix("Cloud forecast unavailable.") == true)
         #expect(none.basisLabel == "No cloud forecast yet" && mid.basisLabel == "Early look" && near.basisLabel == nil)
     }
-    /// Going offline can never raise a score (audit S3/E4): a forecast is never dropped for its
+    /// Going offline can never raise a score: a forecast is never dropped for its
     /// age, so the same forecast gives the same night whenever it is read.
     @Test func goingOfflineNeverRaisesTheScore() throws {
         let jotr = try park("jotr")
@@ -181,7 +181,7 @@ import Testing
         #expect(fresh.score.value <= ScoreEngine.cloudCap(90))
     }
 
-    // MARK: Smoke and the summit (S4, AS-9)
+    // MARK: Smoke and the summit
 
     func series(_ updated: Date, _ window: (start: Date, end: Date), _ values: [String: Double]) -> HourlySeries {
         let first = floor(window.start.timeIntervalSince1970/3600)*3600-3*3600
@@ -215,7 +215,7 @@ import Testing
         }
     }
 
-    // MARK: One constructor (E19)
+    // MARK: One constructor
 
     /// The same fixture night through every surface's path: the app's model, the widget and
     /// reminder snapshot, the trip planner, Siri's and Ask Nyx's planner, and the watch and Vision
@@ -252,7 +252,7 @@ import Testing
         #expect(vision.basis == .usual && vision.score.value == NightPlanner(forecasts: [:]).night(jotr, on: night, now: now).score.value)
     }
 
-    // MARK: Ties (AS-3, DX-14)
+    // MARK: Ties
 
     @Test func tiesGoToTheDarkerMeasuredSky() throws {
         let grba = try park("grba"), grca = try park("grca")

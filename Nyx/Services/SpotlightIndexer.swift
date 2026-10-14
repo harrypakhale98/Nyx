@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 /// The parks in Spotlight. Each item is also the park's `ParkEntity` (iOS 18+), so semantic search
 /// and Siri treat it as the same park; on iOS 27 the item names its entity directly.
 ///
-/// With the world catalogue (G4): the 63 curated parks, and the places abroad a person has opened or
+/// With the world catalogue: the 63 curated parks, and the places abroad a person has opened or
 /// followed, at most `limit` items in all; never the whole catalogue of 3,400 places, which would
 /// crowd Spotlight with places no one here asked about. Saved spots are never indexed: a spot can be
 /// someone's home, and Spotlight shows its results to anyone holding the unlocked phone.

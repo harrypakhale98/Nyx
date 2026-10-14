@@ -1,9 +1,9 @@
 import Foundation
 import Synchronization
 
-/// The bundled world grids (G2, `Research/global-plan.md`): the usual clouds and the night sky's
-/// brightness for any point on land, read on this device from 10-degree tiles that
-/// `Scripts/nyxgrid.py` writes (format 1: raw DEFLATE, a 16-byte header, one byte a cell, 255 for
+/// The bundled world grids: the usual clouds and the night sky's
+/// brightness for any point on land, read on this device from 10-degree tiles
+/// (format 1: raw DEFLATE, a 16-byte header, one byte a cell, 255 for
 /// no data). Nothing is fetched: a coordinate never leaves the device for this.
 ///
 /// **Where the tiles are.** `Nyx/Resources/Grid/grid-<layer>-<n|s>DD-<e|w>DDD.bin`. The resources
@@ -223,8 +223,8 @@ nonisolated final class SkyGrid: Sendable {
     /// "Bortle scale" reference table): 1 from 21.76, 2 from 21.6, 3 from 21.3, 4 from 20.8,
     /// "4.5" from 20.3, 5 from 19.25, 6 from 18.5, 7 from 18.0, 8 below.
     ///
-    /// Two choices keep it consistent with `Research/skyglow.md`: never 1, since satellite light
-    /// cannot tell class 1 from 2 (skyglow.md's computed classes stop at about 2.1), and the "4.5"
+    /// Two choices keep it consistent with the sky glow data: never 1, since satellite light
+    /// cannot tell class 1 from 2 (its computed classes stop at about 2.1), and the "4.5"
     /// band is read as 5, the brighter neighbour, as the bundled estimates are conservative where
     /// unsure. The table gives no range for 9, so the grid says 8 at most; a city centre is 8 or 9 either way.
     static func bortle(fromMagnitude magnitude: Double) -> Int {

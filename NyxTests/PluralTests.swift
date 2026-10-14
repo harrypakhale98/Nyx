@@ -2,8 +2,8 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// Counted strings are real String Catalog plural variations (Research/localization/en-plurals.json and
-/// es-plurals.json), so "1 night" and "2 nights" are one catalog key each and Spanish never prints "1 noches".
+/// Counted strings are real String Catalog plural variations, so "1 night" and "2 nights" are one
+/// catalog key each and Spanish never prints "1 noches".
 struct PluralTests {
     typealias Case = (value:String.LocalizationValue, expected:String)
     /// One catalog string in one language, read from the app bundle so the device language does not matter.

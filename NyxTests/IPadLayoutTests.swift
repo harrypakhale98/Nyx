@@ -4,7 +4,7 @@ import Testing
 
 /// iPad windows chosen by width, the keyboard's Refresh in Tonight's words, and the photo
 /// description's starting line from Vision's labels.
-@Suite struct IPadLaneTests {
+@Suite struct IPadLayoutTests {
     // MARK: Width, never the device
 
     @Test func parksSplitsOnlyWhereTwoColumnsFit() {

@@ -59,7 +59,7 @@ struct StartingPointPicker: View {
             } else if places.isEmpty {
                 Section { Text("No city, town or park by that name. Try a nearby larger city.").font(.subheadline).foregroundStyle(palette.muted) }.listRowBackground(palette.panel)
             }
-            // A place of the person's own, kept beside the parks (G3): from here, from coordinates or a town.
+            // A place of the person's own, kept beside the parks: from here, from coordinates or a town.
             Section {
                 Button { savingSpot=SpotRequest(place:nil) } label:{ Label("Save a spot of your own",systemImage:"mappin.and.ellipse").frame(maxWidth:.infinity,minHeight:44,alignment:.leading).contentShape(Rectangle()) }
                     .foregroundStyle(palette.accent)

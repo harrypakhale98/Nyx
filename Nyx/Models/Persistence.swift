@@ -82,7 +82,7 @@ nonisolated enum NyxSchemaV1: VersionedSchema {
         init(index: Int, data: Data, altText: String? = nil) { self.index=index; self.data=data; self.altText=altText }
     }
 }
-/// Adds saved spots (G3). Every other model is V1's, unchanged; a model is copied here so each
+/// Adds saved spots. Every other model is V1's, unchanged; a model is copied here so each
 /// version names its own classes, as SwiftData's migrations expect.
 nonisolated enum NyxSchemaV2: VersionedSchema {
     static let versionIdentifier=Schema.Version(3,0,0)
@@ -132,7 +132,7 @@ nonisolated enum NyxSchemaV2: VersionedSchema {
         var entry: JournalEntry?
         init(index: Int, data: Data, altText: String? = nil) { self.index=index; self.data=data; self.altText=altText }
     }
-    /// A place the person saved themselves (G3, `Research/global-plan.md`): from where they stand,
+    /// A place the person saved themselves: from where they stand,
     /// typed coordinates or a pin. Scored, forecast and followed like a park (`Place(spot:)`).
     /// While it is saved, a `SavedPark` row with the same id puts it beside the saved parks, so
     /// reminders, the widgets, the watch and Plan include it with no change of their own; unsaving

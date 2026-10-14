@@ -1,10 +1,10 @@
 import Foundation
 
 /// Artificial sky glow from NASA Black Marble night lights (VNP46A4, Román et al. 2018), bundled
-/// as `skyglow.json` by `Scripts/build_skyglow.py`. Method, calibration and limits: Research/skyglow.md.
+/// as `skyglow.json`.
 /// `glow` is relative (the median national-park centre is 1) and ranks places; it is not a
 /// measurement of sky brightness, so the app shows it only as a comparison between parks.
-/// The score keeps the hand Bortle estimate (DECISIONS, "Every sky").
+/// The score keeps the hand Bortle estimate.
 nonisolated struct SkyGlow: Sendable {
     /// A light dome: the bearing (degrees from north, clockwise) of a cluster of light and its share
     /// of the site's modelled glow. `city` is named only when a known town lies within 40 km of it.
@@ -104,7 +104,7 @@ nonisolated struct SkyGlow: Sendable {
     /// "Glow on the horizon: Las Vegas, east. About 45% of the city light around this park lies in
     /// that direction." then, for the other domes, one sentence: "Then Ridgecrest, south (28%), and
     /// Visalia, west (9%)." At most two lines. The share is a 30° sector's part of the modeled city
-    /// light within 300 km (Research/skyglow.md, step 7), not a share of the park's light pollution,
+    /// light within 300 km, not a share of the park's light pollution,
     /// which the data cannot measure; the wording says only what the number is.
     static func domeLines(_ domes: [Dome]) -> [String] {
         let named=namedDomes(domes)
@@ -118,7 +118,7 @@ nonisolated struct SkyGlow: Sendable {
 
     // MARK: Over time
 
-    /// Parks whose 2013–2025 change is not light pollution or not comparable (Research/skyglow.md):
+    /// Parks whose 2013–2025 change is not light pollution or not comparable:
     /// all of Alaska (gap-filled, aurora and snow-window noise on sub-nanowatt cells), Hawaiʻi
     /// Volcanoes (lava), Carlsbad Caverns and Guadalupe Mountains (Permian Basin flaring),
     /// Theodore Roosevelt (Bakken flaring, which fell) and American Samoa (almost no light at all).
@@ -144,8 +144,8 @@ nonisolated struct SkyGlow: Sendable {
     }
 }
 
-/// Step-free access at a viewing spot, from nps.gov accessibility pages (retrieved 2026-10-05;
-/// Research/accessible-spots.md). A claim is recorded only where an official page makes it.
+/// Step-free access at a viewing spot, from nps.gov accessibility pages (retrieved 2026-10-05).
+/// A claim is recorded only where an official page makes it.
 nonisolated struct SpotAccess: Codable, Hashable, Sendable {
     enum Level: String, Codable, Sendable { case yes, partial, no, unknown }
     let park: String

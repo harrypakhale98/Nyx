@@ -3,7 +3,7 @@ import SwiftData
 import Testing
 @testable import Nyx
 
-/// Saved spots (G3): the store's new version, a spot as a place, and the one request that carries
+/// Saved spots: the store's new version, a spot as a place, and the one request that carries
 /// a place the person chose, with its coordinates rounded to 0.1°, on its own, behind its own switch.
 struct SavedSpotTests {
     private static let jotr="pin:3f2a8c1e-5b7d-4e9a-8c6f-1d2e3f4a5b6c"

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-// Saved spots on screen (G3): how a spot names itself beside the parks, its own panel on its page
+// Saved spots on screen: how a spot names itself beside the parks, its own panel on its page
 // (where it is, rename, delete), and the feed that hands the store's spots to the model.
 
 /// Coordinates on the pasteboard: this device only (never Universal Clipboard on a nearby Mac or

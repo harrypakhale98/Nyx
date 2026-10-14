@@ -1,6 +1,6 @@
 import Foundation
 
-/// Cloud forecasts on Vision Pro: the only network requests this app makes (approved 2026-10-07).
+/// Cloud forecasts on Vision Pro: the only network requests this app makes.
 /// The same client as the iPhone (`WeatherService`): all 63 parks' public viewing-spot coordinates
 /// in one request to api.open-meteo.com (two, 50 and 13 parks), clouds only, kept in this
 /// headset's Application Support so the last forecast is there offline. A park's forecast is asked

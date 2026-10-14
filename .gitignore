@@ -10,31 +10,21 @@ build/
 *.xcarchive
 *.ipa
 *.dSYM.zip
+*.trace
 
-# Swift Package Manager (Nyx has no packages; this keeps a stray resolve out)
+# Swift Package Manager
 .swiftpm/
 .build/
 
-# Secrets (NPS key; see README "Optional NPS key")
-Config/Secrets.xcconfig
-Config/*.local.xcconfig
-
-# Python bytecode (the scripts share Scripts/simulators.py)
+# Python
 __pycache__/
 *.pyc
 
-# Large local artifacts (kept outside the repository, in ~/NyxLocalMedia)
-*.trace/
-*.trace
-Store/**/*.mp4
+# Local secrets (see README, "NPS API key")
+Config/Secrets.xcconfig
+Config/*.local.xcconfig
 
-# Capture matrix written by Scripts/capture_screens.py
-Research/Screenshots/
-
-# iCloud Drive conflict copies (the repo lives in ~/Documents): "name 2.ext" and "name 2/"
+# iCloud Drive conflict copies ("name 2.ext")
 /Nyx [0-9]*.xcodeproj/
 * [0-9].*
 * [0-9]/
-
-# Translators' to-do lists (python3 Scripts/apply_translations.py --report)
-Research/localization/reports/

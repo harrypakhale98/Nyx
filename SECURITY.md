@@ -19,4 +19,4 @@ Out of scope: the services Nyx reads from (the National Park Service API and Ope
 
 ## Security posture
 
-Nyx has no account, no server and no analytics. Your journal, saved places and photos stay on your device. The app makes requests to three HTTPS hosts only: `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com`, each behind its own switch in Your privacy. The NPS API key that ships in the app is a free key for public park data; it opens no personal data. The privacy review is in [PRIVACY.md](PRIVACY.md).
+Nyx has no account, no server and no analytics. Your journal, saved places and photos stay on your device. The app makes requests to three HTTPS hosts only: `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com`, each behind its own switch in Your privacy. The NPS API key that ships in the app is a free key for public park data; it opens no personal data. More detail in [PRIVACY.md](PRIVACY.md).

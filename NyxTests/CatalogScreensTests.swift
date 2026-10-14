@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The screens of the world catalogue (G4): the Parks list's order by country and its lazy rows,
+/// The screens of the world catalogue: the Parks list's order by country and its lazy rows,
 /// which places Tonight weighs, how a place abroad names itself and says what Nyx cannot check,
 /// Siri's and Shortcuts' reach into the catalogue, and what Spotlight remembers.
 @MainActor

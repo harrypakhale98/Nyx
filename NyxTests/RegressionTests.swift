@@ -6,11 +6,11 @@ import UIKit
 import UniformTypeIdentifiers
 @testable import Nyx
 
-/// The review of the engine and security commits: real journal exports import, the photos read
+/// Regressions in the engine and security fixes: real journal exports import, the photos read
 /// only as the merge reaches them, a failed import leaves the store as it was, Ask Nyx's closure
 /// guard reads only what is said about a closed place, a failed request is never sent again once
 /// per waiter, closures reach the wrist first, and a republish asked for during a run always runs.
-@MainActor struct RegressionReviewTests {
+@MainActor struct RegressionTests {
     // MARK: Helpers
 
     private static func jpeg(_ color: UIColor) throws -> Data {
@@ -165,7 +165,7 @@ import UniformTypeIdentifiers
     @Test func aFailedSpotsRequestIsNotSentAgainPerWaiter() async throws {
         let echo=OpenMeteoEcho(hold: true)
         let service=WeatherService(transport: echo, persist: false, suite: "nyx.tests.spots.\(UUID().uuidString)")
-        let spot=EngineAuditTests.spot("d4", 34.1, -116.1, "America/Los_Angeles")
+        let spot=EngineEdgeCaseTests.spot("d4", 34.1, -116.1, "America/Los_Angeles")
         let callers=(0..<3).map { _ in Task { await service.spotForecasts(for: [spot], network: true) } }
         try await Self.until { await service.spotWaiting == 3 }
         await echo.refuse(URLError(.timedOut))

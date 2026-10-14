@@ -18,7 +18,7 @@ struct SpanishAndAccessTests {
     @Test func spanishIsInTheBundle() throws {
         #expect(Bundle.main.localizations.contains("es"))
         #expect(try spanish("Tonight")=="Esta noche")
-        // The Learn essays are catalog strings; Spanish comes from Research/localization/learn-es.
+        // The Learn essays are catalog strings.
         #expect(try spanish("essay.access").hasPrefix("Un cielo para todos"))
         #expect(try spanish("essay.darkness").hasPrefix("Un cielo que vale la pena proteger"))
     }

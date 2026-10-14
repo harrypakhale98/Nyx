@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The design review of 2.0: the iPhone's brighter red reaching the wrist, the score's basis on
+/// Consistency across surfaces: the iPhone's brighter red reaching the wrist, the score's basis on
 /// every surface that has no room for a caption, the Moon's symbol from the southern sky, the
 /// iPad's readable page widths, and the journal editor that never throws a night away unasked.
-struct DesignReviewTests {
+struct DesignConsistencyTests {
     @Test func brighterRedTravelsToTheWatchAndOldContextsReadStandard() throws {
         let context = WatchContext.make(savedParkIDs: ["jotr"], homeParkID: "jotr", nightVision: true, brighterRed: true, forecasts: [:])
         let received = try #require(context.data.flatMap(WatchContext.init(data:)))

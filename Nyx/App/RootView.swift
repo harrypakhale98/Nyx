@@ -10,7 +10,7 @@ struct RootView:View {
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
     @Query private var saved:[SavedPark]
-    /// The person's own spots (G3), handed to the model before anything resolves a saved `pin:` id.
+    /// The person's own spots, handed to the model before anything resolves a saved `pin:` id.
     @Query private var spots:[SavedSpot]
     @Environment(\.modelContext) private var context
     @AppStorage("onboardingComplete") private var onboarded=false
@@ -292,7 +292,7 @@ struct RootView:View {
         // Keyed by the place: a catalogue place named by `-nyx-park` arrives once the catalogue is read
         // (the first park stands in until then), and its page must be its own, asking for its own tile.
         case "detail": if let park=model.home { ParkDetailView(park:park).id(park.id) }
-        // G3 captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
+        // Saved spot captures: the save sheet (`-nyx-state coordinates` for typed coordinates) and a saved spot's page.
         case "save-spot": NavigationStack { SaveSpotView(source: DebugScenario.state == "coordinates" ? .coordinates : .here) }
         case "spot":
             let spot=Place(spotID:"pin:00000000-0000-4000-8000-0000000000aa",name:"Pullout off Pinto Basin Road",latitude:33.92,longitude:-115.93,
@@ -326,7 +326,7 @@ struct RootView:View {
         // About the data with the clearly labelled DEBUG luminance fixture (no real MetricKit report in the simulator).
         case "metric": if DebugScenario.state=="privacy" { PrivacyView().defaultScrollAnchor(.bottom) } else { AboutDataView() }
         case "widgets-xl": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),extraLarge:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
-        // 1.1 platform lane: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
+        // 1.1 platform features: inline, the Moon, a closure line, a widget set to one park; iPad's portrait extra-large.
         case "widgets-new": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),newer:true,moon:MoonEntry(date:.now,park:model.home,nightVision:false)).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-xl-portrait": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),portrait:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }
         case "widgets-step": WidgetReviewView(entry:DebugPlatform.widgetEntry(model,large:true),stepped:true).task { await model.refreshForecasts(watching:model.home.map { [$0] } ?? []) }

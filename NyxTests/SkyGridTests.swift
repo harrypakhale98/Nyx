@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// The bundled world grids (G2): the tile format `Scripts/nyxgrid.py` writes, the corner and cell
+/// The bundled world grids: the tile format, the corner and cell
 /// rules, the usual clouds for places the per-park file does not hold, From home tonight with and
 /// without the sky layer, and the dark areas within a radius. The four fixture tiles in
-/// `NyxTests/Fixtures/` come from `python3 Scripts/make_grid_fixtures.py`, which prints the
+/// `NyxTests/Fixtures/` come from a small script that also prints the
 /// centres, magnitudes and distances used here.
 struct SkyGridTests {
     let bundle = Bundle(for: BundleAnchor.self)

@@ -5,10 +5,10 @@ import SwiftData
 import Accessibility
 @testable import Nyx
 
-/// Wave 2 accessibility: a red for every eye, a field screen bright enough to read, the river
+/// Accessibility: a red for every eye, a field screen bright enough to read, the river
 /// without a drag, shorter park rows, the Moon by name, the night in the hand, a tone toward the
 /// sky, journal photo descriptions, the Assistive Access card and the sky map's order.
-@MainActor @Suite struct AccessLaneTests {
+@MainActor @Suite struct AccessibilityTests {
     let engine=AstronomyEngine()
     func date(_ text:String) throws -> Date { try #require(try? Date(text,strategy:.iso8601)) }
     func night(_ park:Park,_ day:String,score:Int=80,forecast:Bool=true) throws -> Night {
@@ -16,7 +16,7 @@ import Accessibility
         return Night(park:park,sky:sky,score:ScoreEngine().score(sky:sky,bortle:park.bortleEstimate,cloudCover:forecast ? 5 : nil),cloudCover:forecast ? 5 : nil,forecastUpdated:forecast ? .now : nil)
     }
 
-    // MARK: AX-02 Red for every eye
+    // MARK: Red for every eye
 
     /// The brighter red keeps primary and secondary text above 4.5:1 on black and on the night
     /// panel for typical, protan and deutan eyes (Machado 2009); the standard red does not for protans.
@@ -29,7 +29,7 @@ import Accessibility
             #expect(vision.contrast(red*0.96,black)>=4.5, "secondary on black, \(vision)")
             #expect(vision.contrast(red,panel)>=4.5, "primary on the panel, \(vision)")
         }
-        // Why it exists: the standard red falls short for protans, and matches Research/contrast.json.
+        // Why it exists: the standard red falls short for protans.
         #expect(ColorVision.protan.contrast(NightTint.standard.rgb,black)<4.5)
         #expect(abs(ColorVision.typical.contrast(NightTint.standard.rgb,black)-6.16)<0.02)
         #expect(abs(ColorVision.protan.contrast(NightTint.brighter.rgb,black)-5.11)<0.02)
@@ -67,7 +67,7 @@ import Accessibility
         #expect(FieldSession.dimmed(from:0.8,legible:false,keep:true)==nil)
     }
 
-    // MARK: AX-08 Park rows
+    // MARK: Park rows
 
     @Test func parkRowSaysNameScoreBandThenClosure() throws {
         let zion=try park("zion"), tonight=try night(zion,"2026-10-10")
@@ -83,7 +83,7 @@ import Accessibility
         #expect(!ParkRow.moreContent(night:tonight,closure:nil,week:[],stepFree:false).contains { $0.high })
     }
 
-    // MARK: AX-13 The Moon by name
+    // MARK: The Moon by name
 
     @Test func moonLabelsLeadWithThePhase() throws {
         let jotr=try park("jotr")
@@ -100,7 +100,7 @@ import Accessibility
         #expect(MoonDisc.label(illumination:1,waxing:false).hasPrefix("Full moon"))
     }
 
-    // MARK: Award angle 1: Feel tonight
+    // MARK: Feel tonight
 
     @Test func feelTonightFollowsTheNight() throws {
         let jotr=try park("jotr"), tonight=try night(jotr,"2026-11-12")
@@ -125,7 +125,7 @@ import Accessibility
         #expect(curves.allSatisfy { $0.controlPoints.count<=16 } && curves.count==4)
     }
 
-    // MARK: Award angle 1: Where to look by sound
+    // MARK: Where to look by sound
 
     @Test func beaconSitsWhereTheTargetIs() {
         let ahead=BeaconGeometry.position(targetAltitude:0,targetAzimuth:180,facingAzimuth:180)
@@ -153,7 +153,7 @@ import Accessibility
         #expect(BeaconGeometry.automatic([target("moon",.moon,-3),target("core",.core,-5)]) == nil)
     }
 
-    // MARK: PA-13 Journal photo descriptions
+    // MARK: Journal photo descriptions
 
     @Test func photoDescriptionsAreKeptInOrder() async throws {
         let opened=JournalStore.open(inMemory:true)
@@ -183,7 +183,7 @@ import Accessibility
         #expect((PhotoDescriber.clean(String(repeating:"a",count:400))?.count ?? 0)==160)
     }
 
-    // MARK: PA-4 Bortle on iOS 26
+    // MARK: Bortle on iOS 26
 
     @Test func bortleIsSpelledPhoneticallyBeforeIOS27() {
         let text="Bortle estimate, class 2 of 9. Bortle is a scale."
@@ -197,7 +197,7 @@ import Accessibility
         #expect(NyxSpeech.pronunciations.first { $0.word=="Bortle" }?.ssml.contains(NyxSpeech.bortleIPA) == true)
     }
 
-    // MARK: AX-07 Assistive Access
+    // MARK: Assistive Access
 
     @Test func assistiveCardSaysOneWordAndOneTime() throws {
         let jotr=try park("jotr"), tonight=try night(jotr,"2026-10-10")
@@ -211,7 +211,7 @@ import Accessibility
         #expect(AssistiveParkCard.darkLine(june)==SkyConditions.noDarknessMessage(tonight:true))
     }
 
-    // MARK: AX-13 Sky map order
+    // MARK: Sky map order
 
     @Test func skyMapStarsReadWestToEast() {
         let stars=[("c",0.8,0.2),("a",0.1,0.5),("b",0.4,0.9),("b2",0.4005,0.1)].map { SkyMapContent.Star(id:$0.0,point:CGPoint(x:$0.1,y:$0.2),brightness:1,label:$0.0) }

@@ -1,8 +1,7 @@
 import SwiftUI
 
 /// Pages Settings opens in Safari (or Mail, or the App Store) when the person taps them. Nyx never
-/// requests them itself, so they are not network hosts of Nyx's (`Scripts/verify_release.py`
-/// checks this list together with `BrowserLink`).
+/// requests them itself, so they are not network hosts of Nyx's.
 enum SupportLink {
     static let privacyPolicy=page(host:"get-nyx.com",path:"/privacy")
     static let support=page(host:"get-nyx.com",path:"/support")

@@ -1,12 +1,12 @@
 import Foundation
 
 /// How cloudy each park's nights usually are, month by month: ten years (2015–2024) of ERA5
-/// reanalysis over each night's true-dark hours (`Scripts/build_cloud_climate.py`, Copernicus
+/// reanalysis over each night's true-dark hours (Copernicus
 /// Climate Change Service, CC BY 4.0). Where no forecast reaches, a night is scored with its park's
 /// usual cloud for the month, and a forecast more than three days ahead is eased toward it
 /// (`CloudBasis`), so a night nobody can forecast yet is neither assumed clear nor ignored. It is
 /// never shown as a forecast: such nights say "No cloud forecast yet" or "Early look". A place
-/// the file does not hold reads the world grid's usual clouds instead (`SkyGrid`, G2).
+/// the file does not hold reads the world grid's usual clouds instead (`SkyGrid`).
 nonisolated struct CloudClimate: Decodable, Sendable {
     struct Months: Codable, Sendable, Equatable {
         /// Mean cloud over the dark hours, percent, January first.

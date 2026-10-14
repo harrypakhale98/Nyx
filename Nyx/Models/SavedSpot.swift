@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-// Saved spots (G3, `Research/global-plan.md`): a place the person saves themselves, from where they
+// Saved spots: a place the person saves themselves, from where they
 // stand, typed coordinates or a pin. The record is `SavedSpot` (Persistence.swift, NyxSchemaV2); this
 // file turns it into a `Place` the engine scores, and saves, unsaves and deletes it.
 //
