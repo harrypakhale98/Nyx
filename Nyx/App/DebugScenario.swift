@@ -1,0 +1,110 @@
+import Foundation
+
+/// All fixtures and direct-screen routing disappear from Release builds.
+enum DebugScenario {
+    static var screen: String? {
+        #if DEBUG
+        return argument("-nyx-screen")
+        #else
+        return nil
+        #endif
+    }
+    static var state: String? {
+        #if DEBUG
+        return argument("-nyx-state")
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-date 2026-12-13`: "now" is that afternoon (21:00 UTC), so tonight is that night in every US park.
+    static var date: Date? {
+        #if DEBUG
+        guard let text=argument("-nyx-date") else { return nil }
+        return try? Date(text+"T21:00:00Z",strategy:.iso8601)
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-park ever`: the starting park for a scenario (Joshua Tree otherwise).
+    static var park: String? {
+        #if DEBUG
+        return argument("-nyx-park")
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-place "Chicago, IL"`: a city or town from `places.json` as the starting point.
+    static var place: String? {
+        #if DEBUG
+        return argument("-nyx-place")
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-link nyx://whatsup?date=2026-12-13&park=grba`: opened as if tapped, once the app is up
+    /// (the simulator's own `openurl` asks "Open in Nyx?" first, which scripts cannot answer).
+    static var link: URL? {
+        #if DEBUG
+        return argument("-nyx-link").flatMap(URL.init(string:))
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-window 878x669`: the app's root drawn at that size, regular in both directions, so an iPad
+    /// simulator stands in for iPhone Duo's open inner display (which Device Hub cannot always open).
+    static var window: CGSize? {
+        #if DEBUG
+        guard let parts=argument("-nyx-window")?.split(separator:"x").compactMap({ Double($0) }), parts.count==2 else { return nil }
+        return CGSize(width:parts[0],height:parts[1])
+        #else
+        return nil
+        #endif
+    }
+    /// `-nyx-fold book` (top to bottom) or `-nyx-fold table` (side to side): a simulated fold through the
+    /// middle of `-nyx-window`, `foldWidth` points wide, read by `readingFold` in place of the hardware's.
+    static var fold: String? {
+        #if DEBUG
+        return window == nil ? nil : argument("-nyx-fold")
+        #else
+        return nil
+        #endif
+    }
+    nonisolated static let foldWidth=28.0
+    static var onboardingPage:Int {
+        #if DEBUG
+        return min(2,max(0,Int(argument("-nyx-onboarding-page") ?? "0") ?? 0))
+        #else
+        return 0
+        #endif
+    }
+    /// A numeric launch argument, such as `-nyx-field-minutes 90`.
+    static func number(_ key: String) -> Double? {
+        #if DEBUG
+        return argument(key).flatMap(Double.init)
+        #else
+        return nil
+        #endif
+    }
+    /// A text launch argument, such as `-nyx-glow-compare city`.
+    static func text(_ key: String) -> String? {
+        #if DEBUG
+        return argument(key)
+        #else
+        return nil
+        #endif
+    }
+    static func isEnabled(_ value: String) -> Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("-nyx-"+value)
+        #else
+        return false
+        #endif
+    }
+    /// Parks opens its map: the `parks-map` route (as the accessibility audit launches it) or `-nyx-parks-map`.
+    static var parksMap: Bool { screen == "parks-map" || isEnabled("parks-map") }
+    private static func argument(_ key:String)->String? {
+        let args=ProcessInfo.processInfo.arguments
+        guard let index=args.firstIndex(of:key),index+1<args.count else { return nil }
+        return args[index+1]
+    }
+}

@@ -1,0 +1,162 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "How dark is it tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wie dunkel wird es heute Nacht laut ${applicationName}",
+              "Wie ist der Dunkelheitswert heute Nacht laut ${applicationName}",
+              "Dunkelheitswert heute Nacht in ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "How dark is it tonight in ${applicationName}",
+              "What's tonight's darkness score in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qué tan oscuro está esta noche según ${applicationName}",
+              "Cuál es el índice de oscuridad de esta noche en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Le ciel est-il noir ce soir dans ${applicationName}",
+              "Quel est l’indice d’obscurité de ce soir dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜はどれくらい暗い",
+              "${applicationName}で今夜の暗さを教えて",
+              "${applicationName}で今夜の暗さスコアを教えて",
+              "${applicationName}で今夜の暗さスコアは"
+            ]
+          }
+        }
+      }
+    },
+    "Red light on in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Rotlicht an in ${applicationName}",
+              "Schalte das Rotlicht in ${applicationName} ein"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Red light on in ${applicationName}",
+              "Turn on red light in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Enciende la luz roja en ${applicationName}",
+              "Activa la luz roja en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Lumière rouge dans ${applicationName}",
+              "Active la lumière rouge dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で赤色ライトをオン",
+              "${applicationName}で赤い光にして",
+              "${applicationName}で赤色ライトをオンにして"
+            ]
+          }
+        }
+      }
+    },
+    "Start dark adaptation in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Starte die Dunkeladaptation in ${applicationName}",
+              "Gewöhne meine Augen mit ${applicationName} an die Dunkelheit"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Start dark adaptation in ${applicationName}",
+              "Adapt my eyes to the dark with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Inicia la adaptación a la oscuridad en ${applicationName}",
+              "Adapta mis ojos a la oscuridad con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Lance l’adaptation à l’obscurité dans ${applicationName}",
+              "Adapte mes yeux à l’obscurité avec ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で暗順応を開始",
+              "${applicationName}で暗順応を始めて",
+              "${applicationName}で目を暗さに慣らして",
+              "${applicationName}で目を暗さに慣らす"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

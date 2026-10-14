@@ -1,0 +1,1639 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		004D7D0D9FD8BC801347DCB0 /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595283380B56E24389ECC7ED /* MotionTilt.swift */; };
+		00E85D5F09464D04CB6AAD8C /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595283380B56E24389ECC7ED /* MotionTilt.swift */; };
+		00F5B8FD438E9BDB79E20183 /* DebugForecasts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709E97C95C2822EF09782FE /* DebugForecasts.swift */; };
+		01D65B60834D7F8C628BA402 /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B776FE36AE984FB59B76D77 /* NyxTheme.swift */; };
+		05E4A3B5BE6A68488CD18F09 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
+		0870407728908FE84B757328 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
+		08EA694F6AB6FF7EB2BE0157 /* FieldActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB37AE2807D0FD113C27DC0D /* FieldActivityView.swift */; };
+		092DD8031C747916C4A36133 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
+		09E343E681A4650B091467CD /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
+		0AECB067EC930F38926E44EC /* CloudForecastClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D166F2461DDF8E880670FC /* CloudForecastClient.swift */; };
+		0C1211C364C7B8A2D326E7B7 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
+		0FE35656AA49598D7396AA03 /* constellations.json in Resources */ = {isa = PBXBuildFile; fileRef = 828535E0682831644E0634EA /* constellations.json */; };
+		0FFA03FB8857F002B6A7ACFD /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
+		14FCF1328DEA03F88F82A978 /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
+		156E6844ECA20351AE3962F3 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
+		19C6A8EF9D8643E2870F40D3 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4FA83F19CA3A305D8FD7A607 /* Moon.metal */; };
+		1AD5B0518495515AEB946186 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
+		1D536123B0A86756062C2086 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EB09DA695F3C836EBD27CA /* SharedSettings.swift */; };
+		1DCF1A526787A265E0CBCC50 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */; };
+		222136EEBB3B38767A68E48A /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
+		24BE1D6F764AEF833CE4CD86 /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
+		2A9AF3CA81592E730ABFB714 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
+		2C18BF2F9437BED1CAD7CDCD /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B776FE36AE984FB59B76D77 /* NyxTheme.swift */; };
+		2D23F9B5C6748F634F300DE5 /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 72998C6FAFE92D4C7CE0351B /* parks.json */; };
+		2E1E441F6353B3F253728AAB /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
+		2E2FC2B190540B614C6DBEDE /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */; };
+		2F55AFD3A62973F36E9742CB /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */; };
+		3096FAC5078743D9AE1443E6 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04AD08C23877FD64760052 /* Park.swift */; };
+		330CCFF09B4E92511DA20A1E /* MoonWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F95FD20B95047690327F9D /* MoonWidgetView.swift */; };
+		33EED4F8CBFC30821DBF5D8D /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
+		35C2B2051D7610E4F82BC434 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */; };
+		36878CCC630965FF211CD0B8 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
+		390C9619142DF95DD65E9C8A /* MoonRelief.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32C5E12757C9A5ABCB32D68E /* MoonRelief.xcassets */; };
+		3B459068F918F3610F56F1CC /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = F1549E33041F22459667C9A1 /* cloud-climate.json */; };
+		3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
+		3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */; };
+		3F06B201A3F3771922AA4458 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
+		40435812B77530EC31184150 /* Campground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F2E16F6D3215FAA0CDD1BF /* Campground.swift */; };
+		42EFA849DFCEB705B626DFED /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = BEA896A970D4E216C36A98A0 /* stars.json */; };
+		44CEAEA71452256B4DF00524 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
+		46245A719A6B8E0DDD128627 /* SkyGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BFB122086DAA75F561950E /* SkyGrid.swift */; };
+		465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4FA83F19CA3A305D8FD7A607 /* Moon.metal */; };
+		475A7C46B31CDA3DD8F5DAFB /* NightsAhead.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99C40D2450289A5AC5A4BAE /* NightsAhead.swift */; };
+		481CB178018855AFAB501E50 /* SkyGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BFB122086DAA75F561950E /* SkyGrid.swift */; };
+		486C85C7FF840FB7A75834E8 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04AD08C23877FD64760052 /* Park.swift */; };
+		48F2BA8F07944391BD20D1AA /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
+		4D3CFCB5F02D6A5D5E6CAEBA /* FieldActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3FEF92A1A54E0F557369DF /* FieldActivity.swift */; };
+		5035B8168A34B07A9A70C8FD /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
+		52C41A72AFEC6BD1F5605C83 /* NyxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B776FE36AE984FB59B76D77 /* NyxTheme.swift */; };
+		52CD76AA510DFA89D5A7796F /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */; };
+		54F9BF81BD406DC2ECDC2C83 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */; };
+		5593F1DDDD5F18D951FA02FF /* MoonWeek.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D52A0A38DA73A94BD94A63 /* MoonWeek.swift */; };
+		55BDAED0516283D51A024B50 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */; };
+		56AD54D98C49E9E45C364048 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04AD08C23877FD64760052 /* Park.swift */; };
+		58B754876B93C815E5503C21 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
+		6021307ED0000EC6CCB5784A /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2191569D624FE860CBED2833 /* WatchContext.swift */; };
+		604E8E80F1487290DF7A6303 /* NyxWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		624E3F8E72FF10BBC1A0D68B /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */; };
+		67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8417DA2D50522530C270A095 /* RealSky.swift */; };
+		692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
+		6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E6518B28E70FF389F8A687 /* SearchRadius.swift */; };
+		6AC003053CD1F414C992EA97 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
+		6C2C5B0C4A6B492E9CC64511 /* MoonWidgetFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4F9FD3096BFB38EFD1C5C7 /* MoonWidgetFace.swift */; };
+		6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
+		70CAB552F38FF2836574C081 /* MoonWeek.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D52A0A38DA73A94BD94A63 /* MoonWeek.swift */; };
+		70EEAC52803BDDD86495EE3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 30E4625F912884C975BC8688 /* Assets.xcassets */; };
+		71206B5A957197433ED472F3 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = F1549E33041F22459667C9A1 /* cloud-climate.json */; };
+		72221BB1981396D9F8D716AA /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 72998C6FAFE92D4C7CE0351B /* parks.json */; };
+		72CC113DC95BBDD8BB37CE0E /* star-names.json in Resources */ = {isa = PBXBuildFile; fileRef = A18D149D73C4FA13DD46E669 /* star-names.json */; };
+		751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		75C537957F4E55952E25AE5F /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EB09DA695F3C836EBD27CA /* SharedSettings.swift */; };
+		76230A37AE7D1D967EB0822D /* WidgetParkIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C41B8315DF5E8ACB61DB077 /* WidgetParkIntent.swift */; };
+		789AB8C03A7ED0EACE11F594 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 30E4625F912884C975BC8688 /* Assets.xcassets */; };
+		7931B0A2C123E527D9329169 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2191569D624FE860CBED2833 /* WatchContext.swift */; };
+		797A8A35878D87971F9F953B /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04AD08C23877FD64760052 /* Park.swift */; };
+		7B63921E0FB8467632635DFC /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
+		7BADDF7064BEFE27DCBCE64E /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
+		7D83EE37A53ABE964A8901E4 /* SkyLore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C424C7442F787D7C3A520B5B /* SkyLore.swift */; };
+		7D88F9519780E4CDFD39EAF8 /* CloudForecastClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D166F2461DDF8E880670FC /* CloudForecastClient.swift */; };
+		7EC8C3897B03E14674BBB850 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
+		7FC8F631FA91104DFF34CE90 /* MoonShading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6725AD36BAD3B91469F544E7 /* MoonShading.swift */; };
+		814C38B8175ACF135E7F65EB /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
+		8273604C4AEF5A111AC145AB /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 72998C6FAFE92D4C7CE0351B /* parks.json */; };
+		828E44ADCB0DD0EA998F69B4 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
+		852479972C7FF2847453F45F /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
+		85E89DD448272AE1C8D3A14D /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = BEA896A970D4E216C36A98A0 /* stars.json */; };
+		898A5A3875E14084294BB08C /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = BEA896A970D4E216C36A98A0 /* stars.json */; };
+		8A637F8ED5A265541E917EB0 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
+		920BDAF3A25147144D2690EF /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */; };
+		94A124BBBBA1A39F5FBA8A47 /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
+		9521AB1049D4F45C54B4260B /* SkyGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BFB122086DAA75F561950E /* SkyGrid.swift */; };
+		9555B130DCFE14678D83272D /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
+		9C4820CEB067F3B802203BEC /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = F1549E33041F22459667C9A1 /* cloud-climate.json */; };
+		9C670B8420ADE24EEEB7D5EE /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
+		9E046FEE636396228A63D693 /* MotionTilt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595283380B56E24389ECC7ED /* MotionTilt.swift */; };
+		A155742FE60C3F1ECB785267 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 19F6A404464D0EAD5F5CEABA /* Localizable.xcstrings */; };
+		A4EA59659DF0EF4DDB4BB951 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
+		A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53D0C95B34F3513BFD765F3B /* AppIntents.framework */; };
+		AA62C904D4214D3E8E186221 /* CloudClimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */; };
+		ABB41DEEA4FFF1D9A64E2CED /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
+		AE963C213E538BEFE9895049 /* WristSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */; };
+		B00E3E3717F8A9536639A020 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
+		B2BCC9A5769EC83274D79A02 /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D319BAF3907884E43F8316F /* DataServices.swift */; };
+		B594B0706D542A815F15C1D8 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
+		B7E0F27E967C498A458A24E0 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30FAB15A78C4224F9A91117 /* Forecast.swift */; };
+		BA785E8BD3C69A9097A954AE /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE401E4AEE8751787D4278CB /* MoonDisc.swift */; };
+		BABE8B1A44675DABE28C69A2 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
+		BDD3314200AD7596B32D9284 /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8417DA2D50522530C270A095 /* RealSky.swift */; };
+		BDF805BE459DDB0B102CCD8D /* SkyDome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D1F0093FB21BCC2BF3CE47 /* SkyDome.swift */; };
+		C1201D85688C47CB4928A3EF /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
+		C1C7DB07418934B05A45534F /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EB09DA695F3C836EBD27CA /* SharedSettings.swift */; };
+		C1FF9ACE40C4BB5192076434 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
+		C2ADDC2ECAC3B8E9DEB41A48 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
+		C2E5B716866DD326933DD928 /* NyxVisionWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7A0D0467BE8E13E5C6686DB1 /* NyxVisionWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CA67A9F355C4494729B73192 /* cloud-climate.json in Resources */ = {isa = PBXBuildFile; fileRef = F1549E33041F22459667C9A1 /* cloud-climate.json */; };
+		CA7BB941605B968CA2847325 /* WatchDialFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE2A68A5F28061C8A1A146B /* WatchDialFace.swift */; };
+		CBB9FF180E3F92412AA8C512 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
+		CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804E5BD1D8D8159594420977 /* ConstellationTrace.swift */; };
+		CFF0FD048B75ED80BA523F43 /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
+		D3E217DBC6AF8C81B0341403 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */; };
+		D76D8AEF6E83CE9D27949264 /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
+		D8249FF7E498630CFFEA5576 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
+		DC6711ADFB108BA823A4AF1A /* NightVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E7A624F99BEE20F5AC8893 /* NightVisionIntent.swift */; };
+		DCFDEDF23A646C0334FCDC17 /* Park.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA04AD08C23877FD64760052 /* Park.swift */; };
+		DDA72658C041C7F738A9EA65 /* skyglow.json in Resources */ = {isa = PBXBuildFile; fileRef = CC857B159B3CE7AA07A7736B /* skyglow.json */; };
+		E3C54CD7BBCAF113F7B1388D /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
+		E517FC440BA1D64CF0A1941A /* SkyGlyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F16F39BA6C42207889C3DFE /* SkyGlyph.swift */; };
+		E6439445EFAF13C7898A290E /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
+		E786F017E42CDFF2BDCBA75D /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2191569D624FE860CBED2833 /* WatchContext.swift */; };
+		E92493A6E7C4FED466334D0B /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
+		EB8A8845B39BB4B34D306816 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
+		EC42ED0FA04F01177B7365E5 /* TonightWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA23E26EDC0F14F8EC6BE0A0 /* TonightWidgetView.swift */; };
+		ECE67416D62B9BAD6B7CA3C2 /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = BEA896A970D4E216C36A98A0 /* stars.json */; };
+		F1532AAEEBA3B1A21184977A /* ForecastDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */; };
+		F27199AAEAD4E639A8752AEE /* SkyGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BFB122086DAA75F561950E /* SkyGrid.swift */; };
+		F45CD45037926209454D0983 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
+		F59C28C90FA325BED3C972C1 /* NyxWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F686C98BD8604BF2D2EEC67B /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8417DA2D50522530C270A095 /* RealSky.swift */; };
+		F86C0DCF2F4503A99D43473B /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 72998C6FAFE92D4C7CE0351B /* parks.json */; };
+		F939755DADB0474A00ABF833 /* ParkHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AD5D34292CFC28A3F97A49 /* ParkHandoff.swift */; };
+		FB85875C5F345BA773561ECC /* FieldModeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54030FE628EFDD89DB8DC0D /* FieldModeIntent.swift */; };
+		FB9F568367F1DFEC6B114E9D /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
+		FCDD50FAFF26C51F12CD294D /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
+		FCEAA33CD015F5EE73BB3B48 /* SkyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */; };
+		FCEF2CD778FC3DCF6AA2484E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1042073ABA0CEA0053190CA6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0A5547B7F4020EE942D01DA6;
+			remoteInfo = Nyx;
+		};
+		7100FCE0907B58549AC63ECE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAB1C17E6D972FDE5831B51D;
+			remoteInfo = NyxWatch;
+		};
+		8730A991A64E8054DB1164EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCB8C04F36729B0984AE9CCD;
+			remoteInfo = NyxVisionWidgets;
+		};
+		8D553FD79B3891F7AB06AE98 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1C08AA3770ABC4BE10D980C7;
+			remoteInfo = NyxWidgets;
+		};
+		E3EC165FDA5FCED4094FB540 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0A5547B7F4020EE942D01DA6;
+			remoteInfo = Nyx;
+		};
+		F15039547FD4327C40D3CFC4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 185F89D3A6658BC2E2C2309C;
+			remoteInfo = NyxWatchWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		78C5461CCE3E62B888D14BEE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F59C28C90FA325BED3C972C1 /* NyxWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B16C8C519B334306220BDCF5 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				604E8E80F1487290DF7A6303 /* NyxWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BAB009E6D388AAD1624DF040 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				751C238C2F51F412EEB6F7B9 /* NyxWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB456E7764296A8DC65076D4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C2E5B716866DD326933DD928 /* NyxVisionWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyConditions.swift; path = Nyx/Models/SkyConditions.swift; sourceTree = "<group>"; };
+		02A9C38C2E731E834DC100FC /* WhatsUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WhatsUp.swift; path = Nyx/Services/WhatsUp.swift; sourceTree = "<group>"; };
+		04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = Nyx/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
+		19F6A404464D0EAD5F5CEABA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = NyxVision/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
+		1B776FE36AE984FB59B76D77 /* NyxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NyxTheme.swift; path = Nyx/DesignSystem/NyxTheme.swift; sourceTree = "<group>"; };
+		20EB09DA695F3C836EBD27CA /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedSettings.swift; path = Nyx/Services/SharedSettings.swift; sourceTree = "<group>"; };
+		2191569D624FE860CBED2833 /* WatchContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchContext.swift; path = Nyx/Services/WatchContext.swift; sourceTree = "<group>"; };
+		2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonSymbol.swift; path = Nyx/DesignSystem/MoonSymbol.swift; sourceTree = "<group>"; };
+		2DDB844BA3C38BF029401D53 /* NyxVision.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = NyxVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		30E4625F912884C975BC8688 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Nyx/Resources/Assets.xcassets; sourceTree = "<group>"; };
+		32C5E12757C9A5ABCB32D68E /* MoonRelief.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = MoonRelief.xcassets; path = Nyx/Resources/MoonRelief.xcassets; sourceTree = "<group>"; };
+		33AD5D34292CFC28A3F97A49 /* ParkHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParkHandoff.swift; path = Nyx/Models/ParkHandoff.swift; sourceTree = "<group>"; };
+		352775EE2B5D179F008BA853 /* Sentences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Sentences.swift; path = Nyx/Services/Sentences.swift; sourceTree = "<group>"; };
+		3883DF0B22709FB826986A9C /* NyxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3FE2A68A5F28061C8A1A146B /* WatchDialFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchDialFace.swift; path = Nyx/DesignSystem/WatchDialFace.swift; sourceTree = "<group>"; };
+		41D1F0093FB21BCC2BF3CE47 /* SkyDome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyDome.swift; path = Nyx/Services/SkyDome.swift; sourceTree = "<group>"; };
+		48D166F2461DDF8E880670FC /* CloudForecastClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CloudForecastClient.swift; path = Nyx/Services/CloudForecastClient.swift; sourceTree = "<group>"; };
+		4FA83F19CA3A305D8FD7A607 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = Moon.metal; path = Nyx/DesignSystem/Moon.metal; sourceTree = "<group>"; };
+		504FC2DA615C646B33B4F0E3 /* sky-events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "sky-events.json"; path = "Nyx/Resources/sky-events.json"; sourceTree = "<group>"; };
+		53D0C95B34F3513BFD765F3B /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		57E6518B28E70FF389F8A687 /* SearchRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchRadius.swift; path = Nyx/Services/SearchRadius.swift; sourceTree = "<group>"; };
+		595283380B56E24389ECC7ED /* MotionTilt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MotionTilt.swift; path = Nyx/DesignSystem/MotionTilt.swift; sourceTree = "<group>"; };
+		5C41B8315DF5E8ACB61DB077 /* WidgetParkIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetParkIntent.swift; path = Nyx/Intents/WidgetParkIntent.swift; sourceTree = "<group>"; };
+		5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristSky.swift; path = Nyx/Services/WristSky.swift; sourceTree = "<group>"; };
+		6725AD36BAD3B91469F544E7 /* MoonShading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonShading.swift; path = Nyx/DesignSystem/MoonShading.swift; sourceTree = "<group>"; };
+		6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CloudClimate.swift; path = Nyx/Models/CloudClimate.swift; sourceTree = "<group>"; };
+		72998C6FAFE92D4C7CE0351B /* parks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = parks.json; path = Nyx/Resources/parks.json; sourceTree = "<group>"; };
+		7A0D0467BE8E13E5C6686DB1 /* NyxVisionWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxVisionWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F16F39BA6C42207889C3DFE /* SkyGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyGlyph.swift; path = Nyx/DesignSystem/SkyGlyph.swift; sourceTree = "<group>"; };
+		804E5BD1D8D8159594420977 /* ConstellationTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConstellationTrace.swift; path = Nyx/DesignSystem/ConstellationTrace.swift; sourceTree = "<group>"; };
+		828535E0682831644E0634EA /* constellations.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = constellations.json; path = Nyx/Resources/constellations.json; sourceTree = "<group>"; };
+		8417DA2D50522530C270A095 /* RealSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RealSky.swift; path = Nyx/DesignSystem/RealSky.swift; sourceTree = "<group>"; };
+		98F2E16F6D3215FAA0CDD1BF /* Campground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Campground.swift; path = Nyx/Models/Campground.swift; sourceTree = "<group>"; };
+		991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NyxPalette.swift; path = Nyx/DesignSystem/NyxPalette.swift; sourceTree = "<group>"; };
+		9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ForecastDetail.swift; path = Nyx/Services/ForecastDetail.swift; sourceTree = "<group>"; };
+		9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParkEntity.swift; path = Nyx/Intents/ParkEntity.swift; sourceTree = "<group>"; };
+		9D319BAF3907884E43F8316F /* DataServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DataServices.swift; path = Nyx/Services/DataServices.swift; sourceTree = "<group>"; };
+		9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AstronomyEngine.swift; path = Nyx/Services/AstronomyEngine.swift; sourceTree = "<group>"; };
+		A18D149D73C4FA13DD46E669 /* star-names.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "star-names.json"; path = "Nyx/Resources/star-names.json"; sourceTree = "<group>"; };
+		A3F95FD20B95047690327F9D /* MoonWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonWidgetView.swift; path = Nyx/DesignSystem/MoonWidgetView.swift; sourceTree = "<group>"; };
+		A4E7A624F99BEE20F5AC8893 /* NightVisionIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightVisionIntent.swift; path = Nyx/Intents/NightVisionIntent.swift; sourceTree = "<group>"; };
+		AA589DE85797E6C559AB746B /* Nyx.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nyx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE401E4AEE8751787D4278CB /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonDisc.swift; path = Nyx/DesignSystem/MoonDisc.swift; sourceTree = "<group>"; };
+		AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyAlmanac.swift; path = Nyx/Services/SkyAlmanac.swift; sourceTree = "<group>"; };
+		B30FAB15A78C4224F9A91117 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Forecast.swift; path = Nyx/Models/Forecast.swift; sourceTree = "<group>"; };
+		B8D52A0A38DA73A94BD94A63 /* MoonWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonWeek.swift; path = Nyx/Services/MoonWeek.swift; sourceTree = "<group>"; };
+		BEA896A970D4E216C36A98A0 /* stars.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = stars.json; path = Nyx/Resources/stars.json; sourceTree = "<group>"; };
+		C2B255D63E873FD4422C672B /* Nyx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Nyx.xcconfig; sourceTree = "<group>"; };
+		C424C7442F787D7C3A520B5B /* SkyLore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyLore.swift; path = Nyx/Services/SkyLore.swift; sourceTree = "<group>"; };
+		C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NyxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB37AE2807D0FD113C27DC0D /* FieldActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FieldActivityView.swift; path = Nyx/DesignSystem/FieldActivityView.swift; sourceTree = "<group>"; };
+		CC857B159B3CE7AA07A7736B /* skyglow.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = skyglow.json; path = Nyx/Resources/skyglow.json; sourceTree = "<group>"; };
+		CD3FEF92A1A54E0F557369DF /* FieldActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FieldActivity.swift; path = Nyx/Models/FieldActivity.swift; sourceTree = "<group>"; };
+		D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NyxWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D54030FE628EFDD89DB8DC0D /* FieldModeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FieldModeIntent.swift; path = Nyx/Intents/FieldModeIntent.swift; sourceTree = "<group>"; };
+		D7CE8F62A781211AEED0D40D /* NightPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightPlanner.swift; path = Nyx/Services/NightPlanner.swift; sourceTree = "<group>"; };
+		E0BFB122086DAA75F561950E /* SkyGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyGrid.swift; path = Nyx/Services/SkyGrid.swift; sourceTree = "<group>"; };
+		E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScoreEngine.swift; path = Nyx/Services/ScoreEngine.swift; sourceTree = "<group>"; };
+		E99C40D2450289A5AC5A4BAE /* NightsAhead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightsAhead.swift; path = Nyx/Services/NightsAhead.swift; sourceTree = "<group>"; };
+		EA23E26EDC0F14F8EC6BE0A0 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TonightWidgetView.swift; path = Nyx/DesignSystem/TonightWidgetView.swift; sourceTree = "<group>"; };
+		EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NyxWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE4F9FD3096BFB38EFD1C5C7 /* MoonWidgetFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MoonWidgetFace.swift; path = NyxVisionWidgets/MoonWidgetFace.swift; sourceTree = "<group>"; };
+		F1549E33041F22459667C9A1 /* cloud-climate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "cloud-climate.json"; path = "Nyx/Resources/cloud-climate.json"; sourceTree = "<group>"; };
+		F709E97C95C2822EF09782FE /* DebugForecasts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DebugForecasts.swift; path = Nyx/App/DebugForecasts.swift; sourceTree = "<group>"; };
+		FA04AD08C23877FD64760052 /* Park.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Park.swift; path = Nyx/Models/Park.swift; sourceTree = "<group>"; };
+		FA5B722D8576099210CEB8CA /* NyxWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NyxWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Starfield.swift; path = Nyx/DesignSystem/Starfield.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1F193FB7B920E78B15671A7D /* NyxVisionWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxVisionWidgets;
+			sourceTree = "<group>";
+		};
+		70AD1413C163EC0ADFA3A121 /* NyxWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxWatch;
+			sourceTree = "<group>";
+		};
+		7424D0904A06D62EF30443BC /* NyxWatchShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxWatchShared;
+			sourceTree = "<group>";
+		};
+		7A5BE32B9081D66DE8C152A9 /* Nyx */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Nyx;
+			sourceTree = "<group>";
+		};
+		7FBCE4E226E945E14F5B033B /* NyxWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxWidgets;
+			sourceTree = "<group>";
+		};
+		8CF9EF626E715091D6C2E2C4 /* NyxWatchWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxWatchWidgets;
+			sourceTree = "<group>";
+		};
+		91BEC42ACC3D532DD1C25BC2 /* NyxTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxTests;
+			sourceTree = "<group>";
+		};
+		C9A570BE0B74B70D0E2873A4 /* NyxUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxUITests;
+			sourceTree = "<group>";
+		};
+		EF9B82021F8DE7AC0904028C /* NyxVision */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NyxVision;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6A9950E892C66649D1BF8818 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A639641CD1D86F5C91F3DCA1 /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		569B78DBBD2892F506E07B16 = {
+			isa = PBXGroup;
+			children = (
+				6A17ED8BAE018F61B73A02CA /* Config */,
+				7A5BE32B9081D66DE8C152A9 /* Nyx */,
+				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
+				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
+				EF9B82021F8DE7AC0904028C /* NyxVision */,
+				1F193FB7B920E78B15671A7D /* NyxVisionWidgets */,
+				70AD1413C163EC0ADFA3A121 /* NyxWatch */,
+				7424D0904A06D62EF30443BC /* NyxWatchShared */,
+				8CF9EF626E715091D6C2E2C4 /* NyxWatchWidgets */,
+				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
+				F5A47E3E49A5066343A6CADC /* Shared */,
+				DF1FCDD136924F1A365B6897 /* Frameworks */,
+				C6C977DAF6E4DA8EAE489090 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6A17ED8BAE018F61B73A02CA /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				C2B255D63E873FD4422C672B /* Nyx.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		86226D13B0BD7618FE3F5901 /* visionOS */ = {
+			isa = PBXGroup;
+			children = (
+				19F6A404464D0EAD5F5CEABA /* Localizable.xcstrings */,
+			);
+			name = visionOS;
+			sourceTree = "<group>";
+		};
+		C6C977DAF6E4DA8EAE489090 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA589DE85797E6C559AB746B /* Nyx.app */,
+				3883DF0B22709FB826986A9C /* NyxTests.xctest */,
+				C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */,
+				2DDB844BA3C38BF029401D53 /* NyxVision.app */,
+				7A0D0467BE8E13E5C6686DB1 /* NyxVisionWidgets.appex */,
+				D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */,
+				EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */,
+				FA5B722D8576099210CEB8CA /* NyxWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DF1FCDD136924F1A365B6897 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				53D0C95B34F3513BFD765F3B /* AppIntents.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F5A47E3E49A5066343A6CADC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				30E4625F912884C975BC8688 /* Assets.xcassets */,
+				9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */,
+				98F2E16F6D3215FAA0CDD1BF /* Campground.swift */,
+				F1549E33041F22459667C9A1 /* cloud-climate.json */,
+				6909D957BF0A7CEFCB8F8603 /* CloudClimate.swift */,
+				48D166F2461DDF8E880670FC /* CloudForecastClient.swift */,
+				828535E0682831644E0634EA /* constellations.json */,
+				804E5BD1D8D8159594420977 /* ConstellationTrace.swift */,
+				9D319BAF3907884E43F8316F /* DataServices.swift */,
+				F709E97C95C2822EF09782FE /* DebugForecasts.swift */,
+				CD3FEF92A1A54E0F557369DF /* FieldActivity.swift */,
+				CB37AE2807D0FD113C27DC0D /* FieldActivityView.swift */,
+				D54030FE628EFDD89DB8DC0D /* FieldModeIntent.swift */,
+				B30FAB15A78C4224F9A91117 /* Forecast.swift */,
+				9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */,
+				04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */,
+				4FA83F19CA3A305D8FD7A607 /* Moon.metal */,
+				AE401E4AEE8751787D4278CB /* MoonDisc.swift */,
+				32C5E12757C9A5ABCB32D68E /* MoonRelief.xcassets */,
+				6725AD36BAD3B91469F544E7 /* MoonShading.swift */,
+				2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */,
+				B8D52A0A38DA73A94BD94A63 /* MoonWeek.swift */,
+				EE4F9FD3096BFB38EFD1C5C7 /* MoonWidgetFace.swift */,
+				A3F95FD20B95047690327F9D /* MoonWidgetView.swift */,
+				595283380B56E24389ECC7ED /* MotionTilt.swift */,
+				D7CE8F62A781211AEED0D40D /* NightPlanner.swift */,
+				E99C40D2450289A5AC5A4BAE /* NightsAhead.swift */,
+				A4E7A624F99BEE20F5AC8893 /* NightVisionIntent.swift */,
+				991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */,
+				1B776FE36AE984FB59B76D77 /* NyxTheme.swift */,
+				FA04AD08C23877FD64760052 /* Park.swift */,
+				9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */,
+				33AD5D34292CFC28A3F97A49 /* ParkHandoff.swift */,
+				72998C6FAFE92D4C7CE0351B /* parks.json */,
+				8417DA2D50522530C270A095 /* RealSky.swift */,
+				E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */,
+				57E6518B28E70FF389F8A687 /* SearchRadius.swift */,
+				352775EE2B5D179F008BA853 /* Sentences.swift */,
+				20EB09DA695F3C836EBD27CA /* SharedSettings.swift */,
+				504FC2DA615C646B33B4F0E3 /* sky-events.json */,
+				AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */,
+				0237C0E0F5172A701CB7CE97 /* SkyConditions.swift */,
+				41D1F0093FB21BCC2BF3CE47 /* SkyDome.swift */,
+				CC857B159B3CE7AA07A7736B /* skyglow.json */,
+				7F16F39BA6C42207889C3DFE /* SkyGlyph.swift */,
+				E0BFB122086DAA75F561950E /* SkyGrid.swift */,
+				C424C7442F787D7C3A520B5B /* SkyLore.swift */,
+				A18D149D73C4FA13DD46E669 /* star-names.json */,
+				FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */,
+				BEA896A970D4E216C36A98A0 /* stars.json */,
+				EA23E26EDC0F14F8EC6BE0A0 /* TonightWidgetView.swift */,
+				2191569D624FE860CBED2833 /* WatchContext.swift */,
+				3FE2A68A5F28061C8A1A146B /* WatchDialFace.swift */,
+				02A9C38C2E731E834DC100FC /* WhatsUp.swift */,
+				5C41B8315DF5E8ACB61DB077 /* WidgetParkIntent.swift */,
+				5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */,
+				86226D13B0BD7618FE3F5901 /* visionOS */,
+			);
+			name = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0A5547B7F4020EE942D01DA6 /* Nyx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2AE323B373CBF347CAED279 /* Build configuration list for PBXNativeTarget "Nyx" */;
+			buildPhases = (
+				6A9B704D1082D7C0A158B7FF /* Sources */,
+				A7E799A6D9F1B899FC1EF092 /* Resources */,
+				BAB009E6D388AAD1624DF040 /* Embed Foundation Extensions */,
+				B16C8C519B334306220BDCF5 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				48A027002D5D29C049984CE7 /* PBXTargetDependency */,
+				FED78128A063AA0DDF522262 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7A5BE32B9081D66DE8C152A9 /* Nyx */,
+			);
+			name = Nyx;
+			packageProductDependencies = (
+			);
+			productName = Nyx;
+			productReference = AA589DE85797E6C559AB746B /* Nyx.app */;
+			productType = "com.apple.product-type.application";
+		};
+		185F89D3A6658BC2E2C2309C /* NyxWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 335B4D7590DCEEDB9025BBAA /* Build configuration list for PBXNativeTarget "NyxWatchWidgets" */;
+			buildPhases = (
+				88CC9FD1B4CB4606593AFBD7 /* Sources */,
+				8440993C71EC02F692BC6F3E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7424D0904A06D62EF30443BC /* NyxWatchShared */,
+				8CF9EF626E715091D6C2E2C4 /* NyxWatchWidgets */,
+			);
+			name = NyxWatchWidgets;
+			packageProductDependencies = (
+			);
+			productName = NyxWatchWidgets;
+			productReference = EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		1C08AA3770ABC4BE10D980C7 /* NyxWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 785C554747E5C87BEE0DE623 /* Build configuration list for PBXNativeTarget "NyxWidgets" */;
+			buildPhases = (
+				79F4C3F3E9B2B801E42CDBA8 /* Sources */,
+				764F4B1206D3D4F22ABA4C57 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7FBCE4E226E945E14F5B033B /* NyxWidgets */,
+			);
+			name = NyxWidgets;
+			packageProductDependencies = (
+			);
+			productName = NyxWidgets;
+			productReference = FA5B722D8576099210CEB8CA /* NyxWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		35EEA7F15A5144F18CBA3158 /* NyxUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED4CF400F3DBEF5B4643E617 /* Build configuration list for PBXNativeTarget "NyxUITests" */;
+			buildPhases = (
+				E86B5928E777CA9F5C1DB1CF /* Sources */,
+				6D98CEA6E9B261416440E889 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F517AB2382ED8132739B40A7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C9A570BE0B74B70D0E2873A4 /* NyxUITests */,
+			);
+			name = NyxUITests;
+			packageProductDependencies = (
+			);
+			productName = NyxUITests;
+			productReference = C6A1336554FE05CE9EA9906B /* NyxUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		854F1CAF019EEA9E852C4585 /* NyxTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95D139A2BAA0499000AEA765 /* Build configuration list for PBXNativeTarget "NyxTests" */;
+			buildPhases = (
+				75EC3E9F8200D595C2DCA896 /* Sources */,
+				8937CA544265ABB3D4DC6840 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A7161FD3EA7E381C9C1519FB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				91BEC42ACC3D532DD1C25BC2 /* NyxTests */,
+			);
+			name = NyxTests;
+			packageProductDependencies = (
+			);
+			productName = NyxTests;
+			productReference = 3883DF0B22709FB826986A9C /* NyxTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C3FE8CF2BC17EF084DAF890D /* NyxVision */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 083E0E382D9FCC8D981CC0D9 /* Build configuration list for PBXNativeTarget "NyxVision" */;
+			buildPhases = (
+				2173521F4FCCD72FDDA9F592 /* Sources */,
+				EFAC2CA7D595D506FA761FFD /* Resources */,
+				6A9950E892C66649D1BF8818 /* Frameworks */,
+				EB456E7764296A8DC65076D4 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				11637B9E5E03448BA9F72649 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EF9B82021F8DE7AC0904028C /* NyxVision */,
+			);
+			name = NyxVision;
+			packageProductDependencies = (
+			);
+			productName = NyxVision;
+			productReference = 2DDB844BA3C38BF029401D53 /* NyxVision.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DAB1C17E6D972FDE5831B51D /* NyxWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C26EC8FCF259145884CFCFC2 /* Build configuration list for PBXNativeTarget "NyxWatch" */;
+			buildPhases = (
+				5E21F98789260E514479F418 /* Sources */,
+				73D8E3258310093F08FC83C3 /* Resources */,
+				78C5461CCE3E62B888D14BEE /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				626CC064643119E5671B0CDD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				70AD1413C163EC0ADFA3A121 /* NyxWatch */,
+				7424D0904A06D62EF30443BC /* NyxWatchShared */,
+			);
+			name = NyxWatch;
+			packageProductDependencies = (
+			);
+			productName = NyxWatch;
+			productReference = D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FCB8C04F36729B0984AE9CCD /* NyxVisionWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A4FAF93D18A10DA567FE5123 /* Build configuration list for PBXNativeTarget "NyxVisionWidgets" */;
+			buildPhases = (
+				C6AE3EC4D96FE93A28A59041 /* Sources */,
+				E6B9E76A0E8EB3A4C23084E8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1F193FB7B920E78B15671A7D /* NyxVisionWidgets */,
+			);
+			name = NyxVisionWidgets;
+			packageProductDependencies = (
+			);
+			productName = NyxVisionWidgets;
+			productReference = 7A0D0467BE8E13E5C6686DB1 /* NyxVisionWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3B2DE3D8B000D0D9ED3C53AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					0A5547B7F4020EE942D01DA6 = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					185F89D3A6658BC2E2C2309C = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					1C08AA3770ABC4BE10D980C7 = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					35EEA7F15A5144F18CBA3158 = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 0A5547B7F4020EE942D01DA6;
+					};
+					854F1CAF019EEA9E852C4585 = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					C3FE8CF2BC17EF084DAF890D = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					DAB1C17E6D972FDE5831B51D = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+					FCB8C04F36729B0984AE9CCD = {
+						DevelopmentTeam = DUHVN68KBA;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 35DBE5EFDB6C5F8237D10EDD /* Build configuration list for PBXProject "Nyx" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 569B78DBBD2892F506E07B16;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C6C977DAF6E4DA8EAE489090 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0A5547B7F4020EE942D01DA6 /* Nyx */,
+				1C08AA3770ABC4BE10D980C7 /* NyxWidgets */,
+				DAB1C17E6D972FDE5831B51D /* NyxWatch */,
+				185F89D3A6658BC2E2C2309C /* NyxWatchWidgets */,
+				C3FE8CF2BC17EF084DAF890D /* NyxVision */,
+				FCB8C04F36729B0984AE9CCD /* NyxVisionWidgets */,
+				854F1CAF019EEA9E852C4585 /* NyxTests */,
+				35EEA7F15A5144F18CBA3158 /* NyxUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6D98CEA6E9B261416440E889 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73D8E3258310093F08FC83C3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DCF1A526787A265E0CBCC50 /* Localizable.xcstrings in Resources */,
+				71206B5A957197433ED472F3 /* cloud-climate.json in Resources */,
+				8273604C4AEF5A111AC145AB /* parks.json in Resources */,
+				CBB9FF180E3F92412AA8C512 /* sky-events.json in Resources */,
+				58B754876B93C815E5503C21 /* skyglow.json in Resources */,
+				ECE67416D62B9BAD6B7CA3C2 /* stars.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		764F4B1206D3D4F22ABA4C57 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCEF2CD778FC3DCF6AA2484E /* Localizable.xcstrings in Resources */,
+				3B459068F918F3610F56F1CC /* cloud-climate.json in Resources */,
+				2D23F9B5C6748F634F300DE5 /* parks.json in Resources */,
+				FCDD50FAFF26C51F12CD294D /* sky-events.json in Resources */,
+				C1FF9ACE40C4BB5192076434 /* skyglow.json in Resources */,
+				85E89DD448272AE1C8D3A14D /* stars.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8440993C71EC02F692BC6F3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3E217DBC6AF8C81B0341403 /* Localizable.xcstrings in Resources */,
+				CA67A9F355C4494729B73192 /* cloud-climate.json in Resources */,
+				72221BB1981396D9F8D716AA /* parks.json in Resources */,
+				D8249FF7E498630CFFEA5576 /* sky-events.json in Resources */,
+				DDA72658C041C7F738A9EA65 /* skyglow.json in Resources */,
+				42EFA849DFCEB705B626DFED /* stars.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8937CA544265ABB3D4DC6840 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7E799A6D9F1B899FC1EF092 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6B9E76A0E8EB3A4C23084E8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				789AB8C03A7ED0EACE11F594 /* Assets.xcassets in Resources */,
+				A155742FE60C3F1ECB785267 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFAC2CA7D595D506FA761FFD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70EEAC52803BDDD86495EE3B /* Assets.xcassets in Resources */,
+				390C9619142DF95DD65E9C8A /* MoonRelief.xcassets in Resources */,
+				9C4820CEB067F3B802203BEC /* cloud-climate.json in Resources */,
+				0FE35656AA49598D7396AA03 /* constellations.json in Resources */,
+				F86C0DCF2F4503A99D43473B /* parks.json in Resources */,
+				9555B130DCFE14678D83272D /* sky-events.json in Resources */,
+				ABB41DEEA4FFF1D9A64E2CED /* skyglow.json in Resources */,
+				72CC113DC95BBDD8BB37CE0E /* star-names.json in Resources */,
+				898A5A3875E14084294BB08C /* stars.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2173521F4FCCD72FDDA9F592 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0C1211C364C7B8A2D326E7B7 /* AstronomyEngine.swift in Sources */,
+				AA62C904D4214D3E8E186221 /* CloudClimate.swift in Sources */,
+				7D88F9519780E4CDFD39EAF8 /* CloudForecastClient.swift in Sources */,
+				CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */,
+				9C670B8420ADE24EEEB7D5EE /* Forecast.swift in Sources */,
+				3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */,
+				465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */,
+				7FC8F631FA91104DFF34CE90 /* MoonShading.swift in Sources */,
+				5593F1DDDD5F18D951FA02FF /* MoonWeek.swift in Sources */,
+				6C2C5B0C4A6B492E9CC64511 /* MoonWidgetFace.swift in Sources */,
+				09E343E681A4650B091467CD /* NightPlanner.swift in Sources */,
+				475A7C46B31CDA3DD8F5DAFB /* NightsAhead.swift in Sources */,
+				5035B8168A34B07A9A70C8FD /* NyxPalette.swift in Sources */,
+				486C85C7FF840FB7A75834E8 /* Park.swift in Sources */,
+				F939755DADB0474A00ABF833 /* ParkHandoff.swift in Sources */,
+				FB9F568367F1DFEC6B114E9D /* ScoreEngine.swift in Sources */,
+				E6439445EFAF13C7898A290E /* Sentences.swift in Sources */,
+				692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */,
+				C2ADDC2ECAC3B8E9DEB41A48 /* SkyConditions.swift in Sources */,
+				BDF805BE459DDB0B102CCD8D /* SkyDome.swift in Sources */,
+				46245A719A6B8E0DDD128627 /* SkyGrid.swift in Sources */,
+				7D83EE37A53ABE964A8901E4 /* SkyLore.swift in Sources */,
+				7BADDF7064BEFE27DCBCE64E /* WhatsUp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5E21F98789260E514479F418 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3F06B201A3F3771922AA4458 /* AstronomyEngine.swift in Sources */,
+				55BDAED0516283D51A024B50 /* CloudClimate.swift in Sources */,
+				00F5B8FD438E9BDB79E20183 /* DebugForecasts.swift in Sources */,
+				1AD5B0518495515AEB946186 /* Forecast.swift in Sources */,
+				F1532AAEEBA3B1A21184977A /* ForecastDetail.swift in Sources */,
+				156E6844ECA20351AE3962F3 /* MoonDisc.swift in Sources */,
+				A4EA59659DF0EF4DDB4BB951 /* MoonSymbol.swift in Sources */,
+				9E046FEE636396228A63D693 /* MotionTilt.swift in Sources */,
+				7EC8C3897B03E14674BBB850 /* NightPlanner.swift in Sources */,
+				E92493A6E7C4FED466334D0B /* NyxPalette.swift in Sources */,
+				2C18BF2F9437BED1CAD7CDCD /* NyxTheme.swift in Sources */,
+				797A8A35878D87971F9F953B /* Park.swift in Sources */,
+				F686C98BD8604BF2D2EEC67B /* RealSky.swift in Sources */,
+				222136EEBB3B38767A68E48A /* ScoreEngine.swift in Sources */,
+				14FCF1328DEA03F88F82A978 /* Sentences.swift in Sources */,
+				C1C7DB07418934B05A45534F /* SharedSettings.swift in Sources */,
+				F45CD45037926209454D0983 /* SkyAlmanac.swift in Sources */,
+				2A9AF3CA81592E730ABFB714 /* SkyConditions.swift in Sources */,
+				481CB178018855AFAB501E50 /* SkyGrid.swift in Sources */,
+				2E2FC2B190540B614C6DBEDE /* Starfield.swift in Sources */,
+				E786F017E42CDFF2BDCBA75D /* WatchContext.swift in Sources */,
+				CA7BB941605B968CA2847325 /* WatchDialFace.swift in Sources */,
+				CFF0FD048B75ED80BA523F43 /* WhatsUp.swift in Sources */,
+				52CD76AA510DFA89D5A7796F /* WristSky.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6A9B704D1082D7C0A158B7FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		75EC3E9F8200D595C2DCA896 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79F4C3F3E9B2B801E42CDBA8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00E3E3717F8A9536639A020 /* AstronomyEngine.swift in Sources */,
+				40435812B77530EC31184150 /* Campground.swift in Sources */,
+				2F55AFD3A62973F36E9742CB /* CloudClimate.swift in Sources */,
+				0AECB067EC930F38926E44EC /* CloudForecastClient.swift in Sources */,
+				B2BCC9A5769EC83274D79A02 /* DataServices.swift in Sources */,
+				4D3CFCB5F02D6A5D5E6CAEBA /* FieldActivity.swift in Sources */,
+				08EA694F6AB6FF7EB2BE0157 /* FieldActivityView.swift in Sources */,
+				FB85875C5F345BA773561ECC /* FieldModeIntent.swift in Sources */,
+				36878CCC630965FF211CD0B8 /* Forecast.swift in Sources */,
+				05E4A3B5BE6A68488CD18F09 /* ForecastDetail.swift in Sources */,
+				BA785E8BD3C69A9097A954AE /* MoonDisc.swift in Sources */,
+				44CEAEA71452256B4DF00524 /* MoonSymbol.swift in Sources */,
+				330CCFF09B4E92511DA20A1E /* MoonWidgetView.swift in Sources */,
+				00E85D5F09464D04CB6AAD8C /* MotionTilt.swift in Sources */,
+				6AC003053CD1F414C992EA97 /* NightPlanner.swift in Sources */,
+				DC6711ADFB108BA823A4AF1A /* NightVisionIntent.swift in Sources */,
+				33EED4F8CBFC30821DBF5D8D /* NyxPalette.swift in Sources */,
+				52C41A72AFEC6BD1F5605C83 /* NyxTheme.swift in Sources */,
+				56AD54D98C49E9E45C364048 /* Park.swift in Sources */,
+				3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */,
+				67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */,
+				6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */,
+				6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */,
+				D76D8AEF6E83CE9D27949264 /* Sentences.swift in Sources */,
+				1D536123B0A86756062C2086 /* SharedSettings.swift in Sources */,
+				48F2BA8F07944391BD20D1AA /* SkyAlmanac.swift in Sources */,
+				E3C54CD7BBCAF113F7B1388D /* SkyConditions.swift in Sources */,
+				E517FC440BA1D64CF0A1941A /* SkyGlyph.swift in Sources */,
+				9521AB1049D4F45C54B4260B /* SkyGrid.swift in Sources */,
+				624E3F8E72FF10BBC1A0D68B /* Starfield.swift in Sources */,
+				EC42ED0FA04F01177B7365E5 /* TonightWidgetView.swift in Sources */,
+				7931B0A2C123E527D9329169 /* WatchContext.swift in Sources */,
+				24BE1D6F764AEF833CE4CD86 /* WhatsUp.swift in Sources */,
+				76230A37AE7D1D967EB0822D /* WidgetParkIntent.swift in Sources */,
+				AE963C213E538BEFE9895049 /* WristSky.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		88CC9FD1B4CB4606593AFBD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1201D85688C47CB4928A3EF /* AstronomyEngine.swift in Sources */,
+				54F9BF81BD406DC2ECDC2C83 /* CloudClimate.swift in Sources */,
+				B7E0F27E967C498A458A24E0 /* Forecast.swift in Sources */,
+				94A124BBBBA1A39F5FBA8A47 /* ForecastDetail.swift in Sources */,
+				B594B0706D542A815F15C1D8 /* MoonDisc.swift in Sources */,
+				828E44ADCB0DD0EA998F69B4 /* MoonSymbol.swift in Sources */,
+				004D7D0D9FD8BC801347DCB0 /* MotionTilt.swift in Sources */,
+				BABE8B1A44675DABE28C69A2 /* NightPlanner.swift in Sources */,
+				0FFA03FB8857F002B6A7ACFD /* NyxPalette.swift in Sources */,
+				01D65B60834D7F8C628BA402 /* NyxTheme.swift in Sources */,
+				3096FAC5078743D9AE1443E6 /* Park.swift in Sources */,
+				BDD3314200AD7596B32D9284 /* RealSky.swift in Sources */,
+				EB8A8845B39BB4B34D306816 /* ScoreEngine.swift in Sources */,
+				7B63921E0FB8467632635DFC /* Sentences.swift in Sources */,
+				75C537957F4E55952E25AE5F /* SharedSettings.swift in Sources */,
+				8A637F8ED5A265541E917EB0 /* SkyAlmanac.swift in Sources */,
+				FCEAA33CD015F5EE73BB3B48 /* SkyConditions.swift in Sources */,
+				F27199AAEAD4E639A8752AEE /* SkyGrid.swift in Sources */,
+				920BDAF3A25147144D2690EF /* Starfield.swift in Sources */,
+				6021307ED0000EC6CCB5784A /* WatchContext.swift in Sources */,
+				814C38B8175ACF135E7F65EB /* WhatsUp.swift in Sources */,
+				35C2B2051D7610E4F82BC434 /* WristSky.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C6AE3EC4D96FE93A28A59041 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				092DD8031C747916C4A36133 /* AstronomyEngine.swift in Sources */,
+				19C6A8EF9D8643E2870F40D3 /* Moon.metal in Sources */,
+				70CAB552F38FF2836574C081 /* MoonWeek.swift in Sources */,
+				852479972C7FF2847453F45F /* NyxPalette.swift in Sources */,
+				DCFDEDF23A646C0334FCDC17 /* Park.swift in Sources */,
+				2E1E441F6353B3F253728AAB /* Sentences.swift in Sources */,
+				0870407728908FE84B757328 /* SkyConditions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E86B5928E777CA9F5C1DB1CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		11637B9E5E03448BA9F72649 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FCB8C04F36729B0984AE9CCD /* NyxVisionWidgets */;
+			targetProxy = 8730A991A64E8054DB1164EC /* PBXContainerItemProxy */;
+		};
+		48A027002D5D29C049984CE7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1C08AA3770ABC4BE10D980C7 /* NyxWidgets */;
+			targetProxy = 8D553FD79B3891F7AB06AE98 /* PBXContainerItemProxy */;
+		};
+		626CC064643119E5671B0CDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 185F89D3A6658BC2E2C2309C /* NyxWatchWidgets */;
+			targetProxy = F15039547FD4327C40D3CFC4 /* PBXContainerItemProxy */;
+		};
+		A7161FD3EA7E381C9C1519FB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0A5547B7F4020EE942D01DA6 /* Nyx */;
+			targetProxy = E3EC165FDA5FCED4094FB540 /* PBXContainerItemProxy */;
+		};
+		F517AB2382ED8132739B40A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0A5547B7F4020EE942D01DA6 /* Nyx */;
+			targetProxy = 1042073ABA0CEA0053190CA6 /* PBXContainerItemProxy */;
+		};
+		FED78128A063AA0DDF522262 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAB1C17E6D972FDE5831B51D /* NyxWatch */;
+			targetProxy = 7100FCE0907B58549AC63ECE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DF95B234AD110CC5265BE3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNew AppIconQuarter AppIconFull";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Nyx.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Nyx-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx;
+				PRODUCT_NAME = Nyx;
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2B9AF3A188B7F9172A485584 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWatch.entitlements;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.harrypakhale.nyx;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp;
+				PRODUCT_NAME = NyxWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		311460C3516466BB9AB49E67 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconNew AppIconQuarter AppIconFull";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Nyx.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Nyx-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx;
+				PRODUCT_NAME = Nyx;
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		568A2686F35CF79DC6FC6544 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nyx.app/Nyx";
+			};
+			name = Debug;
+		};
+		60C27F2F0F4FEDA85CF21D52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVision-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx;
+				PRODUCT_NAME = NyxVision;
+				SDKROOT = xros;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Release;
+		};
+		7BB60CA84F28D3D21EA0C2C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVisionWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
+				SDKROOT = xros;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Debug;
+		};
+		7F28A98E2C5670837553A164 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVisionWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
+				SDKROOT = xros;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Release;
+		};
+		80A612BD5A59A9A9EED2D89E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWidgets.entitlements;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		83E045E4B4896DCF84D38C73 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Nyx;
+			};
+			name = Debug;
+		};
+		9AF55E08FC048C0E40968C66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Nyx;
+			};
+			name = Release;
+		};
+		ACE17A140257E877B5F6BAE7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nyx.app/Nyx";
+			};
+			name = Release;
+		};
+		B71EF4A52132F8E45AC167F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 19;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = DUHVN68KBA;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 2.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		BD40570519083799BC8811C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWatchWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxWatchWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		C2586702C659EA2D4FAAC73A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWatch.entitlements;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.harrypakhale.nyx;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp;
+				PRODUCT_NAME = NyxWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		D882C546F8C830C90D8D5333 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 19;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = DUHVN68KBA;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 2.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		E9F786CC0E54B93BE69F1F1A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWidgets.entitlements;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EF3D960694E3A07D7B83D8F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxVision-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx;
+				PRODUCT_NAME = NyxVision;
+				SDKROOT = xros;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 7;
+			};
+			name = Debug;
+		};
+		F8AF8C10253B5C2C0675E90B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/NyxWatchWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NyxWatchWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Nyx;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.harrypakhale.nyx.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		083E0E382D9FCC8D981CC0D9 /* Build configuration list for PBXNativeTarget "NyxVision" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EF3D960694E3A07D7B83D8F9 /* Debug */,
+				60C27F2F0F4FEDA85CF21D52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		335B4D7590DCEEDB9025BBAA /* Build configuration list for PBXNativeTarget "NyxWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD40570519083799BC8811C7 /* Debug */,
+				F8AF8C10253B5C2C0675E90B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		35DBE5EFDB6C5F8237D10EDD /* Build configuration list for PBXProject "Nyx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B71EF4A52132F8E45AC167F2 /* Debug */,
+				D882C546F8C830C90D8D5333 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		785C554747E5C87BEE0DE623 /* Build configuration list for PBXNativeTarget "NyxWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9F786CC0E54B93BE69F1F1A /* Debug */,
+				80A612BD5A59A9A9EED2D89E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		95D139A2BAA0499000AEA765 /* Build configuration list for PBXNativeTarget "NyxTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				568A2686F35CF79DC6FC6544 /* Debug */,
+				ACE17A140257E877B5F6BAE7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A4FAF93D18A10DA567FE5123 /* Build configuration list for PBXNativeTarget "NyxVisionWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7BB60CA84F28D3D21EA0C2C0 /* Debug */,
+				7F28A98E2C5670837553A164 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C26EC8FCF259145884CFCFC2 /* Build configuration list for PBXNativeTarget "NyxWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2586702C659EA2D4FAAC73A /* Debug */,
+				2B9AF3A188B7F9172A485584 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D2AE323B373CBF347CAED279 /* Build configuration list for PBXNativeTarget "Nyx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				311460C3516466BB9AB49E67 /* Debug */,
+				1DF95B234AD110CC5265BE3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ED4CF400F3DBEF5B4643E617 /* Build configuration list for PBXNativeTarget "NyxUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83E045E4B4896DCF84D38C73 /* Debug */,
+				9AF55E08FC048C0E40968C66 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3B2DE3D8B000D0D9ED3C53AC /* Project object */;
+}

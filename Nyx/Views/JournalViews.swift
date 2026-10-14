@@ -1,0 +1,687 @@
+import SwiftUI
+import SwiftData
+import PhotosUI
+import ImageIO
+import UniformTypeIdentifiers
+
+struct JournalView: View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
+    @Query(sort:\JournalEntry.date,order:.reverse) private var entries:[JournalEntry]
+    @State private var editing=false
+    @State private var deleting:JournalEntry?
+    @State private var saveError=false
+    @State private var opened:JournalEntry?
+    @State private var recap=false
+    @State private var width=0.0
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var exporting:JournalDocument?
+    @State private var importing=false
+    @State private var importResult:String?
+    /// A journal's manifest read and checked, waiting for the person to confirm the import. Its
+    /// photos stay in the file until the merge reads them.
+    @State private var pendingImport:PendingImport?
+    /// An export being gathered or an import being read, off the main thread (photos can be many megabytes).
+    @State private var working:LocalizedStringKey?
+    /// A park dropped onto the journal (a new entry for it, tonight's date), or a night from Plan's month.
+    @State private var dropped:JournalPrefill?
+    /// A wide iPad: your constellation large on the left, the nights themselves on the right.
+    private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
+    /// "Journals stay on each device" where a second device is likely: a window wider than any
+    /// iPhone (440 pt) or a regular-width one, by width rather than by device.
+    nonisolated static func mentionsOtherDevices(width:Double,regular:Bool)->Bool { regular || width>=480 }
+    var body:some View {
+        let nights=model.loggedNights(entries)
+        ScrollView {
+            VStack(alignment:.leading,spacing:24) {
+                if model.journalUnavailable { JournalUnavailableBanner(needsSpace:model.journalNeedsSpace) }
+                // A journal lives on the device it was written on; say so where a second device is likely.
+                if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular) {
+                    Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+                // One way into the year: at the top in recap season (December, early January), else under the constellation.
+                let season=recapSeason(nights)
+                if season { recapCard }
+                if wide && !entries.isEmpty {
+                    // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                    FoldColumns(narrow:.trailing,narrowMax:min(440,(width*0.4).rounded()),spacing:28) {
+                        YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
+                        VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(maxWidth:.infinity,alignment:.leading)
+                    }
+                } else if wide {
+                    // No nights yet: the constellation alone, centred, with its promise and the button inside.
+                    YourSkyPanel(nights:nights,record:recordAction) { _ in }.frame(maxWidth:760).frame(maxWidth:.infinity)
+                } else {
+                    YourSkyPanel(nights:nights,record:recordAction) { id in opened=entries.first { $0.id==id } }
+                    if !season && !nights.isEmpty { recapCard }
+                    entryList
+                }
+            }.padding(NyxMetrics.pagePadding).readableColumn(wide ? WideLayout.twoColumnMaximum : WideLayout.readableWidth)
+        }.measuringWidth($width).foldSource().background(NightBackground()).navigationTitle("Journal").navigationBarTitleDisplayMode(.inline)
+            .tabRootToolbar()
+            .toolbar {
+                // Export and import are rare: on iOS 27 they live in the system's own overflow menu (the
+                // ellipsis is reserved for it), on iOS 26 in a menu of their own.
+                if #available(iOS 27.0,*) {
+                    ToolbarOverflowMenu { journalFileActions }
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { Menu { journalFileActions } label:{ Label { Text("Journal options") } icon:{ Image(systemName:"ellipsis").opacity(model.journalUnavailable ? 0.35 : 1) } }.accessibilityLabel("Journal options").disabled(model.journalUnavailable) }
+                }
+                // Nothing is recorded into a journal that could not be opened: it would be lost. Dimmed by hand, since
+                // the app's ink foreground style (`RootView`) holds bar symbols at full strength when disabled.
+                // Recording a night is the Journal's everyday action, so on iPhone Duo's side bar it overflows last.
+                if #available(iOS 27.0,*) {
+                    ToolbarItem(placement:.topBarTrailing) { recordButton }.visibilityPriority(.high)
+                } else {
+                    ToolbarItem(placement:.topBarTrailing) { recordButton }
+                }
+            }
+            .navigationDestination(item:$opened) { entry in JournalDetailView(entry:entry) }
+            .navigationDestination(isPresented:$recap) { YearRecapView(nights:nights) }
+            .sheet(isPresented:$editing) { NavigationStack { JournalEditorView() }.nyxPresentation() }
+            .sheet(item:$dropped) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
+            // iPad: drop a park, or a night from Plan's month (held over the Journal's tab, it opens),
+            // here to start an entry for it (never into a journal that could not open).
+            .acceptsJournalDrop("Record a night at this park",systemImage:"book.closed") { drop in record(drop) }
+            .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
+            .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
+            .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentType:.nyxJournal,
+                          defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(.iso8601.year().month().day()))")) { result in
+                if case .failure=result { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
+            }
+            .fileImporter(isPresented:$importing,allowedContentTypes:[.nyxJournal]) { result in
+                if case .success(let url)=result { Task { await importJournal(url) } }
+            }
+            .overlay { if let working { WorkingNote(title:working) } }
+            .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
+            // Nothing is merged until the person has seen what the file holds.
+            .alert("Import this journal?",isPresented:Binding(get:{ pendingImport != nil },set:{ if !$0 { pendingImport=nil } }),presenting:pendingImport) { pending in
+                Button("Import") { Task { await confirmImport(pending) } }
+                Button("Cancel",role:.cancel) { finishImport(pending.url) }
+            } message:{ pending in Text(Self.importMessage(pending.summary)) }
+            .task(id:model.journalFile) {
+                // A journal opened from Files or another app.
+                guard let url=model.journalFile else { return }
+                model.importingJournal=url
+                model.journalFile=nil
+                guard !model.journalUnavailable else {
+                    model.importingJournal=nil
+                    Task.detached(priority:.utility) { JournalInbox.remove(url) }
+                    importResult=String(localized:"Your journal could not be opened, so this file was not imported. Nothing was changed.")
+                    return
+                }
+                await importJournal(url)
+            }
+    }
+    /// Opens "Record a night" for a dropped night or park; false when there is nothing to record.
+    private func record(_ drop:JournalDrop)->Bool {
+        guard !model.journalUnavailable, editing == false, dropped == nil, let prefill=drop.prefill(model:model) else { return false }
+        dropped=prefill
+        return true
+    }
+    /// Gathers every entry and its photos from the store on a background context, so the photos'
+    /// files are read off the main thread; the exporter opens once the archive is ready.
+    private func exportJournal() {
+        let container=context.container
+        working="Preparing your journal"
+        Task {
+            let archive=await Task.detached(priority:.userInitiated) { () -> JournalArchive? in
+                let background=ModelContext(container)
+                return (try? background.fetch(FetchDescriptor<JournalEntry>())).map { JournalArchive.make(from:$0) }
+            }.value
+            working=nil
+            if let archive { exporting=JournalDocument(archive:archive) }
+            else { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
+        }
+    }
+    /// Reads the package's manifest off the main thread (every count and file size checked, no
+    /// photo opened), then asks before anything is merged: the counts, and that spots arrive
+    /// unfollowed. The file stays where it is until the import is confirmed or cancelled; a copy
+    /// another app left in Documents/Inbox is removed then, or at once when it cannot be read.
+    private func importJournal(_ url:URL) async {
+        working="Importing your journal"
+        model.importingJournal=url
+        let read=await Task.detached(priority:.userInitiated) { () -> Result<JournalImport,any Error> in Result { try JournalImport.read(url) } }.value
+        working=nil
+        switch read {
+        case .success(let prepared):
+            if let summary=try? prepared.summary(in:context) { pendingImport=PendingImport(prepared:prepared,summary:summary,url:url); return }
+            importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
+        case .failure(let error):
+            importResult=(error as? JournalArchive.ArchiveError) == .tooLarge ? Self.tooLargeMessage
+                : String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
+        }
+        finishImport(url)
+    }
+    /// Adds the nights the journal does not have yet; nothing already here is changed. The photos
+    /// are read and re-encoded a few nights at a time off the main thread (`JournalImport.merge`),
+    /// in a context of the merge's own, and one save makes it all or nothing.
+    private func confirmImport(_ pending:PendingImport) async {
+        working="Importing your journal"
+        defer { working=nil; finishImport(pending.url) }
+        do {
+            let result=try await pending.prepared.merge(into:context,batch:JournalImport.mergeBatch)
+            importResult=result.skipped==0 ? String(localized:"Nights added: \(result.added).") : String(localized:"Nights added: \(result.added). Already in your journal: \(result.skipped).")
+        } catch {
+            importResult=String(localized:"This file could not be read as a Nyx journal. Nothing was changed.")
+        }
+    }
+    /// The import of `url` is over (merged, cancelled or unreadable): the file is no longer kept
+    /// from the Inbox sweep, and a copy another app left there is removed.
+    private func finishImport(_ url:URL) {
+        if model.importingJournal == url { model.importingJournal=nil }
+        Task.detached(priority:.utility) { JournalInbox.remove(url) }
+    }
+    /// The confirmation's words: what the file holds, what is skipped, and how spots arrive.
+    nonisolated static func importMessage(_ summary:JournalImport.Summary)->String {
+        var lines=[summary.spots>0 ? String(localized:"Nights: \(summary.nights). Photos: \(summary.photos). Spots: \(summary.spots).")
+                                   : String(localized:"Nights: \(summary.nights). Photos: \(summary.photos).")]
+        if summary.alreadyHere>0 { lines.append(String(localized:"Already in your journal, so skipped: \(summary.alreadyHere).")) }
+        if summary.spots>0 { lines.append(String(localized:"Spots arrive in Your spots unfollowed. Follow one to get its reminders.")) }
+        return lines.joined(separator:"\n")
+    }
+    /// A journal past `JournalImport`'s limits, with the limits in the reader's own numbers.
+    nonisolated static var tooLargeMessage:String {
+        let nights=JournalImport.maxEntries.formatted(), size=Int64(PhotoScaling.maxSourceBytes).formatted(.byteCount(style:.file))
+        return String(localized:"This journal is too large to import. Nyx imports up to \(nights) nights, \(PhotoScaling.perEntry) photos a night and \(size) a photo. Nothing was changed.")
+    }
+    @ViewBuilder private var entryList: some View {
+        // An empty journal's button sits inside the constellation, under its promise (`YourSkyPanel`).
+        if !entries.isEmpty {
+            LazyVStack(spacing:24) { ForEach(entries) { entry in NavigationLink { JournalDetailView(entry:entry) } label:{ JournalCard(entry:entry) }.buttonStyle(.plain).hoverEffect(.lift).contextMenu { Button("Delete entry",role:.destructive) { deleting=entry } } } }
+        }
+    }
+    /// The empty constellation's "Record a night", never into a journal that could not open.
+    /// Export and import, in the system overflow menu (iOS 27) or the Journal's own (iOS 26).
+    @ViewBuilder private var journalFileActions: some View {
+        Button("Export journal",systemImage:"square.and.arrow.up") { exportJournal() }
+            .disabled(entries.isEmpty || model.journalUnavailable || working != nil)
+        Button("Import journal",systemImage:"square.and.arrow.down") { importing=true }.disabled(model.journalUnavailable || working != nil)
+    }
+    private var recordButton: some View {
+        Button { editing=true } label:{ Label { Text("Record a night") } icon:{ Image(systemName:"plus").opacity(model.journalUnavailable ? 0.35 : 1) } }
+            .disabled(model.journalUnavailable)
+    }
+    private var recordAction: (()->Void)? { entries.isEmpty && !model.journalUnavailable ? { editing=true } : nil }
+    /// December (and the first days of January): the year's recap waits at the top of the journal.
+    private func recapSeason(_ nights:[LoggedNight])->Bool {
+        // Gregorian months and years, whatever calendar the device uses; each night's year where it was spent.
+        let now=model.today, calendar=JournalYear.calendar(.current)
+        let month=calendar.component(.month,from:now), year=calendar.component(.year,from:now)
+        let recapYear=month==12 ? year : month==1 && calendar.component(.day,from:now)<=7 ? year-1 : nil
+        return recapYear.map { y in nights.contains { $0.year==y } } ?? false
+    }
+    private var recapCard:some View {
+        Button { recap=true } label:{
+            Panel { HStack(spacing:14) {
+                Image(systemName:"sparkles").font(.title2.weight(.light)).foregroundStyle(palette.accent).accessibilityHidden(true)
+                VStack(alignment:.leading,spacing:4) {
+                    Text("Your year under the stars").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    // Written on this iPhone when the system model is available; Nyx's own words otherwise.
+                    Text(OnDeviceGuide.speaksYourLanguage ? "Nights out, your darkest sky, the Moons you met, and a few words on the season, written on this iPhone." : "Nights out, your darkest sky, and the Moons you met.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
+                Spacer(minLength:0)
+                Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
+            } }
+        }.buttonStyle(.plain).accessibilityElement(children:.combine).accessibilityAddTraits(.isButton)
+    }
+}
+/// A stock spinner on a solid panel while the journal is exported or imported; solid, not glass,
+/// so it reads over the sky in night vision and with Reduce Transparency alike.
+private struct WorkingNote: View {
+    @Environment(\.nyx) private var palette
+    let title:LocalizedStringKey
+    var body: some View {
+        ProgressView { Text(title) }.tint(palette.accent).foregroundStyle(palette.ink)
+            .padding(.vertical,18).padding(.horizontal,24)
+            .background(palette.nightVision ? Color.black : palette.panel,in:RoundedRectangle(cornerRadius:18))
+            .overlay(RoundedRectangle(cornerRadius:18).stroke(palette.line,lineWidth:0.5))
+            .accessibilityElement(children:.combine)
+    }
+}
+#Preview("Working note") { ZStack { Color.black; WorkingNote(title:"Preparing your journal") }.preferredColorScheme(.dark) }
+/// A remembered night, with the Moon as it actually was over that park.
+struct JournalCard:View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    let entry:JournalEntry
+    var body:some View {
+        let park=model.park(entry.parkID)
+        let moon=park.map { model.night($0,on:entry.date).sky.moon }
+        Panel { VStack(alignment:.leading,spacing:10) {
+            if let thumbnail=entry.thumbnail { JournalThumbnail(data:thumbnail).padding(.bottom,4) }
+            HStack(alignment:.top,spacing:12) {
+                VStack(alignment:.leading,spacing:4) {
+                    Text(park?.shortName ?? String(localized:"A night outside")).font(.system(.title2,design:.serif))
+                    Text(park?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.caption).foregroundStyle(palette.muted)
+                }
+                Spacer(minLength:0)
+                if let moon { MoonDisc(illumination:moon.illumination,waxing:moon.waxing,southern:(park?.latitude ?? 0)<0).frame(width:30,height:30).accessibilityHidden(true) }
+            }
+            if !entry.notes.isEmpty { Text(entry.notes).font(.subheadline).lineLimit(3).foregroundStyle(palette.ink.opacity(0.86)) }
+            Text(moon.map { String(localized:"Bortle \(entry.observedBortle) observed · \($0.name), \(Int(($0.illumination*100).rounded()))% lit") } ?? String(localized:"Observed Bortle class \(entry.observedBortle)"))
+                .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        } }
+    }
+}
+/// A journal's manifest read and checked (its photos not yet opened), what the confirmation says
+/// about it, and the file it came from.
+struct PendingImport {
+    let prepared:JournalImport
+    let summary:JournalImport.Summary
+    let url:URL
+}
+/// Image I/O downsampling: decodes straight to the target size, never the full photo.
+nonisolated enum PhotoScaling {
+    /// The largest photo the journal accepts, from the editor, Shortcuts or an imported journal.
+    static let maxSourceBytes=40_000_000
+    /// The most photos one entry holds, from the editor, Shortcuts or an imported journal.
+    static let perEntry=4
+    /// The image types a photo may arrive as in an imported journal; anything else is left out.
+    static let keepsakeTypes: Set<String>=[UTType.jpeg.identifier,UTType.heic.identifier,UTType.heif.identifier,UTType.png.identifier]
+    /// A photo from outside the editor as the journal keeps it: a JPEG, HEIC or PNG drawn again as
+    /// the editor's JPEG (at most 2,400 pixels on the long edge), which carries none of the
+    /// original file's metadata (location, camera, dates); nil for any other data.
+    static func keepsake(_ data:Data)->Data? {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil), CGImageSourceGetCount(source)>0,
+              let type=CGImageSourceGetType(source) as String?, keepsakeTypes.contains(type) else { return nil }
+        return jpeg(data,maxPixels:2400)
+    }
+    /// True when Image I/O recognizes the data as an image (read from its header; nothing is decoded).
+    static func isImage(_ data:Data)->Bool {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return false }
+        return CGImageSourceGetType(source) != nil && CGImageSourceGetCount(source)>0
+    }
+    static func image(_ data:Data,maxPixels:Int)->CGImage? {
+        guard let source=CGImageSourceCreateWithData(data as CFData,nil) else { return nil }
+        let options:[CFString:Any]=[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceCreateThumbnailWithTransform:true,
+                                    kCGImageSourceThumbnailMaxPixelSize:maxPixels,kCGImageSourceShouldCacheImmediately:true]
+        return CGImageSourceCreateThumbnailAtIndex(source,0,options as CFDictionary)
+    }
+    /// Journal photos are keepsakes, not originals: JPEG, at most `maxPixels` on the long edge.
+    static func jpeg(_ data:Data,maxPixels:Int)->Data? {
+        image(data,maxPixels:maxPixels).flatMap { UIImage(cgImage:$0).jpegData(compressionQuality:0.85) }
+    }
+}
+/// A stored photo, decoded off the main thread at the size it is shown.
+struct PhotoView:View {
+    let data:Data
+    let maxPixels:Int
+    var fill=false
+    @State private var image:UIImage?
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    var body:some View {
+        Group {
+            if let image {
+                if fill { Image(uiImage:image).resizable().scaledToFill() } else { Image(uiImage:image).resizable().scaledToFit() }
+            } else { Color.black.aspectRatio(fill ? 1 : 4/3,contentMode:.fit) }
+        }
+        .accessibilityIgnoresInvertColors()
+        .task(id:data.count ^ data.prefix(64).hashValue) {
+            let data=data, size=maxPixels
+            let decoded=await Task.detached(priority:.utility) { PhotoScaling.image(data,maxPixels:size).map { UIImage(cgImage:$0) } }.value
+            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : .easeOut(duration:0.25)) { image=decoded }
+        }
+    }
+}
+/// A journal card's photo: the stored small thumbnail, so a long journal scrolls smoothly.
+struct JournalThumbnail:View {
+    let data:Data
+    var body:some View {
+        Color.black.frame(height:150).overlay { PhotoView(data:data,maxPixels:900,fill:true) }
+            .clipShape(RoundedRectangle(cornerRadius:16))
+            .accessibilityHidden(true)
+    }
+}
+@MainActor @Observable final class JournalEditorModel {
+    var date=Date.now { didSet { if oldValue != date, settled { dateChosen=true } } }
+    /// The person picked a date, so appearing again never replaces it.
+    private(set) var dateChosen=false
+    @ObservationIgnored private var settled=false
+    var parkID=Park.defaultID
+    var observedBortle=3
+    var notes=""
+    var photos:[Data]=[] { didSet { descriptions=Self.aligned(descriptions,to:photos.count) } }
+    /// Each photo's description for VoiceOver, in the same order; "" for none.
+    var descriptions:[String]=[]
+    /// A description the on-device model suggested, per photo, until the person uses or dismisses it.
+    var suggestions:[Int:String]=[:]
+    var suggesting:Set<Int>=[]
+    /// Photos the last request found nothing to suggest for, so the person hears why the button did nothing.
+    var unsuggested:Set<Int>=[]
+    var loadingPhotos=false
+    /// A save under way (its thumbnail being scaled), so Save cannot store the night twice.
+    var saving=false
+    var error:String?
+    var saved=false
+    /// What the editor holds, to tell an untouched form from one with words or photos in it.
+    private struct Draft:Equatable {
+        let date:Date, parkID:String, observedBortle:Int, notes:String, photos:[Data], descriptions:[String]
+    }
+    private var draft:Draft { Draft(date:date,parkID:parkID,observedBortle:observedBortle,notes:notes,photos:photos,descriptions:descriptions) }
+    @ObservationIgnored private var clean:Draft?
+    /// Something was written, chosen or added since the editor opened (or was prefilled): closing
+    /// it asks first, and a swipe down cannot throw it away.
+    var hasChanges:Bool { !saved && clean.map { $0 != draft } ?? false }
+    /// The form as it stands is the starting point: after opening, prefilling, or the date moving to the night just seen.
+    func markClean() { clean=draft }
+    init(entry:JournalEntry?=nil) {
+        defer { settled=true; clean=draft }
+        if let entry { date=entry.date;parkID=entry.parkID;observedBortle=entry.observedBortle;notes=entry.notes;photos=entry.photos;descriptions=entry.orderedPhotos.map { $0.altText ?? "" } }
+        else if let home=UserDefaults.standard.string(forKey:"homePark") { parkID=home }
+        #if DEBUG
+        if DebugScenario.state=="error" { error=String(localized:"This night could not be stored. Try again when space is available.") }
+        if DebugScenario.state=="photo",let image=UIImage(named:"LaunchStars")?.pngData() { photos=[image] }
+        if DebugScenario.isEnabled("suggest-fixture"), !photos.isEmpty { suggestions[0]="A dark ridge under a sky full of stars, with a faint band of light above it." }
+        #endif
+        // Observers do not run inside init: one description per photo from the start.
+        descriptions=Self.aligned(descriptions,to:photos.count)
+    }
+    func load(_ items:[PhotosPickerItem]) async {
+        loadingPhotos=true;error=nil;defer { loadingPhotos=false }
+        for item in items.prefix(max(0,PhotoScaling.perEntry-photos.count)) {
+            do {
+                if let data=try await item.loadTransferable(type:Data.self), data.count<=PhotoScaling.maxSourceBytes {
+                    // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded.
+                    photos.append(await Task.detached(priority:.userInitiated) { PhotoScaling.jpeg(data,maxPixels:2400) ?? data }.value)
+                }
+                else { error=String(localized:"This photo is too large. Choose a smaller image.") }
+            } catch { self.error=String(localized:"The photo could not be loaded. Try choosing it again.") }
+        }
+    }
+    /// `values` padded with "" or cut to `count`.
+    nonisolated static func aligned(_ values:[String],to count:Int)->[String] { Array((values+Array(repeating:"",count:max(0,count-values.count))).prefix(count)) }
+    func removePhoto(at index:Int) {
+        guard photos.indices.contains(index) else { return }
+        descriptions.remove(at:index)
+        photos.remove(at:index)
+        suggestions=Dictionary(uniqueKeysWithValues:suggestions.compactMap { $0.key<index ? ($0.key,$0.value) : $0.key>index ? ($0.key-1,$0.value) : nil })
+        unsuggested=Set(unsuggested.compactMap { $0<index ? $0 : $0>index ? $0-1 : nil })
+    }
+    /// Asks the on-device model for a draft; it waits beside the field until used or dismissed.
+    func suggest(_ index:Int) async {
+        guard photos.indices.contains(index), !suggesting.contains(index) else { return }
+        suggesting.insert(index); defer { suggesting.remove(index) }
+        let data=photos[index]
+        unsuggested.remove(index)
+        let line=await PhotoDescriber.suggest(data)
+        guard photos.indices.contains(index), photos[index]==data else { return }
+        if let line { suggestions[index]=line }
+        else {
+            unsuggested.insert(index)
+            AccessibilityNotification.Announcement(String(localized:"Nothing to suggest for this photo. Describe it in your own words.")).post()
+        }
+    }
+    func useSuggestion(_ index:Int) {
+        guard let line=suggestions[index], descriptions.indices.contains(index) else { return }
+        descriptions[index]=line; suggestions[index]=nil
+    }
+    /// Stores the night. The card's thumbnail is scaled off the main thread first.
+    func save(context:ModelContext,existing:JournalEntry?) async -> Bool {
+        error=nil
+        saving=true; defer { saving=false }
+        let first=photos.first
+        let thumbnail=await Task.detached(priority:.userInitiated) { first.flatMap { PhotoScaling.jpeg($0,maxPixels:900) } }.value
+        let entry=existing ?? JournalEntry(date:date,parkID:parkID)
+        entry.date=date;entry.parkID=parkID;entry.observedBortle=observedBortle;entry.notes=notes;entry.photos=photos
+        // Only what the person wrote or chose to use is kept; a suggestion never saves itself.
+        for (photo,text) in zip(entry.orderedPhotos,Self.aligned(descriptions,to:photos.count)) {
+            let trimmed=text.trimmingCharacters(in:.whitespacesAndNewlines)
+            photo.altText=trimmed.isEmpty ? nil : trimmed
+        }
+        entry.thumbnail=thumbnail
+        if existing==nil { context.insert(entry) }
+        do { try context.save();saved=true;return true } catch { context.rollback();self.error=String(localized:"This night could not be stored. Try again when space is available.");return false }
+    }
+}
+struct JournalEditorView:View {
+    @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    /// An iPhone in landscape, where the keyboard leaves about a hundred points of form.
+    @Environment(\.verticalSizeClass) private var verticalSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @FocusState private var writingNotes:Bool
+    @State private var editor:JournalEditorModel
+    @State private var picker:[PhotosPickerItem]=[]
+    /// Cancel with words or photos in the form: "Discard this night?" first.
+    @State private var confirmDiscard=false
+    var existing:JournalEntry?
+    /// Called once the entry is saved (a kept night tells the rating request).
+    var saved:(()->Void)?=nil
+    private static let notesID="notes"
+    private func showNotes(_ proxy:ScrollViewProxy) {
+        guard writingNotes, verticalSize == .compact else { return }
+        withAnimation(reduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
+    }
+    init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
+    /// A new entry for a night being kept (field mode at dawn, a park's page the morning after):
+    /// the park, the night it began on, the observed-Bortle default and a first line, all editable.
+    init(prefill:JournalPrefill,saved:(()->Void)?=nil) {
+        existing=nil; self.saved=saved
+        let editor=JournalEditorModel(entry:nil)
+        editor.parkID=prefill.parkID; editor.date=prefill.date; editor.observedBortle=prefill.observedBortle; editor.notes=prefill.notes
+        editor.markClean()
+        _editor=State(initialValue:editor)
+    }
+    var body:some View {
+        @Bindable var editor=editor
+        ScrollViewReader { proxy in
+        Form {
+            Section("The night") {
+                DatePicker("Date",selection:$editor.date,in:...Date.now,displayedComponents:.date).environment(\.timeZone,model.park(editor.parkID)?.timeZone ?? .current)
+                ParkMenuRow(parkID:$editor.parkID)
+                Stepper(value:$editor.observedBortle,in:1...9) {
+                    Text("Observed Bortle: \(editor.observedBortle)").foregroundStyle(palette.ink)
+                }.tint(palette.controlTint).foregroundStyle(palette.ink,palette.muted,palette.controlTint)
+                Text("Your estimate on the Bortle scale of sky brightness: 1 is the darkest sky, 9 an inner-city sky.").font(.caption).foregroundStyle(palette.muted)
+            }.listRowBackground(palette.panel)
+            // On an iPhone in landscape the keyboard leaves about a hundred points: while the notes are
+            // being written they are short enough to sit whole above it and scroll within themselves, so
+            // the line being written stays in sight (at 160 points it went behind the keyboard by the
+            // third line). Read without the keyboard, they keep their full height, as the form scrolls.
+            Section("What you noticed") {
+                let aboveKeyboard=verticalSize == .compact && writingNotes
+                TextEditor(text:$editor.notes).scrollContentBackground(.hidden)
+                    .frame(minHeight:aboveKeyboard ? 80 : 160,maxHeight:aboveKeyboard ? 80 : nil)
+                    .focused($writingNotes).id(Self.notesID).accessibilityLabel("Observation notes")
+            }.listRowBackground(palette.panel)
+            Section {
+                ForEach(Array(editor.photos.enumerated()),id:\.offset) { index,data in
+                    PhotoDescriptionRow(editor:editor,index:index,data:data)
+                }
+                if editor.loadingPhotos { ProgressView("Adding photo") }
+                PhotosPicker(selection:$picker,maxSelectionCount:max(0,PhotoScaling.perEntry-editor.photos.count),matching:.images) { Label("Choose photos",systemImage:"photo") }.disabled(editor.photos.count>=PhotoScaling.perEntry || editor.loadingPhotos)
+            } header:{ Text("Photos") } footer:{ Text("Choose up to four photos. Nyx sees only the photos you select. They stay on this iPhone. A short description lets VoiceOver say what each one shows.").foregroundStyle(palette.muted) }
+            .listRowBackground(palette.panel)
+            if let error=editor.error { Section { Text(error).foregroundStyle(palette.accent) }.listRowBackground(palette.panel) }
+        }.nightForm().readableForm().defaultScrollAnchor(DebugScenario.isEnabled("bottom") ? .bottom : .top)
+        // The notes take Return as a new line, so a drag down the form is how the keyboard goes away.
+        .scrollDismissesKeyboard(.interactively)
+        // In landscape, once the keyboard is up, the form shows the notes from their top edge rather than
+        // only the first line above the keyboard.
+        .onReceive(NotificationCenter.default.publisher(for:UIResponder.keyboardDidShowNotification)) { _ in showNotes(proxy) }
+        }
+        .navigationTitle(existing==nil ? "Record a night" : "Edit night").navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // A new entry starts on the night just seen, not the calendar day it is written on.
+            if existing==nil, !editor.dateChosen, let park=model.park(editor.parkID) { editor.date=min(.now,park.lastNightBegun(at:.now)); editor.markClean() }
+        }
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { if editor.hasChanges { confirmDiscard=true } else { dismiss() } } };ToolbarItem(placement:.confirmationAction) { Button(role:.confirm) { Task { if await editor.save(context:context,existing:existing) { saved?(); dismiss() } } }.accessibilityLabel("Save").accessibilityInputLabels([Text("Save"),Text("Done")]).disabled(editor.loadingPhotos || editor.saving) } }
+            // A swipe down never throws away what was written; Cancel asks first.
+            .interactiveDismissDisabled(editor.hasChanges)
+            .confirmationDialog(existing==nil ? "Discard this night?" : "Discard your changes?",isPresented:$confirmDiscard,titleVisibility:.visible) {
+                Button("Discard",role:.destructive) { dismiss() }
+                Button("Keep editing",role:.cancel) {}
+            }
+            .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
+            .sensoryFeedback(.success,trigger:editor.saved)
+    }
+}
+/// One photo in the editor: the picture, "Describe this photo" (read by VoiceOver as the photo's
+/// label), an optional suggestion from the on-device model, and Remove.
+struct PhotoDescriptionRow:View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Bindable var editor:JournalEditorModel
+    let index:Int
+    let data:Data
+    private var description:Binding<String> {
+        Binding(get:{ editor.descriptions.indices.contains(index) ? editor.descriptions[index] : "" },set:{ if editor.descriptions.indices.contains(index) { editor.descriptions[index]=$0 } })
+    }
+    var body:some View {
+        VStack(alignment:.leading,spacing:10) {
+            let layout=typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment:.leading,spacing:10)) : AnyLayout(HStackLayout(alignment:.top,spacing:12))
+            layout {
+                PhotoView(data:data,maxPixels:240,fill:true).frame(width:80,height:80).clipShape(RoundedRectangle(cornerRadius:10))
+                    .accessibilityLabel(JournalPhotoLabel.text(description.wrappedValue,index:index))
+                TextField("Describe this photo",text:description,axis:.vertical).lineLimit(1...4)
+                    .accessibilityLabel("Description of photo \(index+1)")
+                    .accessibilityHint("VoiceOver reads this when the photo is shown.")
+            }
+            if let suggestion=editor.suggestions[index] {
+                VStack(alignment:.leading,spacing:8) {
+                    Text("Suggested on this iPhone").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                    Text(suggestion).font(.subheadline).fixedSize(horizontal:false,vertical:true)
+                    HStack(spacing:16) {
+                        Button("Use this") { editor.useSuggestion(index) }.buttonStyle(.borderless).foregroundStyle(palette.accent)
+                        Button("Dismiss") { editor.suggestions[index]=nil }.buttonStyle(.borderless).foregroundStyle(palette.muted)
+                    }.frame(minHeight:44)
+                }
+                .padding(12).frame(maxWidth:.infinity,alignment:.leading)
+                .background(RoundedRectangle(cornerRadius:12).stroke(palette.line,lineWidth:0.5))
+                .accessibilityElement(children:.contain)
+            }
+            if editor.unsuggested.contains(index) {
+                Text("Nothing to suggest for this photo. Describe it in your own words.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:16) { actions }
+                VStack(alignment:.leading,spacing:4) { actions }
+            }
+        }.padding(.vertical,4)
+    }
+    @ViewBuilder private var actions:some View {
+        if PhotoDescriber.available {
+            if editor.suggesting.contains(index) { ProgressView().frame(minHeight:44).accessibilityLabel("Suggesting a description") }
+            else {
+                // Borderless, so only the button acts, not a tap anywhere in the row.
+                Button { Task { await editor.suggest(index) } } label:{ Label("Suggest a description",systemImage:"text.below.photo").frame(minHeight:44) }
+                    .buttonStyle(.borderless).foregroundStyle(palette.accent)
+                    .accessibilityHint("Drafts one line on this iPhone for you to read and edit. Nothing is saved until you use it.")
+            }
+        }
+        Button(role:.destructive) { editor.removePhoto(at:index) } label:{ Text("Remove photo").foregroundStyle(palette.accent).frame(minHeight:44).contentShape(Rectangle()) }
+            .buttonStyle(.borderless).accessibilityLabel("Remove photo \(index+1)")
+    }
+}
+/// What VoiceOver says for a journal photo: the person's description, else its place in the entry.
+enum JournalPhotoLabel {
+    nonisolated static func text(_ description:String?,index:Int)->String {
+        let trimmed=description?.trimmingCharacters(in:.whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? String(localized:"Journal photo \(index+1)") : String(localized:"Photo: \(trimmed)")
+    }
+}
+struct JournalDetailView:View {
+    @Environment(PlanModel.self) private var model
+    @Environment(\.nyx) private var palette
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    let entry:JournalEntry
+    @State private var editing=false
+    @State private var confirmDelete=false
+    @State private var deleteFailed=false
+    /// Set before deleting, so the closing animation never reads a deleted model.
+    @State private var removed=false
+    /// The stars as they stood over that park on that night: under the same sky, literally.
+    private var entrySky:some View {
+        let park=model.park(entry.parkID)
+        return NightBackground(park:park,night:park.map { $0.evening(entry.date) })
+    }
+    /// The lit Moon as it stood over the park that night, beside what was observed.
+    @ViewBuilder private var moonThatNight:some View {
+        if let park=model.park(entry.parkID) {
+            let night=model.night(park,on:entry.date)
+            let moon=AstronomyEngine().moon(for:night)
+            HStack(spacing:18) {
+                MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:64,height:64)
+                VStack(alignment:.leading,spacing:4) {
+                    Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                    Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.system(.title3,design:.serif))
+                    Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted)
+                }
+            }
+        } else { Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted) }
+    }
+    var body:some View {
+        ScrollView { if !removed { VStack(alignment:.leading,spacing:24) { Eyebrow(text:"A night remembered");Text(model.park(entry.parkID)?.shortName ?? String(localized:"A night outside")).font(.system(.largeTitle,design:.serif));Text(model.park(entry.parkID)?.dateLabel(entry.date) ?? entry.date.formatted(date:.abbreviated,time:.omitted)).font(.subheadline).foregroundStyle(palette.muted).padding(.top,-14);moonThatNight;Divider().overlay(palette.line);Text(entry.notes).font(.system(.body,design:.serif)).lineSpacing(7);ForEach(Array(entry.orderedPhotos.enumerated()),id:\.offset) { i,photo in PhotoView(data:photo.data,maxPixels:1600).clipShape(RoundedRectangle(cornerRadius:20)).accessibilityLabel(JournalPhotoLabel.text(photo.altText,index:i)) };Divider().overlay(palette.line);GlobeAtNightLink() }.padding(24).readableColumn(WideLayout.proseWidth) } }.background(entrySky).navigationTitle("Journal entry").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement:.topBarTrailing) { Button("Edit",systemImage:"pencil") { editing=true } }
+                ToolbarItem(placement:.topBarTrailing) { Button(role:.destructive) { confirmDelete=true } label:{ Label("Delete entry",systemImage:"trash") } }
+            }
+            .confirmationDialog("Delete this night?",isPresented:$confirmDelete,titleVisibility:.visible) {
+                Button("Delete entry",role:.destructive) {
+                    removed=true
+                    context.delete(entry)
+                    do { try context.save(); dismiss() } catch { context.rollback(); removed=false; deleteFailed=true }
+                }
+            } message:{ Text("The notes and photos are removed from this iPhone.") }
+            .alert("Unable to delete",isPresented:$deleteFailed) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }.sheet(isPresented:$editing) { NavigationStack { JournalEditorView(existing:entry) }.nyxPresentation() }
+    }
+}
+#Preview("Empty journal") { NavigationStack { JournalView() }.environment(PlanModel()).modelContainer(for:[SavedPark.self,JournalEntry.self],inMemory:true).preferredColorScheme(.dark) }
+/// The journal's store could not be opened. Everything else works, and the file on disk is left alone.
+struct JournalUnavailableBanner:View {
+    @Environment(\.nyx) private var palette
+    /// The device is nearly full: the one thing that may help is said first.
+    var needsSpace=false
+    var body:some View {
+        Label { Text(needsSpace ? "There is not enough free space to open your journal. Free up some space, then open Nyx again. Everything else works, and Nyx left your journal untouched." : "Your journal could not be opened. Everything else works. Nyx left your journal untouched.").fixedSize(horizontal:false,vertical:true) }
+            icon:{ Image(systemName:"externaldrive.badge.exclamationmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
+            .font(.subheadline).foregroundStyle(palette.ink)
+            .padding(14).frame(maxWidth:.infinity,alignment:.leading)
+            .background(palette.panel,in:RoundedRectangle(cornerRadius:16)).overlay(RoundedRectangle(cornerRadius:16).stroke(palette.line,lineWidth:0.5))
+            .accessibilityElement(children:.combine)
+    }
+}
+#Preview("Journal unavailable") { JournalUnavailableBanner().padding(24).background(Color.black).preferredColorScheme(.dark) }
+#Preview("Journal unavailable, device full") { JournalUnavailableBanner(needsSpace:true).padding(24).background(Color.black).preferredColorScheme(.dark) }
+/// The editor's park row: the system menu and picker, with a label that keeps the park's whole name.
+/// The stock menu picker's value is one line, so a long name is cut at large text sizes
+/// ("Black…nison" at AX5); here the name sits beside "Park" while it fits and wraps under it when not.
+private struct ParkMenuRow:View {
+    @Environment(\.nyx) private var palette
+    @Environment(PlanModel.self) private var model
+    @Binding var parkID:String
+    private var name:String { model.park(parkID)?.shortName ?? "" }
+    var body:some View {
+        Menu {
+            PlacePickerOptions(title:"Park",selection:$parkID)
+        } label:{
+            TitleValueLayout(spacing:12) {
+                // "Place" once there are spots to choose from too.
+                Text(model.spots.isEmpty ? "Park" : "Place").foregroundStyle(palette.ink)
+                HStack(alignment:.firstTextBaseline,spacing:6) {
+                    Text(name).foregroundStyle(palette.accent).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)
+                    Image(systemName:"chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(palette.accent)
+                }
+            }
+            .frame(maxWidth:.infinity,alignment:.leading).contentShape(Rectangle())
+        }
+        .accessibilityLabel(model.spots.isEmpty ? "Park" : "Place").accessibilityValue(name)
+    }
+}
+#Preview("Park row, short and long") {
+    @Previewable @State var short="jotr"
+    @Previewable @State var long="blca"
+    Form { ParkMenuRow(parkID:$short); ParkMenuRow(parkID:$long) }.environment(PlanModel()).preferredColorScheme(.dark)
+}
+#Preview("Park row, AX5") {
+    @Previewable @State var long="blca"
+    Form { ParkMenuRow(parkID:$long) }.environment(PlanModel()).environment(\.dynamicTypeSize,.accessibility5).preferredColorScheme(.dark)
+}

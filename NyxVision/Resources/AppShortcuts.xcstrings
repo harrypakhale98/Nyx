@@ -1,0 +1,166 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Open ${target} in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Öffne ${target} in ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Open ${target} in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Abre ${target} en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Ouvre ${target} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${target}を開く",
+              "${applicationName}で${target}を開いて"
+            ]
+          }
+        }
+      }
+    },
+    "Stand under tonight's sky at ${park} in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Stell mich unter den Himmel von heute Nacht in ${park} mit ${applicationName}",
+              "Zeig mir den Himmel heute Nacht in ${park} in ${applicationName}",
+              "Stell mich unter den Himmel von heute Nacht in ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Stand under tonight's sky at ${park} in ${applicationName}",
+              "Show me tonight's sky at ${park} in ${applicationName}",
+              "Stand under tonight's sky in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Entra en el cielo de esta noche en ${park} con ${applicationName}",
+              "Muéstrame el cielo de esta noche en ${park} con ${applicationName}",
+              "Entra en el cielo de esta noche con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Place-moi sous le ciel de ce soir à ${park} dans ${applicationName}",
+              "Montre-moi le ciel de ce soir à ${park} dans ${applicationName}",
+              "Place-moi sous le ciel de ce soir dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${park}の今夜の空の下に立つ",
+              "${applicationName}で${park}の今夜の空に入る",
+              "${applicationName}で${park}の今夜の空を見せて",
+              "${applicationName}で${park}の今夜の空を表示",
+              "${applicationName}で今夜の空の下に立つ",
+              "${applicationName}で今夜の空に入る"
+            ]
+          }
+        }
+      }
+    },
+    "What is the darkness score at ${park} in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wie ist der Dunkelheitswert in ${park} laut ${applicationName}",
+              "Dunkelheitswert für ${park} in ${applicationName}",
+              "Prüfe den Himmel heute Nacht in ${park} mit ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "What is the darkness score at ${park} in ${applicationName}",
+              "Check tonight's sky at ${park} with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Cuál es el índice de oscuridad en ${park} según ${applicationName}",
+              "Índice de oscuridad de ${park} en ${applicationName}",
+              "Revisa el cielo de esta noche en ${park} con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Quel est l’indice d’obscurité à ${park} dans ${applicationName}",
+              "Indice d’obscurité à ${park} dans ${applicationName}",
+              "Regarde le ciel de ce soir à ${park} avec ${applicationName}",
+              "Le ciel de ce soir à ${park} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${park}の暗さスコアを教えて",
+              "${applicationName}で${park}の暗さスコアは",
+              "${applicationName}で${park}の今夜の空を確認",
+              "${applicationName}で${park}の今夜の空を見せて"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

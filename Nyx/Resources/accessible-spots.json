@@ -1,0 +1,891 @@
+{
+  "retrieved": "2026-10-05",
+  "spots": [
+    {
+      "park": "acad",
+      "spot": "Seawall",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/places/acad_seawall-picnic-area.htm",
+      "evidence": "The restrooms are up a gravel path off the left parking lot, right next to the accessible parking space.",
+      "note": "Same page: most picnic sites are on a rocky shoreline with uneven footing and ground."
+    },
+    {
+      "park": "arch",
+      "spot": "Panorama Point",
+      "stepFree": "partial",
+      "features": [
+        "pavedPath",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/arch/planyourvisit/physical-mobility.htm",
+      "evidence": "All toilets in the park are accessible to wheelchairs. The picnic areas near Balanced Rock, Panorama Point, and Devils Garden have paved sections.",
+      "note": "Evidence concerns the picnic area; no statement about the viewpoint itself."
+    },
+    {
+      "park": "badl",
+      "spot": "Cedar Pass Amphitheater",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "pavedPath",
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/badl/planyourvisit/accessibility.htm",
+      "evidence": "accessible by a paved and well-lit path from reserved parking spaces in the parking lot"
+    },
+    {
+      "park": "bibe",
+      "spot": "Fossil Discovery Exhibit",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/bibe/planyourvisit/accessibility.htm",
+      "evidence": "Has reserved parking and is accessible by ramp. The exhibits and vault toilet are wheelchair-accessible."
+    },
+    {
+      "park": "bibe",
+      "spot": "Sotol Vista Overlook",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/places/sotol-vista.htm",
+      "evidence": "two handicapped parking spots can accomodate most vehicles",
+      "note": "Place page also lists the amenity \"Wheelchair Accessible\"; park accessibility page lists accessible vault toilets at Sotol Vista."
+    },
+    {
+      "park": "bibe",
+      "spot": "Rio Grande Overlook",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page says most overlooks are accessible, but does not name this one.",
+      "checked": "https://www.nps.gov/bibe/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "bisc",
+      "spot": "Dante Fascell Visitor Center (Convoy Point)",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/bisc/planyourvisit/accessibility.htm",
+      "evidence": "There are 4 designated handicap parking spaces available."
+    },
+    {
+      "park": "blca",
+      "spot": "Chasm View Overlook (South Rim)",
+      "stepFree": "yes",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/blca/planyourvisit/accessibility.htm",
+      "evidence": "Chasm View Overlook (packed gravel trail to the overlook)",
+      "note": "Listed under \"These overlooks are accessible for people using a wheelchair.\" Chasm View restroom also listed as accessible."
+    },
+    {
+      "park": "blca",
+      "spot": "Dragon Point Overlook",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/blca/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "blca",
+      "spot": "Sunset View Overlook",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/blca/planyourvisit/accessibility.htm",
+      "evidence": "These restrooms along the South Rim Drive are accessible for people using a wheelchair.",
+      "note": "Sunset View is one of four restrooms listed; the overlook itself is not described."
+    },
+    {
+      "park": "brca",
+      "spot": "Sunset Point",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "pavedPath",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/brca/planyourvisit/accessibility.htm",
+      "evidence": "Sunset Point (very good access): Paved, level trail, about 494 ft (150m) from parking lot to the viewing area.",
+      "note": "Park page says restrooms at Sunset Point are accessible with assistance."
+    },
+    {
+      "park": "cany",
+      "spot": "Grand View Point",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/cany/planyourvisit/physical-mobility.htm",
+      "evidence": "Grand View Point Overlook",
+      "note": "Listed under \"These overlooks are accessible for people using a wheelchair.\" Page also says a paved sidewalk leads from the parking lot to the geology talk site and all Island in the Sky toilets are accessible."
+    },
+    {
+      "park": "care",
+      "spot": "Panorama Point",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page only says many scenic overlooks are accessible; the place page lists parking and a \"very brief walk\" with no accessibility claim.",
+      "checked": "https://www.nps.gov/care/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "cave",
+      "spot": "Visitor Center East Parking Lot",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/cave/planyourvisit/accessibility.htm",
+      "evidence": "Accessible picnic tables near the visitor center are located at the far end of the east parking lot"
+    },
+    {
+      "park": "cong",
+      "spot": "Harry Hampton Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/cong/planyourvisit/accessibility.htm",
+      "evidence": "The first two lots each have two accessible parking spaces."
+    },
+    {
+      "park": "crla",
+      "spot": "Rim Village (Community House)",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking",
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/crla/planyourvisit/accessibility.htm",
+      "evidence": "Accessible parking is available near the Rim Visitor Center.",
+      "note": "Promenade is described as a 3/4-mile paved walk with uneven surfaces and a grade of less than 5%."
+    },
+    {
+      "park": "cuva",
+      "spot": "Pine Hollow Trailhead (Quick Road)",
+      "stepFree": "yes",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/places/000/pine-hollow-trailhead.htm",
+      "evidence": "Restroom - Accessible, Scenic View/Photo Spot, Toilet - Flush, Trash/Litter Receptacles, Water - Drinking/Potable, Wheelchair Accessible",
+      "note": "NPS place page amenity list, no further detail."
+    },
+    {
+      "park": "cuva",
+      "spot": "Oak Hill Trailhead (Oak Hill Road)",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Place page lists parking and a vault toilet, no wheelchair-accessible amenity.",
+      "checked": "https://www.nps.gov/places/000/oak-hill-trailhead.htm"
+    },
+    {
+      "park": "cuva",
+      "spot": "Horseshoe Pond (Major Road)",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/cuva/planyourvisit/physical-mobility.htm",
+      "evidence": "Horseshoe Pond has an accessible fishing pier close to the parking lot."
+    },
+    {
+      "park": "deva",
+      "spot": "Harmony Borax Works",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/deva/planyourvisit/sightseeing-and-hiking-accessibility.htm",
+      "evidence": "Partially paved surface with small sections of sand, gravel, broken pavement, and gradual uneven dips.",
+      "note": "Same page: 2 accessible parking spaces; no restrooms on site."
+    },
+    {
+      "park": "deva",
+      "spot": "Mesquite Flat Sand Dunes",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom",
+        "viewFromVehicle"
+      ],
+      "sourceURL": "https://www.nps.gov/deva/planyourvisit/sightseeing-and-hiking-accessibility.htm",
+      "evidence": "You do not need to leave your car to see the view.",
+      "note": "Same page: 4 accessible parking spaces with curb cuts, 2 accessible vault toilets; the path to the dunes is rocky and uneven."
+    },
+    {
+      "park": "drto",
+      "spot": "Garden Key Campground",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page covers Fort Jefferson (first tier only) and does not mention the campground.",
+      "checked": "https://www.nps.gov/drto/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "ever",
+      "spot": "Flamingo – Guy Bradley Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/ever/planyourvisit/mobility.htm",
+      "evidence": "The Guy Bradley Visitor Center (Flamingo) is accessible by a steep ramp or elevator."
+    },
+    {
+      "park": "ever",
+      "spot": "Shark Valley Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/ever/planyourvisit/mobility.htm",
+      "evidence": "The Shark Valley Visitor Center is accessible to wheelchairs from the parking lot via a curb ramp."
+    },
+    {
+      "park": "ever",
+      "spot": "Mahogany Hammock",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/ever/planyourvisit/mobility.htm",
+      "evidence": "These have a firm and stable surface which can be paved or a boardwalk.",
+      "note": "Mahogany Hammock Trail is in the page list of wheelchair-accessible trails under 3/4 mile. Evidence is about the trail, not the parking lot."
+    },
+    {
+      "park": "jeff",
+      "spot": "Arch Visitor Center West Entrance Plaza",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/jeff/planyourvisit/accessibility.htm",
+      "evidence": "The paved paths that cross the grounds are fully accessible."
+    },
+    {
+      "park": "glac",
+      "spot": "Logan Pass (visitor center parking lot)",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/glac/planyourvisit/physical-mobility.htm",
+      "evidence": "A ramp leads up to the upper terrace where a paved walkway provides excellent views and interpretive exhibits."
+    },
+    {
+      "park": "glac",
+      "spot": "St. Mary Visitor Center (Dusty Star Observatory)",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/glac/planyourvisit/physical-mobility.htm",
+      "evidence": "It’s a single level and has accessible walkways from the parking lot to the building.",
+      "note": "Evidence covers the visitor center; the observatory pad is not described."
+    },
+    {
+      "park": "glac",
+      "spot": "Apgar Visitor Center / Apgar Transit Center",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/glac/planyourvisit/physical-mobility.htm",
+      "evidence": "It’s on a single level and has accessible walkways from the parking lot to the building."
+    },
+    {
+      "park": "grca",
+      "spot": "Mather Point",
+      "stepFree": "yes",
+      "features": [
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/places/000/mather-point.htm",
+      "evidence": "Amphitheater, Historical/Interpretive Information/Exhibits, Picnic Table, Scenic View/Photo Spot, Wheelchair Accessible",
+      "note": "NPS place page amenity list. Page also says there is no parking right at Mather Point; lots around the visitor center are a short walk away."
+    },
+    {
+      "park": "grte",
+      "spot": "Craig Thomas Discovery and Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "pavedPath",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/grte/planyourvisit/physical-mobility.htm",
+      "evidence": "Nine accessible parking spaces four of which are van accessible.",
+      "note": "Same section: paved, flat routes from the parking lot to the visitor center. Page is older (mentions 2017 works); confirm with the park."
+    },
+    {
+      "park": "grte",
+      "spot": "Colter Bay Amphitheater",
+      "stepFree": "yes",
+      "features": [
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/places/000/colter-bay-amphitheater.htm",
+      "evidence": "Historical/Interpretive Information/Exhibits, Wheelchair Accessible"
+    },
+    {
+      "park": "grba",
+      "spot": "Baker Archaeological Site",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/grba/planyourvisit/physical-mobility-impairments.htm"
+    },
+    {
+      "park": "grsa",
+      "spot": "Dunes Parking Area",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/grsa/planyourvisit/accessibility.htm",
+      "evidence": "There is an accessible mat from the dunes parking area to the edge of the Medano Creek and the sand.",
+      "note": "Same page: loose sand and the creek make the dunefield itself nearly impossible for thin-wheeled chairs."
+    },
+    {
+      "park": "grsm",
+      "spot": "Cades Cove Orientation Shelter (Loop Road entrance)",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page lists Cades Cove campground and visitor center, not the orientation shelter.",
+      "checked": "https://www.nps.gov/grsm/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "grsm",
+      "spot": "Purchase Knob – Appalachian Highlands Science Learning Center",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/grsm/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "gumo",
+      "spot": "Pine Springs Amphitheater",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page confirms the Pine Springs Visitor Center is accessible; the amphitheater is not mentioned.",
+      "checked": "https://www.nps.gov/gumo/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "gumo",
+      "spot": "Salt Basin Dunes Trailhead",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/gumo/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "hale",
+      "spot": "Haleakalā Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/hale/planyourvisit/accessibility.htm",
+      "evidence": "The Headquarters Visitor Center, Haleakalā Visitor Center, and Hosmer Grove picnic area are all accessible sites in the summit area.",
+      "note": "Page is from 2020."
+    },
+    {
+      "park": "hale",
+      "spot": "Hosmer Grove Campground",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/hale/planyourvisit/accessibility.htm",
+      "evidence": "The Headquarters Visitor Center, Haleakalā Visitor Center, and Hosmer Grove picnic area are all accessible sites in the summit area.",
+      "note": "Evidence covers the picnic area; the page also lists accessible restrooms at Hosmer Grove. Page is from 2020."
+    },
+    {
+      "park": "havo",
+      "spot": "Kīlauea Overlook",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/havo/planyourvisit/accessibility.htm",
+      "evidence": "Kīlauea Overlook is accessible on a short asphalt path from the parking area."
+    },
+    {
+      "park": "indu",
+      "spot": "Kemil Beach Parking Lot",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/places/kemil-beach.htm",
+      "evidence": "The restroom is wheelchair accessible. The beach is not wheelchair accessible.",
+      "note": "Same page: parking lot is paved."
+    },
+    {
+      "park": "jotr",
+      "spot": "Cap Rock",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/jotr/planyourvisit/physical-mobility.htm",
+      "evidence": "The hard-packed sand may be loose and deeper in some sections depending on the weather.",
+      "note": "Same page: 2 standard accessible spaces at the trailhead; loop trail is 0.4 miles; boulders may overhang the trail."
+    },
+    {
+      "park": "jotr",
+      "spot": "Hidden Valley",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/jotr/planyourvisit/physical-mobility.htm",
+      "evidence": "2 standard accessible spaces near Hidden Valley Trailhead",
+      "note": "Same page: vault toilets with grab bars; none of the picnic tables or grills are accessible."
+    },
+    {
+      "park": "lavo",
+      "spot": "Bumpass Hell parking area",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page does not cover this trailhead parking area.",
+      "checked": "https://www.nps.gov/lavo/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "lavo",
+      "spot": "Kohm Yah-mah-nee Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/lavo/planyourvisit/accessibility.htm",
+      "evidence": "The Kohm Yah-mah-nee and Manzanita Lake amphitheaters (often used for evening programs and night sky viewing) are wheelchair accessible."
+    },
+    {
+      "park": "lavo",
+      "spot": "Loomis Museum / Manzanita Lake",
+      "stepFree": "yes",
+      "features": [
+        "amphitheater",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/lavo/planyourvisit/accessibility.htm",
+      "evidence": "The Kohm Yah-mah-nee and Manzanita Lake amphitheaters (often used for evening programs and night sky viewing) are wheelchair accessible.",
+      "note": "Same page: Loomis Museum has a wheelchair-accessible west entrance and accessible restrooms in Loomis Plaza; lake paths are dirt."
+    },
+    {
+      "park": "maca",
+      "spot": "Visitor Center bus loop and fields",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/maca/planyourvisit/accessibility.htm",
+      "evidence": "The visitor center is fully accessible with entrance doors operable by buttons, lowered information and ticket desks, and accessible restroom stalls.",
+      "note": "Evidence covers the visitor center building; the bus loop and fields are not described."
+    },
+    {
+      "park": "meve",
+      "spot": "Morefield Campground Amphitheater",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Page covers Morefield campsites and restrooms (accessible with assistance), not the amphitheater.",
+      "checked": "https://www.nps.gov/meve/planyourvisit/physical-mobility.htm"
+    },
+    {
+      "park": "meve",
+      "spot": "Far View Lodge",
+      "stepFree": "yes",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/meve/planyourvisit/accessibility.htm",
+      "evidence": "There are no stairs in any of the Lodge Room buildings, a ramp from the parking lot to the Lodge entrance",
+      "note": "Evidence covers the lodge buildings and entrance."
+    },
+    {
+      "park": "mora",
+      "spot": "Paradise – Jackson Visitor Center plaza",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/mora/planyourvisit/paradise-accessibility.htm",
+      "evidence": "There is a paved plaza in front of the entrance to the visitor center, bordered by a drop-off area.",
+      "note": "Same page: restrooms have wheelchair accessible stalls; there is an elevator to the second level."
+    },
+    {
+      "park": "mora",
+      "spot": "Sunrise Point",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Sunrise area page describes the visitor center and lot, not the overlook.",
+      "checked": "https://www.nps.gov/mora/planyourvisit/sunrise-accessibility.htm"
+    },
+    {
+      "park": "mora",
+      "spot": "Inspiration Point (Stevens Canyon Road)",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Place page lists only \"Scenic View/Photo Spot\".",
+      "checked": "https://www.nps.gov/places/000/inspiration-point.htm"
+    },
+    {
+      "park": "neri",
+      "spot": "New River Gorge Bridge Overlook (Canyon Rim Visitor Center)",
+      "stepFree": "yes",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/neri/planyourvisit/accessibility.htm",
+      "evidence": "An easy walk on an accessible ramp leads to the first viewing point.",
+      "note": "Same page: the boardwalk to the lower overlook is not accessible (178 steps). Evidence is for the first viewing point."
+    },
+    {
+      "park": "neri",
+      "spot": "Grandview Main Overlook",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/neri/planyourvisit/accessibility.htm",
+      "evidence": "The main overlook has a designated viewing platform for wheelchair users",
+      "note": "Same page: the 500 yard path from the parking lot consists of large, uneven stones."
+    },
+    {
+      "park": "neri",
+      "spot": "Meadow Creek Campground",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/neri/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "noca",
+      "spot": "Diablo Lake Overlook",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/noca/planyourvisit/accessibility-at-diablo-lake-overlook.htm",
+      "evidence": "Accessible parking, curb ramps and toilets available.",
+      "note": "Page last updated 2017."
+    },
+    {
+      "park": "olym",
+      "spot": "Hurricane Ridge (visitor center area)",
+      "stepFree": "partial",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/olym/planyourvisit/physical-mobility-accessibility.htm",
+      "evidence": "path to the overlook: 400 feet, one way",
+      "note": "Same section: surface paved, maximum running slope 6-13% on the path to the overlook."
+    },
+    {
+      "park": "pefo",
+      "spot": "Kachina Point",
+      "stepFree": "yes",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/places/kachina-point.htm",
+      "evidence": "The overlook is reached by an easy accessible trail behind the Painted Desert Inn National Historic Landmark.",
+      "note": "Place page amenities also list \"Accessible Sites\" and \"Wheelchair Accessible\". The Painted Desert Rim Trail beyond the viewpoint is not accessible."
+    },
+    {
+      "park": "pefo",
+      "spot": "Chinde Point Picnic Area",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/pefo/planyourvisit/accessibility.htm",
+      "evidence": "The Hózhó Point picnic area has some accessible sites, including an accessible restroom.",
+      "note": "NPS now labels this site Hózhó Point (1984 Chindesaurus discovery site). Name match is based on that site description."
+    },
+    {
+      "park": "pinn",
+      "spot": "Bacon Ranch",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/pinn/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "pinn",
+      "spot": "Peaks View Parking Area",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/pinn/planyourvisit/accessibility.htm",
+      "evidence": "The trailhead is located at the Peaks View Picnic Area near the east entrance.",
+      "note": "Refers to the accessible section of Bench Trail (\"recently hardened and graded\")."
+    },
+    {
+      "park": "pinn",
+      "spot": "Chaparral Parking Area",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/pinn/planyourvisit/accessibility.htm",
+      "evidence": "Chaparral Area: Visitors can enjoy views of Pinnacles' most stunning geological formations directly from or near the parking area.",
+      "note": "Listed under \"Accessible Trails\"; no surface detail."
+    },
+    {
+      "park": "redw",
+      "spot": "Schoolhouse Peak Fire Lookout (Bald Hills)",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/redw/planyourvisit/physicalmobility.htm"
+    },
+    {
+      "park": "redw",
+      "spot": "Redwood Creek Overlook",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Place page lists parking, picnic table and vault toilet; no wheelchair-accessible amenity.",
+      "checked": "https://www.nps.gov/places/redwoodcreekoverlook.htm"
+    },
+    {
+      "park": "romo",
+      "spot": "Park & Ride (Bear Lake Road)",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Shuttles are accessible; page warns bus stops and trailheads along Bear Lake Road have barriers.",
+      "checked": "https://www.nps.gov/romo/planyourvisit/physical-mobility.htm"
+    },
+    {
+      "park": "romo",
+      "spot": "Upper Beaver Meadows Trailhead",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/romo/planyourvisit/physical-mobility.htm"
+    },
+    {
+      "park": "romo",
+      "spot": "Holzwarth Historic Site Parking Area",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Page only lists the access road among routes where assistive power-driven mobility devices are permitted.",
+      "checked": "https://www.nps.gov/romo/planyourvisit/physical-mobility.htm"
+    },
+    {
+      "park": "sagu",
+      "spot": "Red Hills Visitor Center (Tucson Mountain District)",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom",
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/sagu/planyourvisit/accessibility.htm",
+      "evidence": "Accessible features found at both visitor centers include designated parking spaces, accessible restrooms and drinking fountains, paved cactus garden paths"
+    },
+    {
+      "park": "sagu",
+      "spot": "Rincon Mountain Visitor Center (Rincon Mountain District)",
+      "stepFree": "yes",
+      "features": [
+        "accessibleParking",
+        "accessibleRestroom",
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/sagu/planyourvisit/accessibility.htm",
+      "evidence": "Accessible features found at both visitor centers include designated parking spaces, accessible restrooms and drinking fountains, paved cactus garden paths"
+    },
+    {
+      "park": "sagu",
+      "spot": "Loma Alta Trailhead",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "checked": "https://www.nps.gov/sagu/planyourvisit/accessibility.htm"
+    },
+    {
+      "park": "sequ",
+      "spot": "Moro Rock",
+      "stepFree": "no",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/thingstodo/moro-rock.htm",
+      "evidence": "Climb over 350 steps to the top of a granite dome along a concrete and stone stairway.",
+      "note": "Same page: accessible parking spaces are located at the Moro Rock parking lot."
+    },
+    {
+      "park": "shen",
+      "spot": "Big Meadows",
+      "stepFree": "partial",
+      "features": [
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/places/000/big-meadows-amphitheater.htm",
+      "evidence": "Amphitheater, Benches/Seating, Wheelchair Accessible",
+      "note": "Evidence covers the Big Meadows amphitheater, not the whole meadow area."
+    },
+    {
+      "park": "shen",
+      "spot": "Skyland Amphitheater",
+      "stepFree": "yes",
+      "features": [
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/places/000/skyland-amphitheater.htm",
+      "evidence": "Amphitheater, Wheelchair Accessible"
+    },
+    {
+      "park": "thro",
+      "spot": "Peaceful Valley Ranch",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park night-sky page: accessible parking at most paved areas, but accessible sidewalks or telescope areas may not be.",
+      "checked": "https://www.nps.gov/thingstodo/see-the-stars-in-theodore-roosevelt-national-park.htm"
+    },
+    {
+      "park": "thro",
+      "spot": "Buck Hill",
+      "stepFree": "partial",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/thro/planyourvisit/accessibility.htm",
+      "evidence": "Buck Hill - sidewalk and exhibit (trail is paved and gravel with stairs)",
+      "note": "Listed among wheelchair accessible pullouts. The climb to the top has stairs, and the top is the stargazing view."
+    },
+    {
+      "park": "thro",
+      "spot": "Oxbow Overlook (North Unit)",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/thro/planyourvisit/accessibility.htm",
+      "evidence": "Oxbow Overlook - paved path along the rim of the badlands, exhibits"
+    },
+    {
+      "park": "viis",
+      "spot": "Cinnamon Bay Beach",
+      "stepFree": "yes",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/places/cinnamon-bay-beach.htm",
+      "evidence": "Parking - Auto, Restroom, Restroom - Accessible, Wheelchair Accessible",
+      "note": "NPS place page amenity list (page dated 2021). Park page notes beach access ramps can wash out in storms."
+    },
+    {
+      "park": "voya",
+      "spot": "Rainy Lake Visitor Center Upper Parking Lot",
+      "stepFree": "partial",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/voya/planyourvisit/accessibility.htm",
+      "evidence": "Accessible entrance and restrooms at all three visitor centers.",
+      "note": "Evidence covers the visitor center; the upper parking lot is not described."
+    },
+    {
+      "park": "voya",
+      "spot": "Kabetogama Lake Visitor Center",
+      "stepFree": "yes",
+      "features": [
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/voya/planyourvisit/accessibility.htm",
+      "evidence": "Accessible entrance and restrooms at all three visitor centers."
+    },
+    {
+      "park": "whsa",
+      "spot": "Dunes Drive Amphitheater (Evening Program Area)",
+      "stepFree": "partial",
+      "features": [
+        "amphitheater"
+      ],
+      "sourceURL": "https://www.nps.gov/whsa/planyourvisit/full-moon-night.htm",
+      "evidence": "The amphitheater is an outdoor venue with a compact sand surface in most areas.",
+      "note": "NPS place page \"White Sands Amphitheater\" lists the amenity \"Wheelchair Accessible\". Full Moon Night page adds a temporary accessible ramp and limited accessible parking."
+    },
+    {
+      "park": "wica",
+      "spot": "Elk Mountain Campground (Elk Mountain trail)",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/wica/planyourvisit/accessibility.htm",
+      "evidence": "There are two wheelchair accessible sites, B2 and D3.",
+      "note": "Park night-sky page says the Elk Mountain trail constellation hike is not wheelchair accessible due to steep and rocky trail."
+    },
+    {
+      "park": "yell",
+      "spot": "Madison Information Station parking lot",
+      "stepFree": "partial",
+      "features": [
+        "accessibleParking"
+      ],
+      "sourceURL": "https://www.nps.gov/yell/planyourvisit/accessibility.htm",
+      "evidence": "Designated accessible parking spaces at the walkway leading to the information station and in front of the restrooms and picnic area.",
+      "note": "Same page: wheelchair users may require assistance to the center and the amphitheater."
+    },
+    {
+      "park": "yose",
+      "spot": "Glacier Point Overlook",
+      "stepFree": "yes",
+      "features": [
+        "pavedPath"
+      ],
+      "sourceURL": "https://www.nps.gov/yose/planyourvisit/glacierpoint.htm",
+      "evidence": "a short, paved, wheelchair-accessible trail takes you to"
+    },
+    {
+      "park": "zion",
+      "spot": "Checkerboard Mesa Pullout",
+      "stepFree": "unknown",
+      "features": [],
+      "sourceURL": null,
+      "evidence": null,
+      "note": "Park page says accessible parking is often absent on the east side; this pullout is not listed.",
+      "checked": "https://www.nps.gov/zion/planyourvisit/accessibility.htm"
+    }
+  ]
+}

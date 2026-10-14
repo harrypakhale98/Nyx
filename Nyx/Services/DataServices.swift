@@ -1,0 +1,661 @@
+import Foundation
+
+// Park updates (NPS), forecast detail and the smoke forecast, for Nyx on iPhone and iPad. The guarded
+// transport (`SafeHTTP`, `HostGuard`, `HostBackoff`), the offline cache folder and the cloud
+// forecast (`WeatherService`) live in CloudForecastClient.swift, which Vision Pro shares.
+
+nonisolated protocol DetailProviding: Sendable {
+    /// `weather` and `smoke` are the two switches in Your privacy: forecast detail comes from
+    /// the forecast host, aerosols from the air-quality host.
+    func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool) async -> [String: ForecastDetail]
+    /// The cached detail, read once from disk off the main actor at launch.
+    func hydrate(_ parks: [Park]) async -> [String: ForecastDetail]
+    /// Detail already read at launch (`CachePreload`).
+    func seed(_ cached: [String: ForecastDetail], parks: [Park]) async
+    /// True when the last detail request was held back by Low Data Mode.
+    func pausedForLowData() async -> Bool
+    /// "Smoke and haze" was switched off: drop every cached aerosol series, in memory and on disk,
+    /// so nothing (the app, Siri, the widgets) counts the air-quality host's data any more.
+    func forgetAir() async
+}
+/// The forecast's context, beside the score's own clouds: three models' clouds, cloud layers,
+/// cold, dew, wind and visibility (seven days), and the aerosol forecast that warns of smoke.
+/// Like clouds, every park shares each request, so a refresh is three more requests (two chunks
+/// each for 63 parks), never one per park, and none of them hints at where someone is. Each part
+/// keeps its own twelve-hour freshness (`ForecastReuse`); a failed request keeps the last good
+/// part. Requests to one host go one after the other, never side by side, within this device's
+/// budget (`CallBudget`). Detail never uses a Low Data Mode network: it is context, and the
+/// score's clouds still arrive.
+actor ForecastDetailService: DetailProviding {
+    enum Kind: CaseIterable, Sendable {
+        case models, layers, air
+        var host: String { self == .air ? "air-quality-api.open-meteo.com" : "api.open-meteo.com" }
+        /// How soon pulling to refresh may ask again: three hours for the forecast models (ICON
+        /// runs every three), never sooner than twelve for smoke (CAMS runs twice a day).
+        var forced: TimeInterval { self == .air ? ForecastReuse.airForced : ForecastReuse.detailForced }
+    }
+    /// Detail is context for the week ahead; twice a day keeps it current at a quarter of the calls.
+    static let freshFor: TimeInterval=ForecastReuse.detail
+    private let transport: any HTTPTransport
+    private let persist: Bool
+    private let backoff: HostBackoff
+    private let ledger: CallLedger
+    private let budget: CallBudget
+    private let clock: @Sendable () -> Date
+    private var memory: [String: ForecastDetail] = [:]
+    private var loaded=Set<String>()
+    private var lowData=false
+    /// The files on disk hold no aerosol series (`forgetAir` swept them this launch).
+    private var airCleared=false
+    /// Counts `forgetAir` calls. A refresh notes it when it begins; smoke that arrives after the
+    /// switch went off (the request was already in flight) is dropped instead of stored.
+    private var airGeneration=0
+    /// A refresh already under way, with the parks it asked about for each kind; later callers wait
+    /// for it instead of asking again.
+    private var running: (task: Task<Void, Never>, attempted: [Kind: Set<String>])?
+    /// Callers waiting for a refresh to end, the one that started it included (tests read it).
+    private(set) var waiting=0
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
+         budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget
+        self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+        self.ledger=ledger ?? (persist ? .shared : CallLedger(file: nil))
+    }
+    func hydrate(_ parks: [Park]) async -> [String: ForecastDetail] {
+        for park in parks { load(park.id) }
+        return memory
+    }
+    func seed(_ cached: [String: ForecastDetail], parks: [Park]) {
+        for park in parks where loaded.insert(park.id).inserted && memory[park.id] == nil { memory[park.id]=cached[park.id] }
+    }
+    func pausedForLowData() -> Bool { lowData }
+    func forgetAir() {
+        airGeneration+=1
+        for (id, detail) in memory where detail.air != nil {
+            var kept=detail; kept.air=nil
+            memory[id]=kept
+            if persist { CacheDirectory.write(kept, name: "detail-\(id)") }
+        }
+        // Parks not read yet this launch: their files on disk, once until smoke is fetched again.
+        guard persist, !airCleared else { return }
+        airCleared=true
+        let all=(try? ParkData.load().map(\.id)) ?? []
+        for id in all where memory[id] == nil {
+            guard var cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)"), cached.air != nil else { continue }
+            cached.air=nil
+            CacheDirectory.write(cached, name: "detail-\(id)")
+        }
+    }
+    private func load(_ id: String) {
+        guard loaded.insert(id).inserted, memory[id] == nil, persist, let cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)") else { return }
+        memory[id]=cached
+    }
+    func details(for parks: [Park], weather: Bool, smoke: Bool, force: Bool = false) async -> [String: ForecastDetail] {
+        for park in parks { load(park.id) }
+        // Another request is on its way (perhaps for other parks): wait for it, then decide again
+        // what is due, leaving out what it already asked for: a request that failed without a
+        // backoff (a timeout, a refusal, an unreadable answer) is not sent again once per waiter. A
+        // cancelled caller stops waiting and returns what is kept; the request finishes and stores itself.
+        var attempted: [Kind: Set<String>] = [:]
+        while let current=running {
+            waiting+=1
+            let finished=await SharedRequest.value(of: current.task) != nil
+            waiting-=1
+            guard finished else { return kept(parks) }
+            attempted.merge(current.attempted) { $0.union($1) }
+        }
+        do {
+            let now=clock()
+            var jobs: [(Kind, [Park])] = []
+            for kind in Kind.allCases where (kind == .air ? smoke : weather) && backoff.allows(kind.host, now: now) {
+                let due=parks.filter { park in
+                    attempted[kind]?.contains(park.id) != true
+                        && ForecastReuse.due(Self.series(memory[park.id], kind)?.updated, now: now, force: force, normal: Self.freshFor, forced: kind.forced)
+                }
+                for start in stride(from: 0, to: due.count, by: 50) { jobs.append((kind, Array(due[start..<min(due.count, start+50)]))) }
+            }
+            if !jobs.isEmpty {
+                let generation=airGeneration
+                // One host's requests one after the other (Open-Meteo serves one at a time per
+                // address and queues the rest); the two hosts side by side.
+                let byHost=Dictionary(grouping: jobs) { $0.0.host }.values.map { Array($0) }
+                let task=Task {
+                    let results=await withTaskGroup(of: [(Kind, [(String, HourlySeries)]?)].self) { group in
+                        for queue in byHost {
+                            group.addTask {
+                                var done: [(Kind, [(String, HourlySeries)]?)] = []
+                                for (kind, chunk) in queue {
+                                    guard !Task.isCancelled else { break }
+                                    let fetched=await self.fetch(kind, chunk)
+                                    done.append((kind, fetched))
+                                    // A host that now asks Nyx to wait: the rest of its queue waits too.
+                                    if fetched?.isEmpty == true && !self.backoff.allows(kind.host, now: self.clock()) { break }
+                                }
+                                return done
+                            }
+                        }
+                        var all: [(Kind, [(String, HourlySeries)]?)] = []
+                        for await result in group { all+=result }
+                        return all
+                    }
+                    self.store(results, airGeneration: generation)
+                    self.running=nil
+                }
+                var asked: [Kind: Set<String>] = [:]
+                for (kind, chunk) in jobs { asked[kind, default: []].formUnion(chunk.map(\.id)) }
+                running=(task, asked)
+                waiting+=1
+                _=await SharedRequest.value(of: task)
+                waiting-=1
+            }
+        }
+        return kept(parks)
+    }
+    private func kept(_ parks: [Park]) -> [String: ForecastDetail] {
+        var result: [String: ForecastDetail] = [:]
+        for park in parks { if let detail=memory[park.id] { result[park.id]=detail } }
+        return result
+    }
+    /// A nil part was held back by Low Data Mode. Smoke asked for before the latest `forgetAir`
+    /// is not stored: the switch went off while it was on its way.
+    private func store(_ results: [(Kind, [(String, HourlySeries)]?)], airGeneration generation: Int) {
+        var changed=Set<String>()
+        lowData=results.contains { $0.1 == nil }
+        for (kind, fetched) in results {
+            if kind == .air && generation != airGeneration { continue }
+            for (id, series) in fetched ?? [] {
+                var detail=memory[id] ?? ForecastDetail()
+                switch kind { case .models: detail.models=series; case .layers: detail.layers=series; case .air: detail.air=series; airCleared=false }
+                memory[id]=detail; changed.insert(id)
+            }
+        }
+        if persist { for id in changed { if let detail=memory[id] { CacheDirectory.write(detail, name: "detail-\(id)") } } }
+    }
+    private static func series(_ detail: ForecastDetail?, _ kind: Kind) -> HourlySeries? {
+        switch kind { case .models: detail?.models; case .layers: detail?.layers; case .air: detail?.air }
+    }
+    /// Nil when Low Data Mode held the request back; empty when it failed any other way.
+    private func fetch(_ kind: Kind, _ parks: [Park]) async -> [(String, HourlySeries)]? {
+        guard !parks.isEmpty else { return [] }
+        var parts=URLComponents()
+        parts.scheme="https"
+        var items=[URLQueryItem(name: "latitude", value: parks.map { String($0.forecastPoint.latitude) }.joined(separator: ",")),
+                   URLQueryItem(name: "longitude", value: parks.map { String($0.forecastPoint.longitude) }.joined(separator: ","))]
+        let keys: [String]
+        switch kind {
+        case .models:
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.modelKeys
+            items+=[URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "models", value: "gfs_seamless,ecmwf_ifs025,icon_seamless")]
+        case .layers:
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.layerKeys
+            items.append(URLQueryItem(name: "hourly", value: keys.joined(separator: ",")))
+        case .air:
+            // CAMS global covers every park, Alaska and American Samoa included.
+            parts.host="air-quality-api.open-meteo.com"; parts.path="/v1/air-quality"; keys=ForecastDetail.airKeys
+            items+=[URLQueryItem(name: "hourly", value: keys.joined(separator: ",")), URLQueryItem(name: "domains", value: "cams_global")]
+        }
+        parts.queryItems=items+[URLQueryItem(name: "forecast_days", value: "7"), URLQueryItem(name: "past_days", value: "1"),
+                                URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
+        guard let url=parts.url else { return [] }
+        let data: Data
+        do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
+            return Backoff.constrained(error) ? nil : []
+        }
+        struct Response: Decodable { let hourly: [String: [Double?]] }
+        // One coordinate returns an object; several return an array in request order.
+        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+        guard decoded.count == parks.count else { return [] }
+        let now=clock()
+        return zip(parks, decoded).compactMap { park, response in
+            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
+            var values: [String: [Double?]] = [:]
+            for key in keys {
+                guard let series=response.hourly[key], series.count == times.count else { return nil }
+                values[key]=series
+            }
+            return (park.id, HourlySeries(updated: now, times: times, values: values))
+        }
+    }
+}
+nonisolated struct ParkEnrichment: Codable, Sendable {
+    let updated: Date
+    let alerts: [ParkAlert]
+    let programs: [RangerProgram]
+    let description: String?
+    /// When programs were last fetched successfully; nil if they never were. Optional so
+    /// caches written before this field still decode.
+    var programsUpdated: Date?=nil
+}
+/// Every park's alerts from one request, keyed by NPS park code. A code present with no alerts
+/// was checked and had none; a code missing was not in the request.
+nonisolated struct ParkAlertsCache: Codable, Sendable, Equatable {
+    let updated: Date
+    let alerts: [String: [ParkAlert]]
+}
+/// One park's upcoming night-sky ranger programs.
+nonisolated struct ProgramsCache: Codable, Sendable, Equatable {
+    let updated: Date
+    let programs: [RangerProgram]
+}
+/// The alerts every screen shares, and whether NPS is refusing requests right now (the shared
+/// key's quota is spent, or the service is struggling), so the app can say so calmly.
+nonisolated struct AlertsUpdate: Sendable, Equatable {
+    let cache: ParkAlertsCache?
+    let busy: Bool
+}
+nonisolated protocol ParkProviding: Sendable {
+    /// One request for all the parks' alerts, fresh for six hours, shared by every screen. `pages`
+    /// caps the requests (one in a background refresh); a set it cannot complete is not kept.
+    func alerts(for parks: [Park], key: String, network: Bool, force: Bool, pages: Int) async -> AlertsUpdate
+    /// One park's night-sky programs, asked for only when its page is open, fresh for a day.
+    func programs(for park: Park, key: String, network: Bool, force: Bool) async -> ProgramsCache?
+    /// The cached alerts, read once from disk off the main actor at launch.
+    func hydrate(_ parks: [Park]) async -> AlertsUpdate
+    /// Alerts already read at launch (`CachePreload`).
+    func seed(_ cached: ParkAlertsCache?) async
+    /// Every park's campgrounds from one request (all 63 park codes), fresh for seven days.
+    func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache?
+}
+extension ParkProviding {
+    nonisolated func alerts(for parks: [Park], key: String, network: Bool, force: Bool = false) async -> AlertsUpdate {
+        await alerts(for: parks, key: key, network: network, force: force, pages: ParkStore.alertPages)
+    }
+    /// A provider without campgrounds (a test double) has none to show.
+    nonisolated func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache? { nil }
+}
+/// Every install shares one NPS key and its hourly quota (1,000 requests), so requests are spent
+/// carefully. Alerts for all 63 parks arrive in one request every six hours, whichever screen asks
+/// first, so a request never reveals which parks are near someone. Ranger programs are asked for
+/// only when a park's page opens, and kept a day (they are scheduled weeks ahead). Even a forced
+/// refresh waits ten minutes since the last success; one request at a time however many screens
+/// ask; and none at all for a while after the server refuses one (`HostBackoff`, kept on disk).
+actor ParkStore: ParkProviding {
+    static let host="developer.nps.gov"
+    private let transport: any HTTPTransport
+    private let persist: Bool
+    private let backoff: HostBackoff
+    private let clock: @Sendable () -> Date
+    private var alertCache: ParkAlertsCache?
+    private var alertsLoaded=false
+    private var alertsTask: Task<Bool, Never>?
+    /// Callers waiting on `alertsTask`; when the last one is cancelled, so is the request.
+    private var alertWaiters=0
+    /// The last alerts request was refused (quota, a refused key, a server error).
+    private var refused=false
+    private var programCache: [String: ProgramsCache] = [:]
+    private var programsLoaded=Set<String>()
+    private var programTasks: [String: Task<Void, Never>] = [:]
+    private var campgroundCache: CampgroundsCache?
+    private var campgroundsLoaded=false
+    private var campgroundsTask: Task<Void, Never>?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock
+        self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+    }
+    private var busy: Bool { refused || !backoff.allows(Self.host, now: clock()) }
+    func hydrate(_ parks: [Park]) async -> AlertsUpdate {
+        loadAlerts(parks)
+        return AlertsUpdate(cache: alertCache, busy: busy)
+    }
+    /// The shared file, or (once, after an update from a version that kept one file per park)
+    /// the last per-park alerts, so closures known offline are never forgotten by an upgrade.
+    private func loadAlerts(_ parks: [Park]) {
+        guard !alertsLoaded else { return }
+        alertsLoaded=true
+        guard persist, alertCache == nil else { return }
+        alertCache=Self.stored(parks)
+    }
+    func seed(_ cached: ParkAlertsCache?) {
+        guard !alertsLoaded else { return }
+        alertsLoaded=true
+        if alertCache == nil { alertCache=cached }
+    }
+    /// The alerts on disk: the shared file, or the per-park files of earlier versions.
+    nonisolated static func stored(_ parks: [Park]) -> ParkAlertsCache? {
+        if let shared=CacheDirectory.read(ParkAlertsCache.self, name: "alerts") { return shared }
+        var alerts: [String: [ParkAlert]] = [:], oldest: Date?
+        for park in parks {
+            guard let old=CacheDirectory.read(ParkEnrichment.self, name: "park-\(park.id)") else { continue }
+            if let code=park.nps { alerts[code]=old.alerts }
+            oldest=min(oldest ?? old.updated, old.updated)
+        }
+        return oldest.map { ParkAlertsCache(updated: $0, alerts: alerts) }
+    }
+    /// Pages of 500 alerts asked for at most; 63 parks rarely need a second.
+    static let alertPages=4
+    func alerts(for parks: [Park], key: String, network: Bool, force: Bool, pages: Int) async -> AlertsUpdate {
+        loadAlerts(parks)
+        guard network, Self.usable(key) else { return AlertsUpdate(cache: alertCache, busy: false) }
+        // Another screen's request is on its way: wait for it, then decide again. The task clears
+        // itself before it finishes, so a waiter never sees a request that has already ended.
+        // A cancelled caller stops waiting and returns what is cached.
+        while let running=alertsTask {
+            guard await wait(for: running) else { return AlertsUpdate(cache: alertCache, busy: busy) }
+        }
+        guard Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: false) }
+        guard backoff.allows(Self.host, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: true) }
+        let codes=Array(Set(parks.compactMap(\.nps))).sorted(), ids=parks.map(\.id)
+        let task=Task { () -> Bool in
+            let ok=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
+            self.alertsTask=nil
+            return ok
+        }
+        alertsTask=task
+        _=await wait(for: task)
+        return AlertsUpdate(cache: alertCache, busy: busy)
+    }
+    /// Waits for the alerts request; false when the caller was cancelled first. The request is
+    /// cancelled too once nobody is waiting for it.
+    private func wait(for task: Task<Bool, Never>) async -> Bool {
+        alertWaiters+=1
+        let finished=await SharedRequest.value(of: task) != nil
+        alertWaiters-=1
+        if !finished, alertWaiters == 0 { task.cancel() }
+        return finished
+    }
+    func programs(for park: Park, key: String, network: Bool, force: Bool = false) async -> ProgramsCache? {
+        if persist, programsLoaded.insert(park.id).inserted, programCache[park.id] == nil {
+            programCache[park.id]=CacheDirectory.read(ProgramsCache.self, name: "programs-\(park.id)")
+        }
+        guard network, Self.usable(key) else { return programCache[park.id] }
+        while let running=programTasks[park.id] { await running.value }
+        guard Self.stale(programCache[park.id]?.updated, maxAge: 24*3600, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return programCache[park.id] }
+        let task=Task {
+            await self.fetchPrograms(park, key: key)
+            self.programTasks[park.id]=nil
+        }
+        programTasks[park.id]=task
+        await task.value
+        return programCache[park.id]
+    }
+    /// Campgrounds change with the seasons, not the hour: one request for all the parks (so it
+    /// never says which park someone is looking at), kept seven days, and never on a Low Data Mode
+    /// network (the full answer is about 2 MB).
+    func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool = false) async -> CampgroundsCache? {
+        if !campgroundsLoaded {
+            campgroundsLoaded=true
+            if persist, campgroundCache == nil { campgroundCache=CacheDirectory.read(CampgroundsCache.self, name: "campgrounds") }
+        }
+        guard network, Self.usable(key) else { return campgroundCache }
+        while let running=campgroundsTask { await running.value }
+        guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return campgroundCache }
+        let codes=Array(Set(parks.compactMap(\.nps))).sorted()
+        let task=Task {
+            await self.fetchCampgrounds(codes: codes, key: key)
+            self.campgroundsTask=nil
+        }
+        campgroundsTask=task
+        await task.value
+        return campgroundCache
+    }
+    static let campgroundsFresh: TimeInterval=7*86400
+    /// Pages with `start`, as alerts do. A request that fails part-way keeps the last complete set.
+    private func fetchCampgrounds(codes: [String], key: String) async {
+        var all: [Campground] = [], read=0
+        for _ in 0..<4 {
+            guard let data=await data(url("campgrounds", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key, constrained: false),
+                  let page=try? Campground.page(data) else { return }
+            all+=page.campgrounds; read+=page.count
+            guard let total=page.total, read<total, page.count>0 else { break }
+        }
+        var grouped=Dictionary(uniqueKeysWithValues: codes.map { ($0, [Campground]()) })
+        for campground in all where grouped[campground.parkCode] != nil { grouped[campground.parkCode]?.append(campground) }
+        let fresh=CampgroundsCache(updated: clock(), campgrounds: grouped)
+        campgroundCache=fresh
+        if persist { CacheDirectory.write(fresh, name: "campgrounds") }
+    }
+    /// A part is due once it is older than `maxAge`; even a forced refresh waits ten minutes
+    /// since that part's last success.
+    static func stale(_ updated: Date?, maxAge: TimeInterval, force: Bool, now: Date) -> Bool {
+        guard let updated else { return true }
+        let age=now.timeIntervalSince(updated)
+        return age>=maxAge || (force && age>=600)
+    }
+    static func usable(_ key: String) -> Bool { !key.isEmpty && !key.contains("$(") }
+    private func url(_ path: String, _ query: [(String, String)]) -> URL? {
+        var c=URLComponents(); c.scheme="https"; c.host="developer.nps.gov"; c.path="/api/v1/\(path)"
+        c.queryItems=query.map { URLQueryItem(name: $0.0, value: $0.1) }
+        return c.url
+    }
+    private func get<T: Decodable>(_ type: T.Type, _ url: URL?, key: String) async -> T? {
+        guard let url else { return nil }
+        do {
+            let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: true)
+            refused=false
+            backoff.succeeded(Self.host)
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            if error is HTTPStatusError { refused=true }
+            backoff.record(error, host: Self.host, now: clock())
+            return nil
+        }
+    }
+    /// The body of a request that may wait for an unconstrained network: Low Data Mode holding it
+    /// back is not a refusal and starts no backoff.
+    private func data(_ url: URL?, key: String, constrained: Bool) async -> Data? {
+        guard let url else { return nil }
+        do {
+            let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: constrained)
+            refused=false
+            backoff.succeeded(Self.host)
+            return data
+        } catch {
+            if Backoff.constrained(error) { return nil }
+            if error is HTTPStatusError { refused=true }
+            backoff.record(error, host: Self.host, now: clock())
+            return nil
+        }
+    }
+    /// Pages with `start` while NPS reports more than one page holds (it allows up to 500 a page).
+    /// A request that fails part-way keeps the last complete set.
+    private func fetchAlerts(codes: [String], parkIDs: [String], key: String, pages: Int) async -> Bool {
+        // Only an alert's id, title and parks are needed to show it; a missing description or category
+        // reads as empty, and a record that still cannot be read costs only itself, never the page.
+        struct Record: Decodable {
+            let id: String, title: String, description: String, category: String, parkCode: String
+            enum CodingKeys: String, CodingKey { case id, title, description, category, parkCode }
+            init(from decoder: any Decoder) throws {
+                let c=try decoder.container(keyedBy: CodingKeys.self)
+                id=try c.decode(String.self, forKey: .id); title=try c.decode(String.self, forKey: .title)
+                parkCode=try c.decode(String.self, forKey: .parkCode)
+                description=(try? c.decodeIfPresent(String.self, forKey: .description)) ?? ""
+                category=(try? c.decodeIfPresent(String.self, forKey: .category)) ?? ""
+            }
+        }
+        struct Page: Decodable {
+            let data: [Lenient<Record>]; let total: String?
+            enum CodingKeys: String, CodingKey { case data, total }
+            init(from decoder: any Decoder) throws {
+                let c=try decoder.container(keyedBy: CodingKeys.self)
+                data=try c.decode([Lenient<Record>].self, forKey: .data)
+                total=try? c.decodeIfPresent(String.self, forKey: .total)
+            }
+        }
+        var records: [Record] = [], read=0, complete=false
+        for _ in 0..<max(1, min(pages, Self.alertPages)) {
+            guard let page=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key) else { return false }
+            // `start` counts every record on the page, read or not, so the next page follows on.
+            read+=page.data.count
+            records+=page.data.compactMap(\.value)
+            guard let total=page.total.flatMap(Int.init), read<total, !page.data.isEmpty else { complete=true; break }
+        }
+        // Allowed fewer pages than there are (a background refresh): the last complete set stays.
+        if !complete, pages<Self.alertPages { return false }
+        var alerts=Dictionary(uniqueKeysWithValues: codes.map { ($0, [ParkAlert]()) })
+        for record in records {
+            // One alert can name several parks ("acad,ever"); each gets it.
+            for code in record.parkCode.lowercased().split(separator: ",").map({ $0.trimmingCharacters(in: .whitespaces) }) where alerts[code] != nil {
+                alerts[code]?.append(ParkAlert(id: record.id, title: record.title, description: Self.plain(record.description), category: record.category))
+            }
+        }
+        let fresh=ParkAlertsCache(updated: clock(), alerts: alerts)
+        alertCache=fresh
+        if persist {
+            CacheDirectory.write(fresh, name: "alerts")
+            // The per-park files of earlier versions are now superseded.
+            for id in parkIDs { CacheDirectory.remove(name: "park-\(id)") }
+        }
+        return true
+    }
+    private func fetchPrograms(_ park: Park, key: String) async {
+        struct Time: Decodable { let timestart: String?; let timeend: String? }
+        struct Event: Decodable { let id: String; let title: String; let datestart: String; let description: String; let tags: [String]?; let dates: [String]?; let times: [Time]?; let location: String? }
+        struct Page: Decodable { let data: [Event]; let total: String? }
+        // Ranger programs are the National Park Service's: a place it does not run has none to ask for.
+        guard let code=park.nps else { return }
+        let today=park.isoDay(clock())
+        func page(_ number: Int) async -> Page? {
+            // Events page with pageSize, which the server caps at 50 whatever is asked for.
+            await get(Page.self, url("events", [("parkCode", code), ("dateStart", today), ("pageSize", String(Self.eventsPage)), ("pageNumber", String(number))]), key: key)
+        }
+        guard let first=await page(1) else { return }
+        var events=first.data
+        let pages=min(10, Int(ceil((Double(first.total ?? "0") ?? 0)/Double(Self.eventsPage))))
+        if pages>1 {
+            for number in 2...pages {
+                guard let more=await page(number) else { return }
+                events+=more.data
+            }
+        }
+        let programs=events.filter { Self.isNightSky(title: $0.title, tags: $0.tags ?? []) }.flatMap { event in
+            (event.dates ?? [event.datestart]).filter { $0 >= today }.map { day in RangerProgram(id: event.id+day, title: event.title, date: day, description: Self.plain(event.description),
+                time: event.times?.first.flatMap { RangerProgram.timeRange(start: $0.timestart, end: $0.timeend) }, location: RangerProgram.place(event.location)) }
+        }.sorted { $0.date<$1.date }
+        let fresh=ProgramsCache(updated: clock(), programs: programs)
+        programCache[park.id]=fresh
+        if persist { CacheDirectory.write(fresh, name: "programs-\(park.id)") }
+    }
+    static let eventsPage=50
+    /// A ranger program about the night sky, from its title and tags. "astronom" covers astronomy
+    /// and astronomical; a telescope talk with no tags is still a night-sky program.
+    static func isNightSky(title: String, tags: [String]) -> Bool {
+        let text=(title+" "+tags.joined(separator: " ")).lowercased()
+        return ["astronom","stargaz","night sky","night-sky","star party","star parties","telescope","milky way","dark sky","dark-sky","constellation","meteor"].contains(where: text.contains)
+    }
+    static func plain(_ html: String) -> String {
+        html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "&nbsp;", with: " ").replacingOccurrences(of: "&amp;", with: "&")
+    }
+}
+/// The offline caches (forecasts, forecast detail and park alerts for 63 parks, about 190 small
+/// files), read on background threads from the first moment of launch, while the store opens and
+/// the parks load on the main thread. The model takes them just before the first frame, so the
+/// first screen shows exactly what it always did, and the services are seeded so no file is read twice.
+nonisolated final class CachePreload: @unchecked Sendable {
+    nonisolated struct Contents: Sendable {
+        var forecasts: [String: Forecast]=[:]
+        var details: [String: ForecastDetail]=[:]
+        var alerts: ParkAlertsCache?
+        /// The week ahead's astronomy at the parks within reach of the starting point: what the
+        /// first screen (Tonight) draws, worked out on several threads instead of the main one.
+        var conditions: [String: [Date: SkyConditions]]=[:]
+        /// Tonight's real sky (`SkyProjection`) at the starting park and the parks in reach: the sky
+        /// behind the first screen, built after the reads so the first frame does not build it on the
+        /// main thread. Here only when they were done within the first frame's wait; `skies()` always has them.
+        var skies: [SkyProjection.Sky]=[]
+    }
+    /// The reads the scores rest on: forecasts, forecast detail, alerts and the week's astronomy.
+    private let group=DispatchGroup()
+    /// The launch skies, built once `group` has finished: decoration, so the reads never wait on
+    /// them (nor on the first load of the star catalogue).
+    private let skyGroup=DispatchGroup()
+    private let lock=NSLock()
+    /// Written on the reading threads under `lock`, read only after `group` has finished.
+    private var contents=Contents()
+    /// Written under `lock` before `skyGroup` finishes, read only after it.
+    private var builtSkies: [SkyProjection.Sky]=[]
+    /// `lights`: a park's light sources for its sky's light domes (`SkyProjection.lightSources`).
+    static func start(lights: @escaping @Sendable (Park) -> [SkyProjection.LightSource] = SkyProjection.noLight) -> CachePreload {
+        let preload=CachePreload()
+        preload.group.enter(); preload.skyGroup.enter()
+        // The main thread waits on this at launch, so it runs at the waiting thread's own priority.
+        DispatchQueue.global(qos: .userInteractive).async {
+            let parks=preload.read()
+            preload.group.leave()
+            preload.buildSkies(parks, lights: lights)
+            preload.skyGroup.leave()
+        }
+        return preload
+    }
+    /// The most skies built ahead: the starting park and the nearest parks in reach.
+    static let skyLimit=16
+    /// Reads the caches and works out the week's astronomy near the starting point; returns the parks read.
+    private func read() -> [Park] {
+        guard let parks=try? ParkData.load() else { return [] }
+        DispatchQueue.concurrentPerform(iterations: parks.count) { index in
+            let id=parks[index].id
+            let forecast=CacheDirectory.read(Forecast.self, name: "weather-\(id)"), detail=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)")
+            lock.withLock { contents.forecasts[id]=forecast; contents.details[id]=detail }
+        }
+        let alerts=ParkStore.stored(parks)
+        lock.withLock { contents.alerts=alerts }
+        let now=Date.now, engine=AstronomyEngine()
+        let nights=Self.homeArea(parks).flatMap { park in (0..<7).map { (park, park.evening(park.date(park.currentNight(at: now), addingDays: $0))) } }
+        DispatchQueue.concurrentPerform(iterations: nights.count) { index in
+            let (park, evening)=nights[index], sky=engine.conditions(for: park, on: evening)
+            lock.withLock { contents.conditions[park.id, default: [:]][evening]=sky }
+        }
+        return parks
+    }
+    /// Tonight's sky at the starting park (behind every screen) and at the parks in reach (behind
+    /// Tonight's answer), from the conditions already worked out: the same sky `SkyProjection` builds.
+    private func buildSkies(_ parks: [Park], lights: @Sendable (Park) -> [SkyProjection.LightSource]) {
+        let skyParks=Self.skyParks(parks), now=Date.now
+        let known=lock.withLock { contents.conditions }
+        DispatchQueue.concurrentPerform(iterations: skyParks.count) { index in
+            let park=skyParks[index], night=park.currentNight(at: now)
+            let sky=SkyProjection.build(park: park, night: night, conditions: known[park.id]?[park.evening(night)], lights: lights(park))
+            lock.withLock { builtSkies.append(sky) }
+        }
+    }
+    /// The starting park, then the parks in reach nearest first, at most `skyLimit`.
+    static func skyParks(_ parks: [Park], defaults: UserDefaults = .standard, locale: Locale = .current) -> [Park] {
+        let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? Park.defaultID) } ?? parks.first
+        let area=homeArea(parks, defaults: defaults, locale: locale)
+        let near=home.map { home in area.sorted { $0.distanceMeters(latitude: home.latitude, longitude: home.longitude)<$1.distanceMeters(latitude: home.latitude, longitude: home.longitude) } } ?? area
+        var chosen:[Park]=home.map { [$0] } ?? []
+        for park in near where chosen.count<skyLimit && !chosen.contains(where: { $0.id == park.id }) { chosen.append(park) }
+        return chosen
+    }
+    /// The parks within the chosen radius of the starting point, as `PlanModel` reads them from
+    /// the same settings (a place's coordinates, else the starting park's; the locale's standard
+    /// reach unless chosen, `SearchRadius`).
+    static func homeArea(_ parks: [Park], defaults: UserDefaults = .standard, locale: Locale = .current) -> [Park] {
+        struct Place: Decodable { let latitude: Double; let longitude: Double }
+        let place=defaults.data(forKey: "homePlace").flatMap { try? JSONDecoder().decode(Place.self, from: $0) }
+        let home=parks.first { $0.id == (defaults.string(forKey: "homePark") ?? Park.defaultID) } ?? parks.first
+        guard let latitude=place?.latitude ?? home?.latitude, let longitude=place?.longitude ?? home?.longitude else { return [] }
+        let reach=SearchRadius.meters(defaults, locale: locale)
+        return parks.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=reach }
+    }
+    /// Waits for the reads to finish (they began at launch, so usually they already have).
+    func wait() -> Contents {
+        group.wait()
+        return lock.withLock { contents }
+    }
+    /// Waits at most `timeout` seconds; nil if the reads are still going (a slow disk, a cold
+    /// device), so the first frame never waits longer than that for them. The skies come along
+    /// when they are done within the same `timeout`; otherwise `skies()` brings them later.
+    func wait(timeout: Double) -> Contents? {
+        let deadline=DispatchTime.now()+timeout
+        guard group.wait(timeout: deadline) == .success else { return nil }
+        let skiesDone=skyGroup.wait(timeout: deadline) == .success
+        return lock.withLock {
+            var taken=contents
+            if skiesDone { taken.skies=builtSkies }
+            return taken
+        }
+    }
+    /// The launch skies once they are built, without holding any thread meanwhile.
+    func skies() async -> [SkyProjection.Sky] {
+        await withCheckedContinuation { continuation in
+            skyGroup.notify(queue: .global(qos: .utility)) { continuation.resume(returning: self.lock.withLock { self.builtSkies }) }
+        }
+    }
+    /// The reads' contents once they finish, without holding any thread meanwhile.
+    func contents() async -> Contents {
+        await withCheckedContinuation { continuation in
+            group.notify(queue: .global(qos: .userInitiated)) { continuation.resume(returning: self.lock.withLock { self.contents }) }
+        }
+    }
+}

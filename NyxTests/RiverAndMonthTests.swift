@@ -1,0 +1,218 @@
+import Foundation
+import Testing
+import SwiftUI
+@testable import Nyx
+
+/// The river and the month under the finger: the scrub's detents, the loupe's place, directions
+/// where the night is decided, and the month pager's pages.
+@MainActor @Suite struct RiverAndMonthTests {
+
+    // MARK: Detents
+
+    @Test func aFastScrubFeelsEachNightCrossedUpToThree() {
+        #expect(RiverDetents.crossed(from:3,to:4)==[4])
+        #expect(RiverDetents.crossed(from:3,to:5)==[4,5])
+        #expect(RiverDetents.crossed(from:3,to:9)==[5,7,9])
+        #expect(RiverDetents.crossed(from:9,to:3)==[7,5,3])
+        #expect(RiverDetents.crossed(from:nil,to:5)==[5])
+        #expect(RiverDetents.crossed(from:5,to:5)==[5])
+        for from in 0..<30 { for to in 0..<30 where to != from {
+            let ticks=RiverDetents.crossed(from:from,to:to)
+            #expect(ticks.count==min(3,abs(to-from)))
+            #expect(ticks.last==to)
+            // Every tick lies on the way, in order, and none repeats.
+            #expect(Set(ticks).count==ticks.count)
+            #expect(ticks.allSatisfy { to>from ? ($0>from && $0<=to) : ($0<from && $0>=to) })
+        } }
+        #expect(RiverDetents.spacing == .milliseconds(40))
+    }
+
+    // MARK: Loupe
+
+    @Test func theLoupeLiftsAboveTheNightAndStaysInThePanel() {
+        let river=TimeRiver(nights:[],selected:.constant(.now))
+        let width=330.0
+        // A low score: lifted the full 34 pt.
+        let low=river.loupeCenter(CGPoint(x:200,y:128),width:width)
+        #expect(low.x==200 && low.y==94)
+        // A Pristine night near the top: the loupe rises at most 24 pt above the river.
+        let high=river.loupeCenter(CGPoint(x:14,y:42),width:width)
+        #expect(high.y-28 >= -24)
+        #expect(high.x-28 >= 0)
+        let right=river.loupeCenter(CGPoint(x:316,y:60),width:width)
+        #expect(right.x+28 <= width)
+        // The Moon keeps its row above the river's marks (which start at y 42), never under the
+        // loupe, and inside the river's width, with or without the tip's headroom.
+        for headroom in [nil,0.0] {
+            for point in [CGPoint(x:14,y:42),CGPoint(x:165,y:80),CGPoint(x:316,y:128),CGPoint(x:60,y:110)] {
+                let loupe=river.loupeCenter(point,width:width,headroom:headroom), moon=river.moonBeside(loupe,point:point,width:width)
+                #expect(hypot(moon.x-loupe.x,moon.y-loupe.y) >= 28+15)
+                #expect(moon.y+15 <= 39)
+                #expect(moon.x-15 >= 0 && moon.x+15 <= width)
+            }
+        }
+        // A low night's Moon stays above its own night rather than stepping aside.
+        let lowLoupe=river.loupeCenter(CGPoint(x:165,y:128),width:width)
+        #expect(river.moonBeside(lowLoupe,point:CGPoint(x:165,y:128),width:width)==CGPoint(x:165,y:15))
+        // While the tip shows, the loupe never rises above the river into the tip's arrow.
+        #expect(river.loupeCenter(CGPoint(x:100,y:42),width:width,headroom:0).y-28 >= 0)
+    }
+    @Test func theHairlineStartsAtTheLoupesEdge() {
+        // Centred: the circle's lowest point. Held 14 pt inside at the first night: higher, on the curve.
+        #expect(TimeRiver.loupeBottom(CGPoint(x:100,y:50),x:100,radius:28)==78)
+        let edge=TimeRiver.loupeBottom(CGPoint(x:28,y:50),x:14,radius:28)
+        #expect(edge<78 && abs(edge-(50+(28.0*28-14*14).squareRoot()))<0.001)
+    }
+    @Test func theLoupeNamesTheNightInTheReadersLanguage() throws {
+        let night=try Date("2026-10-16T21:00:00Z",strategy:.iso8601)
+        let west=try #require(TimeZone(identifier:"America/Los_Angeles"))
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"en_US"),timeZone:west)=="Fri 16")
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"es_MX"),timeZone:west)=="vie 16")
+        // The park's own day, not the phone's: 21:00 UTC on the 16th is already the 17th at UTC+14.
+        let kiribati=try #require(TimeZone(identifier:"Pacific/Kiritimati"))
+        #expect(TimeRiver.loupeDate(night,locale:Locale(identifier:"en_US"),timeZone:kiribati)=="Sat 17")
+    }
+    @Test func theLargeTextCaptionKeepsFiguresWithTheirWord() {
+        #expect(TimeRiver.lineCaption("Cloud forecast\nmodels range 55–83")=="Cloud forecast\nmodels range\u{00A0}55–83")
+        #expect(TimeRiver.lineCaption("Early look")=="Early look")
+    }
+    @Test func theNextOfTheBestNightsGoesInDateOrderAndWraps() {
+        // Best first, as the river ranks them: nights 12, 3 and 20.
+        let peaks=[12,3,20]
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:nil)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:0)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:3)==12)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:12)==20)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:15)==20)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:20)==3)
+        #expect(TimeRiver.nextPeak(peaks:peaks,current:29)==3)
+        #expect(TimeRiver.nextPeak(peaks:[7],current:7)==7)
+        #expect(TimeRiver.nextPeak(peaks:[7],current:nil)==7)
+        #expect(TimeRiver.nextPeak(peaks:[],current:4)==nil)
+    }
+
+    // MARK: Directions
+
+    @Test func directionsPreferAStepFreeSpot() throws {
+        // The park's first spot is undocumented; a later one is step-free.
+        let meve=try park("meve")
+        let choice=try #require(MapsHandOff.spot(for:meve))
+        #expect(choice.spot.name=="Far View Lodge" && choice.stepFree == .yes)
+        // Partly step-free first, step-free later: the step-free one.
+        #expect(try MapsHandOff.spot(for:park("shen"))?.spot.name=="Skyland Amphitheater")
+        // Only partly step-free spots: the first of them, said as such.
+        let jotr=try #require(try MapsHandOff.spot(for:park("jotr")))
+        #expect(jotr.spot.name=="Cap Rock" && jotr.stepFree == .partial)
+        let url=try #require(MapsHandOff.directions(choice.spot))
+        #expect(url.scheme=="maps" && url.absoluteString.contains("daddr=\(choice.spot.latitude),\(choice.spot.longitude)") && url.absoluteString.contains("dirflg=d"))
+    }
+    @Test func directionsSayTheSpotTheParkAndMaps() {
+        #expect(MapsHandOff.spokenLabel(spot:"Far View Lodge",park:"Mesa Verde",stepFree:.yes)=="Directions to Far View Lodge, step-free, Mesa Verde, in Maps")
+        #expect(MapsHandOff.spokenLabel(spot:"Cap Rock",park:"Joshua Tree",stepFree:.partial)=="Directions to Cap Rock, partly step-free, Joshua Tree, in Maps")
+        #expect(MapsHandOff.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:nil)=="Directions to Seawall, Acadia, in Maps")
+        #expect(MapsHandOff.spokenLabel(spot:"Seawall",park:"Acadia",stepFree:.no)=="Directions to Seawall, Acadia, in Maps")
+    }
+    @Test func roadlessParksShowTheirAccessNoteInstead() throws {
+        let drto=try park("drto")
+        #expect(!drto.drivable && drto.accessNote != nil)
+        #expect(NightDirections.offer(for:drto) == .accessNote)
+        // A drivable park with a step-free spot offers directions there, said as step-free.
+        let meve=try park("meve")
+        guard case .directions(let spot,let url,let stepFree)=NightDirections.offer(for:meve) else { Issue.record("Mesa Verde offers no directions"); return }
+        #expect(spot=="Far View Lodge" && stepFree == .yes && url.scheme=="maps")
+        // Joshua Tree's spot is only partly step-free, and the row says "partly" (never the step-free glyph alone).
+        guard case .directions(_,_,let jotrAccess)=NightDirections.offer(for:try park("jotr")) else { Issue.record("Joshua Tree offers no directions"); return }
+        #expect(jotrAccess == .partial)
+    }
+
+    // MARK: Month pager
+
+    @Test func aSettledSlideBecomesTheMonthAndThePagerReturnsToTheMiddle() {
+        #expect(MonthPager.commit(offset:0,position:1) == (1,0))
+        #expect(MonthPager.commit(offset:3,position:-1) == (2,0))
+        #expect(MonthPager.commit(offset:2,position:0) == (2,0))
+        #expect(MonthPager.commit(offset:2,position:nil) == (2,0))
+    }
+    @Test func aStepAcrossAMonthsEdgeStartsFromTheMonthInView() throws {
+        let jotr=try park("jotr")
+        // Tonight is 9 October at Joshua Tree.
+        var components=DateComponents(); components.year=2026; components.month=10; components.day=9; components.hour=21
+        let tonight=jotr.evening(try #require(jotr.calendar.date(from:components)))
+        let october=MonthPager.evenings(jotr,tonight:tonight,offset:0), november=MonthPager.evenings(jotr,tonight:tonight,offset:1)
+        #expect(october.count==31 && november.count==30)
+        let lastOfOctober=try #require(october.last), firstOfNovember=try #require(november.first)
+        // ⌘→ on 31 October slides one month on and lands on 1 November.
+        let first=try #require(MonthPager.step(jotr,tonight:tonight,offset:0,chosen:lastOfOctober,delta:1))
+        #expect(first.night==firstOfNovember && first.move==1)
+        // A second ⌘→ while that slide is still under way: read from October (the stale month), the
+        // chosen night is not in it and focus falls back to tonight, the bug the review found.
+        #expect(MonthPager.focus(october,chosen:firstOfNovember,tonight:tonight)==tonight)
+        // Settling the slide first, as the calendar now does, steps on from 1 November to the 2nd.
+        let settled=MonthPager.commit(offset:0,position:1)
+        let second=try #require(MonthPager.step(jotr,tonight:tonight,offset:settled.offset,chosen:firstOfNovember,delta:1))
+        #expect(second.night==jotr.date(firstOfNovember,addingDays:1) && second.move==0)
+        // ⌘← on 1 November slides back to 31 October.
+        let back=try #require(MonthPager.step(jotr,tonight:tonight,offset:1,chosen:firstOfNovember,delta:-1))
+        #expect(back.night==lastOfOctober && back.move == -1)
+        // A night chosen elsewhere: the step starts from tonight in tonight's month.
+        let fromTonight=try #require(MonthPager.step(jotr,tonight:tonight,offset:0,chosen:nil,delta:1))
+        #expect(fromTonight.night==jotr.date(tonight,addingDays:1) && fromTonight.move==0)
+    }
+    @Test func thePagerIsAsTallAsTheTallestOfItsThreeMonths() throws {
+        let jotr=try park("jotr")
+        var components=DateComponents(); components.year=2026; components.month=10; components.day=9; components.hour=21
+        let tonight=jotr.evening(try #require(jotr.calendar.date(from:components)))
+        // October 2026 spans five weeks whether weeks start on Sunday or Monday; August 2026 six.
+        #expect(MonthPager.weeks(jotr,tonight:tonight,offset:0)==5)
+        #expect(MonthPager.weeks(jotr,tonight:tonight,offset:-2)==6)
+        for offset in -3...3 {
+            let three=(offset-1...offset+1).map { MonthPager.weeks(jotr,tonight:tonight,offset:$0) }
+            #expect(three.allSatisfy { (4...6).contains($0) })
+            #expect(MonthPager.weeks(jotr,tonight:tonight,around:offset)==three.max())
+        }
+    }
+    @Test func everyPageHasItsOwnKey() throws {
+        let jotr=try park("jotr"), deva=try park("deva")
+        let keys=[-1,0,1].map { CalendarView.pageKey(jotr,$0) }+[CalendarView.pageKey(deva,0)]
+        #expect(Set(keys).count==4)
+    }
+
+    // MARK: Turning the sky
+
+    /// The direction buttons turn the short way round, across north if that is shorter.
+    @Test func directionButtonsTurnTheShortWay() {
+        #expect(SkyTurn.shortestTurn(from:350,to:10)==370)
+        #expect(SkyTurn.shortestTurn(from:10,to:350)==(-10))
+        // Exactly opposite: half a circle, one way or the other, never more.
+        #expect(abs(SkyTurn.shortestTurn(from:90,to:270)-90)==180)
+        #expect(SkyTurn.shortestTurn(from:180,to:180)==180)
+        // Facing is unwrapped: after two turns round, a button still turns less than half a circle.
+        for facing in stride(from:-800.0,through:800,by:37) { for target in [0.0,90,180,270] {
+            let turned=SkyTurn.shortestTurn(from:facing,to:target)
+            #expect(abs(turned-facing)<=180+1e-9)
+            #expect(Compass.name(turned)==Compass.name(target))
+        } }
+    }
+    /// A fling coasts on by the distance the finger was predicted to travel, at most 120°, and
+    /// the sky keeps following the finger (a fling to the left turns toward the right).
+    @Test func aFlingCoastsAtMostAThirdOfACircle() {
+        #expect(SkyTurn.coastTarget(facing:180,predicted:-100,translation:-60,degreesPerPoint:0.2)==188)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:100,translation:60,degreesPerPoint:0.2)==172)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:-5000,translation:-60,degreesPerPoint:0.2)==300)
+        #expect(SkyTurn.coastTarget(facing:180,predicted:5000,translation:60,degreesPerPoint:0.2)==60)
+        // No fling (the finger stopped before lifting), no coast.
+        #expect(SkyTurn.coastTarget(facing:123,predicted:-60,translation:-60,degreesPerPoint:0.2)==123)
+        #expect(SkyTurn.coastTarget(facing:123,predicted:.infinity,translation:0,degreesPerPoint:0.2)==123)
+        #expect(SkyTurn.maximumCoast==120)
+    }
+    /// A turn in flight can be read where it has got to, so a finger catches it in place.
+    @Test func aTurnInFlightIsReadWhereItIs() {
+        let start=Date(timeIntervalSince1970:0)
+        let turn=SkyTurn.Motion(from:100,to:200,velocity:4,start:start)
+        #expect(turn.position(at:start)==100)
+        let early=turn.position(at:start.addingTimeInterval(0.1)), late=turn.position(at:start.addingTimeInterval(3))
+        #expect(early>100 && early<200)
+        #expect(abs(late-200)<0.5)
+        #expect(SkyTurn.Motion(from:100,to:200,velocity:0,start:start).position(at:start.addingTimeInterval(0.1))<early)
+    }
+}

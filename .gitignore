@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+*.xcresult
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.trace
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# Python
+__pycache__/
+*.pyc
+
+# Local secrets (see README, "NPS API key")
+Config/Secrets.xcconfig
+Config/*.local.xcconfig
+
+# iCloud Drive conflict copies ("name 2.ext")
+/Nyx [0-9]*.xcodeproj/
+* [0-9].*
+* [0-9]/

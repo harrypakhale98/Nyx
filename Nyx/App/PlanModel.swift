@@ -1,0 +1,940 @@
+import Foundation
+import Synchronization
+import Observation
+import CoreLocation
+
+@MainActor @Observable final class PlanModel {
+    /// The catalogue: the bundled places, the same for everyone. Saved spots are never in it (`spots`).
+    let parks: [Park]
+    /// Each park's place in `parks` (the first, should an id repeat), for `park(_:)`.
+    private let parkIndex: [String:Int]
+    /// The places the person saved themselves (`SavedSpot`), scored, forecast and followed like
+    /// parks. Set from the store by `setSpots`; `park(_:)` finds them by their `pin:` id.
+    private(set) var spots: [Park] = []
+    @ObservationIgnored private var spotIndex: [String:Int] = [:]
+    /// Every place Nyx scores here: the catalogue, then the saved spots.
+    var places: [Park] { parks+spots }
+    /// The world catalogue (`catalog.json`): national parks worldwide and certified dark-sky places,
+    /// never one of the 63 curated parks. Empty until `prepareCatalog` has read it off the main thread
+    /// (it starts at launch); screens simply show more once it is ready, and never wait for it.
+    private(set) var catalog: [Park] = []
+    /// The catalogue's lookup, spatial index, search terms and forecast regions, built with it.
+    @ObservationIgnored private var placeCatalog=PlaceCatalog.empty
+    @ObservationIgnored private var catalogTask: Task<Void,Never>?
+    /// True once the catalogue has been read (even if it came back empty). Observed, so a screen that
+    /// waits for the world abroad (Tonight's loader, the Parks list's skeleton rows) moves on when it arrives.
+    private(set) var catalogIsReady=false
+    /// The curated parks' folded search terms, made on the first search.
+    @ObservationIgnored private var curatedTerms: [PlaceCatalog.Terms]?
+    let loadError: Bool
+    private let astronomy: any AstronomyProviding
+    private let scoring: any ScoreProviding
+    private let weather: any WeatherProviding
+    private let parkStore: any ParkProviding
+    private let detailService: any DetailProviding
+    @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
+    var forecasts: [String:Forecast] = [:] { didSet { forecastsChanged() } }
+    /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
+    /// With "Smoke and haze" off in Your privacy, the air-quality host's data is not used at all:
+    /// no aerosol series is kept here, so no score, caveat or snapshot counts cached smoke.
+    var details: [String:ForecastDetail] = [:] {
+        didSet {
+            if !smokeEnabled, details.values.contains(where:{ $0.air != nil }) { details=Self.withoutAir(details) }
+            forecastsChanged()
+        }
+    }
+    /// Everything worked out from the forecasts and their detail is let go when either changes.
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:] }
+    /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
+    @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
+    /// Nights already scored, by park and evening: the park list and a month ask for the same
+    /// nights many times a pass. A night is a pure function of its park, sky, forecast, detail and
+    /// scoring; "now" enters only as whether the model spread is recent (`HourlySeries.usable`),
+    /// kept beside each night and checked on every read. Cleared whenever forecasts or detail change.
+    @ObservationIgnored private var nightMemo: [String:[Date:(recent:Bool,night:Night)]] = [:]
+    /// Each park's tonight for the moment it was judged from (`today`), with its evening.
+    @ObservationIgnored private var tonightMemo: [String:(at:Date,park:Park,night:Date,evening:Date)] = [:]
+    /// Journal entries' scores, by entry, night and park (`loggedNights`). The score never reads
+    /// "now", so only a change of forecasts or detail clears them.
+    @ObservationIgnored private var journalScores: [JournalScoreKey:Int?] = [:]
+    nonisolated private struct JournalScoreKey: Hashable, Sendable { let id:UUID; let date:Date; let park:String }
+    /// What's up each night. Astronomy only, so never invalidated by a forecast.
+    @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
+    @ObservationIgnored private var eventCache: [SkyKey:WhatsUp.Events] = [:]
+    /// A park's night, worded for tonight or not (events ignore the wording: always false).
+    nonisolated private struct SkyKey: Hashable, Sendable { let park:String; let night:Date; let isTonight:Bool }
+    /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
+    var staleForecasts: Set<String> = []
+    /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
+    let location=LocationService()
+    var enrichments: [String:ParkEnrichment] = [:]
+    /// Campgrounds for every park, once "Where to stay" has asked (`refreshCampgrounds`).
+    var campgrounds: CampgroundsCache?
+    /// The journal's store could not be opened; Nyx runs with an empty one in memory and says so on the Journal tab.
+    /// Nothing is written to that stand-in (journal entries, saved parks), since it is gone on the next launch.
+    var journalUnavailable=false
+    /// The store could not be opened and the device is nearly full: the Journal tab asks for space.
+    var journalNeedsSpace=false
+    /// A `.nyxjournal` opened from Files or another app, waiting for the Journal tab to import it.
+    var journalFile:URL?
+    /// The journal being read right now; the Inbox sweep leaves it alone until the import ends.
+    var importingJournal:URL?
+    /// NPS is refusing requests right now (the shared key's quota, or a struggling service).
+    var alertsBusy=false
+    /// The last forecast detail request was held back by Low Data Mode.
+    var detailPausedForLowData=false
+    /// Forecast detail (models, layers, smoke) is fetched only once a park's page has been opened
+    /// in this session: Tonight and the park list need only clouds, apart from a summit above the
+    /// inversion, whose clouds are its layers (`refreshForecasts`).
+    @ObservationIgnored private var detailWanted=false
+    @ObservationIgnored private var alertsCache: ParkAlertsCache?
+    @ObservationIgnored private var programs: [String:ProgramsCache] = [:]
+    /// The cached forecasts and alerts, read off the main actor once at launch.
+    @ObservationIgnored private var hydration: Task<Void,Never>?
+    /// Keeps the widget, the watch, Siri and reminders in step with the saved parks, once per process.
+    @ObservationIgnored let savedSync=SavedSkySync()
+    /// When Tonight's candidates were last refreshed, for a refresh on return.
+    @ObservationIgnored private(set) var lastRefresh: Date?
+    /// The parks' forecast was due but held back: the service asked Nyx to wait, or this iPhone's
+    /// request budget was spent (`ForecastRequest`). Read by a refresh's closing line.
+    @ObservationIgnored private(set) var forecastsHeldBack=false
+    /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own).
+    @ObservationIgnored let defaults: UserDefaults
+    var homeID: String { didSet { if DebugScenario.screen == nil { defaults.set(homeID,forKey:"homePark") } } }
+    /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
+    /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
+    var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { defaults.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
+    /// Whether a starting point was ever chosen: a park, a place, or "Near me". Until then Tonight
+    /// asks, and its answer is labelled an example. Anyone who chose a park before has.
+    var startChosen: Bool { didSet { if DebugScenario.screen == nil { defaults.set(startChosen,forKey:"startChosen") } } }
+    /// Tonight's reach, as the crow flies, in metres; shown in miles or kilometres by locale (`SearchRadius`).
+    var radiusMeters: Double { didSet { if DebugScenario.screen == nil { SearchRadius.store(radiusMeters,defaults) } } }
+    var weatherEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(weatherEnabled,forKey:"weatherEnabled") } } }
+    var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:"npsEnabled") } } }
+    /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
+    /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
+    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
+    var smokeEnabled: Bool {
+        didSet {
+            if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:"smokeEnabled") }
+            guard !smokeEnabled, oldValue else { return }
+            // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
+            details=Self.withoutAir(details)
+            let service=detailService
+            Task { [weak self] in
+                await service.forgetAir()
+                // The widgets, the watch and reminders stop counting it too.
+                if let self { await savedSync.republish(self) }
+            }
+        }
+    }
+    nonisolated static func withoutAir(_ details:[String:ForecastDetail])->[String:ForecastDetail] {
+        details.compactMapValues { detail in
+            var kept=detail; kept.air=nil
+            return kept == ForecastDetail() ? nil : kept
+        }
+    }
+    var today: Date {
+        #if DEBUG
+        if DebugScenario.state=="polar-night" { return Date(timeIntervalSince1970:1797886800) }
+        if DebugScenario.state=="polar" { return Date(timeIntervalSince1970:1782086400) }
+        if let fixed=DebugScenario.date { return fixed }
+        #endif
+        return clock
+    }
+    /// The present moment for a forecast's age (the 36 hours after which model spread, layers and
+    /// smoke stop being described): the real clock, never `today`, which moves only when a night
+    /// turns over. Screenshot scenarios with a fixed date keep that date.
+    var present: Date {
+        #if DEBUG
+        if DebugScenario.date != nil || DebugScenario.state=="polar-night" || DebugScenario.state=="polar" { return today }
+        #endif
+        return .now
+    }
+    /// The moment "tonight" is judged from. Advanced only when some park's night turns over
+    /// (at its sunrise or local noon), so open screens move on without constant redraws.
+    private(set) var clock=Date.now
+    func tick(_ now:Date = .now) {
+        // A saved spot far from every park (another continent) turns its night over at its own sunrise.
+        guard (places+viewedCatalog).contains(where:{ $0.currentNight(at:clock) != $0.currentNight(at:now) }) else { return }
+        clock=now
+        trimPastNights()
+    }
+    /// Catalogue places whose night has been asked for: their nights turn over at their own sunrise,
+    /// on any continent, so `tick` watches them as it watches the curated parks and the spots.
+    private var viewedCatalog:[Park] { tonightMemo.values.map(\.park).filter(\.isCatalogPlace) }
+    /// Once a night turns over, the kept astronomy, outlooks and what's-up of nights that have
+    /// passed are let go (a screen that shows one again simply works it out again).
+    private func trimPastNights() {
+        let tonights=Dictionary((places+viewedCatalog).map { ($0.id,tonight($0)) },uniquingKeysWith:{ first,_ in first })
+        func current(_ id:String,_ night:Date)->Bool { tonights[id].map { night>=$0 } ?? true }
+        for (id,nights) in conditions { conditions[id]=nights.filter { current(id,$0.key) } }
+        for (id,nights) in outlookCache { outlookCache[id]=nights.filter { current(id,$0.key) } }
+        for (id,nights) in nightMemo { nightMemo[id]=nights.filter { current(id,$0.key) } }
+        skyCache=skyCache.filter { current($0.key.park,$0.key.night) }
+        eventCache=eventCache.filter { current($0.key.park,$0.key.night) }
+    }
+    init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
+         weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
+         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil, defaults: UserDefaults = .standard) {
+        let loaded:[Park]
+        do { loaded=try ParkData.load(); loadError=false } catch { loaded=[]; loadError=true }
+        parks=loaded
+        parkIndex=Dictionary(loaded.indices.map { (loaded[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
+        self.defaults=defaults
+        // Parks opens darkest tonight first: the list answers the app's question before it is asked.
+        // (A registered default: anyone who chose Name keeps it.)
+        defaults.register(defaults:["parksByScore":true])
+        homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
+        homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
+        startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
+        // A radius kept in miles before 2.0 is written once as metres, exactly.
+        if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
+        radiusMeters=SearchRadius.meters(defaults)
+        weatherEnabled=defaults.object(forKey:"weatherEnabled") as? Bool ?? true
+        npsEnabled=defaults.object(forKey:"npsEnabled") as? Bool ?? true
+        spotForecastsEnabled=SpotForecast.isOn(defaults)
+        smokeEnabled=defaults.object(forKey:"smokeEnabled") as? Bool ?? true
+        // The world catalogue is read in the background from the first moment; nothing waits for it.
+        prepareCatalog()
+        // The last forecasts and park updates are read by the services, off the main actor, while
+        // the first frame paints from the bundled parks; refreshes wait for them and then replace them.
+        if DebugScenario.screen == nil {
+            if let preload {
+                // Read in the background since launch began; taken now, before the first frame, when
+                // they are done within `preloadWait`. Otherwise the first frame does not wait for them:
+                // the screens that would show a score show their loading state (`cachesPending`) until
+                // the same reads land, so no first frame shows a score the caches would change.
+                if let cached=preload.wait(timeout:Self.preloadWait) {
+                    take(cached,replacing:true)
+                    hydration=seedServices(cached)
+                } else {
+                    cachesPending=true
+                    LaunchSignposts.note("Caches late")
+                    hydration=Task { [weak self] in
+                        let cached=await preload.contents()
+                        guard let self else { return }
+                        self.take(cached,replacing:false)
+                        self.cachesPending=false
+                        await self.seedServices(cached).value
+                    }
+                }
+                // Tonight's skies are built after the reads, so neither the first frame nor the scores wait
+                // on them; kept as soon as they are done (one the first frame already has stays as it is).
+                Task { [weak self] in
+                    let skies=await preload.skies()
+                    self?.keep(skies)
+                }
+            } else { hydration=Task { await hydrate() } }
+        }
+        #if DEBUG
+        if DebugScenario.screen != nil { homeID="jotr"; homePlace=nil; startChosen=DebugScenario.state != "first-run" }
+        // `-nyx-place "Chicago, IL"`: a city as the starting point, its nearest park as the home park.
+        if let name=DebugScenario.place, let place=StartingPlaces.named(name) { choose(place) }
+        if DebugScenario.state=="polar" { homeID="dena" }
+        if DebugScenario.state=="polar-night" { homeID="gaar" }
+        if let park=DebugScenario.park { homeID=park }
+        #endif
+        // Until a starting point is chosen, the example night is measured from a town in this
+        // device's time zone (Toronto, Mumbai), worked out from settings alone, off the main thread.
+        if DebugScenario.screen == nil, !startChosen {
+            Task { [weak self] in
+                let example=await Task.detached(priority:.userInitiated) { StartingPlaces.example() }.value
+                self?.showExample(from:example)
+            }
+        }
+    }
+    /// How long the first frame may wait for the offline caches read since launch (`CachePreload`).
+    static let preloadWait=0.15
+    /// The offline caches are still being read after the first frame (`preloadWait` passed): every
+    /// surface with a score waits behind `ScoreGate` rather than show a score the caches are about to change.
+    private(set) var cachesPending=false
+    /// Skies built ahead at launch, kept only when they come from the same astronomy as the screens'.
+    private func keep(_ skies:[SkyProjection.Sky]) {
+        if astronomy is AstronomyEngine { for sky in skies { SkyProjection.shared.store(sky) } }
+    }
+    /// What the launch reads found: forecasts, forecast detail, alerts, the week's astronomy near the
+    /// starting point and tonight's skies there. `replacing`: before the first frame, nothing newer
+    /// exists; later, anything already newer is kept.
+    private func take(_ cached:CachePreload.Contents,replacing:Bool) {
+        let details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
+        if replacing { forecasts=cached.forecasts; self.details=details }
+        else {
+            for (id,forecast) in cached.forecasts where forecasts[id] == nil { forecasts[id]=forecast }
+            for (id,detail) in details where self.details[id] == nil { self.details[id]=detail }
+        }
+        seed(cached.conditions)
+        keep(cached.skies)
+        if replacing || alertsCache == nil { apply(AlertsUpdate(cache:cached.alerts,busy:false)) }
+        LaunchSignposts.note("Caches ready")
+    }
+    /// Returns once the offline caches read at launch are in the model (at once, almost always).
+    func cachesReady() async { await hydration?.value }
+    /// The services start from what the launch reads found, so no file is read twice.
+    private func seedServices(_ cached:CachePreload.Contents)->Task<Void,Never> {
+        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+        return Task {
+            await weather.seed(cached.forecasts,parks:parks)
+            await detailService.seed(cached.details,parks:parks)
+            await parkStore.seed(cached.alerts)
+        }
+    }
+    var home: Park? { park(homeID) ?? parks.first }
+    /// The park-local night in progress (or about to begin) right now.
+    func tonight(_ park:Park)->Date { tonightEntry(park).night }
+    /// Tonight and its evening, worked out once per park for each moment `today` stands at (it
+    /// moves only when some park's night turns over). Reads `today` every time, as before.
+    private func tonightEntry(_ park:Park)->(night:Date,evening:Date) {
+        let at=today
+        if let kept=tonightMemo[park.id], kept.at==at, kept.park==park { return (kept.night,kept.evening) }
+        let night=park.currentNight(at:at), evening=park.evening(night)
+        tonightMemo[park.id]=(at,park,night,evening)
+        return (night,evening)
+    }
+    /// A curated park by its id, a world catalogue place by its `wd:` id (once the catalogue is read),
+    /// or a saved spot by its `pin:` id. Curated ids read neither, so screens that show only parks do
+    /// not redraw when a spot is saved or the catalogue arrives.
+    func park(_ id:String)->Park? {
+        if let index=parkIndex[id] { return parks[index] }
+        if id.hasPrefix(Park.catalogPrefix) {
+            // Read so a screen showing a catalogue place redraws once the catalogue is ready.
+            _=catalog.isEmpty
+            return placeCatalog.place(id)
+        }
+        guard id.hasPrefix(SavedSpots.prefix) else { return nil }
+        return spotIndex[id].flatMap { spots.indices.contains($0) ? spots[$0] : nil }
+    }
+    // MARK: The world catalogue
+
+    /// Starts reading the world catalogue off the main thread, once: decoding about 3,400 places,
+    /// their 1° spatial index, search terms and forecast regions. Called at launch; safe to call again.
+    func prepareCatalog() {
+        guard catalogTask == nil else { return }
+        let curated=Set(parks.map(\.id))
+        catalogTask=Task { [weak self] in
+            let built=await Task.detached(priority:.userInitiated) { PlaceCatalog.bundled(excluding:curated) }.value
+            self?.install(built)
+        }
+    }
+    /// Waits until the catalogue is ready (at once if it is). Paths that resolve saved `wd:` ids for
+    /// the widgets, the watch and reminders wait here, so a followed catalogue place is never dropped.
+    func catalogReady() async {
+        prepareCatalog()
+        await catalogTask?.value
+    }
+    /// A place named from outside the app (a widget, a reminder, Spotlight, a link, Handoff, Siri): at
+    /// once when it is known; a world catalogue id named before the catalogue is read (a cold launch)
+    /// once it is, so it is never dropped. Nil for an id Nyx does not know, never another place.
+    func place(named id:String) async -> Park? {
+        if let known=park(id) { return known }
+        guard awaitsCatalog(id) else { return nil }
+        await catalogReady()
+        return park(id)
+    }
+    /// True for a world catalogue id while the catalogue is still being read: its place is not known yet.
+    func awaitsCatalog(_ id:String)->Bool { id.hasPrefix(Park.catalogPrefix) && !catalogIsReady }
+    /// Field mode's place when none was named (Control Center, "I'm stargazing"): the last place used in
+    /// the field, else the starting place, each waited for when it is a catalogue place not read yet;
+    /// the first park only when neither is known.
+    func usualFieldPlace(lastUsed:String?) async -> Park? {
+        for id in [lastUsed,homeID].compactMap({ $0 }) { if let found=await place(named:id) { return found } }
+        return home
+    }
+    private func install(_ built:PlaceCatalog) {
+        placeCatalog=built
+        catalogIsReady=true
+        catalog=built.places
+        // A journal entry at a catalogue place read before the catalogue was there is scored again.
+        journalScores=[:]
+    }
+    /// Curated parks, catalogue places and saved spots within `radiusMeters` (great-circle) of a point,
+    /// nearest first (ties by id). The catalogue is found through its 1° buckets, so a radius looks at
+    /// a few dozen cells, never all 3,400 places. Without the catalogue yet, the parks and spots.
+    func places(near latitude:Double,longitude:Double,radiusMeters:Double)->[Park] {
+        _=catalog.isEmpty
+        guard latitude.isFinite, longitude.isFinite, radiusMeters>=0 else { return [] }
+        let local=(parks+spots).filter { $0.distanceMeters(latitude:latitude,longitude:longitude)<=radiusMeters }
+        var seen=Set<String>()
+        return (local+placeCatalog.nearby(latitude:latitude,longitude:longitude,radiusMeters:radiusMeters))
+            .filter { seen.insert($0.id).inserted }
+            .map { ($0,$0.distanceMeters(latitude:latitude,longitude:longitude)) }
+            .sorted { ($0.1,$0.0.id)<($1.1,$1.0.id) }.map(\.0)
+    }
+    /// Curated parks and catalogue places whose name, region or country (in the reader's language)
+    /// matches `query`, folded as the park list folds it ("Iguazu" finds Iguazú). Ranked: the whole
+    /// name, a name that begins with it, a word of the name that does, the name containing it, then
+    /// region or country the same way; on a tie a curated park first, then by the name shown. Empty for an empty query.
+    func searchPlaces(_ query:String,limit:Int=50)->[Park] {
+        _=catalog.isEmpty
+        let needle=Park.folded(query)
+        guard !needle.isEmpty, limit>0 else { return [] }
+        if curatedTerms == nil { curatedTerms=parks.map { PlaceCatalog.Terms($0) } }
+        let curated=zip(parks,curatedTerms ?? []).compactMap { park,terms in terms.rank(needle).map { (park,$0) } }
+        let found=curated+placeCatalog.search(needle)
+        return found.sorted { a,b in
+            if a.1 != b.1 { return a.1<b.1 }
+            if a.0.curated != b.0.curated { return a.0.curated }
+            // By the name the list shows, as the world list orders a country (`WorldBrowse.shownBefore`).
+            return WorldBrowse.shownBefore(a.0,b.0)
+        }.prefix(limit).map(\.0)
+    }
+    /// Forecasts for these places, as `refreshForecasts(watching:)`: the curated parks' request as it
+    /// always was, saved spots' rounded request, and for catalogue places their whole 10° tiles
+    /// (`CatalogForecast.Regions`), never a place alone and never the device's position.
+    func refreshForecasts(for places:[Park],force:Bool=false) async { await refreshForecasts(watching:places,force:force) }
+    /// The trip planner's candidates: every place within the radius (curated parks, catalogue places,
+    /// saved spots), at most `TripPlanner.maxCandidates` of them (`TripPlanner.limited`), sorted by id.
+    func tripCandidates(latitude:Double,longitude:Double,radiusMeters:Double,drivableOnly:Bool=false)->[Park] {
+        TripPlanner.limited(TripPlanner.candidates(places(near:latitude,longitude:longitude,radiusMeters:radiusMeters),latitude:latitude,longitude:longitude,
+                                                   radiusMeters:radiusMeters,drivableOnly:drivableOnly),latitude:latitude,longitude:longitude)
+    }
+    /// The saved spots, from the store (call it whenever they change). A spot new to this launch
+    /// gets its cached forecast at once; a spot deleted is forgotten here, along with its forecast.
+    func setSpots(_ records:[SavedSpot]) { setSpots(places:records.sorted { $0.createdAt<$1.createdAt }.map { Place(spot:$0) }) }
+    func setSpots(places:[Park]) {
+        guard places != spots else { return }
+        let before=Set(spots.map(\.id)), now=Set(places.map(\.id))
+        spots=places
+        spotIndex=Dictionary(places.indices.map { (places[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        for id in before.subtracting(now) {
+            forecasts[id]=nil; staleForecasts.remove(id)
+            conditions[id]=nil; tonightMemo[id]=nil
+        }
+        let added=places.filter { !before.contains($0.id) }
+        guard !added.isEmpty, DebugScenario.screen == nil else { return }
+        let weather=self.weather
+        Task { [weak self] in
+            await self?.hydration?.value
+            let cached=await weather.spotForecasts(for:added,network:false,force:false)
+            guard let self else { return }
+            for (id,forecast) in cached where self.spotIndex[id] != nil && self.forecasts[id] == nil { self.forecasts[id]=forecast }
+        }
+    }
+    func night(_ park:Park,on date:Date?=nil)->Night {
+        let evening=date.map(park.evening) ?? tonightEntry(park).evening
+        // Read on every call, kept or not, so a screen still redraws when either changes (the memo is not observed).
+        let forecast=forecasts[park.id], detail=details[park.id], now=present
+        let recent=detail?.models?.usable(now:now) == true
+        if let kept=nightMemo[park.id]?[evening], kept.recent==recent, kept.night.park==park { return kept.night }
+        let sky:SkyConditions
+        if let cached=conditions[park.id]?[evening] { sky=cached } else {
+            sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
+        }
+        let night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now,scoring:scoring)
+        nightMemo[park.id,default:[:]][evening]=(recent,night)
+        return night
+    }
+    /// A journal entry's score at its park, kept per entry, night and park (`loggedNights`). Nil
+    /// for a park Nyx does not know. Reads the forecasts and detail as `night(_:on:)` would.
+    func journalScore(id:UUID,date:Date,parkID:String)->Int? {
+        let key=JournalScoreKey(id:id,date:date,park:parkID)
+        if let kept=journalScores[key] {
+            if kept != nil { _=forecasts[parkID]; _=details[parkID] }
+            return kept
+        }
+        let score=park(parkID).map { night($0,on:date).score.value }
+        journalScores[key]=score
+        return score
+    }
+    /// What the forecast says around the score for one night: model agreement (with the score the
+    /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
+    /// is shown only beside a score that includes clouds, so the two never contradict each other.
+    func outlook(_ night:Night)->NightOutlook? {
+        if let cached=outlookCache[night.park.id]?[night.id] { return cached }
+        let outlook=deriveOutlook(night)
+        outlookCache[night.park.id,default:[:]][night.id]=outlook
+        return outlook
+    }
+    private func deriveOutlook(_ night:Night)->NightOutlook? {
+        details[night.park.id].flatMap { NightOutlook.of(night,detail:$0,now:present,scoring:scoring) }
+    }
+    /// The core, planets, a meteor shower and an eclipse for one night, worded for that night
+    /// ("peak tonight" only on tonight). Kept per park and night: scrubbing recomputes nothing.
+    func whatsUp(_ night:Night)->WhatsUp {
+        let isTonight=night.id==tonight(night.park), key=Self.skyKey(night,isTonight:isTonight)
+        if let cached=skyCache[key] { return cached }
+        let value=WhatsUp(park:night.park,sky:night.sky,isTonight:isTonight)
+        skyCache[key]=value
+        return value
+    }
+    /// Only the shower and eclipse: cheap enough for every night of a calendar month.
+    func events(_ night:Night)->WhatsUp.Events {
+        let key=SkyKey(park:night.park.id,night:night.id,isTonight:false)
+        if let cached=eventCache[key] { return cached }
+        let value=skyCache[Self.skyKey(night,isTonight:night.id==tonight(night.park))]?.events ?? WhatsUp.Events(park:night.park,sky:night.sky)
+        eventCache[key]=value
+        return value
+    }
+    /// Eclipse and shower-peak marks for a run of nights, keyed by night.
+    func markers(_ nights:[Night])->[Date:WhatsUp.Events.Marker] {
+        Dictionary(nights.compactMap { night in events(night).marker(park:night.park).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    }
+    /// Works out the river's nights off the main thread, so a scrub finds each one ready.
+    func prepareWhatsUp(_ nights:[Night]) async {
+        let missing=nights.map { ($0,$0.id==tonight($0.park)) }.filter { skyCache[Self.skyKey($0.0,isTonight:$0.1)] == nil }
+        guard !missing.isEmpty else { return }
+        let inputs=missing.map { (key:Self.skyKey($0.0,isTonight:$0.1),park:$0.0.park,sky:$0.0.sky,isTonight:$0.1) }
+        let computed=await Task.detached(priority:.utility) { inputs.map { ($0.key,WhatsUp(park:$0.park,sky:$0.sky,isTonight:$0.isTonight)) } }.value
+        for (key,value) in computed where skyCache[key] == nil { skyCache[key]=value }
+    }
+    /// Works out the astronomy of these parks' next `count` nights off the main thread, so a
+    /// first look (Parks, a calendar month) finds them ready. The same engine and the same inputs
+    /// as `night(_:on:)`, kept only where nothing is yet: no score can differ.
+    func prepareNights(_ parks:[Park],from start:((Park)->Date)?=nil,count:Int) async {
+        let wanted=parks.flatMap { park in
+            let first=start?(park) ?? tonight(park)
+            return (0..<count).map { (park,park.evening(park.date(first,addingDays:$0))) }
+        }.filter { conditions[$0.0.id]?[$0.1] == nil }
+        guard !wanted.isEmpty else { return }
+        let astronomy=self.astronomy
+        let computed=await Task.detached(priority:.utility) { wanted.map { ($0.0.id,$0.1,astronomy.conditions(for:$0.0,on:$0.1)) } }.value
+        for (id,evening,sky) in computed where conditions[id]?[evening] == nil { conditions[id,default:[:]][evening]=sky }
+    }
+    /// The nights' astronomy is the engine's own (always, outside tests that hand in another), so
+    /// work done ahead with it (`SkyAhead`) is the work a screen would do.
+    var astronomyIsEngine: Bool { astronomy is AstronomyEngine }
+    /// Conditions worked out at launch for the parks near the starting point (`CachePreload`).
+    private func seed(_ prepared:[String:[Date:SkyConditions]]) {
+        guard astronomy is AstronomyEngine else { return }
+        for (id,nights) in prepared { conditions[id,default:[:]].merge(nights) { kept,_ in kept } }
+    }
+    private static func skyKey(_ night:Night,isTonight:Bool)->SkyKey { SkyKey(park:night.park.id,night:night.id,isTonight:isTonight) }
+    func outlooks(_ nights:[Night])->[Date:NightOutlook] {
+        Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
+    }
+    /// The best clear, dark, moon-free stretch of a forecast night, from the hourly clouds
+    /// (mid and high cloud only at a summit above the inversion). Nil without a full forecast.
+    func clearWindow(_ night:Night)->ClearWindow? {
+        guard night.score.hasForecast else { return nil }
+        let window=night.sky.cloudWindow
+        var hours:[(time:Date,cloud:Double)]=[]
+        if night.upperCloudOnly, let layers=details[night.park.id]?.layers, let mid=layers.values["cloud_cover_mid"], let high=layers.values["cloud_cover_high"], mid.count==layers.times.count, high.count==layers.times.count {
+            hours=layers.times.indices.compactMap { i in
+                guard let m=mid[i], let h=high[i], layers.times[i]+1800>window.start.timeIntervalSince1970, layers.times[i]-1800<window.end.timeIntervalSince1970 else { return nil }
+                return (Date(timeIntervalSince1970:layers.times[i]),100*(1-(1-m/100)*(1-h/100)))
+            }
+        } else if let forecast=forecasts[night.park.id] { hours=forecast.hours(from:window.start,to:window.end) }
+        return ClearWindow.find(park:night.park,sky:night.sky,hours:hours)
+    }
+    /// Aurora season, satellites, zodiacal light, the faintest stars and the core's light dome.
+    func skyNotes(_ night:Night)->[SkyNote] {
+        SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:night.aerosol)
+    }
+    /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
+    func smokeCaveat(_ night:Night)->String? {
+        guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
+        return clarity.sentence
+    }
+    /// True when a night without clouds simply lies beyond the forecast's reach (past its last
+    /// hour, or ten days or more ahead, where a forecast counts for nothing), rather than having a
+    /// forecast that failed (`NightPlanner.beyondForecast`).
+    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],detail:details[night.park.id],now:present) }
+    func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
+    func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {
+        guard let origin else { return [] }
+        let lat=latitude ?? origin.latitude, lon=longitude ?? origin.longitude, reach=radiusMeters ?? self.radiusMeters
+        return parks.filter { $0.distanceMeters(latitude:lat,longitude:lon)<=reach }
+    }
+    /// Where distances are measured from without "Near me": the chosen place, else the starting park.
+    var origin:(latitude:Double,longitude:Double)? { homePlace.map { ($0.latitude,$0.longitude) } ?? home.map { ($0.latitude,$0.longitude) } }
+    /// The starting point's name: "Chicago" or "Joshua Tree".
+    var originName:String { homePlace?.name ?? home?.shortName ?? "" }
+    /// Start from a park: distances from it, and no place.
+    func choose(parkID:String) { homePlace=nil; homeID=parkID; startChosen=true }
+    /// Start from a city or town: distances from it, and the park nearest to it as the home park
+    /// (the sky behind the app, the calendar's first park, the widget before anything is saved).
+    func choose(_ place:StartingPlace) { startChosen=true; start(from:place) }
+    /// The example starting point until one is chosen (`StartingPlaces.example`): a town in this
+    /// device's time zone, or the starting park in the US. Never counts as a choice.
+    func showExample(from place:StartingPlace?) {
+        guard !startChosen else { return }
+        if let place { if place != homePlace { start(from:place) } }
+        else if homePlace != nil { homePlace=nil; homeID=Park.defaultID }
+        // Written out, so the home park kept for the example never reads as one chosen (`init`).
+        startChosen=false
+    }
+    private func start(from place:StartingPlace) {
+        homePlace=place
+        let curated=Self.nearestPark(to:place,in:parks)
+        if let curated { homeID=curated.id }
+        // Far from every curated park (abroad), the nearest world catalogue place is the home park
+        // instead. Within reach of one, the curated park stays, as before the catalogue.
+        guard curated.map({ place.distanceMeters(to:$0)>Self.curatedReach }) ?? true else { return }
+        guard catalogIsReady else {
+            // Chosen before the catalogue was read (first run, a cold launch): the nearest curated park
+            // stands in until it is, then the place nearest the city is chosen, unless the starting
+            // point or the home park has changed meanwhile. Never a park an ocean away for good.
+            let provisional=homeID
+            Task { [weak self] in
+                await self?.catalogReady()
+                guard let self, self.homePlace == place, self.homeID == provisional else { return }
+                self.chooseLocal(near:place,curated:curated)
+            }
+            return
+        }
+        chooseLocal(near:place,curated:curated)
+    }
+    /// The world catalogue place nearest a starting point abroad as the home park, when it is nearer
+    /// than the nearest curated park.
+    private func chooseLocal(near place:StartingPlace,curated:Park?) {
+        let local=Self.nearestPark(to:place,in:placeCatalog.nearby(latitude:place.latitude,longitude:place.longitude,radiusMeters:2*Self.curatedReach))
+        if let local, curated.map({ place.distanceMeters(to:local)<place.distanceMeters(to:$0) }) ?? true { homeID=local.id }
+    }
+    /// How far a starting place may be from the nearest curated park and still take it as its home park.
+    nonisolated static let curatedReach:Double=500_000
+    /// The park closest to a place, straight-line.
+    nonisolated static func nearestPark(to place:StartingPlace,in parks:[Park])->Park? {
+        parks.min { place.distanceMeters(to:$0)<place.distanceMeters(to:$1) }
+    }
+    /// The park this iPhone is in or beside, for offering field mode: within 60 km of the park's
+    /// centre or 25 km of one of its viewing spots, nearest first. Straight-line, on this iPhone.
+    func fieldPark(latitude:Double,longitude:Double)->Park? {
+        parks.map { park in (park,min(park.distanceMeters(latitude:latitude,longitude:longitude)/60_000,
+                                       park.viewingSpots.map { spot in Park.distance(spot.latitude,spot.longitude,latitude,longitude)/25_000 }.min() ?? .infinity)) }
+            .filter { $0.1<=1 }.min { $0.1<$1.1 }?.0
+    }
+    func ranked(_ candidates:[Park])->[Park] {
+        // Ranked as every other surface ranks nights: on a tie, the darker measured sky first.
+        let nights=Dictionary(candidates.map { ($0.id,night($0)) },uniquingKeysWith:{ first,_ in first })
+        return candidates.sorted { a,b in
+            guard let x=nights[a.id], let y=nights[b.id] else { return a.name<b.name }
+            return NightPlanner.better(x,y)
+        }
+    }
+    /// The person's own key from Your privacy, else the key every install shares.
+    var npsKey: String { NPSKeyStore().key ?? Bundle.main.object(forInfoDictionaryKey:"NPS_API_KEY") as? String ?? "" }
+    /// Reads every cache once, in the services, and shows what they hold where nothing newer is.
+    func hydrate() async {
+        let interval=LaunchSignposts.begin("Hydrate caches")
+        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+        async let cachedForecasts=weather.hydrate(parks)
+        async let cachedDetails=detailService.hydrate(parks)
+        async let cachedAlerts=parkStore.hydrate(parks)
+        let (f,d,a)=await (cachedForecasts,cachedDetails,cachedAlerts)
+        for (id,forecast) in f where forecasts[id] == nil { forecasts[id]=forecast }
+        for (id,detail) in d where details[id] == nil { details[id]=detail }
+        if alertsCache == nil { apply(a) }
+        LaunchSignposts.end(interval)
+        LaunchSignposts.note("Caches ready")
+    }
+    /// Forecasts for every park arrive together (one or two requests); park updates (alerts, and
+    /// ranger programs where they are shown) follow park by park, and only when asked for.
+    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true,programs:Bool=false) async {
+        // Programs are asked for only on a park's page: from then on its forecast detail is wanted too.
+        if programs { detailWanted=true }
+        await refreshForecasts(watching:parks,force:force)
+        // Cancelled (the question changed while it was asked): the next refresh says when it last happened.
+        guard !Task.isCancelled else { return }
+        lastRefresh=Date.now
+        if parkUpdates { await refreshParkUpdates(parks,force:force,programs:programs) }
+    }
+    /// Always asks for all 63 parks, never only those near the device: it costs the same request,
+    /// and a list of nearby parks would tell the forecast service roughly where you are. Saved spots
+    /// follow in a separate request with rounded coordinates, behind their own switch as well. World
+    /// catalogue places among `parks` are asked for by their whole 10° tiles (`CatalogForecast`).
+    func refreshForecasts(watching parks:[Park],force:Bool=false) async {
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil; details[park.id]=nil }; return }
+        #if DEBUG
+        if let state=DebugScenario.state, let fixture=DebugForecasts(state:state,parks:self.parks,now:today) {
+            forecasts=fixture.forecasts; details=fixture.details; return
+        }
+        #endif
+        await hydration?.value
+        let network=weatherEnabled && live
+        var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
+        for park in self.parks where Forecast.replaces(fresh[park.id],forecasts[park.id]) { forecasts[park.id]=fresh[park.id] }
+        // Cancelled while asking: what arrived is kept, and nothing is called stale for a request cut short.
+        guard !Task.isCancelled else { return }
+        // Saved spots in a request of their own, rounded to 0.1°, never mixed into the parks' (`SpotForecast`).
+        let spots=self.spots
+        if !spots.isEmpty {
+            let spotNetwork=network && spotForecastsEnabled
+            let ofSpots=await weather.spotForecasts(for:spots,network:spotNetwork,force:force)
+            for spot in spots where spotIndex[spot.id] != nil && Forecast.replaces(ofSpots[spot.id],forecasts[spot.id]) { forecasts[spot.id]=ofSpots[spot.id] }
+            if spotNetwork { fresh.merge(ofSpots) { park,_ in park } }
+        }
+        // World catalogue places by whole tiles (`CatalogForecast.Regions`), the same switch and host
+        // as the parks: never one place alone, never the device's position.
+        var askedCatalog=Set<String>()
+        if parks.contains(where:\.isCatalogPlace) {
+            await catalogReady()
+            let requests=placeCatalog.regions.plan(wanted:parks)
+            askedCatalog=Set(requests.joined().map(\.id))
+            let ofCatalog=await weather.catalogForecasts(requests,network:network,force:force)
+            // One assignment for the whole tile, so the kept nights are let go once, not once a place.
+            var updated=forecasts, changed=false
+            for (id,forecast) in ofCatalog where Forecast.replaces(forecast,updated[id]) { updated[id]=forecast; changed=true }
+            if changed { forecasts=updated }
+            if network { fresh.merge(ofCatalog) { park,_ in park } }
+        }
+        // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
+        if !smokeEnabled { await detailService.forgetAir() }
+        forecastsHeldBack=network ? await weather.heldBack() : false
+        // A summit above the inversion (Haleakalā) is scored from its mid and high cloud, which come
+        // with forecast detail: asked for with the clouds from the first refresh, page or no page, so
+        // Tonight never waits for a park page to score it. Every copy of Nyx asks for that one public
+        // park whatever its whereabouts; once a page is open, the summit rides with every park.
+        let summits=self.parks.filter { $0.aboveInversion == true }
+        if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
+        let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
+        for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
+        let paused=await detailService.pausedForLowData()
+        if paused != detailPausedForLowData { detailPausedForLowData=paused }
+        #if DEBUG
+        exportWatchContext()
+        #endif
+        guard network, !Task.isCancelled else { return }
+        // A spot whose forecasts are switched off is not "stale": it was never asked about.
+        // Nor is a catalogue place beyond this refresh's budget (`CatalogForecast.maxPointsPerRefresh`).
+        for park in parks where (spotForecastsEnabled || !park.isSavedSpot) && (!park.isCatalogPlace || askedCatalog.contains(park.id)) {
+            if let forecast=fresh[park.id],Date.now.timeIntervalSince(forecast.updated)<6*3600 { staleForecasts.remove(park.id) } else { staleForecasts.insert(park.id) }
+        }
+    }
+    #if DEBUG
+    /// `-nyx-watch-export jotr,deva,…` (with `-nyx-state live` on a park page, which asks for forecast
+    /// detail): writes the context a paired iPhone would hand Apple Watch for those saved parks, the
+    /// models' ranges worked out by `SavedSkySync.modelRanges`, to the App Group as `watch-context.json`.
+    /// Store captures copy it into the watch simulator, which has no paired iPhone. Writes only a local file.
+    private func exportWatchContext() {
+        guard let list=DebugScenario.text("-nyx-watch-export"), detailWanted else { return }
+        let ids=list.split(separator:",").map(String.init).filter { park($0) != nil }
+        guard let home=ids.first,
+              let url=FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:SharedSettings.group)?.appendingPathComponent(WatchContextExport.file) else { return }
+        let closures=Dictionary(ids.compactMap { id in park(id).flatMap { closure($0) }.map { (id,$0) } },uniquingKeysWith:{ first,_ in first })
+        let context=WatchContext.make(savedParkIDs:ids,homeParkID:home,nightVision:false,forecasts:forecasts,details:details,closures:closures,
+                                      aboveInversion:Set(parks.filter { $0.aboveInversion == true }.map(\.id)),
+                                      ranges:SavedSkySync.modelRanges(self,ids:ids))
+        try? context.data?.write(to:url,options:.atomic)
+    }
+    private enum WatchContextExport { static let file="watch-context.json" }
+    #endif
+    /// Alerts for every park arrive in one request (whichever screen asks first, at most every six
+    /// hours), so the request never says which parks are near you; ranger programs follow only for
+    /// the park whose page is open.
+    /// `alertPages`: one in a background refresh, where time is short (`SavedSkySync`).
+    func refreshParkUpdates(_ parks:[Park],force:Bool=false,programs:Bool=false,alertPages:Int=ParkStore.alertPages) async {
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        let network=npsEnabled && live, key=npsKey
+        await hydration?.value
+        apply(await parkStore.alerts(for:self.parks,key:key,network:network,force:force,pages:alertPages))
+        guard programs else { return }
+        for park in parks {
+            if Task.isCancelled { return }
+            if let fresh=await parkStore.programs(for:park,key:key,network:network,force:force) { self.programs[park.id]=fresh; rebuild(park) }
+        }
+    }
+    private func apply(_ update:AlertsUpdate) {
+        // `-nyx-alerts-busy` (DEBUG): the busy state for screenshots.
+        let busy=update.busy || DebugScenario.isEnabled("alerts-busy")
+        if alertsBusy != busy { alertsBusy=busy }
+        guard update.cache != alertsCache else { return }
+        alertsCache=update.cache
+        for park in parks { rebuild(park) }
+    }
+    /// One park's update as the screens read it: its alerts from the shared request, ranked, and
+    /// its programs if its page has asked for them.
+    private func rebuild(_ park:Park) {
+        guard let cache=alertsCache, let code=park.nps, let alerts=cache.alerts[code] else { return }
+        let today=park.isoDay(Date.now), shown=programs[park.id]
+        enrichments[park.id]=ParkEnrichment(updated:cache.updated,alerts:AlertRanking.ranked(alerts),programs:(shown?.programs ?? []).filter { $0.date>=today },description:nil,programsUpdated:shown?.updated)
+    }
+    /// A closure from the last park update, if any: a road, trail, campground, area or the park
+    /// itself, never an amenity notice. Shown beside every score for that park.
+    func closure(_ park:Park)->String? {
+        AlertRanking.closure(enrichments[park.id]?.alerts ?? [])?.displayTitle(park:park)
+    }
+    /// Every park's campgrounds from the NPS, asked for only when a park's "Where to stay" opens,
+    /// in one request for all 63 parks, kept seven days (`ParkStore.campgrounds`).
+    func refreshCampgrounds(force:Bool=false) async {
+        let live=DebugScenario.screen == nil || DebugScenario.state == "live"
+        await hydration?.value
+        let fresh=await parkStore.campgrounds(for:parks,key:npsKey,network:npsEnabled && live,force:force)
+        if let fresh, fresh != campgrounds { campgrounds=fresh }
+    }
+    func alertSummary(_ park:Park)->String {
+        guard let data=enrichments[park.id] else {
+            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
+        }
+        if let closure=closure(park) { return closure }
+        if let danger=data.alerts.first(where:{ $0.kind == .danger }) { return danger.displayTitle(park:park) }
+        if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
+        return String(localized:"No closures in the last park update. Check all park alerts before you go.")
+    }
+    /// Where a place's access stands for Ask Nyx, in Nyx's own fixed words only. A closure is a flag
+    /// (`OnDeviceGuide.closureRecord`), never the Park Service's title or text: that is free text,
+    /// and the on-device model must not read it as an instruction or quote it as access advice.
+    func guideAccess(_ park:Park)->String {
+        guard park.nps != nil else { return park.unknownClosuresLine }
+        guard let data=enrichments[park.id] else {
+            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
+        }
+        if closure(park) != nil { return OnDeviceGuide.closureRecord }
+        if data.alerts.contains(where:{ $0.kind == .danger }) { return String(localized:"A safety alert is listed in the last park update. Read it in Nyx before you go.") }
+        if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
+        return String(localized:"No closures in the last park update. Check all park alerts before you go.")
+    }
+    /// The curated parks with a closure in the last park update, for Ask Nyx's lookups.
+    var closedParks:Set<String> { Set(parks.filter { closure($0) != nil }.map(\.id)) }
+    /// `alertSummary` as short facts for one caption, only when the last park update lists nothing
+    /// to stop a trip (no closure, no danger): the fact, then the cue to check before going. Nil
+    /// otherwise, when the summary's full sentence stands alone.
+    func alertFacts(_ park:Park)->[String]? {
+        guard let data=enrichments[park.id], closure(park) == nil, !data.alerts.contains(where:{ $0.kind == .danger }) else { return nil }
+        if data.alerts.isEmpty { return [String(localized:"No alerts listed"),String(localized:"confirm access before you go")] }
+        return [String(localized:"No closures listed"),String(localized:"check alerts before you go")]
+    }
+}
+/// The world catalogue as the planner reads it, built once off the main thread (`prepareCatalog`):
+/// the places in file order, a lookup by id, a spatial index of 1° cells, folded search terms and
+/// the forecast regions (`CatalogForecast.Regions`).
+nonisolated struct PlaceCatalog: Sendable {
+    let places: [Park]
+    let regions: CatalogForecast.Regions
+    private let byID: [String: Int]
+    private let cells: [Cell: [Int]]
+    private let terms: [Terms]
+    static let empty=PlaceCatalog([])
+    /// The bundled catalogue without the curated parks, built once per process (about 60 ms on a
+    /// recent Mac: 20 to decode, 40 to fold the search terms) and kept: every model shares it.
+    static func bundled(excluding curated: Set<String>) -> PlaceCatalog {
+        if let kept=store.withLock({ $0 }), kept.excluded == curated { return kept.catalog }
+        let built=PlaceCatalog(((try? CatalogData.load()) ?? []).filter { !curated.contains($0.id) })
+        // A failed read (no file) is not kept, so a later model tries again.
+        if !built.places.isEmpty { store.withLock { $0=(curated,built) } }
+        return built
+    }
+    private static let store=Mutex<(excluded: Set<String>, catalog: PlaceCatalog)?>(nil)
+    /// One degree of latitude and longitude: rows −90…89, columns −180…179.
+    nonisolated struct Cell: Hashable, Sendable {
+        let row: Int
+        let column: Int
+        init(row: Int, column: Int) { self.row=row; self.column=Cell.wrap(column) }
+        init(latitude: Double, longitude: Double) {
+            self.init(row: min(89, max(-90, Int(latitude.rounded(.down)))), column: Int(longitude.rounded(.down)))
+        }
+        static func wrap(_ column: Int) -> Int { ((column+180)%360+360)%360-180 }
+    }
+    init(_ places: [Park], locale: Locale = .current) {
+        var seen=Set<String>()
+        let unique=places.filter { $0.latitude.isFinite && $0.longitude.isFinite && seen.insert($0.id).inserted }
+        self.places=unique
+        byID=Dictionary(unique.indices.map { (unique[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
+        var cells: [Cell: [Int]]=[:]
+        for (index,place) in unique.enumerated() { cells[Cell(latitude: place.latitude, longitude: place.longitude),default:[]].append(index) }
+        self.cells=cells
+        terms=unique.map { Terms($0, locale: locale) }
+        regions=CatalogForecast.Regions(unique)
+    }
+    func place(_ id: String) -> Park? { byID[id].map { places[$0] } }
+    /// The places within `radiusMeters` (great-circle) of a point, in file order: only the 1° cells the
+    /// circle can reach are read (every column near a pole or for a radius past a quarter of the Earth).
+    func nearby(latitude: Double, longitude: Double, radiusMeters: Double) -> [Park] {
+        guard !places.isEmpty, latitude.isFinite, longitude.isFinite, radiusMeters.isFinite, radiusMeters>=0 else { return [] }
+        let angle=radiusMeters/6_371_008.8, degrees=angle*180 / .pi+1e-6
+        let rows=Int(max(-90, latitude-degrees).rounded(.down))...Int(min(89.999_999, latitude+degrees).rounded(.down))
+        let ratio=sin(min(angle, .pi/2))/cos(latitude * .pi/180)
+        let columns: [Int]
+        if angle >= .pi/2 || latitude+degrees >= 90 || latitude-degrees <= -90 || !(ratio<1) {
+            columns=Array(-180...179)
+        } else {
+            let span=asin(ratio)*180 / .pi+1e-6
+            let low=Int((longitude-span).rounded(.down)), high=Int((longitude+span).rounded(.down))
+            columns=high-low >= 359 ? Array(-180...179) : Array(Set((low...high).map(Cell.wrap)))
+        }
+        var found: [Int]=[]
+        for row in rows { for column in columns { if let indices=cells[Cell(row: row, column: column)] { found += indices } } }
+        return found.sorted().map { places[$0] }.filter { $0.distanceMeters(latitude: latitude, longitude: longitude)<=radiusMeters }
+    }
+    /// Every place matching an already folded query, with its rank (`Terms.rank`).
+    func search(_ needle: String) -> [(Park, Int)] {
+        guard !needle.isEmpty else { return [] }
+        return zip(places, terms).compactMap { place, terms in terms.rank(needle).map { (place,$0) } }
+    }
+    /// A place's name (and short name and aliases), region and country (in the reader's language), folded once.
+    /// A place shown in the app's language is found by its English name and region too (`Place.searchNames`).
+    nonisolated struct Terms: Sendable {
+        let names: [String]
+        let others: [String]
+        init(_ place: Park, locale: Locale = .current) {
+            names=Array(Set(place.searchNames+(Park.aliases[place.id] ?? [])).map(Park.folded).filter { !$0.isEmpty }).sorted()
+            let country=place.countryCode.isEmpty ? nil : locale.localizedString(forRegionCode: place.countryCode)
+            others=(place.searchRegions+(country.map { [$0] } ?? [])).map(Park.folded).filter { !$0.isEmpty }
+        }
+        /// 0 the whole name, 1 a name beginning with the query, 2 a word of the name beginning with it,
+        /// 3 the name containing it; 4 to 7 the same for the region or country; nil for no match.
+        func rank(_ needle: String) -> Int? {
+            func tier(_ terms: [String]) -> Int? {
+                if terms.contains(needle) { return 0 }
+                if terms.contains(where: { $0.hasPrefix(needle) }) { return 1 }
+                if terms.contains(where: { $0.contains(" "+needle) }) { return 2 }
+                if terms.contains(where: { $0.contains(needle) }) { return 3 }
+                return nil
+            }
+            return tier(names) ?? tier(others).map { $0+4 }
+        }
+    }
+}
+@MainActor @Observable final class LocationService: NSObject, CLLocationManagerDelegate {
+    var latitude:Double?
+    var longitude:Double?
+    var denied=false
+    var locating=false
+    var message:String?
+    private let manager=CLLocationManager()
+    override init() { super.init(); manager.delegate=self; manager.desiredAccuracy=kCLLocationAccuracyThreeKilometers }
+    /// "Near me" as the starting point, kept across launches: the choice, never a position. While
+    /// location stays allowed, the next launch starts from where you are without asking.
+    private var remembered:Bool {
+        get { DebugScenario.screen == nil && UserDefaults.standard.bool(forKey:"nearMe") }
+        set { if DebugScenario.screen == nil { UserDefaults.standard.set(newValue,forKey:"nearMe") } }
+    }
+    /// The explainer has led to iOS's prompt once: after an "Allow Once" lapses, Near me goes
+    /// straight to the prompt instead of explaining again.
+    private var explained:Bool {
+        get { DebugScenario.screen == nil && UserDefaults.standard.bool(forKey:"locationExplained") }
+        set { if DebugScenario.screen == nil { UserDefaults.standard.set(newValue,forKey:"locationExplained") } }
+    }
+    private var allowed:Bool { manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways }
+    /// Near me should explain first: iOS has never asked, and Nyx has never explained.
+    var needsPermission:Bool { manager.authorizationStatus == .notDetermined && !explained }
+    func request() {
+        locating=true
+        if allowed { manager.requestLocation() }
+        else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted { denied=true; locating=false; remembered=false }
+        else { explained=true; manager.requestWhenInUseAuthorization() }
+    }
+    func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse,.authorizedAlways: denied=false; if locating { manager.requestLocation() } else { resume() }
+        // Turned off in Settings: back to the starting point, not a stale position.
+        case .denied,.restricted: denied=true; clear()
+        default: break
+        }
+    }
+    func locationManager(_ manager:CLLocationManager,didUpdateLocations locations:[CLLocation]) {
+        // A fix that lands after a starting point was chosen instead is dropped.
+        guard let location=locations.last, locating || latitude != nil else { locating=false; return }
+        latitude=location.coordinate.latitude; longitude=location.coordinate.longitude; locating=false; message=nil; remembered=true
+    }
+    /// Return to the chosen starting park.
+    func clear() { latitude=nil; longitude=nil; message=nil; locating=false; remembered=false }
+    /// Back in the app: a fresh fix, only when "near me" is in use and already allowed. Never asks.
+    func refreshIfAuthorized() {
+        guard allowed, !locating else { return }
+        if latitude != nil { manager.requestLocation() } else { resume() }
+    }
+    /// Near me from an earlier launch, only while still allowed. Never asks. iOS's last fix, when
+    /// recent, paints at once; a fresh one follows.
+    private func resume() {
+        guard remembered, latitude == nil, !locating, allowed else { return }
+        if let last=manager.location, last.timestamp.timeIntervalSinceNow > -900 { latitude=last.coordinate.latitude; longitude=last.coordinate.longitude }
+        else { locating=true }
+        manager.requestLocation()
+    }
+    func locationManager(_ manager:CLLocationManager,didFailWithError error:any Error) {
+        locating=false
+        if latitude == nil { message=String(localized:"Location is unavailable. Choose a starting point instead.") }
+    }
+}

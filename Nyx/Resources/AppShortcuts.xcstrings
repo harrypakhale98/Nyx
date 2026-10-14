@@ -1,0 +1,521 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Add to my ${applicationName} journal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Füge etwas zu meinem ${applicationName}-Journal hinzu",
+              "Neuer Eintrag in ${applicationName}",
+              "Halte eine Nacht in ${applicationName} fest",
+              "Nacht in ${applicationName} festhalten"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Add to my ${applicationName} journal",
+              "Record a night in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Agrega una entrada a mi diario de ${applicationName}",
+              "Registra una noche en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Ajoute une entrée à mon journal ${applicationName}",
+              "Note une nuit dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}のジャーナルに追加",
+              "${applicationName}のジャーナルに記録して",
+              "${applicationName}で夜を記録",
+              "${applicationName}で今夜を記録して"
+            ]
+          }
+        }
+      }
+    },
+    "Find the best night at ${park} with ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Finde die beste Nacht in ${park} mit ${applicationName}",
+              "Beste Nacht in ${park} mit ${applicationName}",
+              "Wann ist die dunkelste Nacht in ${park} laut ${applicationName}",
+              "Finde die beste Nacht für Sterne mit ${applicationName}",
+              "Beste Sternennacht mit ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Find the best night at ${park} with ${applicationName}",
+              "When is the darkest night at ${park} in ${applicationName}",
+              "Find the best night for stars with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Busca la mejor noche en ${park} con ${applicationName}",
+              "Cuándo es la noche más oscura en ${park} según ${applicationName}",
+              "Busca la mejor noche para ver estrellas con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Trouve la meilleure nuit à ${park} avec ${applicationName}",
+              "Quelle est la nuit la plus noire à ${park} dans ${applicationName}",
+              "Trouve la meilleure nuit pour les étoiles avec ${applicationName}",
+              "Quelle est la meilleure nuit pour les étoiles dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${park}のいちばんよい夜を探して",
+              "${applicationName}で${park}のいちばんよい夜を教えて",
+              "${applicationName}で${park}がいちばん暗い夜はいつ",
+              "${applicationName}で${park}のいちばん暗い夜を教えて",
+              "${applicationName}で星を見るのにいちばんよい夜を探して",
+              "${applicationName}で星空がいちばんよい夜を教えて"
+            ]
+          }
+        }
+      }
+    },
+    "Follow tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Verfolge heute Nacht in ${applicationName}",
+              "Verfolge heute Nacht in ${park} mit ${applicationName}",
+              "Zeig heute Nacht mit ${applicationName} auf meinem Sperrbildschirm"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Follow tonight in ${applicationName}",
+              "Follow tonight at ${park} in ${applicationName}",
+              "Put tonight on my Lock Screen with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Sigue esta noche en ${applicationName}",
+              "Sigue esta noche en ${park} con ${applicationName}",
+              "Pon esta noche en mi pantalla bloqueada con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Suis la nuit de ce soir dans ${applicationName}",
+              "Suis la nuit de ce soir à ${park} dans ${applicationName}",
+              "Mets la nuit de ce soir sur mon écran verrouillé avec ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜をフォロー",
+              "${applicationName}で今夜をフォローして",
+              "${applicationName}で${park}の今夜をフォロー",
+              "${applicationName}で${park}の今夜をフォローして",
+              "${applicationName}で今夜をロック画面に表示",
+              "${applicationName}で今夜をロック画面に出して"
+            ]
+          }
+        }
+      }
+    },
+    "Start field mode at ${park} in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Starte den Feldmodus in ${park} mit ${applicationName}",
+              "Ich beobachte Sterne in ${park} mit ${applicationName}",
+              "Starte den Feldmodus in ${applicationName}",
+              "${applicationName} Feldmodus starten",
+              "Ich beobachte Sterne mit ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Start field mode at ${park} in ${applicationName}",
+              "I'm stargazing at ${park} with ${applicationName}",
+              "Start field mode in ${applicationName}",
+              "I'm stargazing with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Inicia el modo de campo en ${park} con ${applicationName}",
+              "Estoy observando estrellas en ${park} con ${applicationName}",
+              "Inicia el modo de campo en ${applicationName}",
+              "Estoy observando estrellas con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Lance le mode terrain à ${park} dans ${applicationName}",
+              "J’observe les étoiles à ${park} avec ${applicationName}",
+              "Lance le mode terrain dans ${applicationName}",
+              "J’observe les étoiles avec ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${park}のフィールドモードを開始",
+              "${applicationName}で${park}のフィールドモードを始めて",
+              "${applicationName}で${park}で星空観察中",
+              "${applicationName}で${park}で星を見ています",
+              "${applicationName}でフィールドモードを開始",
+              "${applicationName}でフィールドモードを始めて",
+              "${applicationName}で星空観察中",
+              "${applicationName}で星を見ています"
+            ]
+          }
+        }
+      }
+    },
+    "Stop following the night in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Beende das Verfolgen der Nacht in ${applicationName}",
+              "Verfolge ${park} in ${applicationName} nicht mehr"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Stop following the night in ${applicationName}",
+              "Stop following ${park} in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Deja de seguir la noche en ${applicationName}",
+              "Deja de seguir ${park} en ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Arrête de suivre la nuit dans ${applicationName}",
+              "Arrête de suivre ${park} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で夜のフォローを停止",
+              "${applicationName}で夜のフォローをやめて",
+              "${applicationName}で${park}のフォローを停止",
+              "${applicationName}で${park}のフォローをやめて"
+            ]
+          }
+        }
+      }
+    },
+    "Turn on night vision in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Schalte die Nachtsicht in ${applicationName} ein",
+              "${applicationName} Nachtsicht einschalten",
+              "Schalte die ${applicationName}-Nachtsicht ein"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Turn on night vision in ${applicationName}",
+              "Turn on ${applicationName} night vision"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Activa la visión nocturna en ${applicationName}",
+              "Activa la visión nocturna de ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Active la vision nocturne dans ${applicationName}",
+              "Active la vision nocturne de ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}でナイトビジョンをオン",
+              "${applicationName}でナイトビジョンをオンにして",
+              "${applicationName}のナイトビジョンをオン",
+              "${applicationName}のナイトビジョンをオンにして"
+            ]
+          }
+        }
+      }
+    },
+    "What is the darkness score at ${park} in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wie ist der Dunkelheitswert in ${park} laut ${applicationName}",
+              "Dunkelheitswert für ${park} in ${applicationName}",
+              "Prüfe den Himmel heute Nacht in ${park} mit ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "What is the darkness score at ${park} in ${applicationName}",
+              "Check tonight's sky at ${park} with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Cuál es el índice de oscuridad en ${park} según ${applicationName}",
+              "Índice de oscuridad de ${park} en ${applicationName}",
+              "Revisa el cielo de esta noche en ${park} con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Quel est l’indice d’obscurité à ${park} dans ${applicationName}",
+              "Indice d’obscurité à ${park} dans ${applicationName}",
+              "Regarde le ciel de ce soir à ${park} avec ${applicationName}",
+              "Le ciel de ce soir à ${park} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で${park}の暗さスコアを教えて",
+              "${applicationName}で${park}の暗さスコアは",
+              "${applicationName}で${park}の今夜の空を確認",
+              "${applicationName}で${park}の今夜の空を見せて"
+            ]
+          }
+        }
+      }
+    },
+    "What's up tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Was ist heute Nacht am Himmel laut ${applicationName}",
+              "Was ist heute Nacht in ${park} am Himmel laut ${applicationName}",
+              "Was kann ich heute Nacht in ${park} sehen laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "What's up tonight in ${applicationName}",
+              "What's up tonight at ${park} in ${applicationName}",
+              "What can I see tonight at ${park} with ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qué hay en el cielo esta noche según ${applicationName}",
+              "Qué hay en el cielo esta noche en ${park} según ${applicationName}",
+              "Qué puedo ver esta noche en ${park} con ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Qu’y a-t-il dans le ciel ce soir dans ${applicationName}",
+              "Qu’y a-t-il dans le ciel ce soir à ${park} dans ${applicationName}",
+              "Que puis-je voir ce soir à ${park} avec ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜の空に何が見える",
+              "${applicationName}で今夜の空を教えて",
+              "${applicationName}で${park}の今夜の空に何が見える",
+              "${applicationName}で${park}の今夜の空を教えて",
+              "${applicationName}で${park}で今夜何が見られる",
+              "${applicationName}で${park}で今夜見えるものを教えて"
+            ]
+          }
+        }
+      }
+    },
+    "When is it dark tonight in ${applicationName}": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Wann wird es heute Nacht dunkel laut ${applicationName}",
+              "Wann wird es in ${park} dunkel laut ${applicationName}",
+              "Wann beginnt die echte Dunkelheit in ${park} laut ${applicationName}"
+            ]
+          }
+        },
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "When is it dark tonight in ${applicationName}",
+              "When is it dark at ${park} in ${applicationName}",
+              "When does true darkness start at ${park} in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Cuándo oscurece esta noche según ${applicationName}",
+              "Cuándo oscurece en ${park} según ${applicationName}",
+              "Cuándo empieza la oscuridad total en ${park} según ${applicationName}"
+            ]
+          }
+        },
+        "fr": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Quand fait-il nuit noire ce soir dans ${applicationName}",
+              "Quand fait-il nuit noire à ${park} dans ${applicationName}",
+              "Quand commence l’obscurité totale à ${park} dans ${applicationName}"
+            ]
+          }
+        },
+        "ja": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "${applicationName}で今夜はいつ暗くなる",
+              "${applicationName}で今夜暗くなる時間を教えて",
+              "${applicationName}で${park}はいつ暗くなる",
+              "${applicationName}で${park}が暗くなる時間を教えて",
+              "${applicationName}で${park}が完全に暗くなるのはいつ",
+              "${applicationName}で${park}の完全な暗さが始まる時間を教えて"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

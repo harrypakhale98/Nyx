@@ -1,0 +1,296 @@
+import AppIntents
+import Foundation
+import UserNotifications
+
+nonisolated struct NightReminder:Sendable {
+    let id:String
+    let parkID:String
+    let title:String
+    let body:String
+    let fireDate:Date
+    let timeZone:TimeZone
+    /// The night it is about, as the park's local date ("2026-10-09"), so a tap opens that night.
+    var night:String?=nil
+    /// A shower reminder opens the night at What's up.
+    var whatsUp=false
+    var userInfo:[String:String] {
+        var info=["parkID":parkID]
+        if let night { info["night"]=night }
+        if whatsUp { info["whatsUp"]="1" }
+        return info
+    }
+}
+/// Where a tapped reminder leads: the park, at the night it announced.
+nonisolated struct ReminderRoute:Sendable,Equatable {
+    let parkID:String
+    let day:TripDay?
+    let whatsUp:Bool
+    init(parkID:String,day:TripDay?=nil,whatsUp:Bool=false) { self.parkID=parkID; self.day=day; self.whatsUp=whatsUp }
+    init?(userInfo:[AnyHashable:Any]) {
+        guard let parkID=userInfo["parkID"] as? String else { return nil }
+        self.init(parkID:parkID,day:(userInfo["night"] as? String).flatMap(TripDay.init(iso:)),whatsUp:userInfo["whatsUp"] as? String == "1")
+    }
+}
+nonisolated protocol LocalNotificationCenter:Sendable {
+    func authorized() async -> Bool
+    func request() async -> Bool
+    func pendingIDs() async -> [String]
+    func deliveredIDs() async -> [String]
+    func remove(_ ids:[String]) async
+    func add(_ reminder:NightReminder) async throws
+}
+nonisolated struct SystemNotifications:LocalNotificationCenter {
+    /// When a reminder fires, as the calendar trigger reads it: the park's wall clock in its zone.
+    /// Gregorian components need their calendar attached, or a device set to another calendar reads
+    /// 2026 as a different year. Seconds too: a reminder due "in a minute" rounded down to the minute
+    /// could already be past.
+    static func fireComponents(_ date:Date,in zone:TimeZone)->DateComponents {
+        var calendar=Calendar(identifier:.gregorian);calendar.timeZone=zone
+        var components=calendar.dateComponents([.year,.month,.day,.hour,.minute,.second],from:date);components.calendar=calendar;components.timeZone=zone
+        return components
+    }
+    func authorized() async -> Bool { let settings=await UNUserNotificationCenter.current().notificationSettings();return settings.authorizationStatus == .authorized }
+    func request() async -> Bool { (try? await UNUserNotificationCenter.current().requestAuthorization(options:[.alert,.sound])) ?? false }
+    func pendingIDs() async -> [String] { await UNUserNotificationCenter.current().pendingNotificationRequests().map(\.identifier) }
+    func deliveredIDs() async -> [String] { await UNUserNotificationCenter.current().deliveredNotifications().map(\.request.identifier) }
+    func remove(_ ids:[String]) async { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers:ids) }
+    func add(_ reminder:NightReminder) async throws {
+        guard UserDefaults.standard.bool(forKey:"notificationsEnabled") else { throw URLError(.cancelled) }
+        let content=UNMutableNotificationContent();content.title=reminder.title;content.body=reminder.body;content.userInfo=reminder.userInfo;content.sound = .default
+        // iOS 27: the reminder is about a park Siri knows, so "open this park" works from the notification.
+        if #available(iOS 27.0,*) { content.appEntityIdentifiers=[EntityIdentifier(for:ParkEntity.self,identifier:reminder.parkID)] }
+        let components=Self.fireComponents(reminder.fireDate,in:reminder.timeZone)
+        let request=UNNotificationRequest(identifier:reminder.id,content:content,trigger:UNCalendarNotificationTrigger(dateMatching:components,repeats:false))
+        try await UNUserNotificationCenter.current().add(request)
+    }
+}
+/// Every reminder ID Nyx has handed to iOS. iOS forgets a notification once it is tapped or
+/// cleared, so this ledger is what guarantees a night is announced at most once.
+nonisolated struct ReminderLedger:Sendable {
+    /// A suite name for tests; nil is the app's standard defaults.
+    let suite:String?
+    init(suite:String?=nil) { self.suite=suite }
+    private var defaults:UserDefaults { suite.flatMap { UserDefaults(suiteName:$0) } ?? .standard }
+    var ids:Set<String> { Set(defaults.stringArray(forKey:"issuedReminders") ?? []) }
+    func record(_ issued:Set<String>,now:Date) {
+        // Forget nights that ended more than two days ago; their IDs can never be planned again.
+        let kept=issued.filter { id in
+            guard let stamp=id.split(separator:"-").last.flatMap({ Double($0) }) else { return false }
+            return stamp>now.timeIntervalSince1970-3*86400
+        }
+        defaults.set(Array(kept).sorted(),forKey:"issuedReminders")
+    }
+    /// The app's language when the pending reminders were written; nil before any was.
+    var language:String? { defaults.string(forKey:"remindersLanguage") }
+    func record(language:String) { defaults.set(language,forKey:"remindersLanguage") }
+}
+nonisolated struct NotificationScheduler {
+    let center:any LocalNotificationCenter
+    let ledger:ReminderLedger
+    init(center:any LocalNotificationCenter=SystemNotifications(),ledger:ReminderLedger=ReminderLedger()) { self.center=center;self.ledger=ledger }
+    func requestAuthorization() async -> Bool { await center.request() }
+    /// Cancels every pending reminder. Cancelled ones were never seen, so they may be planned again later.
+    func remove() async {
+        let ours=Set(await center.pendingIDs().filter{$0.hasPrefix("nyx-night-")})
+        await center.remove(ours.sorted())
+        ledger.record(ledger.ids.subtracting(ours),now:.now)
+    }
+    /// A score reminder is planned only for a night at most this far ahead...
+    static let horizon:TimeInterval=5*86400
+    /// ...and only when its forecast will be at most this old when it fires: the age after which
+    /// the app itself stops using a forecast. A background refresh brings later nights in range.
+    static let maxForecastAge:TimeInterval=36*3600
+    /// At most one score reminder per park in this many nights: the best of a run, the earliest on a tie.
+    static let spacing=7
+    /// Only full forecasts can trigger a 'pristine' reminder. No fabricated clouds.
+    /// Reminders fire at 18:00 park time the evening before. When that moment has passed
+    /// (tonight, or tomorrow opened late), they fire in a minute instead, as long as true
+    /// darkness has not begun; a reminder already issued is never repeated.
+    /// Meteor shower peaks join the same plan, budget, ledger and switch (with their own sub-switch).
+    /// `details` are the saved parks' forecast details (the widget snapshot's), so a reminder can say
+    /// when all three forecast models agree the night is clear.
+    func plans(nights:[Night],now:Date = .now,limit:Int=60,delivered:Set<String>=[],showers:Bool=false,details:[String:ForecastDetail]=[:],table:SkyEvents = .shared)->[NightReminder] {
+        let scored=scorePlans(nights:nights,now:now,delivered:delivered,details:details)
+        let meteors=showers ? showerPlans(nights:nights,now:now,delivered:delivered,table:table) : []
+        return (scored+meteors).sorted { ($0.fireDate,$0.id)<($1.fireDate,$1.id) }.prefix(max(0,min(60,limit))).map{$0}
+    }
+    private func scorePlans(nights:[Night],now:Date,delivered:Set<String>,details:[String:ForecastDetail])->[NightReminder] {
+        let candidates:[(night:Night,fire:Date)]=nights.compactMap { night in
+            guard Self.worthAReminder(night), let updated=night.forecastUpdated,
+                  night.id.timeIntervalSince(now)<=Self.horizon else { return nil }
+            let park=night.park
+            let previous=park.date(night.id,addingDays:-1)
+            guard let evening=park.calendar.date(bySettingHour:18,minute:0,second:0,of:previous) else { return nil }
+            let soon=now.addingTimeInterval(60), deadline=night.sky.darkStart ?? night.sky.sunset ?? night.id.addingTimeInterval(6*3600)
+            let fire=evening>now ? evening : soon
+            guard fire<deadline, fire.timeIntervalSince(updated)<=Self.maxForecastAge else { return nil }
+            return (night,fire)
+        }
+        // Nights already announced hold their park for the spacing either side.
+        var taken:[String:[Date]]=[:]
+        for id in delivered {
+            guard let (park,night)=Self.scoreReminder(id) else { continue }
+            taken[park,default:[]].append(night)
+        }
+        let window=Double(Self.spacing)*86400-12*3600
+        var plans:[NightReminder]=[]
+        // Best first, the earliest on a tie; each pick holds its park for the spacing either side.
+        let ranked=candidates.sorted { a,b in a.night.score.value != b.night.score.value ? a.night.score.value>b.night.score.value : a.night.id<b.night.id }
+        for (night,fire) in ranked {
+            let park=night.park
+            let identifier=Self.identifier(park:park,night:night.id)
+            guard !delivered.contains(identifier), !(taken[park.id] ?? []).contains(where:{ abs($0.timeIntervalSince(night.id))<window }) else { continue }
+            taken[park.id,default:[]].append(night.id)
+            let models=Self.agreement(night,detail:details[park.id],now:now)
+            plans.append(NightReminder(id:identifier,parkID:park.id,title:Self.title(night),body:Self.body(night,models:models),fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id)))
+        }
+        return plans
+    }
+    /// How the three forecast models compare over the night's dark window, as the park page shows
+    /// it: only beside a score that includes clouds, and not when only high cloud was forecast.
+    static func agreement(_ night:Night,detail:ForecastDetail?,now:Date)->ModelAgreement? {
+        guard let detail, night.score.hasForecast, !night.upperCloudOnly else { return nil }
+        let window=night.sky.cloudWindow
+        return detail.outlook(from:window.start,to:window.end,now:now).agreement
+    }
+    /// True when all three models agree on a clear night (at most 15% cloud in the cloudiest).
+    static func modelsClear(_ models:ModelAgreement?)->Bool { models.map { $0.band == .agree && $0.high<=15 } ?? false }
+    /// "Pristine night at Joshua Tree, Friday": the news first, in the title.
+    /// A night a score reminder can announce: Pristine, with a full cloud forecast and some true
+    /// darkness. Tonight's double tap uses the same rule.
+    static func worthAReminder(_ night:Night)->Bool { night.score.value>=90 && night.score.hasForecast && night.sky.darkHours>0 }
+    static func title(_ night:Night)->String {
+        var weekday=Date.FormatStyle.dateTime.weekday(.wide)
+        weekday.timeZone=night.park.timeZone
+        return String(localized:"\(night.score.band.label) night at \(night.park.shortName), \(night.id.formatted(weekday))")
+    }
+    /// "94 out of 100. Moon down all night. Check park alerts before you go." Never "94/100",
+    /// which VoiceOver reads as "slash". A place the Park Service does not run has no park alerts to
+    /// check: it says "closures and access" instead.
+    static func body(_ night:Night,models:ModelAgreement?=nil)->String {
+        let why=reason(night,models:models)
+        guard night.park.nps != nil else { return String(localized:"\(night.score.value) out of 100. \(why). Check closures and access before you go.") }
+        return String(localized:"\(night.score.value) out of 100. \(why). Check park alerts before you go.")
+    }
+    /// One thing that is true of this night and makes it dark, the most telling first; with it,
+    /// when true, that all three forecast models are clear ("Moon down all night; all three
+    /// forecast models clear").
+    static func reason(_ night:Night,models:ModelAgreement?=nil)->String {
+        let moon=moonReason(night)
+        guard modelsClear(models) else { return moon ?? cloudReason(night) }
+        guard let moon else { return String(localized:"All three forecast models clear") }
+        return String(localized:"\(moon); all three forecast models clear")
+    }
+    /// The Moon's part, when it is the reason; nil when it is not.
+    private static func moonReason(_ night:Night)->String? {
+        let sky=night.sky
+        if sky.moonBelowFraction>=0.99 { return String(localized:"Moon down all night") }
+        if sky.moon.illumination<0.05 { return String(localized:"Almost no moonlight") }
+        if let set=sky.moonset, let start=sky.darkStart, let end=sky.darkEnd, set>start, set<end, sky.moonrise.map({ $0<start || $0>end }) ?? true {
+            return String(localized:"Moon sets at \(night.park.time(set))")
+        }
+        return nil
+    }
+    /// Without a Moon reason: a clear forecast, else the hours of true darkness.
+    private static func cloudReason(_ night:Night)->String {
+        if let clouds=night.cloudCover, clouds<=10 { return String(localized:"Forecast \(Int(clouds.rounded()))% cloud") }
+        return String(localized:"About \(Int(night.sky.darkHours.rounded())) hours of true darkness")
+    }
+    /// A major shower's peak night at a saved park, when at least 20 an hour are expected at its
+    /// best moment with the Moon down (`WhatsUp.Events.reminderShower`), whatever the score. One per
+    /// night across all saved parks: the park with the highest rate. Skipped when the forecast for
+    /// that night is mostly cloud. Fires at 16:00 park time that day, or in a minute when that has
+    /// passed, as long as true darkness has not begun.
+    func showerPlans(nights:[Night],now:Date,delivered:Set<String>,table:SkyEvents = .shared)->[NightReminder] {
+        var best:[String:(night:Night,shower:SkyAlmanac.ShowerNight)]=[:]
+        for night in nights where night.sky.darkHours>0 && (night.cloudCover ?? 0)<70 {
+            guard let shower=WhatsUp.Events(park:night.park,sky:night.sky,table:table).reminderShower else { continue }
+            let day=night.park.isoDay(night.id)
+            if shower.hourlyRate>(best[day]?.shower.hourlyRate ?? -1) { best[day]=(night,shower) }
+        }
+        return best.values.compactMap { night,shower in
+            let park=night.park
+            guard let afternoon=park.calendar.date(bySettingHour:16,minute:0,second:0,of:night.id), let darkStart=night.sky.darkStart, let moment=shower.best else { return nil }
+            let fire=afternoon>now ? afternoon : now.addingTimeInterval(60)
+            let identifier=Self.showerIdentifier(park:park,night:night.id)
+            guard fire<darkStart, !delivered.contains(identifier) else { return nil }
+            return NightReminder(id:identifier,parkID:park.id,title:String(localized:"\(shower.shower.localizedName) at \(park.shortName) tonight"),
+                body:String(localized:"\(WhatsUp.rateText(shower.hourlyRate).sentenceStart) \(WhatsUp.whenPhrase(moment,sky:night.sky,park:park)), Moon down. A rough guide. Check clouds and closures before you go."),
+                fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id),whatsUp:true)
+        }
+    }
+    static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
+    /// A score reminder's place and night, read back from its identifier: the stamp after the last dash,
+    /// the place between the prefix and that dash, so a spot's id (`pin:` and a UUID, itself hyphenated)
+    /// reads as whole as a park's. Nil for a shower reminder or anything else.
+    static func scoreReminder(_ id:String)->(parkID:String,night:Date)? {
+        let prefix="nyx-night-"
+        guard id.hasPrefix(prefix), !id.contains("-meteors-"), let dash=id.lastIndex(of:"-") else { return nil }
+        let start=id.index(id.startIndex,offsetBy:prefix.count)
+        guard start<dash, let stamp=Double(id[id.index(after:dash)...]) else { return nil }
+        return (String(id[start..<dash]),Date(timeIntervalSince1970:stamp))
+    }
+    /// Same prefix and trailing night stamp as score reminders, so the ledger and cancel paths treat both alike.
+    static func showerIdentifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-meteors-\(Int(night.timeIntervalSince1970))" }
+    /// Replans reminders, off the main actor (planning works out What's up for every saved park's
+    /// nights). A reminder already pending is left exactly as scheduled, so opening Nyx again never
+    /// pushes it back or replaces its title; one that no longer qualifies is cancelled and may be
+    /// planned again later. The copy is written by rule, never by a model.
+    /// Without permission nothing is added, but reminders that no longer qualify are still
+    /// cancelled: iOS keeps pending ones while notifications are off and delivers them if they
+    /// are turned back on.
+    /// A reminder's words are in the app's language when it was planned (`language`, the app's own
+    /// localization): after the language changes, every pending reminder is taken back and planned
+    /// again in the new one, at the same moment. None of them was seen, so each stays plannable.
+    @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,details:[String:ForecastDetail]=[:],language:String=PlaceNames.appLanguage) async {
+        let allowed=await center.authorized()
+        let pending=await center.pendingIDs()
+        var ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
+        if let written=ledger.language, written != language, !ours.isEmpty {
+            await center.remove(ours.sorted())
+            ledger.record(ledger.ids.subtracting(ours),now:now)
+            ours=[]
+        }
+        ledger.record(language:language)
+        let issued=ledger.ids
+        // Issued before and no longer pending: it was delivered, tapped or cleared.
+        let finished=issued.subtracting(ours).union(await center.deliveredIDs())
+        let available=max(0,64-pending.filter{!$0.hasPrefix("nyx-night-")}.count)
+        let planned=plans(nights:nights,now:now,limit:available,delivered:finished,showers:showers,details:details)
+        let plannedIDs=Set(planned.map(\.id))
+        let cancelled=ours.subtracting(plannedIDs)
+        await center.remove(cancelled.sorted())
+        var added=ours.intersection(plannedIDs)
+        for plan in planned where allowed && !ours.contains(plan.id) {
+            if (try? await center.add(plan)) != nil { added.insert(plan.id) }
+        }
+        // Read the ledger and the pending list again: reminders may have been switched off while
+        // this ran, and a reminder cancelled that way was never seen, so it must stay plannable.
+        let stillScheduled=Set(await center.pendingIDs()).union(await center.deliveredIDs())
+        ledger.record(ledger.ids.subtracting(cancelled).union(added.intersection(stillScheduled)),now:now)
+    }
+}
+
+/// Opens the night a reminder is about, and shows reminders while Nyx is open.
+@MainActor final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
+    static let shared=NotificationRouter()
+    private var open:((ReminderRoute)->Void)?
+    private var pending:ReminderRoute?
+    func connect(_ handler:@escaping (ReminderRoute)->Void) {
+        open=handler
+        if let pending { self.pending=nil; handler(pending) }
+    }
+    private func deliver(_ route:ReminderRoute) { if let open { open(route) } else { pending=route } }
+    nonisolated func userNotificationCenter(_ center:UNUserNotificationCenter,didReceive response:UNNotificationResponse) async {
+        guard let route=ReminderRoute(userInfo:response.notification.request.content.userInfo) else { return }
+        await deliver(route)
+    }
+    nonisolated func userNotificationCenter(_ center:UNUserNotificationCenter,willPresent notification:UNNotification) async -> UNNotificationPresentationOptions {
+        [.banner,.list,.sound]
+    }
+}
+
+private extension String {
+    /// "60–130 an hour" stays as is; "about 60 an hour" opens a sentence as "About 60 an hour".
+    nonisolated var sentenceStart:String { prefix(1).uppercased()+dropFirst() }
+}

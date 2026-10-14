@@ -1,0 +1,615 @@
+# Source of truth for Nyx.xcodeproj. Change targets or build settings here, then run `xcodegen generate`.
+# Source folders are synchronized folders: adding or removing files needs no regeneration.
+name: Nyx
+options:
+  bundleIdPrefix: com.harrypakhale
+  deploymentTarget:
+    iOS: "26.0"
+    watchOS: "26.0"
+    visionOS: "26.0"
+  defaultSourceDirectoryType: syncedFolder
+  createIntermediateGroups: true
+# Single files shared into the extensions, the watch and Vision Pro carry `group: Shared`. Without it each
+# one builds an intermediate "Nyx" (or "NyxVision", "NyxVisionWidgets") group beside the synchronized folder
+# of the same name, and xcodegen orders those same-named siblings differently from run to run. Names inside
+# Shared stay unique (the visionOS string catalogue sits in Shared/visionOS) so the output is byte-stable.
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: DUHVN68KBA
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "2.2"
+    CURRENT_PROJECT_VERSION: "19"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: NO
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+  # Warnings fail Debug builds (every local and CI build and test), never a Release archive: a new
+  # deprecation in an Xcode point release must not block a launch-day fix.
+  configs:
+    Debug:
+      GCC_TREAT_WARNINGS_AS_ERRORS: YES
+      SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+targets:
+  Nyx:
+    type: application
+    platform: iOS
+    sources:
+      - path: Nyx
+    info:
+      path: Config/Nyx-Info.plist
+      properties:
+        # Version keys follow the build settings, so a static plist value can never ship an old build number.
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [nyx]
+        # Custom keys are not expanded from INFOPLIST_KEY_* settings; this one must live in the plist.
+        NPS_API_KEY: "$(NPS_API_KEY)"
+        # Field mode: the night's countdown on the Lock Screen and in the Dynamic Island (computed on the phone, no push).
+        NSSupportsLiveActivities: true
+        # Field mode's wake-ups (AlarmKit). Shown by iOS when the first alarm is set, after Nyx's own explainer.
+        NSAlarmKitUsageDescription: "Nyx sets alarms you choose for moments in the night, like the Milky Way's core rising. They are set on this device only."
+        UILaunchScreen:
+          UIImageName: LaunchStars
+          UIColorName: LaunchBlack
+        # One background mode: about every six hours iOS may let Nyx refresh saved parks' clouds (and
+        # park alerts when due) on the same hosts, then rewrite the widget, the watch and reminders.
+        UIBackgroundModes: [fetch]
+        BGTaskSchedulerPermittedIdentifiers: [com.harrypakhale.nyx.refresh]
+        # Custom animation (the time river, the gauge's count-up) may run at 120 Hz on ProMotion iPhones.
+        CADisableMinimumFrameDurationOnPhone: true
+        # Assistive Access: Nyx's own simplified scene (`AssistiveAccess`), listed under Optimized Apps.
+        UISupportsAssistiveAccess: true
+        # Journal export: a private package Nyx writes and reads back (Journal → Export / Import).
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.harrypakhale.nyx.journal
+            UTTypeDescription: Nyx Journal
+            UTTypeConformsTo: [com.apple.package, public.composite-content]
+            UTTypeTagSpecification:
+              public.filename-extension: [nyxjournal]
+          # A park dragged between Nyx's screens and windows (iPad): only the park id travels.
+          - UTTypeIdentifier: com.harrypakhale.nyx.park
+            UTTypeDescription: Nyx Park
+            UTTypeConformsTo: [public.data]
+          # A night dragged from Plan's month onto the Journal (iPad): only the place's id and the night's day travel.
+          - UTTypeIdentifier: com.harrypakhale.nyx.night
+            UTTypeDescription: Nyx Night
+            UTTypeConformsTo: [public.data]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Nyx Journal
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.harrypakhale.nyx.journal]
+        # Opened journals are copied in and merged; the original file is never edited in place.
+        LSSupportsOpeningDocumentsInPlace: false
+        # Handoff: a park and night from park detail to Nyx on the person's other devices (`ParkHandoff`).
+        NSUserActivityTypes: [com.harrypakhale.nyx.park]
+    configFiles:
+      Debug: Config/Nyx.xcconfig
+      Release: Config/Nyx.xcconfig
+    dependencies:
+      - target: NyxWidgets
+      # The companion watch app, embedded in Watch/; built for the matching watch simulator or device.
+      - target: NyxWatch
+    settings:
+      base:
+        # iPhone and iPad. The phone takes portrait and landscape (iPhone Duo's guidance: a Duo propped on
+        # its edge reads in landscape, and its inner display ignores the lock anyway); iPad takes every
+        # orientation and any window size (iPadOS 26 windowing; `UIRequiresFullScreen` is deprecated and not
+        # set). Layout follows size classes and the window's own size, never the device.
+        TARGETED_DEVICE_FAMILY: "1,2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
+        PRODUCT_NAME: Nyx
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UIUserInterfaceStyle: Dark
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Nyx uses your location on this device to find parks and dark-sky places near you, notice when you are at a U.S. national park, and point the sky to true north. It stays on this device unless you save where you stand as a spot; then that spot's position, rounded to about 7 miles (11 km), is used for its cloud forecast.
+        # "Where to look by sound" in field mode: AirPods head motion turns the tone with your head (CMHeadphoneMotionManager).
+        INFOPLIST_KEY_NSMotionUsageDescription: Nyx follows how your head turns through headphones that track motion, so the tone in field mode stays toward the part of the sky you chose. Motion never leaves this device.
+        CODE_SIGN_ENTITLEMENTS: Config/Nyx.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Settings → App icon: the Moon's other phases, each its own Icon Composer document in Resources.
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIconNew AppIconQuarter AppIconFull"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ENABLE_PREVIEWS: YES
+  NyxWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NyxWidgets
+      - path: Nyx/DesignSystem/TonightWidgetView.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonDisc.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonSymbol.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxTheme.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxPalette.swift
+        group: Shared
+      - path: Nyx/DesignSystem/Starfield.swift
+        group: Shared
+      - path: Nyx/DesignSystem/RealSky.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MotionTilt.swift
+        group: Shared
+      - path: Nyx/Resources/stars.json
+        group: Shared
+      - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
+      - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      - path: Nyx/Services/AstronomyEngine.swift
+        group: Shared
+      - path: Nyx/Services/SkyAlmanac.swift
+        group: Shared
+      - path: Nyx/Services/WhatsUp.swift
+        group: Shared
+      - path: Nyx/Resources/sky-events.json
+        group: Shared
+      - path: Nyx/Services/ScoreEngine.swift
+        group: Shared
+      - path: Nyx/Services/DataServices.swift
+        group: Shared
+      # The search radius the launch preload reads (CachePreload.homeArea), in metres.
+      - path: Nyx/Services/SearchRadius.swift
+        group: Shared
+      # The campground types `ParkStore` reads and caches (the widget never asks for them).
+      - path: Nyx/Models/Campground.swift
+        group: Shared
+      - path: Nyx/Services/CloudForecastClient.swift
+        group: Shared
+      - path: Nyx/Models/Forecast.swift
+        group: Shared
+      - path: Nyx/Services/ForecastDetail.swift
+        group: Shared
+      - path: Nyx/Services/SharedSettings.swift
+        group: Shared
+      - path: Nyx/Intents/NightVisionIntent.swift
+        group: Shared
+      - path: Nyx/Intents/FieldModeIntent.swift
+        group: Shared
+      - path: Nyx/Intents/WidgetParkIntent.swift
+        group: Shared
+      # The park choice for the Tonight and Moon widgets and the Tonight control.
+      - path: Nyx/Intents/ParkEntity.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonWidgetView.swift
+        group: Shared
+      # `MoonNow` (the Moon widget's phase, rise and set), shared with the watch's Moon complication.
+      - path: Nyx/Services/WristSky.swift
+        group: Shared
+      - path: Nyx/Services/WatchContext.swift
+        group: Shared
+      - path: Nyx/Services/NightPlanner.swift
+        group: Shared
+      - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
+      - path: Nyx/Resources/cloud-climate.json
+        group: Shared
+      # Measured sky glow breaks ties between equal scores (`NightPlanner.glowRank`).
+      - path: Nyx/Resources/skyglow.json
+        group: Shared
+      - path: Nyx/DesignSystem/SkyGlyph.swift
+        group: Shared
+      - path: Nyx/Models/FieldActivity.swift
+        group: Shared
+      - path: Nyx/DesignSystem/FieldActivityView.swift
+        group: Shared
+      - path: Nyx/Resources/parks.json
+        group: Shared
+      - path: Nyx/Resources/Localizable.xcstrings
+        group: Shared
+    info:
+      path: Config/NyxWidgets-Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        # Must match the app's families, or the extension cannot be embedded for iPad.
+        TARGETED_DEVICE_FAMILY: "1,2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        CODE_SIGN_ENTITLEMENTS: Config/NyxWidgets.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+        ENABLE_PREVIEWS: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+  # Apple Watch: a single-target watch app and its complications. The engine is shared by listing
+  # files; DataServices.swift (the network) is deliberately absent: the watch makes no requests.
+  NyxWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: NyxWatch
+      - path: NyxWatchShared
+      - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
+      - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      - path: Nyx/Models/Forecast.swift
+        group: Shared
+      - path: Nyx/Services/AstronomyEngine.swift
+        group: Shared
+      - path: Nyx/Services/ScoreEngine.swift
+        group: Shared
+      # One rule for a night everywhere (`NightPlanner.night`): usual clouds where no forecast reaches.
+      - path: Nyx/Services/NightPlanner.swift
+        group: Shared
+      - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
+      - path: Nyx/Resources/cloud-climate.json
+        group: Shared
+      - path: Nyx/Resources/skyglow.json
+        group: Shared
+      - path: Nyx/Services/ForecastDetail.swift
+        group: Shared
+      - path: Nyx/Services/SharedSettings.swift
+        group: Shared
+      - path: Nyx/Services/WatchContext.swift
+        group: Shared
+      # DEBUG only (the whole file): the iPhone's forecast fixture, for the watch's models' range debug screen.
+      - path: Nyx/App/DebugForecasts.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonDisc.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonSymbol.swift
+        group: Shared
+      - path: Nyx/Services/WristSky.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxTheme.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxPalette.swift
+        group: Shared
+      - path: Nyx/DesignSystem/Starfield.swift
+        group: Shared
+      - path: Nyx/DesignSystem/RealSky.swift
+        group: Shared
+      - path: Nyx/Services/SkyAlmanac.swift
+        group: Shared
+      - path: Nyx/Services/WhatsUp.swift
+        group: Shared
+      - path: Nyx/Resources/sky-events.json
+        group: Shared
+      - path: Nyx/DesignSystem/MotionTilt.swift
+        group: Shared
+      # The dial face's geometry (numeral and band word clear of the ticks), shared with the tests.
+      - path: Nyx/DesignSystem/WatchDialFace.swift
+        group: Shared
+      - path: Nyx/Resources/stars.json
+        group: Shared
+      - path: Nyx/Resources/parks.json
+        group: Shared
+      - path: Nyx/Resources/Localizable.xcstrings
+        group: Shared
+    dependencies:
+      - target: NyxWatchWidgets
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "4"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.watchkitapp
+        PRODUCT_NAME: NyxWatch
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.harrypakhale.nyx
+        # Not independent: the watch has no network and gets saved parks and clouds from Nyx on iPhone,
+        # so it installs with the iPhone app rather than alone from the watch's App Store.
+        INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp: NO
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        CODE_SIGN_ENTITLEMENTS: Config/NyxWatch.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ENABLE_PREVIEWS: YES
+  NyxWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: NyxWatchWidgets
+      - path: NyxWatchShared
+      - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
+      - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      - path: Nyx/Models/Forecast.swift
+        group: Shared
+      - path: Nyx/Services/AstronomyEngine.swift
+        group: Shared
+      - path: Nyx/Services/ScoreEngine.swift
+        group: Shared
+      # One rule for a night everywhere (`NightPlanner.night`): usual clouds where no forecast reaches.
+      - path: Nyx/Services/NightPlanner.swift
+        group: Shared
+      - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
+      - path: Nyx/Resources/cloud-climate.json
+        group: Shared
+      - path: Nyx/Resources/skyglow.json
+        group: Shared
+      - path: Nyx/Services/ForecastDetail.swift
+        group: Shared
+      - path: Nyx/Services/SharedSettings.swift
+        group: Shared
+      - path: Nyx/Services/WatchContext.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonDisc.swift
+        group: Shared
+      - path: Nyx/DesignSystem/MoonSymbol.swift
+        group: Shared
+      - path: Nyx/Services/WristSky.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxTheme.swift
+        group: Shared
+      - path: Nyx/DesignSystem/NyxPalette.swift
+        group: Shared
+      - path: Nyx/DesignSystem/Starfield.swift
+        group: Shared
+      - path: Nyx/DesignSystem/RealSky.swift
+        group: Shared
+      - path: Nyx/Services/SkyAlmanac.swift
+        group: Shared
+      - path: Nyx/Services/WhatsUp.swift
+        group: Shared
+      - path: Nyx/Resources/sky-events.json
+        group: Shared
+      - path: Nyx/DesignSystem/MotionTilt.swift
+        group: Shared
+      - path: Nyx/Resources/stars.json
+        group: Shared
+      - path: Nyx/Resources/parks.json
+        group: Shared
+      - path: Nyx/Resources/Localizable.xcstrings
+        group: Shared
+    info:
+      path: Config/NyxWatchWidgets-Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "4"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.watchkitapp.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        CODE_SIGN_ENTITLEMENTS: Config/NyxWatchWidgets.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+        # The same isolation as every other target, so shared files compile identically everywhere.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+  # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
+  # bundled data by listing files. Its one network request is the cloud forecast from
+  # api.open-meteo.com, behind its own switch: CloudForecastClient.swift only,
+  # never DataServices.swift (park updates, smoke), so no other host is compiled in (see PRIVACY.md).
+  NyxVision:
+    type: application
+    platform: visionOS
+    sources:
+      - path: NyxVision
+      - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
+      - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      - path: Nyx/Services/AstronomyEngine.swift
+        group: Shared
+      - path: Nyx/Services/ScoreEngine.swift
+        group: Shared
+      # The phone's night rule (`NightPlanner.night`): the forecast where it reaches, usual clouds beyond.
+      - path: Nyx/Services/NightPlanner.swift
+        group: Shared
+      # The darkest of the next 14 nights and the week of Moons, shared and tested on the iPhone.
+      - path: Nyx/Services/NightsAhead.swift
+        group: Shared
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
+      - path: Nyx/Services/CloudForecastClient.swift
+        group: Shared
+      - path: Nyx/Models/CloudClimate.swift
+        group: Shared
+      - path: Nyx/Services/SkyGrid.swift
+        group: Shared
+      - path: Nyx/Models/Forecast.swift
+        group: Shared
+      - path: Nyx/Services/ForecastDetail.swift
+        group: Shared
+      - path: Nyx/Resources/cloud-climate.json
+        group: Shared
+      # The sky-glow ranking `NightPlanner.glowRank` breaks equal scores with, so parks order as on the iPhone and watch.
+      - path: Nyx/Resources/skyglow.json
+        group: Shared
+      - path: Nyx/Services/SkyAlmanac.swift
+        group: Shared
+      - path: Nyx/Services/WhatsUp.swift
+        group: Shared
+      - path: Nyx/Services/SkyDome.swift
+        group: Shared
+      - path: Nyx/DesignSystem/Moon.metal
+        group: Shared
+      # The Moon's shared size and relief rules, and the globe's grid (window Moon and Moon volume).
+      - path: Nyx/DesignSystem/MoonShading.swift
+        group: Shared
+      # The palette, night-vision red and spring every Nyx target shares (`VisionPalette` derives from them).
+      - path: Nyx/DesignSystem/NyxPalette.swift
+        group: Shared
+      # The iPhone's constellation loader, for the planner's loading state.
+      - path: Nyx/DesignSystem/ConstellationTrace.swift
+        group: Shared
+      # The large Moon's atlas (colour and LOLA relief), for the window's Moon from 120 pt. The app
+      # only: the visionOS widget keeps the small MoonMap.
+      - path: Nyx/Resources/MoonRelief.xcassets
+        group: Shared
+      - path: Nyx/Resources/stars.json
+        group: Shared
+      # Star names and figures, shared with Tonight's sky on iPhone and iPad.
+      - path: Nyx/Services/SkyLore.swift
+        group: Shared
+      - path: Nyx/Resources/star-names.json
+        group: Shared
+      - path: Nyx/Resources/constellations.json
+        group: Shared
+      - path: Nyx/Resources/parks.json
+        group: Shared
+      - path: Nyx/Resources/sky-events.json
+        group: Shared
+      - path: Nyx/Resources/Assets.xcassets
+        group: Shared
+      # The widget's faces, compiled into the app too for its DEBUG renders of them.
+      - path: NyxVisionWidgets/MoonWidgetFace.swift
+        group: Shared
+      # Handoff from park detail on iPhone or iPad: that park and night in the window.
+      - path: Nyx/Models/ParkHandoff.swift
+        group: Shared
+    # Linked so the App Intents metadata step finds its framework instead of warning on every build
+    # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, open a park, stand under tonight's sky) live in NyxVision/Intents.
+    dependencies:
+      - sdk: AppIntents.framework
+      - target: NyxVisionWidgets
+    info:
+      path: Config/NyxVision-Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSUserActivityTypes: [com.harrypakhale.nyx.park]
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "7"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
+        PRODUCT_NAME: NyxVision
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ENABLE_PREVIEWS: YES
+  # The visionOS widget: tonight's Moon and the next new moon, from the date alone. No App Group,
+  # no saved parks, no network transport compiled in (as in the app).
+  NyxVisionWidgets:
+    type: app-extension
+    platform: visionOS
+    sources:
+      - path: NyxVisionWidgets
+      # The large face's week of Moons and next new moon, from the date alone.
+      - path: Nyx/Services/MoonWeek.swift
+        group: Shared
+      - path: Nyx/Models/Park.swift
+        group: Shared
+      - path: Nyx/Services/Sentences.swift
+        group: Shared
+      - path: Nyx/Models/SkyConditions.swift
+        group: Shared
+      - path: Nyx/Services/AstronomyEngine.swift
+        group: Shared
+      - path: Nyx/DesignSystem/Moon.metal
+        group: Shared
+      # For `MoonMap` (the catalogue is small and holds no app icon).
+      - path: Nyx/Resources/Assets.xcassets
+        group: Shared
+      # Starlight, amber and indigo from the one palette.
+      - path: Nyx/DesignSystem/NyxPalette.swift
+        group: Shared
+      - path: NyxVision/Resources/Localizable.xcstrings
+        group: Shared/visionOS
+    info:
+      path: Config/NyxVisionWidgets-Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "7"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nyx
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ENABLE_PREVIEWS: YES
+  NyxTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: NyxTests
+    dependencies:
+      - target: Nyx
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1,2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.tests
+        GENERATE_INFOPLIST_FILE: YES
+  NyxUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: NyxUITests
+    dependencies:
+      - target: Nyx
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1,2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Nyx
+schemes:
+  Nyx:
+    build:
+      targets:
+        Nyx: all
+        NyxTests: [test]
+        NyxUITests: [test]
+    test:
+      # Unit and UI tests in one plan, with a single Default configuration (English, US).
+      testPlans:
+        - path: Nyx.xctestplan
+          defaultPlan: true
+    run:
+      config: Debug
+    archive:
+      config: Release
+  NyxWatch:
+    build:
+      targets:
+        NyxWatch: all
+  NyxVision:
+    build:
+      targets:
+        NyxVision: all
+    run:
+      config: Debug
+    archive:
+      config: Release
