@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import Nyx
 
 /// The watch's own logic: Automatic colours, the dark-adaptation clock, the next dark moment, the
@@ -137,7 +138,7 @@ struct WristSkyTests {
         #expect(none.isUp == nil && none.next == nil)
     }
 
-    @Test func cloudSourceSaysHowOldTheCloudsAreAndWhenTheyExpired() throws {
+    @Test @MainActor func cloudSourceSaysHowOldTheCloudsAreAndWhenTheyExpired() throws {
         let jotr = try park("jotr"), yell = try park("yell")
         let updated = Date(timeIntervalSince1970: 1_791_158_400)
         let times = (0..<72).map { updated.timeIntervalSince1970 + Double($0)*3600 }
@@ -150,7 +151,9 @@ struct WristSkyTests {
         #expect(fresh.line(for: jotr)?.hasPrefix("Clouds from") == true)
         let expired = CloudSource.of(context: context, park: jotr, now: updated.addingTimeInterval(36*3600))
         #expect(expired == .expired(updated) && expired.isStale)
-        #expect(expired.line(for: jotr) == "No recent forecast. Open Nyx on iPhone to refresh.")
+        // The catalog names the device the person holds: iPad on iPad, iPhone elsewhere.
+        let device = UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+        #expect(expired.line(for: jotr) == "No recent forecast. Open Nyx on \(device) to refresh.")
         // An old forecast still reaches the score (eased toward usual clouds by its lead time); the watch
         // only says it is old, so the person knows to refresh it.
         let window = (updated.addingTimeInterval(40*3600), updated.addingTimeInterval(44*3600))
@@ -158,7 +161,7 @@ struct WristSkyTests {
         // A saved park whose clouds did not travel can be refreshed; a park never saved cannot.
         #expect(CloudSource.of(context: context, park: try park("deva"), now: updated) == .missing(followed: true))
         #expect(CloudSource.of(context: context, park: yell, now: updated) == .missing(followed: false))
-        #expect(CloudSource.missing(followed: false).line(for: yell) == "Save this park on iPhone for its clouds.")
+        #expect(CloudSource.missing(followed: false).line(for: yell) == "Save this park on \(device) for its clouds.")
         #expect(!CloudSource.missing(followed: false).isStale)
     }
 }
