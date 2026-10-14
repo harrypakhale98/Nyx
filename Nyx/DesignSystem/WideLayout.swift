@@ -56,12 +56,24 @@ nonisolated enum WideLayout {
     /// the outer scroll view's content margin, never by narrowing the scroll views, so a column
     /// still scrolls (and shows its indicator) at the window's edge.
     static func twoColumnSide(_ width:Double)->Double { margin(width:width,measure:twoColumnMaximum).rounded(.down) }
+    /// How far a centred column of at most `measure` points moves so it centres on iPhone Duo's fold
+    /// instead of on `width` (whose trailing side bar puts the middle of the space left of the
+    /// crease). Whole points; zero without a fold that runs top to bottom near the middle, which on
+    /// every other device and on the Duo's outer display means always.
+    static func foldShift(width:Double,measure:Double,fold:Fold?)->Double {
+        guard let fold, fold.dividesWidth, width>0 else { return 0 }
+        let shift=((fold.minX+fold.maxX)/2-width/2).rounded()
+        // A fold far from the middle (a narrow sheet it happens to cross) leaves the column centred.
+        guard abs(shift)<=width/8 else { return 0 }
+        return shift
+    }
 }
 
 extension View {
     /// Content no wider than `measure`, centred: a readable column on a wide iPad, unchanged on iPhone.
+    /// On iPhone Duo's inner display it centres on the fold, so a page sits square on the crease.
     func readableColumn(_ measure:Double=WideLayout.readableWidth)->some View {
-        frame(maxWidth:measure).frame(maxWidth:.infinity)
+        modifier(ReadableColumn(measure:measure))
     }
     /// A `Form` or `List` whose rows keep a readable width on a wide iPad. The scroll view still
     /// spans the window, so its indicator stays at the edge.
@@ -70,6 +82,20 @@ extension View {
     /// Sub-point changes are ignored, so a layout can never chase its own rounding.
     func measuringWidth(_ width:Binding<Double>)->some View {
         onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-width.wrappedValue)>=1 { width.wrappedValue=$0 } }
+    }
+}
+private struct ReadableColumn: ViewModifier {
+    let measure:Double
+    @State private var width=0.0
+    @State private var fold:Fold?
+    func body(content:Content)->some View {
+        // The shift is twice the padding on one side: the column is centred in what remains, so its
+        // middle lands on the fold. The outer frame keeps the full width, which alone is measured.
+        let shift=WideLayout.foldShift(width:width,measure:measure,fold:fold)
+        return content.frame(maxWidth:measure)
+            .padding(.leading,max(0,shift*2)).padding(.trailing,max(0,-shift*2))
+            .frame(maxWidth:.infinity)
+            .measuringWidth($width).readingFold($fold)
     }
 }
 private struct ReadableForm: ViewModifier {

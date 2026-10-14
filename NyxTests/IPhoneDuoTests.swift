@@ -51,6 +51,18 @@ import Testing
         #expect(split.gap==64)
         #expect(split.leading+split.gap+split.trailing==880)
     }
+    @Test func singleColumnCentresOnTheFold() {
+        // Open flat in landscape the side bar takes the trailing 70 or so of the inner display's 951
+        // points, so the space's middle (440) sits left of the fold (461 to 489, centre 475).
+        let fold=Fold(frame:CGRect(x:461,y:0,width:28,height:669))
+        #expect(WideLayout.foldShift(width:880,measure:700,fold:fold)==35)
+        // Mirrored the other way, it moves the other way.
+        #expect(WideLayout.foldShift(width:880,measure:700,fold:Fold(frame:CGRect(x:391,y:0,width:28,height:669)))==(-35))
+        // No fold, a side-to-side fold, or one far from the middle: the column stays centred.
+        #expect(WideLayout.foldShift(width:880,measure:700,fold:nil)==0)
+        #expect(WideLayout.foldShift(width:880,measure:700,fold:Fold(frame:CGRect(x:0,y:466,width:669,height:28)))==0)
+        #expect(WideLayout.foldShift(width:400,measure:700,fold:Fold(frame:CGRect(x:300,y:0,width:28,height:669)))==0)
+    }
     @Test func scrollingPastTheFoldLeavesItUnchanged() {
         // In a scrolling page the fold's region moves up and down the page's coordinates with every
         // frame; the fold the columns read must not change, or they would re-lay on each frame.

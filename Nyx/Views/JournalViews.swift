@@ -45,7 +45,7 @@ struct JournalView: View {
                 let season=recapSeason(nights)
                 if season { recapCard }
                 if wide && !entries.isEmpty {
-                    // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                    // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:min(440,(width*0.4).rounded()),spacing:28) {
                         YourSkyPanel(nights:nights) { id in opened=entries.first { $0.id==id } }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:24) { if !season && !nights.isEmpty { recapCard }; entryList }.frame(maxWidth:.infinity,alignment:.leading)

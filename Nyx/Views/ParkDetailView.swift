@@ -93,7 +93,7 @@ struct ParkDetailView: View {
     /// Two columns on a wide iPad: tonight (gauge, river, access) stays in view on the left while
     /// the sky and the place scroll on the right. One readable column otherwise.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
-    /// iPhone Duo's fold while it is half open (`readingFold`); nil everywhere else.
+    /// iPhone Duo's fold on its inner display, half open or flat (`readingFold`); nil everywhere else.
     @State private var fold:Fold?
     /// The pinned index: one column, standard text sizes (segments do not grow with the text).
     private var showsIndex:Bool { !wide && !typeSize.isAccessibilitySize }
@@ -104,7 +104,7 @@ struct ParkDetailView: View {
                     // Both columns within a readable width, centred in a very wide window: the room
                     // beyond it is each scroll view's own margin, so both still scroll from the window's edges.
                     let side=WideLayout.twoColumnSide(width)
-                    // iPhone Duo half open like a book: tonight on one side of the fold, the sky and the
+                    // iPhone Duo's inner display: tonight on one side of the fold, the sky and the
                     // place on the other, each column's own padding keeping its words off the crease.
                     let folded=fold.flatMap { f in f.leadingWidth(in:width).map { (leading:$0,gap:f.width) } }
                     HStack(alignment:.top,spacing:folded?.gap ?? 0) {
@@ -183,7 +183,7 @@ struct ParkDetailView: View {
         // the offline caches with the loader over its own sky, never a score they would change.
         .scoreGate(background:false)
         .measuringWidth($width)
-        // The fold of a half-open iPhone Duo, in the page's coordinates; the columns ease to it.
+        // The fold of iPhone Duo's inner display, in the page's coordinates; the columns ease to it.
         .readingFold($fold)
         .animation(reduceMotion ? nil : NyxMotion.spring,value:fold)
         // iPad keyboard: ⌘← and ⌘→ move along the river, as dragging it does.

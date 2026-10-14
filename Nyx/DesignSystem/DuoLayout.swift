@@ -30,7 +30,7 @@ private struct SingleControlBar: ViewModifier {
     }
 }
 
-/// The fold of a partially opened iPhone Duo, in a view's own coordinates. Pure numbers, so they are
+/// The fold of iPhone Duo's inner display, in a view's own coordinates, half open or open flat. Pure numbers, so they are
 /// tested; `readingFold` fills them from the view's geometry.
 ///
 /// Only what layout reads is kept: whether the fold runs top to bottom, and then its left and right
@@ -88,8 +88,9 @@ nonisolated struct Fold: Equatable, Sendable {
 }
 
 extension View {
-    /// Reports the active fold crossing this view, in its own coordinates: nil on every other device,
-    /// on iPhone Duo when it is closed or open flat, and before iOS 27.1.
+    /// Reports the fold crossing this view, in its own coordinates, whether iPhone Duo is half open or
+    /// open flat: the crease shows either way, so columns meet at it in both. Nil on every other device,
+    /// on iPhone Duo when it is closed, and before iOS 27.1.
     func readingFold(_ fold: Binding<Fold?>) -> some View {
         modifier(FoldReader(fold: fold))
     }
@@ -99,27 +100,20 @@ private struct FoldReader: ViewModifier {
     @Binding var fold: Fold?
     #if DEBUG
     @Environment(\.debugWindowOrigin) private var windowOrigin
-    /// `-nyx-fold-for <seconds>`: the stand-in fold goes away after that long, as when the Duo is opened flat.
-    @State private var openedFlat=false
     #endif
     func body(content: Content) -> some View {
         #if DEBUG
         if let kind=DebugScenario.fold, let window=DebugScenario.window {
             // DEBUG captures: a fold through the middle of the simulated window (`-nyx-window`). Read in
             // screen coordinates less the window's own origin: a named coordinate space does not reach
-            // through the tab view's and split view's hosted columns. The origin and the flat state are
-            // captured, so the reading is redone when either changes, and reported only when it changes.
-            let origin=windowOrigin, gone=openedFlat, w=DebugScenario.foldWidth
+            // through the tab view's and split view's hosted columns. The origin is captured, so the
+            // reading is redone when it changes, and reported only when it changes.
+            let origin=windowOrigin, w=DebugScenario.foldWidth
             let band=kind == "table" ? CGRect(x: 0, y: (window.height-w)/2, width: window.width, height: w) : CGRect(x: (window.width-w)/2, y: 0, width: w, height: window.height)
             content.onGeometryChange(for: Fold?.self) { proxy in
-                guard let origin, !gone else { return nil }
+                guard let origin else { return nil }
                 return Fold.standIn(band: band, viewFrame: proxy.frame(in: .global).offsetBy(dx: -origin.x, dy: -origin.y), window: window)
             } action: { fold=$0 }
-            .task {
-                guard let seconds=DebugScenario.number("-nyx-fold-for") else { return }
-                try? await Task.sleep(for: .seconds(seconds))
-                openedFlat=true
-            }
         } else {
             hardware(content)
         }
@@ -132,8 +126,11 @@ private struct FoldReader: ViewModifier {
         if #available(iOS 27.1, *) {
             content.onGeometryChange(for: Fold?.self) { proxy in
                 // `Fold` keeps whole points of the side-to-side extent only, so a layout placed by the
-                // fold never chases its own rounding, and scrolling never changes it.
-                proxy.reservedRegions(kind: .division).first(where: \.isActive).map { Fold(frame: $0.frame) }
+                // fold never chases its own rounding, and scrolling never changes it. Open flat, the
+                // fold is reserved but inactive (`.includeInactive`); its crease still shows, so the
+                // columns stay on it, and opening or half closing the Duo moves nothing.
+                let regions=proxy.reservedRegions(kind: .division, options: .includeInactive)
+                return (regions.first(where: \.isActive) ?? regions.first).map { Fold(frame: $0.frame) }
             } action: { fold=$0 }
         } else {
             content
@@ -173,9 +170,9 @@ extension EnvironmentValues {
     @Entry var debugWindowOrigin: CGPoint?=nil
 }
 
-/// Two top-aligned columns, the narrower one at most `narrowMax` wide, `spacing` apart. When iPhone
-/// Duo is half open like a book, the gap moves onto the fold and widens by it, so neither column bends
-/// through the crease (the outer margins stay as they were; Apple's Fitness grid does the same).
+/// Two top-aligned columns, the narrower one at most `narrowMax` wide, `spacing` apart. On iPhone Duo's
+/// inner display (half open like a book, or open flat), the gap moves onto the fold and widens by it, so
+/// neither column runs across the crease (the outer margins stay as they were; Apple's Fitness grid does the same).
 nonisolated struct ColumnSplit: Layout {
     enum Narrow: Sendable { case leading, trailing }
     var narrow: Narrow

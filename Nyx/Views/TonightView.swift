@@ -82,7 +82,7 @@ struct TonightView: View {
             if wide, !loading, !empty, let park=best.first {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
-                    // The two columns meet at iPhone Duo's fold when it is half open like a book.
+                    // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
                         VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { startingPoint(heading:false); more(best); fromHome; extras }.frame(maxWidth:.infinity,alignment:.leading)

@@ -39,7 +39,7 @@ struct FieldView: View {
     /// A wide landscape window: "The night" and "Where to look" side by side, with no switch between them.
     private var sideBySide: Bool { WideLayout.sideBySide(width:size.width,height:size.height,largeText:typeSize.isAccessibilitySize,compactHeight:verticalSize == .compact) }
     @Environment(\.verticalSizeClass) private var verticalSize
-    /// iPhone Duo half open like a book (`readingFold`): the night on one side of the fold, the sky on the other.
+    /// iPhone Duo's inner display, half open like a book or open flat (`readingFold`): the night on one side of the fold, the sky on the other.
     @State private var fold: Fold?
     private var foldSplit: (leading: CGFloat, gap: CGFloat)? {
         guard sideBySide, let fold, let leading=fold.leadingWidth(in:size.width,minimum:320) else { return nil }
@@ -66,7 +66,7 @@ struct FieldView: View {
             Group {
                 if sideBySide {
                     // The night on the left, the sky on the right; the eye's clock stays with the night.
-                    // Half open like a book, the hairline is the fold itself and each page keeps to its side.
+                    // On iPhone Duo's inner display, the hairline is the fold itself and each page keeps to its side.
                     let split=foldSplit
                     HStack(spacing:0) {
                         FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage).frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
