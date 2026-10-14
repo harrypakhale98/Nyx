@@ -62099,13 +62099,13 @@
     "Too many places to send all their forecasts.": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
+        "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Too many places to send all their forecasts."
           }
         },
-        "en": {
+        "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Zu viele Orte, um alle ihre Vorhersagen zu senden."
@@ -64382,6 +64382,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "最新です。%@時点の予報"
+          }
+        }
+      }
+    },
+    "Update Nyx on Apple Watch for matching scores.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Nyx on Apple Watch for matching scores."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiere Nyx auf der Apple Watch, damit die Werte übereinstimmen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza Nyx en el Apple Watch para que los índices coincidan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez à jour Nyx sur l’Apple Watch pour des indices identiques."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スコアをそろえるには、Apple WatchのNyxをアップデートしてください。"
           }
         }
       }
