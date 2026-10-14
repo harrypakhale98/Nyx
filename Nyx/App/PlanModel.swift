@@ -538,10 +538,6 @@ import CoreLocation
         guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
         return clarity.sentence
     }
-    /// True when a night without clouds simply lies beyond the forecast's reach (past its last
-    /// hour, or ten days or more ahead, where a forecast counts for nothing), rather than having a
-    /// forecast that failed (`NightPlanner.beyondForecast`).
-    func beyondForecast(_ night:Night)->Bool { NightPlanner.beyondForecast(night,forecast:forecasts[night.park.id],detail:details[night.park.id],now:present) }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {
         guard let origin else { return [] }

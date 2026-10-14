@@ -289,8 +289,13 @@ struct WatchComplicationView: View {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(night.score.value, format: .number).font(.system(.title2, design: .serif).weight(.light)).foregroundStyle(accent).widgetAccentable()
                 if case .mark = closure { Image(systemName: WristClosure.symbol).font(.caption2).foregroundStyle(accent).widgetAccentable() }
-                Text(night.bandWithBasis)
-                    .font(.caption2).foregroundStyle(muted).lineLimit(1).minimumScaleFactor(0.8)
+                // Whole or the one word: a basis or smoke note cut mid-word would say less than the
+                // word under the score (VoiceOver hears it all in the summary).
+                ViewThatFits(in: .horizontal) {
+                    Text(night.bandWithBasis).lineLimit(1)
+                    Text(night.bandWithBasis).lineLimit(1).minimumScaleFactor(0.8)
+                    Text(night.compactBandLabel).lineLimit(1).minimumScaleFactor(0.8)
+                }.font(.caption2).foregroundStyle(muted)
             }
             // Measured at full height, so a closure that would need cutting gives way to a shorter form instead.
             switch closure {
@@ -349,6 +354,7 @@ struct WatchComplicationView: View {
         // The closure is spoken in every family, right after the score it stands beside.
         if let closure = entry.closure { text += " " + WristClosure.spoken(closure) }
         if let caption = night.basisCaption() { text += " " + caption }
+        if let smoke = night.smokeSentence() { text += " " + smoke }
         // In every family, though only the rectangular one has room to show it.
         if entry.cloudsOld { text += " " + String(localized: "No recent forecast. Open Nyx on iPhone to refresh.") }
         if let next = entry.next {

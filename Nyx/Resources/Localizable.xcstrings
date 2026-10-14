@@ -2928,6 +2928,41 @@
         }
       }
     },
+    "%@, Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、月と暗さのみ"
+          }
+        }
+      }
+    },
     "%@, a bright star, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -2994,6 +3029,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、早めの見通し"
+          }
+        }
+      }
+    },
+    "%@, haze or smoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, haze or smoke"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Dunst oder Rauch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, bruma o humo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, brume ou fumée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、もやまたは煙"
           }
         }
       }
@@ -15600,6 +15670,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲予報を含む"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable · Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar · nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible · solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible · Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません · 月と暗さのみ"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable · usual clouds for the month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · usual clouds for the month"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar · übliche Bewölkung des Monats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible · nubosidad habitual del mes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible · nébulosité habituelle du mois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません · その月の平年の雲量"
           }
         }
       }
@@ -36303,6 +36478,41 @@
         }
       }
     },
+    "No cloud forecast yet · Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet · Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Wolkenvorhersage · nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún sin pronóstico de nubes · solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de nuages · Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報はまだありません · 月と暗さのみ"
+          }
+        }
+      }
+    },
     "No cloud forecast yet · usual clouds for the month": {
       "extractionState": "manual",
       "localizations": {
@@ -36369,171 +36579,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲予報はまだありません。"
-          }
-        }
-      }
-    },
-    "No cloud forecast yet. Open Nyx on iPhone for clouds.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Noch keine Wolkenvorhersage. Öffne Nyx auf dem iPad für die Wolken."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Noch keine Wolkenvorhersage. Öffne Nyx auf dem iPhone für die Wolken."
-                }
-              }
-            }
-          }
-        },
-        "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "No cloud forecast yet. Open Nyx on iPad for clouds."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "No cloud forecast yet. Open Nyx on iPhone for clouds."
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Aún sin pronóstico de nubes. Abre Nyx en el iPad para ver las nubes."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Aún sin pronóstico de nubes. Abre Nyx en el iPhone para ver las nubes."
-                }
-              }
-            }
-          }
-        },
-        "fr": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Pas encore de prévision de nuages. Ouvrez Nyx sur l’iPad pour les nuages."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Pas encore de prévision de nuages. Ouvrez Nyx sur l’iPhone pour les nuages."
-                }
-              }
-            }
-          }
-        },
-        "ja": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "雲予報はまだありません。雲の情報はiPadでNyxを開くと取得されます。"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "雲予報はまだありません。雲の情報はiPhoneでNyxを開くと取得されます。"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "No cloud forecast yet. This score uses the park's usual clouds.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch keine Wolkenvorhersage. Dieser Wert nutzt die übliche Bewölkung des Parks."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cloud forecast yet. This score uses the park's usual clouds."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún sin pronóstico de nubes. Este índice usa la nubosidad habitual del parque."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas encore de prévision de nuages. Cet indice utilise la nébulosité habituelle du parc."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "雲予報はまだありません。このスコアには公園の平年の雲量を使っています。"
-          }
-        }
-      }
-    },
-    "No cloud forecast yet. Usual clouds here this month: %lld%%.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch keine Wolkenvorhersage. Übliche Bewölkung hier in diesem Monat: %lld %%."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cloud forecast yet. Usual clouds here this month: %lld%%."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún sin pronóstico de nubes. Nubosidad habitual aquí este mes: %lld%%."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas encore de prévision de nuages. Nébulosité habituelle ici ce mois-ci : %lld %%."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "雲予報はまだありません。今月のここの平年の雲量：%lld%%。"
           }
         }
       }
@@ -41502,6 +41547,101 @@
           "stringUnit": {
             "state": "translated",
             "value": "%2$@の%1$@を開く"
+          }
+        }
+      }
+    },
+    "Open Nyx on iPhone for clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open Nyx on iPad for clouds."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open Nyx on iPhone for clouds."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Öffne Nyx auf dem iPad für die Wolken."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Öffne Nyx auf dem iPhone für die Wolken."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Abre Nyx en el iPad para ver las nubes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Abre Nyx en el iPhone para ver las nubes."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ouvrez Nyx sur l’iPad pour les nuages."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ouvrez Nyx sur l’iPhone pour les nuages."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "device": {
+              "ipad": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "雲を表示するには、iPadでNyxを開いてください。"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "雲を表示するには、iPhoneでNyxを開いてください。"
+                }
+              }
+            }
           }
         }
       }
@@ -60801,6 +60941,41 @@
         }
       }
     },
+    "This score uses the park's usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This score uses the park's usual clouds."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Wert nutzt die übliche Bewölkung des Parks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este índice usa la nubosidad habitual del parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet indice utilise la nébulosité habituelle du parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このスコアには公園の平年の雲量を使っています。"
+          }
+        }
+      }
+    },
     "This score uses the usual %@ clouds at %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -64862,6 +65037,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@の平年の雲量"
+          }
+        }
+      }
+    },
+    "Usual clouds here this month: %lld%%.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usual clouds here this month: %lld%%."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übliche Bewölkung hier in diesem Monat: %lld %%."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nubosidad habitual aquí este mes: %lld%%."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébulosité habituelle ici ce mois-ci : %lld %%."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月のここの平年の雲量：%lld%%。"
           }
         }
       }
@@ -71850,6 +72060,146 @@
         }
       }
     },
+    "cloud forecast unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloud forecast unavailable"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de nubes no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prévision de nuages indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません"
+          }
+        }
+      }
+    },
+    "cloud forecast unavailable, usually %lld%% cloud": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloud forecast unavailable, usually %lld%% cloud"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar, üblicherweise %lld %% Bewölkung"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de nubes no disponible, por lo general %lld%% de nubes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prévision de nuages indisponible, en général %lld %% de nuages"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません。平年の雲量は%lld%%"
+          }
+        }
+      }
+    },
+    "cloud forecast unavailable; scored on the Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloud forecast unavailable; scored on the Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar; bewertet nur nach Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de nubes no disponible; calculado solo con la Luna y la oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prévision de nuages indisponible ; noté sur la Lune et l’obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません。月と暗さだけでスコアを計算"
+          }
+        }
+      }
+    },
+    "cloud forecast unavailable; scored with the park's usual clouds for the month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloud forecast unavailable; scored with the park's usual clouds for the month"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar; bewertet mit der üblichen Bewölkung des Parks in diesem Monat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de nubes no disponible; calculado con la nubosidad habitual del parque en ese mes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prévision de nuages indisponible ; noté avec la nébulosité habituelle du parc pour le mois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません。公園のその月の平年の雲量でスコアを計算"
+          }
+        }
+      }
+    },
     "clouds": {
       "extractionState": "manual",
       "localizations": {
@@ -73856,6 +74206,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲予報はまだありません。平年の雲量は%lld%%"
+          }
+        }
+      }
+    },
+    "no cloud forecast yet; scored on the Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no cloud forecast yet; scored on the Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "noch keine Wolkenvorhersage; bewertet nur nach Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aún sin pronóstico de nubes; calculado solo con la Luna y la oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pas encore de prévision de nuages ; noté sur la Lune et l’obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報はまだありません。月と暗さだけでスコアを計算"
           }
         }
       }

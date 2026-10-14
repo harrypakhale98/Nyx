@@ -46,9 +46,11 @@ struct FieldView: View {
     /// The night's pages, beside the sky or on their own.
     private var nightPager: some View { FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage) }
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
+    /// Field mode is tonight, always within a forecast's reach: without one, it is unavailable, never "not yet".
     private var basisNote: String? {
         guard !session.score.hasForecast else { return nil }
-        return session.score.basis.isEarlyLook ? String(localized:"Early look: the forecast is eased toward usual clouds.") : String(localized:"No cloud forecast yet. This score uses the park's usual clouds.")
+        if session.score.basis.isEarlyLook { return String(localized:"Early look: the forecast is eased toward usual clouds.") }
+        return Sentences.join([String(localized:"Cloud forecast unavailable."),session.score.cloudPoints == nil ? String(localized:"This score counts the Moon and darkness only.") : String(localized:"This score uses the park's usual clouds.")])
     }
     var body: some View {
         let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"))

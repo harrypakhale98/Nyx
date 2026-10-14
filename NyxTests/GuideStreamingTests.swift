@@ -80,12 +80,13 @@ import Testing
         let night=NightPlanner(forecasts: [:]).night(arch, on: arch.currentNight(at: now), now: now)
         let line=lookup.describe(night)
         // The model still reads its own record, lower case and all.
-        #expect(line.hasPrefix("Arches; ") && line.contains("score \(night.score.value)/100") && line.contains("no cloud forecast yet; scored with the park's usual clouds for the month"))
+        #expect(line.hasPrefix("Arches; ") && line.contains("score \(night.score.value)/100") && line.contains("cloud forecast unavailable; scored with the park's usual clouds for the month"))
         let record=GuideRecord(line, parks: parks) { $0.currentNight(at: self.now) }
         #expect(record.park?.id == "arch" && record.score == night.score.value && record.detail == nil)
         // The row says it the app's way.
-        #expect(GuideRecordRow.basis(night) == "No cloud forecast yet")
-        #expect(GuideRecordRow.sharedCaption("No cloud forecast yet") == "No cloud forecast yet · usual clouds for the month")
+        // Tonight without a forecast: unavailable, not "not yet", in the record, the row and the caption above them.
+        #expect(GuideRecordRow.basis(night) == "Cloud forecast unavailable")
+        #expect(GuideRecordRow.sharedCaption("Cloud forecast unavailable",nights:[night,night]) == "Cloud forecast unavailable · usual clouds for the month")
         // A "parks near" record keeps its distance, the one thing the row cannot work out.
         let near=GuideRecord("Arches, UT; 220 miles straight-line from Denver, CO; tonight 88/100 Excellent", parks: parks) { $0.currentNight(at: self.now) }
         #expect(near.detail == "220 miles straight-line from Denver, CO")

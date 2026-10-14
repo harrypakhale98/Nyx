@@ -40,7 +40,7 @@ nonisolated struct WeekAcrossParks: Sendable {
     /// What VoiceOver says for one cell: the row and the column, as a table would, then the night.
     static func spoken(_ night:Night,isBest:Bool)->String {
         var parts=[night.park.shortName,night.park.dayLabel(night.id),String(localized:"\(night.score.value), \(night.score.band.label)")]
-        if let basis=night.basisLabel { parts.append(basis) }
+        parts+=night.basisLabels
         if isBest { parts.append(String(localized:"The best night this week")) }
         return parts.joined(separator:". ")
     }

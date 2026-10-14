@@ -49,7 +49,7 @@ struct ScoreBreakdownView: View {
                     : String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."))
             row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
-            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             if night.sky.darkHours==0 { Text(isTonight ? String(localized:"No true darkness tonight at this latitude. The score is capped below 40.") : String(localized:"No true darkness on this night at this latitude. The score is capped below 40.")).foregroundStyle(palette.accent) }
             else if ScoreEngine.cap(darkHours:night.sky.darkHours)<100 { Text(isTonight ? String(localized:"True darkness lasts only \(darkness) tonight, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.") : String(localized:"True darkness lasts only \(darkness) on this night, so the score is held to \(ScoreEngine.cap(darkHours:night.sky.darkHours)) or less.")).foregroundStyle(palette.accent) }
             if let event=model.events(night).item(park:night.park,sky:night.sky,isTonight:isTonight) {
@@ -81,8 +81,9 @@ struct ScoreBreakdownView: View {
             guard let forecast=night.cloudCover, let counted=night.score.cloudUsed else { return String(localized:"An early look at the clouds.") }
             return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(max(1,Int(lead.rounded()))) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%.")
         case .usual:
-            guard let usual=night.usualCloud else { return String(localized:"No cloud forecast yet.") }
-            return String(localized:"No cloud forecast yet. Usual clouds here this month: \(Int(usual.rounded()))%.")
+            // "No cloud forecast yet." or "Cloud forecast unavailable.", as every surface says it.
+            guard let usual=night.usualCloud else { return Sentences.join([night.noForecastSentence ?? "",String(localized:"This score counts the Moon and darkness only.")]) }
+            return Sentences.join([night.noForecastSentence ?? "",String(localized:"Usual clouds here this month: \(Int(usual.rounded()))%.")])
         }
     }
     private var moonFact:String {

@@ -162,9 +162,11 @@ import Testing
         // No forecast: the usual clouds, said in words.
         let none = NightPlanner.night(park: deva, sky: s, forecast: nil, detail: nil, now: middle)
         #expect(none.basis == .usual && none.score.value == far.score.value)
-        #expect(none.basisCaption() == "No cloud forecast yet. This score uses the usual December clouds at Death Valley.")
-        #expect(none.basisCaption(unavailable: true)?.hasPrefix("Cloud forecast unavailable.") == true)
-        #expect(none.basisLabel == "No cloud forecast yet" && mid.basisLabel == "Early look" && near.basisLabel == nil)
+        // Tonight is within any forecast's reach: without one, the forecast is unavailable, not "not yet".
+        #expect(!none.beyondForecast && none.basisCaption() == "Cloud forecast unavailable. This score uses the usual December clouds at Death Valley.")
+        #expect(none.basisLabel == "Cloud forecast unavailable" && mid.basisLabel == "Early look" && near.basisLabel == nil)
+        let later = NightPlanner.night(park: deva, sky: AstronomyEngine().conditions(for: deva, on: deva.date(s.evening, addingDays: 12)), forecast: nil, detail: nil, now: middle)
+        #expect(later.beyondForecast && later.basisCaption()?.hasPrefix("No cloud forecast yet. This score uses the usual") == true && later.basisLabel == "No cloud forecast yet")
     }
     /// Going offline can never raise a score: a forecast is never dropped for its
     /// age, so the same forecast gives the same night whenever it is read.

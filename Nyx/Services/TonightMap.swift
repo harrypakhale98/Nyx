@@ -45,7 +45,7 @@ nonisolated struct TonightMap: Sendable {
             let park=night.park, closure=closures[park.id]
             guard let point=frame.point(park) else { return nil }
             var parts=[String(localized:"\(park.shortName), \(night.score.value), \(night.score.band.label)")]
-            if let basis=night.basisLabel { parts.append(basis) }
+            parts+=night.basisLabels
             if let closure { parts.append(String(localized:"Closure: \(closure)")) }
             return (night,Mark(id:park.id,name:park.shortName,latitude:park.latitude,longitude:park.longitude,point:point,region:SkyMap.region(park) ?? .world,
                                score:night.score.value,band:night.score.band,fill:night.basis.fill,closure:closure,label:parts.joined(separator:". ")))

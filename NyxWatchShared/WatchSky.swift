@@ -129,12 +129,17 @@ nonisolated enum WatchSky {
     static func nightVision(_ choice: PaletteChoice, context: WatchContext?, park: Park?, at now: Date) -> Bool {
         choice.nightVision(phone: context?.nightVision, park: park, at: now)
     }
-    /// What a score's clouds rest on when there is no full forecast, in one short honest line.
+    /// What a score's clouds rest on when there is no full forecast, in one short honest line, in
+    /// the iPhone's words (`Night.basisCaption`).
     static func forecastNote(_ night: Night, context: WatchContext?, short: Bool = false) -> String? {
         guard let label = night.basisLabel else { return nil }
         if short { return label }
-        if context == nil, night.basis == .usual { return String(localized: "No cloud forecast yet. Open Nyx on iPhone for clouds.") }
-        return night.basisCaption()
+        return Sentences.join([night.basisCaption() ?? "", unsyncedNote(night, context: context) ?? ""])
+    }
+    /// Before the iPhone has sent anything, a night a forecast should reach says where its clouds
+    /// come from; one beyond every forecast's reach needs no such line.
+    static func unsyncedNote(_ night: Night, context: WatchContext?) -> String? {
+        context == nil && night.basis == .usual && !night.beyondForecast ? String(localized: "Open Nyx on iPhone for clouds.") : nil
     }
 }
 

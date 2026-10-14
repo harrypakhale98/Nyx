@@ -106,7 +106,8 @@ struct DelightTests {
         for stop in plan.stops {
             #expect(stop.night.score.value<=39 && !stop.night.score.hasForecast)
             #expect(stop.reason.hasPrefix(String(localized:"No true darkness at this latitude")))
-            #expect(stop.reason.contains(String(localized:"no cloud forecast yet")))
+            // "Not yet" beyond the forecast's reach, "unavailable" within it, as everywhere else.
+            #expect(stop.reason.contains(stop.night.beyondForecast ? String(localized:"no cloud forecast yet") : String(localized:"cloud forecast unavailable")))
         }
         let draft=CalendarDraft(stop:try #require(plan.stops.first))
         #expect(draft.notes.contains(SkyConditions.noDarknessMessage(tonight:false)))
@@ -144,7 +145,7 @@ struct DelightTests {
         #expect(draft.start==real.sky.darkStart && draft.end==real.sky.darkEnd && draft.timeZone==grba.timeZone)
         #expect(draft.title==String(localized:"Stargazing at Great Basin"))
         #expect(draft.notes.contains("Wheeler Peak Scenic Drive closed") && draft.notes.contains(String(localized:"Check closures and the forecast before you go.")))
-        #expect(draft.notes.contains(String(localized:"No cloud forecast yet.")) && draft.notes.contains(String(localized:"This score uses the usual October clouds at Great Basin.")))
+        #expect(draft.notes.contains(try #require(real.noForecastSentence)) && draft.notes.contains(String(localized:"This score uses the usual October clouds at Great Basin.")))
         #expect(draft.url?.absoluteString=="nyx://whatsup?date=2026-10-10&park=grba")
     }
 

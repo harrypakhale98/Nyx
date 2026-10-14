@@ -36,7 +36,7 @@ extension ParkDetailView {
             AccessNoteLabel(park:park,alignment:large ? .leading : .center).frame(maxWidth:420).padding(.horizontal,large ? 0 : 12)
             // The dial opens at the bottom; let the lines below tuck into that space.
             let range=CelestialGauge.modelRange(outlook,basis:night.basis)
-            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(unavailable:!model.beyondForecast(night)),
+            CelestialGauge(score:night.score.value,hasForecast:night.score.hasForecast,spokenBasis:night.basisCaption(),
                            revealKey:ScoreReveals.key(parkID:park.id,night:park.isoDay(night.id),score:night.score.value),
                            range:range)
                 .frame(maxWidth:.infinity)
@@ -46,7 +46,7 @@ extension ParkDetailView {
                 .environment(\.nyxRevealHeld,heroHeld)
             if night.sky.state == .polarNight { Text("The Sun stays below the horizon today.").font(.subheadline).foregroundStyle(palette.muted).multilineTextAlignment(align) }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.body).foregroundStyle(palette.accent).multilineTextAlignment(align) }
-            if let caption=night.basisCaption(unavailable:!model.beyondForecast(night),typical:true) {
+            if let caption=night.basisCaption(typical:true) {
                 // The gauge speaks the first sentence; VoiceOver hears only the month's usual clouds here.
                 Text(caption).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(align)
                     .accessibilityLabel(night.typicalClouds ?? caption).accessibilityHidden(night.typicalClouds == nil)

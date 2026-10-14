@@ -220,8 +220,9 @@ nonisolated enum TripPlanner {
         else if night.sky.moonBelowFraction>=0.95 { parts.append(String(localized:"Moon down through true darkness")) }
         else { parts.append(String(localized:"Moon \(lit)% lit")) }
         if let cloud=night.cloudCover { parts.append(night.score.hasForecast ? String(localized:"\(Int(cloud.rounded()))% cloud forecast") : String(localized:"\(Int(cloud.rounded()))% cloud forecast, an early look")) }
-        else if let usual=night.usualCloud { parts.append(String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud")) }
-        else { parts.append(String(localized:"no cloud forecast yet")) }
+        // "Not yet" beyond the forecast's reach, "unavailable" within it, as every surface says it.
+        else if let usual=night.usualCloud { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet, usually \(Int(usual.rounded()))% cloud") : String(localized:"cloud forecast unavailable, usually \(Int(usual.rounded()))% cloud")) }
+        else { parts.append(night.beyondForecast ? String(localized:"no cloud forecast yet") : String(localized:"cloud forecast unavailable")) }
         parts.append(String(localized:"Bortle \(night.park.bortleEstimate)"))
         return parts.joined(separator:", ")
     }

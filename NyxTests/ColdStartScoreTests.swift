@@ -43,7 +43,7 @@ import Testing
         #expect(cold.basis == .usual && cold.cloudCover == nil && !cold.upperCloudOnly && cold.usualCloud != nil)
         #expect(cold.score.value > byTotal.value)
         // Within the layers' reach, the caption says the summit's forecast is unavailable, not "not yet".
-        #expect(!model.beyondForecast(cold))
+        #expect(!cold.beyondForecast)
         // A park below the inversion still counts its total cloud.
         #expect(model.night(havo).cloudCover == 95)
         // The layers arrive: the kept nights are let go everywhere.

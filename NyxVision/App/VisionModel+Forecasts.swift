@@ -52,21 +52,16 @@ extension VisionModel {
     }
     /// The newest forecast on this headset, for Your privacy.
     var lastForecast: Date? { forecasts.values.map(\.updated).max() }
-    /// True when a night without clouds simply lies beyond the forecast's reach (past its last
-    /// hour, or ten days or more ahead), rather than having a forecast that could not be read or
-    /// was switched off. The iPhone's rule (`NightPlanner.beyondForecast`).
-    func beyondForecast(_ night: Night) -> Bool {
-        NightPlanner.beyondForecast(night, forecast: forecasts[night.park.id], detail: VisionModel.detail(summitLayers[night.park.id]), now: now)
-    }
     /// The words under the score for a night's clouds, as the iPhone says them: nothing extra with
     /// a forecast but its average; "Early look: …" days ahead; "No cloud forecast yet. …" beyond.
     /// Over Haleakalā's summit, when its layers count, the iPhone's line on why only mid and high cloud.
     func cloudCaption(_ night: Night) -> String {
-        Self.cloudCaption(night, forecast: forecasts[night.park.id], detail: VisionModel.detail(summitLayers[night.park.id]), forecastsOn: forecastsOn, now: now)
+        Self.cloudCaption(night, forecastsOn: forecastsOn)
     }
-    /// The same words from what the caller holds (Siri's answer reads the cache itself). `detail`:
-    /// a summit's layers, so a summit night past their reach reads "not yet", as on the iPhone.
-    nonisolated static func cloudCaption(_ night: Night, forecast: Forecast?, detail: ForecastDetail? = nil, forecastsOn: Bool, now: Date) -> String {
+    /// The same words from what the caller holds (Siri's answer reads the cache itself). Whether a
+    /// night is beyond the forecast's reach ("not yet") or within it ("unavailable") comes with the
+    /// night (`Night.beyondForecast`), as on the iPhone.
+    nonisolated static func cloudCaption(_ night: Night, forecastsOn: Bool) -> String {
         let summit = night.upperCloudOnly ? String(localized: "The summit sits above most low cloud, so the score counts mid and high cloud only.") : ""
         switch night.basis {
         case .forecast:
@@ -74,8 +69,8 @@ extension VisionModel {
             let issued = night.forecastUpdated.map { String(localized: "Forecast as of \(night.park.timestamp($0))") } ?? ""
             return Sentences.join([cover, summit, issued])
         case .blended, .usual:
-            let unavailable = !NightPlanner.beyondForecast(night, forecast: forecast, detail: detail, now: now)
-            let caption = night.basisCaption(unavailable: unavailable, typical: true) ?? ""
+            let unavailable = !(night.basis == .usual && night.beyondForecast)
+            let caption = night.basisCaption(typical: true) ?? ""
             let off = unavailable && !forecastsOn ? String(localized: "Cloud forecasts are off in Your privacy.") : ""
             return Sentences.join([caption, summit, off])
         }

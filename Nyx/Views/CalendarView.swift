@@ -77,7 +77,7 @@ struct NightCell: View {
         if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
         var parts=[isTonight ? String(localized:"Tonight, \(night.park.dayLabel(night.id))") : night.park.dayLabel(night.id),
                    String(localized:"\(night.score.value), \(night.score.band.label)")]
-        if let label=night.basisLabel { parts.append(label) }
+        parts+=night.basisLabels
         if let cloud=night.cloudCover { parts.append(String(localized:"Clouds \(Int(cloud.rounded())) percent")) }
         if highlighted, let stretchName { parts.append(stretchName) }
         if let marker { parts.append(marker.name) }
@@ -109,7 +109,7 @@ struct NightPeek: View {
             }
             if night.sky.darkHours==0 { Text(SkyConditions.noDarknessMessage(tonight:isTonight)).font(.subheadline).foregroundStyle(palette.ink) }
             else { Text("True darkness \(night.park.time(night.sky.darkStart)) – \(night.park.time(night.sky.darkEnd))").font(.subheadline).foregroundStyle(palette.ink) }
-            Text(night.basisCaption(typical:true) ?? night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? "").font(.caption).foregroundStyle(palette.muted)
+            Text(Sentences.join([night.basisCaption(typical:true) ?? night.cloudCover.map { String(localized:"Clouds \(Int($0.rounded()))% on average") } ?? "",night.smokeSentence(tonight:isTonight) ?? ""])).font(.caption).foregroundStyle(palette.muted)
             if let event {
                 Divider().overlay(palette.line)
                 HStack(alignment:.top,spacing:12) {
@@ -341,7 +341,7 @@ struct CalendarView: View {
                 VStack(alignment:.leading,spacing:8) {
                     Text(park.dayLabel(night.id)).font(.headline)
                     Text("\(night.score.value) · \(night.score.band.label)").font(.system(.title3,design:.serif)).foregroundStyle(palette.accent)
-                    Text(night.basisCaption(typical:true) ?? String(localized:"Forecast included")).font(.caption).foregroundStyle(palette.muted)
+                    Text(Sentences.join([night.basisCaption(typical:true) ?? String(localized:"Forecast included"),night.smokeSentence() ?? ""])).font(.caption).foregroundStyle(palette.muted)
                     if let marker=model.events(night).marker(park:park) { Text(marker.name).font(.caption).foregroundStyle(palette.ink) }
                 }.fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,14)
             }.buttonStyle(.plain).accessibilityElement(children:.ignore)

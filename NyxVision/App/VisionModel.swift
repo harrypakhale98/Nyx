@@ -14,7 +14,7 @@ nonisolated struct NightPlan: Sendable {
     let forecast: Forecast?
     /// True when the night has no forecast clouds because it lies beyond the forecast's reach;
     /// false for one the forecast should reach but could not (switched off, never fetched, unreadable).
-    let beyondForecast: Bool
+    var beyondForecast: Bool { night.beyondForecast }
     var score: DarknessScore { night.score }
     let whatsUp: WhatsUp
     let moon: MoonGeometry
@@ -31,7 +31,6 @@ nonisolated struct NightPlan: Sendable {
         let scored = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
         self.night = scored
         self.forecast = scored.upperCloudOnly ? layers?.upperCloud ?? forecast : forecast
-        beyondForecast = NightPlanner.beyondForecast(scored, forecast: forecast, detail: VisionModel.detail(layers), now: now)
         whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)

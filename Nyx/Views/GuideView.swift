@@ -225,7 +225,7 @@ struct GuideRecords: View {
         VStack(alignment:.leading,spacing:0) {
             Eyebrow(text:"The records").padding(.bottom,shared == nil ? 8 : 4)
             if let shared {
-                Text(GuideRecordRow.sharedCaption(shared)).font(.caption).foregroundStyle(palette.muted)
+                Text(GuideRecordRow.sharedCaption(shared,nights:nights.compactMap { $0 })).font(.caption).foregroundStyle(palette.muted)
                     .fixedSize(horizontal:false,vertical:true).padding(.bottom,8)
             }
             if let order=citations.flatMap({ GuideRecords.order(count:all.count,citations:$0) }) {
@@ -452,7 +452,7 @@ struct GuideRecordRow: View {
         switch night.basis {
         case .forecast: String(localized:"\(Int((night.cloudCover ?? 0).rounded()))% cloud forecast")
         case .blended: String(localized:"\(Int((night.cloudCover ?? 0).rounded()))% cloud forecast, an early look")
-        case .usual: String(localized:"No cloud forecast yet")
+        case .usual: night.basisLabel ?? String(localized:"No cloud forecast yet")
         }
     }
     /// The Moon beside its percentage. Below 5% lit the phase symbol's crescent would read as a
@@ -462,9 +462,12 @@ struct GuideRecordRow: View {
         let moon=night.sky.moon
         return Image(systemName:Int((moon.illumination*100).rounded())<5 ? "moonphase.new.moon" : moon.symbolName(southern:night.park.latitude<0))
     }
-    /// The basis said once above the records.
-    static func sharedCaption(_ basis:String)->String {
-        basis == String(localized:"No cloud forecast yet") ? String(localized:"No cloud forecast yet · usual clouds for the month") : basis
+    /// The basis said once above the records: on the usual clouds, the longer line every surface
+    /// uses (`Night.basisLine`), which also says what the score counts instead, when all the nights share it.
+    static func sharedCaption(_ basis:String,nights:[Night])->String {
+        let lines=Set(nights.filter { $0.basis == .usual }.compactMap(\.basisLine))
+        guard nights.contains(where:{ $0.basis == .usual && $0.basisLabel == basis }), lines.count == 1, let line=lines.first else { return basis }
+        return line
     }
     var body: some View {
         Group {
