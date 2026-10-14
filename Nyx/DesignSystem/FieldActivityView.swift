@@ -28,6 +28,8 @@ struct FieldActivityLockView: View {
     let isStale: Bool
     @Environment(\.colorSchemeContrast) private var contrast
     private var colors: FieldActivityColors { FieldActivityColors(nightVision:state.nightVision,contrast:contrast) }
+    /// Two lines of the score's caption: as much as the score line may take beside the park's name.
+    @ScaledMetric(relativeTo:.caption) private var scoreLines=34.0
     /// "Heading out": followed ahead, before true darkness. Sunset, true darkness and the closure.
     private var heading: Bool { state.heading == true && !isStale && !state.finished }
     var body: some View {
@@ -38,9 +40,17 @@ struct FieldActivityLockView: View {
                 Text(heading ? String(localized:"Tonight at \(attributes.parkName)") : attributes.parkName).lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
                 Spacer(minLength:8)
                 // The night's latest score; its day when it is old, so the face is never surer than Nyx.
-                // Two lines where the band carries its basis ("Excellent, usual clouds"): wrapped, never cut.
-                Text(attributes.scoreLine(state)).monospacedDigit().lineLimit(2).minimumScaleFactor(0.8).multilineTextAlignment(.trailing)
-                    .accessibilityLabel(attributes.spokenScore(state))
+                // Two lines where the band carries its basis ("Excellent, usual clouds"): wrapped, never
+                // cut. A line that needs more ("Gut, frühe Vorschau, Dunst oder Rauch") gives way to the
+                // band's one word; VoiceOver still hears the whole line.
+                ViewThatFits(in:.vertical) {
+                    Text(attributes.scoreLine(state)).fixedSize(horizontal:false,vertical:true)
+                    Text(attributes.scoreLine(state,short:true)).fixedSize(horizontal:false,vertical:true)
+                    Text(attributes.scoreLine(state,short:true)).lineLimit(2).minimumScaleFactor(0.8)
+                }
+                .frame(maxHeight:scoreLines)
+                .monospacedDigit().multilineTextAlignment(.trailing)
+                .accessibilityElement(children:.ignore).accessibilityLabel(attributes.spokenScore(state))
             }.font(.caption.weight(.medium)).foregroundStyle(colors.muted)
             if state.finished {
                 Text("The night is over. Rest your eyes.").font(.system(.title3,design:.serif)).foregroundStyle(colors.ink)

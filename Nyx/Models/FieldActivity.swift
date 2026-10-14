@@ -85,10 +85,13 @@ nonisolated struct FieldActivityAttributes: ActivityAttributes {
     /// "94 · Pristine", or "94 · Pristine as of Wed" when the score is old. Park time. A score worked
     /// out in the small hours of the night's own day names its time instead ("as of 1:10 AM"), as
     /// naming the weekday would name today.
-    func scoreLine(_ state: ContentState, locale: Locale = .current) -> String {
-        guard let day=scoreDay(state) else { return "\(score(state)) · \(band(state))" }
-        if sameParkDay(day) { return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(time(locale)))") }
-        return String(localized: "\(score(state)) · \(band(state)) as of \(day.formatted(weekday(.abbreviated,locale)))")
+    /// `short`: the band's one word in place of its whole line ("Good" for "Good, early look, haze or
+    /// smoke"), for a face where the whole line would be cut.
+    func scoreLine(_ state: ContentState, locale: Locale = .current, short: Bool = false) -> String {
+        let band=short ? ScoreBand.band(score(state)).label : band(state)
+        guard let day=scoreDay(state) else { return "\(score(state)) · \(band)" }
+        if sameParkDay(day) { return String(localized: "\(score(state)) · \(band) as of \(day.formatted(time(locale)))") }
+        return String(localized: "\(score(state)) · \(band) as of \(day.formatted(weekday(.abbreviated,locale)))")
     }
     /// What a state's face shows of its night, for deciding whether a refresh changes anything:
     /// the score line (score, band and the "as of" day in park time) and the closure.

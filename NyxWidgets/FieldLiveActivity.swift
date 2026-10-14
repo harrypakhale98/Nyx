@@ -34,7 +34,13 @@ struct FieldLiveActivity: Widget {
                         if context.isStale && !context.state.finished {
                             FieldActivityUpdated(attributes:context.attributes,state:context.state).font(.caption2).foregroundStyle(colors.muted)
                         } else {
-                            Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state))").font(.caption2).foregroundStyle(colors.muted)
+                            // One line: the whole band when it fits, else its one word, never cut.
+                            ViewThatFits(in:.horizontal) {
+                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state))").lineLimit(1)
+                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state,short:true))").lineLimit(1)
+                                Text("\(context.attributes.parkName) · \(context.attributes.scoreLine(context.state,short:true))").lineLimit(2).minimumScaleFactor(0.8)
+                            }.font(.caption2).foregroundStyle(colors.muted)
+                                .accessibilityElement(children:.ignore)
                                 .accessibilityLabel("\(context.attributes.parkName). \(context.attributes.spokenScore(context.state))")
                         }
                     }.environment(\.timeZone,zone)

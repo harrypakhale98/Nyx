@@ -231,12 +231,15 @@ struct TonightWidgetView:View {
                 }.gaugeStyle(.accessoryCircular).dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if family == .accessoryRectangular {
                 // Lock Screen dimensions are fixed: the score is the hero, the band beside it, and a
-                // smaller numeral when large text would not fit. A closure adds "Closure alert" below;
-                // where three lines cannot fit, it takes the band's place beside the score (the band
-                // stays in the spoken summary). The score and the closure are never cut.
+                // smaller numeral when large text would not fit. A long band ("Gut, frühe Vorschau,
+                // Dunst oder Rauch") gives way to its one word (`compactBandLabel`) rather than being
+                // cut. A closure adds "Closure alert" below; where three lines cannot fit, it takes the
+                // band's place beside the score (the band stays in the spoken summary). The score and
+                // the closure are never cut.
                 ViewThatFits(in:.vertical) {
                     lockHero(night,numeral:.title)
                     lockHero(night,numeral:.title3)
+                    lockHero(night,numeral:.title3,shortBand:true)
                     if entry.closure != nil { lockHero(night,numeral:.title3,closureBesideScore:true) }
                 }.dynamicTypeSize(.small ... .xxxLarge).summarized(summary(night))
             } else if portraitXL, let month=entry.month, !typeSize.isAccessibilitySize {
@@ -356,14 +359,17 @@ struct TonightWidgetView:View {
         month.nights.compactMap { $0 }.first { $0.basis == .usual }?.basisLabel
     }
     /// The Lock Screen rectangle: the park, then the score as the hero with its band beside it,
-    /// then a closure's mark. `closureBesideScore` puts the mark in the band's place, for two lines.
-    private func lockHero(_ night:Night,numeral:Font.TextStyle,closureBesideScore:Bool=false)->some View {
+    /// then a closure's mark. `closureBesideScore` puts the mark in the band's place, for two lines;
+    /// `shortBand` shows the band's one word where its whole line would not fit.
+    private func lockHero(_ night:Night,numeral:Font.TextStyle,closureBesideScore:Bool=false,shortBand:Bool=false)->some View {
         VStack(alignment:.leading,spacing:0) {
             Text(night.park.shortName).font(.headline).lineLimit(1)
             HStack(alignment:.firstTextBaseline,spacing:6) {
                 Text("\(night.score.value)").font(.system(numeral,design:.serif).weight(.light)).monospacedDigit().widgetAccentable()
                 if closureBesideScore { closureMark(.caption) }
-                else { Text(forecastLabel(night)).font(.caption).lineLimit(2).fixedSize(horizontal:false,vertical:true) }
+                else if shortBand { Text(night.compactBandLabel).font(.caption).lineLimit(1).minimumScaleFactor(0.8) }
+                // Unlimited here, so a band that needs a third line does not fit and the short word is chosen.
+                else { Text(forecastLabel(night)).font(.caption).fixedSize(horizontal:false,vertical:true) }
             }
             if !closureBesideScore { closureMark(.caption) }
         }.frame(maxWidth:.infinity,alignment:.leading)

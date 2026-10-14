@@ -40,6 +40,16 @@ import Testing
         #expect(try JSONEncoder().encode(attributes).count+data.count<4096)
     }
 
+    /// Where the whole band would be cut, the face shows its one word, and keeps the "as of" day.
+    @Test func shortScoreLineKeepsTheBandWord() throws {
+        let (_, _, attributes, heading)=try followed()
+        let long=scored(heading, 64, "Good, early look, haze or smoke", nil, at: attributes.dusk.addingTimeInterval(-12*3600))
+        #expect(attributes.scoreLine(long) == "64 · Good, early look, haze or smoke")
+        #expect(attributes.scoreLine(long, short: true) == "64 · Good")
+        let old=scored(heading, 64, "Good, early look, haze or smoke", nil, at: attributes.dusk.addingTimeInterval(-4*24*3600))
+        #expect(attributes.scoreLine(old, short: true) == "64 · Good as of Wed")
+    }
+
     /// More than 18 hours before dusk the face names the score's day, and VoiceOver hears it in full.
     @Test func oldScoreNamesItsDay() throws {
         let (_, _, attributes, heading)=try followed()
