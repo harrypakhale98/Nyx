@@ -26,9 +26,7 @@ struct ParkDetailView: View {
     @Environment(PlanModel.self) var model
     @Environment(\.nyx) var palette
     @Environment(\.modelContext) private var context
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) var typeSize
     @Environment(\.nyxAccess) private var access
     /// The root's hold on an unseen score reveal (onboarding, first light), passed on to the hero.

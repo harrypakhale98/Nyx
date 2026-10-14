@@ -10,8 +10,7 @@ import SwiftUI
 struct ScoreReadout: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.legibilityWeight) private var legibilityWeight
     /// The meters' width, for fitting the four titles (`titleStyle`).
     @State private var gridWidth=0.0
@@ -108,7 +107,7 @@ struct ScoreReadout: View {
                                     widestPlain:SubscoreTitles.widestWord(titles,typeSize:typeSize,spaced:false,bold:bold),width:gridWidth,spacing:Self.columnSpacing)
     }
     private func meter(_ part:Part)->some View {
-        Meter(fraction:part.points.map { min(1,max(0,$0/part.maximum)) },reduceMotion:systemReduceMotion || forcedReduceMotion)
+        Meter(fraction:part.points.map { min(1,max(0,$0/part.maximum)) },reduceMotion:reduceMotion)
     }
     private func value(_ part:Part)->some View {
         VStack(alignment:.leading,spacing:4) {

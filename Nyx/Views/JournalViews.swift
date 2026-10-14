@@ -313,8 +313,7 @@ struct PhotoView:View {
     let maxPixels:Int
     var fill=false
     @State private var image:UIImage?
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     var body:some View {
         Group {
             if let image {
@@ -325,7 +324,7 @@ struct PhotoView:View {
         .task(id:data.count ^ data.prefix(64).hashValue) {
             let data=data, size=maxPixels
             let decoded=await Task.detached(priority:.utility) { PhotoScaling.image(data,maxPixels:size).map { UIImage(cgImage:$0) } }.value
-            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : .easeOut(duration:0.25)) { image=decoded }
+            withAnimation(reduceMotion ? nil : .easeOut(duration:0.25)) { image=decoded }
         }
     }
 }
@@ -446,8 +445,7 @@ struct JournalEditorView:View {
     @Environment(\.dismiss) private var dismiss
     /// An iPhone in landscape, where the keyboard leaves about a hundred points of form.
     @Environment(\.verticalSizeClass) private var verticalSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @FocusState private var writingNotes:Bool
     @State private var editor:JournalEditorModel
     @State private var picker:[PhotosPickerItem]=[]
@@ -459,7 +457,7 @@ struct JournalEditorView:View {
     private static let notesID="notes"
     private func showNotes(_ proxy:ScrollViewProxy) {
         guard writingNotes, verticalSize == .compact else { return }
-        withAnimation(reduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { proxy.scrollTo(Self.notesID,anchor:.top) }
     }
     init(existing:JournalEntry?=nil) { self.existing=existing;_editor=State(initialValue:JournalEditorModel(entry:existing)) }
     /// A new entry for a night being kept (field mode at dawn, a park's page the morning after):

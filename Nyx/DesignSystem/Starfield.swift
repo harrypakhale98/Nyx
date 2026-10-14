@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct Starfield: View {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyx) private var palette
     @Environment(\.skyResting) private var resting
     @Environment(\.nyxAccess) private var access

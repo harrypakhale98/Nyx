@@ -4,8 +4,7 @@ struct TonightView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     @ScaledMetric(relativeTo:.subheadline) private var dotSize=3.0
     @State private var shooting=0.0
@@ -159,7 +158,7 @@ struct TonightView: View {
             .measuringWidth($width)
             .refreshable {
                 // The shooting star is a highlight: it stays home under Reduce Highlighting Effects.
-                if !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting && shooting==0 {
+                if !reduceMotion && !access.reduceHighlighting && shooting==0 {
                     withAnimation(ShootingStar.launch) { shooting=1 } completion:{ shooting=0 }
                 }
                 let before=model.forecasts.mapValues(\.updated)
@@ -224,7 +223,7 @@ struct TonightView: View {
             let bestScore=best.map { model.night($0).score.value } ?? -1
             if let far=model.ranked(shortlist).first,
                model.night(far).score.value>bestScore {
-                Button { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { model.radiusMeters=wider } } label:{
+                Button { withAnimation(reduceMotion ? nil : NyxMotion.spring) { model.radiusMeters=wider } } label:{
                     HStack(spacing:8) {
                         Image(systemName:"scope").imageScale(.small).accessibilityHidden(true)
                         Text("Darker within \(SearchRadius.label(wider)): \(far.shortName), \(model.night(far).score.value) tonight").multilineTextAlignment(.leading)
@@ -273,7 +272,7 @@ struct TonightView: View {
         let tonight=model.tonight(park), current=riverNight ?? tonight
         let next=park.date(current,addingDays:delta)
         guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
-        withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { riverNight=next }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=next }
     }
     private func hero(_ park:Park,others:[Park])->some View {
         let night=model.night(park)
@@ -338,7 +337,7 @@ struct TonightView: View {
     /// has settled (0.6 s without motion), so it never overlaps the count-up's pulses.
     private func feelFound(_ key:String?) async {
         guard let key, DebugScenario.screen == nil, !FoundNights.felt(key) else { return }
-        try? await Task.sleep(for:.seconds(systemReduceMotion || forcedReduceMotion ? 0.6 : 0.8))
+        try? await Task.sleep(for:.seconds(reduceMotion ? 0.6 : 0.8))
         guard !Task.isCancelled else { return }
         FoundNights.note(key)
         found+=1

@@ -18,9 +18,7 @@ struct FieldCompassView: View {
     /// The view's height, which bounds the notice over the drawn sky.
     @State private var height: CGFloat=600
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var frozen: SkyCompass.Pose?
     /// iPhone Duo's hinge part way open (`readingHalfOpen`).

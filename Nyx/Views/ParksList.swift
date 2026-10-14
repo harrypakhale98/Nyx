@@ -12,8 +12,7 @@ struct ParksView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.modelContext) private var context
     @Environment(SceneCommands.self) private var commands: SceneCommands?
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Query(sort:\SavedPark.savedAt) private var saved: [SavedPark]
     /// Beside the park on a wide iPad: rows choose the park shown in the detail column instead of pushing it.
     var selection: Binding<String?>?=nil
@@ -42,7 +41,6 @@ struct ParksView: View {
     @SceneStorage("parksWorldOpen") private var worldOpen=false
     /// The catalogue rows on screen, so their forecasts are asked for and nothing else.
     @State private var onScreen=OnScreenForecasts()
-    private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
     /// Worked out once per update of the list (the body reads it into `shown`): ranking 63 parks is not free.
     private var filtered:[Park] {
         let filter=ParkFilter(darkOnly:darkOnly,stepFreeOnly:stepFreeOnly)

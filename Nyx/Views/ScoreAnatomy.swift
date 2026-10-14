@@ -5,8 +5,7 @@ import SwiftUI
 struct ScoreAnatomy:View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let active:Bool
     @State private var filled=0
     /// The breakdown's own words (`ScoreReadout`), so the recipe and every night's score name the same four parts.
@@ -41,7 +40,7 @@ struct ScoreAnatomy:View {
         .accessibilityLabel("Example score 94 out of 100. Share of the score: moonlight 40 percent, clouds 25, sky glow 20, and true darkness 15. 90 and above is Pristine, 75 Excellent, 60 Good.")
         .task(id:active) {
             guard active else { filled=0; return }
-            if systemReduceMotion || forcedReduceMotion { filled=parts.count; return }
+            if reduceMotion { filled=parts.count; return }
             for i in 1...parts.count {
                 try? await Task.sleep(for:.milliseconds(260))
                 withAnimation(NyxMotion.spring) { filled=i }

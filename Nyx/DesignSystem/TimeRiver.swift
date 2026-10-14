@@ -27,11 +27,9 @@ struct TimeRiver: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     @Environment(\.locale) private var locale
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let nights: [Night]
     @Binding var selected: Date
     /// False when the river starts on a chosen night instead of tonight.

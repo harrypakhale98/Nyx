@@ -3,8 +3,7 @@ import SwiftUI
 struct NightCell: View {
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let night:Night
     var highlighted:Bool=false
     /// What the ring means, for VoiceOver: "In the best stretch" or "In the darkest moon stretch".
@@ -72,7 +71,7 @@ struct NightCell: View {
             Circle().trim(from:0,to:ringDrawn ? 1 : 0).stroke(palette.accent.opacity(0.65),lineWidth:0.7*palette.stroke)
                 .rotationEffect(.degrees(-90)).frame(width:25*scale,height:25*scale)
         }
-        .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring.delay(ringDelay),value:ringDrawn)
+        .animation(reduceMotion ? nil : NyxMotion.spring.delay(ringDelay),value:ringDrawn)
     }
     private var spoken:String {
         if isPast { return [night.park.dayLabel(night.id),String(localized:"Past night")].joined(separator:". ") }
@@ -131,9 +130,7 @@ struct CalendarView: View {
     /// This window's commands, which carry its calendar requests.
     @Environment(SceneCommands.self) private var commands: SceneCommands?
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nyxAccess) private var access
     /// Kept for the window, so switching Plan to "My free nights" and back returns to this park.

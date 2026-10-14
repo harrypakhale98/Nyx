@@ -22,9 +22,7 @@ struct FieldView: View {
     @Environment(\.colorSchemeContrast) private var contrast
     @AppStorage(NightTint.key,store:SharedSettings.defaults) private var brighterRed=false
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     private var current: Page { page ?? initialPage }
     private var alarms: Binding<Bool> { Binding(get:{ alarmsShown ?? showsAlarms },set:{ alarmsShown=$0 }) }
     /// At accessibility sizes the eye's clock scrolls with the page instead of standing in the
@@ -231,8 +229,7 @@ struct FieldNightPager: View {
     /// At accessibility sizes and at compact height, "Your eyes started over" opens the page.
     var showsReset=false
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @ScaledMetric(relativeTo:.largeTitle) private var numeral=68.0
     var body: some View {
         TimelineView(.periodic(from:.now,by:30)) { _ in
@@ -266,7 +263,7 @@ struct FieldNightPager: View {
         }
     }
     private func dims(_ content:some View)->some View {
-        content.scrollTransition(.interactive) { [still = systemReduceMotion || forcedReduceMotion] view,phase in
+        content.scrollTransition(.interactive) { [still = reduceMotion] view,phase in
             view.scaleEffect(still || phase.isIdentity ? 1 : 0.96,anchor:.leading)
         }
     }

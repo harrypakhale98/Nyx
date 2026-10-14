@@ -8,8 +8,7 @@ import SwiftUI
 struct ParkPillPicker: View {
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     /// The other parks in reach, best first.
@@ -25,7 +24,7 @@ struct ParkPillPicker: View {
         Group {
             if solid { stack } else { GlassEffectContainer(spacing:10) { stack } }
         }
-        .animation(reduceMotion || forcedReduceMotion ? nil : NyxMotion.spring,value:open)
+        .animation(reduceMotion ? nil : NyxMotion.spring,value:open)
     }
     private var stack: some View {
         VStack(spacing:10) {
