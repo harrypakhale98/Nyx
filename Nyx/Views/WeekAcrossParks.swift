@@ -74,7 +74,7 @@ struct WeekAcrossParksPanel: View {
                 ForEach(Array(week.rows.enumerated()),id:\.element.id) { r,row in
                     HStack(spacing:2) {
                         Text(row.park.shortName).font(.system(.subheadline,design:.serif)).foregroundStyle(palette.ink)
-                            .lineLimit(2).fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
+                            .fixedSize(horizontal:false,vertical:true).frame(width:150,alignment:.leading)
                             .accessibilityAddTraits(.isHeader)
                         ForEach(Array(row.nights.enumerated()),id:\.offset) { n,night in
                             cell(night,at:WeekAcrossParks.Cell(row:r,night:n))
@@ -89,7 +89,7 @@ struct WeekAcrossParksPanel: View {
             .accessibilityRotor("Best nights this week") {
                 ForEach(rotorCells,id:\.self) { cell in
                     let night=week.rows[cell.row].nights[cell.night]
-                    AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:false)),id:cell,in:rotor)
+                    AccessibilityRotorEntry(Text(WeekAcrossParks.spoken(night,isBest:week.best == cell)),id:cell,in:rotor)
                 }
             }
             Text(access.differentiate ? "\(NightMark.legend) The ring marks the week's best night." : "Solid: forecast. Half-filled: an early look. Hollow: usual clouds. The ring marks the week's best night.")

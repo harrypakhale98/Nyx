@@ -22,7 +22,7 @@ struct AddNightToCalendar: View {
         .accessibilityHint("Opens a calendar event to review and save. Nyx does not read your calendars.")
         .accessibilityInputLabels([Text("Add to Calendar"),Text("Calendar")])
         .sheet(isPresented:$editing) {
-            CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { editing=false }.ignoresSafeArea()
+            CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { editing=false }.ignoresSafeArea().nyxPresentation()
         }
     }
 }

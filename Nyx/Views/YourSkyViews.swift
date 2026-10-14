@@ -276,14 +276,18 @@ struct YearRecapView: View {
         // Again for a night logged while the page is open.
         .task(id:[year,nights.count]) {
             let yearNights=nights.filter { $0.year==year }
-            reflection=nil
+            // A year left mid-reflection never finished its own reset.
+            reflection=nil; reflecting=false
             let asked=year, all=nights, parks=model.mapPlaces
             let made=await Task.detached(priority:.userInitiated) { YearRecap(year:asked,nights:all,parks:parks) }.value
             guard !Task.isCancelled else { return }
             recap=made
             guard made.nights>0, OnDeviceGuide.speaksYourLanguage, DebugScenario.screen == nil else { return }
             reflecting=true
-            reflection=await OnDeviceGuide.yearReflection(facts:made.facts,notes:yearNights.map(\.notes).filter { !$0.isEmpty })
+            let text=await OnDeviceGuide.yearReflection(facts:made.facts,notes:yearNights.map(\.notes).filter { !$0.isEmpty })
+            // Another year chosen meanwhile: its own task writes, never this one.
+            guard !Task.isCancelled else { return }
+            reflection=text
             reflecting=false
         }
     }

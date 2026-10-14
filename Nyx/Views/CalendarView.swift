@@ -277,7 +277,7 @@ struct CalendarView: View {
             .sensoryFeedback(.selection,trigger:monthOffset)
             .sensoryFeedback(.impact(weight:.light),trigger:ringsLit)
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
-            .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea() }
+            .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea().nyxPresentation() }
             .sheet(item:$recording) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
             .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }

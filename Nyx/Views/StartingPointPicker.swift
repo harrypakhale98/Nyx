@@ -37,7 +37,7 @@ struct StartingPointPicker: View {
             if typeSize.isAccessibilitySize { PlaceSearchField(text:$search,focus:$searchFocused).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top:8,leading:16,bottom:8,trailing:16)) }
             if locationOff { Section { Text("Location is off. Choose your city or the park closest to you.").font(.subheadline).foregroundStyle(palette.ink) }.listRowBackground(palette.panel) }
             if let nearMe, search.isEmpty, !locationOff {
-                Section { Button { dismiss(); nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:44,alignment:.leading) }.accessibilityLabel("Use my location") }.listRowBackground(palette.panel)
+                Section { Button { dismiss(); nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:44,alignment:.leading) }.accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }.listRowBackground(palette.panel)
             }
             if search.isEmpty {
                 Section { Text("Search for your city or town, such as Paris or Denver, or choose a park.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }.listRowBackground(palette.panel)

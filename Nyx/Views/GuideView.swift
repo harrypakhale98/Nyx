@@ -91,7 +91,7 @@ struct GuideView:View {
                 if !guide.lookups.isEmpty { GuideLookups(lines:guide.lookups) }
                 // The streaming words live in their own view, so each new part redraws only the
                 // answer, never the records below it.
-                GuideAnswerBlock(guide:guide,shown:shown,lit:$lit)
+                GuideAnswerBlock(guide:guide,shown:shown,places:recordPlaces,lit:$lit)
                 if let error=guide.error { Text(error).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if asked.isEmpty && !guide.loading { suggestionChips }
                 if case .learn = mode {
@@ -318,6 +318,8 @@ private struct GuideAnswerBlock: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     let guide:OnDeviceGuide
     let shown:[String]
+    /// Every place a record may name (`GuideView.recordPlaces`), so a chip names a spot or a place abroad too.
+    let places:[Park]
     @Binding var lit:Int?
     var body: some View {
         if guide.loading && guide.text.isEmpty { ConstellationLoader().frame(maxWidth:.infinity) }
@@ -367,7 +369,7 @@ private struct GuideAnswerBlock: View {
             Text("Sources").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
             FlowLayout(spacing:8) {
                 ForEach(guide.citations,id:\.self) { id in
-                    let record=all.indices.contains(id) ? GuideRecord(all[id],parks:model.parks,tonight:{ model.tonight($0) }) : nil
+                    let record=all.indices.contains(id) ? GuideRecord(all[id],parks:places,tonight:{ model.tonight($0) }) : nil
                     Button { lit=id; Task { try? await Task.sleep(for:.seconds(2)); if lit==id { lit=nil } } } label:{ GuideChip(text:Text(record?.chip(number:id+1) ?? String(localized:"Record \(id+1)"))) }
                         .buttonStyle(.plain)
                         .accessibilityHint("Shows this record below.")

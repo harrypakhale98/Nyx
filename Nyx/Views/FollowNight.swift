@@ -222,6 +222,8 @@ struct NightInProgressStrip: View {
             .accessibilityLabel(String(localized:"\(followed.attributes.parkName) tonight. \(status.line)"))
             .accessibilityHint("Opens field mode.")
             .accessibilityInputLabels([Text("Field mode"),Text(followed.attributes.parkName)])
+            // The strip's words are cut short at accessibility sizes: a long press shows them whole.
+            .accessibilityShowsLargeContentViewer { Label(String(localized:"\(followed.attributes.parkName) tonight. \(status.line)"),systemImage:status.symbol) }
             .contextMenu {
                 Button("Stop following",systemImage:"moon.stars") {
                     Task {

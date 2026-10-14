@@ -61,9 +61,7 @@ struct SpotPanel: View {
     @Environment(\.nyx) private var palette
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
     let spot: Park
-    @State private var copied=false
     @State private var renaming=false
     @State private var newName=""
     @State private var confirmingDelete=false
@@ -78,11 +76,7 @@ struct SpotPanel: View {
                     Text(clockLine).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }.accessibilityElement(children:.combine)
                 if !spot.description.isEmpty { Text(spot.description).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true) }
-                ViewThatFits(in:.horizontal) {
-                    HStack(spacing:10) { placeActions }
-                    VStack(alignment:.leading,spacing:6) { placeActions }
-                }
-                if copied { Text("Copied \(coordinates)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).transition(.opacity) }
+                CoordinateActions(latitude:spot.latitude,longitude:spot.longitude,shown:coordinates,copyHint:String(localized:"Copies \(coordinates)."),spacing:14)
                 Text(cloudLine).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 Divider().overlay(palette.line)
                 ViewThatFits(in:.horizontal) {
@@ -91,8 +85,6 @@ struct SpotPanel: View {
                 }
             }
         }
-        // A copy is a light tick: the success thump is the journal's alone.
-        .sensoryFeedback(.selection,trigger:copied) { _,new in new }
         .alert("Rename spot",isPresented:$renaming) {
             TextField("Name",text:$newName).textInputAutocapitalization(.words)
             Button("Cancel",role:.cancel) {}
@@ -104,20 +96,6 @@ struct SpotPanel: View {
         } message:{ Text("It leaves your saved places, widgets and reminders. Journal entries written there keep their words and photos.") }
         .alert("Unable to save",isPresented:$failed) { Button("OK",role:.cancel) {} } message:{
             Text(model.journalUnavailable ? "Saved spots are kept with your journal, which could not be opened. Nothing was changed." : "Your changes could not be stored. Try again when space is available.")
-        }
-    }
-    @ViewBuilder private var placeActions: some View {
-        Button {
-            PrivatePasteboard.copy("\(spot.latitude), \(spot.longitude)")
-            copied=true
-            Task { try? await Task.sleep(for:.seconds(3)); copied=false }
-        } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
-            .buttonStyle(.borderless).foregroundStyle(palette.accent)
-            .accessibilityHint(String(localized:"Copies \(coordinates)."))
-        if let url=MapsHandOff.directions(latitude:spot.latitude,longitude:spot.longitude) {
-            Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
-                .buttonStyle(.borderless).foregroundStyle(palette.accent)
-                .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")
         }
     }
     @ViewBuilder private var editActions: some View {

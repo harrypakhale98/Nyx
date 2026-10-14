@@ -95,7 +95,8 @@ struct RealSky: View {
             }
             .animation(.easeInOut(duration:0.6),value:seen)
         }
-        .motionTilt(!still)
+        // No tilt while a full-screen sky covers it, as it draws nothing new then.
+        .motionTilt(!still && !resting)
         .allowsHitTesting(false).accessibilityHidden(true)
         // A night sky, not an interface: Smart Invert leaves it dark.
         .accessibilityIgnoresInvertColors()
