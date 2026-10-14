@@ -40,12 +40,22 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
         return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, cache: &cache)
     }
     func timeline(for configuration: TonightParkIntent, in context: Context) async -> Timeline<WatchSkyEntry> {
+        await Self.noteFacePlaces()
         let now = Date.now, choice = Self.snapshot(for: configuration)
         if choice.unsaved {
             // Until the face is set to another place (or the place is saved again, which reloads every timeline).
             return Timeline(entries: [WatchSkyEntry(date: now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: now), unsaved: true)], policy: .never)
         }
         return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current), now: now)
+    }
+    /// Notes the places the Tonight complications on the faces are set to (`WatchSky.facePlaces`), so
+    /// the watch names them the next time it asks the iPhone for clouds. Left as it was when the
+    /// system cannot say.
+    static func noteFacePlaces() async {
+        guard let faces = try? await WidgetCenter.shared.currentConfigurations() else { return }
+        var seen = Set<String>()
+        WatchSky.facePlaces = faces.compactMap { $0.widgetConfigurationIntent(of: TonightParkIntent.self)?.park?.id }
+            .filter { $0 != WristParkEntity.darkestID && seen.insert($0).inserted }
     }
     /// The parks this complication weighs: the watch app's choice, or the one place set (a park, or a
     /// saved spot or world place the iPhone sent whole), with the clouds, the usual clouds and the

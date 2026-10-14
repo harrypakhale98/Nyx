@@ -50,16 +50,52 @@ nonisolated enum WatchSky {
         get { defaults.string(forKey: parkKey).flatMap { $0.isEmpty ? nil : $0 } }
         set { defaults.set(newValue ?? "", forKey: parkKey) }
     }
+    /// Why Tonight on the wrist weighs the places it does (`choice`).
+    enum Rule: Sendable, Equatable {
+        /// A place kept on Tonight from the watch.
+        case pinned
+        /// The places saved on iPhone.
+        case saved
+        /// Nothing saved: the place Tonight on the iPhone answered with (`WatchContext.tonightParkID`).
+        case iPhoneTonight
+        /// Nothing saved and no answer from Tonight on the iPhone: its starting park.
+        case start
+    }
     /// The parks Tonight and the complications weigh, in order: a park kept on the watch; else the
-    /// parks saved on iPhone; else the iPhone's starting park. Empty until one of those exists.
-    /// Saved spots and world catalogue places arrive whole in the context (`WatchContext.places`); a
-    /// bundled park keeps its id.
-    static func candidates(in parks: [Park], context: WatchContext?, pinned: String?) -> [Park] {
+    /// parks saved on iPhone; else the place Tonight on the iPhone answered with; else the iPhone's
+    /// starting park. Empty until one of those exists. Saved spots and world catalogue places arrive
+    /// whole in the context (`WatchContext.places`); a bundled park keeps its id.
+    static func choice(in parks: [Park], context: WatchContext?, pinned: String?) -> (parks: [Park], rule: Rule?) {
         let byID = Dictionary((parks + (context?.places ?? [])).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        if let pinned, let park = byID[pinned] { return [park] }
+        if let pinned, let park = byID[pinned] { return ([park], .pinned) }
         let saved = (context?.savedParkIDs ?? []).compactMap { byID[$0] }
-        if !saved.isEmpty { return saved }
-        return context.flatMap { byID[$0.homeParkID] }.map { [$0] } ?? []
+        if !saved.isEmpty { return (saved, .saved) }
+        if let park = context?.tonightParkID.flatMap({ byID[$0] }) { return ([park], .iPhoneTonight) }
+        if let park = context.flatMap({ byID[$0.homeParkID] }) { return ([park], .start) }
+        return ([], nil)
+    }
+    static func candidates(in parks: [Park], context: WatchContext?, pinned: String?) -> [Park] { choice(in: parks, context: context, pinned: pinned).parks }
+    /// One short line naming the rule where the screen does not already say it: Tonight's answer on
+    /// the iPhone, or its starting park. Nil for a kept or saved place.
+    static func caption(_ rule: Rule?) -> String? {
+        switch rule {
+        case .iPhoneTonight: String(localized: "Darkest near your iPhone tonight")
+        case .start: String(localized: "Starting park on iPhone")
+        case .pinned, .saved, nil: nil
+        }
+    }
+    static let facesKey = "watchFacePlaces"
+    /// The places complications on this watch's faces are set to, as they last found them
+    /// (`TonightComplicationProvider` notes them).
+    static var facePlaces: [String] {
+        get { defaults.stringArray(forKey: facesKey) ?? [] }
+        set { defaults.set(newValue, forKey: facesKey) }
+    }
+    /// The places this watch asks the iPhone to carry clouds for, once each: the one kept on Tonight,
+    /// then those its complications are set to.
+    static func wantedPlaces(pinned: String?) -> [String] {
+        var seen = Set<String>()
+        return ((pinned.map { [$0] } ?? []) + facePlaces).filter { seen.insert($0).inserted }
     }
     /// A place by id on the wrist: a bundled park, else a saved spot or catalogue place the iPhone
     /// sent whole (`WatchContext.places`). Nil for an id neither knows.

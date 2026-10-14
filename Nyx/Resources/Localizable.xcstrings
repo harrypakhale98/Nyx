@@ -18104,6 +18104,41 @@
         }
       }
     },
+    "Darkest near your iPhone tonight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute Nacht am dunkelsten nahe deinem iPhone"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darkest near your iPhone tonight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más oscuro esta noche cerca de tu iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le plus sombre ce soir près de votre iPhone"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今夜iPhoneの近くでいちばん暗い"
+          }
+        }
+      }
+    },
     "Darkest observed sky: %@, %@, Bortle %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -53864,6 +53899,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "出発地"
+          }
+        }
+      }
+    },
+    "Starting park on iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgangspark auf dem iPhone"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting park on iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parque de partida en el iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parc de départ sur l’iPhone"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhoneの出発地の公園"
           }
         }
       }
