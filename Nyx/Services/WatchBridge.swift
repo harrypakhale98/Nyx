@@ -27,6 +27,13 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         get { UserDefaults.standard.stringArray(forKey: WatchRequest.placesKey) ?? [] }
         set { UserDefaults.standard.set(newValue, forKey: WatchRequest.placesKey) }
     }
+    /// The number of the last context handed to WatchConnectivity (`WatchContext.sequence`), kept
+    /// across launches so the next one is always higher.
+    static var lastSequence: Int64? {
+        get { (UserDefaults.standard.object(forKey: sequenceKey) as? NSNumber)?.int64Value }
+        set { UserDefaults.standard.set(newValue.map { NSNumber(value: $0) }, forKey: sequenceKey) }
+    }
+    private static let sequenceKey = "watchContextSequence"
     /// False where no watch can ever pair (iPad), so nothing is worked out for one.
     static var isAvailable: Bool { WCSession.isSupported() }
     /// True only once the session is active with a paired watch that has Nyx on it. The models'
@@ -83,12 +90,20 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
             return
         }
         let context: WatchContext? = lock.withLock { latest }
-        guard let context, let data = context.data else { return }
+        guard let context else { return }
         // The same parks, forecasts, smoke, closures, ranges and switch as last time: nothing to say.
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         let comparable = try? encoder.encode(context.sent(at: .distantPast))
         guard comparable == nil || lock.withLock({ comparable != lastSent }) else { return }
+        // Numbered as it goes, so the watch tells it from an older one whatever this iPhone's clock
+        // says. Taken under the lock, so two sends never share a number; one that fails leaves a gap.
+        let sequence = lock.withLock { () -> Int64 in
+            let next = WatchContext.nextSequence(after: Self.lastSequence)
+            Self.lastSequence = next
+            return next
+        }
+        guard let data = context.numbered(sequence).data else { return }
         // Remembered only once delivered to WatchConnectivity, so a failed update is retried next time.
         do { try session.updateApplicationContext([WatchContext.key: data]) } catch { return }
         lock.withLock { lastSent = comparable }
