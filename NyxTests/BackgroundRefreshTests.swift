@@ -36,6 +36,28 @@ struct BackgroundRefreshTests {
         #expect(await waiting.value.cache == nil)
         await http.release()
     }
+    /// Programs and campgrounds wait as alerts do: a cancelled caller returns the cache at once,
+    /// even while another caller's request is still held.
+    @Test func cancelledProgramsAndCampgroundsCallersStopWaiting() async throws {
+        let p=try park()
+        let http=GatedHTTP(body: "{\"total\":\"0\",\"data\":[]}")
+        let store=ParkStore(transport: http, persist: false)
+        let first=Task { await store.programs(for: p, key: "test", network: true, force: true) }
+        try await waitUntilHeld(http)
+        let second=Task { await store.programs(for: p, key: "test", network: true, force: true) }
+        try await Task.sleep(for: .milliseconds(50))
+        second.cancel(); first.cancel()
+        #expect(await second.value == nil)
+        #expect(await first.value == nil)
+        await http.release()
+        let campsHTTP=GatedHTTP(body: "{\"total\":\"0\",\"data\":[]}")
+        let camps=ParkStore(transport: campsHTTP, persist: false)
+        let waiting=Task { await camps.campgrounds(for: [p], key: "test", network: true, force: true) }
+        try await waitUntilHeld(campsHTTP)
+        waiting.cancel()
+        #expect(await waiting.value == nil)
+        await campsHTTP.release()
+    }
     /// One page in the background: a set that needs more is not kept, the last complete one stays.
     @Test func backgroundAlertsAskForOnePage() async throws {
         let p=try park()

@@ -158,6 +158,33 @@ import Testing
         #expect(jotr.isoDay(jotr.lastNightBegun(at: try at(5, 10))) == "2026-12-04")
         #expect(jotr.isoDay(jotr.lastNightBegun(at: try at(5, 21))) == "2026-12-05")
     }
+    /// Recorded by voice without a date, a note lands on the night the editor would choose; a date
+    /// given is kept as it is.
+    @Test func spokenJournalEntryLandsOnTheLastNightBegun() throws {
+        let jotr = try park("jotr")
+        var pacific = Calendar(identifier: .gregorian); pacific.timeZone = jotr.timeZone
+        let late = try #require(pacific.date(from: DateComponents(year: 2026, month: 12, day: 5, hour: 1)))
+        #expect(jotr.isoDay(JournalAccess.entryDate(nil, park: jotr, now: late)) == "2026-12-04")
+        #expect(JournalAccess.entryDate(nil, park: jotr, now: late) <= late)
+        #expect(JournalAccess.entryDate(late, park: jotr, now: now) == late)
+        #expect(JournalAccess.entryDate(nil, park: nil, now: late) == late)
+    }
+    /// A spoken answer names a closure from the widgets' copy, else from the last park alerts on
+    /// disk while park alerts are on; never for a place the Park Service does not run.
+    @Test func spokenAnswersFindCachedClosures() throws {
+        let jotr = try park("jotr")
+        let cache = ParkAlertsCache(updated: now, alerts: ["jotr": [ParkAlert(id: "1", title: "Heat Danger", description: "", category: "Danger"),
+                                                                   ParkAlert(id: "2", title: "Geology Tour Road Closed", description: "", category: "Information")]])
+        let closure = IntentClosure.closure(jotr, shared: nil, enabled: true, cached: { _ in cache })
+        #expect(closure == ParkAlert(id: "2", title: "Geology Tour Road Closed", description: "", category: "Information").displayTitle(park: jotr))
+        #expect(IntentClosure.closure(jotr, shared: nil, enabled: false, cached: { _ in cache }) == nil)
+        var saved = SavedSkySnapshot(parks: [jotr], forecasts: [:])
+        saved.closures = ["jotr": "Park road closed"]
+        #expect(IntentClosure.closure(jotr, shared: saved, enabled: true, cached: { _ in cache }) == "Park road closed")
+        if let abroad = ParkLibrary.catalog().first { #expect(IntentClosure.closure(abroad, shared: nil, enabled: true, cached: { _ in cache }) == nil) }
+        let best = try #require(BestNightSearch.answer(parks: [jotr], planner: NightPlanner(forecasts: [:]), from: now, nights: 3, now: now))
+        #expect(BestNightSearch.dialog(best, voiceOnly: true, closure: closure).contains(try #require(closure)))
+    }
     @Test func bestNightDialogIsHonestAndShorterForVoice() throws {
         let jotr = try park("jotr")
         let planner = NightPlanner(forecasts: [:])

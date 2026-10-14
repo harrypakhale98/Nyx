@@ -46,9 +46,20 @@ struct DarknessIntent:AppIntent {
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
         // The park's closure from the app's last park update, said before the score.
         let answer=DarknessAnswer(park:selected,forecast:BestNightSearch.forecasts(for:[selected],shared:shared)[selected.id],
-                                  detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],closure:shared?.closures[selected.id],now:.now,voiceOnly:voiceOnly)
+                                  detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],closure:IntentClosure.closure(selected,shared:shared),now:.now,voiceOnly:voiceOnly)
         return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night))
     }
+}
+/// A place's closure for a spoken answer: the copy shared with the widgets (saved parks), else the
+/// app's own last park alerts on disk, never a request, while park alerts are on in Your privacy.
+nonisolated enum IntentClosure {
+    static func closure(_ park:Park,shared:SavedSkySnapshot?,enabled:Bool=alertsEnabled(),cached:(Park)->ParkAlertsCache?={ ParkStore.stored([$0]) })->String? {
+        if let saved=shared?.closures[park.id] { return saved }
+        guard enabled, let code=park.nps, let alerts=cached(park)?.alerts[code] else { return nil }
+        return AlertRanking.closure(alerts)?.displayTitle(park:park)
+    }
+    /// The Your privacy switch for the Park Service (on unless turned off).
+    static func alertsEnabled(_ defaults:UserDefaults = .standard)->Bool { defaults.object(forKey:"npsEnabled") as? Bool ?? true }
 }
 /// The darkness answer apart from the intent, so its words and value can be tested.
 nonisolated struct DarknessAnswer:Sendable {

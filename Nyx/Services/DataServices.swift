@@ -201,20 +201,7 @@ actor ForecastDetailService: DetailProviding {
         do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
             return Backoff.constrained(error) ? nil : []
         }
-        struct Response: Decodable { let hourly: [String: [Double?]] }
-        // One coordinate returns an object; several return an array in request order.
-        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
-        guard decoded.count == parks.count else { return [] }
-        let now=clock()
-        return zip(parks, decoded).compactMap { park, response in
-            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
-            var values: [String: [Double?]] = [:]
-            for key in keys {
-                guard let series=response.hourly[key], series.count == times.count else { return nil }
-                values[key]=series
-            }
-            return (park.id, HourlySeries(updated: now, times: times, values: values))
-        }
+        return OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: keys, now: clock())
     }
 }
 nonisolated struct ParkEnrichment: Codable, Sendable {
@@ -358,14 +345,17 @@ actor ParkStore: ParkProviding {
             programCache[park.id]=CacheDirectory.read(ProgramsCache.self, name: "programs-\(park.id)")
         }
         guard network, Self.usable(key) else { return programCache[park.id] }
-        while let running=programTasks[park.id] { await running.value }
+        // A cancelled caller stops waiting and returns what is cached, as for alerts.
+        while let running=programTasks[park.id] {
+            guard await SharedRequest.value(of: running) != nil else { return programCache[park.id] }
+        }
         guard Self.stale(programCache[park.id]?.updated, maxAge: 24*3600, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return programCache[park.id] }
         let task=Task {
             await self.fetchPrograms(park, key: key)
             self.programTasks[park.id]=nil
         }
         programTasks[park.id]=task
-        await task.value
+        _=await SharedRequest.value(of: task)
         return programCache[park.id]
     }
     /// Campgrounds change with the seasons, not the hour: one request for all the parks (so it
@@ -377,7 +367,9 @@ actor ParkStore: ParkProviding {
             if persist, campgroundCache == nil { campgroundCache=CacheDirectory.read(CampgroundsCache.self, name: "campgrounds") }
         }
         guard network, Self.usable(key) else { return campgroundCache }
-        while let running=campgroundsTask { await running.value }
+        while let running=campgroundsTask {
+            guard await SharedRequest.value(of: running) != nil else { return campgroundCache }
+        }
         guard Self.stale(campgroundCache?.updated, maxAge: Self.campgroundsFresh, force: force, now: clock()), backoff.allows(Self.host, now: clock()) else { return campgroundCache }
         let codes=Array(Set(parks.compactMap(\.nps))).sorted()
         let task=Task {
@@ -385,7 +377,7 @@ actor ParkStore: ParkProviding {
             self.campgroundsTask=nil
         }
         campgroundsTask=task
-        await task.value
+        _=await SharedRequest.value(of: task)
         return campgroundCache
     }
     static let campgroundsFresh: TimeInterval=7*86400
@@ -418,17 +410,8 @@ actor ParkStore: ParkProviding {
         return c.url
     }
     private func get<T: Decodable>(_ type: T.Type, _ url: URL?, key: String) async -> T? {
-        guard let url else { return nil }
-        do {
-            let data=try await transport.get(url, headers: ["X-Api-Key": key], constrained: true)
-            refused=false
-            backoff.succeeded(Self.host)
-            return try JSONDecoder().decode(type, from: data)
-        } catch {
-            if error is HTTPStatusError { refused=true }
-            backoff.record(error, host: Self.host, now: clock())
-            return nil
-        }
+        guard let data=await data(url, key: key, constrained: true) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
     }
     /// The body of a request that may wait for an unconstrained network: Low Data Mode holding it
     /// back is not a refusal and starts no backoff.

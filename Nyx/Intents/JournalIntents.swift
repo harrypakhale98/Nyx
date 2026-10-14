@@ -43,9 +43,10 @@ struct JournalEntryEntity: AppEntity {
     }
 }
 extension JournalEntryEntity {
-    /// `photos` reads every photo's file; lists and searches leave it off.
-    @MainActor init(_ entry: JournalEntry, photos: Bool) {
-        let park=JournalAccess.park(entry.parkID)
+    /// `photos` reads every photo's file; lists and searches leave it off. `snapshot`: the shared
+    /// settings, read once by the caller for every entry it lists.
+    @MainActor init(_ entry: JournalEntry, photos: Bool, snapshot: SavedSkySnapshot?) {
+        let park=JournalAccess.park(entry.parkID, snapshot: snapshot)
         id=entry.id
         title=park?.shortName
         message=entry.notes.isEmpty ? nil : AttributedString(entry.notes)
@@ -71,7 +72,7 @@ struct AddJournalEntryIntent: AppIntent {
     @Parameter(title: "Photos", supportedContentTypes: [.image])
     var mediaItems: [IntentFile]?
     func perform() async throws -> some ReturnsValue<JournalEntryEntity> {
-        let entry=try await JournalAccess.add(title: title, message: message, date: entryDate ?? .now, location: nil, files: mediaItems ?? [])
+        let entry=try await JournalAccess.add(title: title, message: message, date: entryDate, location: nil, files: mediaItems ?? [])
         return .result(value: entry)
     }
 }
@@ -95,7 +96,7 @@ struct AddJournalEntryIntent: AppIntent {
         guard !unavailable, let container else { throw NyxIntentError.journalUnavailable }
         return container
     }
-    nonisolated static func park(_ id: String) -> Park? { ParkLibrary.place(id) }
+    nonisolated static func park(_ id: String, snapshot: SavedSkySnapshot?) -> Park? { ParkLibrary.place(id, snapshot: snapshot) }
     /// The park's place for the journal schema: its coordinates and name, nothing looked up.
     nonisolated static func place(_ park: Park) -> PlaceDescriptor {
         PlaceDescriptor(representations: [.coordinate(CLLocationCoordinate2D(latitude: park.latitude, longitude: park.longitude))], commonName: park.name)
@@ -119,7 +120,8 @@ struct AddJournalEntryIntent: AppIntent {
         guard unlocked() else { throw NyxIntentError.journalLocked }
         var descriptor=descriptor
         descriptor.sortBy=[SortDescriptor(\.date, order: .reverse)]
-        return try store().mainContext.fetch(descriptor).map { JournalEntryEntity($0, photos: photos) }
+        let entries=try store().mainContext.fetch(descriptor), snapshot=SharedSettings.read()
+        return entries.map { JournalEntryEntity($0, photos: photos, snapshot: snapshot) }
     }
     /// Up to 20 entries whose words contain the text (ignoring case and accents), or whose park it names.
     static func entities(matching string: String) async throws -> [JournalEntryEntity] {
@@ -137,18 +139,26 @@ struct AddJournalEntryIntent: AppIntent {
         guard data.count<=PhotoScaling.maxSourceBytes else { return nil }
         return PhotoScaling.jpeg(data, maxPixels: 2400)
     }
-    static func add(title: String?, message: String, date: Date, location: PlaceDescriptor?, files: [IntentFile]) async throws -> JournalEntryEntity {
+    /// The night an entry belongs to when no date was given: the latest night begun at the park, as
+    /// the editor starts it, so a note made after midnight or at breakfast lands on the night before.
+    nonisolated static func entryDate(_ date: Date?, park: Park?, now: Date) -> Date {
+        if let date { return date }
+        return park.map { min(now, $0.lastNightBegun(at: now)) } ?? now
+    }
+    /// `date` nil: the latest night begun at the entry's park (`entryDate`).
+    static func add(title: String?, message: String, date: Date?, location: PlaceDescriptor?, files: [IntentFile]) async throws -> JournalEntryEntity {
         let store=try store()
         let inProgress=FieldActivities.current?.attributes.parkID
         let parkID=defaultParkID(location: location, inProgress: inProgress, home: UserDefaults.standard.string(forKey: "homePark"))
+        let snapshot=SharedSettings.read(), place=park(parkID, snapshot: snapshot)
         let notes=[title, message].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }.joined(separator: "\n\n")
         // Read and shrunk off the main thread: a photo can be tens of megabytes.
         let scaled=await Task.detached(priority: .userInitiated) { Array(files.lazy.compactMap(keepsake).prefix(PhotoScaling.perEntry)) }.value
-        let entry=JournalEntry(date: date, parkID: parkID, observedBortle: park(parkID)?.bortleEstimate ?? 3, notes: notes, photos: scaled)
+        let entry=JournalEntry(date: entryDate(date, park: place, now: .now), parkID: parkID, observedBortle: place?.bortleEstimate ?? 3, notes: notes, photos: scaled)
         entry.thumbnail=scaled.first.flatMap { PhotoScaling.jpeg($0, maxPixels: 900) }
         let context=store.mainContext
         context.insert(entry)
         do { try context.save() } catch { context.rollback(); throw NyxIntentError.journalUnavailable }
-        return JournalEntryEntity(entry, photos: true)
+        return JournalEntryEntity(entry, photos: true, snapshot: snapshot)
     }
 }

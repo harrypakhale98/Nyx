@@ -14,10 +14,12 @@ struct TonightProvider:AppIntentTimelineProvider {
         return builder.entry(at:.now)
     }
     func snapshot(for configuration:TonightWidgetIntent,in context:Context) async -> TonightEntry {
-        var snapshot=SharedSettings.read()
+        let saved=SharedSettings.read()
+        var snapshot=saved
         // The widget gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not "save a park".
         if context.isPreview, snapshot?.parks.isEmpty ?? true, configuration.park == nil { snapshot=Self.sample }
-        var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
+        var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park,snapshot:saved),
+                                    unsaved:Self.unsaved(configuration.park,snapshot:saved))
         // The gallery shows tonight; a placed widget shows the night its buttons moved to.
         if !context.isPreview { builder.stepScope=Self.stepScope(configuration,family:context.family) }
         return builder.entry(at:.now)
@@ -42,14 +44,14 @@ struct TonightProvider:AppIntentTimelineProvider {
         return family == .systemLarge || family == .systemExtraLarge
     }
     /// The park a widget was set to follow, from the bundled library, or a followed spot from the snapshot.
-    static func park(_ entity:ParkEntity?)->Park? {
+    static func park(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?)->Park? {
         guard let entity else { return nil }
-        return ParkLibrary.place(entity.id)
+        return ParkLibrary.place(entity.id,snapshot:snapshot)
     }
     /// The name of the place a widget or the control was set to when it no longer resolves: a saved
     /// spot deleted or a place abroad unsaved (the extension knows only the followed ones). The 63
     /// parks are bundled and always resolve. Nil when nothing was set or it resolves.
-    static func unsaved(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?=SharedSettings.read())->String? {
+    static func unsaved(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?)->String? {
         // Without a snapshot (Nyx not opened since install) nothing is known to be unsaved.
         guard let entity, let snapshot, entity.id.contains(":"), ParkLibrary.place(entity.id,snapshot:snapshot) == nil else { return nil }
         // A setting restored without its place keeps only the id: no name rather than the id itself.
@@ -59,8 +61,9 @@ struct TonightProvider:AppIntentTimelineProvider {
     /// so "tonight" turns over at the park's own sunrise rather than at the next hour, and one at
     /// each edge of a promising dusk, where the Smart Stack relevance changes.
     func timeline(for configuration:TonightWidgetIntent,in context:Context) async -> Timeline<TonightEntry> {
-        let now=Date.now
-        var builder=TonightTimeline(snapshot:SharedSettings.read(),large:Self.large(context.family),pinned:Self.park(configuration.park),unsaved:Self.unsaved(configuration.park))
+        let now=Date.now, snapshot=SharedSettings.read()
+        var builder=TonightTimeline(snapshot:snapshot,large:Self.large(context.family),pinned:Self.park(configuration.park,snapshot:snapshot),
+                                    unsaved:Self.unsaved(configuration.park,snapshot:snapshot))
         builder.stepScope=Self.stepScope(configuration,family:context.family)
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
         let end=hour.addingTimeInterval(23*3600)
@@ -106,15 +109,18 @@ struct TonightWidget:Widget {
 // MARK: The Moon
 
 struct MoonProvider:AppIntentTimelineProvider {
-    func placeholder(in context:Context)->MoonEntry { MoonEntry(date:.now,park:Self.park(nil),nightVision:false) }
+    func placeholder(in context:Context)->MoonEntry { MoonEntry(date:.now,park:Self.park(nil,snapshot:SharedSettings.read()),nightVision:false) }
     func snapshot(for configuration:MoonWidgetIntent,in context:Context) async -> MoonEntry {
-        MoonEntry(date:.now,park:Self.park(configuration.park),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),unsaved:TonightProvider.unsaved(configuration.park))
+        let snapshot=SharedSettings.read()
+        return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),
+                         unsaved:TonightProvider.unsaved(configuration.park,snapshot:snapshot))
     }
     /// Every hour for a day, plus each rise and set, so "up now" and the next event turn over on time.
     func timeline(for configuration:MoonWidgetIntent,in context:Context) async -> Timeline<MoonEntry> {
-        let now=Date.now, park=Self.park(configuration.park), vision=SharedSettings.defaults.bool(forKey:"nightVision")
+        let now=Date.now, snapshot=SharedSettings.read()
+        let park=Self.park(configuration.park,snapshot:snapshot), vision=SharedSettings.defaults.bool(forKey:"nightVision")
         // A deleted spot or unsaved place abroad: one entry that says so, as the Tonight widget does.
-        if let unsaved=TonightProvider.unsaved(configuration.park) {
+        if let unsaved=TonightProvider.unsaved(configuration.park,snapshot:snapshot) {
             return Timeline(entries:[MoonEntry(date:now,park:nil,nightVision:vision,unsaved:unsaved)],policy:.never)
         }
         let hour=Calendar.current.dateInterval(of:.hour,for:now)?.end ?? now.addingTimeInterval(3600)
@@ -124,9 +130,9 @@ struct MoonProvider:AppIntentTimelineProvider {
         return Timeline(entries:dates.map { MoonEntry(date:$0,park:park,nightVision:vision) },policy:.after(end))
     }
     /// The chosen park, else the first saved park, else Joshua Tree in the gallery's preview.
-    static func park(_ entity:ParkEntity?)->Park? {
-        if let entity { return ParkLibrary.place(entity.id) }
-        return SharedSettings.read()?.parks.first
+    static func park(_ entity:ParkEntity?,snapshot:SavedSkySnapshot?)->Park? {
+        if let entity { return ParkLibrary.place(entity.id,snapshot:snapshot) }
+        return snapshot?.parks.first
     }
 }
 /// The Moon on the Home Screen and the Lock Screen: never stale, because it needs no forecast.
@@ -182,7 +188,7 @@ struct TonightControlProvider:AppIntentControlValueProvider {
     func currentValue(configuration:TonightControlIntent) async throws -> TonightControlValue {
         let snapshot=SharedSettings.read()
         if TonightProvider.unsaved(configuration.park,snapshot:snapshot) != nil { return .unsaved }
-        return TonightControlValue(snapshot:snapshot,pinned:TonightProvider.park(configuration.park),now:.now)
+        return TonightControlValue(snapshot:snapshot,pinned:TonightProvider.park(configuration.park,snapshot:snapshot),now:.now)
     }
 }
 #Preview(as:.systemSmall) { TonightWidget() } timeline:{ TonightEntry(date:.now,night:nil,nightVision:false) }

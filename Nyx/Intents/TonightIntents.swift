@@ -41,7 +41,7 @@ struct DarkTonightIntent: AppIntent {
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:now))
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        let closure=SharedSettings.read()?.closures[selected.id]
+        let closure=IntentClosure.closure(selected,shared:SharedSettings.read())
         let dialog=DarkWindowAnswer.dialog(park:selected,sky:sky,closure:closure,voiceOnly:voiceOnly)
         return .result(value:sky.darkStart ?? sky.sunset ?? sky.evening,dialog:IntentDialog(stringLiteral:dialog))
     }
@@ -99,7 +99,7 @@ struct WhatsUpTonightIntent: AppIntent {
         let whatsUp=WhatsUp(park:selected,sky:sky,isTonight:true)
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        let closure=SharedSettings.read()?.closures[selected.id]
+        let closure=IntentClosure.closure(selected,shared:SharedSettings.read())
         let dialog=WhatsUpAnswer.dialog(whatsUp,park:selected,closure:closure,voiceOnly:voiceOnly)
         return .result(dialog:IntentDialog(stringLiteral:dialog))
     }
