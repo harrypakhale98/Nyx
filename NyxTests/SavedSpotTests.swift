@@ -125,7 +125,7 @@ struct SavedSpotTests {
     /// in the open ocean, the meridian's zone and no country.
     @Test func aNewSpotIsPlacedOnThisDevice() throws {
         let spot=SavedSpots.make(name: "Pinto Basin", latitude: 33.92, longitude: -115.88, now: Date(timeIntervalSince1970: 1_790_000_000))
-        #expect(spot.id.hasPrefix("pin:") && DeepLink.placeID(spot.id) == spot.id)
+        #expect(spot.id.hasPrefix("pin:") && PlaceIDText.validated(spot.id) == spot.id)
         #expect(spot.latitude == 33.92 && spot.longitude == -115.88 && spot.createdAt == Date(timeIntervalSince1970: 1_790_000_000))
         #expect(spot.timeZoneID == "America/Los_Angeles" && spot.countryCode == "US" && spot.region == "CA")
         let sea=SavedSpots.locality(latitude: 0, longitude: -140)

@@ -84,8 +84,11 @@ struct LaunchRoutingTests {
             #expect(ParkHandoff(userInfo: ["park": bad]) == nil, "\(bad)")
         }
         // The same rule as links.
-        for raw in ["jotr", "JOTR", "wd:Q24451", "wd%3AQ24451", "WD:q24451", "pin:00000000-0000-4000-8000-0000000000AB", "../x", "wd:Q0123", "pin:nope"] {
-            #expect(PlaceIDText.validated(raw) == DeepLink.placeID(raw), "\(raw)")
+        let stored: [String: String?]=["jotr": "jotr", "JOTR": "jotr", "wd:Q24451": "wd:Q24451", "wd%3AQ24451": "wd:Q24451", "WD:q24451": "wd:Q24451",
+                                        "pin:00000000-0000-4000-8000-0000000000AB": "pin:00000000-0000-4000-8000-0000000000ab", "../x": nil, "wd:Q0123": nil, "pin:nope": nil]
+        for (raw, id) in stored {
+            #expect(PlaceIDText.validated(raw) == id, "\(raw)")
+            #expect(URL(string: "nyx://park/\(raw)").flatMap(DeepLink.init) == id.map(DeepLink.park), "\(raw)")
         }
     }
 

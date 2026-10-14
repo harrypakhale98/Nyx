@@ -94,7 +94,7 @@ struct WristParkQuery: EntityQuery {
         return identifiers.compactMap { id in
             if id == WristParkEntity.darkestID { return .darkest }
             if let place = WatchSky.place(id, in: parks, context: context) { return WristParkEntity(place) }
-            return WatchLink.placeID(id) == id && id.contains(":") ? WristParkEntity(id: id, name: String(localized: "No longer saved")) : nil
+            return PlaceIDText.validated(id) == id && id.contains(":") ? WristParkEntity(id: id, name: String(localized: "No longer saved")) : nil
         }
     }
     /// Darkest saved park, then the saved parks, then every park.
