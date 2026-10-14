@@ -46,6 +46,14 @@ struct ParksTab: View {
         if let atFold { return (atFold,atFold,atFold) }
         return returningFlat ? (390,390,390) : (330,390,460)
     }
+    /// The park column's range while the list is held at the fold: as narrow as the other half. Open flat, the
+    /// split's own minimum for the park is wider than that half, so it floated the list over a dimmed park
+    /// instead of setting them side by side (half open it tiles them either way). Nil without the fold.
+    nonisolated static func parkColumn(atFold:Double?,width:Double)->(min:Double,ideal:Double,max:Double)? {
+        guard let atFold else { return nil }
+        let rest=(width-atFold).rounded(.down)
+        return (min(330,rest),rest,rest)
+    }
     /// How far the park keeps from its column's leading edge: the fold's width while the list ends at the
     /// fold and is shown; nothing when the person hides the list (the park then reads the fold itself).
     nonisolated static func parkInset(fold:Fold?,listAtFold:Double?,listShown:Bool)->Double {
@@ -79,6 +87,7 @@ struct ParksTab: View {
                     // its index and its bar (Back among it) sit on the other half rather than on the crease.
                     // Padding rather than safe area: bars and the park's pinned index extend into a safe area.
                     .padding(.leading,ParksTab.parkInset(fold:fold,listAtFold:listAtFold,listShown:columnVisibility != .detailOnly))
+                    .modifier(ParkColumnWidth(range:ParksTab.parkColumn(atFold:listAtFold,width:width)))
                 }
                 .navigationSplitViewStyle(.balanced)
             } else {
@@ -136,5 +145,13 @@ struct ParksTab: View {
                 .help(showsMap ? "Show list" : "Show map")
                 .sensoryFeedback(.selection,trigger:showsMap)
         }
+    }
+}
+
+/// The park column's width range, where the list is held at the fold (`ParksTab.parkColumn`); the split's own otherwise.
+private struct ParkColumnWidth: ViewModifier {
+    let range:(min:Double,ideal:Double,max:Double)?
+    func body(content: Content) -> some View {
+        if let range { content.navigationSplitViewColumnWidth(min:range.min,ideal:range.ideal,max:range.max) } else { content }
     }
 }
