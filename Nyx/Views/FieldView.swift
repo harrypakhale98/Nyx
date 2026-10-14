@@ -46,6 +46,8 @@ struct FieldView: View {
         return (CGFloat(leading), CGFloat(fold.width))
     }
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
+    /// The night's pages, beside the sky or on their own.
+    private var nightPager: some View { FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage) }
     private var basisNote: String? {
         guard !session.score.hasForecast else { return nil }
         return session.score.basis.isEarlyLook ? String(localized:"Early look: the forecast is eased toward usual clouds.") : String(localized:"No cloud forecast yet. This score uses the park's usual clouds.")
@@ -69,13 +71,13 @@ struct FieldView: View {
                     // On iPhone Duo's inner display, the hairline is the fold itself and each page keeps to its side.
                     let split=foldSplit
                     HStack(spacing:0) {
-                        FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage).frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
+                        nightPager.frame(width:split?.leading).frame(maxWidth:split == nil ? .infinity : nil)
                         Rectangle().fill(palette.line).frame(width:split == nil ? 0.5 : 0).padding(.vertical,24).frame(width:split?.gap).accessibilityHidden(true)
                         FieldCompassView(session:session,fixedPose:fixedPose).frame(maxWidth:.infinity)
                     }
                 } else {
                     switch current {
-                    case .night: FieldNightPager(session:session,focused:$focused,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage)
+                    case .night: nightPager
                     case .look: FieldCompassView(session:session,fixedPose:fixedPose,eyeClock:inline ? $aboutEyes : nil,note:inline ? basisNote : nil,showsReset:resetInPage)
                     }
                 }
@@ -373,6 +375,7 @@ struct EyeClock: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityElement(children:.ignore)
+                .accessibilityAddTraits(.isButton)
                 .accessibilityLabel(adaptation.stage(at:now) == .rods ? String(localized:"Dark adaptation: rods taking over. Your faint-light vision is waking up.") : String(localized:"Dark adaptation: \(title(adaptation.stage(at:now)))"))
                 .accessibilityValue(String(localized:"\(minutes) of about 30 minutes. An estimate."))
                 .accessibilityHint(expanded ? "Hides how this works" : "Explains how this works")

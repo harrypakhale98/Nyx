@@ -65,7 +65,7 @@ struct TimeRiver: View {
     private var current:Night? { index.map { nights[$0] } }
     /// The three best nights, at least Good, receive the amber glow: by score, which beyond the
     /// forecast already counts the park's usual clouds, never a clear sky.
-    private var peaks:Set<Int> { Self.peaks(nights.map(\.rankScore)) }
+    private var peaks:Set<Int> { Set(peakOrder) }
     /// The night on the river that `date` falls in: its evening (`Park.evening`, noon of the same
     /// park-local day) matched against each night's own, so one calendar is made, not one per night.
     nonisolated static func index(of date:Date,in nights:[Night])->Int? {
@@ -74,8 +74,10 @@ struct TimeRiver: View {
         return nights.firstIndex { $0.id==evening }
     }
     /// The (at most three) best nights at least Good, by rank; the earlier night on a tie.
-    nonisolated static func peaks(_ ranks:[Int])->Set<Int> {
-        Set(ranks.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
+    nonisolated static func peaks(_ ranks:[Int])->Set<Int> { Set(peakOrder(ranks)) }
+    /// The same nights, best first.
+    nonisolated static func peakOrder(_ ranks:[Int])->[Int] {
+        Array(ranks.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0, lensSize=30.0
     /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may
@@ -382,10 +384,7 @@ struct TimeRiver: View {
     }
     private var showsTip:Bool { DebugScenario.screen == nil || DebugScenario.isEnabled("river-tip") }
     /// The glowing nights, best first.
-    private var peakOrder:[Int] {
-        let ranks=nights.map(\.rankScore)
-        return peaks.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }
-    }
+    private var peakOrder:[Int] { Self.peakOrder(nights.map(\.rankScore)) }
 
     /// A score's height on the river, as `draw` places it.
     private func y(_ score:Int,height:Double)->Double {

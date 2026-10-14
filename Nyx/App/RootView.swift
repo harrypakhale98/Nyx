@@ -81,7 +81,7 @@ struct RootView:View {
                         // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
-                        .springLoadingBehavior(NightDragPolicy.drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
+                        .springLoadingBehavior(NightDragPolicy.drags(horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
