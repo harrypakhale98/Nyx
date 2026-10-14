@@ -19,6 +19,8 @@ struct PlannerWindow: View {
     @State private var showPrivacy = VisionDebug.isEnabled("vision-privacy")
     /// True while the sky is opening or closing, so a second tap cannot start a second transition.
     @State private var skyBusy = false
+    /// Whether this window is counted in `model.plannerWindows`.
+    @State private var counted = false
     var body: some View {
         @Bindable var model = model
         let palette = VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency)
@@ -86,9 +88,10 @@ struct PlannerWindow: View {
             guard scenePhase == .active else { return }
             await model.keepClock()
         }
-        // The Moon volume offers a way back here only while every planner window is closed.
-        .onAppear { model.plannerWindows += 1 }
-        .onDisappear { model.plannerWindows = max(0, model.plannerWindows-1) }
+        // The Moon volume offers a way back here only while every planner window is closed. A window
+        // counts while it is on screen: closed, its scene goes to the background before it disappears.
+        .onAppear { count(true) }
+        .onDisappear { count(false) }
         // While the window is in use: the parks' cloud forecast, asked for again only when six hours old.
         .task(id: scenePhase == .active) {
             guard scenePhase == .active else { return }
@@ -108,10 +111,12 @@ struct PlannerWindow: View {
         // Siri or Shortcuts asked for a park, or to stand under its sky: answered once this window is active.
         .task(id: Asked(request: model.intentRequest?.id, active: scenePhase == .active)) { await answerIntent() }
         .onChange(of: scenePhase) { _, phase in
-            // The window holds every control for the sky. Closed, it would leave someone standing
-            // in a sky they cannot change or leave except by the Digital Crown, so the sky closes
-            // with it. Opening Nyx again brings the window back.
-            guard phase == .background, model.immersiveOpen, !VisionDebug.isEnabled("vision-skyonly") else { return }
+            count(phase != .background)
+            // The window holds every control for the sky. With the last one closed, it would leave
+            // someone standing in a sky they cannot change or leave except by the Digital Crown, so
+            // the sky closes with it; another planner window still open keeps it. Opening Nyx again
+            // brings the window back.
+            guard phase == .background, model.plannerWindows == 0, model.immersiveOpen, !VisionDebug.isEnabled("vision-skyonly") else { return }
             Task { await dismissImmersiveSpace(); model.immersiveOpen = false }
         }
     }
@@ -124,6 +129,12 @@ struct PlannerWindow: View {
         .disabled(skyBusy || model.plan == nil)
         .accessibilityHint(open ? Text("Returns to the room. The window stays where it is.")
                                 : Text("Surrounds you with this park's computed sky at the time on the clock below the window"))
+    }
+    /// Counts this window among the open planner windows, or no longer, once each way.
+    private func count(_ open: Bool) {
+        guard open != counted else { return }
+        counted = open
+        model.plannerWindows = max(0, model.plannerWindows+(open ? 1 : -1))
     }
     private struct Asked: Hashable { let request: UUID?; let active: Bool }
     /// Opens the asked-for park on tonight, and its sky when asked. The first planner window to be

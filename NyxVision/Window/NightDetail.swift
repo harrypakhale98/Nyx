@@ -85,9 +85,11 @@ struct NightDetail: View {
         return limit.cap < score.partsSum ? limit.sentence(tonight: model.nightOffset == 0) : nil
     }
     private func moon(_ plan: NightPlan) -> some View {
-        VStack(spacing: 10) {
+        // One figure for the eye and VoiceOver: the night's, as the list and the iPhone give it.
+        let lit = Int((plan.sky.moon.illumination*100).rounded())
+        return VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: String(localized: "Moon, \(plan.sky.moon.name), \(Int((plan.moon.illumination*100).rounded())) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
+                       label: String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
                 .frame(width: moonSide, height: moonSide)
                 .background {
                     // A piece of night behind the Moon, so even a new moon reads as a disc against the sky.
@@ -98,7 +100,7 @@ struct NightDetail: View {
                 }
                 .shadow(color: palette.ink.opacity(0.12*plan.moon.illumination), radius: 30)
             Text(plan.sky.moon.name).font(.system(.headline, design: .serif))
-            Text("\(Int((plan.sky.moon.illumination*100).rounded()))% lit").font(.subheadline).foregroundStyle(palette.muted)
+            Text("\(lit)% lit").font(.subheadline).foregroundStyle(palette.muted)
         }
     }
 
@@ -120,7 +122,7 @@ struct NightDetail: View {
         // Three columns side by side; stacked at accessibility sizes, where columns would clip.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
-        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(Int(sky.moonBelowFraction*100))% of true darkness")
+        let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(Int((sky.moonBelowFraction*100).rounded()))% of true darkness")
             : String(localized: "The Moon counts only in true darkness, and this night has none.")
         return layout { factCells(darkness, hours, moonLine, moonNote, park) }
     }
