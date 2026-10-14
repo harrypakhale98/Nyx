@@ -364,7 +364,11 @@ final class AccessibilityAuditTests:XCTestCase {
             // title the card's width (2026-10-09) and starting it on a whole point did not change the text's own frame.
             // Standard text sizes only: at AX5 the cards stand one to a row, and a clipped title there is measured.
             let learnTitle=screen=="learn" && pass != "ax5" && UIDevice.current.userInterfaceIdiom == .pad && issue.element?.elementType == .staticText && issue.element?.label=="Watching a meteor shower"
-            return !visible || pastHomeIndicator || learnTitle || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
+            // iPad Your privacy (2026-10-14): the four- and five-line caption under Smoke and haze and under Park alerts, in some
+            // runs only (default and night vision), on iOS 27. The audit's own captures show both in full, down to "IP address.";
+            // the same quirk as the Learn title. These network captions only, at standard sizes; AX5 still measures them.
+            let privacyCaption=screen=="privacy" && pass != "ax5" && UIDevice.current.userInterfaceIdiom == .pad && issue.element?.elementType == .staticText && (issue.element?.label ?? "").hasSuffix("network information such as your IP address.")
+            return !visible || pastHomeIndicator || learnTitle || privacyCaption || issue.element?.elementType == .searchField || issue.element?.label=="Park or state" || (screen=="editor" && issue.element?.label=="Choose photos")
         case .elementDetection:
             // Decorative "NYX" wordmark and the time river's Canvas-drawn dates; the river element speaks the full value.
             // The sky map's Canvas-drawn inset names (Alaska, Hawaiʻi, Am. Samoa, Virgin Is.): decoration; each star is a
