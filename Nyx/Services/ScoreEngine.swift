@@ -10,6 +10,11 @@ extension ScoreProviding {
     }
 }
 nonisolated struct ScoreEngine: ScoreProviding {
+    /// The scoring rules' version: bump it with any change here (or in what the score reads: the
+    /// astronomy, the cloud basis, the caps) that can move a score. Apple Watch compares it, with the
+    /// bundled parks and usual clouds (`WatchContext.bundledData`), and says when its Nyx and the
+    /// iPhone's would score the same night differently.
+    static let rulesVersion = 1
     /// Four parts are added, then the weakest link caps the sum.
     ///
     /// **Parts**: 40 moon + 25 clouds + 20 Bortle + 15 duration.

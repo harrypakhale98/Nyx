@@ -213,16 +213,25 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         if let next = context.sequence, let last = previous.sequence { return next > last }
         return context.sent > previous.sent
     }
-    /// The bundled data every score rests on (the parks, their usual clouds and their measured sky
-    /// glow) as a short fingerprint: 64-bit FNV-1a over the three files' bytes, in hex. Read once;
-    /// nil when a file is missing.
+    /// The bundled data and rules every score rests on, as a short fingerprint: each park's id,
+    /// coordinates, time zone, Bortle estimate and summit flag, each park's usual clouds month by
+    /// month, and `ScoreEngine.rulesVersion`, in a fixed text form, hashed with 64-bit FNV-1a, in hex.
+    /// Descriptions, sources, viewing spots and the measured sky glow (which only breaks ties) are
+    /// left out, so an edit to words never reads as different scores. Read once; nil when a file is missing.
     static let bundledData: String? = bundledData(in: .main)
     static func bundledData(in bundle: Bundle) -> String? {
-        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
-        for name in ["parks", "cloud-climate", "skyglow"] {
-            guard let url = bundle.url(forResource: name, withExtension: "json"), let data = try? Data(contentsOf: url) else { return nil }
-            for byte in data { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
+        guard let parks = try? ParkData.load(bundle: bundle), let climate = CloudClimate.load(bundle) else { return nil }
+        return fingerprint(parks: parks, climate: climate.parks)
+    }
+    static func fingerprint(parks: [Park], climate: [String: CloudClimate.Months], rules: Int = ScoreEngine.rulesVersion) -> String {
+        func values(_ months: [Int?]) -> String { months.map { $0.map(String.init) ?? "-" }.joined(separator: ",") }
+        var text = "rules \(rules)\n"
+        for park in parks.sorted(by: { $0.id < $1.id }) {
+            text += "\(park.id)|\(park.latitude)|\(park.longitude)|\(park.timeZoneID)|\(park.bortleEstimate)|\(park.aboveInversion == true)\n"
         }
+        for (id, months) in climate.sorted(by: { $0.key < $1.key }) { text += "\(id)|\(values(months.cloud))|\(values(months.clear))\n" }
+        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
+        for byte in text.utf8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
         return String(hash, radix: 16)
     }
     /// True when the iPhone's bundled data differs from this device's: the watch then asks to be
@@ -231,9 +240,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         guard let dataVersion, let mine = Self.bundledData else { return false }
         return dataVersion != mine
     }
-    /// When the iPhone runs a Nyx whose parks or usual clouds differ from this watch's, the same
-    /// night could score differently on each: said plainly, on the watch.
-    var dataNote: String? { dataDiffers ? String(localized: "Update Nyx on Apple Watch for matching scores.") : nil }
+    /// When the iPhone runs a Nyx whose parks, usual clouds or scoring rules differ from this
+    /// watch's, the same night could score differently on each: said plainly, on the watch, without
+    /// guessing which of the two is older.
+    var dataNote: String? { dataDiffers ? String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") : nil }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
         let parts = park.calendar.dateComponents([.year, .month, .day], from: evening)
