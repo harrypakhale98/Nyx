@@ -51,7 +51,7 @@ nonisolated struct TonightMap: Sendable {
                                score:night.score.value,band:night.score.band,fill:night.basis.fill,closure:closure,label:parts.joined(separator:". ")))
         }
         marks=Self.geographic(built.map(\.1))
-        darkest=built.sorted { NightPlanner.better($0.0,$1.0) }.map(\.1)
+        darkest=built.sorted { NightPlanner.better($0.0,$1.0,closures:closures) }.map(\.1)
         self.inView=max(inView ?? built.count,built.count)
         let across=built.map(\.1).sorted { $0.point.x != $1.point.x ? $0.point.x<$1.point.x : $0.id<$1.id }
         let count=Double(max(1,across.count))

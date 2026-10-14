@@ -106,8 +106,8 @@ nonisolated enum TripPlanner {
         min(max(last, first), latestLast(first: first, weekendsOnly: weekendsOnly))
     }
     /// A closure in the last park update costs a park this many points in the assignment only; the
-    /// score shown is never changed. A closed road beats a slightly darker sky every time.
-    static let closurePenalty = 10
+    /// score shown is never changed. The same penalty every best night uses (`NightPlanner.closurePenalty`).
+    static let closurePenalty = NightPlanner.closurePenalty
     /// The nights of a trip, first to last inclusive, at most `maxNights` of them (counted after the
     /// weekend filter, so "weekends only" can span seven weekends).
     static func days(first: TripDay, last: TripDay, weekendsOnly: Bool, calendar: Calendar = .current) -> [TripDay] {

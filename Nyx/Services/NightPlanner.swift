@@ -120,13 +120,13 @@ nonisolated struct NightPlanner: Sendable {
     private func nights(_ park: Park, first: Date, count: Int, now: Date) -> [Night] {
         (0..<min(60, max(1, count))).map { night(park, on: park.date(first, addingDays: $0), now: now) }
     }
-    /// The best nights across parks, ranked by `better`.
-    func bestNights(_ parks: [Park], from start: Date, count: Int, now: Date, limit: Int = 3) -> [Night] {
-        Array(Self.ranked(parks.flatMap { nights($0, from: start, count: count, now: now) }).prefix(max(0, limit)))
+    /// The best nights across parks, ranked by `better`, a closure counting against its park's nights.
+    func bestNights(_ parks: [Park], from start: Date, count: Int, now: Date, limit: Int = 3, closures: [String: String] = [:]) -> [Night] {
+        Array(Self.ranked(parks.flatMap { nights($0, from: start, count: count, now: now) }, closures: closures).prefix(max(0, limit)))
     }
     /// The same, from a picked day.
-    func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3) -> [Night] {
-        Array(Self.ranked(parks.flatMap { nights($0, day: day, count: count, now: now) }).prefix(max(0, limit)))
+    func bestNights(_ parks: [Park], day: DateComponents, count: Int, now: Date, limit: Int = 3, closures: [String: String] = [:]) -> [Night] {
+        Array(Self.ranked(parks.flatMap { nights($0, day: day, count: count, now: now) }, closures: closures).prefix(max(0, limit)))
     }
     /// Best first, by score. Every night's score already counts clouds (forecast, early look or
     /// the park's usual clouds), so scores compare directly. Ties, which are common near new moon,
@@ -156,6 +156,21 @@ nonisolated struct NightPlanner: Sendable {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
     }
     static func ranked(_ nights: [Night]) -> [Night] { nights.sorted(by: better) }
+    /// A closure in its park's last update costs a night this many points wherever a best night is
+    /// picked (the trip planner, Siri's best night, the week's ring, the map's darkest first), so
+    /// every surface picks the same night; the score shown never changes. A closed road beats a
+    /// slightly darker sky every time.
+    static let closurePenalty = 10
+    /// `better`, with each closed park's nights `closurePenalty` points down (`closures`: park id →
+    /// closure, as the app words it).
+    static func better(_ a: Night, _ b: Night, closures: [String: String]) -> Bool {
+        let va = a.rankScore-(closures[a.park.id] == nil ? 0 : closurePenalty), vb = b.rankScore-(closures[b.park.id] == nil ? 0 : closurePenalty)
+        if va != vb { return va > vb }
+        return better(a, b)
+    }
+    static func ranked(_ nights: [Night], closures: [String: String]) -> [Night] {
+        closures.isEmpty ? ranked(nights) : nights.sorted { better($0, $1, closures: closures) }
+    }
     static func best(_ nights: [Night]) -> Night? { ranked(nights).first }
     /// Where a park's measured sky glow sits among the 63 park centres, 0 (darkest) to 1
     /// (brightest); 1 when unknown. NASA Black Marble (`skyglow.json`) separates the 35 parks a
