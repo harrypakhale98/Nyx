@@ -50,13 +50,23 @@ struct DarknessIntent:AppIntent {
         return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night))
     }
 }
-/// A place's closure for a spoken answer: the copy shared with the widgets (saved parks), else the
-/// app's own last park alerts on disk, never a request, while park alerts are on in Your privacy.
+/// A place's closure for a spoken answer or a followed night, from whichever is newer: the copy
+/// shared with the widgets, or the app's own last park alerts on disk (while park alerts are on in
+/// Your privacy). Never a request. A closure the newer alerts cleared is never said.
 nonisolated enum IntentClosure {
     static func closure(_ park:Park,shared:SavedSkySnapshot?,enabled:Bool=alertsEnabled(),cached:(Park)->ParkAlertsCache?={ ParkStore.stored([$0]) })->String? {
-        if let saved=shared?.closures[park.id] { return saved }
-        guard enabled, let code=park.nps, let alerts=cached(park)?.alerts[code] else { return nil }
+        let saved=shared?.closures[park.id]
+        guard enabled, let code=park.nps, let cache=cached(park) else { return saved }
+        // The shared copy stands when it was made from these alerts or newer ones, and for a park the
+        // alerts on disk do not cover (each fetch lists every park asked for, with or without alerts).
+        if let stamp=shared?.closuresUpdated, stamp>=cache.updated { return saved }
+        guard let alerts=cache.alerts[code] else { return saved }
         return AlertRanking.closure(alerts)?.displayTitle(park:park)
+    }
+    /// Every closure among these places, by park id, with the alerts on disk read once.
+    static func closures(_ parks:[Park],shared:SavedSkySnapshot?,enabled:Bool=alertsEnabled())->[String:String] {
+        let cache=enabled ? ParkStore.stored(parks) : nil
+        return Dictionary(parks.compactMap { park in closure(park,shared:shared,enabled:enabled,cached:{ _ in cache }).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
     /// The Your privacy switch for the Park Service (on unless turned off).
     static func alertsEnabled(_ defaults:UserDefaults = .standard)->Bool { defaults.object(forKey:"npsEnabled") as? Bool ?? true }

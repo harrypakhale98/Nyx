@@ -208,7 +208,7 @@ import WidgetKit
     /// Writes the snapshot and, only when it says something new (or new Moon pictures were drawn),
     /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
     @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
-        let snapshot=Self.snapshot(parks:parks,followed:followed(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model))
+        let snapshot=Self.snapshot(parks:parks,followed:followed(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model),closuresUpdated:model.alertsUpdated)
         if SharedSettings.write(snapshot) || moonsDrawn {
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
@@ -221,10 +221,10 @@ import WidgetKit
     /// read), with the forecasts and detail of every followed place, so a widget or the control set
     /// to a park that is not saved scores it from the same forecast the app does. Saved spots and
     /// world places carry their usual clouds from the grid, which the widgets do not bundle.
-    nonisolated static func snapshot(parks:[Park],followed:[Park],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String])->SavedSkySnapshot {
+    nonisolated static func snapshot(parks:[Park],followed:[Park],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String],closuresUpdated:Date?=nil)->SavedSkySnapshot {
         let ids=Set((parks+followed).map(\.id))
         return SavedSkySnapshot(parks:parks,forecasts:forecasts.filter { ids.contains($0.key) },details:details.filter { ids.contains($0.key) },closures:closures,
-                                usualClouds:CloudClimate.shared.carriedMonths(for:parks+followed))
+                                usualClouds:CloudClimate.shared.carriedMonths(for:parks+followed),closuresUpdated:closuresUpdated)
     }
     /// Publishes what is cached again, with no request: after a change that alters scores without
     /// new data (switching "Smoke and haze" off).
@@ -328,7 +328,7 @@ import WidgetKit
         if defaults.bool(forKey:"notificationsEnabled") { await NotificationScheduler().reschedule(nights:nights,showers:showers,details:snapshot.details ?? [:]) }
     }
     /// The next week's Moons for each saved park, drawn once each for the widgets, so a widget left
-    /// for days without Nyx being opened still shows the real Moon (`MoonImages.nearest`).
+    /// for a week without Nyx being opened still shows the real Moon; past that, its vector Moon.
     static let moonNights=7
     /// True when a picture was drawn that the widgets have not seen. Drawn only with Nyx on
     /// screen: the Moon is a Metal shader, which a background run may not use (a failed draw would

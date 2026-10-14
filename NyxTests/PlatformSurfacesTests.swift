@@ -163,13 +163,18 @@ import Testing
         let spot=try #require(jotr.viewingSpots.first)
         #expect(region.radius == 25_000 && region.center.latitude == spot.latitude && region.center.longitude == spot.longitude)
     }
-    @Test func widgetMoonFallsBackToTheNearestNightDrawn() {
-        let night=Date(timeIntervalSince1970: 1_800_000_000)
-        func file(_ park: String, _ days: Double) -> String { "moon-\(park)-\(Int(night.timeIntervalSince1970+days*86400)).png" }
-        let files=[file("jotr", -5), file("jotr", 2), file("jotr", -1), file("deva", 0), "saved-sky.json"]
-        #expect(MoonImages.nearest(in: files, park: "jotr", night: night) == file("jotr", -1))
-        #expect(MoonImages.nearest(in: [file("jotr", 4)], park: "jotr", night: night) == nil)
-        #expect(MoonImages.nearest(in: files, park: "grba", night: night) == nil)
+    /// The widget shows the picture of its own night only; a neighbouring night's picture would
+    /// show another phase, so without one it draws the vector Moon.
+    @Test func widgetMoonIsTheExactNightOnly() throws {
+        let night=Date(timeIntervalSince1970: 1_800_000_000), park="test-moon-\(UUID().uuidString.prefix(8))"
+        let next=try #require(SharedSettings.moonImageURL(park: park, night: night.addingTimeInterval(86400)))
+        try Data([0]).write(to: next)
+        defer { try? FileManager.default.removeItem(at: next) }
+        #expect(SharedSettings.moonImage(park: park, night: night) == nil)
+        let exact=try #require(SharedSettings.moonImageURL(park: park, night: night))
+        try Data([0]).write(to: exact)
+        defer { try? FileManager.default.removeItem(at: exact) }
+        #expect(SharedSettings.moonImage(park: park, night: night) == exact)
         #expect(SavedSkySync.moonNights == 7)
     }
 

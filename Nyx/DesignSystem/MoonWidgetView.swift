@@ -116,7 +116,7 @@ struct MoonWidgetView: View {
     private var symbol: some View {
         Image(systemName: entry.moon.phase.symbolName(southern: southern))
     }
-    /// The app's picture of that night's Moon (or the nearest night it drew), else the vector Moon.
+    /// The app's picture of that night's Moon, else the vector Moon.
     @ViewBuilder private var disc: some View {
         if let park=entry.park, let night=entry.night, let url=SharedSettings.moonImage(park: park.id, night: night), let image=UIImage(contentsOfFile: url.path) {
             Image(uiImage: image).resizable().widgetAccentedRenderingMode(.accentedDesaturated).scaledToFit()

@@ -18,38 +18,25 @@ nonisolated enum SharedSettings {
     static func moonImageURL(park:String,night:Date)->URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:group)?.appendingPathComponent("moon-\(park)-\(Int(night.timeIntervalSince1970)).png")
     }
-    /// The app's picture of this park's Moon on this night, or on the nearest night it drew (within
-    /// three nights, where the phase has moved less than a tenth of its cycle); nil past that.
+    /// The app's picture of this park's Moon on this very night, or nil: a picture of another
+    /// night would show another phase beside this night's numbers, so the widget draws its vector
+    /// Moon (`MoonDisc`) instead.
     static func moonImage(park:String,night:Date)->URL? {
-        guard let exact=moonImageURL(park:park,night:night) else { return nil }
-        if FileManager.default.fileExists(atPath:exact.path) { return exact }
-        let folder=exact.deletingLastPathComponent()
-        let files=(try? FileManager.default.contentsOfDirectory(atPath:folder.path)) ?? []
-        return MoonImages.nearest(in:files,park:park,night:night).map { folder.appendingPathComponent($0) }
+        guard let exact=moonImageURL(park:park,night:night), FileManager.default.fileExists(atPath:exact.path) else { return nil }
+        return exact
     }
     static func read()->SavedSkySnapshot? {
         guard let url=snapshotURL,let data=try? Data(contentsOf:url) else { return nil }
         return try? JSONDecoder().decode(SavedSkySnapshot.self,from:data)
     }
 }
-/// Finding the pre-rendered Moon nearest a night among the files the app left ("moon-jotr-1797210000.png").
-nonisolated enum MoonImages {
-    static let window:TimeInterval=3*86400+3600
-    static func nearest(in files:[String],park:String,night:Date)->String? {
-        let prefix="moon-\(park)-"
-        return files.compactMap { file -> (String,TimeInterval)? in
-            guard file.hasPrefix(prefix), file.hasSuffix(".png"), let stamp=Double(file.dropFirst(prefix.count).dropLast(4)) else { return nil }
-            return (file,abs(stamp-night.timeIntervalSince1970))
-        }.filter { $0.1<=window }.min { $0.1<$1.1 }?.0
-    }
-}
 /// What the app hands its widgets (and the watch app writes for its complications). Versioned and
 /// decoded leniently, so a field added later, or one park that no longer decodes, never blanks a
 /// widget until the app is next opened.
 nonisolated struct SavedSkySnapshot:Codable,Sendable {
-    /// 2 adds the version and the per-park closures (1.1); 3 the carried usual clouds (2.0). Readers
-    /// never refuse a version: every field after the parks is optional.
-    static let currentVersion=3
+    /// 2 adds the version and the per-park closures (1.1); 3 the carried usual clouds (2.0); 4 when
+    /// the closures were fetched. Readers never refuse a version: every field after the parks is optional.
+    static let currentVersion=4
     var version=SavedSkySnapshot.currentVersion
     let parks:[Park]
     let forecasts:[String:Forecast]
@@ -64,6 +51,9 @@ nonisolated struct SavedSkySnapshot:Codable,Sendable {
     /// the widgets and the watch bundle no grid, and score those places with these, as the app does.
     /// Optional both ways: an older reader ignores it, and a snapshot without it still decodes.
     var usualClouds:[String:CloudClimate.Months]?=nil
+    /// When the park alerts behind `closures` were fetched, so a reader can tell them from a newer
+    /// copy of the alerts (`IntentClosure`). Nil before 2.3, and before any alerts were fetched.
+    var closuresUpdated:Date?=nil
     /// The climate every night here is scored with: the bundled one plus the carried months.
     var climate:CloudClimate { CloudClimate.shared.carrying(usualClouds) }
     /// Bulk reminder planning is safe to run off the main actor. It never reads
@@ -85,6 +75,7 @@ nonisolated extension SavedSkySnapshot {
         closures=(try? container.decodeIfPresent([String:String].self,forKey:.closures)) ?? [:]
         // Absent before 2.0 (15); one place's months that no longer decode cost only that place's usual clouds.
         usualClouds=(try? container.decodeIfPresent([String:Lenient<CloudClimate.Months>].self,forKey:.usualClouds))?.compactMapValues(\.value)
+        closuresUpdated=(try? container.decodeIfPresent(Date.self,forKey:.closuresUpdated)) ?? nil
     }
 }
 /// A value that decodes to nil instead of failing the whole document.
