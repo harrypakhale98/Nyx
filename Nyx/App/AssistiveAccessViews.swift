@@ -49,18 +49,14 @@ private struct AssistiveSavedSync: View {
     @AppStorage("notificationsEnabled") private var reminders=false
     var body: some View {
         Color.clear.frame(width: 0, height: 0).accessibilityHidden(true)
-            .task { await update() }
-            .onChange(of: saved.map(\.parkID)) { _, _ in Task { await update() } }
-            .onChange(of: SavedSpotsFeed.signature(spots)) { _, _ in Task { await update() } }
-            .onChange(of: reminders) { _, enabled in Task { if enabled { await update() } else { await NotificationScheduler().remove() } } }
+            .task { await model.savedSync.update(model, saved: saved, spots: spots) }
+            .onChange(of: saved.map(\.parkID)) { _, _ in Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
+            .onChange(of: SavedSpotsFeed.signature(spots)) { _, _ in Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
+            .onChange(of: reminders) { _, enabled in Task { if enabled { await model.savedSync.update(model, saved: saved, spots: spots) } else { await NotificationScheduler().remove() } } }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active { model.tick(); Task { await update() } }
+                if phase == .active { model.tick(); Task { await model.savedSync.update(model, saved: saved, spots: spots) } }
                 if phase == .background, DebugScenario.screen == nil { SavedSkySync.scheduleRefresh() }
             }
-    }
-    private func update() async {
-        model.setSpots(spots)
-        await model.savedSync.update(model, parkIDs: saved.map(\.parkID))
     }
 }
 /// The three choices: the guidance's limit for a home screen.

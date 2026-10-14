@@ -25,6 +25,12 @@ import WidgetKit
     /// launched Nyx in the background is heard; it is answered once a run knows the model.
     init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
 
+    /// A window's run (the main window's `RootView`, or Assistive Access's): its saved spots and parks
+    /// as the store holds them now. However many windows ask, the work is done once per process.
+    func update(_ model:PlanModel,saved:[SavedPark],spots:[SavedSpot]) async {
+        model.setSpots(spots)
+        await update(model,parkIDs:saved.map(\.parkID))
+    }
     /// `background`: a run iOS gave about 30 seconds (`backgroundRefresh`). `publishOnly`: what is
     /// cached is published again with no request (`republish`).
     func update(_ model:PlanModel,parkIDs ids:[String]?=nil,background:Bool=false,publishOnly:Bool=false) async {

@@ -3,19 +3,15 @@ import SwiftUI
 /// Pages Settings opens in Safari (or Mail, or the App Store) when the person taps them. Nyx never
 /// requests them itself, so they are not network hosts of Nyx's.
 enum SupportLink {
-    static let privacyPolicy=page(host:"get-nyx.com",path:"/privacy")
-    static let support=page(host:"get-nyx.com",path:"/support")
+    static let privacyPolicy=BrowserLink.page(host:"get-nyx.com",path:"/privacy")
+    static let support=BrowserLink.page(host:"get-nyx.com",path:"/support")
     /// The attribution Open-Meteo's CC BY 4.0 licence asks for links here (one constant, shared with About the data).
     static let openMeteo=BrowserLink.openMeteo
     static let email:URL?={ var components=URLComponents(); components.scheme="mailto"; components.path="harry.pakhale98@gmail.com"; components.queryItems=[URLQueryItem(name:"subject",value:"Nyx")]; return components.url }()
     /// The App Store's "Write a Review" page for Nyx, once the app has an App Store ID.
     /// The product page, shared beside a card (the recipient opens it in the App Store; Nyx requests nothing).
-    static var storePage:URL? { AppStoreLink.appID.flatMap { page(host:"apps.apple.com",path:"/app/id\($0)") } }
-    static var review:URL? { AppStoreLink.appID.flatMap { page(host:"apps.apple.com",path:"/app/id\($0)",query:[URLQueryItem(name:"action",value:"write-review")]) } }
-    private static func page(host:String,path:String="",query:[URLQueryItem]?=nil)->URL? {
-        var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path; components.queryItems=query
-        return components.url
-    }
+    static var storePage:URL? { AppStoreLink.appID.flatMap { BrowserLink.page(host:"apps.apple.com",path:"/app/id\($0)") } }
+    static var review:URL? { AppStoreLink.appID.flatMap { BrowserLink.page(host:"apps.apple.com",path:"/app/id\($0)",query:[URLQueryItem(name:"action",value:"write-review")]) } }
 }
 /// Nyx's App Store ID (live since October 7, 2026): the "Rate Nyx" row and share cards link to it.
 enum AppStoreLink {
