@@ -105,6 +105,9 @@ import Testing
         #expect(TimeRiver.peaks([50, 90, 61, 90, 75, 59]) == [1, 3, 4])
         #expect(TimeRiver.peaks([59, 40, 10]) == [])
         #expect(TimeRiver.peaks([80, 80, 80, 80]) == [0, 1, 2])
+        // Best first, the earlier night on a tie; the set is the same nights.
+        #expect(TimeRiver.peakOrder([50, 90, 61, 90, 75, 59]) == [1, 3, 4])
+        #expect(TimeRiver.peakOrder([60, 75, 99, 40]) == [2, 1, 0])
     }
 
     // MARK: The count-up

@@ -98,7 +98,7 @@ private struct NightDragSource: ViewModifier {
     @Environment(\.horizontalSizeClass) private var horizontal
     @Environment(\.verticalSizeClass) private var vertical
     func body(content: Content) -> some View {
-        if NightDragPolicy.drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontal,vertical:vertical) { content.draggable(NightTransfer(night)) }
+        if NightDragPolicy.drags(horizontal:horizontal,vertical:vertical) { content.draggable(NightTransfer(night)) }
         else { content }
     }
 }
@@ -106,5 +106,9 @@ private struct NightDragSource: ViewModifier {
 nonisolated enum NightDragPolicy {
     static func drags(pad:Bool,horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
         pad || (horizontal == .regular && vertical == .regular)
+    }
+    /// On this device.
+    @MainActor static func drags(horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
+        drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontal,vertical:vertical)
     }
 }

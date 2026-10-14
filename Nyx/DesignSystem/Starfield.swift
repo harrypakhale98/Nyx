@@ -17,8 +17,8 @@ struct Starfield: View {
     private let faint: [Star], bright: [Star], fewerFaint: [Star], fewerBright: [Star]
     init(seed: String, strength: Double=0.6, twinkle: Double=0.3) {
         self.seed=seed; self.strength=strength; self.twinkle=min(1,max(0,twinkle))
-        var state=seed.utf8.reduce(UInt64(5381)) { ($0 &* 33) &+ UInt64($1) }
-        func random()->Double { state=state &* 6364136223846793005 &+ 1442695040888963407; return Double(state>>11)/Double(UInt64(1)<<53) }
+        var generator=SeededGenerator(seed:seed)
+        func random()->Double { Double(generator.next()>>11)/Double(UInt64(1)<<53) }
         let stars=(0..<88).map { _ in Star(x:random(),y:random(),radius:0.35+random()*1.05,phase:random()*6.28) }
         let fewer=stars.prefix(44)
         faint=stars.filter { $0.radius<Self.faintRadius }; bright=stars.filter { $0.radius>=Self.faintRadius }
