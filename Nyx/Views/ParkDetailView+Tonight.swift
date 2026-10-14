@@ -16,7 +16,7 @@ extension ParkDetailView {
     private func hero(_ proxy:ScrollViewProxy)->some View {
         let large=typeSize.isAccessibilitySize, align:TextAlignment=large ? .leading : .center
         return VStack(alignment:large ? .leading : .center,spacing:12) {
-            Eyebrow(text:"\(eyebrow)")
+            Eyebrow(text:"\(eyebrow)").multilineTextAlignment(align)
             Text(park.shortName).font(.system(.largeTitle,design:.serif)).multilineTextAlignment(align).accessibilityAddTraits(.isHeader)
                 .onGeometryChange(for:Bool.self) { $0.frame(in:.scrollView).maxY<0 } action:{ titleGone=$0 }
             Text(park.dayLabel(night.id)).font(.subheadline).foregroundStyle(palette.muted)
