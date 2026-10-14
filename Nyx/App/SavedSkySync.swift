@@ -21,6 +21,12 @@ import WidgetKit
     var palette=NyxPalette(nightVision:false,highContrast:false)
     /// Whether the watch's "Update from iPhone" is answered with this model yet (`listenToWatch`).
     private var listening=false
+    /// The places Home Screen widgets and the Tonight control are set to, as the last run read them (`widgetPlaces`).
+    private var widgetIDs:[String]?
+    /// What the widget, the watch and reminders were last handed, as `FollowedData` sees it.
+    private var published:FollowedData?
+    /// A republish waiting for changes made outside a run to settle (`noteChange`).
+    private var settling:Task<Void,Never>?
     /// The watch session is set up at launch, as WatchConnectivity asks, so a watch's request that
     /// launched Nyx in the background is heard; it is answered once a run knows the model.
     init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
@@ -48,30 +54,33 @@ import WidgetKit
             return
         }
         running=true
+        // A widget set to a park is followed as a saved park is: its clouds are fetched and carried.
+        if !publishOnly || widgetIDs == nil { widgetIDs=await Self.widgetPlaces() }
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
         // never dropped from the widget, the watch or reminders for having been asked too early.
-        if current.contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
+        if followedIDs(model).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) { await model.catalogReady() }
         // "Tonight" as of now, even in a background launch whose model last looked at the clock hours ago.
         model.tick()
         // Never a snapshot from before the launch's cache reads land (`PlanModel.cachesPending`).
         await model.cachesReady()
         defer {
             running=false
-            if let next=Self.followUp(again,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }
+            var queued=again
+            // Something a followed place shows changed during the run without being handed over (a
+            // park's page asking for its smoke while alerts were read): it follows from the cache.
+            if queued == nil, followedData(model) != published { queued=(publishOnly:true,background:background) }
+            if let next=Self.followUp(queued,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }
             again=nil
         }
         let parks=current.compactMap { model.park($0) }
-        // The watch also carries the starting park's clouds, and follows it when nothing is saved:
-        // a new forecast there is handed over too, not only the saved parks'.
-        let ids=Set(parks.map(\.id)).union([model.homeID])
-        let cached=model.forecasts.filter { ids.contains($0.key) }.mapValues(\.updated)
         await publish(model,parks)
         if publishOnly { return }
         // The widget and reminders need only forecasts; park alerts follow once they are done,
-        // so a quick visit still leaves both up to date.
+        // so a quick visit still leaves both up to date. Every followed place's clouds are asked
+        // for: the starting park and Tonight's answer abroad too, which the parks' request leaves out.
         let started=ContinuousClock.now
-        await model.refreshForecasts(watching:parks)
-        if again == nil, model.forecasts.filter({ ids.contains($0.key) }).mapValues(\.updated) != cached { await publish(model,parks) }
+        await model.refreshForecasts(watching:followed(model))
+        if again == nil, followedData(model) != published { await publish(model,parks) }
         // A followed night's Live Activity follows the new forecast.
         await Self.refreshFollowed(model)
         // In the background, alerts wait for the next run when time is up or the forecasts were
@@ -80,7 +89,7 @@ import WidgetKit
         let closures=Self.closures(model)
         await model.refreshParkUpdates(parks,alertPages:background ? 1 : ParkStore.alertPages)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
-        if again == nil, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); await Self.refreshFollowed(model) }
+        if again == nil, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model) }
         Self.scheduleRefresh()
     }
     /// The run that follows one that ends with `queued` asked for meanwhile. A run cut short
@@ -152,6 +161,45 @@ import WidgetKit
         // Unavailable in the simulator and when Background App Refresh is off; the app then refreshes on open.
         try? BGTaskScheduler.shared.submit(request)
     }
+    /// The places whose forecasts and closures the widget, the watch and reminders carry, in order and
+    /// once each: the saved places, the starting park, Tonight's answer on this iPhone, the places
+    /// Apple Watch asked for (its kept park and its complications'), then the parks widgets and the
+    /// Tonight control are set to. Every surface that shows one of them scores it from the same data.
+    nonisolated static func followedIDs(saved:[String],home:String,tonight:String?,watch:[String],widgets:[String])->[String] {
+        var seen=Set<String>()
+        return (WatchContext.followed(saved:saved,home:home,tonight:tonight,watch:watch)+widgets).filter { !$0.isEmpty && seen.insert($0).inserted }
+    }
+    func followedIDs(_ model:PlanModel)->[String] {
+        Self.followedIDs(saved:parkIDs ?? [],home:model.homeID,tonight:model.tonightPickID,watch:WatchBridge.requestedParkIDs,widgets:widgetIDs ?? [])
+    }
+    func followed(_ model:PlanModel)->[Park] { followedIDs(model).compactMap { model.park($0) } }
+    func followedData(_ model:PlanModel)->FollowedData {
+        FollowedData(ids:followedIDs(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model))
+    }
+    /// The parks the Tonight's sky widgets and the Tonight control are set to; empty when none is
+    /// set or the system cannot say (a "darkest saved park" widget follows the saved parks anyway).
+    static func widgetPlaces() async -> [String] {
+        guard DebugScenario.screen == nil else { return [] }
+        let widgets=(try? await WidgetCenter.shared.currentConfigurations()) ?? []
+        let controls=(try? await ControlCenter.shared.currentControls()) ?? []
+        return widgets.compactMap { $0.widgetConfigurationIntent(of:TonightWidgetIntent.self)?.park?.id }
+            + controls.compactMap { $0.configurationIntent(of:TonightControlIntent.self)?.park?.id }
+    }
+    /// Forecasts, smoke, summit layers, closures or the followed places changed in the model. A run
+    /// hands over its own changes; outside one (a pull to refresh on Tonight or Parks, a park's page
+    /// asking for its smoke and summit layers, a new answer on Tonight) the widget, the watch and
+    /// reminders follow from the cache once the changes settle, when anything a followed place
+    /// shows is new. Never a request.
+    func noteChange(_ model:PlanModel) {
+        guard parkIDs != nil, !running, DebugScenario.screen == nil else { return }
+        settling?.cancel()
+        settling=Task { [weak self, weak model] in
+            try? await Task.sleep(for:Self.settleDelay)
+            guard !Task.isCancelled, let self, let model, !self.running, self.followedData(model) != self.published else { return }
+            await self.republish(model)
+        }
+    }
+    static let settleDelay:Duration = .seconds(1.5)
     /// Every park's closure from the last park update, not only the saved parks': a widget or the
     /// control can be set to any park, and following a night works for any park.
     private static func closures(_ model:PlanModel)->[String:String] {
@@ -160,10 +208,7 @@ import WidgetKit
     /// Writes the snapshot and, only when it says something new (or new Moon pictures were drawn),
     /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
     @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
-        let ids=Set(parks.map(\.id))
-        // Saved spots and world places carry their usual clouds from the grid, which the widgets do not bundle.
-        let snapshot=SavedSkySnapshot(parks:parks,forecasts:model.forecasts.filter { ids.contains($0.key) },details:model.details.filter { ids.contains($0.key) },closures:Self.closures(model),
-                                      usualClouds:CloudClimate.shared.carriedMonths(for:parks))
+        let snapshot=Self.snapshot(parks:parks,followed:followed(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model))
         if SharedSettings.write(snapshot) || moonsDrawn {
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
@@ -171,6 +216,15 @@ import WidgetKit
             WidgetCenter.shared.invalidateRelevance(ofKind:WidgetSelection.kind)
         }
         return snapshot
+    }
+    /// The widgets' snapshot: the saved places (which "darkest saved place" weighs and reminders
+    /// read), with the forecasts and detail of every followed place, so a widget or the control set
+    /// to a park that is not saved scores it from the same forecast the app does. Saved spots and
+    /// world places carry their usual clouds from the grid, which the widgets do not bundle.
+    nonisolated static func snapshot(parks:[Park],followed:[Park],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String])->SavedSkySnapshot {
+        let ids=Set((parks+followed).map(\.id))
+        return SavedSkySnapshot(parks:parks,forecasts:forecasts.filter { ids.contains($0.key) },details:details.filter { ids.contains($0.key) },closures:closures,
+                                usualClouds:CloudClimate.shared.carriedMonths(for:parks+followed))
     }
     /// Publishes what is cached again, with no request: after a change that alters scores without
     /// new data (switching "Smoke and haze" off).
@@ -194,22 +248,26 @@ import WidgetKit
         // update has run: the saved parks the widgets last had stand in, as in `answerWatch`.
         if parkIDs == nil { parkIDs=SharedSettings.read()?.parks.map(\.id) }
         guard let ids=parkIDs, WatchBridge.isAvailable else { return }
+        let asked=WatchBridge.requestedParkIDs
         // A followed catalogue place goes to the watch whole, so the catalogue must be read first:
         // until then the hand-over waits rather than leaving the place out.
-        if !model.catalogIsReady, (ids+[model.homeID]).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) {
+        if !model.catalogIsReady, (ids+[model.homeID]+(model.tonightPickID.map { [$0] } ?? [])+asked).contains(where:{ $0.hasPrefix(Park.catalogPrefix) }) {
             Task { [weak self, weak model] in
                 await model?.catalogReady()
                 if let self, let model { self.pushWatch(model,watchSeen:watchSeen) }
             }
             return
         }
+        // Tonight's answer and the watch's own places travel only when this iPhone knows them.
+        let tonight=model.tonightPickID.flatMap { model.park($0)?.id }, watchIDs=asked.filter { model.park($0) != nil }
+        let all=WatchContext.followed(saved:ids,home:model.homeID,tonight:tonight,watch:watchIDs)
         let bridge=WatchBridge.shared, watch=watchSeen || bridge.hasWatchApp
-        let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:ids+[model.homeID]) : nil
+        let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:all) : nil
         var complete:(@MainActor @Sendable ()->Void)?=nil
         if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
-        bridge.push(savedParkIDs:ids,homeParkID:model.homeID,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
+        bridge.push(savedParkIDs:ids,homeParkID:model.homeID,tonightParkID:tonight,watchParkIDs:watchIDs,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
-                    places:(ids+[model.homeID]).compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },complete:complete)
+                    places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },complete:complete)
     }
     /// A launch with no window yet (a background refresh, a watch's request, Control Center) has had
     /// no window hand the model its saved spots (`RootView`): they are read from the store here, so a
@@ -261,6 +319,7 @@ import WidgetKit
         // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
         NyxShortcuts.updateAppShortcutParameters()
         pushWatch(model)
+        published=followedData(model)
         let defaults=UserDefaults.standard
         guard defaults.bool(forKey:"notificationsEnabled") else { return }
         let today=model.today, showers=defaults.object(forKey:"showerReminders") as? Bool ?? true
@@ -313,6 +372,29 @@ import WidgetKit
             // The image's centre pixel lands on the one-pixel canvas.
             context.draw(image,in:CGRect(x:-CGFloat(image.width/2),y:-CGFloat(image.height/2),width:CGFloat(image.width),height:CGFloat(image.height)))
             return buffer[3]>0
+        }
+    }
+}
+
+/// What the widget, the watch and reminders show of each followed place, reduced to when each part
+/// was issued: the clouds, the models, the cloud layers, the smoke, and the closure. Two moments
+/// with the same value would hand over the same thing; any new forecast or detail, a closure, or a
+/// change in which places are followed makes it differ.
+nonisolated struct FollowedData:Equatable,Sendable {
+    nonisolated struct Stamp:Equatable,Sendable {
+        var clouds:Date?
+        var models:Date?
+        var layers:Date?
+        var air:Date?
+        var closure:String?
+    }
+    let ids:[String]
+    let stamps:[Stamp]
+    init(ids:[String],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String]) {
+        self.ids=ids
+        stamps=ids.map { id in
+            let detail=details[id]
+            return Stamp(clouds:forecasts[id]?.updated,models:detail?.models?.updated,layers:detail?.layers?.updated,air:detail?.air?.updated,closure:closures[id])
         }
     }
 }

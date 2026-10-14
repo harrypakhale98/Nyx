@@ -217,8 +217,9 @@ struct RootView:View {
             model.savedSync.pushWatch(model)
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
         }
-        // The watch falls back to the starting park when nothing is saved: tell it when that changes.
-        .onChange(of:model.homeID) { _,_ in model.savedSync.pushWatch(model) }
+        // The starting park is followed by the widgets' snapshot and the watch (which falls back to it
+        // when nothing is saved): a new one is handed over at once, then its clouds are fetched.
+        .onChange(of:model.homeID) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
         .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await model.savedSync.update(model,saved:saved,spots:spots) } else { await NotificationScheduler().remove() } } }
         .onChange(of:saved.map(\.parkID)) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
         // A spot saved, renamed or deleted: the model first, then the widget, the watch and reminders follow.
