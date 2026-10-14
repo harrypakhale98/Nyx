@@ -186,17 +186,13 @@ nonisolated enum ParkOpenRequest {
     static let notification=Notification.Name("NyxParkOpenRequest")
     /// `parkID` nil asks for the Tonight tab.
     static func post(parkID:String?,now:Date = .now,defaults:UserDefaults = SharedSettings.defaults) {
-        defaults.set(["park":parkID ?? "","at":now.timeIntervalSince1970],forKey:key)
+        PendingPark.store(parkID,key:key,now:now,defaults:defaults)
         NotificationCenter.default.post(name:notification,object:nil)
     }
     /// The pending request, once, if it was made within the last minute. `parkID` is nil for Tonight.
-    struct Pending:Equatable { let parkID:String? }
+    typealias Pending=PendingPark
     static func take(now:Date = .now,defaults:UserDefaults = SharedSettings.defaults)->Pending? {
-        guard let request=defaults.dictionary(forKey:key) else { return nil }
-        defaults.removeObject(forKey:key)
-        guard let at=request["at"] as? Double,abs(now.timeIntervalSince1970-at)<60 else { return nil }
-        let park=request["park"] as? String
-        return Pending(parkID:park?.isEmpty == false ? park : nil)
+        PendingPark.take(key:key,now:now,defaults:defaults)
     }
 }
 

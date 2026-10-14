@@ -23,16 +23,28 @@ nonisolated enum FieldModeRequest {
     static let lastParkKey="lastFieldPark"
     static let notification=Notification.Name("NyxFieldModeRequest")
     static func post(parkID: String?, now: Date = .now, defaults: UserDefaults = SharedSettings.defaults, notify: Bool = true) {
-        defaults.set(["park": parkID ?? "", "at": now.timeIntervalSince1970], forKey: key)
+        PendingPark.store(parkID, key: key, now: now, defaults: defaults)
         if notify { NotificationCenter.default.post(name: notification, object: nil) }
     }
     /// The pending request, once, if it was made within the last minute. `parkID` is nil for "the usual park".
-    struct Pending: Equatable { let parkID: String? }
+    typealias Pending = PendingPark
     static func take(now: Date = .now, defaults: UserDefaults = SharedSettings.defaults) -> Pending? {
+        PendingPark.take(key: key, now: now, defaults: defaults)
+    }
+}
+/// A park asked for by an intent and stored for the app to read (`FieldModeRequest`, `ParkOpenRequest`):
+/// the park's id, empty for the default, and when it was asked.
+nonisolated struct PendingPark: Equatable {
+    let parkID: String?
+    static func store(_ parkID: String?, key: String, now: Date, defaults: UserDefaults) {
+        defaults.set(["park": parkID ?? "", "at": now.timeIntervalSince1970], forKey: key)
+    }
+    /// The request under `key`, once, if it was made within the last minute.
+    static func take(key: String, now: Date, defaults: UserDefaults) -> PendingPark? {
         guard let request=defaults.dictionary(forKey: key) else { return nil }
         defaults.removeObject(forKey: key)
         guard let at=request["at"] as? Double, abs(now.timeIntervalSince1970-at)<60 else { return nil }
         let park=request["park"] as? String
-        return Pending(parkID: park?.isEmpty == false ? park : nil)
+        return PendingPark(parkID: park?.isEmpty == false ? park : nil)
     }
 }

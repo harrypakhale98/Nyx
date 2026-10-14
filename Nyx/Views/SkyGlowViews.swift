@@ -259,8 +259,9 @@ enum BrowserLink {
     static let creativeCommonsBY=page(host:"creativecommons.org",path:"/licenses/by/4.0/")
     /// The park's current conditions and alerts on nps.gov, for when Nyx's own alerts are unavailable.
     static func parkConditions(_ park:Park)->URL? { park.nps.flatMap { page(host:"www.nps.gov",path:"/\($0)/planyourvisit/conditions.htm") } }
-    private static func page(host:String,path:String="")->URL? {
-        var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path
+    /// An https page; every page Nyx links to is built here (Settings' and Where to stay's too).
+    static func page(host:String,path:String="",query:[URLQueryItem]?=nil)->URL? {
+        var components=URLComponents(); components.scheme="https"; components.host=host; components.path=path; components.queryItems=query
         return components.url
     }
 }

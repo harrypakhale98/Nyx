@@ -173,7 +173,7 @@ struct RootView:View {
             Task(priority:.utility) { await model.prepareNights(model.parks,count:7) }
             if let link=DebugScenario.link { try? await Task.sleep(for:.seconds(1)); handle(DeepLink(link)) }
             if DebugScenario.screen == nil { firstLight=await FirstLightWatcher.check(model:model) }
-            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.indexIfNeeded(model.parks);await updateSaved() }
+            if DebugScenario.screen == nil { LuminanceProof.shared.start(); try? await SpotlightIndexer.indexIfNeeded(model.parks);await model.savedSync.update(model,saved:saved,spots:spots) }
             launchPublished=true
         }
         .onChange(of:scenePhase) { _,phase in
@@ -188,7 +188,7 @@ struct RootView:View {
             }
             if phase == .active {
             model.tick(); moonIcon=RootView.currentMoonIcon()
-            if launchPublished { Task { await updateSaved() } }
+            if launchPublished { Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
             openRequestedField(); openRequestedPark()
             // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
@@ -219,11 +219,11 @@ struct RootView:View {
         }
         // The watch falls back to the starting park when nothing is saved: tell it when that changes.
         .onChange(of:model.homeID) { _,_ in model.savedSync.pushWatch(model) }
-        .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await updateSaved() } else { await NotificationScheduler().remove() } } }
-        .onChange(of:saved.map(\.parkID)) { _,_ in Task { await updateSaved() } }
+        .onChange(of:notificationsEnabled) { _,enabled in Task { if enabled { await model.savedSync.update(model,saved:saved,spots:spots) } else { await NotificationScheduler().remove() } } }
+        .onChange(of:saved.map(\.parkID)) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
         // A spot saved, renamed or deleted: the model first, then the widget, the watch and reminders follow.
-        .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); Task { await updateSaved() } }
-        .onChange(of:showerReminders) { _,_ in Task { await updateSaved() } }
+        .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots); Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
+        .onChange(of:showerReminders) { _,_ in Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             withPlace(activity.userInfo?[CSSearchableItemActivityIdentifier] as? String) { open($0) }
         }
@@ -411,12 +411,6 @@ struct RootView:View {
         let renderer=ImageRenderer(content:MoonDisc(illumination:moon.illumination,waxing:moon.waxing,iconMode:true).frame(width:24,height:24))
         renderer.scale=3
         return renderer.uiImage.map{Image(uiImage:$0).renderingMode(.template)} ?? Image(systemName:"moon")
-    }
-    /// The widget, the watch, Siri's park list and reminders follow the saved parks; the work is
-    /// the model's (`SavedSkySync`), once per process however many windows are open.
-    private func updateSaved() async {
-        model.setSpots(spots)
-        await model.savedSync.update(model,parkIDs:saved.map(\.parkID))
     }
 }
 /// What a link, reminder or Spotlight asked the main window to open: the park, the night, and
