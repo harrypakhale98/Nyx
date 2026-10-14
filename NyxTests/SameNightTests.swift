@@ -60,4 +60,41 @@ import Testing
             if let usual = phone.usualCloud { #expect(usual == usual.rounded()) }
         }
     }
+
+    /// The iPhone names the data it scores with; a watch whose bundled data differs says so, and an
+    /// older iPhone's context, which names none, says nothing.
+    @Test func watchKnowsWhenItsDataDiffers() throws {
+        let mine = try #require(WatchContext.bundledData)
+        #expect(!mine.isEmpty && mine == WatchContext.bundledData(in: .main))
+        let same = WatchContext(sent: now, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:])
+        #expect(same.dataVersion == mine && !same.dataDiffers && same.dataNote == nil)
+        let data = try #require(same.data)
+        let decoded = try #require(WatchContext(data: data))
+        #expect(decoded.dataVersion == mine && decoded == same)
+        let other = WatchContext(sent: now, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], dataVersion: "0")
+        #expect(other.dataDiffers && other.dataNote == "Update Nyx on Apple Watch for matching scores.")
+        // An iPhone before the fingerprint: nothing to compare.
+        let old = try #require(WatchContext(data: Data(#"{"version":1,"sent":0,"homeParkID":"jotr"}"#.utf8)))
+        #expect(old.dataVersion == nil && !old.dataDiffers)
+    }
+
+    /// Tonight's pick travels to the widgets and the watch only while the night it was picked for is
+    /// still tonight there; a pick kept from an earlier night is never handed on as tonight's.
+    @Test func tonightsPickExpiresWithItsNight() throws {
+        let suite = "nyx-pick-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let model = PlanModel(defaults: defaults)
+        model.tonightPickID = "jotr"
+        let jotr = try park("jotr")
+        #expect(model.tonightPick == "jotr" && model.tonightPickNight == jotr.isoDay(jotr.currentNight(at: model.present)))
+        #expect(defaults.string(forKey: "tonightPickNight") == model.tonightPickNight)
+        // Days later: the same pick, kept on disk, is no longer tonight's.
+        defaults.set("2020-01-01", forKey: "tonightPickNight")
+        let later = PlanModel(defaults: defaults)
+        #expect(later.tonightPickID == "jotr" && later.tonightPick == nil)
+        // A pick saved before its night was kept: not handed on until Tonight answers again.
+        defaults.removeObject(forKey: "tonightPickNight")
+        #expect(PlanModel(defaults: defaults).tonightPick == nil)
+    }
 }

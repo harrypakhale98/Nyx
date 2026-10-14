@@ -388,6 +388,7 @@ func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
     var lines: [String] = []
     if let note = WatchSky.forecastNote(night, context: context, short: refreshable) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }
+    if let line = context?.dataNote { lines.append(line) }
     return lines
 }
 
@@ -577,6 +578,7 @@ struct WeekPage: View {
                         Text("Hollow nights have no full cloud forecast yet.")
                     }
                     if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
+                    if let line = store.context?.dataNote { Text(line) }
                 }
                 .font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true).nonEssential()
                 AskIPhoneRow(source: CloudSource.of(context: store.context, park: park, now: now))

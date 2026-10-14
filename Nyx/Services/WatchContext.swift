@@ -57,6 +57,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// usual clouds and says why (`CloudSource.dropped`). Smoke and summit layers that did not fit
     /// beside clouds that did are not listed: those clouds still say where they came from and when.
     let droppedParkIDs: [String]
+    /// The iPhone's `bundledData`: the watch app updates on its own schedule, so when its own
+    /// differs, its scores can differ from the iPhone's and it says so (`dataDiffers`). Nil from an
+    /// iPhone before 2.3; an older watch ignores it.
+    let dataVersion: String?
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
@@ -66,20 +70,22 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let climate: CloudClimate
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
     enum CodingKeys: String, CodingKey {
-        case version, sent, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs
+        case version, sent, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion
     }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
         a.version == b.version && a.sent == b.sent && a.savedParkIDs == b.savedParkIDs && a.homeParkID == b.homeParkID
             && a.nightVision == b.nightVision && a.brighterRed == b.brighterRed && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
-            && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs
+            && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs && a.dataVersion == b.dataVersion
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
-         usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = []) {
+         usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = [],
+         dataVersion: String? = WatchContext.bundledData) {
         self.version = Self.currentVersion
+        self.dataVersion = dataVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
         self.nightVision = nightVision; self.brighterRed = brighterRed; self.forecasts = forecasts; self.details = details; self.closures = closures; self.ranges = ranges
         self.places = places; self.usualClouds = usualClouds
@@ -180,8 +186,29 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     func sent(at date: Date) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
                      closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
-                     droppedParkIDs: droppedParkIDs)
+                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion)
     }
+    /// The bundled data every score rests on (the parks, their usual clouds and their measured sky
+    /// glow) as a short fingerprint: 64-bit FNV-1a over the three files' bytes, in hex. Read once;
+    /// nil when a file is missing.
+    static let bundledData: String? = bundledData(in: .main)
+    static func bundledData(in bundle: Bundle) -> String? {
+        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
+        for name in ["parks", "cloud-climate", "skyglow"] {
+            guard let url = bundle.url(forResource: name, withExtension: "json"), let data = try? Data(contentsOf: url) else { return nil }
+            for byte in data { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
+        }
+        return String(hash, radix: 16)
+    }
+    /// True when the iPhone's bundled data differs from this device's: the watch then asks to be
+    /// updated, since the same night could score differently on each.
+    var dataDiffers: Bool {
+        guard let dataVersion, let mine = Self.bundledData else { return false }
+        return dataVersion != mine
+    }
+    /// When the iPhone runs a Nyx whose parks or usual clouds differ from this watch's, the same
+    /// night could score differently on each: said plainly, on the watch.
+    var dataNote: String? { dataDiffers ? String(localized: "Update Nyx on Apple Watch for matching scores.") : nil }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
         let parts = park.calendar.dateComponents([.year, .month, .day], from: evening)
@@ -224,6 +251,8 @@ nonisolated extension WatchContext {
         tonightParkID = (try? container.decodeIfPresent(String.self, forKey: .tonightParkID)) ?? nil
         watchParkIDs = (try? container.decodeIfPresent([String].self, forKey: .watchParkIDs)) ?? []
         droppedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .droppedParkIDs)) ?? []
+        // Absent before 2.3: nothing to compare, so nothing is said.
+        dataVersion = (try? container.decodeIfPresent(String.self, forKey: .dataVersion)) ?? nil
         cloudForecasts = forecasts.compactMapValues(\.forecast); forecastDetails = details.compactMapValues(\.detail)
         climate = CloudClimate.shared.carrying(usualClouds)
     }
