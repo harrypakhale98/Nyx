@@ -32,13 +32,6 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     }
 }
 
-/// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read
-/// as broken words, so spaced labels set solid when Nyx speaks Japanese (the iPhone's `Lettering`,
-/// in NyxTheme.swift, which neither Vision Pro target compiles). Here for both: the app compiles this file.
-nonisolated enum Lettering {
-    static let spaced = !(Bundle.main.preferredLocalizations.first ?? "en").hasPrefix("ja")
-}
-
 /// The widget's faces. `simplified` is the far-away look (visionOS `levelOfDetail`): the Moon and
 /// its percentage, large (and on the large face, the next new moon). The large face adds the
 /// next seven nights' Moons (`MoonWeek`), the new moon's night ringed in amber.

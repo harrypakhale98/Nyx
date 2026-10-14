@@ -54,7 +54,7 @@ nonisolated enum SkyTextures {
         let r = k <= 66 ? 255 : 329.698727446*pow(k-60, -0.1332047592)
         let g = k <= 66 ? 99.4708025861*log(k)-161.1195681661 : 288.1221695283*pow(k-60, -0.0755148492)
         let b = k >= 66 ? 255 : k <= 19 ? 0 : 138.5177312231*log(k-10)-305.0447927307
-        return SIMD3(linear(r/255), linear(g/255), linear(b/255))
+        return SIMD3(SRGB.linear(r/255), SRGB.linear(g/255), SRGB.linear(b/255))
     }
 
     /// The atlas's parameters for `nyxStarAtlas` (SkyShaders.metal): eight numbers per row
@@ -239,7 +239,6 @@ nonisolated enum SkyTextures {
     // MARK: Drawing
 
     static func smooth(_ x: Double) -> Double { let t = min(1, max(0, x)); return t*t*(3-2*t) }
-    static func linear(_ s: Double) -> Double { s <= 0.04045 ? s/12.92 : pow((s+0.055)/1.055, 2.4) }
 
     /// Gradient noise in about 0…1, deterministic, wrapping every `period` cells in x, so the same
     /// Milky Way appears every launch and nothing seams at 360°.
@@ -275,8 +274,7 @@ nonisolated enum SkyTextures {
     /// at about its own resolution (the Moon's aureole) does not band. Not for the dome, whose
     /// texels are degrees wide and would show the pattern.
     private static func encode(_ linear: Double, _ x: Int, _ y: Int, dither: Bool) -> UInt8 {
-        let c = min(1, max(0, linear))
-        let s = c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4)-0.055
+        let s = SRGB.encoded(linear)
         guard dither else { return UInt8((s*255).rounded()) }
         let bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5][(y & 3)*4+(x & 3)]
         return UInt8(max(0, min(255, (s*255+(Double(bayer)+0.5)/16-0.5).rounded())))
