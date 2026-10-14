@@ -78,7 +78,10 @@ struct DataIntegrityTests {
         // Sequoia and Kings Canyon share one NPS code and so share its alerts.
         let model=PlanModel(weather: WeatherService(transport: http, persist: false), parkStore: store, detail: ForecastDetailService(transport: http, persist: false), defaults: isolatedDefaults())
         model.npsEnabled=true
+        let revision=model.dataRevision
         await model.refreshParkUpdates([])
+        // New closures move the data revision, so a kept trip plan is worked out again.
+        #expect(model.dataRevision>revision)
         #expect(model.enrichments["kica"]?.alerts.first?.id == "a3" && model.enrichments["sequ"]?.alerts.first?.id == "a3")
         #expect(model.enrichments["deva"]?.programs.isEmpty == true)
         // Asking again from another screen within six hours costs nothing.

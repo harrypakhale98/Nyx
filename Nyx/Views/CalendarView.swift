@@ -276,7 +276,7 @@ struct CalendarView: View {
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea().nyxPresentation() }
             .sheet(item:$recording) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
-            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:night,isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
+            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:model.night(night.park,on:night.id),isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
             .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
