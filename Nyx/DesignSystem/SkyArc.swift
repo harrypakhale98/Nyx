@@ -60,8 +60,11 @@ struct SkyArc: View {
     private var chart: some View {
         VStack(alignment:.leading,spacing:14) {
             // Its own equatable view, so a sliding finger redraws the hairline and caption alone,
-            // never the sky beneath them.
-            SkyArcPicture(night:night,palette:palette,access:access,moonSize:moonSize).equatable()
+            // never the sky beneath them. The "Now" marker steps once a minute, and only while the
+            // night's window holds the present (outside it the picture never redraws for the time).
+            TimelineView(.everyMinute) { timeline in
+                SkyArcPicture(night:night,palette:palette,access:access,moonSize:moonSize,now:Self.nowMarker(at:timeline.date,window:window)).equatable()
+            }
             .frame(height:chartHeight)
             .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ if abs($0-chartWidth)>=1 { chartWidth=$0 } }
             // The "True darkness" label's width at the drawing's own text size, so the hairline parts
@@ -124,7 +127,12 @@ struct SkyArc: View {
             // A double tap hands the arc to the finger; ordinary swipes and the audio graph are untouched.
             .accessibilityDirectTouch(true,options:[.silentOnTouch,.requiresActivation])
             .nightChart { [night=night,window=window,summary=spokenSummary] in NightChart.sky(night,window:window,summary:summary) }
-            .accessibilityLabel("Sun and Moon paths for \(night.park.dayLabel(night.id)). Sunset \(night.park.time(night.sky.sunset)). \(night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")) Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)). \(core.map { $0.spoken+" " } ?? "")Times in \(night.park.timeZoneName).")
+            .accessibilityLabel(spokenLabel)
+    }
+    /// The minute the "Now" marker stands at, or nil when the present is outside the night's window.
+    nonisolated static func nowMarker(at date:Date,window:(start:Date,end:Date))->Date? {
+        let minute=Date(timeIntervalSinceReferenceDate:(date.timeIntervalSinceReferenceDate/60).rounded(.down)*60)
+        return minute>window.start && minute<window.end ? minute : nil
     }
 
     /// "Feel" only where there is something to feel: an iPad without a Taptic Engine, or the
@@ -132,9 +140,33 @@ struct SkyArc: View {
     private var touchHint:String {
         MoonHaptics.enabled ? String(localized:"Double-tap, then slide a finger to feel the night.") : String(localized:"Double-tap, then slide a finger to explore the night.")
     }
-    private var spokenSummary:String {
-        let darkness=night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
-        return String(localized:"Sunset \(night.park.time(night.sky.sunset)).")+" "+darkness+" "+String(localized:"Moonrise \(night.park.time(night.sky.moonrise)), moonset \(night.park.time(night.sky.moonset)).")
+    private var darkness:String {
+        night.sky.darkHours==0 ? SkyConditions.noDarknessMessage(tonight:isTonight) : String(localized:"True darkness from \(night.park.time(night.sky.darkStart)) to \(night.park.time(night.sky.darkEnd)).")
+    }
+    /// The night's crossings as sentences, each only when it happens: a night without a moonrise
+    /// (or, near the poles, a sunset) says nothing of it, never "Moonrise No crossing".
+    private var crossings:[String] {
+        let park=night.park, sky=night.sky
+        var parts:[String]=[]
+        if let sunset=sky.sunset { parts.append(String(localized:"Sunset \(park.time(sunset)).")) }
+        parts.append(darkness)
+        switch (sky.moonrise,sky.moonset) {
+        case let (rise?,set?): parts.append(String(localized:"Moonrise \(park.time(rise)), moonset \(park.time(set))."))
+        case let (rise?,nil): parts.append(String(localized:"Moonrise \(park.time(rise))."))
+        case let (nil,set?): parts.append(String(localized:"Moonset \(park.time(set))."))
+        case (nil,nil): break
+        }
+        return parts
+    }
+    private var spokenSummary:String { Phrase.sentences(crossings) }
+    /// The whole element's label: the night's day, its crossings, the Milky Way core and the clock.
+    private var spokenLabel:String {
+        let park=night.park, sky=night.sky
+        // Every crossing there: the one sentence, as translated.
+        if let sunset=sky.sunset, let rise=sky.moonrise, let set=sky.moonset {
+            return String(localized:"Sun and Moon paths for \(park.dayLabel(night.id)). Sunset \(park.time(sunset)). \(darkness) Moonrise \(park.time(rise)), moonset \(park.time(set)). \(core.map { $0.spoken+" " } ?? "")Times in \(park.timeZoneName).")
+        }
+        return Phrase.sentences([String(localized:"Sun and Moon paths for \(park.dayLabel(night.id))."),Phrase.sentences(crossings),core?.spoken ?? "",Phrase.ended(String(localized:"Times in \(park.timeZoneName)"))])
     }
     /// Where the finger rests: a hairline through the arc and the time and sky beside it, for anyone
     /// who explores by touch with some sight. VoiceOver hears the same line when the finger rests.
@@ -229,9 +261,11 @@ private struct SkyArcPicture: View, Equatable {
     let palette: NyxPalette
     let access: NyxAccess
     let moonSize: Double
+    /// Where the "Now" marker stands (`SkyArc.nowMarker`), nil outside the night's window.
+    let now: Date?
     nonisolated static func ==(a:SkyArcPicture,b:SkyArcPicture)->Bool {
         // A park's night is drawn from its sky alone, which its park and evening fix.
-        a.night.park.id==b.night.park.id && a.night.id==b.night.id && a.palette==b.palette && a.access==b.access && a.moonSize==b.moonSize
+        a.night.park.id==b.night.park.id && a.night.id==b.night.id && a.palette==b.palette && a.access==b.access && a.moonSize==b.moonSize && a.now==b.now
     }
     private var window:(start:Date,end:Date) { ArcTouch.window(night) }
     var body: some View {
@@ -424,8 +458,7 @@ private struct SkyArcPicture: View, Equatable {
         }
 
         // Where the night stands now.
-        let now=Date.now
-        if now>start && now<end {
+        if let now {
             let nx=x(now)
             var marker=Path(); marker.move(to:CGPoint(x:nx,y:14)); marker.addLine(to:CGPoint(x:nx,y:horizon))
             context.stroke(marker,with:.color(palette.ink.opacity(0.7)),style:StrokeStyle(lineWidth:0.8*palette.stroke,dash:[2,2]))

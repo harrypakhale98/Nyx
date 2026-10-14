@@ -33103,6 +33103,17 @@
         }
       }
     },
+    "Moonrise %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonrise %@."
+          }
+        }
+      }
+    },
     "Moonrise at %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -33204,6 +33215,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "月の入り"
+          }
+        }
+      }
+    },
+    "Moonset %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moonset %@."
           }
         }
       }
@@ -55044,6 +55066,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "太陽"
+          }
+        }
+      }
+    },
+    "Sun and Moon paths for %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sun and Moon paths for %@."
           }
         }
       }
