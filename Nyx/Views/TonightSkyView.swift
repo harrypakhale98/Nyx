@@ -40,12 +40,17 @@ struct TonightSkyView: View {
     /// and the side column (`beside`) takes its share of the width.
     @State private var screen=CGSize(width:390,height:800)
     private var screenHeight: Double { screen.height }
-    /// An iPhone in landscape (compact height): the title and the controls stand in a column beside
-    /// the sky, so the sky keeps the screen's whole height instead of a strip between them.
+    /// An iPhone in landscape (compact height), or any window wider than tall and under 500 pt high
+    /// (a short iPad window): the title and the controls stand in a column beside the sky, so the
+    /// sky keeps the screen's whole height instead of a strip between them.
     @Environment(\.verticalSizeClass) private var verticalSize
-    private var beside: Bool { verticalSize == .compact }
+    private var beside: Bool { Self.beside(compactHeight:verticalSize == .compact,screen:screen) }
+    nonisolated static func beside(compactHeight:Bool,screen:CGSize)->Bool {
+        compactHeight || (screen.width>screen.height && screen.height<500)
+    }
     /// Accessibility text sizes: the header keeps only its title (the time and facing are in the
-    /// controls, and the reveal's caption is decoration), and the controls scroll within half the screen.
+    /// controls, and the reveal's caption is decoration). At any size the controls scroll within
+    /// half the screen, so the sky always keeps the rest.
     private var large: Bool { typeSize.isAccessibilitySize }
     /// The adaptation reveal is running (from `revealStart`); false once it lands or a touch ends it.
     @State private var revealing: Bool
@@ -212,12 +217,7 @@ struct TonightSkyView: View {
         .padding(.vertical,8).padding(.trailing,8)
     }
     private func controls(sky:HorizonSky)->some View {
-        let stack=controlRows(sky:sky).padding(16)
-        return Group {
-            if large {
-                ScrollView { stack }.scrollBounceBehavior(.basedOnSize).frame(maxHeight:max(240,screenHeight*0.5)).fixedSize(horizontal:false,vertical:true)
-            } else { stack }
-        }
+        ScrollView { controlRows(sky:sky).padding(16) }.scrollBounceBehavior(.basedOnSize).frame(maxHeight:max(240,screenHeight*0.5)).fixedSize(horizontal:false,vertical:true)
         .modifier(FloatingGlass(shape:RoundedRectangle(cornerRadius:26)))
         .padding(.horizontal,12).padding(.bottom,8)
         .readableColumn(WideLayout.proseWidth)
@@ -238,10 +238,7 @@ struct TonightSkyView: View {
                     VStack(alignment:.leading,spacing:2) { Text(park.time(window.start)); Text(park.time(window.end)) }
                 }
                 .font(.caption2).foregroundStyle(palette.muted).accessibilityHidden(true)
-                Grid(alignment:.leading,horizontalSpacing:8,verticalSpacing:8) {
-                    GridRow { direction(0); direction(1) }
-                    GridRow { direction(2); direction(3) }
-                }
+                directionGrid
             } else {
                 HStack(alignment:.firstTextBaseline) {
                     Text(park.time(moment)).font(.system(.title2,design:.serif)).monospacedDigit().foregroundStyle(palette.accent)
@@ -258,12 +255,7 @@ struct TonightSkyView: View {
                 ViewThatFits(in:.horizontal) {
                     HStack(spacing:8) { directions }
                     // The column beside the sky: two by two, as at large sizes, rather than four rows.
-                    if beside {
-                        Grid(alignment:.leading,horizontalSpacing:8,verticalSpacing:8) {
-                            GridRow { direction(0); direction(1) }
-                            GridRow { direction(2); direction(3) }
-                        }
-                    } else {
+                    if beside { directionGrid } else {
                         VStack(alignment:.leading,spacing:8) { directions }
                     }
                 }
@@ -273,6 +265,12 @@ struct TonightSkyView: View {
     }
     @ViewBuilder private var directions: some View {
         ForEach(0..<4,id:\.self) { index in direction(index) }
+    }
+    private var directionGrid: some View {
+        Grid(alignment:.leading,horizontalSpacing:8,verticalSpacing:8) {
+            GridRow { direction(0); direction(1) }
+            GridRow { direction(2); direction(3) }
+        }
     }
     /// North, east, south or west (0…3): turns there the short way round.
     private func direction(_ index:Int)->some View {
@@ -513,17 +511,14 @@ struct BortleFigure: View {
         VStack(alignment:.leading,spacing:14) {
             Text("An illustration").font(.caption.weight(.medium)).foregroundStyle(palette.muted).textCase(Lettering.spaced ? .uppercase : nil).kerning(1.6)
             if let park {
+                // Never more than 45% of the visible height, so the picture stays in view above the
+                // slider while it is dragged (a landscape iPhone, accessibility sizes).
                 PanoramaCanvas(sky:Self.sky(park),options:Self.options(park,bortle:level))
-                    .frame(height:260)
+                    .containerRelativeFrame(.vertical) { length,_ in min(260,(length*0.45).rounded()) }
                     .clipShape(RoundedRectangle(cornerRadius:20))
                     .overlay(RoundedRectangle(cornerRadius:20).stroke(palette.line,lineWidth:0.5))
                     .accessibilityHidden(true)
             }
-            VStack(alignment:.leading,spacing:6) {
-                Text("Class \(shownClass): \(BortleScale.name(shownClass))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).contentTransition(.numericText(value:level))
-                Text(BortleScale.cue(shownClass)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
-            }
-            .accessibilityHidden(true)
             Slider(value:$level,in:1...9) { Text("Bortle class") } minimumValueLabel:{ Text("1").font(.caption).foregroundStyle(palette.muted) } maximumValueLabel:{ Text("9").font(.caption).foregroundStyle(palette.muted) } onEditingChanged:{ editing in
                 if !editing { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { level=level.rounded() } }
             }
@@ -536,6 +531,12 @@ struct BortleFigure: View {
                 @unknown default: break
                 }
             }
+            // Under the slider, so the slider sits right below the picture it changes.
+            VStack(alignment:.leading,spacing:6) {
+                Text("Class \(shownClass): \(BortleScale.name(shownClass))").font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).contentTransition(.numericText(value:level))
+                Text(BortleScale.cue(shownClass)).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
+            .accessibilityHidden(true)
             Text("A summer sky in \(park?.shortName ?? String(localized:"a national park")), redrawn at each class. Real skies vary with the season, the weather and where you stand.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
         }
         .sensoryFeedback(.selection,trigger:shownClass)

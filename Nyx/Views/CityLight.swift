@@ -12,6 +12,7 @@ struct CityLightFigure: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var verticalSize
     let park: Park
     @State private var selection: Sky
     /// The class drawn: animates between the park's estimate and `cityClass`.
@@ -44,8 +45,9 @@ struct CityLightFigure: View {
     /// reaches the horizon only about 1.3 heights either side of the middle; a full-width iPad panel
     /// showed the ground's ends as a black slab with the sky in a bowl between them.
     static let aspect=2.2
-    /// Taller in a regular-width layout (iPad), so the capped figure keeps its presence in a wide panel.
-    private var figureHeight: Double { sizeClass == .regular ? 260 : Self.height }
+    /// Taller in a regular-width layout (iPad), so the capped figure keeps its presence in a wide panel;
+    /// not at compact height (a large iPhone in landscape is regular width too, with little height).
+    private var figureHeight: Double { sizeClass == .regular && verticalSize != .compact ? 260 : Self.height }
     init(park:Park,selection:Sky = .here) {
         self.park=park
         _selection=State(initialValue:selection)

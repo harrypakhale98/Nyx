@@ -95,6 +95,16 @@ nonisolated struct TripPlan: Sendable {
 /// whose winter nights are usually overcast does not tie a desert.
 nonisolated enum TripPlanner {
     static let maxNights = 14
+    /// The latest last night the planner offers: 13 nights after the first, or 69 for weekends
+    /// only, whose filter keeps about one night in five (seven weekends' worth).
+    static func latestLast(first: Date, weekendsOnly: Bool) -> Date {
+        first.addingTimeInterval(Double(weekendsOnly ? 69 : 13)*86400)
+    }
+    /// A last night kept inside what the planner offers: never before the first, never past `latestLast`
+    /// (turning weekends only off, or moving the first night earlier, brings it back in).
+    static func clampedLast(_ last: Date, first: Date, weekendsOnly: Bool) -> Date {
+        min(max(last, first), latestLast(first: first, weekendsOnly: weekendsOnly))
+    }
     /// A closure in the last park update costs a park this many points in the assignment only; the
     /// score shown is never changed. A closed road beats a slightly darker sky every time.
     static let closurePenalty = 10

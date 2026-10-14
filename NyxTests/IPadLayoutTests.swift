@@ -21,6 +21,16 @@ import Testing
         // Not yet measured: a stack, so the first measurement never pushes the chosen park.
         #expect(!ParksTab.split(width:0,largeText:false))
     }
+    @Test func theFullScreenSkyStandsBesideItsColumnInShortWideWindows() {
+        // iPhone in landscape (compact height), whatever its measured size.
+        #expect(TonightSkyView.beside(compactHeight:true,screen:CGSize(width:874,height:402)))
+        // A short, wide iPad window: the column, so the sky keeps its height.
+        #expect(TonightSkyView.beside(compactHeight:false,screen:CGSize(width:900,height:420)))
+        // Portrait iPhone, an iPad window taller than wide, and a full iPad in landscape: header and controls.
+        #expect(!TonightSkyView.beside(compactHeight:false,screen:CGSize(width:402,height:874)))
+        #expect(!TonightSkyView.beside(compactHeight:false,screen:CGSize(width:420,height:480)))
+        #expect(!TonightSkyView.beside(compactHeight:false,screen:CGSize(width:1376,height:1032)))
+    }
     @Test func theJournalMentionsOtherDevicesInWideWindows() {
         // The widest iPhone in portrait (440) says nothing; any window wider than a phone does.
         #expect(!JournalView.mentionsOtherDevices(width:402,regular:false))
@@ -29,6 +39,9 @@ import Testing
         #expect(JournalView.mentionsOtherDevices(width:1032,regular:false))
         // A regular-width window says it before it is measured.
         #expect(JournalView.mentionsOtherDevices(width:0,regular:true))
+        // An iPhone on its side is wide (and regular on the largest), but it is still the phone.
+        #expect(!JournalView.mentionsOtherDevices(width:874,regular:false,compactHeight:true))
+        #expect(!JournalView.mentionsOtherDevices(width:956,regular:true,compactHeight:true))
         // The journal's own two columns follow WideLayout.
         #expect(WideLayout.columns(width:834,largeText:false)==1)
         #expect(WideLayout.columns(width:1032,largeText:false)==2)
