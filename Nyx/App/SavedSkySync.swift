@@ -27,6 +27,8 @@ import WidgetKit
     private var published:FollowedData?
     /// A republish waiting for changes made outside a run to settle (`noteChange`).
     private var settling:Task<Void,Never>?
+    /// Something changed in the model while a run was under way (`noteChange`).
+    private var changedDuringRun=false
     /// The watch session is set up at launch, as WatchConnectivity asks, so a watch's request that
     /// launched Nyx in the background is heard; it is answered once a run knows the model.
     init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
@@ -54,6 +56,7 @@ import WidgetKit
             return
         }
         running=true
+        changedDuringRun=false
         // A widget set to a park is followed as a saved park is: its clouds are fetched and carried.
         if !publishOnly || widgetIDs == nil { widgetIDs=await Self.widgetPlaces() }
         // A followed world catalogue place (`wd:`) resolves only once the catalogue is read; it is
@@ -70,6 +73,9 @@ import WidgetKit
             // park's page asking for its smoke while alerts were read): it follows from the cache.
             if queued == nil, followedData(model) != published { queued=(publishOnly:true,background:background) }
             if let next=Self.followUp(queued,cancelled:Task.isCancelled) { Task { await update(model,background:next.background,publishOnly:next.publishOnly) } }
+            // A change made during the run at a place followed only by a Live Activity: it catches up from the cache.
+            else if changedDuringRun, !FieldActivities.Item.activities.isEmpty { Task { await Self.refreshFollowed(model) } }
+            changedDuringRun=false
             again=nil
         }
         let parks=current.compactMap { model.park($0) }
@@ -80,9 +86,10 @@ import WidgetKit
         // for: the starting park and Tonight's answer abroad too, which the parks' request leaves out.
         let started=ContinuousClock.now
         await model.refreshForecasts(watching:followed(model))
+        // A followed night's Live Activity follows the new forecast: with the widget when that is
+        // published again, else on its own (a night can be followed at a place nothing else follows).
         if again == nil, followedData(model) != published { await publish(model,parks) }
-        // A followed night's Live Activity follows the new forecast.
-        await Self.refreshFollowed(model)
+        else { await Self.refreshFollowed(model) }
         // In the background, alerts wait for the next run when time is up or the forecasts were
         // slow, and ask for one page only; the next refresh was already requested.
         if background, Task.isCancelled || ContinuousClock.now-started>Self.alertsAfter { return }
@@ -190,13 +197,18 @@ import WidgetKit
     /// asking for its smoke and summit layers, a new answer on Tonight) the widget, the watch and
     /// reminders follow from the cache once the changes settle, when anything a followed place
     /// shows is new. Never a request.
+    /// A night can be followed at any place, not only a followed one: when nothing the widget shows
+    /// changed, the Live Activities are still brought up to date (each is updated only if it changed).
     func noteChange(_ model:PlanModel) {
-        guard parkIDs != nil, !running, DebugScenario.screen == nil else { return }
+        guard DebugScenario.screen == nil else { return }
+        guard !running else { changedDuringRun=true; return }
         settling?.cancel()
         settling=Task { [weak self, weak model] in
             try? await Task.sleep(for:Self.settleDelay)
-            guard !Task.isCancelled, let self, let model, !self.running, self.followedData(model) != self.published else { return }
-            await self.republish(model)
+            guard !Task.isCancelled, let self, let model else { return }
+            guard !self.running else { self.changedDuringRun=true; return }
+            if self.parkIDs != nil, self.followedData(model) != self.published { await self.republish(model) }
+            else if !FieldActivities.Item.activities.isEmpty { await Self.refreshFollowed(model) }
         }
     }
     static let settleDelay:Duration = .seconds(1.5)
@@ -321,6 +333,8 @@ import WidgetKit
         NyxShortcuts.updateAppShortcutParameters()
         pushWatch(model)
         published=followedData(model)
+        // A followed night's Live Activity says what the widget now says, on every path that publishes.
+        await Self.refreshFollowed(model)
         let defaults=UserDefaults.standard
         guard defaults.bool(forKey:"notificationsEnabled") else { return }
         let today=model.today, showers=defaults.object(forKey:"showerReminders") as? Bool ?? true
