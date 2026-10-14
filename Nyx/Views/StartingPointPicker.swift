@@ -34,7 +34,7 @@ struct StartingPointPicker: View {
         let parks=model.parks.filter { search.isEmpty || $0.matches(search) }
         List {
             // The bar's search field fails at accessibility sizes on iOS 27 (see `SystemSearch`).
-            if typeSize.isAccessibilitySize { PlaceSearchField(text:$search,focus:$searchFocused).listRowBackground(Color.clear).listRowInsets(EdgeInsets(top:8,leading:16,bottom:8,trailing:16)) }
+            if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:"City, town or park",focus:$searchFocused,label:"Search cities, towns and parks").listRowBackground(Color.clear).listRowInsets(EdgeInsets(top:8,leading:16,bottom:8,trailing:16)) }
             if locationOff { Section { Text("Location is off. Choose your city or the park closest to you.").font(.subheadline).foregroundStyle(palette.ink) }.listRowBackground(palette.panel) }
             if let nearMe, search.isEmpty, !locationOff {
                 Section { Button { dismiss(); nearMe() } label:{ Label("Near me",systemImage:"location").frame(minHeight:44,alignment:.leading) }.accessibilityLabel("Use my location").accessibilityInputLabels([Text("Near me"),Text("Use my location")]) }.listRowBackground(palette.panel)
@@ -45,7 +45,7 @@ struct StartingPointPicker: View {
             if !towns.isEmpty {
                 Section("Cities and towns") {
                     ForEach(towns) { place in
-                        row(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() }
+                        PlaceRow(title:place.name,detail:place.regionName,selected:place==selectedPlace) { choose(.place(place)); dismiss() }
                             // A town can be kept as a spot of its own too: scored and followed like a park.
                             .contextMenu { Button("Save as a spot",systemImage:"mappin.and.ellipse") { savingSpot=SpotRequest(place:place) } }
                             .accessibilityAction(named:Text("Save as a spot")) { savingSpot=SpotRequest(place:place) }
@@ -54,7 +54,7 @@ struct StartingPointPicker: View {
             }
             if !parks.isEmpty {
                 Section("US national parks") {
-                    ForEach(parks) { park in row(title:park.shortName,detail:park.region.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
+                    ForEach(parks) { park in PlaceRow(title:park.shortName,detail:park.region.replacingOccurrences(of:",",with:" · "),selected:selectedPlace == nil && park.id==selectedParkID) { choose(.park(park.id)); dismiss() } }
                 }.listRowBackground(palette.panel)
             } else if places.isEmpty {
                 Section { Text("No city, town or park by that name. Try a nearby larger city.").font(.subheadline).foregroundStyle(palette.muted) }.listRowBackground(palette.panel)
@@ -78,40 +78,28 @@ struct StartingPointPicker: View {
         .toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.cancel) { dismiss() } } }.singleControlBar()
         .sheet(item:$savingSpot) { request in SaveSpotView(source:request.place == nil ? .here : .place,place:request.place,search:request.place == nil ? search : "").nyxPresentation() }
     }
-    private func row(title:String,detail:String,selected:Bool,action:@escaping ()->Void)->some View {
+}
+/// A place to choose in a list (a starting point, a spot's town): its name, where it is, and a
+/// checkmark when it is the one chosen.
+struct PlaceRow: View {
+    @Environment(\.nyx) private var palette
+    let title:String
+    let detail:String
+    let selected:Bool
+    let action:()->Void
+    var body: some View {
         Button(action:action) {
             HStack {
-                VStack(alignment:.leading,spacing:2) { Text(title).foregroundStyle(palette.ink); Text(detail).font(.caption).foregroundStyle(palette.muted) }
+                VStack(alignment:.leading,spacing:2) {
+                    Text(title).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+                    Text(detail).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                }
                 Spacer(minLength:8)
                 if selected { Image(systemName:"checkmark").foregroundStyle(palette.accent).accessibilityHidden(true) }
             }.frame(minHeight:44).contentShape(Rectangle())
         }
         .accessibilityElement(children:.combine)
         .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-}
-/// The picker's search field in the page itself, for accessibility text sizes, where it grows and wraps.
-private struct PlaceSearchField: View {
-    @Environment(\.nyx) private var palette
-    @Binding var text:String
-    var focus:FocusState<Bool>.Binding
-    var body: some View {
-        HStack(alignment:.center,spacing:10) {
-            Image(systemName:"magnifyingglass").foregroundStyle(palette.muted).accessibilityHidden(true)
-            TextField("City, town or park",text:$text,axis:.vertical).lineLimit(1...3).submitLabel(.search).focused(focus)
-                .autocorrectionDisabled().textInputAutocapitalization(.words)
-                .onChange(of:text) { old,new in if new.contains("\n") { text=new.replacingOccurrences(of:"\n",with:""); if ReturnKey.pressed(old:old,new:new) { focus.wrappedValue=false } } }
-                .accessibilityLabel("Search cities, towns and parks")
-            if !text.isEmpty {
-                Button { text="" } label:{ Image(systemName:"xmark.circle.fill").foregroundStyle(palette.muted).frame(minWidth:44,minHeight:44) }
-                    .buttonStyle(.plain).accessibilityLabel("Clear search")
-            }
-        }
-        .dynamicTypeSize(...DynamicTypeSize.accessibility3)
-        .padding(.horizontal,16).padding(.vertical,10).frame(minHeight:44)
-        .contentShape(Rectangle()).onTapGesture { focus.wrappedValue=true }
-        .background(RoundedRectangle(cornerRadius:22,style:.continuous).fill(palette.panel))
-        .overlay(RoundedRectangle(cornerRadius:22,style:.continuous).stroke(palette.line,lineWidth:0.5))
     }
 }
 #Preview("Starting point") { NavigationStack { StartingPointPicker(nearMe:{},selectedParkID:"jotr") { _ in } }.environment(PlanModel()).preferredColorScheme(.dark) }
