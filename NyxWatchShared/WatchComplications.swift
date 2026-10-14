@@ -107,9 +107,10 @@ nonisolated enum WatchTimeline {
         for park in snapshot?.parks ?? [] { moments.formUnion(park.nightTurnovers(from: now, to: now.addingTimeInterval(86400))) }
         return moments
     }
-    /// A timeline asked for again after its last entry (an hour from now, should it have none).
+    /// A timeline asked for again after its last entry, and never sooner than an hour from now
+    /// (a face with nothing to follow yet has only `now`, and must not be asked for again at once).
     static func timeline<Entry: TimelineEntry>(_ entries: [Entry], now: Date) -> Timeline<Entry> {
-        Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600)))
+        Timeline(entries: entries, policy: .after(max(entries.last?.date ?? now, now.addingTimeInterval(3600))))
     }
     /// Entries now, at every milestone of the next day (so "next" turns over on time), whenever the
     /// followed park may change (`followMoments`), and hourly. Countdown text updates itself in between.

@@ -41,6 +41,10 @@ nonisolated struct IPhoneAsk: Equatable, Sendable {
         if age < Self.patience { return .asking }
         return age < Self.patience+Self.shown ? .unreachable : nil
     }
+    /// The moments `current(at:)` changes: a request running out of time, and an answer leaving.
+    var changes: [Date] {
+        state == .asking ? [at.addingTimeInterval(Self.patience), at.addingTimeInterval(Self.patience+Self.shown)] : [at.addingTimeInterval(Self.shown)]
+    }
     static func line(_ state: State) -> String {
         switch state {
         case .asking: String(localized: "Asking your iPhone")
@@ -60,10 +64,13 @@ struct AskIPhoneRow: View {
     @Environment(WatchStore.self) private var store
     @Environment(\.nyx) private var palette
     @Environment(\.watchNow) private var now
+    /// The app's clock ticks once a minute; a request keeps its own, so it turns unreachable and
+    /// its answer leaves on time (`IPhoneAsk.changes`).
+    @State private var tick = Date.distantPast
     let source: CloudSource
     var body: some View {
         if source.isStale || source == .unsynced {
-            let state = store.ask?.current(at: now)
+            let state = store.ask?.current(at: max(now, tick))
             VStack(alignment: .leading, spacing: 4) {
                 if state == .asking {
                     HStack(spacing: 6) {
@@ -80,10 +87,18 @@ struct AskIPhoneRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            // VoiceOver hears the answer where it lands, without moving focus to it.
-            .onChange(of: store.ask) { _, ask in
-                guard let ask, ask.state != .asking else { return }
-                AccessibilityNotification.Announcement(IPhoneAsk.line(ask.state)).post()
+            .task(id: store.ask) {
+                guard let ask = store.ask else { return }
+                for mark in ask.changes where mark > .now {
+                    do { try await Task.sleep(for: .seconds(mark.timeIntervalSinceNow)) } catch { return }
+                    tick = mark
+                }
+            }
+            // VoiceOver hears the answer where it lands, without moving focus to it: a reply, a
+            // request that ran out of time, or the same answer to a new request.
+            .onChange(of: state.flatMap { state in store.ask.map { IPhoneAsk(state, at: $0.at) } }) { _, shown in
+                guard let shown, shown.state != .asking else { return }
+                AccessibilityNotification.Announcement(IPhoneAsk.line(shown.state)).post()
             }
         }
     }

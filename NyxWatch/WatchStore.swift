@@ -40,6 +40,10 @@ import WidgetKit
         // Awaited by the receiver, so a background wake knows when the context is stored and the face reloaded.
         receiver.onContext = { [weak self] context in await self?.apply(context) }
         receiver.activate()
+        // An update may change what the faces read (the bundled parks, the snapshot's shape) while
+        // the stored context is unchanged, and an unchanged context is never applied again: write
+        // the snapshot now. Nothing reloads unless it was rewritten.
+        publish(force: false)
     }
     func apply(_ context: WatchContext) {
         // Each send arrives twice with the same `sent` (application context, and a complication
