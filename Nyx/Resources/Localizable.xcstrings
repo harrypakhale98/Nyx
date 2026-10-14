@@ -64386,41 +64386,6 @@
         }
       }
     },
-    "Update Nyx on Apple Watch for matching scores.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Update Nyx on Apple Watch for matching scores."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktualisiere Nyx auf der Apple Watch, damit die Werte übereinstimmen."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actualiza Nyx en el Apple Watch para que los índices coincidan."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mettez à jour Nyx sur l’Apple Watch pour des indices identiques."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スコアをそろえるには、Apple WatchのNyxをアップデートしてください。"
-          }
-        }
-      }
-    },
     "Update from iPhone": {
       "extractionState": "manual",
       "localizations": {
@@ -73481,6 +73446,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "iOSは、画面の明るさを含むNyxの動作状況を、MetricKitを通じて1日に1回ほど報告します。Nyxが保持するのは最新の画面の明るさだけで、ここと「データについて」に表示するためです。どこにも送信されません。"
+          }
+        }
+      }
+    },
+    "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone und Apple Watch haben unterschiedliche Versionen von Nyx. Aktualisiere beide, damit die Werte übereinstimmen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El iPhone y el Apple Watch tienen versiones distintas de Nyx. Actualiza ambos para que los índices coincidan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’iPhone et l’Apple Watch n’ont pas la même version de Nyx. Mettez les deux à jour pour des indices identiques."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhoneとApple WatchのNyxのバージョンが異なります。スコアをそろえるには、両方をアップデートしてください。"
           }
         }
       }

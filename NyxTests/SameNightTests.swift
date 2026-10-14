@@ -97,10 +97,33 @@ import Testing
         let decoded = try #require(WatchContext(data: data))
         #expect(decoded.dataVersion == mine && decoded == same)
         let other = WatchContext(sent: now, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], dataVersion: "0")
-        #expect(other.dataDiffers && other.dataNote == "Update Nyx on Apple Watch for matching scores.")
+        #expect(other.dataDiffers && other.dataNote == "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.")
         // An iPhone before the fingerprint: nothing to compare.
         let old = try #require(WatchContext(data: Data(#"{"version":1,"sent":0,"homeParkID":"jotr"}"#.utf8)))
         #expect(old.dataVersion == nil && !old.dataDiffers)
+    }
+
+    /// The fingerprint follows what scores rest on, never the words: a new description or viewing
+    /// spot leaves it alone; a moved park, a new Bortle estimate, other usual clouds or new scoring
+    /// rules change it.
+    @Test func dataFingerprintFollowsOnlyScoreInputs() throws {
+        let climate = try #require(CloudClimate.load()).parks
+        let base = WatchContext.fingerprint(parks: parks, climate: climate)
+        #expect(base == WatchContext.bundledData)
+        func edited(_ change: (inout [String: Any]) -> Void) throws -> [Park] {
+            var list = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(parks)) as? [[String: Any]])
+            change(&list[0])
+            return try JSONDecoder().decode([Park].self, from: JSONSerialization.data(withJSONObject: list))
+        }
+        #expect(WatchContext.fingerprint(parks: try edited { $0["description"] = "Other words." ; $0["sourceNote"] = "Another note." }, climate: climate) == base)
+        #expect(WatchContext.fingerprint(parks: try edited { $0["viewingSpots"] = [Any]() }, climate: climate) == base)
+        #expect(WatchContext.fingerprint(parks: try edited { $0["bortleEstimate"] = 9 }, climate: climate) != base)
+        #expect(WatchContext.fingerprint(parks: try edited { $0["latitude"] = 10.5 }, climate: climate) != base)
+        var cloudier = climate
+        let id = try #require(climate.keys.sorted().first), months = try #require(climate[id])
+        cloudier[id] = CloudClimate.Months(cloud: months.cloud.map { $0.map { $0+1 } }, clear: months.clear)
+        #expect(WatchContext.fingerprint(parks: parks, climate: cloudier) != base)
+        #expect(WatchContext.fingerprint(parks: parks, climate: climate, rules: ScoreEngine.rulesVersion+1) != base)
     }
 
     /// Tonight's pick travels to the widgets and the watch only while the night it was picked for is
