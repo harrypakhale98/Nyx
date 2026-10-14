@@ -105,14 +105,7 @@ nonisolated enum NyxSpeech {
     /// or switches language for are left as they are).
     static let phonetic:[(word:String,ipa:String)]=[("Bortle",bortleIPA)]
     /// Every range of `text` that has an IPA spelling, with it. Pure, for tests.
-    static func phoneticAnnotations(in text:String)->[(range:Range<String.Index>,ipa:String)] {
-        var found:[(Range<String.Index>,String)]=[]
-        for entry in phonetic {
-            var start=text.startIndex
-            while let range=text.range(of:entry.word,range:start..<text.endIndex) { found.append((range,entry.ipa)); start=range.upperBound }
-        }
-        return found.sorted { $0.0.lowerBound<$1.0.lowerBound }
-    }
+    static func phoneticAnnotations(in text:String)->[(range:Range<String.Index>,ipa:String)] { ranges(of:phonetic,in:text) }
     /// Word → SSML fragment. "Bortle" is said BOR-tl, not "bottle"; the Milky Way's centre is
     /// "Sagittarius A star", as astronomers say it.
     static let pronunciations:[(word:String,ssml:String)]=[
@@ -121,11 +114,13 @@ nonisolated enum NyxSpeech {
         ("Gemínidas","<lang xml:lang=\"es-US\">Gemínidas</lang>")
     ]
     /// Every range of `text` that has a pronunciation, with its fragment. Pure, for tests.
-    static func annotations(in text:String)->[(range:Range<String.Index>,ssml:String)] {
+    static func annotations(in text:String)->[(range:Range<String.Index>,ssml:String)] { ranges(of:pronunciations,in:text) }
+    /// Every range of `text` where one of the table's words appears, with that word's spelling, in reading order.
+    private static func ranges(of table:[(String,String)],in text:String)->[(Range<String.Index>,String)] {
         var found:[(Range<String.Index>,String)]=[]
-        for entry in pronunciations {
+        for (word,spelling) in table {
             var start=text.startIndex
-            while let range=text.range(of:entry.word,range:start..<text.endIndex) { found.append((range,entry.ssml)); start=range.upperBound }
+            while let range=text.range(of:word,range:start..<text.endIndex) { found.append((range,spelling)); start=range.upperBound }
         }
         return found.sorted { $0.0.lowerBound<$1.0.lowerBound }
     }
@@ -167,31 +162,20 @@ enum SpokenText {
 // MARK: Actions
 
 /// For actions that are only words (amber text, a small capsule): pressed, they dim like a plain
-/// button; with Show Borders (Button Shapes) on, a hairline capsule, or an underline for a link in
-/// running text, says "this is a button" without colour. Rows and cards that draw their own
-/// outline keep `.plain`.
+/// button; with Show Borders (Button Shapes) on, a hairline capsule says "this is a button" without
+/// colour. Rows and cards that draw their own outline keep `.plain`.
 struct NyxActionStyle: ButtonStyle {
-    enum Border { case capsule, underline }
-    var border: Border = .capsule
-    func makeBody(configuration:Configuration)->some View { NyxActionLabel(configuration:configuration,border:border) }
+    func makeBody(configuration:Configuration)->some View { NyxActionLabel(configuration:configuration) }
 }
 private struct NyxActionLabel: View {
     let configuration: ButtonStyleConfiguration
-    let border: NyxActionStyle.Border
     @Environment(\.nyxAccess) private var access
     @Environment(\.nyx) private var palette
     @Environment(\.isEnabled) private var enabled
     var body: some View {
         configuration.label
-            .padding(.horizontal,access.showBorders && border == .capsule ? 12 : 0)
-            .overlay {
-                if access.showBorders {
-                    switch border {
-                    case .capsule: Capsule().strokeBorder(palette.line,lineWidth:1)
-                    case .underline: Rectangle().fill(palette.line).frame(height:1).frame(maxHeight:.infinity,alignment:.bottom).padding(.bottom,6)
-                    }
-                }
-            }
+            .padding(.horizontal,access.showBorders ? 12 : 0)
+            .overlay { if access.showBorders { Capsule().strokeBorder(palette.line,lineWidth:1) } }
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? 0.55 : enabled ? 1 : 0.45)
     }

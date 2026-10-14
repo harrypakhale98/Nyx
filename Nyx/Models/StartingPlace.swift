@@ -494,7 +494,7 @@ nonisolated enum StartingPlaces {
                 let meters=Park.distance(latitude, longitude, place.latitude, place.longitude)
                 if best.map({ meters<$0.meters || (meters==$0.meters && Int(index)<$0.index) }) ?? true { best=(Int(index), meters) }
             }
-            let row=Self.row(latitude), column=Self.column(longitude), radian=Double.pi/180, earth=6_371_008.8
+            let row=Self.row(latitude), column=Self.column(longitude), radian=Double.pi/180, earth=Park.earthRadius
             for ring in 0...45 {
                 for dRow in -ring...ring {
                     let r=row+dRow

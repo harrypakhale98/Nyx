@@ -832,7 +832,7 @@ nonisolated struct PlaceCatalog: Sendable {
     /// circle can reach are read (every column near a pole or for a radius past a quarter of the Earth).
     func nearby(latitude: Double, longitude: Double, radiusMeters: Double) -> [Park] {
         guard !places.isEmpty, latitude.isFinite, longitude.isFinite, radiusMeters.isFinite, radiusMeters>=0 else { return [] }
-        let angle=radiusMeters/6_371_008.8, degrees=angle*180 / .pi+1e-6
+        let angle=radiusMeters/Park.earthRadius, degrees=angle*180 / .pi+1e-6
         let rows=Int(max(-90, latitude-degrees).rounded(.down))...Int(min(89.999_999, latitude+degrees).rounded(.down))
         let ratio=sin(min(angle, .pi/2))/cos(latitude * .pi/180)
         let columns: [Int]
