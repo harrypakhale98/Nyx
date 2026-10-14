@@ -76,9 +76,7 @@ struct RedLightOnIntent: AppIntent {
     static let description = IntentDescription("Keep Nyx red on the wrist, day or night, to protect dark-adapted eyes.")
     init() {}
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        WatchSky.palette = .red
-        WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadControls(ofKind: WatchSky.redLightKind)
+        WatchSky.setPalette(.red)
         return .result(dialog: IntentDialog(stringLiteral: String(localized: "Red light is on. Nyx stays red, day or night, until you change Colors in Parks.")))
     }
 }

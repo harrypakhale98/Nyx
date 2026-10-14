@@ -25,38 +25,48 @@ nonisolated enum WristTimeline {
     static func park(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Park? {
         WatchTimeline.best(at: date, snapshot: snapshot, cache: &cache)?.park ?? snapshot?.parks.first
     }
-    /// Now, every hour for a day, at each rise and set, and where Automatic changes colour.
+    /// Now, every hour for a day, at each rise and set at every park the face may follow, whenever
+    /// the followed park may change, and where Automatic changes colour. The park is picked again at
+    /// each entry, as Tonight's is (`WatchTimeline.followMoments`), so the faces never mix parks.
     static func moonEntries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [MoonEntry] {
         var cache: [String: SkyConditions] = [:]
-        let followed = park(at: now, snapshot: snapshot, cache: &cache)
-        let events = followed.map { park in MoonNow.events(at: park, around: now) { WatchTimeline.sky(park, evening: $0, cache: &cache) } } ?? []
-        let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
-        var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
-        moments.formUnion(events.map(\.date).filter { $0 > now && $0 < now.addingTimeInterval(86400) })
-        moments.formUnion(WatchTimeline.paletteMoments(from: now, snapshot: followed.map { SavedSkySnapshot(parks: [$0], forecasts: [:]) }, look: look))
+        var events: [String: [MoonNow.Event]] = [:]
+        var moments = WatchTimeline.followMoments(from: now, snapshot: snapshot)
+        for park in snapshot?.parks ?? [] {
+            let list = MoonNow.events(at: park, around: now) { WatchTimeline.sky(park, evening: $0, cache: &cache) }
+            events[park.id] = list
+            moments.formUnion(list.map(\.date).filter { $0 > now && $0 < now.addingTimeInterval(86400) })
+        }
+        moments.formUnion(WatchTimeline.paletteMoments(from: now, snapshot: snapshot, look: look))
         return ([now] + moments.sorted()).map { date in
-            MoonEntry(date: date, park: followed, moon: MoonNow(at: date, park: followed, events: events), nightVision: look.nightVision(park: followed, at: date))
+            let followed = park(at: date, snapshot: snapshot, cache: &cache)
+            return MoonEntry(date: date, park: followed, moon: MoonNow(at: date, park: followed, events: followed.flatMap { events[$0.id] }),
+                             nightVision: look.nightVision(park: followed, at: date))
         }
     }
-    /// Now, at each moment the answer changes (true darkness, moonrise, moonset, dawn) over the
-    /// next day, hourly, and where Automatic changes colour.
+    /// Now, at each moment the answer changes at any park the face may follow (true darkness,
+    /// moonrise, moonset, dawn) over the next day, whenever the followed park may change, hourly, and
+    /// where Automatic changes colour. The park is picked again at each entry, as for the Moon.
     static func nextDarkEntries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook) -> [NextDarkEntry] {
         var cache: [String: SkyConditions] = [:]
-        guard let followed = park(at: now, snapshot: snapshot, cache: &cache) else {
+        let parks = snapshot?.parks ?? []
+        guard !parks.isEmpty else {
             return [NextDarkEntry(date: now, park: nil, moment: .none, nightVision: look.nightVision(park: nil, at: now))]
         }
-        let hour = Calendar.current.dateInterval(of: .hour, for: now)?.end ?? now.addingTimeInterval(3600)
-        var moments = Set((0..<24).map { hour.addingTimeInterval(Double($0)*3600) })
-        for offset in 0..<2 {
-            let sky = WatchTimeline.sky(followed, evening: followed.date(followed.currentNight(at: now), addingDays: offset), cache: &cache)
-            for date in [sky.darkStart, sky.darkEnd, sky.moonrise, sky.moonset].compactMap({ $0 }) where date > now && date < now.addingTimeInterval(86400) {
-                moments.insert(date.addingTimeInterval(1))
+        var moments = WatchTimeline.followMoments(from: now, snapshot: snapshot)
+        for park in parks {
+            for offset in 0..<2 {
+                let sky = WatchTimeline.sky(park, evening: park.date(park.currentNight(at: now), addingDays: offset), cache: &cache)
+                for date in [sky.darkStart, sky.darkEnd, sky.moonrise, sky.moonset].compactMap({ $0 }) where date > now && date < now.addingTimeInterval(86400) {
+                    moments.insert(date.addingTimeInterval(1))
+                }
             }
         }
-        moments.formUnion(WatchTimeline.paletteMoments(from: now, snapshot: SavedSkySnapshot(parks: [followed], forecasts: [:]), look: look))
+        moments.formUnion(WatchTimeline.paletteMoments(from: now, snapshot: snapshot, look: look))
         return ([now] + moments.sorted()).map { date in
-            NextDarkEntry(date: date, park: followed, moment: DarkMoment.next(at: followed, now: date) { WatchTimeline.sky(followed, evening: $0, cache: &cache) },
-                          nightVision: look.nightVision(park: followed, at: date))
+            let followed = park(at: date, snapshot: snapshot, cache: &cache)
+            let moment = followed.map { park in DarkMoment.next(at: park, now: date) { WatchTimeline.sky(park, evening: $0, cache: &cache) } } ?? .none
+            return NextDarkEntry(date: date, park: followed, moment: moment, nightVision: look.nightVision(park: followed, at: date))
         }
     }
 }
@@ -121,10 +131,10 @@ struct MoonComplicationView: View {
         case nil: String(localized: "\(entry.moon.percent)% lit")
         }
     }
-    /// "Sets 11:40 PM · Joshua Tree" in park time.
+    /// "Sets 11:40 PM · Joshua Tree" in park time, with the park's zone where its clock is not this watch's.
     private var eventLine: String? {
         guard let park = entry.park, let next = entry.moon.next else { return nil }
-        let time = park.time(next.date)
+        let time = park.wristTime(next.date)
         return next.rises ? String(localized: "Rises \(time) · \(park.wristName)") : String(localized: "Sets \(time) · \(park.wristName)")
     }
     private var cornerLine: String {
@@ -137,6 +147,7 @@ struct MoonComplicationView: View {
         if let up = entry.moon.isUp { text += " " + (up ? String(localized: "The Moon is up.") : String(localized: "The Moon is down.")) }
         if let park = entry.park, let next = entry.moon.next {
             text += " " + (next.rises ? String(localized: "Moonrise at \(park.time(next.date)), \(park.wristName).") : String(localized: "Moonset at \(park.time(next.date)), \(park.wristName)."))
+            if let zone = park.spokenZone(at: next.date) { text += " " + zone }
         }
         return text
     }
@@ -233,10 +244,10 @@ struct NextDarkComplicationView: View {
     private var detail: String {
         guard let park = entry.park else { return String(localized: "Choose a place in Nyx on Apple Watch.") }
         switch entry.moment {
-        case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.time(until))")
-        case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.time(until))")
-        case .begins(let date, true): return String(localized: "Moonset at \(park.time(date))")
-        case .begins(let date, false): return String(localized: "At \(park.time(date))")
+        case .darkNow(let until, true): return String(localized: "Until moonrise at \(park.wristTime(until))")
+        case .darkNow(let until, false): return String(localized: "Until dawn twilight at \(park.wristTime(until))")
+        case .begins(let date, true): return String(localized: "Moonset at \(park.wristTime(date))")
+        case .begins(let date, false): return String(localized: "At \(park.wristTime(date))")
         case .moonlit: return String(localized: "The Moon is up all through true darkness.")
         case .none: return String(localized: "The Sun stays too high at this latitude.")
         }
@@ -254,6 +265,11 @@ struct NextDarkComplicationView: View {
     }
     private var summary: String {
         guard let park = entry.park else { return String(localized: "Nyx. Choose a place in Nyx on Apple Watch.") }
+        // The times are the park's: where its clock is not this watch's, say whose.
+        let zone = entry.moment.target(at: entry.date).flatMap { park.spokenZone(at: $0) }
+        return zone.map { spoken(park) + " " + $0 } ?? spoken(park)
+    }
+    private func spoken(_ park: Park) -> String {
         switch entry.moment {
         case .darkNow(let until, _): return String(localized: "\(park.wristName). Truly dark now, until \(park.time(until)).")
         case .begins(let date, true): return String(localized: "\(park.wristName). The Moon sets at \(park.time(date)); truly dark from then.")

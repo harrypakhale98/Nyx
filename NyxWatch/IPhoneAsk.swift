@@ -31,8 +31,16 @@ nonisolated struct IPhoneAsk: Equatable, Sendable {
     }
     /// How long an answer stays beside the forecast; after it the button is offered again.
     static let shown: TimeInterval = 120
+    /// How long a request waits for an answer. WatchConnectivity may call neither handler (the
+    /// iPhone lost mid-request), so a request older than this reads as unreachable, and can be made again.
+    static let patience: TimeInterval = 30
     /// The state to show at `now`: a request still on its way, or an answer under two minutes old.
-    func current(at now: Date) -> State? { state == .asking || now.timeIntervalSince(at) < Self.shown ? state : nil }
+    func current(at now: Date) -> State? {
+        let age = now.timeIntervalSince(at)
+        guard state == .asking else { return age < Self.shown ? state : nil }
+        if age < Self.patience { return .asking }
+        return age < Self.patience+Self.shown ? .unreachable : nil
+    }
     static func line(_ state: State) -> String {
         switch state {
         case .asking: String(localized: "Asking your iPhone")

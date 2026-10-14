@@ -45,8 +45,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
             // Until the face is set to another place (or the place is saved again, which reloads every timeline).
             return Timeline(entries: [WatchSkyEntry(date: now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: now), unsaved: true)], policy: .never)
         }
-        let entries = WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current)
-        return Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600)))
+        return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current), now: now)
     }
     /// The parks this complication weighs: the watch app's choice, or the one place set (a park, or a
     /// saved spot or world place the iPhone sent whole), with the clouds, the usual clouds and the
@@ -126,8 +125,7 @@ struct MoonProvider: TimelineProvider {
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<MoonEntry>) -> Void) {
         let now = Date.now
-        let entries = WristTimeline.moonEntries(from: now, snapshot: SharedSettings.read(), look: .current)
-        completion(Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600))))
+        completion(WatchTimeline.timeline(WristTimeline.moonEntries(from: now, snapshot: SharedSettings.read(), look: .current), now: now))
     }
 }
 
@@ -152,8 +150,7 @@ struct NextDarkProvider: TimelineProvider {
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<NextDarkEntry>) -> Void) {
         let now = Date.now
-        let entries = WristTimeline.nextDarkEntries(from: now, snapshot: SharedSettings.read(), look: .current)
-        completion(Timeline(entries: entries, policy: .after(entries.last?.date ?? now.addingTimeInterval(3600))))
+        completion(WatchTimeline.timeline(WristTimeline.nextDarkEntries(from: now, snapshot: SharedSettings.read(), look: .current), now: now))
     }
 }
 
@@ -256,9 +253,7 @@ struct RedLightIntent: SetValueIntent {
     @Parameter(title: "Red light") var value: Bool
     init() {}
     func perform() async throws -> some IntentResult {
-        WatchSky.palette = value ? .red : .automatic
-        WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadControls(ofKind: WatchSky.redLightKind)
+        WatchSky.setPalette(value ? .red : .automatic)
         return .result()
     }
 }
