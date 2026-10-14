@@ -144,6 +144,11 @@ struct TonightView: View {
             }
             // A location found is a starting point chosen.
             .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
+            // The answer here is the one the widgets and Apple Watch follow too (`PlanModel.tonightPickID`):
+            // once a starting point is chosen, and never one the loader is about to replace.
+            .onChange(of:loading ? model.tonightPickID : (model.startChosen && !empty ? best.first?.id : nil),initial:true) { _,id in
+                if DebugScenario.screen == nil { model.tonightPickID=id }
+            }
             // Back from the background: where you are may have changed, and so may the sky.
             .onChange(of:scenePhase) { _,phase in
                 guard phase == .active, DebugScenario.screen == nil else { return }

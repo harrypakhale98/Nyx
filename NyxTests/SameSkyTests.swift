@@ -7,18 +7,18 @@ import Testing
 @MainActor struct SameSkyTests {
     /// 2026-10-06 06:00 UTC.
     let now = Date(timeIntervalSince1970: 1_791_158_400 + 30*3600)
-    private func hours(_ count: Int) -> [Double] {
-        let first = (floor(now.timeIntervalSince1970/3600)-24)*3600
+    private func hours(_ count: Int, around reference: Date? = nil) -> [Double] {
+        let first = (floor((reference ?? now).timeIntervalSince1970/3600)-24)*3600
         return (0..<count).map { first+Double($0)*3600 }
     }
     /// Sixteen days of hourly clouds that differ from place to place and hour to hour.
-    func forecast(_ seed: Int) -> Forecast {
-        let times = hours(17*24)
-        return Forecast(updated: now.addingTimeInterval(-3600), times: times, clouds: times.indices.map { Double(($0*(seed%7+3)+seed*13) % 101) })
+    func forecast(_ seed: Int, at reference: Date? = nil) -> Forecast {
+        let times = hours(17*24, around: reference)
+        return Forecast(updated: (reference ?? now).addingTimeInterval(-3600), times: times, clouds: times.indices.map { Double(($0*(seed%7+3)+seed*13) % 101) })
     }
     /// A week of forecast detail: the three models, the cloud layers and smoke.
-    func detail(_ seed: Int, updated: Date? = nil) -> ForecastDetail {
-        let times = hours(8*24), issued = updated ?? now.addingTimeInterval(-3600)
+    func detail(_ seed: Int, at reference: Date? = nil, updated: Date? = nil) -> ForecastDetail {
+        let times = hours(8*24, around: reference), issued = updated ?? (reference ?? now).addingTimeInterval(-3600)
         func values(_ step: Int, _ scale: Double = 1) -> [Double?] { times.indices.map { Double(($0*step+seed*11) % 101)*scale } }
         let models = HourlySeries(updated: issued, times: times, values: Dictionary(uniqueKeysWithValues: ForecastDetail.modelKeys.enumerated().map { ($1, values(5+$0)) }))
         let layers = HourlySeries(updated: issued, times: times, values: ["cloud_cover_low": values(3), "cloud_cover_mid": values(7), "cloud_cover_high": values(11)])
@@ -92,5 +92,53 @@ import Testing
         #expect(older.tonightParkID == nil && older.watchParkIDs.isEmpty && older.droppedParkIDs.isEmpty && older.forecasts == context.forecasts)
         let answer = try park(pick)
         #expect(CloudSource.of(context: older, park: answer, now: now) == .missing(followed: false))
+    }
+
+    /// A change to a followed place's smoke alone (a park's page fetching its detail) is a change
+    /// worth handing over; the same data again, or a change at a place nobody follows, is not.
+    @Test func followedDataChangesOnADetailOnlyChange() {
+        let ids = SavedSkySync.followedIDs(saved: ["jotr", "deva"], home: "chis", tonight: "deva", watch: ["grba", "jotr"], widgets: ["yell", "chis"])
+        #expect(ids == ["jotr", "deva", "chis", "grba", "yell"])
+        let forecasts = Dictionary(uniqueKeysWithValues: ids.enumerated().map { ($1, forecast($0+1)) })
+        var details = ["jotr": detail(1)]
+        let before = FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:])
+        #expect(FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]) == before)
+        details["deva"] = ForecastDetail(air: detail(2).air)
+        #expect(FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]) != before)
+        let smoke = FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:])
+        details["deva"] = ForecastDetail(air: detail(2, updated: now).air)
+        #expect(FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]) != smoke)
+        // A closure, and a new place followed, are changes too; a park nobody follows is not.
+        #expect(FollowedData(ids: ids, forecasts: forecasts, details: details, closures: ["yell": "Road closed"]) != FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]))
+        #expect(FollowedData(ids: ids+["arch"], forecasts: forecasts, details: details, closures: [:]) != FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]))
+        details["zion"] = detail(9)
+        #expect(FollowedData(ids: ids, forecasts: forecasts, details: details, closures: [:]) == FollowedData(ids: ids, forecasts: forecasts, details: details.filter { $0.key != "zion" }, closures: [:]))
+    }
+
+    /// The widgets' snapshot scores every followed place as the app does, a widget set to a park
+    /// that is not saved included: same score, band, basis and limit, tonight and the week ahead.
+    @Test func theSnapshotScoresEveryFollowedPlaceAsTheAppDoes() throws {
+        let model = PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
+                              detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())
+        let saved = ["jotr", "deva", "hale"], reference = Date.now
+        let ids = SavedSkySync.followedIDs(saved: saved, home: "chis", tonight: "grba", watch: [], widgets: ["yell"])
+        model.forecasts = Dictionary(uniqueKeysWithValues: ids.enumerated().map { ($1, forecast($0+1, at: reference)) })
+        model.details = Dictionary(uniqueKeysWithValues: ids.enumerated().map { ($1, detail($0+1, at: reference)) })
+        let parks = try saved.map(park), followed = try ids.map(park)
+        let written = SavedSkySync.snapshot(parks: parks, followed: followed, forecasts: model.forecasts, details: model.details, closures: [:])
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let snapshot = try JSONDecoder().decode(SavedSkySnapshot.self, from: try encoder.encode(written))
+        // "Darkest saved place" still weighs only the saved places; the others ride along for widgets set to them.
+        #expect(snapshot.parks.map(\.id) == saved && Set(snapshot.forecasts.keys) == Set(ids) && Set((snapshot.details ?? [:]).keys) == Set(ids))
+        let planner = snapshot.planner
+        for place in followed {
+            for offset in 0..<7 {
+                let app = model.night(place, on: place.date(model.tonight(place), addingDays: offset))
+                let widget = planner.night(place, sky: app.sky, now: model.present)
+                #expect(widget.score.value == app.score.value && widget.score.band == app.score.band, "\(place.id) +\(offset)")
+                #expect(widget.basis == app.basis && widget.score.limit == app.score.limit, "\(place.id) +\(offset)")
+            }
+        }
     }
 }

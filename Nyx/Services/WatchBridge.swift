@@ -20,6 +20,13 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     private var requested = false
     private var activating = false
     private override init() { super.init() }
+    /// The places Apple Watch last asked the iPhone to follow (`WatchRequest.places`): the one kept
+    /// on its Tonight and those its complications are set to. Kept across launches, so a background
+    /// refresh carries their clouds too.
+    static var requestedParkIDs: [String] {
+        get { UserDefaults.standard.stringArray(forKey: WatchRequest.placesKey) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: WatchRequest.placesKey) }
+    }
     /// False where no watch can ever pair (iPad), so nothing is worked out for one.
     static var isAvailable: Bool { WCSession.isSupported() }
     /// True only once the session is active with a paired watch that has Nyx on it. The models'
@@ -35,13 +42,14 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch. `ranges` is nil when they
     /// were not worked out (`hasWatchApp` was false); `complete` then hands over again, with them,
     /// once a watch with Nyx turns out to be there.
-    func push(savedParkIDs: [String], homeParkID: String, forecasts: [String: Forecast], details: [String: ForecastDetail],
+    func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast], details: [String: ForecastDetail],
               closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
               complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision"), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
-                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places)
+                                        details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places,
+                                        tonightParkID: tonightParkID, watchParkIDs: watchParkIDs)
         let session = WCSession.default
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
@@ -100,6 +108,8 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         let forecastsOn = UserDefaults.standard.object(forKey: "weatherEnabled") as? Bool ?? true
         guard let reply = WatchRequest.reply(to: message, forecastsOn: forecastsOn) else { replyHandler([:]); return }
         replyHandler([WatchRequest.replyKey: reply.rawValue])
+        // A watch before 2.2 names no places: what an earlier request asked for stays followed.
+        if let places = WatchRequest.places(in: message) { Self.requestedParkIDs = places }
         let handler = lock.withLock { () -> (@MainActor @Sendable () -> Void)? in
             // The watch asked: the next hand-over goes even when it says nothing new.
             lastSent = nil
@@ -119,12 +129,23 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     }
 }
 
-/// The one message Apple Watch sends: "Update from iPhone" (`["request": "context"]`). The watch
-/// spells the same strings (`IPhoneAsk` in NyxWatch); the iPhone answers at once with `Reply`.
+/// The one message Apple Watch sends: "Update from iPhone" (`["request": "context"]`), naming the
+/// places it wants clouds for (`places`). The watch spells the same strings (`IPhoneAsk` in
+/// NyxWatch); the iPhone answers at once with `Reply`.
 nonisolated enum WatchRequest {
     static let key = "request"
     static let context = "context"
     static let replyKey = "reply"
+    static let placesKey = "places"
+    /// More than a watch could show at once; a longer list is cut, never refused.
+    static let maxPlaces = 8
+    /// The places a request names, each a valid place id (`PlaceIDText`), once, in order; nil from a
+    /// watch before 2.2, which names none.
+    static func places(in message: [String: Any]) -> [String]? {
+        guard let raw = message[placesKey] as? [String] else { return nil }
+        var seen = Set<String>()
+        return Array(raw.compactMap(PlaceIDText.validated).filter { seen.insert($0).inserted }.prefix(maxPlaces))
+    }
     enum Reply: String, Sendable {
         /// Asking Open-Meteo for the saved parks' clouds, then handing the context over.
         case refreshing

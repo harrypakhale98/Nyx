@@ -44,7 +44,8 @@ import CoreLocation
         }
     }
     /// Everything worked out from the forecasts and their detail is let go when either changes.
-    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:] }
+    /// The widget, the watch and reminders follow too, once the changes settle (`SavedSkySync.noteChange`).
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:]; savedSync.noteChange(self) }
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
     /// Nights already scored, by park and evening: the park list and a month ask for the same
@@ -101,6 +102,16 @@ import CoreLocation
     /// Where the settings below are kept: the app's own defaults (tests pass a suite of their own).
     @ObservationIgnored let defaults: UserDefaults
     var homeID: String { didSet { if DebugScenario.screen == nil { defaults.set(homeID,forKey:"homePark") } } }
+    /// The place Tonight last answered with on this iPhone (the darkest within reach, once a starting
+    /// point is chosen), kept across launches: the widgets and Apple Watch follow it too
+    /// (`SavedSkySync.followedIDs`), so even a background refresh fetches and hands over its clouds.
+    @ObservationIgnored var tonightPickID: String? {
+        didSet {
+            guard tonightPickID != oldValue else { return }
+            if DebugScenario.screen == nil { defaults.set(tonightPickID,forKey:"tonightPick") }
+            savedSync.noteChange(self)
+        }
+    }
     /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
     /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
     var homePlace: StartingPlace? { didSet { if DebugScenario.screen == nil { defaults.set(homePlace.flatMap { try? JSONEncoder().encode($0) },forKey:"homePlace") } } }
@@ -188,6 +199,7 @@ import CoreLocation
         defaults.register(defaults:["parksByScore":true])
         homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
         homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
+        tonightPickID=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPick").flatMap(PlaceIDText.validated) : nil
         startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
         // A radius kept in miles before 2.0 is written once as metres, exactly.
         if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }
@@ -732,6 +744,8 @@ import CoreLocation
         guard update.cache != alertsCache else { return }
         alertsCache=update.cache
         for park in parks { rebuild(park) }
+        // A new closure reaches the widget and the watch too.
+        savedSync.noteChange(self)
     }
     /// One park's update as the screens read it: its alerts from the shared request, ranked, and
     /// its programs if its page has asked for them.
