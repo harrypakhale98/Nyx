@@ -31,10 +31,18 @@ nonisolated struct ReminderRoute:Sendable,Equatable {
         self.init(parkID:parkID,day:(userInfo["night"] as? String).flatMap(TripDay.init(iso:)),whatsUp:userInfo["whatsUp"] as? String == "1")
     }
 }
+/// A pending reminder as iOS holds it: what it says and when it fires.
+nonisolated struct ScheduledReminder:Sendable,Equatable {
+    let id:String
+    let title:String
+    let body:String
+    let fireDate:Date?
+}
 nonisolated protocol LocalNotificationCenter:Sendable {
     func authorized() async -> Bool
     func request() async -> Bool
     func pendingIDs() async -> [String]
+    func pendingReminders() async -> [ScheduledReminder]
     func deliveredIDs() async -> [String]
     func remove(_ ids:[String]) async
     func add(_ reminder:NightReminder) async throws
@@ -52,6 +60,12 @@ nonisolated struct SystemNotifications:LocalNotificationCenter {
     func authorized() async -> Bool { let settings=await UNUserNotificationCenter.current().notificationSettings();return settings.authorizationStatus == .authorized }
     func request() async -> Bool { (try? await UNUserNotificationCenter.current().requestAuthorization(options:[.alert,.sound])) ?? false }
     func pendingIDs() async -> [String] { await UNUserNotificationCenter.current().pendingNotificationRequests().map(\.identifier) }
+    func pendingReminders() async -> [ScheduledReminder] {
+        await UNUserNotificationCenter.current().pendingNotificationRequests().map { request in
+            ScheduledReminder(id:request.identifier,title:request.content.title,body:request.content.body,
+                              fireDate:(request.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate())
+        }
+    }
     func deliveredIDs() async -> [String] { await UNUserNotificationCenter.current().deliveredNotifications().map(\.request.identifier) }
     func remove(_ ids:[String]) async { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers:ids) }
     func add(_ reminder:NightReminder) async throws {
@@ -219,6 +233,16 @@ nonisolated struct NotificationScheduler {
                 fireDate:fire,timeZone:park.timeZone,night:park.isoDay(night.id),whatsUp:true)
         }
     }
+    /// Whether a pending reminder no longer says what the plan says: its title or words changed
+    /// (the score moved from 94 to 91, the Moon reason or the models' agreement changed), or, for one
+    /// set for a fixed evening, its moment did. A reminder due "in a minute" keeps its moment, since
+    /// working that out again later would only push it back.
+    static func needsRewrite(_ pending:ScheduledReminder,to plan:NightReminder,now:Date)->Bool {
+        if pending.title != plan.title || pending.body != plan.body { return true }
+        guard plan.fireDate>now.addingTimeInterval(60), let fire=pending.fireDate else { return false }
+        // The trigger keeps whole seconds.
+        return abs(fire.timeIntervalSince(plan.fireDate))>=1
+    }
     static func identifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-\(Int(night.timeIntervalSince1970))" }
     /// A score reminder's place and night, read back from its identifier: the stamp after the last dash,
     /// the place between the prefix and that dash, so a spot's id (`pin:` and a UUID, itself hyphenated)
@@ -233,9 +257,11 @@ nonisolated struct NotificationScheduler {
     /// Same prefix and trailing night stamp as score reminders, so the ledger and cancel paths treat both alike.
     static func showerIdentifier(park:Park,night:Date)->String { "nyx-night-\(park.id)-meteors-\(Int(night.timeIntervalSince1970))" }
     /// Replans reminders, off the main actor (planning works out What's up for every saved park's
-    /// nights). A reminder already pending is left exactly as scheduled, so opening Nyx again never
-    /// pushes it back or replaces its title; one that no longer qualifies is cancelled and may be
-    /// planned again later. The copy is written by rule, never by a model.
+    /// nights). A reminder already pending is left as scheduled while it still says what the plan
+    /// says, so opening Nyx again never pushes it back; when the night's score or reason moved, it is
+    /// written again under the same identifier, which replaces it (`needsRewrite`). One that no
+    /// longer qualifies is cancelled and may be planned again later. The copy is written by rule,
+    /// never by a model.
     /// Without permission nothing is added, but reminders that no longer qualify are still
     /// cancelled: iOS keeps pending ones while notifications are off and delivers them if they
     /// are turned back on.
@@ -244,7 +270,8 @@ nonisolated struct NotificationScheduler {
     /// again in the new one, at the same moment. None of them was seen, so each stays plannable.
     @concurrent func reschedule(nights:[Night],now:Date = .now,showers:Bool=false,details:[String:ForecastDetail]=[:],language:String=PlaceNames.appLanguage) async {
         let allowed=await center.authorized()
-        let pending=await center.pendingIDs()
+        let scheduled=await center.pendingReminders()
+        let pending=scheduled.map(\.id)
         var ours=Set(pending.filter{$0.hasPrefix("nyx-night-")})
         if let written=ledger.language, written != language, !ours.isEmpty {
             await center.remove(ours.sorted())
@@ -261,7 +288,10 @@ nonisolated struct NotificationScheduler {
         let cancelled=ours.subtracting(plannedIDs)
         await center.remove(cancelled.sorted())
         var added=ours.intersection(plannedIDs)
-        for plan in planned where allowed && !ours.contains(plan.id) {
+        let current=Dictionary(scheduled.map { ($0.id,$0) },uniquingKeysWith:{ first,_ in first })
+        for plan in planned where allowed {
+            // The same identifier replaces a pending reminder in place: the budget is unchanged.
+            if ours.contains(plan.id) { guard let old=current[plan.id], Self.needsRewrite(old,to:plan,now:now) else { continue } }
             if (try? await center.add(plan)) != nil { added.insert(plan.id) }
         }
         // Read the ledger and the pending list again: reminders may have been switched off while
