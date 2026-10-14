@@ -74,6 +74,9 @@ struct ParksTab: View {
                         .onGeometryChange(for:Double.self) { $0.frame(in:.global).minX.rounded() } action:{ listMinX=$0 }
                         .onGeometryChange(for:Double.self) { $0.size.width.rounded() } action:{ listWidthSeen=$0 }
                         .modifier(listRefresh).toolbar { mapToggle }.tabRootToolbar()
+                        // The column's bar is full with its buttons, so the title only showed as a lone "…";
+                        // the selected Parks tab names the column.
+                        .toolbar(removing:.title)
                         // iPhone Duo's inner display (half open or flat): the list ends at the fold, so the park beside it
                         // starts on the other half (the column's usual 390 points could not reach it). Held at
                         // that width, and at 390 once the fold has gone until the list is back there (`listColumn`).
