@@ -61,7 +61,9 @@ import WidgetKit
             again=nil
         }
         let parks=current.compactMap { model.park($0) }
-        let ids=Set(parks.map(\.id))
+        // The watch also carries the starting park's clouds, and follows it when nothing is saved:
+        // a new forecast there is handed over too, not only the saved parks'.
+        let ids=Set(parks.map(\.id)).union([model.homeID])
         let cached=model.forecasts.filter { ids.contains($0.key) }.mapValues(\.updated)
         await publish(model,parks)
         if publishOnly { return }
