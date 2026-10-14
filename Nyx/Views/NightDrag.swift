@@ -26,11 +26,11 @@ nonisolated struct NightTransfer: Codable, Equatable, Sendable, Transferable {
     }
     static let years=1900...2200
     /// A night as it arrives from a drag, which any app can offer under Nyx's type: small, a place
-    /// id in its stored form (`DeepLink.placeID`) and a real day, or nothing.
+    /// id in its stored form (`PlaceIDText`) and a real day, or nothing.
     static func received(_ data: Data) throws -> NightTransfer {
         guard data.count <= 512 else { throw ParkTransferError.unknownPark }
         let transfer=try JSONDecoder().decode(NightTransfer.self,from:data)
-        guard DeepLink.placeID(transfer.place) == transfer.place, let day=TripDay(iso:transfer.night), years.contains(day.year) else {
+        guard PlaceIDText.validated(transfer.place) == transfer.place, let day=TripDay(iso:transfer.night), years.contains(day.year) else {
             throw ParkTransferError.unknownPark
         }
         return transfer

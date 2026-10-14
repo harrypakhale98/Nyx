@@ -32,7 +32,7 @@ struct CatalogTests {
         #expect(Set(ids).count == 3_422)
         for place in catalog {
             #expect(place.isCatalogPlace && !place.curated && place.nps == nil && place.viewingSpots.isEmpty, "\(place.id)")
-            #expect(DeepLink.placeID(place.id) == place.id, "\(place.id)")
+            #expect(PlaceIDText.validated(place.id) == place.id, "\(place.id)")
             #expect((-90...90).contains(place.latitude) && (-180...180).contains(place.longitude), "\(place.id)")
             #expect(TimeZone(identifier: place.timeZoneID) != nil, "\(place.id)")
             #expect((1...9).contains(place.bortleEstimate) && place.countryCode.count == 2, "\(place.id)")

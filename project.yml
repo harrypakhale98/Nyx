@@ -16,6 +16,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
+    # iPhone and iPad for every iOS target (the widget extension must match the app to embed for iPad);
+    # the watch and Vision Pro targets set their own.
     TARGETED_DEVICE_FAMILY: "1,2"
     DEVELOPMENT_TEAM: DUHVN68KBA
     CODE_SIGN_STYLE: Automatic
@@ -100,9 +102,7 @@ targets:
         # its edge reads in landscape, and its inner display ignores the lock anyway); iPad takes every
         # orientation and any window size (iPadOS 26 windowing; `UIRequiresFullScreen` is deprecated and not
         # set). Layout follows size classes and the window's own size, never the device.
-        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
-        PRODUCT_NAME: Nyx
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
@@ -225,8 +225,6 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        # Must match the app's families, or the extension cannot be embedded for iPad.
-        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.widgets
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
@@ -243,6 +241,9 @@ targets:
     sources:
       - path: NyxWatch
       - path: NyxWatchShared
+      # The place id rule links and the watch's own links share (`PlaceIDText`).
+      - path: Nyx/Models/PlaceIDText.swift
+        group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
       - path: Nyx/Services/Sentences.swift
@@ -314,7 +315,6 @@ targets:
       base:
         TARGETED_DEVICE_FAMILY: "4"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.watchkitapp
-        PRODUCT_NAME: NyxWatch
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
         INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.harrypakhale.nyx
@@ -335,6 +335,9 @@ targets:
     sources:
       - path: NyxWatchWidgets
       - path: NyxWatchShared
+      # The place id rule links and the watch's own links share (`PlaceIDText`).
+      - path: Nyx/Models/PlaceIDText.swift
+        group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
       - path: Nyx/Services/Sentences.swift
@@ -488,6 +491,8 @@ targets:
       # Handoff from park detail on iPhone or iPad: that park and night in the window.
       - path: Nyx/Models/ParkHandoff.swift
         group: Shared
+      - path: Nyx/Models/PlaceIDText.swift
+        group: Shared
     # Linked so the App Intents metadata step finds its framework instead of warning on every build
     # ("Metadata extraction skipped"). The window's own intents (Siri and Shortcuts: a park's score, open a park, stand under tonight's sky) live in NyxVision/Intents.
     dependencies:
@@ -503,7 +508,6 @@ targets:
       base:
         TARGETED_DEVICE_FAMILY: "7"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx
-        PRODUCT_NAME: NyxVision
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Nyx
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
@@ -567,7 +571,6 @@ targets:
       - target: Nyx
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.tests
         GENERATE_INFOPLIST_FILE: YES
   NyxUITests:
@@ -579,7 +582,6 @@ targets:
       - target: Nyx
     settings:
       base:
-        TARGETED_DEVICE_FAMILY: "1,2"
         PRODUCT_BUNDLE_IDENTIFIER: com.harrypakhale.nyx.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Nyx

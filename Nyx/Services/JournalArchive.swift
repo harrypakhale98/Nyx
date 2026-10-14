@@ -331,7 +331,7 @@ nonisolated struct JournalImport: Sendable {
             var seen=Set<String>()
             // Only a well-formed spot id (`pin:<uuid>`), once, with real coordinates.
             newSpots=(source.manifest.spots ?? []).filter { spot in
-                DeepLink.placeID(spot.id) == spot.id && spot.id.hasPrefix(SavedSpots.prefix) && !spotIDs.contains(spot.id)
+                PlaceIDText.validated(spot.id) == spot.id && spot.id.hasPrefix(SavedSpots.prefix) && !spotIDs.contains(spot.id)
                     && (-90...90).contains(spot.latitude) && (-180...180).contains(spot.longitude) && seen.insert(spot.id).inserted
             }
         }
@@ -356,7 +356,7 @@ nonisolated struct JournalImport: Sendable {
         mutating func insert(_ items: [JournalArchive.Entry], staged: [UUID: Staged]) {
             for item in items {
                 // A park id that names no place in any form Nyx writes is kept as a night outside, never stored as given.
-                let parkID=DeepLink.placeID(item.parkID) == nil ? "" : item.parkID
+                let parkID=PlaceIDText.validated(item.parkID) == nil ? "" : item.parkID
                 let entry=JournalEntry(date: item.date, parkID: parkID, observedBortle: min(9, max(1, item.observedBortle)), notes: item.notes)
                 entry.id=item.id
                 context.insert(entry)

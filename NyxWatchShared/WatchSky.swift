@@ -116,32 +116,10 @@ nonisolated struct WatchLink: Hashable, Sendable {
     }
     init?(_ url: URL) {
         guard url.scheme?.lowercased() == "nyx", url.host()?.lowercased() == "park",
-              let raw = url.pathComponents.first(where: { $0 != "/" }), let id = Self.placeID(raw) else { return nil }
+              let raw = url.pathComponents.first(where: { $0 != "/" }), let id = PlaceIDText.validated(raw) else { return nil }
         parkID = id
         let date = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "date" }?.value
         day = date.flatMap(LinkDay.components)
-    }
-    /// A place id in its stored form, as the iPhone's links read it (`DeepLink.placeID`): a park's
-    /// letters (any case), a Wikidata item (`wd:Q123456`) or a saved spot (`pin:` and a UUID, lowercase).
-    static func placeID(_ raw: String) -> String? {
-        let raw = raw.contains("%") ? (raw.removingPercentEncoding ?? raw) : raw
-        let parts = raw.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
-        if parts.count == 1 {
-            guard (2...8).contains(raw.count), raw.allSatisfy({ $0.isLetter && $0.isASCII }) else { return nil }
-            return raw.lowercased()
-        }
-        let rest = parts[1]
-        switch parts[0].lowercased() {
-        case "wd":
-            let digits = rest.dropFirst()
-            guard rest.first?.lowercased() == "q", (1...12).contains(digits.count), digits.first != "0",
-                  digits.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
-            return "wd:Q\(digits)"
-        case "pin":
-            guard rest.count == 36, let uuid = UUID(uuidString: String(rest)) else { return nil }
-            return "pin:\(uuid.uuidString.lowercased())"
-        default: return nil
-        }
     }
     var url: URL? {
         var components = URLComponents()

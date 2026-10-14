@@ -138,7 +138,7 @@ nonisolated enum NyxSchemaV2: VersionedSchema {
     /// reminders, the widgets, the watch and Plan include it with no change of their own; unsaving
     /// removes that row only, and deleting the spot removes both (`SavedSpots`).
     @Model nonisolated final class SavedSpot {
-        /// `pin:` and a lowercase UUID (`DeepLink.placeID`).
+        /// `pin:` and a lowercase UUID (`PlaceIDText`).
         @Attribute(.unique) var id: String
         var name: String
         /// Exactly where it was saved. Only the forecast request rounds them (to 0.1°, `SpotForecast`).
