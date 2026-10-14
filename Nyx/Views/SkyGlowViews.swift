@@ -119,11 +119,9 @@ nonisolated enum SpotGlow {
 }
 struct ViewingSpotRow: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     let spot: ViewingSpot
-    @State private var copied=false
     private var access: SpotAccess? { AccessData.shared.access(park:park.id,spot:spot.name) }
     private var coordinates: String { "\(spot.latitude.formatted(.number.precision(.fractionLength(4)))), \(spot.longitude.formatted(.number.precision(.fractionLength(4))))" }
     var body: some View {
@@ -146,28 +144,55 @@ struct ViewingSpotRow: View {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
                     .font(.footnote).foregroundStyle(palette.ink)
             }
-            ViewThatFits(in:.horizontal) {
-                HStack(spacing:10) { actions }
-                VStack(alignment:.leading,spacing:6) { actions }
-            }
-            if copied { Text("Copied \(coordinates)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).transition(.opacity) }
+            CoordinateActions(latitude:spot.latitude,longitude:spot.longitude,shown:coordinates,copyHint:String(localized:"Copies \(coordinates), approximate."),spacing:10)
             if let access, access.summary != nil {
                 DisclosureGroup { AccessSource(access:access).padding(.top,6) } label:{ Text("Access source").font(.footnote).frame(maxWidth:.infinity,minHeight:44,alignment:.leading) }
                     .tint(palette.accent)
             }
         }
+    }
+}
+/// A place's two plain actions: copy its coordinates, or hand them to Maps for directions (side by
+/// side, or stacked when they do not fit), with "Copied …" beneath for three seconds after the last
+/// copy. A park's viewing spots and your own spot's panel share it.
+struct CoordinateActions: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.openURL) private var openURL
+    let latitude: Double
+    let longitude: Double
+    /// The coordinates as "Copied …" shows them.
+    let shown: String
+    let copyHint: String
+    /// The spacing of the page's own column, between the actions and "Copied …".
+    var spacing=10.0
+    /// Each copy restarts the three seconds, so a second tap is never cut short by the first one's timer.
+    @State private var copies=0
+    @State private var copied=false
+    var body: some View {
+        VStack(alignment:.leading,spacing:spacing) {
+            ViewThatFits(in:.horizontal) {
+                HStack(spacing:10) { actions }
+                VStack(alignment:.leading,spacing:6) { actions }
+            }
+            if copied { Text("Copied \(shown)").font(.caption.monospacedDigit()).foregroundStyle(palette.muted).transition(.opacity) }
+        }
         // A copy is a light tick: the success thump is the journal's alone.
-        .sensoryFeedback(.selection,trigger:copied) { _,new in new }
+        .sensoryFeedback(.selection,trigger:copies)
+        .task(id:copies) {
+            guard copies>0 else { return }
+            try? await Task.sleep(for:.seconds(3))
+            guard !Task.isCancelled else { return }
+            copied=false
+        }
     }
     @ViewBuilder private var actions: some View {
         Button {
-            PrivatePasteboard.copy("\(spot.latitude), \(spot.longitude)")
-            copied=true
-            Task { try? await Task.sleep(for:.seconds(3)); copied=false }
+            PrivatePasteboard.copy("\(latitude), \(longitude)")
+            copied=true; copies+=1
         } label:{ Label("Copy coordinates",systemImage:"doc.on.doc").font(.footnote.weight(.medium)).frame(minHeight:44) }
             .buttonStyle(.borderless).foregroundStyle(palette.accent)
-            .accessibilityHint(String(localized:"Copies \(coordinates), approximate."))
-        if let url=MapsHandOff.directions(spot) {
+            .accessibilityHint(copyHint)
+        if let url=MapsHandOff.directions(latitude:latitude,longitude:longitude) {
             Button { openURL(url) } label:{ Label("Directions in Maps",systemImage:"arrow.triangle.turn.up.right.diamond").font(.footnote.weight(.medium)).frame(minHeight:44) }
                 .buttonStyle(.borderless).foregroundStyle(palette.accent)
                 .accessibilityHint("Opens Apple Maps with driving directions. Nyx sends nothing.")

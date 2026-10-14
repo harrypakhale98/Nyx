@@ -116,7 +116,9 @@ struct OnboardingView:View {
 private struct OnboardingMoon:View {
     @Environment(PlanModel.self) private var model
     let daysAfterNew:Double
-    var body:some View {
+    /// Decoration beside the words, which say what it shows: VoiceOver passes it by.
+    var body:some View { moon.accessibilityHidden(true) }
+    @ViewBuilder private var moon:some View {
         let engine=AstronomyEngine(), park=model.home
         // Walk forward to the next new moon (phase fraction wraps past 0), then add the offset.
         let now=Date.now, fraction=engine.moonPhase(at:now).fraction

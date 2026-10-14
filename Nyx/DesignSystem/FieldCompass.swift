@@ -210,8 +210,10 @@ struct FieldCompassView: View {
         func point(_ p:SIMD2<Double>)->CGPoint { CGPoint(x:p.x,y:p.y) }
         // Farthest first: the Milky Way under everything else.
         if band.visibility>0.02 { drawBand(&context,band:band,pose:pose,size:size,fieldOfView:fov,ink:ink) }
-        // Altitude rings at 30° and 60°, and the horizon, each a run of short segments in view.
-        for (altitude,opacity,width) in [(0.0,0.7,1.2),(30.0,0.2,0.6),(60.0,0.2,0.6)] {
+        // Altitude rings at 30° and 60°, and the horizon, each a run of short segments in view;
+        // heavier and stronger under Increase Contrast and Bold Text, as every hairline is.
+        let ring=palette.highContrast ? 0.45 : 0.2, horizonLine=palette.highContrast ? 0.9 : 0.7
+        for (altitude,opacity,width) in [(0.0,horizonLine,1.2*palette.stroke),(30.0,ring,0.6*palette.stroke),(60.0,ring,0.6*palette.stroke)] {
             var path=Path(), drawing=false
             for step in 0...180 {
                 let placed=SkyCompass.place(altitude:altitude,azimuth:Double(step)*2,pose:pose,width:w,height:h,fieldOfView:fov,clipped:false)

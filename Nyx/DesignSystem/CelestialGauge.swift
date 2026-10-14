@@ -463,7 +463,7 @@ struct CelestialGauge: View {
     /// glass would flatten toward the text colour.
     @ViewBuilder private var bezel:some View {
         if reduceTransparency || palette.nightVision || palette.highContrast {
-            DialRing().fill(palette.panel.opacity(0.9)).overlay(DialRing().stroke(palette.line,lineWidth:0.5))
+            DialRing().fill(palette.panel.opacity(0.9)).overlay(DialRing().stroke(palette.line,lineWidth:0.5*palette.stroke))
         } else {
             Color.clear.glassEffect(.clear,in:DialRing())
         }

@@ -97,7 +97,7 @@ struct SkyMapCanvas: View {
                     }
                     path.move(to:a); path.addLine(to:CGPoint(x:a.x+(b.x-a.x)*grown,y:a.y+(b.y-a.y)*grown))
                 }
-                context.stroke(path,with:.color(palette.ink.opacity(0.5)),style:StrokeStyle(lineWidth:0.8,lineCap:.round))
+                context.stroke(path,with:.color(palette.ink.opacity(palette.highContrast ? 0.8 : 0.5)),style:StrokeStyle(lineWidth:0.8*palette.stroke,lineCap:.round))
             }
             // Your stars: a soft halo and a bright core, brighter for darker nights.
             for star in content.stars {
@@ -111,7 +111,7 @@ struct SkyMapCanvas: View {
                 }
                 context.fill(Path(ellipseIn:CGRect(x:p.x-core/2,y:p.y-core/2,width:core,height:core)),with:.color(palette.ink.opacity(0.55+0.45*b)))
                 if star.ringed {
-                    context.stroke(Path(ellipseIn:CGRect(x:p.x-9,y:p.y-9,width:18,height:18)),with:.color(palette.accent.opacity(0.8)),lineWidth:0.9)
+                    context.stroke(Path(ellipseIn:CGRect(x:p.x-9,y:p.y-9,width:18,height:18)),with:.color(palette.accent.opacity(palette.highContrast ? 1 : 0.8)),lineWidth:0.9*palette.stroke)
                 }
             }
         }

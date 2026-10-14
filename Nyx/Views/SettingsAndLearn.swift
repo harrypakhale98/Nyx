@@ -58,7 +58,7 @@ struct SettingsView:View {
             }.listRowBackground(palette.panel)
         }.readableForm().nightForm().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented:$explainNotifications) { RemindersExplainer { granted in
-                notifications=granted; if !granted { permissionMessage=String(localized:"Reminders are off. You can enable them in iPhone Settings.") }
+                notifications=granted; permissionMessage=granted ? nil : String(localized:"Reminders are off. You can enable them in iPhone Settings.")
             }.nyxPresentation() }
             .sheet(isPresented:$replay) { OnboardingView { replay=false }.nyxPresentation() }
             .task { await syncPermission() }

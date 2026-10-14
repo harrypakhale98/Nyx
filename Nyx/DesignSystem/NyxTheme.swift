@@ -50,7 +50,7 @@ struct Panel<Content: View>: View {
         // One card however many views the content holds.
         VStack(alignment:.leading,spacing:0) { content }.padding(NyxMetrics.cardPadding).frame(maxWidth:.infinity,alignment:.leading)
             .background(shape.fill(palette.panel))
-            .overlay(shape.stroke(palette.line,lineWidth:0.5))
+            .overlay(shape.stroke(palette.line,lineWidth:0.5*palette.stroke))
     }
 }
 /// Letter-spaced capitals are a Latin-script convention: Japanese kana and kanji spread apart read

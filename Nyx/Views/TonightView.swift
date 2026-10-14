@@ -305,7 +305,8 @@ struct TonightView: View {
             else if let closure=model.closure(park) {
                 if let stale { forecastAsOf(park,stale) }
                 Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent).multilineTextAlignment(.center)
-                .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12)) }
+                .padding(.horizontal,12).padding(.vertical,6).background(Color.black.opacity(0.6),in:RoundedRectangle(cornerRadius:12))
+                .accessibilityLabel(String(localized:"Closure alert: \(closure)")) }
             // Nothing listed: the alerts and the forecast's age share one quiet caption, the safety cue kept.
             else if let listed=model.alertFacts(park) { CaveatLine(facts:listed+(stale.map { [String(localized:"forecast from \(park.timestamp($0))")] } ?? [])).padding(.horizontal,12) }
             else {
