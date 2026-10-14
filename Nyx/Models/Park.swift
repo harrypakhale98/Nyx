@@ -248,11 +248,13 @@ nonisolated struct Place: Codable, Identifiable, Hashable, Sendable {
     func distanceMeters(latitude lat: Double, longitude lon: Double) -> Double {
         Self.distance(latitude, longitude, lat, lon)
     }
+    /// The mean radius of Earth (IUGG), in metres: every distance and map in Nyx uses it.
+    static let earthRadius = 6_371_008.8
     /// Great-circle distance in metres between two coordinates (degrees).
     static func distance(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {
         let r = Double.pi / 180
         let a = pow(sin((lat1-lat2)*r/2),2) + cos(lat2*r)*cos(lat1*r)*pow(sin((lon1-lon2)*r/2),2)
-        return 6_371_008.8 * 2 * atan2(sqrt(max(0,a)), sqrt(max(0,1-a)))
+        return earthRadius * 2 * atan2(sqrt(max(0,a)), sqrt(max(0,1-a)))
     }
 }
 

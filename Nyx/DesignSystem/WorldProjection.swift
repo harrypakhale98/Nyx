@@ -8,7 +8,7 @@ nonisolated struct GeoPoint: Hashable, Sendable {
     init(latitude: Double, longitude: Double) { self.latitude=latitude; self.longitude=longitude }
     init(_ place: Park) { self.init(latitude:place.latitude,longitude:place.longitude) }
     /// The mean radius of Earth (IUGG), in kilometres.
-    static let earthRadiusKm = 6371.0088
+    static let earthRadiusKm = Park.earthRadius/1000
     static let radian = Double.pi/180
     /// The unit vector: x toward 0° N 0° E, y toward 0° N 90° E, z toward the North Pole.
     var unit: SIMD3<Double> {
