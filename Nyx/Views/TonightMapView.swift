@@ -448,9 +448,11 @@ struct WrappingMenuPicker<Value: Hashable, Options: View>: View {
     let selection: Binding<Value>
     /// The chosen option's words, shown as the label at accessibility sizes.
     let current: String
+    /// The wrapping label at every size, for a choice whose words may be long.
+    var wraps = false
     @ViewBuilder let options: () -> Options
     var body: some View {
-        if typeSize.isAccessibilitySize {
+        if wraps || typeSize.isAccessibilitySize {
             Menu {
                 Picker(title,selection:selection) { options() }.pickerStyle(.inline)
             } label:{

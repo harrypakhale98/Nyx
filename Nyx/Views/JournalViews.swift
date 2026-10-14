@@ -17,6 +17,7 @@ struct JournalView: View {
     @State private var width=0.0
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
@@ -30,15 +31,16 @@ struct JournalView: View {
     /// A wide iPad: your constellation large on the left, the nights themselves on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
     /// "Journals stay on each device" where a second device is likely: a window wider than any
-    /// iPhone (440 pt) or a regular-width one, by width rather than by device.
-    nonisolated static func mentionsOtherDevices(width:Double,regular:Bool)->Bool { regular || width>=480 }
+    /// iPhone (440 pt) or a regular-width one, by width rather than by device; never at compact
+    /// height, so an iPhone turned on its side (wide, and regular on the largest) says nothing new.
+    nonisolated static func mentionsOtherDevices(width:Double,regular:Bool,compactHeight:Bool=false)->Bool { !compactHeight && (regular || width>=480) }
     var body:some View {
         let nights=model.loggedNights(entries)
         ScrollView {
             VStack(alignment:.leading,spacing:24) {
                 if model.journalUnavailable { JournalUnavailableBanner(needsSpace:model.journalNeedsSpace) }
                 // A journal lives on the device it was written on; say so where a second device is likely.
-                if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular) {
+                if JournalView.mentionsOtherDevices(width:width,regular:sizeClass == .regular,compactHeight:verticalSizeClass == .compact) {
                     Text("Journals stay on each device. Export to move yours.").font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
                 // One way into the year: at the top in recap season (December, early January), else under the constellation.
