@@ -145,9 +145,11 @@ struct TonightView: View {
             // A location found is a starting point chosen.
             .onChange(of:location.latitude != nil) { _,found in if found, DebugScenario.screen == nil { model.startChosen=true } }
             // The answer here is the one the widgets and Apple Watch follow too (`PlanModel.tonightPickID`):
-            // once a starting point is chosen, and never one the loader is about to replace.
-            .onChange(of:loading ? model.tonightPickID : (model.startChosen && !empty ? best.first?.id : nil),initial:true) { _,id in
-                if DebugScenario.screen == nil { model.tonightPickID=id }
+            // once a starting point is chosen, and never one the loader is about to replace. Stamped
+            // again when the night turns over (`model.today`), so the same place picked again tonight
+            // is followed tonight rather than expiring with last night's pick.
+            .onChange(of:loading ? nil : TonightPickKey(id:model.startChosen && !empty ? best.first?.id : nil,night:model.today),initial:true) { _,key in
+                if let key, DebugScenario.screen == nil { model.tonightPickID=key.id }
             }
             // Back from the background: where you are may have changed, and so may the sky.
             .onChange(of:scenePhase) { _,phase in
@@ -526,6 +528,11 @@ struct TonightView: View {
         .buttonStyle(.plain).fixedSize(horizontal:!typeSize.isAccessibilitySize,vertical:true)
         .accessibilityLabel("Radius").accessibilityValue(Phrase.clauses([distance,String(localized:"as the crow flies")])).accessibilityInputLabels([Text("Radius"),Text("Distance")])
     }
+}
+/// Tonight's answer and the moment "tonight" is judged from: either changing hands the pick on.
+private struct TonightPickKey: Equatable {
+    let id: String?
+    let night: Date
 }
 /// The quiet facts under Tonight's dial when nothing is closed: "No closures listed · check alerts
 /// before you go · forecast from Oct 8, 1:51 PM" on one line when it fits, wrapped at a dot when it
