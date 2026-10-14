@@ -45,7 +45,11 @@ import CoreLocation
     }
     /// Everything worked out from the forecasts and their detail is let go when either changes.
     /// The widget, the watch and reminders follow too, once the changes settle (`SavedSkySync.noteChange`).
-    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:]; savedSync.noteChange(self) }
+    private func forecastsChanged() { outlookCache=[:]; nightMemo=[:]; journalScores=[:]; dataRevision+=1; savedSync.noteChange(self) }
+    /// Counts every change to what a score or its caveats rest on: forecasts, their detail (smoke,
+    /// layers, models) and closures. A screen that keeps a result worked out from them (the trip
+    /// plan) works it out again when this moves, so it never disagrees with the calendar or a park's page.
+    private(set) var dataRevision=0
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
     /// Nights already scored, by park and evening: the park list and a month ask for the same
@@ -756,6 +760,7 @@ import CoreLocation
         guard update.cache != alertsCache else { return }
         alertsCache=update.cache
         for park in parks { rebuild(park) }
+        dataRevision+=1
         // A new closure reaches the widget and the watch too.
         savedSync.noteChange(self)
     }

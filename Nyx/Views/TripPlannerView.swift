@@ -58,7 +58,10 @@ struct TripPlannerView: View {
         return origin.map { CLLocationCoordinate2D(latitude:$0.latitude,longitude:$0.longitude) }
     }
     private var originLabel:String { originPlace?.label ?? origin?.shortName ?? "" }
-    private var inputs:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(originPlace?.id ?? "")-\(useDevice)-\(device?.latitude ?? 0)-\(model.forecasts.count)" }
+    /// What the person chose; a change is announced.
+    private var choices:String { "\(TripDay(first).iso)-\(TripDay(last).iso)-\(radius)-\(maxHop)-\(weekendsOnly)-\(drivableOnly)-\(originID)-\(originPlace?.id ?? "")-\(useDevice)-\(device?.latitude ?? 0)" }
+    /// The choices and the data under them: new clouds, smoke or a closure plan again, quietly.
+    private var inputs:String { "\(choices)-\(model.dataRevision)" }
     var body: some View {
         ScrollViewReader { proxy in ScrollView {
             if wide {
@@ -133,7 +136,7 @@ struct TripPlannerView: View {
             withAnimation(reduceMotion ? nil : NyxMotion.spring) { plan=result }
             planning=false
             // Only a change of plan is spoken and felt; a return to the page is not.
-            let key=inputs
+            let key=choices
             guard key != announced else { return }
             announced=key
             // The plan changes above and below the controls; say what it now leads with.

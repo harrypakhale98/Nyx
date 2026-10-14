@@ -78,6 +78,21 @@ import SwiftUI
         model.forecasts[park.id]=nil
         #expect(same(model.night(park,on:date),before))
     }
+    /// Every new forecast or detail moves the data revision, even for parks that already had one,
+    /// so a result kept from them (the trip plan) is worked out again rather than left stale.
+    @Test func newForecastsAndDetailMoveTheRevision() throws {
+        let model=offline()
+        let park=try named("jotr")
+        let night=model.night(park,on:park.date(model.tonight(park),addingDays:1))
+        model.forecasts[park.id]=forecast(night,clouds:0)
+        let first=model.dataRevision
+        // Same park, same count of forecasts: still a new revision.
+        model.forecasts[park.id]=forecast(night,clouds:80)
+        #expect(model.dataRevision>first)
+        let second=model.dataRevision
+        model.details[park.id]=models(night,updated:.now)
+        #expect(model.dataRevision>second)
+    }
     /// A park with the same id but a different record is scored as itself, never as the kept one.
     @Test func aDifferentParkRecordIsNotTakenForTheKeptOne() throws {
         let model=offline()
