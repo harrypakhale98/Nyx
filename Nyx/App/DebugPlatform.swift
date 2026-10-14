@@ -30,10 +30,10 @@ struct DebugSnippetView: View {
                 Text(tonight.dialog).font(.callout)
                 DarknessSnippetView(night:tonight.night)
                 Text(BestNightSearch.dialog(answer,voiceOnly:false)).font(.callout)
-                BestNightSnippetView(night:answer.best,rank:0,total:answer.ranked.count,nights:answer.count,following:false,closure:model.closure(park))
+                BestNightSnippetView(night:answer.best,rank:0,total:answer.ranked.count,nights:answer.count,following:false,closure:"Keys View Road closed at night")
                 Text("Voice only (iOS 27):").font(.caption)
                 Text(BestNightSearch.dialog(answer,voiceOnly:true)).font(.callout)
-                if answer.ranked.count>1 { BestNightSnippetView(night:answer.ranked[1],rank:1,total:answer.ranked.count,nights:answer.count,closure:"Keys View Road closed at night") }
+                if answer.ranked.count>1 { BestNightSnippetView(night:answer.ranked[1],rank:1,total:answer.ranked.count,nights:answer.count,closure:model.closure(park)) }
             }
             Text("Content preview. Siri and Shortcuts host the real snippet.").font(.caption)
         }.padding(24) }.background(Color(white:0.12))

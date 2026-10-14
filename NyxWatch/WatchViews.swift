@@ -418,7 +418,14 @@ struct NextMoment: View {
                         // Park time, with its zone where the park's clock is not the watch's ("at 4:52 AM MST").
                         let time = night.park.wristTime(next.date)
                         let at = Text("at \(time)")
-                        if cloudsUnknown { Text("at \(time) · no cloud forecast").minimumScaleFactor(0.8) }
+                        if cloudsUnknown {
+                            // Whole or not at all, as the models' range below (it was cut to "no cloud
+                            // forec…" on 40 mm): where it does not fit, the time stands alone and the
+                            // dial's dashed rim says the clouds are not forecast. VoiceOver hears it all.
+                            let full = Text("at \(time) · no cloud forecast")
+                            if typeSize.isAccessibilitySize || wraps { full }
+                            else { ViewThatFits(in: .horizontal) { full; at.minimumScaleFactor(0.8) }.accessibilityLabel(full) }
+                        }
                         else if let models {
                             // The range shares the line only whole, never shrunk or cut (a cut "models
                             // 59–8…" would show a wrong number): where it does not fit, the time stands
