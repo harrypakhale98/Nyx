@@ -232,6 +232,11 @@ struct ContentTests {
         let june=try home(71.29, -156.79, "America/Anchorage", "2026-06-21")
         #expect(!june.hasDarkness && june.darkness == SkyConditions.noDarknessMessage(tonight: true) && june.moonlightLine == nil && june.moonFree == nil)
         #expect(june.summary.contains(SkyConditions.noDarknessMessage(tonight: true)))
+        // Midnight sun with the Moon far south (full Moon, June 29) and far north (new Moon, June 15):
+        // no true darkness to measure it by, so its own altitude says which.
+        let fullMoon=try home(71.29, -156.79, "America/Anchorage", "2026-06-29"), newMoon=try home(71.29, -156.79, "America/Anchorage", "2026-06-15")
+        #expect(fullMoon.moonTimes == String(localized: "Below the horizon all night"), "\(fullMoon.moonTimes)")
+        #expect(newMoon.moonTimes == String(localized: "Up all night"), "\(newMoon.moonTimes)")
         let december=try home(71.29, -156.79, "America/Anchorage", "2026-12-21")
         #expect(december.sky.darkHours.isFinite && !december.darkness.isEmpty && !december.summary.contains("nan"))
         for (lat, lon, zone) in [(21.31, -157.86, "Pacific/Honolulu"), (-14.28, -170.70, "Pacific/Pago_Pago")] {

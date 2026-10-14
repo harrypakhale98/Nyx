@@ -619,6 +619,29 @@ extension Park {
         viewingSpots.first.map { ($0.latitude, $0.longitude) } ?? (latitude, longitude)
     }
 }
+/// Open-Meteo answers one coordinate with an object and several with an array, in request order.
+nonisolated enum OpenMeteoAnswer {
+    /// Every answer in request order; empty when the body cannot be read.
+    static func decode<T: Decodable>(_ type: T.Type, from data: Data) -> [T] {
+        (try? JSONDecoder().decode([T].self, from: data)) ?? (try? JSONDecoder().decode(T.self, from: data)).map { [$0] } ?? []
+    }
+    /// Each place's hourly series for `keys`, with the places' `ids` in request order. A place whose
+    /// answer is not whole is left out; empty unless there is one answer per place.
+    static func series(_ data: Data, ids: [String], keys: [String], now: Date) -> [(String, HourlySeries)] {
+        struct Response: Decodable { let hourly: [String: [Double?]] }
+        let decoded=decode(Response.self, from: data)
+        guard decoded.count == ids.count else { return [] }
+        return zip(ids, decoded).compactMap { id, response in
+            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
+            var values: [String: [Double?]] = [:]
+            for key in keys {
+                guard let series=response.hourly[key], series.count == times.count else { return nil }
+                values[key]=series
+            }
+            return (id, HourlySeries(updated: now, times: times, values: values))
+        }
+    }
+}
 /// Waiting on a request that several callers share (`WeatherService`, `ParkStore`). A cancelled
 /// caller stops waiting at once and gets nil, without cancelling the request for the others; the
 /// service decides whether anyone is still waiting.
@@ -859,8 +882,7 @@ actor WeatherService: WeatherProviding {
             }
             held=false
             struct Response: Decodable { struct Hourly: Decodable { let time: [Double]; let cloud_cover: [Double?] }; let hourly: Hourly }
-            // One coordinate returns an object; several return an array in request order.
-            let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+            let decoded=OpenMeteoAnswer.decode(Response.self, from: data)
             guard decoded.count == chunk.count else { continue }
             let now=clock()
             for (point, response) in zip(chunk, decoded) where response.hourly.time.count == response.hourly.cloud_cover.count && !response.hourly.time.isEmpty {
@@ -910,8 +932,7 @@ actor WeatherService: WeatherProviding {
             return []
         }
         if curated { held=false }
-        // One coordinate returns an object; several return an array in request order.
-        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
+        let decoded=OpenMeteoAnswer.decode(Response.self, from: data)
         guard decoded.count == parks.count else { return [] }
         let now=clock()
         return zip(parks, decoded).compactMap { park, response in
@@ -1022,19 +1043,6 @@ actor SummitLayerService {
         do { data=try await ForecastRequest.get(url, transport: transport, constrained: true, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
             return []
         }
-        struct Response: Decodable { let hourly: [String: [Double?]] }
-        // One coordinate returns an object; several return an array in request order.
-        let decoded=(try? JSONDecoder().decode([Response].self, from: data)) ?? (try? JSONDecoder().decode(Response.self, from: data)).map { [$0] } ?? []
-        guard decoded.count == parks.count else { return [] }
-        let now=clock()
-        return zip(parks, decoded).compactMap { park, response in
-            guard let times=response.hourly["time"].map({ $0.compactMap { $0 } }), !times.isEmpty, times.count == response.hourly["time"]?.count else { return nil }
-            var values: [String: [Double?]] = [:]
-            for key in Self.keys {
-                guard let series=response.hourly[key], series.count == times.count else { return nil }
-                values[key]=series
-            }
-            return (park.id, HourlySeries(updated: now, times: times, values: values))
-        }
+        return OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: Self.keys, now: clock())
     }
 }

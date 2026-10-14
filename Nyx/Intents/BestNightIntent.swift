@@ -21,14 +21,14 @@ struct FindBestNightIntent: AppIntent {
         let library=try ParkLibrary.places(snapshot:saved)
         // A chosen place the library lacks (a world catalogue place found by search, not followed) resolves by its id.
         let parks=park.map { chosen in (library.first { $0.id==chosen.id } ?? ParkLibrary.place(chosen.id,snapshot:saved)).map { [$0] } ?? [] } ?? (saved?.parks ?? [])
-        guard !parks.isEmpty else { throw NyxIntentError.noParks }
+        guard !parks.isEmpty else { throw park == nil ? NyxIntentError.noParks : NyxIntentError.parkNotFound }
         let now=Date.now, day=start.map { TripDay($0) }
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
         guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else { throw NyxIntentError.noNights }
         BestNightBrowse.reset()
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        return .result(value:BestNightSearch.value(answer),dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly)),
+        return .result(value:BestNightSearch.value(answer),dialog:IntentDialog(stringLiteral:BestNightSearch.dialog(answer,voiceOnly:voiceOnly,closure:IntentClosure.closure(answer.best.park,shared:saved))),
                        snippetIntent:BestNightSnippetIntent(parkIDs:parks.map(\.id),start:start,nights:answer.count))
     }
 }
@@ -86,9 +86,10 @@ nonisolated enum BestNightSearch {
     }
     /// The full answer names the night, the score and what it rests on. Voice-only (iOS 27, no
     /// screen in view) keeps the night, the score and the one caveat that matters. At a place the Park
-    /// Service does not run, it ends by saying Nyx cannot check closures there.
-    static func dialog(_ answer: Answer, voiceOnly: Bool) -> String {
-        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly,noDarkness:answer.noDarkness)),park:answer.best.park,closure:nil)
+    /// Service does not run, it ends by saying Nyx cannot check closures there. `closure`: the best
+    /// night's park's closure, said first.
+    static func dialog(_ answer: Answer, voiceOnly: Bool, closure: String? = nil) -> String {
+        DarknessAnswer.withClosures(answer.best.spokenSummary(.siriBest(count:answer.count,voiceOnly:voiceOnly,noDarkness:answer.noDarkness)),park:answer.best.park,closure:closure)
     }
 }
 
