@@ -35,6 +35,11 @@ actor StubNotifications {
     func authorized() async -> Bool { allowed }
     func request() async -> Bool { true }
     func pendingIDs() async -> [String] { ids+requests.map(\.id) }
+    func pendingReminders() async -> [ScheduledReminder] {
+        ids.map { ScheduledReminder(id:$0,title:"",body:"",fireDate:nil) }+requests.map { ScheduledReminder(id:$0.id,title:$0.title,body:$0.body,fireDate:$0.fireDate) }
+    }
+    /// How many reminders were handed to `add`, replacements included.
+    var addCount:Int { added }
     func deliveredIDs() async -> [String] { delivered }
     func remove(_ values:[String]) async { ids.removeAll{values.contains($0)};requests.removeAll{values.contains($0.id)} }
     private var added=0
@@ -256,6 +261,43 @@ struct ServiceTests {
         await center.deliver(plan.id)
         await scheduler.reschedule(nights:[night],now:afternoon)
         #expect(await center.requests.isEmpty)
+    }
+    /// A pending "94 out of 100" that the plan now scores 91 is written again under the same
+    /// identifier, so it says 91; an unchanged plan adds nothing, and a replacement never grows the count.
+    @Test func pendingReminderFollowsANewScore() async throws {
+        let p=try park(),now=Date(timeIntervalSince1970:1790899200),engine=AstronomyEngine()
+        let sky=engine.conditions(for:p,on:p.date(now,addingDays:2))
+        func night(_ value:Int)->Night {
+            Night(park:p,sky:sky,score:DarknessScore(value:value,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:now)
+        }
+        let center=StubNotifications(ids:(0..<3).map { "unrelated-\($0)" }),ledger=ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)")
+        let scheduler=NotificationScheduler(center:center,ledger:ledger)
+        await scheduler.reschedule(nights:[night(94)],now:now)
+        let first=try #require(await center.requests.first)
+        #expect(first.body.hasPrefix("94 out of 100"))
+        // Opened again with nothing new: nothing is touched.
+        await scheduler.reschedule(nights:[night(94)],now:now.addingTimeInterval(600))
+        #expect(await center.addCount==1)
+        // The plan now says 91: the pending reminder says so too, at the same moment, under the same identifier.
+        await scheduler.reschedule(nights:[night(91)],now:now.addingTimeInterval(1200))
+        let second=try #require(await center.requests.first)
+        #expect(await center.addCount==2)
+        #expect(await center.requests.count==1)
+        #expect(second.id==first.id && second.fireDate==first.fireDate && second.body.hasPrefix("91 out of 100"))
+        #expect(await center.pendingIDs().count==4)
+        #expect(ledger.ids.contains(first.id))
+    }
+    @Test func rewriteOnlyWhenTheReminderSaysSomethingElse() {
+        let now=Date(timeIntervalSince1970:1790899200), evening=now.addingTimeInterval(6*3600)
+        let plan=NightReminder(id:"nyx-night-jotr-1",parkID:"jotr",title:"Pristine night",body:"94 out of 100.",fireDate:evening,timeZone:.gmt)
+        let same=ScheduledReminder(id:plan.id,title:plan.title,body:plan.body,fireDate:evening)
+        #expect(!NotificationScheduler.needsRewrite(same,to:plan,now:now))
+        #expect(NotificationScheduler.needsRewrite(ScheduledReminder(id:plan.id,title:plan.title,body:"91 out of 100.",fireDate:evening),to:plan,now:now))
+        #expect(NotificationScheduler.needsRewrite(ScheduledReminder(id:plan.id,title:"Excellent night",body:plan.body,fireDate:evening),to:plan,now:now))
+        #expect(NotificationScheduler.needsRewrite(ScheduledReminder(id:plan.id,title:plan.title,body:plan.body,fireDate:evening.addingTimeInterval(3600)),to:plan,now:now))
+        // Due in a minute: a later run's "in a minute" never pushes it back.
+        let soon=NightReminder(id:plan.id,parkID:"jotr",title:plan.title,body:plan.body,fireDate:now.addingTimeInterval(60),timeZone:.gmt)
+        #expect(!NotificationScheduler.needsRewrite(ScheduledReminder(id:plan.id,title:plan.title,body:plan.body,fireDate:now.addingTimeInterval(30)),to:soon,now:now))
     }
     /// iOS forgets a notification once it is tapped or cleared; the ledger must still remember it.
     @Test func tappedReminderNeverReturns() async throws {
