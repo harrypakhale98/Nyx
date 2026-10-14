@@ -255,7 +255,8 @@ struct TonightView: View {
     private var weekAcross: some View {
         let radius=SearchRadius.label(model.radiusMeters)
         let reach=location.latitude != nil ? String(localized:"within \(radius) of you") : String(localized:"within \(radius) of \(model.originName)")
-        return WeekAcrossParksPanel(week:.make(aheadPool.map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) }),reach:reach)
+        let closures=Dictionary(aheadPool.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
+        return WeekAcrossParksPanel(week:.make(aheadPool.map { model.nights($0,from:model.tonight($0),count:WeekAcrossParks.nights) },closures:closures),reach:reach)
     }
     /// The places whose coming nights are looked at (the darker night ahead, the week across parks):
     /// all of them in the US as before; abroad, the twelve best tonight, so a radius of hundreds of

@@ -24,7 +24,7 @@ struct FindBestNightIntent: AppIntent {
         guard !parks.isEmpty else { throw park == nil ? NyxIntentError.noParks : NyxIntentError.parkNotFound }
         let now=Date.now, day=start.map { TripDay($0) }
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:saved),details:BestNightSearch.details(for:parks,shared:saved))
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now) else { throw NyxIntentError.noNights }
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:day,nights:nights,now:now,closures:IntentClosure.closures(parks,shared:saved)) else { throw NyxIntentError.noNights }
         BestNightBrowse.reset()
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
@@ -48,18 +48,20 @@ nonisolated enum BestNightSearch {
             noDarkness=nights.allSatisfy { $0.sky.darkHours==0 }
         }
     }
-    static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date) -> Answer? {
+    /// `closures`: each park's closure, which counts against its nights as in the trip planner
+    /// (`NightPlanner.better(_:_:closures:)`), so Siri and the planner pick the same best night.
+    static func answer(parks: [Park], planner: NightPlanner, from start: Date, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
         let count=min(30,max(1,nights))
-        let all=planner.bestNights(parks,from:start,count:count,now:now,limit:.max)
+        let all=planner.bestNights(parks,from:start,count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
     /// From the night of a picked day (the day as the person's calendar shows it, so a date
     /// picked at midnight or before a western park's sunrise never starts the night before),
     /// or from tonight when no day was picked.
-    static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date) -> Answer? {
-        guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now) }
+    static func answer(parks: [Park], planner: NightPlanner, day: TripDay?, nights: Int, now: Date, closures: [String: String] = [:]) -> Answer? {
+        guard let day else { return answer(parks:parks,planner:planner,from:now,nights:nights,now:now,closures:closures) }
         let count=min(30,max(1,nights))
-        let all=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:.max)
+        let all=planner.bestNights(parks,day:DateComponents(year:day.year,month:day.month,day:day.day),count:count,now:now,limit:.max,closures:closures)
         return all.isEmpty ? nil : Answer(nights:all,count:count)
     }
     /// Each park's newest forecast: the one the widget shares, or the app's own cache.
@@ -121,7 +123,7 @@ struct BestNightSnippetIntent: SnippetIntent {
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:parks,shared:shared),details:BestNightSearch.details(for:parks,shared:shared))
         // Nothing left to show (the nights have passed since Siri first answered): a calm card that
         // says so and offers Nyx, never an empty one.
-        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now) else {
+        guard let answer=BestNightSearch.answer(parks:parks,planner:planner,day:start.map { TripDay($0) },nights:nights,now:now,closures:IntentClosure.closures(parks,shared:shared)) else {
             return .result(view:BestNightEmptySnippetView(parkID:parks.count==1 ? parks.first?.id : nil))
         }
         let rank=min(BestNightBrowse.rank(),answer.ranked.count-1)

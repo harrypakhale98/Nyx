@@ -18,20 +18,22 @@ nonisolated struct WeekAcrossParks: Sendable {
     /// The week's best night among the rows shown, marked with the calendar's ring.
     let best: Cell?
     /// `weeks`: each park's next seven nights, starting tonight, in the order to keep on a tie
-    /// (Tonight passes them darkest tonight first).
-    static func make(_ weeks:[[Night]],limit:Int=rowLimit)->WeekAcrossParks {
+    /// (Tonight passes them darkest tonight first). `closures` count against their parks' nights,
+    /// as wherever a best night is picked (`NightPlanner.better(_:_:closures:)`).
+    static func make(_ weeks:[[Night]],closures:[String:String]=[:],limit:Int=rowLimit)->WeekAcrossParks {
         let usable=weeks.filter { !$0.isEmpty }
-        func top(_ week:[Night])->Night? { week.min { NightPlanner.better($0,$1) } }
+        func better(_ a:Night,_ b:Night)->Bool { NightPlanner.better(a,b,closures:closures) }
+        func top(_ week:[Night])->Night? { week.min { better($0,$1) } }
         let ordered=usable.enumerated().sorted { a,b in
             guard let x=top(a.element), let y=top(b.element) else { return a.offset<b.offset }
-            if NightPlanner.better(x,y) { return true }
-            if NightPlanner.better(y,x) { return false }
+            if better(x,y) { return true }
+            if better(y,x) { return false }
             return a.offset<b.offset
         }.map(\.element)
         let rows=ordered.prefix(max(0,limit)).compactMap { week in week.first.map { Row(park:$0.park,nights:Array(week.prefix(nights))) } }
         var best:Cell?, bestNight:Night?
         for (r,row) in rows.enumerated() {
-            for (n,night) in row.nights.enumerated() where bestNight.map({ NightPlanner.better(night,$0) }) ?? true {
+            for (n,night) in row.nights.enumerated() where bestNight.map({ better(night,$0) }) ?? true {
                 best=Cell(row:r,night:n); bestNight=night
             }
         }
