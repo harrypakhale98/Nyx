@@ -105,14 +105,27 @@ import CoreLocation
     @ObservationIgnored let defaults: UserDefaults
     var homeID: String { didSet { if DebugScenario.screen == nil { defaults.set(homeID,forKey:"homePark") } } }
     /// The place Tonight last answered with on this iPhone (the darkest within reach, once a starting
-    /// point is chosen), kept across launches: the widgets and Apple Watch follow it too
-    /// (`SavedSkySync.followedIDs`), so even a background refresh fetches and hands over its clouds.
+    /// point is chosen), kept across launches with the place's night it was picked for
+    /// (`tonightPickNight`). The widgets and Apple Watch follow it while that night is still tonight
+    /// (`tonightPick`), so even a background refresh fetches and hands over its clouds.
     @ObservationIgnored var tonightPickID: String? {
         didSet {
-            guard tonightPickID != oldValue else { return }
-            if DebugScenario.screen == nil { defaults.set(tonightPickID,forKey:"tonightPick") }
+            let night=tonightPickID.flatMap { park($0) }.map { $0.isoDay($0.currentNight(at:present)) }
+            guard tonightPickID != oldValue || night != tonightPickNight else { return }
+            tonightPickNight=night
+            if DebugScenario.screen == nil { defaults.set(tonightPickID,forKey:"tonightPick"); defaults.set(night,forKey:"tonightPickNight") }
             savedSync.noteChange(self)
         }
+    }
+    /// The place-local night ("2026-10-16") `tonightPickID` was picked for.
+    @ObservationIgnored private(set) var tonightPickNight: String?
+    /// Tonight's pick while the night it was picked for is still tonight at that place; nil after,
+    /// so a days-old answer is never handed on as tonight's. A place not yet loaded (the world
+    /// catalogue at launch) keeps its pick until it can be checked.
+    var tonightPick: String? {
+        guard let id=tonightPickID, let night=tonightPickNight else { return nil }
+        guard let park=park(id) else { return id }
+        return park.isoDay(park.currentNight(at:present)) == night ? id : nil
     }
     /// A city or town chosen as the starting point (`places.json`). Distances are measured from it
     /// and `homeID` holds the park nearest to it; nil when the starting point is a park.
@@ -202,6 +215,7 @@ import CoreLocation
         homeID=defaults.string(forKey:"homePark") ?? Park.defaultID
         homePlace=defaults.data(forKey:"homePlace").flatMap { try? JSONDecoder().decode(StartingPlace.self,from:$0) }
         tonightPickID=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPick").flatMap(PlaceIDText.validated) : nil
+        tonightPickNight=DebugScenario.screen == nil ? defaults.string(forKey:"tonightPickNight") : nil
         startChosen=defaults.object(forKey:"startChosen") as? Bool ?? (defaults.string(forKey:"homePark") != nil)
         // A radius kept in miles before 2.0 is written once as metres, exactly.
         if DebugScenario.screen == nil { SearchRadius.migrate(defaults) }

@@ -82,7 +82,7 @@ import Testing
         let data = try #require(context.data)
         let received = try #require(WatchContext(data: data))
         let start = try park(home), source = CloudSource.of(context: received, park: start, now: now)
-        #expect(source == .dropped && !source.isStale && source.line(for: start) == "Too many saved places to send this whole forecast.")
+        #expect(source == .dropped && !source.isStale && source.line(for: start) == "Too many places to send all their forecasts.")
         // An iPhone from before these fields: its context still decodes, with nothing left out or answered.
         let object = try JSONSerialization.jsonObject(with: data)
         var json = try #require(object as? [String: Any])

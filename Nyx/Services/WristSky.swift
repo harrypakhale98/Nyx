@@ -185,8 +185,9 @@ nonisolated enum CloudSource: Equatable, Sendable {
 
     static func of(context: WatchContext?, park: Park, now: Date) -> CloudSource {
         guard let context else { return .unsynced }
-        if context.droppedParkIDs.contains(park.id) { return .dropped }
         guard let updated = context.forecasts[park.id]?.updated else {
+            // Clouds left out for room; a place whose clouds came (its layers left out) keeps their time and age.
+            if context.droppedParkIDs.contains(park.id) { return .dropped }
             return .missing(followed: context.followedParkIDs.contains(park.id))
         }
         return now.timeIntervalSince(updated) < lifetime ? .fresh(updated) : .expired(updated)
@@ -208,7 +209,8 @@ nonisolated enum CloudSource: Equatable, Sendable {
             return String(localized: "Clouds from \(updated.formatted(format))")
         case .expired, .missing(followed: true): return String(localized: "No recent forecast. Open Nyx on iPhone to refresh.")
         case .missing(followed: false): return String(localized: "Save this park on iPhone for its clouds.")
-        case .dropped: return String(localized: "Too many saved places to send this whole forecast.")
+        // Drops can come from Tonight's pick or the watch's own places, not only saved ones.
+        case .dropped: return String(localized: "Too many places to send all their forecasts.")
         }
     }
 }
