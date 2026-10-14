@@ -384,7 +384,7 @@ struct NightGlance: View {
 func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
     let source = CloudSource.of(context: context, park: night.park, now: now)
     // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
-    let refreshable = source.isStale || source == .missing(followed: false)
+    let refreshable = source.isStale || source == .missing(followed: false) || source == .dropped
     var lines: [String] = []
     if let note = WatchSky.forecastNote(night, context: context, short: refreshable) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }

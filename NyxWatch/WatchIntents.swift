@@ -62,9 +62,9 @@ nonisolated enum WristTonightAnswer {
             let sent = Calendar.current.isDate(context.sent, inSameDayAs: now)
                 ? String(localized: "From the cloud forecast your iPhone sent at \(time).")
                 : String(localized: "From the cloud forecast your iPhone sent on \(context.sent.formatted(.dateTime.weekday(.wide))) at \(time).")
-            return Sentences.join([sent, source.isStale ? source.line(for: night.park) : nil].compactMap { $0 })
+            return Sentences.join([sent, source.isStale || source == .dropped ? source.line(for: night.park) : nil].compactMap { $0 })
         }
-        let fix = source.isStale || source == .missing(followed: false) ? source.line(for: night.park) : nil
+        let fix = source.isStale || source == .missing(followed: false) || source == .dropped ? source.line(for: night.park) : nil
         return Sentences.join([night.basisCaption(), fix].compactMap { $0 })
     }
 }

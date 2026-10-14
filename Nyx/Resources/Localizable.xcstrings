@@ -61851,6 +61851,41 @@
         }
       }
     },
+    "Too many saved places to send this whole forecast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu viele gespeicherte Orte, um diese Vorhersage ganz zu senden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too many saved places to send this whole forecast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay demasiados lugares guardados para enviar este pronóstico completo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trop de lieux enregistrés pour envoyer cette prévision en entier."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存した場所が多すぎるため、この予報をすべては送れません。"
+          }
+        }
+      }
+    },
     "Total lunar eclipse": {
       "extractionState": "manual",
       "localizations": {
