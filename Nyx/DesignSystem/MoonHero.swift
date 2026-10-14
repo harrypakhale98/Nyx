@@ -7,8 +7,7 @@ import SwiftUI
 /// terminator sweeps on the shared spring (at once under Reduce Motion).
 struct MoonHero: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     /// An iPhone in landscape (compact height): the Moon beside its words, so the whole panel fits
     /// the short screen and its phase can be read while the Moon is scrubbed.
@@ -16,7 +15,6 @@ struct MoonHero: View {
     private var beside: Bool { verticalSize == .compact && !typeSize.isAccessibilitySize }
     /// Off while the page's time river is scrubbed (set by the park page).
     @Environment(\.moonRelief) private var relief
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     let night: Night
     /// Moves the selected night by a number of nights and says whether it moved (false at the
     /// river's ends); nil where the Moon only shows one night.

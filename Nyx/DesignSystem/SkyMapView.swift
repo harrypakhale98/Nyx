@@ -123,8 +123,7 @@ struct SkyMapCanvas: View {
 /// Motion), a night just recorded arrives as a star, and each star is a 44-point button for touch
 /// and for VoiceOver.
 struct SkyMapView: View {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     let content: SkyMapContent
     var summary: String
@@ -145,7 +144,6 @@ struct SkyMapView: View {
     @State private var done=false
     @State private var arrivalStart: Date?
     @State private var arrivedID: String?
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// Reduce Motion and Reduce Highlighting draw an arriving star whole.
     private var stillArrival: Bool { reduceMotion || access.reduceHighlighting }
     /// About a second per figure, at most four seconds in all.

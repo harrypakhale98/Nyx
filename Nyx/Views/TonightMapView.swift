@@ -101,8 +101,7 @@ struct TonightMapCanvas: View {
 struct TonightMapView: View {
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let map: TonightMap
     /// The search radius (`SkyMap.ring`) and the starting point, in canvas units.
     var ring: [CGPoint]? = nil
@@ -117,7 +116,6 @@ struct TonightMapView: View {
     @State private var started: Date?
     @State private var done=false
     @Namespace private var rotor
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     private static let reveal=1.2
     private struct RevealKey: Hashable { let frame: MapFrame; let pending: Bool }
     private var summary: String { pending ? String(localized:"Working out tonight's scores.") : map.summary }

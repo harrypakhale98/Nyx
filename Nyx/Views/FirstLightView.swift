@@ -8,8 +8,7 @@ import SwiftUI
 /// Under Reduce Motion it is one gentle fade. It never holds the app back.
 struct FirstLightView: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     let park: Park
     let night: Date
@@ -20,7 +19,6 @@ struct FirstLightView: View {
     @State private var leaving=false
     /// The stars have all arrived: the sky is drawn once more, whole, and the timeline rests.
     @State private var done=false
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// Seconds for the stars to arrive; the name follows as the last of them do.
     private let reveal=7.0
     /// The words' viewport: they sit low on the screen and scroll when they do not fit it (an

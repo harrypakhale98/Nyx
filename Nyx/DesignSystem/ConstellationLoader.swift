@@ -3,10 +3,9 @@ import SwiftUI
 /// (`ConstellationTrace`, shared with Apple Vision Pro) in Nyx's palette, still under Reduce Motion.
 struct ConstellationLoader: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     var body: some View {
-        ConstellationTrace(ink:palette.ink,accent:palette.accent,reduceMotion:systemReduceMotion || forcedReduceMotion)
+        ConstellationTrace(ink:palette.ink,accent:palette.accent,reduceMotion:reduceMotion)
     }
 }
 /// A row still loading: the row's shapes in the hairline colour, with a soft light passing over them
@@ -14,13 +13,12 @@ struct ConstellationLoader: View {
 /// shimmer already says it is on its way, and five spinners at once read as noise.
 struct SkeletonRow: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     private var shapes: some View {
         HStack { RoundedRectangle(cornerRadius:8).frame(width:48,height:48); VStack(alignment:.leading) { RoundedRectangle(cornerRadius:4).frame(height:14); RoundedRectangle(cornerRadius:4).frame(width:120,height:10) }; Spacer() }
     }
     var body: some View {
-        let still=systemReduceMotion || forcedReduceMotion
+        let still=reduceMotion
         shapes.foregroundStyle(palette.line)
             .overlay {
                 if !still {

@@ -25,9 +25,7 @@ import SwiftUI
 struct CelestialGauge: View {
     @Environment(\.skyResting) private var resting
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.dynamicTypeSize) private var typeSize
     /// Landscape on iPhone (and iPhone Duo's outer display turned): a shorter dial, so the whole
     /// score sits in the window's height rather than under its bars.

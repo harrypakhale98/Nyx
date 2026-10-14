@@ -5,8 +5,7 @@ import UIKit
 /// what each sound means, and the transcript, whose current line brightens while it plays.
 struct NightListenView: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let night: Night
     var isTonight=true
     /// DEBUG and Settings: open with the transcript showing.
@@ -46,7 +45,7 @@ struct NightListenView: View {
                         Image(systemName:cue.symbol).font(.caption).frame(width:20).foregroundStyle(heard ? palette.accent : palette.muted).accessibilityHidden(true)
                         Text(cue.line).font(.subheadline.weight(heard ? .semibold : .regular)).foregroundStyle(heard || !playing ? palette.ink : palette.muted).fixedSize(horizontal:false,vertical:true)
                     }
-                    .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring,value:heard)
+                    .animation(reduceMotion ? nil : NyxMotion.spring,value:heard)
                 }
             }.padding(.top,8)
         }

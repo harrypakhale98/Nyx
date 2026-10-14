@@ -10,9 +10,7 @@ struct OnboardingView:View {
     /// the margins tighten, so the page keeps most of the height.
     private var compactHeight:Bool { verticalSize == .compact }
     @Environment(\.nyx) private var palette
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
-    private var reduceMotion:Bool { systemReduceMotion || forcedReduceMotion }
+    @MotionReduced private var reduceMotion: Bool
     @Environment(PlanModel.self) private var model
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @State private var page=DebugScenario.onboardingPage

@@ -240,13 +240,12 @@ struct FoldColumns<Content: View>: View {
     @ViewBuilder var content: Content
     @Environment(\.pageFold) private var pageFold
     @State private var leadingEdge=0.0
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     private var fold: Fold? { pageFold?.seen(fromX: leadingEdge) }
     var body: some View {
         ColumnSplit(narrow: narrow, narrowMax: narrowMax, spacing: spacing, fold: fold) { content }
             .onGeometryChange(for: Double.self) { $0.frame(in: .named(FoldSource.space)).minX.rounded() } action: { leadingEdge=$0 }
             // The columns ease to the fold as the hinge turns (small moves, on the shared spring).
-            .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring, value: fold)
+            .animation(reduceMotion ? nil : NyxMotion.spring, value: fold)
     }
 }

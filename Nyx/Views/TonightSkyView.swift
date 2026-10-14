@@ -23,8 +23,7 @@ struct TonightSkyView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let night: Night
     var isTonight=true
     @State private var facing: Double
@@ -72,8 +71,7 @@ struct TonightSkyView: View {
         _captionShown=State(initialValue:first || previewLanded)
     }
     /// The reveal is a highlight and a motion: neither plays under Reduce Motion or Reduce Highlighting Effects.
-    private var revealAllowed: Bool { !systemReduceMotion && !forcedReduceMotion && !access.reduceHighlighting }
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
+    private var revealAllowed: Bool { !reduceMotion && !access.reduceHighlighting }
     /// Minutes after the night's start that the view opens at: the middle of true darkness, else
     /// the middle of the night.
     nonisolated static func defaultMinutes(_ sky:SkyConditions)->Double {
@@ -485,8 +483,7 @@ struct SkyWindowCard: View {
 struct BortleFigure: View {
     @Environment(\.nyx) private var palette
     @Environment(\.skyHome) private var home
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @State private var level=Double(DebugScenario.number("-nyx-bortle") ?? 3)
     private static let fallback:Park?=(try? ParkData.load())?.first { $0.id==Park.defaultID }
     private var park: Park? { home ?? Self.fallback }
@@ -520,7 +517,7 @@ struct BortleFigure: View {
                     .accessibilityHidden(true)
             }
             Slider(value:$level,in:1...9) { Text("Bortle class") } minimumValueLabel:{ Text("1").font(.caption).foregroundStyle(palette.muted) } maximumValueLabel:{ Text("9").font(.caption).foregroundStyle(palette.muted) } onEditingChanged:{ editing in
-                if !editing { withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { level=level.rounded() } }
+                if !editing { withAnimation(reduceMotion ? nil : NyxMotion.spring) { level=level.rounded() } }
             }
             .tint(palette.controlTint)
             .accessibilityValue(String(localized:"Class \(shownClass), \(BortleScale.name(shownClass)). \(BortleScale.cue(shownClass))"))

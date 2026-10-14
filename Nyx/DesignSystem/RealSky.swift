@@ -8,14 +8,12 @@ import SwiftUI
 /// A night without true darkness shows what twilight leaves (`Visibility`): only the brightest
 /// stars over a faint lift of light low in the sky while the Sun is less than 6° down.
 struct RealSky: View {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
     @Environment(\.nyx) private var palette
     @Environment(\.nyxAccess) private var access
     @Environment(\.skyResting) private var resting
     @Environment(\.scenePhase) private var scenePhase
-    private var reduceMotion: Bool { systemReduceMotion || forcedReduceMotion }
     /// When the system asks for less, the sky holds still: no twinkle, no tilt.
     private var still: Bool { reduceMotion || access.reducedResources }
     let park: Park

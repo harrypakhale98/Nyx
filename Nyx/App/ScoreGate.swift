@@ -10,8 +10,7 @@ import SwiftUI
 /// without a score answer at once; the gate lifts on the shared spring the moment the reads land.
 struct ScoreGate: ViewModifier {
     @Environment(PlanModel.self) private var model
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     /// Off for a surface that carries no score from the caches (`ungatedTabs`).
     var enabled=true
     /// Draw the night behind the loader: off where the page already has its own sky behind it.
@@ -25,7 +24,7 @@ struct ScoreGate: ViewModifier {
                     .transition(.opacity)
             } else { content }
         }
-        .animation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring,value:waits)
+        .animation(reduceMotion ? nil : NyxMotion.spring,value:waits)
     }
     /// Whether a surface waits: only while the launch's cache reads are still out.
     nonisolated static func waits(enabled:Bool,cachesPending:Bool)->Bool { enabled && cachesPending }

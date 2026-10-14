@@ -73,8 +73,7 @@ struct SettingsSheet: View {
 struct NightVisionToggle: View {
     @AppStorage("nightVision",store:SharedSettings.defaults) private var nightVision=false
     @Environment(SceneCommands.self) private var commands:SceneCommands?
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.nyxAccess) private var access
     private var shown:Bool { commands?.lampTarget ?? nightVision }
     /// The switch's centre in its window, for the lamp's dark to grow from.
@@ -94,7 +93,7 @@ struct NightVisionToggle: View {
     private func turn(_ on:Bool) {
         // Read at the tap, before the lamp's cover could move VoiceOver anywhere.
         let announce = !NightVisionLamp.voiceOverOnSwitch()
-        if let commands, !(systemReduceMotion || forcedReduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce,origin:center); return }
+        if let commands, !(reduceMotion || access.crossFade) { commands.requestNightVision(on,announce:announce,origin:center); return }
         nightVision=on
         if announce { NightVisionLamp.announce(on) }
     }

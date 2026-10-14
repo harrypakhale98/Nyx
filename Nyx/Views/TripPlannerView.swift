@@ -10,8 +10,7 @@ struct TripPlannerView: View {
     @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     /// Inside Plan, which names the page and holds the toolbar; alone (a DEBUG route) it names itself.
     var embedded=false
     /// The chosen nights as seconds since 1970; 0 until chosen, which means from tonight for a week.
@@ -131,7 +130,7 @@ struct TripPlannerView: View {
             guard let point else { planning=false; return }
             let result=await model.planTrip(days:days,latitude:point.latitude,longitude:point.longitude,radiusMeters:radius,maxHopMeters:maxHop,drivableOnly:drivableOnly)
             guard !Task.isCancelled else { return }
-            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { plan=result }
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { plan=result }
             planning=false
             // Only a change of plan is spoken and felt; a return to the page is not.
             let key=inputs

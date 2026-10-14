@@ -9,8 +9,7 @@ struct CityLightFigure: View {
     enum Sky: Hashable { case here, city }
     @Environment(\.nyx) private var palette
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSize
     let park: Park
@@ -81,7 +80,7 @@ struct CityLightFigure: View {
         .sensoryFeedback(.selection,trigger:selection)
         .onChange(of:selection) { _,new in
             let target=new == .city ? Self.cityClass : Double(park.bortleEstimate)
-            withAnimation(systemReduceMotion || forcedReduceMotion ? nil : NyxMotion.spring) { drawnClass=target }
+            withAnimation(reduceMotion ? nil : NyxMotion.spring) { drawnClass=target }
         }
     }
     /// The labels in full for the menu, and short for the segments ("Here · Class 3", "City · Class 8"),

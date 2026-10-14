@@ -6,6 +6,14 @@ extension EnvironmentValues {
     var nyxReduceMotion: Bool { get { self[MotionOverrideKey.self] } set { self[MotionOverrideKey.self]=newValue } }
     var nyx: NyxPalette { get { self[PaletteKey.self] } set { self[PaletteKey.self]=newValue } }
 }
+/// Reduce Motion as every Nyx view reads it: the system setting, or the still override (`nyxReduceMotion`:
+/// share cards, previews, DEBUG screenshots). Read where it is used rather than set once at the root,
+/// so a sheet hosted outside the root still follows the system setting.
+@propertyWrapper struct MotionReduced: DynamicProperty {
+    @Environment(\.accessibilityReduceMotion) private var system
+    @Environment(\.nyxReduceMotion) private var forced
+    var wrappedValue: Bool { system || forced }
+}
 /// The accessibility preferences Nyx adapts to beyond the basics (set by `nyxAccessibility()` in the app) each view reads itself (Reduce
 /// Motion, Reduce Transparency, Increase Contrast, Dynamic Type). Read once near the root from the
 /// system, newest settings behind availability, so every screen asks one question instead of four.
@@ -98,11 +106,10 @@ struct NightBackground: View {
 /// text around it, so it reads as nearer than the sky and farther than the page.
 /// Off under Reduce Motion.
 struct DepthParallax: ViewModifier {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @Environment(\.nyxReduceMotion) private var forcedReduceMotion
+    @MotionReduced private var reduceMotion: Bool
     let depth: Double
     func body(content:Content)->some View {
-        if systemReduceMotion || forcedReduceMotion { content }
+        if reduceMotion { content }
         else {
             content.visualEffect { [depth] view,proxy in
                 view.offset(y:min(0,proxy.frame(in:.scrollView).minY)*(-depth))
