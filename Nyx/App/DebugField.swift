@@ -33,7 +33,8 @@ struct DebugField: View {
             .task {
                 guard DebugScenario.state=="live" else { return }
                 await model.refreshForecasts(watching: [session.park])
-                session.score=model.night(session.park).score
+                let tonight=model.night(session.park)
+                session.score=tonight.score; session.scoredAt=FieldActivities.scoredAt(tonight)
             }
     }
 }

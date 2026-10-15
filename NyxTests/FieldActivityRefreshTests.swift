@@ -198,7 +198,7 @@ import Testing
         let closure=try #require(model.closure(jotr))
         #expect(session.closure == closure)
         let now=Date.now
-        let scored=FieldActivities.fieldScored(session.score, closure: session.closure, now: now)
+        let scored=FieldActivities.fieldScored(session.score, closure: session.closure, at: session.scoredAt)
         let attributes=FieldActivityAttributes(night: session.night, score: scored.score, band: scored.band, closure: session.closure)
         let state=attributes.content(at: now, nightVision: true, scored: scored).state
         #expect(attributes.closure(state) == closure && attributes.score(state) == session.score.value)
