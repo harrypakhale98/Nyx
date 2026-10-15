@@ -165,9 +165,6 @@ targets:
         group: Shared
       - path: Nyx/Services/DataServices.swift
         group: Shared
-      # The search radius the launch preload reads (CachePreload.homeArea), in metres.
-      - path: Nyx/Services/SearchRadius.swift
-        group: Shared
       # The campground types `ParkStore` reads and caches (the widget never asks for them).
       - path: Nyx/Models/Campground.swift
         group: Shared
@@ -406,14 +403,25 @@ targets:
         # The same isolation as every other target, so shared files compile identically everywhere.
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
   # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
-  # bundled data by listing files. Its one network request is the cloud forecast from
-  # api.open-meteo.com, behind its own switch: CloudForecastClient.swift only,
-  # never DataServices.swift (park updates, smoke), so no other host is compiled in (see PRIVACY.md).
+  # bundled data by listing files. Its requests are the iPhone's, to the same three hosts, each behind
+  # its own switch in Your privacy: the cloud forecast (CloudForecastClient.swift), and the smoke
+  # forecast and park alerts (DataServices.swift), so its scores and closures match (see PRIVACY.md).
   NyxVision:
     type: application
     platform: visionOS
     sources:
       - path: NyxVision
+      # Smoke (`ForecastDetailService`, air only) and park alerts (`ParkStore`), with the types they cache.
+      - path: Nyx/Services/DataServices.swift
+        group: Shared
+      - path: Nyx/Models/Campground.swift
+        group: Shared
+      # Which alert is a closure, its headline in Nyx's words, and the line beside the score.
+      - path: Nyx/Services/ParkAlerts.swift
+        group: Shared
+      # What the headset's score counts, and what it says when smoke or alerts are missing.
+      - path: Nyx/Services/ScoreInputs.swift
+        group: Shared
       - path: Nyx/Models/Park.swift
         group: Shared
       - path: Nyx/Services/Sentences.swift
@@ -504,6 +512,11 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSUserActivityTypes: [com.harrypakhale.nyx.park]
+        # The iPhone's shared NPS key (Config/Nyx.xcconfig, Secrets.xcconfig); empty, closures are simply not checked.
+        NPS_API_KEY: "$(NPS_API_KEY)"
+    configFiles:
+      Debug: Config/Nyx.xcconfig
+      Release: Config/Nyx.xcconfig
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "7"
@@ -518,7 +531,7 @@ targets:
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
         ENABLE_PREVIEWS: YES
   # The visionOS widget: tonight's Moon and the next new moon, from the date alone. No App Group,
-  # no saved parks, no network transport compiled in (as in the app).
+  # no saved parks, no network transport compiled in.
   NyxVisionWidgets:
     type: app-extension
     platform: visionOS

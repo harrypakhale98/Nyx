@@ -515,3 +515,8 @@ nonisolated enum LinkDay {
         return components
     }
 }
+/// A value that decodes to nil instead of failing the whole document.
+nonisolated struct Lenient<T:Decodable>:Decodable {
+    let value:T?
+    init(from decoder:any Decoder) throws { value=try? T(from:decoder) }
+}

@@ -44,6 +44,38 @@ nonisolated enum AlertRanking {
     }
     /// The one alert that stands beside the score: a true closure, never an amenity notice.
     static func closure(_ alerts: [ParkAlert]) -> ParkAlert? { alerts.first { $0.kind == .closure } }
+    /// What the last park update says beside a park's score, in one line: its closure, else a
+    /// danger alert, else that nothing is listed. The iPhone's park page and Tonight, and Vision Pro.
+    static func summary(_ alerts: [ParkAlert], park: Park) -> String {
+        if let closure=closure(alerts) { return closure.displayTitle(park: park) }
+        if let danger=alerts.first(where: { $0.kind == .danger }) { return danger.displayTitle(park: park) }
+        if alerts.isEmpty { return String(localized: "No alerts in the last park update. Confirm access before travel.") }
+        return String(localized: "No closures in the last park update. Check all park alerts before you go.")
+    }
+    /// No park update covers the park yet: the Park Service refusing requests, or nothing fetched.
+    static func unchecked(busy: Bool) -> String {
+        busy ? String(localized: "Park alerts are busy. Check current conditions on nps.gov.") : String(localized: "Access not checked. Confirm closures with the park.")
+    }
+}
+/// The closure beside a score, said one way on every device that has park alerts.
+nonisolated enum ClosureLine {
+    /// "Closure alert: Kolob Canyons Road closed"
+    static func spoken(_ closure: String) -> String { String(localized: "Closure alert: \(closure)") }
+    /// "Closure alert: …." before an answer about a park, when it has one: a long drive to a closed
+    /// road is the worst outcome Nyx can cause. An NPS headline usually ends without a full stop;
+    /// one is added so the score reads as its own sentence.
+    static func first(_ body: String, closure: String?) -> String {
+        guard let closure=closure?.trimmingCharacters(in: .whitespacesAndNewlines), !closure.isEmpty else { return body }
+        return Sentences.join([Sentences.end(spoken(closure)), body])
+    }
+}
+extension ParkAlertsCache {
+    /// The park's closure as Nyx words it beside the score; nil without one, or when this update
+    /// does not cover the park.
+    nonisolated func closure(for park: Park) -> String? {
+        guard let code=park.nps, let listed=alerts[code] else { return nil }
+        return AlertRanking.closure(listed)?.displayTitle(park: park)
+    }
 }
 /// NPS headlines are mostly Title Case ("Notch Trail Closure for Repairs"); Nyx's voice is
 /// sentence case. Only words known to be ordinary are lowered, so names survive: anything

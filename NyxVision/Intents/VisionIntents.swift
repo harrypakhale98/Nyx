@@ -3,7 +3,7 @@ import Foundation
 
 // Siri and Shortcuts on Apple Vision Pro: a park's darkness score tonight, a park opened in the
 // planner, and tonight's sky to stand under. Everything is computed on the headset from the
-// bundled parks and the cached cloud forecast; no intent makes a request.
+// bundled parks and the cached cloud forecast, smoke and park alerts; no intent makes a request.
 
 /// A national park, for Siri and Shortcuts. The iPhone's entity name and identifiers (the park
 /// code), so a park means the same thing on every device; read from the bundled park list.
@@ -39,8 +39,8 @@ enum VisionIntentError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 /// "What's the darkness score at Joshua Tree tonight?" Answers in words and returns the score,
-/// 0 to 100, so Shortcuts can use it. Reads this headset's cached forecast and never asks for a
-/// new one, so it answers the same with the cloud forecast switched off, and says so.
+/// 0 to 100, so Shortcuts can use it. Reads this headset's cached forecast, smoke and park alerts
+/// and never asks for new ones, so it answers the same with a switch off, and says so.
 struct DarknessIntent: AppIntent {
     static let title: LocalizedStringResource = "Tonight's darkness score"
     static let description = IntentDescription("Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.")
@@ -50,29 +50,37 @@ struct DarknessIntent: AppIntent {
         guard let selected = try ParkData.load().first(where: { $0.id == park.id }) else { throw VisionIntentError.parkNotFound }
         let forecast = await WeatherService().forecast(for: selected, network: false)
         let layers = await SummitLayerService().layers(for: [selected], network: false)[selected.id]
-        let answer = VisionDarknessAnswer(park: selected, forecast: forecast, layers: layers, forecastsOn: CloudForecastSwitch.isOn(), now: .now)
+        let defaults = UserDefaults.standard
+        let smokeOn = defaults.object(forKey: VisionModel.smokeKey) as? Bool ?? true
+        let air = smokeOn ? await ForecastDetailService().hydrate([selected])[selected.id]?.air : nil
+        let inputs = ScoreInputs(smokeOn: smokeOn, smokeKnown: air == nil ? [] : [selected.id],
+                                 alertsOn: defaults.object(forKey: VisionModel.alertsKey) as? Bool ?? true, alerts: ParkStore.stored([selected]))
+        let answer = VisionDarknessAnswer(park: selected, forecast: forecast, layers: layers, air: air, inputs: inputs, forecastsOn: CloudForecastSwitch.isOn(), now: .now)
         return .result(value: answer.night.score.value, dialog: IntentDialog(stringLiteral: answer.dialog))
     }
 }
 /// Siri's answer apart from the intent: tonight scored as the planner scores it (`NightPlan`),
-/// and the clouds in the planner's words (`VisionModel.cloudCaption`): the forecast's cover, an
-/// early look, the usual clouds beyond its reach, or the switch that is off. Vision Pro has no
-/// park alerts, so every answer ends by asking to confirm conditions and access.
+/// the clouds in the planner's words (`VisionModel.cloudCaption`): the forecast's cover, an early
+/// look, the usual clouds beyond its reach, or the switch that is off; smoke that holds the score
+/// down, or why smoke is not counted; and a closure first, as on the iPhone (`ClosureLine.first`),
+/// or that closures are not checked. Every answer asks to confirm conditions and access.
 nonisolated struct VisionDarknessAnswer: Sendable {
     let night: Night
     let dialog: String
-    init(park: Park, forecast: Forecast?, layers: HourlySeries?, forecastsOn: Bool, now: Date) {
+    init(park: Park, forecast: Forecast?, layers: HourlySeries?, air: HourlySeries?, inputs: ScoreInputs, forecastsOn: Bool, now: Date) {
         let sky = AstronomyEngine().conditions(for: park, on: park.currentNight(at: now))
-        night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: VisionModel.detail(layers), now: now)
-        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecastsOn: forecastsOn))
+        night = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: ForecastDetail.vision(layers: layers, air: air), now: now)
+        dialog = Self.dialog(night, caption: VisionModel.cloudCaption(night, forecastsOn: forecastsOn), inputs: inputs)
     }
-    /// Smoke is not scored on this headset, so the answer says so, as the night view does.
-    static func dialog(_ night: Night, caption: String) -> String {
+    static func dialog(_ night: Night, caption: String, inputs: ScoreInputs) -> String {
         let park = night.park, score = night.score
-        if night.sky.darkHours == 0 { return String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
-        let smoke = String(localized: "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.")
-        if caption.isEmpty { return Sentences.join([String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling."), smoke]) }
-        return Sentences.join([String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling."), smoke])
+        let body: String
+        if night.sky.darkHours == 0 { body = String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
+        else if caption.isEmpty { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
+        else { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
+        let smoke = night.smokeSentence(tonight: true) ?? inputs.smokeNote(park) ?? ""
+        let access = inputs.closure(park) == nil && inputs.unchecked(park) ? inputs.accessNote(park) ?? "" : ""
+        return ClosureLine.first(Sentences.join([body, smoke, access]), closure: inputs.closure(park))
     }
 }
 

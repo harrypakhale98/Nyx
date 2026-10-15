@@ -1,16 +1,21 @@
 import Foundation
 
-/// Cloud forecasts on Vision Pro: the only network requests this app makes.
-/// The same client as the iPhone (`WeatherService`): all 63 parks' public viewing-spot coordinates
-/// in one request to api.open-meteo.com (two, 50 and 13 parks), clouds only, kept in this
-/// headset's Application Support so the last forecast is there offline. A park's forecast is asked
-/// for again only once it is six hours old, however often the window asks; a refused request
-/// waits (`HostBackoff`). Alongside it, Haleakalā's summit cloud layers (`SummitLayerService`):
-/// one small request at most every twelve hours, so that park scores from mid and high cloud as
-/// on the iPhone. With the switch off nothing is requested and the cached forecast keeps fading
-/// toward the usual clouds, as on the iPhone.
+/// Cloud forecasts, smoke and park alerts on Vision Pro: the network requests this app makes, the
+/// iPhone's own clients, hosts and pacing, each behind its own switch in Your privacy.
+/// Clouds (`WeatherService`): all 63 parks' public viewing-spot coordinates in one request to
+/// api.open-meteo.com (two, 50 and 13 parks), kept in this headset's Application Support so the
+/// last forecast is there offline, asked for again only once six hours old; Haleakalā's summit
+/// cloud layers (`SummitLayerService`) at most every twelve hours. Smoke (`ForecastDetailService`,
+/// air only): the same coordinates to air-quality-api.open-meteo.com at most every twelve hours.
+/// Park alerts (`ParkStore`): one request for all 63 park codes to developer.nps.gov at most every
+/// six hours, with the iPhone's shared key, and none without one. A refused request waits
+/// (`HostBackoff`). With a switch off nothing is requested for it: cached clouds keep fading toward
+/// the usual clouds, cached smoke is dropped, cached closures still stand, as on the iPhone.
 extension VisionModel {
-    /// Reads the cache, and with `network` (and the switch on) refreshes what is six hours old.
+    /// The iPhone's shared NPS key, from this app's Info.plist (`Config/Nyx.xcconfig`); empty in a
+    /// build without one, when park alerts are simply not asked for (`ParkStore.usable`).
+    nonisolated static var npsKey: String { Bundle.main.object(forInfoDictionaryKey: "NPS_API_KEY") as? String ?? "" }
+    /// Reads the cache, and with `network` (and each switch on) refreshes what is due.
     func refreshForecasts(network: Bool = true) async {
         #if DEBUG
         // Screenshot routes never touch the network: a fixed forecast (`-nyx-vision-clouds 60`),
@@ -24,11 +29,27 @@ extension VisionModel {
         // (the score sets aside layers more than twelve hours older than the forecast).
         let layers = await summits.layers(for: parks, network: asking)
         merge(fresh, layers: layers)
+        // Smoke and the park update side by side: two other hosts, each paced on its own.
+        let smokeOn = smokeOn, parks = parks, details = detailService, store = parkStore, key = Self.npsKey
+        let smokeNetwork = network && live, alertsNetwork = network && live && alertsOn
+        if !smokeOn { await details.forgetAir() }
+        async let air = smokeOn ? details.details(for: parks, weather: false, smoke: smokeNetwork, force: false).compactMapValues(\.air) : [:]
+        async let update = store.alerts(for: parks, key: key, network: alertsNetwork, force: false)
+        let (smoke, alertsUpdate) = await (air, update)
+        take(alertsUpdate)
+        // Switched off while the request was out: what arrived is not counted.
+        merge([:], layers: [:], smoke: self.smokeOn ? smoke : [:])
     }
-    /// Takes in forecasts and summit layers newer than those held; true when anything changed
+    /// The park update as the store has it: its alerts (only ever replaced by a newer update) and
+    /// whether the Park Service is refusing requests.
+    func take(_ update: AlertsUpdate) {
+        if alertsBusy != update.busy { alertsBusy = update.busy }
+        if let cache = update.cache, cache.updated > (alerts?.updated ?? .distantPast) { alerts = cache }
+    }
+    /// Takes in forecasts, summit layers and smoke newer than those held; true when anything changed
     /// (and so the night, the list and the nights ahead are being rescored). Only ever newer: a
-    /// failed or switched-off request never takes a forecast away.
-    @discardableResult func merge(_ fresh: [String: Forecast], layers: [String: HourlySeries]) -> Bool {
+    /// failed or switched-off request never takes a forecast away (smoke switched off is dropped by its switch).
+    @discardableResult func merge(_ fresh: [String: Forecast], layers: [String: HourlySeries], smoke air: [String: HourlySeries] = [:]) -> Bool {
         var merged = forecasts, changed = false
         for park in parks {
             guard let forecast = fresh[park.id], forecast.updated > (merged[park.id]?.updated ?? .distantPast) else { continue }
@@ -40,10 +61,15 @@ extension VisionModel {
             mergedLayers[id] = series; layersChanged = true
         }
         if layersChanged { summitLayers = mergedLayers }
-        return changed || layersChanged
+        var mergedSmoke = smoke, smokeChanged = false
+        for (id, series) in air where series.updated > (mergedSmoke[id]?.updated ?? .distantPast) {
+            mergedSmoke[id] = series; smokeChanged = true
+        }
+        if smokeChanged { smoke = mergedSmoke }
+        return changed || layersChanged || smokeChanged
     }
     /// Asks while the window is open: at once, then every half hour (each park only once its
-    /// forecast is six hours old, so in practice every six hours).
+    /// forecast is six hours old, smoke twelve, alerts six, so in practice every six hours).
     func keepForecastsFresh() async {
         while !Task.isCancelled {
             await refreshForecasts()
@@ -52,6 +78,8 @@ extension VisionModel {
     }
     /// The newest forecast on this headset, for Your privacy.
     var lastForecast: Date? { forecasts.values.map(\.updated).max() }
+    /// The newest smoke forecast on this headset, for Your privacy.
+    var lastSmoke: Date? { smoke.values.map(\.updated).max() }
     /// The words under the score for a night's clouds, as the iPhone says them: nothing extra with
     /// a forecast but its average; "Early look: …" days ahead; "No cloud forecast yet. …" beyond.
     /// Over Haleakalā's summit, when its layers count, the iPhone's line on why only mid and high cloud.

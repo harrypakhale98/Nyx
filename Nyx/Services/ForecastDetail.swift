@@ -65,6 +65,12 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
     static let modelKeys=["cloud_cover_gfs_seamless","cloud_cover_ecmwf_ifs025","cloud_cover_icon_seamless"]
     static let layerKeys=["cloud_cover_low","cloud_cover_mid","cloud_cover_high","temperature_2m","dew_point_2m","wind_gusts_10m","visibility"]
     static let airKeys=["aerosol_optical_depth","pm2_5"]
+    /// What Nyx on Vision Pro has for a night: a summit's cloud layers (`SummitLayerService`) and the
+    /// aerosol forecast (`ForecastDetailService`, asked for smoke only); nil with neither. The same
+    /// parts the iPhone's detail gives `NightPlanner.night` for the score, so both score alike.
+    static func vision(layers: HourlySeries?, air: HourlySeries?) -> ForecastDetail? {
+        layers == nil && air == nil ? nil : ForecastDetail(layers: layers, air: air)
+    }
 
     /// What the detail says about one night's window. `scoreRange` is filled in by the caller,
     /// which owns the score engine.

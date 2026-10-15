@@ -456,6 +456,41 @@
         }
       }
     },
+    "%@, haze or smoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, haze or smoke"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Dunst oder Rauch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, bruma o humo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, brume ou fumée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、もやまたは煙"
+          }
+        }
+      }
+    },
     "%@, in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1226,6 +1261,41 @@
         }
       }
     },
+    "Access not checked. Confirm closures with the park.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access not checked. Confirm closures with the park."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zugang nicht geprüft. Erkundige dich beim Park nach Sperrungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceso sin verificar. Confirma los cierres con el parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès non vérifié. Vérifiez les fermetures auprès du parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセスは未確認です。閉鎖情報は公園に確認してください。"
+          }
+        }
+      }
+    },
     "Ahead is %@, not your room's real north.": {
       "extractionState": "manual",
       "localizations": {
@@ -1257,6 +1327,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "正面は%@です。部屋の実際の北ではありません。"
+          }
+        }
+      }
+    },
+    "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Hinweise für alle %lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, höchstens alle sechs Stunden, sodass sie nie verrät, welche Parks dich interessieren. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las alertas de los %lld parques nacionales de EE. UU. llegan en una sola solicitud a developer.nps.gov, como máximo cada seis horas, así que nunca revela qué parques te interesan. Tus coordenadas nunca se envían. El servicio recibe información de red, como tu dirección IP."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les alertes des %lld parcs nationaux des États-Unis arrivent en une seule requête à developer.nps.gov, toutes les six heures au plus, si bien qu’elle ne révèle jamais quels parcs vous intéressent. Vos coordonnées ne sont jamais envoyées. Le service reçoit des informations réseau, comme votre adresse IP."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "米国の全%lldか所の国立公園のアラートは、developer.nps.govへの1回のリクエストでまとめて取得します。頻度は最大で6時間ごとなので、どの公園に関心があるかは伝わりません。座標が送信されることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -1782,6 +1887,216 @@
           "stringUnit": {
             "state": "translated",
             "value": "3つの予報モデルすべてで晴れ。"
+          }
+        }
+      }
+    },
+    "Closure alert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure alert"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sperrungshinweis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerta de cierre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerte de fermeture"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉鎖のアラート"
+          }
+        }
+      }
+    },
+    "Closure alert: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure alert: %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sperrungshinweis: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerta de cierre: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerte de fermeture : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉鎖のアラート：%@"
+          }
+        }
+      }
+    },
+    "Closures not checked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closures not checked."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sperrungen nicht geprüft."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cierres sin verificar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermetures non vérifiées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉鎖は未確認です。"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable · Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar · nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible · solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible · Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません · 月と暗さのみ"
+          }
+        }
+      }
+    },
+    "Cloud forecast unavailable · usual clouds for the month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · usual clouds for the month"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wolkenvorhersage nicht verfügbar · übliche Bewölkung des Monats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de nubes no disponible · nubosidad habitual del mes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de nuages indisponible · nébulosité habituelle du mois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報を取得できません · その月の平年の雲量"
           }
         }
       }
@@ -2451,6 +2766,41 @@
         }
       }
     },
+    "Counts forecast smoke and haze in every score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts forecast smoke and haze in every score"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berücksichtigt vorhergesagten Rauch und Dunst in jedem Wert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta el humo y la bruma pronosticados en cada índice"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compte la fumée et la brume prévues dans chaque indice"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予報される煙ともやを各スコアに反映します"
+          }
+        }
+      }
+    },
     "Credits": {
       "extractionState": "manual",
       "localizations": {
@@ -2797,6 +3147,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "早めの見通し"
+          }
+        }
+      }
+    },
+    "Early look · forecast eased toward usual clouds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look · forecast eased toward usual clouds"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Einschätzung · Vorhersage an die übliche Bewölkung angenähert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista anticipada · pronóstico ajustado hacia la nubosidad habitual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendance · prévision rapprochée de la nébulosité habituelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早めの見通し · 予報を平年の雲量に寄せています"
           }
         }
       }
@@ -3781,6 +4166,41 @@
         }
       }
     },
+    "Last park update: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last park update: %@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Parkmeldung: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última actualización de los parques: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière mise à jour des parcs : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の最新情報：%@。"
+          }
+        }
+      }
+    },
     "Last quarter": {
       "extractionState": "manual",
       "localizations": {
@@ -3812,6 +4232,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "下弦の月"
+          }
+        }
+      }
+    },
+    "Last smoke forecast: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last smoke forecast: %@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Rauchvorhersage: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último pronóstico de humo: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière prévision de fumée : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新の煙の予報：%@。"
           }
         }
       }
@@ -5706,6 +6161,76 @@
         }
       }
     },
+    "No alerts in the last park update. Confirm access before travel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts in the last park update. Confirm access before travel."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Hinweise in der letzten Meldung des Parks. Prüfe vor der Fahrt den Zugang."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin alertas en la última actualización del parque. Confirma el acceso antes de viajar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune alerte dans la dernière mise à jour du parc. Vérifiez l’accès avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の最新情報にアラートはありません。出かける前に、公園に入れるか確認してください。"
+          }
+        }
+      }
+    },
+    "No closures in the last park update. Check all park alerts before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No closures in the last park update. Check all park alerts before you go."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Sperrungen in der letzten Meldung des Parks. Prüfe vor der Fahrt alle Parkhinweise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin cierres en la última actualización del parque. Revisa todas las alertas del parque antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune fermeture dans la dernière mise à jour du parc. Consultez toutes les alertes du parc avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の最新情報に閉鎖はありません。出かける前に、公園のすべてのアラートを確認してください。"
+          }
+        }
+      }
+    },
     "No cloud forecast yet": {
       "extractionState": "manual",
       "localizations": {
@@ -5737,6 +6262,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲予報はまだありません"
+          }
+        }
+      }
+    },
+    "No cloud forecast yet · Moon and darkness only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet · Moon and darkness only"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Wolkenvorhersage · nur Mond und Dunkelheit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún sin pronóstico de nubes · solo Luna y oscuridad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de nuages · Lune et obscurité seules"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報はまだありません · 月と暗さのみ"
+          }
+        }
+      }
+    },
+    "No cloud forecast yet · usual clouds for the month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet · usual clouds for the month"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Wolkenvorhersage · übliche Bewölkung des Monats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún sin pronóstico de nubes · nubosidad habitual del mes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de nuages · nébulosité habituelle du mois"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報はまだありません · その月の平年の雲量"
           }
         }
       }
@@ -5877,6 +6472,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "かき消す月明かりはありません。"
+          }
+        }
+      }
+    },
+    "No park update on this device yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No park update on this device yet."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Parkmeldung auf diesem Gerät."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay actualización de los parques en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de mise à jour des parcs sur cet appareil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにはまだ公園の最新情報がありません。"
+          }
+        }
+      }
+    },
+    "No smoke forecast on this device yet, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device yet, so smoke is not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Rauchvorhersage auf diesem Gerät, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay pronóstico de humo en este dispositivo, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de fumée sur cet appareil : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにはまだ煙の予報がないため、煙は考慮していません。"
+          }
+        }
+      }
+    },
+    "No smoke forecast on this device yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device yet."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Rauchvorhersage auf diesem Gerät."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay pronóstico de humo en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de fumée sur cet appareil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにはまだ煙の予報がありません。"
           }
         }
       }
@@ -6196,41 +6896,6 @@
         }
       }
     },
-    "Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonst verlässt nichts diese Apple Vision Pro. Parkhinweise, Rauchvorhersagen und dein Standort werden hier nie abgefragt, und nichts wird gemessen oder geteilt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing else leaves this Apple Vision Pro. Park alerts, smoke forecasts and your location are never requested here, and nothing is measured or shared."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nada más sale de este Apple Vision Pro. Aquí nunca se piden avisos de parques, pronósticos de humo ni tu ubicación, y nada se mide ni se comparte."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien d’autre ne quitte cet Apple Vision Pro. Les alertes des parcs, les prévisions de fumée et votre position ne sont jamais demandées ici, et rien n’est mesuré ni partagé."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このApple Vision Proから外に出るものはほかにありません。ここでは公園のアラート、煙の予報、位置情報を要求することはなく、何も測定したり共有したりしません。"
-          }
-        }
-      }
-    },
     "Nyx": {
       "extractionState": "manual",
       "localizations": {
@@ -6476,6 +7141,41 @@
         }
       }
     },
+    "Only the three optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the three optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur die drei optionalen Aktualisierungen unten verlassen diese Apple Vision Pro, jede mit einem eigenen Schalter. Dein Standort wird hier nie abgefragt, und nichts wird gemessen oder geteilt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo las tres actualizaciones opcionales de abajo salen de este Apple Vision Pro, cada una con su propio interruptor. Aquí nunca se pide tu ubicación, y nada se mide ni se comparte."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seules les trois mises à jour facultatives ci-dessous quittent cet Apple Vision Pro, chacune avec son propre interrupteur. Votre position n’est jamais demandée ici, et rien n’est mesuré ni partagé."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このApple Vision Proから外に出るのは、下にある3つのオプションの更新だけで、それぞれに個別のスイッチがあります。ここでは位置情報を要求することはなく、何も測定したり共有したりしません。"
+          }
+        }
+      }
+    },
     "Open park": {
       "extractionState": "manual",
       "localizations": {
@@ -6651,31 +7351,31 @@
         }
       }
     },
-    "Optional data update": {
+    "Optional data updates": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optionale Datenaktualisierung"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Optional data update"
+            "value": "Optional data updates"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optionale Datenaktualisierungen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Actualización de datos opcional"
+            "value": "Actualizaciones de datos opcionales"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mise à jour de données facultative"
+            "value": "Mises à jour de données facultatives"
           }
         },
         "ja": {
@@ -6752,6 +7452,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園"
+          }
+        }
+      }
+    },
+    "Park alerts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parkhinweise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alertas del parque"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alertes du parc"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園のアラート"
+          }
+        }
+      }
+    },
+    "Park alerts are busy. Check current conditions on nps.gov.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are busy. Check current conditions on nps.gov."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Parkhinweise sind gerade überlastet. Sieh die aktuellen Bedingungen auf nps.gov nach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las alertas del parque están saturadas. Consulta las condiciones actuales en nps.gov."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le service des alertes du parc est saturé. Consultez les conditions actuelles sur nps.gov."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園のアラートが混み合っています。nps.govで現在の状況を確認してください。"
+          }
+        }
+      }
+    },
+    "Park alerts are off in Your privacy, so closures are not checked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are off in Your privacy, so closures are not checked."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parkhinweise sind unter „Deine Privatsphäre“ ausgeschaltet, daher werden Sperrungen nicht geprüft."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las alertas del parque están desactivadas en Tu privacidad, así que no se verifican los cierres."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les alertes du parc sont désactivées dans Votre vie privée : les fermetures ne sont donc pas vérifiées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で公園のアラートがオフになっているため、閉鎖は確認していません。"
           }
         }
       }
@@ -7032,6 +7837,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜を読む"
+          }
+        }
+      }
+    },
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld Parks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Er liefert die CAMS-Aerosolvorhersage, die warnt, wenn Rauch oder Dunst schwache Sterne verbergen werden. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. El servicio recibe información de red, como tu dirección IP."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Il renvoie la prévision d’aérosols CAMS, qui avertit quand la fumée ou la brume masqueront les étoiles faibles. Le service reçoit des informations réseau, comme votre adresse IP."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、全%lldか所の公園についてまとめて送ります。1回のリクエストには最大50か所を含め、同じ観察スポットの座標だけを使います。返ってくるのはCAMSのエアロゾル予報で、煙やもやが暗い星を隠しそうなときに注意を表示します。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -7876,6 +8716,41 @@
         }
       }
     },
+    "Shows park closures beside every score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows park closures beside every score"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt Sperrungen im Park neben jedem Wert"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra los cierres del parque junto a cada índice"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche les fermetures du parc à côté de chaque indice"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の閉鎖を各スコアの横に表示します"
+          }
+        }
+      }
+    },
     "Shows this night in the planner": {
       "extractionState": "manual",
       "localizations": {
@@ -8051,37 +8926,107 @@
         }
       }
     },
-    "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.": {
+    "Smoke and haze": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rauch und Dunst fließen auf der Vision Pro nicht ein. An verrauchten Tagen wirf einen Blick in die iPhone-App."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app."
+            "value": "Smoke and haze"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch und Dunst"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El humo y la bruma no se cuentan en Vision Pro. En días de humo, consulta la app del iPhone."
+            "value": "Humo y bruma"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La fumée et la brume ne sont pas comptées sur Vision Pro. Les jours de fumée, consultez l’app iPhone."
+            "value": "Fumée et brume"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vision Proでは、煙ともやは計算に入れていません。煙の多い日は、iPhoneアプリで確認してください。"
+            "value": "煙ともや"
+          }
+        }
+      }
+    },
+    "Smoke and haze are off in Your privacy, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze are off in Your privacy, so smoke is not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch und Dunst ist unter „Deine Privatsphäre“ ausgeschaltet, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo y bruma está desactivado en Tu privacidad, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fumée et brume est désactivé dans Votre vie privée : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で煙ともやがオフになっているため、煙は考慮していません。"
+          }
+        }
+      }
+    },
+    "Smoke not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo sin contar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fumée non comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "煙は考慮していません。"
           }
         }
       }
@@ -8856,6 +9801,41 @@
         }
       }
     },
+    "The Moon's phase and the next new moon, when the darkest nights begin.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon's phase and the next new moon, when the darkest nights begin."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fase de la Luna y la próxima luna nueva, cuando empiezan las noches más oscuras."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Mondphase und der nächste Neumond, wenn die dunkelsten Nächte beginnen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La phase de la Lune et la prochaine nouvelle lune, quand commencent les nuits les plus sombres."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の満ち欠けと次の新月。いちばん暗い夜が始まる時期です。"
+          }
+        }
+      }
+    },
     "The North Unit keeps Central Time, one hour ahead of the times Nyx shows for this park.": {
       "extractionState": "manual",
       "localizations": {
@@ -9311,37 +10291,37 @@
         }
       }
     },
-    "The public coordinates of the %lld national parks. Nothing about you.": {
+    "The public coordinates and park codes of the %lld national parks. Nothing about you.": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die öffentlichen Koordinaten der %lld Nationalparks. Nichts über dich."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The public coordinates of the %lld national parks. Nothing about you."
+            "value": "The public coordinates and park codes of the %lld national parks. Nothing about you."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die öffentlichen Koordinaten und Parkcodes der %lld Nationalparks. Nichts über dich."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las coordenadas públicas de los %lld parques nacionales. Nada sobre ti."
+            "value": "Las coordenadas públicas y los códigos de los %lld parques nacionales. Nada sobre ti."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les coordonnées publiques des %lld parcs nationaux. Rien sur vous."
+            "value": "Les coordonnées publiques et les codes des %lld parcs nationaux. Rien sur vous."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lldの国立公園の公開座標だけです。あなたについての情報は含まれません。"
+            "value": "%lldの国立公園の公開座標と公園コードだけです。あなたについての情報は含まれません。"
           }
         }
       }
@@ -9517,6 +10497,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "薄い上層雲。明るい星だけが見えます。"
+          }
+        }
+      }
+    },
+    "This copy of Nyx has no park service key, so park alerts are not requested.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This copy of Nyx has no park service key, so park alerts are not requested."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Nyx-Kopie hat keinen Schlüssel des Park Service, daher werden keine Parkhinweise abgefragt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta copia de Nyx no tiene clave del servicio de parques, así que no se piden alertas de los parques."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette copie de Nyx n’a pas de clé du service des parcs : les alertes des parcs ne sont donc pas demandées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このNyxには公園サービスのキーがないため、公園のアラートは要求しません。"
           }
         }
       }
@@ -9906,37 +10921,37 @@
         }
       }
     },
-    "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. The Moon, the stars and every score still work offline.": {
+    "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. The Moon, the stars and every score still work offline.": {
       "extractionState": "manual",
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wenn du Vorhersagen ausschaltest, werden keine neuen Anfragen gestellt. Die letzte Vorhersage bleibt auf diesem Gerät und zählt mit zunehmendem Alter weniger, dann übernimmt die übliche Bewölkung des Parks. Mond, Sterne und jeder Wert funktionieren weiterhin offline."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. The Moon, the stars and every score still work offline."
+            "value": "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. The Moon, the stars and every score still work offline."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn du Vorhersagen ausschaltest, werden keine neuen Anfragen gestellt. Die letzte Vorhersage bleibt auf diesem Gerät und zählt mit zunehmendem Alter weniger, dann übernimmt die übliche Bewölkung des Parks. Wenn du Rauch und Dunst ausschaltest, wird die Rauchvorhersage entfernt, und die Werte sagen, dass Rauch nicht berücksichtigt wird. Wenn du Parkhinweise ausschaltest, werden keine neuen Anfragen gestellt; bereits vorhandene Sperrungen bleiben neben dem Wert. Mond, Sterne und jeder Wert funktionieren weiterhin offline."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Al desactivar los pronósticos se detienen las solicitudes nuevas. El último pronóstico se queda en este dispositivo y cuenta menos con el tiempo; después rige la nubosidad habitual del parque. La Luna, las estrellas y todos los índices siguen funcionando sin conexión."
+            "value": "Al desactivar los pronósticos se detienen las solicitudes nuevas. El último pronóstico se queda en este dispositivo y cuenta menos con el tiempo; después rige la nubosidad habitual del parque. Al desactivar humo y bruma se borra el pronóstico de humo, y los índices indican que no se cuenta el humo. Al desactivar las alertas del parque se detienen las solicitudes nuevas; los cierres que ya están aquí siguen junto al índice. La Luna, las estrellas y todos los índices siguen funcionando sin conexión."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
+            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. Désactiver la fumée et la brume supprime la prévision de fumée, et les indices précisent que la fumée n’est pas comptée. Désactiver les alertes du parc arrête les nouvelles requêtes ; les fermetures déjà présentes restent à côté de l’indice. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報をオフにすると、新しいリクエストは止まります。最後の予報はこのデバイスに残り、古くなるにつれて影響が小さくなり、その後は公園の平年の雲量に切り替わります。月、星、すべてのスコアはオフラインでも使えます。"
+            "value": "予報をオフにすると、新しいリクエストは止まります。最後の予報はこのデバイスに残り、古くなるにつれて影響が小さくなり、その後は公園の平年の雲量に切り替わります。煙ともやをオフにすると煙の予報は削除され、スコアには煙を考慮していないと表示されます。公園のアラートをオフにすると新しいリクエストは止まりますが、すでにある閉鎖情報はスコアの横に残ります。月、星、すべてのスコアはオフラインでも使えます。"
           }
         }
       }

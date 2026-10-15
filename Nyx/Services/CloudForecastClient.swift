@@ -3,9 +3,9 @@ import Synchronization
 
 // The guarded transport and the cloud forecast client, shared by Nyx on iPhone and iPad (with the
 // widgets, which read the cache) and by Nyx on Vision Pro. Park updates, forecast detail and the
-// smoke forecast stay in DataServices.swift, which Vision Pro does not compile: its only requests
-// are this file's cloud forecast and Haleakalā's summit cloud layers (`SummitLayerService`), both
-// to api.open-meteo.com, behind one switch.
+// smoke forecast live in DataServices.swift, which Vision Pro compiles too: it asks for this file's
+// cloud forecast and Haleakalā's summit cloud layers (`SummitLayerService`), the smoke forecast and
+// the park alerts, the same three hosts as the iPhone, each behind its own switch.
 
 /// The cloud forecast's switch in Your privacy (on unless turned off), read by the transport
 /// before any request to the forecast host.
@@ -506,8 +506,8 @@ nonisolated enum ForecastRequest {
 }
 /// A redirect is never followed. Runtime requests can reach exactly three hosts, each behind its
 /// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05)
-/// the aerosol forecast that warns of smoke. Nyx on Vision Pro reaches only the
-/// forecast host (`SafeHTTP.preferences`).
+/// the aerosol forecast that warns of smoke. Nyx on Vision Pro reaches the same three, behind the
+/// same switches (`SafeHTTP.preferences`).
 nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
@@ -515,15 +515,11 @@ nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     }
 }
 nonisolated struct SafeHTTP: HTTPTransport {
-    /// Each host and the preference that must not be off before it is contacted. On Vision Pro
-    /// only the cloud forecast: the other two hosts are not even compiled into that app, so no
-    /// code path there can name them.
-    #if os(visionOS)
-    static let preferences: [String: String] = ["api.open-meteo.com": CloudForecastSwitch.key]
-    #else
+    /// Each host and the preference that must not be off before it is contacted, on iPhone, iPad
+    /// and Vision Pro alike (since 2026-10-14 the headset asks for smoke and park alerts too, so its
+    /// scores and closures match the iPhone's).
     static let preferences: [String: String] = ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": CloudForecastSwitch.key,
                                                  "air-quality-api.open-meteo.com": "smokeEnabled"]
-    #endif
     static var hosts: Set<String> { Set(preferences.keys) }
     /// Where the switches live; tests use their own suite.
     let suite: String?
@@ -942,7 +938,7 @@ actor WeatherService: WeatherProviding {
     }
 }
 /// The cloud layers over a summit that sits above the trade-wind inversion (`Park.aboveInversion`,
-/// Haleakalā alone), for Nyx on Vision Pro, which has no forecast detail service: the iPhone scores
+/// Haleakalā alone), for Nyx on Vision Pro, which asks forecast detail for smoke only: the iPhone scores
 /// that park from mid and high cloud (`NightPlanner.night`), and these two layers let Vision Pro
 /// score it the same way. One small request, at most every twelve hours, carrying only the
 /// summit's public viewing-spot coordinates: same host, same switch, same guarded transport and

@@ -181,14 +181,20 @@ struct ParkList: View {
     let query: String
     var body: some View {
         @Bindable var model = model
-        let parks = model.parks.filter { $0.matches(query) }
+        let parks = model.parks.filter { $0.matches(query) }, inputs = model.inputs
         List(selection: $model.selectedID) {
             Section {
                 ForEach(parks) { park in
-                    ParkRow(park: park, night: model.listNights[park.id]).tag(park.id)
+                    ParkRow(park: park, night: model.listNights[park.id], closure: inputs.closure(park), notes: inputs.spoken(park)).tag(park.id)
                 }
             } header: {
-                Text(model.nightOffset == 0 ? String(localized: "Tonight") : nightName)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(model.nightOffset == 0 ? String(localized: "Tonight") : nightName)
+                    // What no score below counts yet (smoke, closures), said once rather than in every row.
+                    if let note = inputs.listNote(model.parks) {
+                        Text(note).font(.caption).foregroundStyle(palette.muted).textCase(nil).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
             }
         }
         .overlay {
@@ -202,16 +208,24 @@ struct ParkList: View {
     }
 }
 /// A park and its night: the score, and under it the band, or "Early look" / "Estimate" when the
-/// night has no full cloud forecast (the iPhone's compact words).
+/// night has no full cloud forecast (the iPhone's compact words); under the name, the park's
+/// closure, as in the iPhone's Parks list. VoiceOver hears the closure, or that closures or smoke
+/// are not counted (`ScoreInputs.spoken`), after the score.
 struct ParkRow: View {
     @Environment(\.visionPalette) private var palette
     let park: Park
     let night: Night?
+    var closure: String?
+    var notes: [String] = []
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(park.shortName).font(.system(.body, design: .serif))
                 Text(park.region.replacingOccurrences(of: ",", with: " · ")).font(.caption).foregroundStyle(palette.muted)
+                if let closure {
+                    Label(closure, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent)
+                        .fixedSize(horizontal: false, vertical: true).padding(.top, 2)
+                }
             }
             Spacer(minLength: 8)
             if let night {
@@ -225,12 +239,12 @@ struct ParkRow: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(park.name))
-        .accessibilityValue(night.map { Text("\($0.score.value) out of 100, \($0.bandWithBasis)") } ?? Text("Computing"))
+        .accessibilityValue(night.map { Text(verbatim: Sentences.join([Sentences.end(String(localized: "\($0.score.value) out of 100, \($0.bandWithBasis)"))]+notes)) } ?? Text("Computing"))
     }
 }
 
 #if DEBUG
-#Preview("Park rows: forecast, early look, usual clouds, computing") {
+#Preview("Park rows: forecast and a closure, early look, usual clouds, computing") {
     let parks = Array(VisionModel(now: .now).parks.prefix(2))
     let now = Date.now
     func night(_ park: Park, days: Int, forecast: Bool) -> Night {
@@ -240,7 +254,7 @@ struct ParkRow: View {
     }
     return List {
         ForEach(parks) { park in
-            ParkRow(park: park, night: night(park, days: 0, forecast: true))
+            ParkRow(park: park, night: night(park, days: 0, forecast: true), closure: "Scenic drive closed for repairs", notes: [ClosureLine.spoken("Scenic drive closed for repairs")])
             ParkRow(park: park, night: night(park, days: 6, forecast: true))
             ParkRow(park: park, night: night(park, days: 20, forecast: false))
             ParkRow(park: park, night: nil)

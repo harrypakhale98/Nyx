@@ -3,7 +3,9 @@ import SwiftUI
 /// The darkest of the chosen park's next 14 nights, best first (`NightsAhead`), scored as the
 /// night above is. A tap opens that night in the planner, as the ornament's arrows would, and the
 /// night on show is marked. Nights without a full cloud forecast say so in the iPhone's words:
-/// "Early look" or "Estimate" under the score, and the first of them explained beneath.
+/// "Early look" or "Estimate" under the score, and the first of them explained beneath. A park
+/// closure is marked on every night ("Closure alert", its words above and in VoiceOver), and a
+/// night smoke holds down says so, as the iPhone's rows do.
 struct DarkestAhead: View {
     @Environment(VisionModel.self) private var model
     @Environment(\.visionPalette) private var palette
@@ -24,7 +26,7 @@ struct DarkestAhead: View {
     }
 
     private func row(_ pick: NightsAhead.Pick) -> some View {
-        let night = pick.night, chosen = pick.offset == model.nightOffset
+        let night = pick.night, chosen = pick.offset == model.nightOffset, inputs = model.inputs
         return Button { model.nightOffset = pick.offset } label: {
             VStack(alignment: .leading, spacing: 8) {
                 Text(name(pick)).font(.system(.headline, design: .serif)).foregroundStyle(palette.ink)
@@ -38,6 +40,11 @@ struct DarkestAhead: View {
                         .scaleEffect(x: park.latitude < 0 ? -1 : 1).foregroundStyle(palette.ink)
                     Text("\(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.subheadline).foregroundStyle(palette.muted)
                 }
+                if let smoke = night.smokeLabel { Text(smoke).font(.subheadline).foregroundStyle(palette.muted) }
+                // The closure's own words stand above the score; each night carries the mark.
+                if inputs.closure(park) != nil {
+                    Label("Closure alert", systemImage: "exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
@@ -49,7 +56,7 @@ struct DarkestAhead: View {
         .hoverEffect()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(name(pick)))
-        .accessibilityValue(Text("\(night.score.value) out of 100, \(night.bandWithBasis)"))
+        .accessibilityValue(Text(verbatim: Sentences.join([Sentences.end(String(localized: "\(night.score.value) out of 100, \(night.bandWithBasis)"))]+inputs.spoken(park))))
         .accessibilityHint(Text("Shows this night in the planner"))
         .accessibilityAddTraits(chosen ? [.isButton, .isSelected] : .isButton)
     }
