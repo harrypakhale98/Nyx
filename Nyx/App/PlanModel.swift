@@ -51,11 +51,14 @@ import CoreLocation
     /// plan) works it out again when this moves, so it never disagrees with the calendar or a park's page.
     private(set) var dataRevision=0
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
-    @ObservationIgnored private var outlookCache: [String:[Date:NightOutlook?]] = [:]
+    /// Kept with which of the detail's series were recent (`ages`): one that turns 36 hours old drops out on the next read.
+    @ObservationIgnored private var outlookCache: [String:[Date:(ages:UInt8,outlook:NightOutlook?)]] = [:]
     /// Nights already scored, by park and evening: the park list and a month ask for the same
     /// nights many times a pass. A night is a pure function of its park, sky, forecast, detail and
     /// scoring; "now" enters only as whether the model spread is recent (`HourlySeries.usable`),
-    /// kept beside each night and checked on every read. Cleared whenever forecasts or detail change.
+    /// kept beside each night and checked on every read, and as "not yet" or "unavailable"
+    /// (`NightPlanner.beyondForecast`, which moves with the forecast's age), worked out again on
+    /// every read: no astronomy, so cheap. Cleared whenever forecasts or detail change.
     @ObservationIgnored private var nightMemo: [String:[Date:(recent:Bool,night:Night)]] = [:]
     /// Each park's tonight for the moment it was judged from (`today`), with its evening.
     @ObservationIgnored private var tonightMemo: [String:(at:Date,park:Park,night:Date,evening:Date)] = [:]
@@ -179,8 +182,10 @@ import CoreLocation
         #if DEBUG
         if DebugScenario.date != nil || DebugScenario.state=="polar-night" || DebugScenario.state=="polar" { return today }
         #endif
-        return .now
+        return presentOverride ?? .now
     }
+    /// Tests move the real clock here; nil in the app.
+    @ObservationIgnored var presentOverride: Date?
     /// The moment "tonight" is judged from. Advanced only when some park's night turns over
     /// (at its sunrise or local noon), so open screens move on without constant redraws.
     private(set) var clock=Date.now
@@ -448,7 +453,12 @@ import CoreLocation
         // Read on every call, kept or not, so a screen still redraws when either changes (the memo is not observed).
         let forecast=forecasts[park.id], detail=details[park.id], now=present
         let recent=detail?.models?.usable(now:now) == true
-        if let kept=nightMemo[park.id]?[evening], kept.recent==recent, kept.night.park==park { return kept.night }
+        if let kept=nightMemo[park.id]?[evening], kept.recent==recent, kept.night.park==park {
+            // Offline past the forecast's 36 hours, "No cloud forecast yet" becomes "Cloud forecast unavailable", as the widget and Siri say it.
+            var night=kept.night
+            night.beyondForecast=NightPlanner.beyondForecast(night,forecast:forecast,detail:detail,now:now)
+            return night
+        }
         let sky:SkyConditions
         if let cached=conditions[park.id]?[evening] { sky=cached } else {
             sky=astronomy.conditions(for:park,on:evening); conditions[park.id,default:[:]][evening]=sky
@@ -473,10 +483,16 @@ import CoreLocation
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
     /// is shown only beside a score that includes clouds, so the two never contradict each other.
     func outlook(_ night:Night)->NightOutlook? {
-        if let cached=outlookCache[night.park.id]?[night.id] { return cached }
+        let ages=Self.ages(details[night.park.id],now:present)
+        if let cached=outlookCache[night.park.id]?[night.id], cached.ages==ages { return cached.outlook }
         let outlook=deriveOutlook(night)
-        outlookCache[night.park.id,default:[:]][night.id]=outlook
+        outlookCache[night.park.id,default:[:]][night.id]=(ages,outlook)
         return outlook
+    }
+    /// Which of a detail's series are recent enough to describe (models, layers, smoke), as bits.
+    nonisolated private static func ages(_ detail:ForecastDetail?,now:Date)->UInt8 {
+        guard let detail else { return 0 }
+        return (detail.models?.usable(now:now) == true ? 1 : 0) | (detail.layers?.usable(now:now) == true ? 2 : 0) | (detail.air?.usable(now:now) == true ? 4 : 0)
     }
     private func deriveOutlook(_ night:Night)->NightOutlook? {
         details[night.park.id].flatMap { NightOutlook.of(night,detail:$0,now:present,scoring:scoring) }
