@@ -5677,6 +5677,41 @@
         }
       }
     },
+    "%lld out of 100. %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld von 100. %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld out of 100. %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld de 100. %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld sur 100. %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "100点中%1$lld点。%2$@。"
+          }
+        }
+      }
+    },
     "%lld out of 100. %@. Check closures and access before you go.": {
       "extractionState": "manual",
       "localizations": {

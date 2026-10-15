@@ -83,8 +83,8 @@ nonisolated struct TripPlan: Sendable {
 /// darkness score, less `closurePenalty` when its last park update lists a closure. Between two
 /// back-to-back nights the straight-line hop may not exceed `maxHopMeters`; nights separated by a
 /// gap (weekends only) are independent, since you go home in between. The plan maximises the total
-/// value; ties go to the darker measured skies and longer true darkness (`NightPlanner.better`'s
-/// order), then the shorter total distance driven, then the park whose id sorts first, so the
+/// value; ties are broken in `NightPlanner.better`'s order (darker measured sky, sum of parts,
+/// longer true darkness, closer models, surer clouds), each summed over the nights, then the shorter total distance driven, then the park whose id sorts first, so the
 /// same inputs always give the same plan. 14 nights × 63 parks × 63 parks is about 56,000 steps;
 /// with the world catalogue the candidates are the places in range, at most `maxCandidates`.
 /// Staying put is always allowed (a hop of zero), so a plan exists whenever one park is in reach.
@@ -94,6 +94,29 @@ nonisolated struct TripPlan: Sendable {
 /// for the month alone (ERA5 2015–2024). Scores therefore compare directly across parks, and a park
 /// whose winter nights are usually overcast does not tie a desert.
 nonisolated enum TripPlanner {
+    /// `NightPlanner.better`'s tie-breaks after the score, with its margins, summable over a trip's nights.
+    struct Tie {
+        var glow=0.0, parts=0.0, dark=0.0, spread=0.0, certainty=0.0
+        init() {}
+        init(_ night: Night) {
+            glow=NightPlanner.glowRank(night.park.id); parts=NightPlanner.partsSum(night.score); dark=night.sky.darkHours
+            // No models' spread ranks below any spread, as in `better`.
+            spread=night.modelSpread ?? 1000; certainty=NightPlanner.certainty(night.basis)
+        }
+        func adding(_ o: Tie) -> Tie { Tie(glow:glow+o.glow,parts:parts+o.parts,dark:dark+o.dark,spread:spread+o.spread,certainty:certainty+o.certainty) }
+        private init(glow: Double, parts: Double, dark: Double, spread: Double, certainty: Double) {
+            self.glow=glow; self.parts=parts; self.dark=dark; self.spread=spread; self.certainty=certainty
+        }
+        /// Whether this side wins, term by term; nil when every term ties.
+        func beats(_ o: Tie) -> Bool? {
+            if abs(glow-o.glow)>1e-9 { return glow<o.glow }
+            if abs(parts-o.parts)>=0.5 { return parts>o.parts }
+            if abs(dark-o.dark)>=1.0/60 { return dark>o.dark }
+            if abs(spread-o.spread)>=0.5 { return spread<o.spread }
+            if abs(certainty-o.certainty)>1e-9 { return certainty>o.certainty }
+            return nil
+        }
+    }
     static let maxNights = 14
     /// The latest last night the planner offers: 13 nights after the first, or 69 for weekends
     /// only, whose filter keeps about one night in five (seven weekends' worth).
@@ -158,13 +181,14 @@ nonisolated enum TripPlanner {
         for a in 0..<n { for b in 0..<n where a != b { hop[a][b]=Park.distance(parks[a].latitude,parks[a].longitude,parks[b].latitude,parks[b].longitude) } }
         let ranks=grid.map { $0.map(\.rankScore) }
         func value(_ d: Int, _ p: Int) -> Int { ranks[d][p]-(closures[parks[p].id] == nil ? 0 : closurePenalty) }
-        // Equal totals go to the darker measured sky, then the longer true darkness: under 1 a night.
-        func tie(_ d: Int, _ p: Int) -> Double { (1-NightPlanner.glowRank(parks[p].id))*0.5+min(24,grid[d][p].sky.darkHours)/48 }
-        struct Cell { var total: Int; var tie: Double; var distance: Double; var previous: Int? }
+        // Equal totals are broken in `NightPlanner.better`'s order, each term summed over the nights,
+        // so a one-night choice is exactly the one every other best surface makes.
+        func tie(_ d: Int, _ p: Int) -> Tie { Tie(grid[d][p]) }
+        struct Cell { var total: Int; var tie: Tie; var distance: Double; var previous: Int? }
         func better(_ a: Cell, than b: Cell?) -> Bool {
             guard let b else { return true }
             if a.total != b.total { return a.total>b.total }
-            if abs(a.tie-b.tie)>1e-9 { return a.tie>b.tie }
+            if let wins=a.tie.beats(b.tie) { return wins }
             return a.distance<b.distance-1e-6
         }
         var table:[[Cell]]=[(0..<n).map { Cell(total:value(0,$0),tie:tie(0,$0),distance:0,previous:nil) }]
@@ -175,11 +199,11 @@ nonisolated enum TripPlanner {
                 var best:Cell?
                 for q in 0..<n {
                     if backToBack && hop[q][p]>maxHopMeters { continue }
-                    let cell=Cell(total:table[d-1][q].total+value(d,p),tie:table[d-1][q].tie+tie(d,p),distance:table[d-1][q].distance+(backToBack ? hop[q][p] : 0),previous:q)
+                    let cell=Cell(total:table[d-1][q].total+value(d,p),tie:table[d-1][q].tie.adding(tie(d,p)),distance:table[d-1][q].distance+(backToBack ? hop[q][p] : 0),previous:q)
                     if better(cell,than:best) { best=cell }
                 }
                 // Unreachable only if no park is within a hop, which staying put rules out.
-                row.append(best ?? Cell(total:Int.min/4,tie:0,distance:0,previous:p))
+                row.append(best ?? Cell(total:Int.min/4,tie:Tie(),distance:0,previous:p))
             }
             table.append(row)
         }

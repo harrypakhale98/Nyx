@@ -154,13 +154,13 @@ nonisolated struct NightPlanner: Sendable {
     static func partsSum(_ score: DarknessScore) -> Double {
         score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints
     }
-    private static func certainty(_ basis: CloudBasis) -> Double {
+    static func certainty(_ basis: CloudBasis) -> Double {
         switch basis { case .forecast: 1; case .blended(let w, _): w; case .usual: 0 }
     }
     static func ranked(_ nights: [Night]) -> [Night] { nights.sorted(by: better) }
     /// A closure in its park's last update costs a night this many points wherever a night is
     /// recommended as the best (the trip planner, Siri's best night, the week's ring, Ask Nyx's
-    /// parks nearby), so every such surface picks the same night; the score shown never changes. A
+    /// parks nearby, which night a reminder announces), so every such surface picks the same night; the score shown never changes. A
     /// closed road beats a slightly darker sky every time. What claims the darkest (Tonight's answer,
     /// the map's darkest, the watch, the Tonight control) ranks the sky alone with `better(_:_:)` and
     /// shows the closure beside the score.

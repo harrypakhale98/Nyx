@@ -221,8 +221,8 @@ struct DataIntegrityTests {
         // Beyond five nights, never, however fresh.
         #expect(scheduler.plans(nights: [try night("jotr", daysAhead: 6, from: now, updated: now.addingTimeInterval(5*86400))], now: now).isEmpty)
     }
-    /// One score reminder per park in seven nights: the best of a run, the earliest on a tie; and a
-    /// night already announced holds the park.
+    /// One score reminder per park in seven nights: the best of a run, a tie broken as every best
+    /// night is (`NightPlanner.better`: here the longer darkness); and a night already announced holds the park.
     @Test func oneReminderPerParkPerWeek() throws {
         let now=Date(timeIntervalSince1970: 1790899200)
         let scheduler=NotificationScheduler(center: StubNotifications(), ledger: ReminderLedger(suite: "nyx-ledger-test-\(UUID().uuidString)"))
@@ -234,7 +234,9 @@ struct DataIntegrityTests {
         let plans=scheduler.plans(nights: run, now: now)
         #expect(plans.count == 2)
         let jotr=try #require(plans.first { $0.parkID == "jotr" })
-        #expect(jotr.id == NotificationScheduler.identifier(park: run[1].park, night: run[1].id))
+        let tied=NightPlanner.better(run[1], run[2]) ? run[1] : run[2]
+        #expect(run[2].sky.darkHours > run[1].sky.darkHours && tied.id == run[2].id)
+        #expect(jotr.id == NotificationScheduler.identifier(park: tied.park, night: tied.id))
         // Tuesday's reminder was already seen: nothing else for Joshua Tree within the week.
         let seen=NotificationScheduler.identifier(park: run[0].park, night: run[0].id)
         #expect(scheduler.plans(nights: Array(run.dropFirst()), now: now, delivered: [seen]).map(\.parkID) == ["deva"])
