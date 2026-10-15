@@ -792,6 +792,13 @@ import CoreLocation
     func closure(_ park:Park)->String? {
         AlertRanking.closure(enrichments[park.id]?.alerts ?? [])?.displayTitle(park:park)
     }
+    /// Why this night's score does not count smoke, in Vision Pro's words (`ScoreInputs.smokeNote`):
+    /// switched off, none fetched here yet (smoke comes with a park's page), or none reaching the
+    /// night (past its few days). Nil when it counts (`Night.aerosol`).
+    func smokeNote(_ night:Night)->String? {
+        let park=night.park
+        return ScoreInputs(smokeOn:smokeEnabled,smokeKnown:details[park.id]?.air == nil ? [] : [park.id]).smokeNote(park,night:night)
+    }
     /// Every park's campgrounds from the NPS, asked for only when a park's "Where to stay" opens,
     /// in one request for all 63 parks, kept seven days (`ParkStore.campgrounds`).
     func refreshCampgrounds(force:Bool=false) async {
