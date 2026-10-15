@@ -78,7 +78,7 @@ nonisolated struct VisionDarknessAnswer: Sendable {
         if night.sky.darkHours == 0 { body = String(localized: "No true darkness tonight at \(park.shortName). The darkness score is \(score.value) out of 100.") }
         else if caption.isEmpty { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). Includes a cached cloud forecast. Confirm conditions and park access before traveling.") }
         else { body = String(localized: "\(park.shortName): \(score.value) out of 100, \(score.band.label). \(caption) Confirm conditions and park access before traveling.") }
-        let smoke = night.smokeSentence(tonight: true) ?? inputs.smokeNote(park) ?? ""
+        let smoke = night.smokeSentence(tonight: true) ?? inputs.smokeNote(park, night: night) ?? ""
         let access = inputs.closure(park) == nil && inputs.unchecked(park) ? inputs.accessNote(park) ?? "" : ""
         return ClosureLine.first(Sentences.join([body, smoke, access]), closure: inputs.closure(park))
     }

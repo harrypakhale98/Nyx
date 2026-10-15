@@ -6511,6 +6511,41 @@
         }
       }
     },
+    "No smoke forecast on this device reaches this night, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Rauchvorhersage auf diesem Gerät reicht bis zu dieser Nacht, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device reaches this night, so smoke is not counted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún pronóstico de humo en este dispositivo llega a esta noche, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスの煙の予報はこの夜まで届いていないため、煙は考慮していません。"
+          }
+        }
+      }
+    },
     "No smoke forecast on this device yet, so smoke is not counted.": {
       "extractionState": "manual",
       "localizations": {
