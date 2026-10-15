@@ -108,6 +108,20 @@ struct WatchWholePlaceTests {
         #expect(CloudSource.issued(try park("jotr"), forecast: total.updated, layers: layered) == total.updated)
     }
 
+    /// Haleakalā's total cloud without its layers: the watch app says "No recent forecast", and so
+    /// does the face. With fresh layers neither does; a park below the inversion reads its total.
+    @Test func theSummitsFaceAgreesWithTheAppWithoutLayers() throws {
+        let hale = try park("hale"), jotr = try park("jotr"), total = forecast(3)
+        let bare = WatchContext(sent: now, savedParkIDs: ["hale"], homeParkID: "hale", nightVision: false,
+                                forecasts: ["hale": try #require(CompactForecast(total, from: now.addingTimeInterval(-86400), to: now.addingTimeInterval(11*86400)))])
+        #expect(CloudSource.of(context: bare, park: hale, now: now).line(for: hale) == "No recent forecast. Open Nyx on iPhone to refresh.")
+        #expect(CloudSource.faceOld(hale, forecast: bare.cloudForecasts["hale"]?.updated, layers: bare.forecastDetails["hale"]?.layers?.updated, at: now))
+        #expect(!CloudSource.faceOld(hale, forecast: total.updated, layers: now.addingTimeInterval(-3600), at: now))
+        #expect(CloudSource.faceOld(hale, forecast: total.updated, layers: now.addingTimeInterval(-CloudSource.lifetime), at: now))
+        #expect(!CloudSource.faceOld(jotr, forecast: total.updated, layers: nil, at: now))
+        #expect(!CloudSource.faceOld(hale, forecast: nil, layers: nil, at: now))
+    }
+
     /// A face says when the iPhone's Nyx has other data: a short line where there is room, and the
     /// whole sentence in every face's spoken label, beside an old forecast's.
     @Test func facesSayWhenVersionsDiffer() throws {

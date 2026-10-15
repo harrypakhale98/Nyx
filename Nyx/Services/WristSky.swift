@@ -196,6 +196,12 @@ nonisolated enum CloudSource: Equatable, Sendable {
     /// and high layers, never its total cloud (`NightPlanner.night`): without layers it has no cloud
     /// forecast, so the line never says "Clouds from…" over a score the caption calls unavailable.
     static func issued(_ park: Park, forecast: Date?, layers: Date?) -> Date? { park.aboveInversion == true ? layers : forecast }
+    /// Whether a face says "No recent forecast" where the watch app's line does: the clouds the score
+    /// counts are `lifetime` old, or a forecast came without them (a summit's total cloud, no layers).
+    static func faceOld(_ park: Park, forecast: Date?, layers: Date?, at date: Date) -> Bool {
+        guard let updated = issued(park, forecast: forecast, layers: layers) else { return forecast != nil }
+        return date.timeIntervalSince(updated) >= lifetime
+    }
     /// The forecast can no longer be used and the iPhone could fix that.
     var isStale: Bool {
         switch self {
