@@ -142,6 +142,49 @@ import Testing
         }
     }
 
+    /// A widget or the control newly set to a park nobody follows (the app reads the setting only on
+    /// its next run) scores it from the snapshot as the app does: clouds, smoke, a summit's layers
+    /// and the models' ties, tonight and the week ahead.
+    @Test func aWidgetSetToAnyParkScoresItAsTheAppDoes() throws {
+        let model = PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
+                              detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())
+        let reference = Date.now
+        model.forecasts = Dictionary(uniqueKeysWithValues: model.parks.enumerated().map { ($1.id, forecast($0+1, at: reference)) })
+        model.details = Dictionary(uniqueKeysWithValues: model.parks.enumerated().map { ($1.id, detail($0+1, at: reference)) })
+        let saved = try ["jotr", "deva"].map(park)
+        let written = SavedSkySync.snapshot(parks: saved, followed: saved + [try park("chis")], bundled: model.parks, forecasts: model.forecasts,
+                                            details: model.details, closures: [:])
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let data = try encoder.encode(written)
+        let snapshot = try JSONDecoder().decode(SavedSkySnapshot.self, from: data)
+        #expect(snapshot.parks.map(\.id) == ["jotr", "deva"] && snapshot.forecasts.count == model.parks.count)
+        // Only what a score reads rides along for a park nobody follows; a followed one keeps everything.
+        #expect(snapshot.details?["arch"]?.air?.values.keys.sorted() == ["aerosol_optical_depth"] && snapshot.details?["arch"]?.layers == nil)
+        #expect(snapshot.details?["hale"]?.layers?.values.keys.sorted() == ["cloud_cover_high", "cloud_cover_mid"])
+        #expect(snapshot.details?["jotr"] == model.details["jotr"])
+        var smoky = 0
+        for id in ["arch", "hale", "yell"] {
+            let place = try park(id)
+            var widget = TonightTimeline(snapshot: snapshot, large: false, pinned: place)
+            let entry = widget.entry(at: model.present)
+            let app = model.night(place)
+            let shown = try #require(entry.night)
+            #expect(shown.score.value == app.score.value && shown.basis == app.basis && shown.score.limit == app.score.limit, "\(id)")
+            #expect(shown.aerosol == app.aerosol && shown.modelSpread == app.modelSpread && shown.bandWithBasis == app.bandWithBasis, "\(id)")
+            if app.aerosol != nil { smoky += 1 }
+            for (offset, night) in entry.week.enumerated() {
+                let tonight = model.night(place, on: place.date(model.tonight(place), addingDays: offset))
+                #expect(night.score.value == tonight.score.value && night.basis == tonight.basis, "\(id) +\(offset)")
+            }
+            #expect(NightPlanner.best(entry.week)?.id == NightPlanner.best(entry.week.indices.map { model.night(place, on: place.date(model.tonight(place), addingDays: $0)) })?.id)
+            #expect(TonightControlValue(snapshot: snapshot, pinned: place, now: model.present).score == app.score.value, "\(id)")
+        }
+        #expect(smoky > 0)
+        // All 63 parks' clouds and score detail stay small enough for a widget to read at each reload.
+        #expect(data.count < 1_500_000)
+    }
+
     /// "Update from iPhone" names the watch's own places (its kept park, its complications'): the
     /// iPhone follows the valid ones, once each and at most eight; an older watch names none, and
     /// what an earlier request asked for stays followed.
