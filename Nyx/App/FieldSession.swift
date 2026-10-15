@@ -15,6 +15,9 @@ import WidgetKit
     /// Read once on entry (field mode is one night); DEBUG captures set it again after a live refresh.
     /// The night's Live Activity keeps it too while field mode is open (`FieldActivities.held`).
     var score: DarknessScore
+    /// When `score` was worked out (`FieldActivities.scoredAt`): its cloud forecast's time, so the
+    /// Live Activity says how old it is ("as of Tue") for a session opened on an old forecast.
+    var scoredAt: Date
     /// The park's closure when field mode opened, for the Live Activity it starts (later park alerts update it there).
     let closure: String?
     var adaptation: DarkAdaptation
@@ -61,7 +64,8 @@ import WidgetKit
 
     init(park: Park, model: PlanModel, changesPhone: Bool=true, offset: TimeInterval=0, adaptedFor: TimeInterval=0) {
         let tonight=model.night(park)
-        self.park=park; self.score=tonight.score; self.night=FieldNight(park: park, sky: tonight.sky); closure=model.closure(park)
+        self.park=park; self.score=tonight.score; scoredAt=FieldActivities.scoredAt(tonight)
+        self.night=FieldNight(park: park, sky: tonight.sky); closure=model.closure(park)
         self.changesPhone=changesPhone; self.offset=offset
         adaptation=DarkAdaptation(start: Date.now.addingTimeInterval(offset-adaptedFor))
         following=FieldActivities.isFollowing(park)
@@ -145,7 +149,7 @@ import WidgetKit
         following=on && FieldActivities.enabled
         guard changesPhone else { return }
         Task {
-            if on { await FieldActivities.start(night: night, score: score, nightVision: true, closure: closure, now: now) } else { await FieldActivities.stop() }
+            if on { await FieldActivities.start(night: night, score: score, scoredAt: scoredAt, nightVision: true, closure: closure, now: now) } else { await FieldActivities.stop() }
             following=FieldActivities.isFollowing(park)
         }
     }

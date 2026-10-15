@@ -63,12 +63,12 @@ extension FieldActivityAttributes {
     nonisolated static func isFollowing(park: Park, night: Date) -> Bool { live.contains { $0.attributes.covers(parkID: park.id, night: night) } }
     /// Field mode for tonight. A night already followed at this park becomes the field face (no
     /// longer "heading out"); other running activities end, while nights followed for later stay.
-    /// Either way it shows the field screen's score and the park's closure (`fieldScored`), and keeps
-    /// that score while field mode is open (`held`).
-    static func start(night: FieldNight, score: DarknessScore, nightVision: Bool, closure: String?=nil, now: Date = .now) async {
+    /// Either way it shows the field screen's score, as old as its forecast (`scoredAt`), and the
+    /// park's closure (`fieldScored`), and keeps that score while field mode is open (`held`).
+    static func start(night: FieldNight, score: DarknessScore, scoredAt: Date, nightVision: Bool, closure: String?=nil, now: Date = .now) async {
         guard enabled, !night.isOver(at: now) else { return }
         let evening=night.sky.evening
-        let scored=fieldScored(score, closure: closure, now: now)
+        let scored=fieldScored(score, closure: closure, at: min(now, scoredAt))
         hold(parkID: night.park.id, night: evening)
         for activity in live {
             let same=activity.attributes.covers(parkID: night.park.id, night: evening)
@@ -85,9 +85,10 @@ extension FieldActivityAttributes {
     }
     /// What field mode's night shows: the session's score, read once when field mode opened, and the
     /// park's closure. The band carries its basis ("Excellent, usual clouds"): the Lock Screen has no
-    /// room for the caption.
-    static func fieldScored(_ score: DarknessScore, closure: String?, now: Date) -> FieldActivityAttributes.Scored {
-        .init(score: score.value, band: score.bandWithBasis, closure: closure, at: now)
+    /// room for the caption. `at`: when the score was worked out (`FieldSession.scoredAt`), so one
+    /// opened offline on Tuesday's forecast says "as of Tue", as a followed night does.
+    static func fieldScored(_ score: DarknessScore, closure: String?, at: Date) -> FieldActivityAttributes.Scored {
+        .init(score: score.value, band: score.bandWithBasis, closure: closure, at: at)
     }
     /// The park and night of the field screen now open. The field screen keeps one score for the
     /// session (`FieldSession.score`), so its activity does too: a refresh with new forecasts leaves
