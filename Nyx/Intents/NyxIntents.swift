@@ -47,7 +47,7 @@ struct DarknessIntent:AppIntent {
         // The park's closure from the app's last park update, said before the score.
         let answer=DarknessAnswer(park:selected,forecast:BestNightSearch.forecasts(for:[selected],shared:shared)[selected.id],
                                   detail:BestNightSearch.details(for:[selected],shared:shared)[selected.id],closure:IntentClosure.closure(selected,shared:shared),now:.now,voiceOnly:voiceOnly)
-        return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night))
+        return .result(value:answer.night.score.value,dialog:IntentDialog(stringLiteral:answer.dialog),view:DarknessSnippetView(night:answer.night,closure:answer.closure))
     }
 }
 /// A place's closure for a spoken answer or a followed night, from whichever is newer: the copy
@@ -75,11 +75,14 @@ nonisolated enum IntentClosure {
 nonisolated struct DarknessAnswer:Sendable {
     let night:Night
     let dialog:String
+    /// The closure the dialog leads with, for the card beside it.
+    let closure:String?
     /// `closure` is the park's closure as Nyx words it beside the score; `voiceOnly` (iOS 27, no
     /// screen in view) keeps the closure, the score and the one caveat that matters.
     init(park:Park,forecast:Forecast?,detail:ForecastDetail?,closure:String?=nil,now:Date,voiceOnly:Bool=false) {
         let sky=AstronomyEngine().conditions(for:park,on:park.currentNight(at:now))
         night=NightPlanner.night(park:park,sky:sky,forecast:forecast,detail:detail,now:now)
+        self.closure=closure
         dialog=Self.dialog(night,closure:closure,voiceOnly:voiceOnly)
     }
     /// A closure comes first: a long drive to a closed road is the worst outcome Nyx can cause.
@@ -106,9 +109,11 @@ nonisolated struct DarknessAnswer:Sendable {
     static func sentence(_ text:String)->String { Sentences.end(text) }
 }
 /// Siri's card for tonight's score: the score on a still dial (Siri shows a snapshot, so nothing
-/// counts up), the Moon as it is tonight, and what the clouds rest on.
+/// counts up), the Moon as it is tonight, what the clouds rest on, and the closure the answer led with.
 struct DarknessSnippetView:View {
     let night:Night
+    /// The park's closure, as the spoken answer says it first and the best-night card shows it.
+    var closure:String?=nil
     @Environment(\.colorSchemeContrast) private var contrast
     /// The app's night look, so a night-vision evening is not lit up by a white card.
     private var palette:NyxPalette { NightLook(contrast:contrast).palette }
@@ -119,6 +124,8 @@ struct DarknessSnippetView:View {
                 Text("Tonight").textCase(Lettering.spaced ? .uppercase : nil).font(.caption2.weight(.medium)).tracking(Lettering.spaced ? 1.4 : 0).foregroundStyle(palette.muted)
                 Text(night.park.shortName).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true)
                 Text(night.score.band.label).font(.system(.headline,design:.serif)).foregroundStyle(palette.accent)
+                // The one line that must never be lost: beside the score, as on the park's page.
+                if let closure { Label(closure,systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(palette.accent).fixedSize(horizontal:false,vertical:true) }
                 HStack(spacing:8) {
                     MoonDisc(illumination:night.sky.moon.illumination,waxing:night.sky.moon.waxing,southern:night.park.latitude<0)
                         .frame(width:22,height:22).accessibilityIgnoresInvertColors()
@@ -137,7 +144,11 @@ struct DarknessSnippetView:View {
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .environment(\.colorScheme,.dark)
         .accessibilityElement(children:.ignore)
-        .accessibilityLabel(DarknessAnswer.withClosures(night.spokenSummary(.snippet),park:night.park,closure:nil))
+        .accessibilityLabel(Self.spoken(night,closure:closure))
+    }
+    /// What VoiceOver reads for the card: the closure first, as the dialog says it.
+    static func spoken(_ night:Night,closure:String?)->String {
+        DarknessAnswer.withClosures(night.spokenSummary(.snippet),park:night.park,closure:closure)
     }
 }
 /// The celestial gauge's arc and numeral, drawn once: for snapshots (Siri) where nothing animates.
