@@ -176,8 +176,8 @@ nonisolated enum CloudSource: Equatable, Sendable {
     /// is one the iPhone sends clouds for (saved, the starting park, Tonight's answer on the
     /// iPhone, or one the watch asked for).
     case missing(followed: Bool)
-    /// The iPhone follows this park but its clouds, or its smoke and summit layers, did not fit
-    /// what WatchConnectivity carries (`WatchContext.droppedParkIDs`): asking again would not help.
+    /// The iPhone follows this park but its clouds, smoke and summit layers did not fit what
+    /// WatchConnectivity carries (`WatchContext.droppedParkIDs`): asking again would not help.
     case dropped
 
     /// After this the watch asks for a fresh forecast; the score itself fades an old one by lead time.
@@ -185,13 +185,17 @@ nonisolated enum CloudSource: Equatable, Sendable {
 
     static func of(context: WatchContext?, park: Park, now: Date) -> CloudSource {
         guard let context else { return .unsynced }
-        guard let updated = context.forecasts[park.id]?.updated else {
-            // Clouds left out for room; a place whose clouds came (its layers left out) keeps their time and age.
+        guard let updated = issued(park, forecast: context.forecasts[park.id]?.updated, layers: context.details[park.id]?.layers?.updated) else {
+            // Left out for room: nothing of the place's forecast came, and asking again would not help.
             if context.droppedParkIDs.contains(park.id) { return .dropped }
             return .missing(followed: context.followedParkIDs.contains(park.id))
         }
         return now.timeIntervalSince(updated) < lifetime ? .fresh(updated) : .expired(updated)
     }
+    /// When the clouds a park's score counts were issued. A summit above the inversion counts its mid
+    /// and high layers, never its total cloud (`NightPlanner.night`): without layers it has no cloud
+    /// forecast, so the line never says "Clouds from…" over a score the caption calls unavailable.
+    static func issued(_ park: Park, forecast: Date?, layers: Date?) -> Date? { park.aboveInversion == true ? layers : forecast }
     /// The forecast can no longer be used and the iPhone could fix that.
     var isStale: Bool {
         switch self {
@@ -211,6 +215,33 @@ nonisolated enum CloudSource: Equatable, Sendable {
         case .missing(followed: false): return String(localized: "Save this park on iPhone for its clouds.")
         // Drops can come from Tonight's pick or the watch's own places, not only saved ones.
         case .dropped: return String(localized: "Too many places to send all their forecasts.")
+        }
+    }
+}
+
+/// What a score complication says about the data beneath the score, in the order shown: the iPhone
+/// running a Nyx whose data differs from this watch's (`WatchContext.dataDiffers`: the same night may
+/// score differently on each), then an old forecast. A few words where a face has room (the
+/// rectangular one), whole sentences in every face's VoiceOver label.
+nonisolated enum FaceNote: Sendable, Equatable {
+    case versionsDiffer, oldForecast
+    static func notes(cloudsOld: Bool, dataDiffers: Bool) -> [FaceNote] { (dataDiffers ? [.versionsDiffer] : []) + (cloudsOld ? [.oldForecast] : []) }
+    var short: String {
+        switch self {
+        case .versionsDiffer: String(localized: "Nyx versions differ")
+        case .oldForecast: String(localized: "No recent forecast")
+        }
+    }
+    var spoken: String {
+        switch self {
+        case .versionsDiffer: WatchContext.versionsNote
+        case .oldForecast: String(localized: "No recent forecast. Open Nyx on iPhone to refresh.")
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .versionsDiffer: "exclamationmark.arrow.triangle.2.circlepath"
+        case .oldForecast: "clock.arrow.circlepath"
         }
     }
 }

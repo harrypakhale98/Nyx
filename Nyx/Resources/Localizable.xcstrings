@@ -40321,6 +40321,41 @@
         }
       }
     },
+    "Nyx versions differ": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx-Versionen weichen ab"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx versions differ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versiones de Nyx distintas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versions de Nyx différentes"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxのバージョンが異なります"
+          }
+        }
+      }
+    },
     "Nyx will ask to tap your wrist at 25 and 30 minutes.": {
       "extractionState": "manual",
       "localizations": {

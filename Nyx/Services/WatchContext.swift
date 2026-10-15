@@ -57,9 +57,10 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// The places this watch asked the iPhone to follow (the one kept on Tonight and those its
     /// complications are set to), which the iPhone now carries clouds for. Empty from an older iPhone.
     let watchParkIDs: [String]
-    /// Followed places whose clouds did not fit the byte budget: the wrist scores them with their
-    /// usual clouds and says why (`CloudSource.dropped`). Smoke and summit layers that did not fit
-    /// beside clouds that did are not listed: those clouds still say where they came from and when.
+    /// Followed places whose clouds, smoke and summit layers did not fit the byte budget: the wrist
+    /// scores them with their usual clouds and says why (`CloudSource.dropped`). A place travels whole
+    /// or not at all (`make`), so one listed here has nothing of its forecast on the wrist, and one
+    /// not listed scores with all the iPhone's score counts.
     let droppedParkIDs: [String]
     /// The iPhone's `bundledData`: the watch app updates on its own schedule, so when its own
     /// differs, its scores can differ from the iPhone's and it says so (`dataDiffers`). Nil from an
@@ -107,12 +108,13 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// the watch asked for (`followed(saved:home:tonight:watch:)`).
     /// A spot or world place travels first, its usual clouds (from `climate`, the iPhone's grid) right behind it.
     /// The followed places' closures come next, before any forecast: a closure is safety, and it is
-    /// the forecasts that give way when room runs short. Then every followed place's clouds, in order,
-    /// so the starting park and Tonight's answer are never left out for a place after them; then
-    /// their smoke and summit layers, then the models' ranges (which mean nothing without clouds); the
+    /// the forecasts that give way when room runs short. Then every followed place's clouds with its
+    /// smoke and summit layers, as one, in order, so the starting park and Tonight's answer are never
+    /// left out for a place after them; then the models' ranges (which mean nothing without clouds); the
     /// other parks' closures (a complication can be set to any park) fill what room is left. A place
-    /// whose clouds did not fit is named in `droppedParkIDs`, and once one place's clouds do not
-    /// fit, no place after it gets any.
+    /// whose forecast did not fit is named in `droppedParkIDs`, and once one place's does not fit, no
+    /// place after it gets any. Never clouds without their smoke: the wrist would show a clear score
+    /// where the iPhone's is held down by smoke, as if it were the iPhone's.
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
@@ -123,9 +125,12 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         let from = now.addingTimeInterval(-24*3600)
         // Park IDs and the envelope are small; each forecast is measured on its own.
         var used = 2_000 + (ids+watchParkIDs).reduce(0) { $0 + $1.utf8.count + 4 } + (tonightParkID?.utf8.count ?? 0)
-        func fits(_ value: some Encodable, _ id: String) -> Bool {
-            guard let size = (try? JSONEncoder().encode(value))?.count, used + size + id.utf8.count + 4 <= byteBudget else { return false }
-            used += size + id.utf8.count + 4
+        // A value that cannot be encoded never fits.
+        func size(_ value: some Encodable, _ id: String) -> Int { ((try? JSONEncoder().encode(value))?.count ?? byteBudget) + id.utf8.count + 4 }
+        func fits(_ value: some Encodable, _ id: String) -> Bool { room(size(value, id)) }
+        func room(_ size: Int) -> Bool {
+            guard used + size <= byteBudget else { return false }
+            used += size
             return true
         }
         // A spot or catalogue place first: without its record the watch cannot show it at all, while a
@@ -147,17 +152,19 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
         // (`CloudBasis.forecastWeight`), plus a day so a night that begins before then has all its
         // hours, as on the iPhone. Measured from the forecast, not the clock, so both score alike.
         func reach(_ forecast: Forecast) -> Date { forecast.updated.addingTimeInterval(Self.forecastReach) }
+        // A place's clouds, smoke and summit layers travel together or not at all, so the wrist scores
+        // as the iPhone does or says why it cannot. Smoke or layers without clouds travel too: the
+        // iPhone counts them over the usual clouds, and a summit's layers are its clouds.
         var dropped: [String] = [], full = false
         for id in ids {
-            guard let forecast = forecasts[id], let trimmed = CompactForecast(forecast, from: from, to: reach(forecast)) else { continue }
-            guard !full, fits(trimmed, id) else { full = true; dropped.append(id); continue }
-            compact[id] = trimmed
-        }
-        // Smoke and summit layers, only beside clouds that travel, so the wrist scores as the iPhone does.
-        for id in ids {
-            guard let forecast = forecasts[id], compact[id] != nil, let detail = details[id],
-                  let small = CompactDetail(detail, upper: aboveInversion.contains(id), from: from, to: reach(forecast)) else { continue }
-            if fits(small, id) { compactDetails[id] = small }
+            let forecast = forecasts[id]
+            let trimmed = forecast.flatMap { CompactForecast($0, from: from, to: reach($0)) }
+            let small = details[id].flatMap {
+                CompactDetail($0, upper: aboveInversion.contains(id), from: from, to: forecast.map(reach) ?? now.addingTimeInterval(Self.forecastReach))
+            }
+            guard trimmed != nil || small != nil else { continue }
+            guard !full, room((trimmed.map { size($0, id) } ?? 0) + (small.map { size($0, id) } ?? 0)) else { full = true; dropped.append(id); continue }
+            compact[id] = trimmed; compactDetails[id] = small
         }
         for id in ids where compact[id] != nil {
             guard let nights = ranges[id]?.filter({ (0...100).contains($0.value.lowerBound) && $0.value.upperBound <= 100 }), !nights.isEmpty else { continue }
@@ -243,7 +250,9 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// When the iPhone runs a Nyx whose parks, usual clouds or scoring rules differ from this
     /// watch's, the same night could score differently on each: said plainly, on the watch, without
     /// guessing which of the two is older.
-    var dataNote: String? { dataDiffers ? String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") : nil }
+    var dataNote: String? { dataDiffers ? Self.versionsNote : nil }
+    /// The same words on the faces (`FaceNote.versionsDiffer`), spoken.
+    static var versionsNote: String { String(localized: "iPhone and Apple Watch have different versions of Nyx. Update both for matching scores.") }
     /// A night's key in `ranges`: its park-local calendar day, as `WatchLink` writes a date.
     static func day(_ evening: Date, in park: Park) -> String {
         let parts = park.calendar.dateComponents([.year, .month, .day], from: evening)
