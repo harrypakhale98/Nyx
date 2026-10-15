@@ -52,19 +52,27 @@ nonisolated struct HourlySeries: Codable, Sendable, Equatable {
 }
 
 /// Everything Nyx knows about a park's coming nights beyond the score's own cloud forecast:
-/// three forecast models' clouds, cloud layers, cold, dew, wind and visibility (Open-Meteo,
-/// seven days), and aerosol optical depth (CAMS global via Open-Meteo, about five days).
+/// three forecast models' clouds, cloud layers, cold, dew, wind, visibility, rain, fog and water
+/// vapour (Open-Meteo, seven days), and aerosol optical depth and dust (CAMS global via
+/// Open-Meteo, about five days).
 /// None of it changes the score. It is context, and every part is optional.
 nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
     /// `hourly=cloud_cover&models=gfs_seamless,ecmwf_ifs025,icon_seamless`
     var models: HourlySeries?
-    /// `hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high,temperature_2m,dew_point_2m,wind_gusts_10m,visibility`
+    /// `hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high,temperature_2m,dew_point_2m,wind_gusts_10m,visibility`,
+    /// plus `layerExtras`.
     var layers: HourlySeries?
-    /// `hourly=aerosol_optical_depth,pm2_5` from the air-quality host.
+    /// `hourly=aerosol_optical_depth,pm2_5` from the air-quality host, plus `airExtras`.
     var air: HourlySeries?
     static let modelKeys=["cloud_cover_gfs_seamless","cloud_cover_ecmwf_ifs025","cloud_cover_icon_seamless"]
     static let layerKeys=["cloud_cover_low","cloud_cover_mid","cloud_cover_high","temperature_2m","dew_point_2m","wind_gusts_10m","visibility"]
     static let airKeys=["aerosol_optical_depth","pm2_5"]
+    /// Asked for with the layers and kept when they come back whole, but never required: a series
+    /// without them is still a series. Ten variables in all, so the request still counts as one
+    /// Open-Meteo call per place.
+    static let layerExtras=["precipitation_probability","weather_code","total_column_integrated_water_vapour"]
+    /// Dust near the ground (µg/m³), to tell dust from smoke when the air is hazy.
+    static let airExtras=["dust"]
     /// What Nyx on Vision Pro has for a night: a summit's cloud layers (`SummitLayerService`) and the
     /// aerosol forecast (`ForecastDetailService`, asked for smoke only); nil with neither. The same
     /// parts the iPhone's detail gives `NightPlanner.night` for the score, so both score alike.
@@ -104,9 +112,15 @@ nonisolated struct ForecastDetail: Codable, Sendable, Equatable {
             }
             outlook.gust=layers.samples("wind_gusts_10m",from:start,to:end,valid:0...400,timing:.precedingHour)?.map(\.value).max()
             outlook.visibility=layers.mean("visibility",from:start,to:end,valid:0...200_000)
+            // The chance of rain or snow in each hour, as Open-Meteo gives it: for the hour before the timestamp.
+            outlook.rainChance=layers.samples("precipitation_probability",from:start,to:end,valid:0...100,timing:.precedingHour)?.map(\.value).max()
+            outlook.weather=layers.samples("weather_code",from:start,to:end,valid:0...99).map { NightWeather(codes:$0.map { Int($0.value.rounded()) }) }
+            outlook.waterVapour=layers.mean("total_column_integrated_water_vapour",from:start,to:end,valid:0...100)
         }
         if let air, air.usable(now:now) {
             outlook.aerosol=air.mean("aerosol_optical_depth",from:start,to:end,valid:0...10)
+            outlook.dust=air.mean("dust",from:start,to:end,valid:0...20_000)
+            outlook.fineParticles=air.mean("pm2_5",from:start,to:end,valid:0...20_000)
         }
         return outlook
     }
@@ -171,21 +185,39 @@ nonisolated enum AirClarity: String, Sendable, Equatable {
     static func band(_ aod: Double) -> Self { aod<0.1 ? .clear : aod<0.25 ? .lightHaze : aod<0.5 ? .haze : .heavy }
     /// From 0.25 the caveat stands beside the score, like a closure.
     var isCaveat: Bool { self == .haze || self == .heavy }
-    /// The short value beside "Air" on park detail.
-    var label: String {
+    /// The short value beside "Air" on park detail. `dusty` names dust instead of smoke when dust
+    /// makes most of the haze (`NightOutlook.dusty`); clean or lightly hazy air reads the same.
+    func label(dusty: Bool = false) -> String {
         switch self {
         case .clear: String(localized:"Clear")
         case .lightHaze: String(localized:"Light haze")
-        case .haze: String(localized:"Haze or smoke")
-        case .heavy: String(localized:"Heavy smoke or haze")
+        case .haze: dusty ? String(localized:"Dust or haze") : String(localized:"Haze or smoke")
+        case .heavy: dusty ? String(localized:"Heavy dust or haze") : String(localized:"Heavy smoke or haze")
         }
     }
-    var sentence: String {
+    func sentence(dusty: Bool = false) -> String {
         switch self {
         case .clear: String(localized:"Clear air.")
         case .lightHaze: String(localized:"Light haze.")
-        case .haze: String(localized:"Haze or smoke: the Milky Way will look faint.")
-        case .heavy: String(localized:"Heavy smoke or haze: faint stars hidden.")
+        case .haze: dusty ? String(localized:"Dust in the air: the Milky Way will look faint.") : String(localized:"Haze or smoke: the Milky Way will look faint.")
+        case .heavy: dusty ? String(localized:"Heavy dust in the air: faint stars hidden.") : String(localized:"Heavy smoke or haze: faint stars hidden.")
+        }
+    }
+}
+
+/// What the forecast's hourly weather codes (WMO 4677, as Open-Meteo gives them) show in a window:
+/// 45 and 48 fog; 51–67 and 80–82 drizzle and rain; 71–77, 85 and 86 snow; 95–99 thunderstorms.
+nonisolated struct NightWeather: Sendable, Equatable {
+    var fog=false, rain=false, snow=false, thunder=false
+    init(codes: [Int]) {
+        for code in codes {
+            switch code {
+            case 45, 48: fog=true
+            case 51...67, 80...82: rain=true
+            case 71...77, 85, 86: snow=true
+            case 95...99: thunder=true
+            default: break
+            }
         }
     }
 }
@@ -204,13 +236,38 @@ nonisolated struct NightOutlook: Sendable, Equatable {
     /// Metres, mean. A haze hint only: weather-model visibility is coarse.
     var visibility: Double?
     var aerosol: Double?
+    /// µg/m³ near the ground, means over the window: dust, and all fine particles (smoke, haze and fine dust).
+    var dust: Double?
+    var fineParticles: Double?
+    /// Percent, the highest hourly chance of rain or snow in the window.
+    var rainChance: Double?
+    /// What the forecast's weather codes show in the window.
+    var weather: NightWeather?
+    /// kg/m² (the same number as millimetres of water), mean: all the water vapour above the place.
+    var waterVapour: Double?
     /// The score with the clearest and the cloudiest model in place of the best-match clouds,
     /// widened to hold the night's own score (`PlanModel.outlook`).
     var scoreRange: ClosedRange<Int>?
     var clarity: AirClarity? { aerosol.map(AirClarity.band) }
     var dewLikely: Bool { dewMargin.map { $0<=2 } ?? false }
-    /// Visibility speaks only when the aerosol forecast cannot, and only below 10 km.
-    var hazeHint: Double? { aerosol == nil ? visibility.flatMap { $0<10_000 ? $0 : nil } : nil }
+    /// Dust makes most of the haze: at least 50 µg/m³ of it, more than all the fine particles together.
+    /// Smoke is fine particles; desert dust is mostly coarser, so a dust storm shows as more dust than PM2.5.
+    var dusty: Bool { dust.map { $0>=50 && $0>(fineParticles ?? 0) } ?? false }
+    /// Visibility speaks only when the aerosol forecast cannot, only below 10 km, and not in fog,
+    /// which the fog line already names.
+    var hazeHint: Double? { aerosol == nil && weather?.fog != true ? visibility.flatMap { $0<10_000 ? $0 : nil } : nil }
+    /// Very dry, clean, clear air: under 10 kg/m² of water vapour (desert winter is 5 to 8; a humid
+    /// summer night 30 to 50), no haze in the aerosol forecast when there is one, and no more than a
+    /// trace of cloud in any layer. Water vapour hardly dims starlight itself, but humid air carries
+    /// haze, so this is a pointer to unusually transparent air, never part of the score. Not with
+    /// dew likely or fog: the air at the ground is then near saturation, and "very dry" beside
+    /// "Dew likely on lenses" would read as a contradiction even where both are true.
+    var crispAir: Bool {
+        guard let waterVapour, waterVapour<10, !dewLikely, weather?.fog != true else { return false }
+        if let aerosol, aerosol>=0.1 { return false }
+        if let layers, max(layers.low,layers.mid,layers.high)>=10 { return false }
+        return true
+    }
     var isEmpty: Bool { self == NightOutlook() }
 }
 nonisolated extension NightOutlook {
@@ -261,4 +318,26 @@ extension NightOutlook {
     var hazeText: String? {
         hazeHint.map { String(localized:"Visibility forecast about \(Self.distance($0)); haze is possible.") }
     }
+    /// The air on park detail and in the breakdown, dust named when dust makes the haze.
+    nonisolated var airLabel: String? { clarity?.label(dusty:dusty) }
+    nonisolated var airSentence: String? { clarity?.sentence(dusty:dusty) }
+    /// "Clean" only when the aerosol forecast says so; without one, only the dryness is known.
+    nonisolated var crispText: String? {
+        guard crispAir else { return nil }
+        return aerosol == nil ? String(localized:"Very dry air: good for faint stars.") : String(localized:"Very dry, clean air: good for faint stars.")
+    }
+    /// Rain, snow or thunderstorms, as one line with its symbol: shown for any thunderstorm in the
+    /// forecast, or when the chance of rain or snow reaches 25% in some hour of the window.
+    nonisolated var precipitationLine: (symbol: String, text: String)? {
+        let chance=rainChance.map { Int($0.rounded()) }
+        let weather=weather ?? NightWeather(codes:[])
+        guard weather.thunder || (chance ?? 0)>=25 || (chance == nil && (weather.snow || weather.rain)) else { return nil }
+        if weather.thunder {
+            guard let chance, chance>=10 else { return ("cloud.bolt",String(localized:"Thunderstorms possible")) }
+            return ("cloud.bolt",String(localized:"Thunderstorms possible, up to \(chance)% chance of rain"))
+        }
+        if weather.snow { return ("cloud.snow",chance.map { String(localized:"Snow possible, up to \($0)% chance") } ?? String(localized:"Snow possible")) }
+        return ("cloud.rain",chance.map { String(localized:"Rain possible, up to \($0)% chance") } ?? String(localized:"Rain possible"))
+    }
+    nonisolated var fogText: String? { weather?.fog == true ? String(localized:"Fog possible, mostly in low ground") : nil }
 }

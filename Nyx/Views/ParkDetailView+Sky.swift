@@ -46,12 +46,16 @@ extension ParkDetailView {
                 if night.upperCloudOnly { Text("The summit sits above most low cloud, so the score counts mid and high cloud only.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 ForEach(cloudContext,id:\.self) { line in Text(line).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
             }
-            if let clarity=outlook?.clarity {
+            if let air=outlook?.airLabel {
                 VStack(alignment:.leading,spacing:6) {
-                    LabeledContent("Air",value:clarity.label)
-                    Text("Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+                    LabeledContent("Air",value:air)
+                    if let crisp=outlook?.crispText { Text(crisp).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                    Text("Smoke, dust and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke, dust or haze caps the score.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
                 }
-            } else if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            } else {
+                if let crisp=outlook?.crispText { Text(crisp).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                if let haze=outlook?.hazeText { Text(haze).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            }
             // The credit Open-Meteo's licence asks for, as a link beside its data.
             if let updated=night.forecastUpdated { OpenMeteoCredit(updated:park.timestamp(updated)) }
             if !nightItself.isEmpty {
@@ -79,14 +83,15 @@ extension ParkDetailView {
         if let usual=night.usualCloud { return String(localized:"Usually \(Int(usual.rounded()))%") }
         return String(localized:"Unavailable")
     }
-    /// What to bring, one short line each: the coldest hour, dew on optics, and wind. Lines with
-    /// no data are left out; with none, the section is not shown.
+    /// What to expect and bring, one short line each: rain, snow or storms, fog, the coldest hour,
+    /// dew on optics, and wind. Lines with no data are left out; with none, the section is not shown.
     private var nightItself:[(symbol:String,text:String)] {
         guard let outlook=model.outlook(skyNight) else { return [] }
         let cold=outlook.coldest.map { cold in
             outlook.coldestAt.map { String(localized:"Down to \(NightOutlook.temperature(cold)) around \(park.time($0))") } ?? String(localized:"Down to \(NightOutlook.temperature(cold))")
         }
-        let lines:[(String,String?)]=[("thermometer.low",cold),("drop",outlook.dewLikely ? String(localized:"Dew likely on lenses") : nil),("wind",outlook.gustText)]
+        let lines:[(String,String?)]=[(outlook.precipitationLine?.symbol ?? "cloud.rain",outlook.precipitationLine?.text),("cloud.fog",outlook.fogText),
+                                      ("thermometer.low",cold),("drop",outlook.dewLikely ? String(localized:"Dew likely on lenses") : nil),("wind",outlook.gustText)]
         return lines.compactMap { symbol,text in text.map { (symbol,$0) } }
     }
 }

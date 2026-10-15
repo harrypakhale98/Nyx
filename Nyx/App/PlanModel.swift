@@ -571,8 +571,10 @@ import CoreLocation
     }
     /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
     func smokeCaveat(_ night:Night)->String? {
+        // Smoke's words, as every device says them; dust is named only in the park's air details,
+        // where the dust forecast stands beside it.
         guard let clarity=outlook(night)?.clarity, clarity.isCaveat else { return nil }
-        return clarity.sentence
+        return clarity.sentence()
     }
     func nights(_ park:Park,from date:Date,count:Int)->[Night] { (0..<count).map { night(park,on:park.date(date,addingDays:$0)) } }
     func nearby(latitude:Double?,longitude:Double?,radiusMeters:Double?=nil)->[Park] {

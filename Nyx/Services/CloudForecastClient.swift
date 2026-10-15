@@ -622,8 +622,10 @@ nonisolated enum OpenMeteoAnswer {
         (try? JSONDecoder().decode([T].self, from: data)) ?? (try? JSONDecoder().decode(T.self, from: data)).map { [$0] } ?? []
     }
     /// Each place's hourly series for `keys`, with the places' `ids` in request order. A place whose
-    /// answer is not whole is left out; empty unless there is one answer per place.
-    static func series(_ data: Data, ids: [String], keys: [String], now: Date) -> [(String, HourlySeries)] {
+    /// answer is not whole is left out; empty unless there is one answer per place. `extras` are kept
+    /// when they come whole and skipped otherwise, so context the score never reads cannot cost a
+    /// place the series it does.
+    static func series(_ data: Data, ids: [String], keys: [String], extras: [String] = [], now: Date) -> [(String, HourlySeries)] {
         struct Response: Decodable { let hourly: [String: [Double?]] }
         let decoded=decode(Response.self, from: data)
         guard decoded.count == ids.count else { return [] }
@@ -634,6 +636,7 @@ nonisolated enum OpenMeteoAnswer {
                 guard let series=response.hourly[key], series.count == times.count else { return nil }
                 values[key]=series
             }
+            for key in extras { if let series=response.hourly[key], series.count == times.count { values[key]=series } }
             return (id, HourlySeries(updated: now, times: times, values: values))
         }
     }

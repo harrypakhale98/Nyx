@@ -98,7 +98,9 @@ struct ScoreBreakdownView: View {
     private var cloudContext:[(symbol:String,text:String)] {
         guard let outlook=model.outlook(night) else { return [] }
         let lines:[(String,String?)]=[("rectangle.split.3x1",outlook.agreement?.sentence(tonight:isTonight)),("cloud",outlook.layers?.note),
-                                      (outlook.clarity.map(Self.airSymbol) ?? "aqi.low",outlook.clarity?.sentence),("sun.haze",outlook.clarity == nil ? outlook.hazeText : nil)]
+                                      // Very dry, clean air says "Clear air." and more, so it stands in for it.
+                                      (outlook.clarity.map(Self.airSymbol) ?? "aqi.low",outlook.crispText == nil ? outlook.airSentence : nil),("sun.haze",outlook.clarity == nil ? outlook.hazeText : nil),
+                                      ("sparkles",outlook.crispText)]
         return lines.compactMap { symbol,text in text.map { (symbol,$0) } }
     }
     /// The air's symbol: clean air is not drawn as smoke.
@@ -108,7 +110,11 @@ struct ScoreBreakdownView: View {
     /// NASA's night lights, as context beside the estimate the score uses.
     private var lightContext:[(symbol:String,text:String)] {
         guard let site=SkyGlow.shared.park(night.park.id) else { return [] }
-        return [("globe.americas",String(localized:"Satellite night lights: \(SkyGlow.levelLabel(SkyGlow.shared.level(site.glow))). Context only; not part of the score."))]
+        let lights=String(localized:"Satellite night lights: \(SkyGlow.levelLabel(SkyGlow.shared.level(site.glow))). Context only; not part of the score.")
+        // The Park Service's darkest measured site, with its year: also context only.
+        guard let darkest=MeasuredSky.shared.sites(night.park.id).first, let measured=darkest.latest, let year=measured.year else { return [("globe.americas",lights)] }
+        return [("globe.americas",lights),
+                ("camera.aperture",String(localized:"Measured by the Park Service at its darkest site here, \(darkest.name): \(MeasuredSky.reading(measured.sqm)) in \(MeasuredSky.span(year...year)) (higher is darker). Context only; not part of the score."))]
     }
     private var darkness:String { Duration.seconds(night.sky.darkHours*3600).formatted(.units(allowed:[.hours,.minutes],width:.wide)) }
     /// `weight` is the component's share of 100; with no cloud figure at all the others are scaled up to fill it.

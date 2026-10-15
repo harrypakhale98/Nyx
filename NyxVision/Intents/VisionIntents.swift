@@ -52,7 +52,7 @@ struct DarknessIntent: AppIntent {
         let layers = await SummitLayerService().layers(for: [selected], network: false)[selected.id]
         let defaults = UserDefaults.standard
         let smokeOn = defaults.object(forKey: VisionModel.smokeKey) as? Bool ?? true
-        let air = smokeOn ? await ForecastDetailService().hydrate([selected])[selected.id]?.air : nil
+        let air = smokeOn ? await ForecastDetailService(extras: false).hydrate([selected])[selected.id]?.air : nil
         let inputs = ScoreInputs(smokeOn: smokeOn, smokeKnown: air == nil ? [] : [selected.id],
                                  alertsOn: defaults.object(forKey: VisionModel.alertsKey) as? Bool ?? true, alerts: ParkStore.stored([selected]))
         let answer = VisionDarknessAnswer(park: selected, forecast: forecast, layers: layers, air: air, inputs: inputs, forecastsOn: CloudForecastSwitch.isOn(), now: .now)
