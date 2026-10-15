@@ -27604,6 +27604,41 @@
         }
       }
     },
+    "In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei einem Aufenthalt über mehrere Nächte stützen sich Nächte, die die Vorhersage nicht ganz erreicht, auf die übliche Bewölkung des Parks in diesem Monat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En una estancia de varias noches, las noches que el pronóstico no cubre del todo se apoyan en la nubosidad habitual de cada parque en ese mes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans un séjour de plusieurs nuits, les nuits que la prévision n’atteint pas entièrement s’appuient sur la nébulosité habituelle du mois pour chaque parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "数泊の滞在では、予報が十分に届かない夜は、各公園のその月の平年の雲量をもとにしています。"
+          }
+        }
+      }
+    },
     "In decimal degrees, such as 34.01, -116.18. South and west are negative. You can paste both at once.": {
       "extractionState": "manual",
       "localizations": {
