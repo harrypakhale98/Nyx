@@ -264,20 +264,28 @@ nonisolated struct NotificationScheduler {
         }
     }
     /// The days (park-local, as `showerPlans` keys them) a shower reminder was delivered for: from
-    /// the night it names among `nights`, else (a park no longer saved) the UTC day of its stamp, the
-    /// park's local noon, which is that same day from UTC−11 to UTC+12.
-    static func showerDays(_ delivered:Set<String>,nights:[Night])->Set<String> {
+    /// the night it names among `nights`, else (a place no longer saved) its stamp, the place's local
+    /// noon, read in the place's own time zone when `zone` knows it, since Hawaii's noon and Tonga's
+    /// fall in the same UTC hours a day apart; a removed spot falls back to the UTC day, right from
+    /// UTC−11 to UTC+12.
+    static func showerDays(_ delivered:Set<String>,nights:[Night],zone:(String)->TimeZone? = Self.placeZone)->Set<String> {
         let shown=delivered.filter { $0.hasPrefix("nyx-night-") && $0.contains("-meteors-") }
         guard !shown.isEmpty else { return [] }
         let known=Dictionary(nights.map { (showerIdentifier(park:$0.park,night:$0.id),$0.park.isoDay($0.id)) },uniquingKeysWith:{ first,_ in first })
-        var utc=Calendar(identifier:.gregorian)
-        utc.timeZone=TimeZone(identifier:"UTC") ?? .gmt
         return Set(shown.compactMap { id in
             if let day=known[id] { return day }
-            guard let dash=id.lastIndex(of:"-"), let stamp=Double(id[id.index(after:dash)...]) else { return nil }
-            let parts=utc.dateComponents([.year,.month,.day],from:Date(timeIntervalSince1970:stamp))
+            let rest=id.dropFirst("nyx-night-".count)
+            guard let marker=rest.range(of:"-meteors-"), let stamp=Double(rest[marker.upperBound...]) else { return nil }
+            let place=String(rest[..<marker.lowerBound])
+            var calendar=Calendar(identifier:.gregorian)
+            calendar.timeZone=zone(place) ?? TimeZone(identifier:"UTC") ?? .gmt
+            let parts=calendar.dateComponents([.year,.month,.day],from:Date(timeIntervalSince1970:stamp))
             return String(format:"%04d-%02d-%02d",parts.year ?? 2000,parts.month ?? 1,parts.day ?? 1)
         })
+    }
+    /// A place's time zone by id: a curated park, then a world catalogue place (both read once per process).
+    static func placeZone(_ id:String)->TimeZone? {
+        ((try? ParkData.load())?.first { $0.id==id } ?? (try? CatalogData.load())?.first { $0.id==id })?.timeZone
     }
     /// Whether a pending reminder no longer says what the plan says: its title or words changed
     /// (the score moved from 94 to 91, the Moon reason or the models' agreement changed, a closure
