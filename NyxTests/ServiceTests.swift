@@ -317,4 +317,69 @@ struct ServiceTests {
         await scheduler.reschedule(nights:[night],now:afternoon.addingTimeInterval(120))
         #expect(await center.requests.isEmpty)
     }
+    /// A closure in the last park update: the reminder says it first, in the park page's words, and
+    /// a pending reminder is written again when the closure appears and when it clears.
+    @Test func reminderNamesTheClosureAndFollowsIt() async throws {
+        let zion=try #require(try ParkData.load().first { $0.id=="zion" }),now=Date(timeIntervalSince1970:1790899200),engine=AstronomyEngine()
+        let night=Night(park:zion,sky:engine.conditions(for:zion,on:zion.date(now,addingDays:2)),score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:now)
+        let closed=["zion":"Kolob Canyons Road closed"]
+        let center=StubNotifications(),scheduler=NotificationScheduler(center:center,ledger:ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)"))
+        await scheduler.reschedule(nights:[night],now:now)
+        let open=try #require(await center.requests.first)
+        #expect(open.body.hasSuffix("Check park alerts before you go.") && !open.body.contains("Closure"))
+        await scheduler.reschedule(nights:[night],now:now.addingTimeInterval(600),closures:closed)
+        let shut=try #require(await center.requests.first)
+        #expect(await center.addCount==2)
+        #expect(await center.requests.count==1)
+        #expect(shut.id==open.id && shut.fireDate==open.fireDate && shut.title==open.title)
+        #expect(shut.body.hasPrefix(ClosureLine.spoken("Kolob Canyons Road closed")+". 94 out of 100."))
+        #expect(shut.body==ClosureLine.first(String(localized:"\(94) out of 100. \(NotificationScheduler.reason(night))."),closure:closed["zion"]))
+        #expect(!shut.body.contains("Check park alerts"))
+        // Unchanged: untouched. Cleared: the plain words again.
+        await scheduler.reschedule(nights:[night],now:now.addingTimeInterval(900),closures:closed)
+        #expect(await center.addCount==2)
+        await scheduler.reschedule(nights:[night],now:now.addingTimeInterval(1200))
+        #expect(await center.addCount==3)
+        #expect(await center.requests.first?.body==open.body)
+    }
+    /// Two nights at one park scoring 94: the later one rests on more (a darker Moon held at the
+    /// cap). A reminder, the trip planner, Siri's best night, the calendar's chart and the river's
+    /// "Best night" all name the same night, with or without a closure at the park.
+    @Test func everyBestNightPickerAgreesOnATie() throws {
+        let zion=try #require(try ParkData.load().first { $0.id=="zion" }),engine=AstronomyEngine()
+        let now=Date(timeIntervalSince1970:1790899200-6*3600), tonight=zion.currentNight(at:now)
+        func night(_ offset:Int,moon:Double)->Night {
+            Night(park:zion,sky:engine.conditions(for:zion,on:zion.date(tonight,addingDays:offset)),
+                  score:DarknessScore(value:94,moonPoints:moon,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:now)
+        }
+        let earlier=night(1,moon:39), later=night(2,moon:45), nights=[earlier,later]
+        #expect(NightPlanner.better(later,earlier))
+        for closures in [[:],["zion":"Kolob Canyons Road closed"]] {
+            let scheduler=NotificationScheduler(center:StubNotifications(),ledger:ReminderLedger(suite:"nyx-ledger-test-\(UUID().uuidString)"))
+            let reminders=scheduler.plans(nights:nights,now:now,closures:closures)
+            #expect(reminders.map(\.night)==[zion.isoDay(later.id)])
+            let trip=TripPlanner.plan(days:nights.map { TripDay($0.id) },grid:nights.map { [$0] },closures:closures,maxHopMeters:.infinity)
+            #expect(trip.best?.night.id==later.id)
+            let siri=BestNightSearch.Answer(nights:NightPlanner.ranked(nights,closures:closures),count:2)
+            #expect(siri.best.id==later.id)
+        }
+        #expect(NightPlanner.best(nights)?.id==later.id)
+        #expect(NightChart.summary(nights).hasPrefix(later.spokenSummary(.chartBest)))
+        #expect(TimeRiver.peakOrder(nights).first==1)
+    }
+    /// One night, two candidates scoring alike (the same park twice, so the measured glow ties): the
+    /// trip planner takes the one `NightPlanner.better` takes (more beneath the cap), not the longer darkness.
+    @Test func tripPlannerBreaksATieAsEveryBestNight() throws {
+        let zion=try #require(try ParkData.load().first { $0.id=="zion" }),engine=AstronomyEngine()
+        let tonight=zion.currentNight(at:Date(timeIntervalSince1970:1790899200))
+        let short=Night(park:zion,sky:engine.conditions(for:zion,on:zion.date(tonight,addingDays:1)),
+                        score:DarknessScore(value:94,moonPoints:45,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:nil)
+        let long=Night(park:zion,sky:engine.conditions(for:zion,on:zion.date(tonight,addingDays:3)),
+                       score:DarknessScore(value:94,moonPoints:39,cloudPoints:24,bortlePoints:18,lengthPoints:13),cloudCover:4,forecastUpdated:nil)
+        #expect(long.sky.darkHours>short.sky.darkHours && NightPlanner.better(short,long))
+        for grid in [[short,long],[long,short]] {
+            let plan=TripPlanner.plan(days:[TripDay(short.id)],grid:[grid],closures:[:],maxHopMeters:.infinity)
+            #expect(plan.stops.first?.night.score.moonPoints==45)
+        }
+    }
 }

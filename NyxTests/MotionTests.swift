@@ -101,13 +101,24 @@ import Testing
         }
         #expect(TimeRiver.index(of: Self.date, in: []) == nil)
     }
-    @Test func riverPeaksAreTheThreeBestAtLeastGood() {
-        #expect(TimeRiver.peaks([50, 90, 61, 90, 75, 59]) == [1, 3, 4])
-        #expect(TimeRiver.peaks([59, 40, 10]) == [])
-        #expect(TimeRiver.peaks([80, 80, 80, 80]) == [0, 1, 2])
-        // Best first, the earlier night on a tie; the set is the same nights.
-        #expect(TimeRiver.peakOrder([50, 90, 61, 90, 75, 59]) == [1, 3, 4])
-        #expect(TimeRiver.peakOrder([60, 75, 99, 40]) == [2, 1, 0])
+    /// Consecutive Joshua Tree nights scoring `values`, every part alike but the score.
+    private static func river(_ values: [Int]) throws -> [Night] {
+        let park=try park("jotr"), engine=AstronomyEngine()
+        return values.enumerated().map { i, value in
+            Night(park: park, sky: engine.conditions(for: park, on: park.date(park.evening(date), addingDays: i)),
+                  score: DarknessScore(value: value, moonPoints: 30, cloudPoints: 20, bortlePoints: 18, lengthPoints: 12), cloudCover: 10, forecastUpdated: date)
+        }
+    }
+    @Test func riverPeaksAreTheThreeBestAtLeastGood() throws {
+        #expect(TimeRiver.peaks(try Self.river([50, 90, 61, 90, 75, 59])) == [1, 3, 4])
+        #expect(TimeRiver.peaks(try Self.river([59, 40, 10])) == [])
+        // Best first; a tie broken as every best night is (`NightPlanner.better`); the set is the same nights.
+        let even=try Self.river([80, 80, 80, 80])
+        #expect(TimeRiver.peakOrder(even) == NightPlanner.ranked(even).prefix(3).compactMap { night in even.firstIndex { $0.id == night.id } })
+        let mixed=try Self.river([50, 90, 61, 90, 75, 59])
+        #expect(Array(TimeRiver.peakOrder(mixed).suffix(1)) == [4] && Set(TimeRiver.peakOrder(mixed).prefix(2)) == [1, 3])
+        #expect(TimeRiver.peakOrder(mixed).first == mixed.firstIndex { $0.id == NightPlanner.best(mixed)?.id })
+        #expect(TimeRiver.peakOrder(try Self.river([60, 75, 99, 40])) == [2, 1, 0])
     }
 
     // MARK: The count-up

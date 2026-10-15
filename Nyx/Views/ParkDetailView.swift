@@ -163,7 +163,7 @@ struct ParkDetailView: View {
                     try? await Task.sleep(for:.seconds(2.5))
                     let nights=model.nights(park,from:riverStart,count:30)
                     for night in nights { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(110)) }
-                    let best=nights.prefix(20).max { $0.score.value < $1.score.value }
+                    let best=NightPlanner.best(Array(nights.prefix(20)))
                     for night in nights.reversed() where night.id >= (best?.id ?? night.id) { guard !Task.isCancelled else { return }; selected=night.id; try? await Task.sleep(for:.milliseconds(70)) }
                     return
                 }

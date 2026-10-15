@@ -96,7 +96,11 @@ import WidgetKit
         let closures=Self.closures(model)
         await model.refreshParkUpdates(parks,alertPages:background ? 1 : ParkStore.alertPages)
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
-        if again == nil, Self.closures(model) != closures { writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model) }
+        // Reminders too: a pending one names the closure (or stops naming it) before it fires.
+        if again == nil, Self.closures(model) != closures {
+            let snapshot=writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model)
+            await remind(model,snapshot)
+        }
         Self.scheduleRefresh()
     }
     /// The run that follows one that ends with `queued` asked for meanwhile. A run cut short
@@ -335,12 +339,19 @@ import WidgetKit
         published=followedData(model)
         // A followed night's Live Activity says what the widget now says, on every path that publishes.
         await Self.refreshFollowed(model)
+        await remind(model,snapshot)
+    }
+    /// Reminders planned from the snapshot just written: the nights, smoke, layers and closures the
+    /// widget shows, so a reminder never says less than the park page.
+    private func remind(_ model:PlanModel,_ snapshot:SavedSkySnapshot) async {
         let defaults=UserDefaults.standard
         guard defaults.bool(forKey:"notificationsEnabled") else { return }
         let today=model.today, showers=defaults.object(forKey:"showerReminders") as? Bool ?? true
         let nights=await Task.detached(priority:.utility) { snapshot.nights(from:today,count:14) }.value
         // Reminders may have been switched off while the nights were computed.
-        if defaults.bool(forKey:"notificationsEnabled") { await NotificationScheduler().reschedule(nights:nights,showers:showers,details:snapshot.details ?? [:]) }
+        if defaults.bool(forKey:"notificationsEnabled") {
+            await NotificationScheduler().reschedule(nights:nights,showers:showers,details:snapshot.details ?? [:],closures:snapshot.closures)
+        }
     }
     /// The next week's Moons for each saved park, drawn once each for the widgets, so a widget left
     /// for a week without Nyx being opened still shows the real Moon; past that, its vector Moon.

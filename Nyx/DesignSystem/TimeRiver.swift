@@ -71,11 +71,12 @@ struct TimeRiver: View {
         let evening=park.evening(date)
         return nights.firstIndex { $0.id==evening }
     }
-    /// The (at most three) best nights at least Good, by rank; the earlier night on a tie.
-    nonisolated static func peaks(_ ranks:[Int])->Set<Int> { Set(peakOrder(ranks)) }
+    /// The (at most three) best nights at least Good, ties broken as every best night is
+    /// (`NightPlanner.better`), so "Best night" here is the calendar's, Siri's and a reminder's.
+    nonisolated static func peaks(_ nights:[Night])->Set<Int> { Set(peakOrder(nights)) }
     /// The same nights, best first.
-    nonisolated static func peakOrder(_ ranks:[Int])->[Int] {
-        Array(ranks.indices.filter { ranks[$0]>=60 }.sorted { ranks[$0]>ranks[$1] || (ranks[$0]==ranks[$1] && $0<$1) }.prefix(3))
+    nonisolated static func peakOrder(_ nights:[Night])->[Int] {
+        Array(nights.indices.filter { nights[$0].rankScore>=60 }.sorted { NightPlanner.better(nights[$0],nights[$1]) }.prefix(3))
     }
     private let inset=14.0, moonSize=30.0, lensSize=30.0
     /// The loupe while scrubbing: its size, its lift above the night's point, and how far it may
@@ -382,7 +383,7 @@ struct TimeRiver: View {
     }
     private var showsTip:Bool { DebugScenario.screen == nil || DebugScenario.isEnabled("river-tip") }
     /// The glowing nights, best first.
-    private var peakOrder:[Int] { Self.peakOrder(nights.map(\.rankScore)) }
+    private var peakOrder:[Int] { Self.peakOrder(nights) }
 
     /// A score's height on the river, as `draw` places it.
     private func y(_ score:Int,height:Double)->Double {
