@@ -1121,6 +1121,41 @@
         }
       }
     },
+    "%@ or %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ oder %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ or %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ o %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ou %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@または%@"
+          }
+        }
+      }
+    },
     "%@ peak": {
       "extractionState": "manual",
       "localizations": {
@@ -35963,37 +35998,142 @@
         }
       }
     },
-    "Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part.": {
+    "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those are not known.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nächte mit „Noch keine Wolkenvorhersage“ oder „Erste Einschätzung“ rechnen ganz oder teilweise mit der üblichen Bewölkung des Parks in diesem Monat."
+            "value": "Nächte mit %@ rechnen mit der üblichen Bewölkung des Parks in diesem Monat oder nur mit Mond und Dunkelheit, wo diese unbekannt ist."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part."
+            "value": "Nights marked %@ count each park's usual clouds for the month, or the Moon and darkness only where those are not known."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las noches marcadas “Aún sin pronóstico de nubes” o “Vista anticipada” cuentan la nubosidad habitual de cada parque en ese mes, total o parcialmente."
+            "value": "Las noches marcadas %@ cuentan la nubosidad habitual de cada parque en ese mes, o solo la Luna y la oscuridad donde no se conoce."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les nuits marquées « Pas encore de prévision de nuages » ou « Tendance » comptent la nébulosité habituelle du mois pour chaque parc, en tout ou en partie."
+            "value": "Les nuits marquées %@ comptent la nébulosité habituelle du mois pour chaque parc, ou seulement la Lune et l’obscurité là où elle n’est pas connue."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「雲予報はまだありません」または「早めの見通し」と表示された夜は、各公園のその月の平年の雲量を、全部または一部使って計算しています。"
+            "value": "%@と表示された夜は、各公園のその月の平年の雲量で計算しています。平年の雲量がわからない場所では、月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Nights marked %@ count each park's usual clouds for the month.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte mit %@ rechnen mit der üblichen Bewölkung des Parks in diesem Monat."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked %@ count each park's usual clouds for the month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches marcadas %@ cuentan la nubosidad habitual de cada parque en ese mes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits marquées %@ comptent la nébulosité habituelle du mois pour chaque parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@と表示された夜は、各公園のその月の平年の雲量で計算しています。"
+          }
+        }
+      }
+    },
+    "Nights marked %@ count the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächte mit %@ berücksichtigen nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked %@ count the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches marcadas %@ solo cuentan la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits marquées %@ ne comptent que la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@と表示された夜は、月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Nights marked %@ ease the forecast toward each park's usual clouds for the month.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei Nächten mit %@ wird die Vorhersage an die übliche Bewölkung des Parks in diesem Monat angenähert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nights marked %@ ease the forecast toward each park's usual clouds for the month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En las noches marcadas %@, el pronóstico se ajusta hacia la nubosidad habitual de cada parque en ese mes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour les nuits marquées %@, la prévision est rapprochée de la nébulosité habituelle du mois pour chaque parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@と表示された夜は、予報を各公園のその月の平年の雲量に寄せています。"
           }
         }
       }
