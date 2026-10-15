@@ -184,7 +184,8 @@ nonisolated struct Night: Identifiable, Sendable {
     var aerosol: Double? = nil
     /// For a night scored on the usual clouds: true when it simply lies beyond what a cloud forecast
     /// reaches ("No cloud forecast yet"), false when a forecast should reach it but could not be read
-    /// ("Cloud forecast unavailable"). Set once, by `NightPlanner.night`, so every surface says the same.
+    /// ("Cloud forecast unavailable"). Set by `NightPlanner.night` (`beyondForecast`), so every surface
+    /// says the same; a night the app keeps has it worked out again as the forecast ages (`PlanModel.night`).
     var beyondForecast = true
     var basis: CloudBasis { score.basis }
 }

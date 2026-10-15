@@ -159,11 +159,11 @@ nonisolated struct NightPlanner: Sendable {
     }
     static func ranked(_ nights: [Night]) -> [Night] { nights.sorted(by: better) }
     /// A closure in its park's last update costs a night this many points wherever a night is
-    /// recommended as the best (the trip planner, Siri's best night, the week's ring, Ask Nyx's
-    /// parks nearby, which night a reminder announces), so every such surface picks the same night; the score shown never changes. A
+    /// recommended as the best (the trip planner, Siri's best night, the week's ring, which night a
+    /// reminder announces), so every such surface picks the same night; the score shown never changes. A
     /// closed road beats a slightly darker sky every time. What claims the darkest (Tonight's answer,
-    /// the map's darkest, the watch, the Tonight control) ranks the sky alone with `better(_:_:)` and
-    /// shows the closure beside the score.
+    /// the map's darkest, the watch, the Tonight control, Ask Nyx's parks nearby) ranks the sky alone
+    /// with `better(_:_:)` and shows the closure beside the score.
     static let closurePenalty = 10
     /// `better`, with each closed park's nights `closurePenalty` points down (`closures`: park id →
     /// closure, as the app words it).
