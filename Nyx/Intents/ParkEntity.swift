@@ -81,7 +81,7 @@ struct ParkEntity:IndexedEntity {
 struct ParkQuery:EntityStringQuery {
     /// Parks, followed places and any world catalogue place by its `wd:` id, in the order asked.
     func entities(for identifiers:[String]) async throws -> [ParkEntity] {
-        let snapshot=SharedSettings.read(), library=try ParkLibrary.places(snapshot:snapshot)
+        let snapshot=await SharedSettings.load(), library=try ParkLibrary.places(snapshot:snapshot)
         var seen=Set<String>()
         return identifiers.filter { seen.insert($0).inserted }
             .compactMap { id in
@@ -97,10 +97,10 @@ struct ParkQuery:EntityStringQuery {
     }
     /// Saved spots first, then followed places abroad and saved parks (the ones people ask about), then
     /// the rest of the 63 by name. Never the whole world: a list of 3,400 helps no one choose.
-    func suggestedEntities() async throws -> [ParkEntity] { try ParkLibrary.suggested().map(ParkEntity.init) }
+    func suggestedEntities() async throws -> [ParkEntity] { try ParkLibrary.suggested(snapshot:await SharedSettings.load()).map(ParkEntity.init) }
     /// The parks and followed places that match, then the world catalogue's best matches (`ParkLibrary.search`).
     func entities(matching string:String) async throws -> [ParkEntity] {
-        let known=try ParkLibrary.places().filter { $0.matches(string) }
+        let known=try ParkLibrary.places(snapshot:await SharedSettings.load()).filter { $0.matches(string) }
         let ids=Set(known.map(\.id))
         return (known+ParkLibrary.search(string).filter { !ids.contains($0.id) }).map(ParkEntity.init)
     }

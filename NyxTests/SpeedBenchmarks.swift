@@ -57,6 +57,43 @@ struct SpeedBenchmarks {
         let ms=time("Park.calendar x12,600") { for park in parks { for _ in 0..<200 { _=park.calendar.timeZone } } }
         #expect(ms>0)
     }
+    /// The widgets' snapshot with all 63 parks' forecasts, read as a reload reads it: five readers
+    /// (Tonight, Lock Screen, Moon, the control, Siri's park list). Before: each decoded its own copy
+    /// and held it while it built its timeline. After: one decode per change of the file, shared.
+    /// Memory is the process footprint while the five copies are held, over the footprint before.
+    @Test func snapshotReads() throws {
+        let sky=SameSkyTests(), model=PlanModel(), reference=Date.now
+        let forecasts=Dictionary(uniqueKeysWithValues: model.parks.enumerated().map { ($1.id, sky.forecast($0+1, at: reference)) })
+        let details=Dictionary(uniqueKeysWithValues: model.parks.enumerated().map { ($1.id, sky.detail($0+1, at: reference)) })
+        let saved=model.parks.filter { ["jotr", "deva", "chis"].contains($0.id) }
+        let written=SavedSkySync.snapshot(parks: saved, followed: saved, bundled: model.parks, forecasts: forecasts, details: details, closures: [:])
+        let file=SnapshotFile(url: FileManager.default.temporaryDirectory.appendingPathComponent("bench-\(UUID().uuidString).json"))
+        #expect(file.write(written))
+        let url=try #require(file.url)
+        defer { try? FileManager.default.removeItem(at: url) }
+        let bytes=(try? Data(contentsOf: url).count) ?? 0
+        print("BENCH|snapshot bytes|\(bytes)")
+        let uncached=time("snapshot read x5, each decoding (before)") { for _ in 0..<5 { _=try? JSONDecoder().decode(SavedSkySnapshot.self, from: Data(contentsOf: url)) } }
+        _=file.read()
+        let cached=time("snapshot read x5, one decode kept (after)") { for _ in 0..<5 { _=file.read() } }
+        // A fresh file object (a fresh extension process): one decode, shared by the five readers.
+        let fresh=SnapshotFile(url: url), sharedBase=Self.footprint()
+        let shared=(0..<5).compactMap { _ in fresh.read() }
+        let after=Self.footprint()-sharedBase
+        let heldBase=Self.footprint()
+        let held=(0..<5).compactMap { _ in try? JSONDecoder().decode(SavedSkySnapshot.self, from: Data(contentsOf: url)) }
+        let before=Self.footprint()-heldBase
+        print("BENCH|snapshot 5 copies held (before) MB|\(String(format: "%.2f", Double(max(0, before))/1_048_576))")
+        print("BENCH|snapshot one shared copy (after) MB|\(String(format: "%.2f", Double(max(0, after))/1_048_576))")
+        #expect(shared.count == 5 && held.count == 5 && cached<uncached && file.decodes == 1 && fresh.decodes == 1)
+    }
+    /// The process's physical footprint (what iOS holds an extension to), in bytes.
+    nonisolated static func footprint() -> Int {
+        var info=task_vm_info_data_t()
+        var count=mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size/MemoryLayout<integer_t>.size)
+        let result=withUnsafeMutablePointer(to: &info) { $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count) } }
+        return result == KERN_SUCCESS ? Int(info.phys_footprint) : 0
+    }
     /// One night at 3,000 places (the 63 parks' records, moved about), as a catalogue that size would ask.
     @Test func catalog3000() throws {
         let url=try #require(Bundle.main.url(forResource: "parks", withExtension: "json"))

@@ -20,6 +20,11 @@ struct MoonEntry: TimelineEntry {
         moon=MoonNow(at: date, park: park)
         night=park.map { $0.currentNight(at: date) }
     }
+    /// The system's redacted placeholder: the Moon at Joshua Tree from the bundled parks, never the
+    /// App Group's snapshot (0.8 MB, decoded synchronously, for a shape drawn redacted).
+    static func placeholder(at date: Date = .now) -> MoonEntry {
+        MoonEntry(date: date, park: (try? ParkData.load())?.first { $0.id == Park.defaultID }, nightVision: false)
+    }
 }
 /// The words of the Moon widget's Lock Screen rectangle: the phase, how much is lit in the reader's
 /// own percent style ("42 %" where that is the custom), and the next moonrise or moonset in the

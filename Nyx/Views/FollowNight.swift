@@ -84,9 +84,9 @@ struct FollowNightIntent: LiveActivityIntent {
     init(park: ParkEntity, night: Date) { self.park=park; self.night=night }
     // Live Activity intents run outside the main actor; following reads and changes the app's night list there.
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
-        let chosen=try IntentPark.resolve(park)
+        let shared=await SharedSettings.load()
+        let chosen=try IntentPark.resolve(park,snapshot:shared)
         let now=Date.now
-        let shared=SharedSettings.read()
         let planner=NightPlanner(forecasts:BestNightSearch.forecasts(for:[chosen],shared:shared),details:BestNightSearch.details(for:[chosen],shared:shared))
         let found=planner.night(chosen,on:night.map { FollowNightWords.evening(of:$0,at:chosen) } ?? chosen.currentNight(at:now),now:now)
         let result=await FieldActivities.follow(night:found,closure:IntentClosure.closure(chosen,shared:shared),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),now:now)

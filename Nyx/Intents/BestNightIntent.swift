@@ -18,7 +18,7 @@ struct FindBestNightIntent: AppIntent {
     /// Returns the moment the best night's true darkness begins (sunset where there is none), so a
     /// shortcut can put it in a calendar or a reminder.
     func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog & ShowsSnippetIntent {
-        let saved=SharedSettings.read()
+        let saved=await SharedSettings.load()
         let library=try ParkLibrary.places(snapshot:saved)
         // A chosen place the library lacks (a world catalogue place found by search, not followed) resolves by its id.
         let parks=park.map { chosen in (library.first { $0.id==chosen.id } ?? ParkLibrary.place(chosen.id,snapshot:saved)).map { [$0] } ?? [] } ?? (saved?.parks ?? [])
@@ -115,7 +115,7 @@ struct BestNightSnippetIntent: SnippetIntent {
     init() {}
     init(parkIDs: [String], start: Date?, nights: Int) { self.parkIDs=parkIDs; self.start=start; self.nights=nights }
     func perform() async throws -> some IntentResult & ShowsSnippetView {
-        let shared=SharedSettings.read()
+        let shared=await SharedSettings.load()
         let library=try ParkLibrary.places(snapshot:shared)
         let known=library.filter { parkIDs.contains($0.id) }
         // An unfollowed world catalogue place the answer was about resolves by its id, as it did for the answer.
