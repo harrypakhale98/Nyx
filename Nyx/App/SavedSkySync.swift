@@ -224,7 +224,7 @@ import WidgetKit
     /// Writes the snapshot and, only when it says something new (or new Moon pictures were drawn),
     /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
     @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
-        let snapshot=Self.snapshot(parks:parks,followed:followed(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model),closuresUpdated:model.alertsUpdated)
+        let snapshot=Self.snapshot(parks:parks,followed:followed(model),bundled:model.parks,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),closuresUpdated:model.alertsUpdated)
         if SharedSettings.write(snapshot) || moonsDrawn {
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
@@ -237,10 +237,33 @@ import WidgetKit
     /// read), with the forecasts and detail of every followed place, so a widget or the control set
     /// to a park that is not saved scores it from the same forecast the app does. Saved spots and
     /// world places carry their usual clouds from the grid, which the widgets do not bundle.
-    nonisolated static func snapshot(parks:[Park],followed:[Park],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String],closuresUpdated:Date?=nil)->SavedSkySnapshot {
+    /// `bundled`: every one of the 63 parks also carries its clouds and what its score reads of the
+    /// detail (`scoring`), followed or not: a widget or the control newly set to a park is read by
+    /// the app only on its next run (`widgetPlaces`), and until then must not score without a
+    /// forecast the app has. About 12 KB a park, 0.8 MB for all 63 (about 30 ms to decode on a Mac).
+    nonisolated static func snapshot(parks:[Park],followed:[Park],bundled:[Park]=[],forecasts:[String:Forecast],details:[String:ForecastDetail],
+                                     closures:[String:String],closuresUpdated:Date?=nil)->SavedSkySnapshot {
         let ids=Set((parks+followed).map(\.id))
-        return SavedSkySnapshot(parks:parks,forecasts:forecasts.filter { ids.contains($0.key) },details:details.filter { ids.contains($0.key) },closures:closures,
+        var carried=forecasts.filter { ids.contains($0.key) }, detail=details.filter { ids.contains($0.key) }
+        for park in bundled where !ids.contains(park.id) {
+            carried[park.id]=forecasts[park.id]
+            detail[park.id]=details[park.id].flatMap { scoring($0,summit:park.aboveInversion == true) }
+        }
+        return SavedSkySnapshot(parks:parks,forecasts:carried,details:detail,closures:closures,
                                 usualClouds:CloudClimate.shared.carriedMonths(for:parks+followed),closuresUpdated:closuresUpdated)
+    }
+    /// Only what `NightPlanner.night` reads of a park's detail: the three models' clouds (which break
+    /// ties), the aerosol (smoke) and, at a summit above the inversion, its mid and high cloud. Nil
+    /// with none of them. Wind, cold, dew and particulates are shown only in the app and reminders.
+    nonisolated static func scoring(_ detail:ForecastDetail,summit:Bool)->ForecastDetail? {
+        func keep(_ series:HourlySeries?,_ keys:[String])->HourlySeries? {
+            guard let series else { return nil }
+            let values=series.values.filter { keys.contains($0.key) }
+            return values.isEmpty ? nil : HourlySeries(updated:series.updated,times:series.times,values:values)
+        }
+        let trimmed=ForecastDetail(models:keep(detail.models,ForecastDetail.modelKeys),layers:summit ? keep(detail.layers,["cloud_cover_mid","cloud_cover_high"]) : nil,
+                                   air:keep(detail.air,["aerosol_optical_depth"]))
+        return trimmed.models == nil && trimmed.layers == nil && trimmed.air == nil ? nil : trimmed
     }
     /// Publishes what is cached again, with no request: after a change that alters scores without
     /// new data (switching "Smoke and haze" off).
