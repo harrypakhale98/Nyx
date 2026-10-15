@@ -220,7 +220,7 @@ struct DuskProvider: RelevanceEntriesProvider {
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
         let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : context?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
-                                              closure: closure, cloudsOld: WatchTimeline.isOld(WatchTimeline.issued(park, forecast: forecast, detail: detail), at: now),
+                                              closure: closure, cloudsOld: WatchTimeline.cloudsOld(park, forecast: forecast, detail: detail, at: now),
                                               dataDiffers: context?.dataDiffers ?? false))
     }
     func placeholder(context: Context) -> DuskEntry {

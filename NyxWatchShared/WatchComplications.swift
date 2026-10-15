@@ -89,10 +89,13 @@ nonisolated enum WatchTimeline {
         let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
         return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) },
                              closure: best.flatMap { snapshot?.closures[$0.park.id] },
-                             cloudsOld: isOld(best.flatMap { issued($0.park, snapshot: snapshot) }, at: date), dataDiffers: dataDiffers)
+                             cloudsOld: best.map { cloudsOld($0.park, forecast: snapshot?.forecasts[$0.park.id], detail: snapshot?.details?[$0.park.id], at: date) } ?? false,
+                             dataDiffers: dataDiffers)
     }
-    /// A forecast fetched at `updated` is old at `date` once the watch app would say so ("No recent forecast").
-    static func isOld(_ updated: Date?, at date: Date) -> Bool { updated.map { date.timeIntervalSince($0) >= CloudSource.lifetime } ?? false }
+    /// The face's "No recent forecast", when the watch app's line says it (`CloudSource.faceOld`).
+    static func cloudsOld(_ park: Park, forecast: Forecast?, detail: ForecastDetail?, at date: Date) -> Bool {
+        CloudSource.faceOld(park, forecast: forecast?.updated, layers: detail?.layers?.updated, at: date)
+    }
     /// When the clouds the park's score counts were issued, as the watch app reads it (`CloudSource.issued`).
     static func issued(_ park: Park, forecast: Forecast?, detail: ForecastDetail?) -> Date? {
         CloudSource.issued(park, forecast: forecast?.updated, layers: detail?.layers?.updated)
