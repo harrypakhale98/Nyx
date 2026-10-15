@@ -19,6 +19,10 @@ nonisolated struct NightLookup: Sendable {
     /// Places with a closure in the last park update: their lines carry Nyx's fixed closure flag
     /// (`OnDeviceGuide.closureRecord`), never the Park Service's words.
     var closed: Set<String> = []
+    /// Where "tonight" is judged from: the app's `today`, so Ask Nyx's tonight is the Tonight tab's even
+    /// in the minutes after sunrise before it moves on. `now` stays the clock a forecast's age is read by.
+    var today: Date?
+    private var tonightClock: Date { today ?? now }
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
     /// A place by name: a curated park's exact short name, a spot's or catalogue place's exact name, then
@@ -46,13 +50,13 @@ nonisolated struct NightLookup: Sendable {
     }
     /// "2026-11-14" in the park's time zone, or tonight for "tonight", empty or unreadable text.
     func night(_ text: String, at park: Park) -> Date {
-        day(text, at: park)?.evening(in: park) ?? park.currentNight(at: now)
+        day(text, at: park)?.evening(in: park) ?? park.currentNight(at: tonightClock)
     }
     /// A real calendar day within a year of tonight; nil for anything else (February 30, month 13,
     /// year 0, 9999), which the tools read as tonight rather than computing a night no one asked for.
     func day(_ text: String, at park: Park) -> TripDay? {
         guard let day=TripDay(iso: text) else { return nil }
-        let tonight=TripDay(park.currentNight(at: now), calendar: park.calendar)
+        let tonight=TripDay(park.currentNight(at: tonightClock), calendar: park.calendar)
         return abs(tonight.days(to: day))<=366 ? day : nil
     }
     /// One line per night, worded like the app: score, band, what the score rests on, the Moon.
@@ -93,13 +97,13 @@ nonisolated struct NightLookup: Sendable {
         guard let park=park(named: name) else { return [Self.noMatch(name)] }
         // A named day is that day's night (never one already past); anything else is tonight.
         let ranked=day(first, at: park).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
-            ?? planner.bestNights([park], from: now, count: min(30, max(1, nights)), now: now, limit: limit)
+            ?? planner.bestNights([park], from: tonightClock, count: min(30, max(1, nights)), now: now, limit: limit)
         return ranked.map(describe)
     }
     func whatsUp(park name: String, on day: String) -> [String] {
         guard let park=park(named: name) else { return [Self.noMatch(name)] }
         let night=planner.night(park, on: night(day, at: park), now: now)
-        let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: now), table: table)
+        let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: tonightClock), table: table)
         return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
     }
     /// Where "near" is measured from: a park by its exact name, then a city or town from the
@@ -132,7 +136,7 @@ nonisolated struct NightLookup: Sendable {
             let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: origin.latitude, longitude: origin.longitude) : chosen
             near=pool.compactMap { park in distances[park.id].map { (park, $0) } }
         }
-        let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: now), now: now)) }, uniquingKeysWith: { a, _ in a })
+        let tonight=Dictionary(near.map { ($0.0.id, planner.night($0.0, on: $0.0.currentNight(at: tonightClock), now: now)) }, uniquingKeysWith: { a, _ in a })
         // Darkest first, by the sky alone as on Tonight: a closed park keeps its place and its record says it is closed.
         let ranked=near.sorted { a, b in
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }

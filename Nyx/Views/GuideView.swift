@@ -30,10 +30,10 @@ struct GuideView:View {
     @FocusState private var typing:Bool
     /// The tools find the curated parks, saved spots and the world catalogue by name.
     private var lookup:NightLookup { Self.lookup(model) }
-    /// On the app's clock (`present`, as every screen reads a forecast's age), never `today`, which
-    /// moves only when a night turns over: model spread, "not yet" and ties then agree with the park page.
+    /// Forecast ages on the app's clock (`present`), so model spread, "not yet" and ties agree with the park
+    /// page; tonight itself on `today`, so it is the Tonight tab's night even just after sunrise.
     static func lookup(_ model:PlanModel)->NightLookup {
-        NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.present,details:model.details,others:model.spots+model.catalog,closed:model.closedParks)
+        NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.present,details:model.details,others:model.spots+model.catalog,closed:model.closedParks,today:model.today)
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
