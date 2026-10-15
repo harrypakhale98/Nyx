@@ -285,7 +285,9 @@ nonisolated struct NotificationScheduler {
     }
     /// A place's time zone by id: a curated park, then a world catalogue place (both read once per process).
     static func placeZone(_ id:String)->TimeZone? {
-        ((try? ParkData.load())?.first { $0.id==id } ?? (try? CatalogData.load())?.first { $0.id==id })?.timeZone
+        // A removed spot (`pin:`) is in neither, so the catalogue is never read for one.
+        guard !id.hasPrefix(SavedSpots.prefix) else { return nil }
+        return ((try? ParkData.load())?.first { $0.id==id } ?? (try? CatalogData.load())?.first { $0.id==id })?.timeZone
     }
     /// Whether a pending reminder no longer says what the plan says: its title or words changed
     /// (the score moved from 94 to 91, the Moon reason or the models' agreement changed, a closure

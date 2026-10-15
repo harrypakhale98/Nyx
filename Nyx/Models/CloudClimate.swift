@@ -367,7 +367,7 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
     /// them leans on the usual clouds, the note says so without naming a mark no row shows.
     static func trip(_ nights: [Night], unmarked: [Night] = []) -> String? {
         let early=nights.contains { $0.basis.isEarlyLook } ? String(localized:"Nights marked \(quoted(String(localized:"Early look"))) ease the forecast toward each park's usual clouds for the month.") : nil
-        let others=unmarked.contains { $0.basis == .usual || $0.basis.isEarlyLook }
+        let others=unmarked.contains { ($0.basis == .usual && $0.usualCloud != nil) || $0.basis.isEarlyLook }
             ? String(localized:"In a stay of several nights, nights the forecast does not fully reach lean on each park's usual clouds for the month.") : nil
         let parts=[UsualCloudsNote(nights)?.marked, early, others].compactMap { $0 }
         return parts.isEmpty ? nil : Sentences.join(parts)
