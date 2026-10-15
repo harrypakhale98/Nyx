@@ -185,13 +185,13 @@ struct ParkList: View {
         List(selection: $model.selectedID) {
             Section {
                 ForEach(parks) { park in
-                    ParkRow(park: park, night: model.listNights[park.id], closure: inputs.closure(park), notes: inputs.spoken(park)).tag(park.id)
+                    ParkRow(park: park, night: model.listNights[park.id], closure: inputs.closure(park), notes: inputs.spoken(park, night: model.listNights[park.id])).tag(park.id)
                 }
             } header: {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(model.nightOffset == 0 ? String(localized: "Tonight") : nightName)
                     // What no score below counts yet (smoke, closures), said once rather than in every row.
-                    if let note = inputs.listNote(model.parks) {
+                    if let note = inputs.listNote(model.parks, nights: model.listNights) {
                         Text(note).font(.caption).foregroundStyle(palette.muted).textCase(nil).fixedSize(horizontal: false, vertical: true)
                     }
                 }

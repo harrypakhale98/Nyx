@@ -84,8 +84,8 @@ struct VisionSmokeAlertsTests {
         #expect(inputs.closure(jotr) == expected && cache.closure(for: jotr) == AlertRanking.closure([notice, Self.closure])?.displayTitle(park: jotr))
         #expect(inputs.closure(arch) == nil)
         // The row's spoken words: the closure, and nothing about smoke (it is counted).
-        #expect(inputs.spoken(jotr) == [Sentences.end(String(localized: "Closure alert: \(expected)"))])
-        #expect(inputs.spoken(arch).isEmpty)
+        #expect(inputs.spoken(jotr, night: nil) == [Sentences.end(String(localized: "Closure alert: \(expected)"))])
+        #expect(inputs.spoken(arch, night: nil).isEmpty)
         // No second line under a closure; where none stands, the iPhone's park-page line.
         #expect(inputs.accessNote(jotr) == nil)
         #expect(inputs.accessNote(arch) == String(localized: "No alerts in the last park update. Confirm access before travel."))
@@ -119,7 +119,7 @@ struct VisionSmokeAlertsTests {
         let inputs = ScoreInputs(smokeKnown: [jotr.id])
         #expect(inputs.unchecked(jotr))
         #expect(inputs.accessNote(jotr) == String(localized: "Access not checked. Confirm closures with the park."))
-        #expect(inputs.spoken(jotr) == [String(localized: "Closures not checked.")])
+        #expect(inputs.spoken(jotr, night: nil) == [String(localized: "Closures not checked.")])
     }
 
     // MARK: What is said when an input is missing
@@ -132,15 +132,15 @@ struct VisionSmokeAlertsTests {
         let smokeNotYet = String(localized: "No smoke forecast on this device yet, so smoke is not counted.")
         let alertsOff = String(localized: "Park alerts are off in Your privacy, so closures are not checked.")
         let off = ScoreInputs(smokeOn: false, smokeKnown: [jotr.id], alertsOn: false)
-        #expect(off.smokeNote(jotr) == smokeOff)
+        #expect(off.smokeNote(jotr, night: nil) == smokeOff)
         #expect(off.accessNote(jotr) == alertsOff)
-        #expect(off.spoken(jotr) == [String(localized: "Closures not checked."), String(localized: "Smoke not counted.")])
+        #expect(off.spoken(jotr, night: nil) == [String(localized: "Closures not checked."), String(localized: "Smoke not counted.")])
         #expect(off.listNote([jotr]) == Sentences.join([smokeOff, alertsOff]))
         let notYet = ScoreInputs()
-        #expect(notYet.smokeNote(jotr) == smokeNotYet)
+        #expect(notYet.smokeNote(jotr, night: nil) == smokeNotYet)
         #expect(notYet.listNote([jotr]) == Sentences.join([smokeNotYet, String(localized: "Access not checked. Confirm closures with the park.")]))
         let busy = ScoreInputs(smokeKnown: [jotr.id], alertsBusy: true)
-        #expect(busy.smokeNote(jotr) == nil)
+        #expect(busy.smokeNote(jotr, night: nil) == nil)
         #expect(busy.accessNote(jotr) == String(localized: "Park alerts are busy. Check current conditions on nps.gov."))
         // Switched off with a park update already here: its closures still stand, as on the iPhone.
         let code = try #require(jotr.nps)

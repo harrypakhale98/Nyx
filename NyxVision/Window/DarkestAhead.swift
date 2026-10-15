@@ -56,7 +56,7 @@ struct DarkestAhead: View {
         .hoverEffect()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(name(pick)))
-        .accessibilityValue(Text(verbatim: Sentences.join([Sentences.end(String(localized: "\(night.score.value) out of 100, \(night.bandWithBasis)"))]+inputs.spoken(park))))
+        .accessibilityValue(Text(verbatim: Sentences.join([Sentences.end(String(localized: "\(night.score.value) out of 100, \(night.bandWithBasis)"))]+inputs.spoken(park, night: night))))
         .accessibilityHint(Text("Shows this night in the planner"))
         .accessibilityAddTraits(chosen ? [.isButton, .isSelected] : .isButton)
     }
