@@ -75,6 +75,19 @@ import Testing
         #expect(!voice.contains("Confirm conditions"))
         #expect(DarknessAnswer.dialog(night, closure: nil, voiceOnly: true).hasPrefix("Tonight at \(jotr.shortName): "))
     }
+    /// The card beside the dialog carries the same closure, on screen and for VoiceOver, first.
+    @Test func darknessCardCarriesTheClosure() throws {
+        let jotr=try #require(try ParkData.load().first(where: { $0.id == "jotr" }))
+        let now=Date(timeIntervalSince1970: 1_796_158_800)
+        let answer=DarknessAnswer(park: jotr, forecast: nil, detail: nil, closure: "Keys View Road closed at night", now: now)
+        #expect(answer.closure == "Keys View Road closed at night")
+        let card=DarknessSnippetView(night: answer.night, closure: answer.closure)
+        #expect(card.closure == answer.closure)
+        let spoken=DarknessSnippetView.spoken(answer.night, closure: answer.closure)
+        #expect(spoken.hasPrefix("Closure alert: Keys View Road closed at night. "))
+        #expect(spoken.hasSuffix(DarknessSnippetView.spoken(answer.night, closure: nil)))
+        #expect(DarknessAnswer(park: jotr, forecast: nil, detail: nil, now: now).closure == nil)
+    }
     /// One sRGB curve for every target (contrast, the watch's red, Vision Pro's sky): it round-trips,
     /// clamps, and the watch's red levels measure as they did with their own copy.
     @Test func oneSRGBCurve() {
