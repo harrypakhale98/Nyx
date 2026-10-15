@@ -372,19 +372,18 @@ import Testing
                                        forecasts: Dictionary(uniqueKeysWithValues: all.map { ($0, total) }),
                                        details: Dictionary(uniqueKeysWithValues: all.map { ($0, detail) }), now: now)
         #expect((budget.data?.count ?? .max) <= WatchContext.byteBudget)
-        // Clouds for every place come before anyone's smoke: the places with clouds are the first ones
-        // in order, smoke and layers travel only beside clouds, and only a place whose clouds were
-        // left out is named as dropped (its smoke left out alone keeps the clouds' own time and age).
+        // Each place's clouds travel with its smoke and layers, or not at all: the places with clouds
+        // are the first ones in order, each with its smoke, and every other place is named as dropped.
         let clouded = all.filter { budget.forecasts[$0] != nil }
         #expect(!clouded.isEmpty && clouded == Array(all.prefix(clouded.count)))
-        #expect(Set(budget.details.keys).isSubset(of: Set(clouded)))
+        #expect(Set(budget.details.keys) == Set(clouded))
         #expect(budget.droppedParkIDs == all.filter { budget.forecasts[$0] == nil })
         for id in clouded {
             let place = try park(id)
-            #expect(!budget.droppedParkIDs.contains(id) && CloudSource.of(context: budget, park: place, now: now) == .fresh(now))
+            #expect(!budget.droppedParkIDs.contains(id) && budget.details[id]?.air != nil)
+            #expect(CloudSource.of(context: budget, park: place, now: now) == (place.aboveInversion == true && budget.details[id]?.layers == nil ? .missing(followed: true) : .fresh(now)))
         }
         #expect(budget.details[all[0]]?.air != nil && budget.details[all[0]]?.layers == nil)
-        if let lost = clouded.first(where: { budget.details[$0] == nil }) { #expect(!budget.droppedParkIDs.contains(lost)) }
     }
 
     // MARK: Beyond the forecast (K)

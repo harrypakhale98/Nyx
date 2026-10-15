@@ -24,6 +24,9 @@ nonisolated enum WatchSky {
         guard let url = contextURL, let data = context.data else { return }
         try? data.write(to: url, options: .atomic)
     }
+    /// Whether the iPhone's last context came from a Nyx whose data differs from this one's
+    /// (`WatchContext.dataDiffers`), so a face can say its score may differ from the iPhone's.
+    static var dataDiffers: Bool { readContext()?.dataDiffers ?? false }
     /// The iPhone's "Brighter red", from the last context it sent (`WatchContext.brighterRed`).
     static var brighterRed: Bool { defaults.bool(forKey: NightTint.key) }
     static var palette: PaletteChoice {

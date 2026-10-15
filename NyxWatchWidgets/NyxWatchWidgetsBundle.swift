@@ -37,7 +37,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
         // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         var cache: [String: SkyConditions] = [:]
-        return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, cache: &cache)
+        return WatchTimeline.entry(at: .now, snapshot: snapshot, look: .current, dataDiffers: WatchSky.dataDiffers, cache: &cache)
     }
     func timeline(for configuration: TonightParkIntent, in context: Context) async -> Timeline<WatchSkyEntry> {
         await Self.noteFacePlaces()
@@ -46,7 +46,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
             // Until the face is set to another place (or the place is saved again, which reloads every timeline).
             return Timeline(entries: [WatchSkyEntry(date: now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: now), unsaved: true)], policy: .never)
         }
-        return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current), now: now)
+        return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current, dataDiffers: WatchSky.dataDiffers), now: now)
     }
     /// Notes the places the Tonight complications on the faces are set to (`WatchSky.facePlaces`), so
     /// the watch names them the next time it asks the iPhone for clouds. Left as it was when the
@@ -220,7 +220,8 @@ struct DuskProvider: RelevanceEntriesProvider {
         // The closure from the snapshot, or from the iPhone's context for a park the snapshot no longer weighs.
         let closure = parks.contains { $0.id == id } ? snapshot?.closures[id] : context?.closures[id]
         return DuskEntry(entry: WatchSkyEntry(date: now, night: night, next: NightMilestone.next(after: now, in: night.sky), nightVision: look.nightVision(park: park, at: now),
-                                              closure: closure, cloudsOld: WatchTimeline.isOld(forecast?.updated, at: now)))
+                                              closure: closure, cloudsOld: WatchTimeline.isOld(WatchTimeline.issued(park, forecast: forecast, detail: detail), at: now),
+                                              dataDiffers: context?.dataDiffers ?? false))
     }
     func placeholder(context: Context) -> DuskEntry {
         var cache: [String: SkyConditions] = [:]

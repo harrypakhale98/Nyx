@@ -186,7 +186,9 @@ private struct ComplicationReview: View {
         let night = store.tonight(park, at: .now)
         let red = store.nightVision(at: .now)
         let entry = WatchSkyEntry(date: .now, night: night, next: NightMilestone.next(after: .now, in: night.sky), nightVision: red, closure: store.context?.closures[park.id],
-                                  cloudsOld: WatchTimeline.isOld(store.context?.forecasts[park.id]?.updated, at: .now))
+                                  cloudsOld: WatchTimeline.isOld(CloudSource.issued(park, forecast: store.context?.forecasts[park.id]?.updated,
+                                                                                    layers: store.context?.details[park.id]?.layers?.updated), at: .now),
+                                  dataDiffers: store.context?.dataDiffers ?? false)
         let moon = MoonEntry(date: .now, park: park, moon: MoonNow(at: .now, park: park), nightVision: red)
         let dark = NextDarkEntry(date: .now, park: park, moment: DarkMoment.next(at: park, now: .now), nightVision: red)
         // Countdowns are drawn for this moment: a live `.currentDate` reference inside an app scroll view
