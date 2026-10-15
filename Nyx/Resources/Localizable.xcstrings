@@ -20414,6 +20414,41 @@
         }
       }
     },
+    "Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Punktgröße folgt dem Wert; eine Wolke markiert bedeckten Himmel. Vergangene Nächte behalten nur einen blassen Punkt. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El tamaño del punto sigue al índice; una nube indica cielo cubierto. Las noches pasadas conservan solo un punto tenue. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La taille du point suit l’indice ; un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点の大きさはスコアを表し、雲の印は全天曇りを示します。過ぎた夜は淡い点だけが残ります。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
+          }
+        }
+      }
+    },
     "Double-tap, then slide a finger to explore the night.": {
       "extractionState": "manual",
       "localizations": {
@@ -26004,6 +26039,41 @@
         }
       }
     },
+    "Half-filled nights are an early look. A soft glow spans what three forecast models expect.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halb gefüllte Nächte sind eine erste Einschätzung. Ein sanfter Schein umfasst, was drei Vorhersagemodelle erwarten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Half-filled nights are an early look. A soft glow spans what three forecast models expect."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches de medio relleno son una vista anticipada. Un brillo suave abarca lo que esperan tres modelos de pronóstico."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits à moitié pleines sont une tendance. Un halo doux couvre ce qu’attendent trois modèles de prévision."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "半分塗りの夜は早めの見通しです。淡い光の帯は、3つの予報モデルが予想する範囲を示しています。"
+          }
+        }
+      }
+    },
     "Hawaiʻi": {
       "extractionState": "manual",
       "localizations": {
@@ -26729,41 +26799,6 @@
         }
       }
     },
-    "Hollow nights have no cloud forecast yet; half-filled ones are an early look. A soft glow spans what three forecast models expect.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leere Nächte haben noch keine Wolkenvorhersage; halb gefüllte sind eine erste Einschätzung. Ein sanfter Schein umfasst, was drei Vorhersagemodelle erwarten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hollow nights have no cloud forecast yet; half-filled ones are an early look. A soft glow spans what three forecast models expect."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las noches sin relleno aún no tienen pronóstico de nubes; las de medio relleno son una vista anticipada. Un brillo suave abarca lo que esperan tres modelos de pronóstico."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les nuits vides n’ont pas encore de prévision de nuages ; les nuits à moitié pleines sont une tendance. Un halo doux couvre ce qu’attendent trois modèles de prévision."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "白抜きの夜には、まだ雲予報がありません。半分塗りの夜は早めの見通しです。淡い光の帯は、3つの予報モデルが予想する範囲を示しています。"
-          }
-        }
-      }
-    },
     "Hollow nights have no full cloud forecast yet.": {
       "extractionState": "manual",
       "localizations": {
@@ -26795,6 +26830,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "白抜きの夜には、まだ雲予報がそろっていません。"
+          }
+        }
+      }
+    },
+    "Hollow: %@, so the Moon and darkness only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer: %@, also nur Mond und Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hollow: %@, so the Moon and darkness only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin relleno: %@, así que solo cuentan la Luna y la oscuridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vide : %@, donc seulement la Lune et l’obscurité."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白抜き：%@。月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Hollow: %@, so the park's usual clouds, or the Moon and darkness only where those are not known.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer: %@, also die übliche Bewölkung des Parks oder nur Mond und Dunkelheit, wo diese unbekannt ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hollow: %@, so the park's usual clouds, or the Moon and darkness only where those are not known."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin relleno: %@, así que cuenta la nubosidad habitual del parque, o solo la Luna y la oscuridad donde no se conoce."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vide : %@, donc la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白抜き：%@。公園の平年の雲量を使い、それが分からない場合は月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Hollow: %@, so the park's usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer: %@, also die übliche Bewölkung des Parks."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hollow: %@, so the park's usual clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin relleno: %@, así que cuenta la nubosidad habitual del parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vide : %@, donc la nébulosité habituelle du parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白抜き：%@。公園の平年の雲量を使っています。"
           }
         }
       }
@@ -37714,6 +37854,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存した公園はまだありません。Nyxで保存した公園がここに表示されます。"
+          }
+        }
+      }
+    },
+    "No smoke forecast on this device reaches this night, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Rauchvorhersage auf diesem Gerät reicht bis zu dieser Nacht, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device reaches this night, so smoke is not counted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún pronóstico de humo en este dispositivo llega a esta noche, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスの煙の予報はこの夜まで届いていないため、煙は考慮していません。"
           }
         }
       }
@@ -49940,37 +50115,107 @@
         }
       }
     },
-    "Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.": {
+    "Scores marked Estimate: %@. They count the Moon and darkness only.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mit „Schätzung“ markierte Werte haben noch keine Wolkenvorhersage und nutzen die übliche Bewölkung jedes Parks."
+            "value": "Mit „Schätzung“ markierte Werte: %@. Sie berücksichtigen nur Mond und Dunkelheit."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scores marked Estimate have no cloud forecast yet and use each park's usual clouds."
+            "value": "Scores marked Estimate: %@. They count the Moon and darkness only."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los índices marcados como Estimación aún no tienen pronóstico de nubes y usan la nubosidad habitual de cada parque."
+            "value": "Índices marcados como Estimación: %@. Solo cuentan la Luna y la oscuridad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les indices marqués Estimation n’ont pas encore de prévision de nuages et utilisent la nébulosité habituelle de chaque parc."
+            "value": "Indices marqués Estimation : %@. Ils ne comptent que la Lune et l’obscurité."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「推定」と表示されたスコアにはまだ雲予報がなく、各公園の平年の雲量を使っています。"
+            "value": "「推定」のスコア：%@。月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those are not known.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit „Schätzung“ markierte Werte: %@. Sie nutzen die übliche Bewölkung jedes Parks oder nur Mond und Dunkelheit, wo diese unbekannt ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores marked Estimate: %@. They use each park's usual clouds, or the Moon and darkness only where those are not known."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índices marcados como Estimación: %@. Usan la nubosidad habitual de cada parque, o solo la Luna y la oscuridad donde no se conoce."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「推定」のスコア：%@。各公園の平年の雲量を使い、それが分からない場所では月と暗さだけで計算しています。"
+          }
+        }
+      }
+    },
+    "Scores marked Estimate: %@. They use each park's usual clouds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit „Schätzung“ markierte Werte: %@. Sie nutzen die übliche Bewölkung jedes Parks."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores marked Estimate: %@. They use each park's usual clouds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índices marcados como Estimación: %@. Usan la nubosidad habitual de cada parque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「推定」のスコア：%@。各公園の平年の雲量を使っています。"
           }
         }
       }
@@ -53203,37 +53448,37 @@
         }
       }
     },
-    "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.": {
+    "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gefüllt: vollständige Vorhersage. Halb gefüllt: erste Einschätzung, die Vorhersage an die übliche Bewölkung angenähert. Leer: noch keine Wolkenvorhersage, also die übliche Bewölkung des Parks. Die Punktgröße folgt dem Wert; eine Wolke markiert bedeckten Himmel. Vergangene Nächte behalten nur einen blassen Punkt. Ein kleiner Strich markiert das Maximum eines Meteorstroms, ein schattierter Mond eine sichtbare Mondfinsternis; beides ändert den Wert nicht."
+            "value": "Gefüllt: vollständige Vorhersage. Halb gefüllt: erste Einschätzung, die Vorhersage an die übliche Bewölkung angenähert."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score."
+            "value": "Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Relleno: pronóstico completo. Medio relleno: vista anticipada, el pronóstico ajustado hacia la nubosidad habitual. Sin relleno: aún sin pronóstico de nubes, así que cuenta la nubosidad habitual del parque. El tamaño del punto sigue al índice; una nube indica cielo cubierto. Las noches pasadas conservan solo un punto tenue. Un pequeño trazo marca el máximo de una lluvia de meteoros, y una Luna sombreada, un eclipse de Luna visible; ninguno cambia el índice."
+            "value": "Relleno: pronóstico completo. Medio relleno: vista anticipada, el pronóstico ajustado hacia la nubosidad habitual."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision rapprochée de la nébulosité habituelle. Vide : pas encore de prévision de nuages, donc la nébulosité habituelle du parc. La taille du point suit l’indice ; un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
+            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision rapprochée de la nébulosité habituelle."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "塗りつぶし：予報がそろっています。半分塗り：早めの見通しで、予報を平年の雲量に寄せています。白抜き：まだ雲予報がないため、公園の平年の雲量を使っています。点の大きさはスコアを表し、雲の印は全天曇りを示します。過ぎた夜は淡い点だけが残ります。小さな流れの印は流星群の極大を、影のある月は見られる月食を示します。どちらもスコアは変えません。"
+            "value": "塗りつぶし：予報がそろっています。半分塗り：早めの見通しで、予報を平年の雲量に寄せています。"
           }
         }
       }
@@ -74451,6 +74696,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "雲予報はまだありません"
+          }
+        }
+      }
+    },
+    "no cloud forecast yet, or unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "noch keine Wolkenvorhersage oder nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no cloud forecast yet, or unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aún sin pronóstico de nubes, o no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pas encore de prévision de nuages, ou indisponible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雲予報はまだないか、取得できません"
           }
         }
       }

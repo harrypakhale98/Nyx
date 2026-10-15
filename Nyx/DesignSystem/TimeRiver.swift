@@ -90,7 +90,7 @@ struct TimeRiver: View {
     private let loupeHeadroom=24.0
     /// The loupe is up: a horizontal scrub is under way (or a DEBUG capture holds it up).
     private var lifted:Bool { scrubbing==true || DebugScenario.isEnabled("loupe") }
-    private let tip=RiverTip()
+    private var tip:RiverTip { RiverTip(hollow:UsualCloudsNote(nights)?.hollow) }
     private var tipShown:Bool { showsTip && !nights.isEmpty && !typeSize.isAccessibilitySize }
     /// While the tip is above the river the loupe may not rise into its arrow.
     private var tipHeadroom:Double? { tipShown && tip.shouldDisplay ? 0 : nil }
@@ -635,7 +635,12 @@ private struct LoupePreview: View {
 }
 /// The river explains itself once, then gets out of the way: it closes after the first scrub.
 struct RiverTip: Tip {
+    /// What the river's hollow nights rest on (`UsualCloudsNote.hollow`); nil when none is hollow.
+    var hollow: String?=nil
     var title: Text { Text("Drag along the nights") }
-    var message: Text? { Text("Hollow nights have no cloud forecast yet; half-filled ones are an early look. A soft glow spans what three forecast models expect.") }
+    var message: Text? { Text(Self.message(hollow:hollow)) }
+    nonisolated static func message(hollow:String?)->String {
+        Sentences.join([hollow ?? "",String(localized:"Half-filled nights are an early look. A soft glow spans what three forecast models expect.")])
+    }
     var image: Image? { Image(systemName:"hand.draw") }
 }

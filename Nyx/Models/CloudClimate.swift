@@ -305,4 +305,42 @@ extension Night {
         return Sentences.join([String(localized:"\(day) at \(park.shortName): \(score.value), \(score.band.label)."), caveat])
     }
 }
+/// What the nights shown on the usual clouds rest on, in the rows' own words: "not yet" or
+/// "unavailable" as `basisLabel` says it (`beyondForecast`), the usual clouds or the Moon and
+/// darkness only as `basisCaption` says it (`usualCloud`). One source for the note under a list
+/// ("Scores marked Estimate: …", where such a row reads "Estimate") and a month's key ("Hollow: …").
+/// Nil when no night shown rests on the usual clouds, so nothing is explained that no row shows.
+nonisolated struct UsualCloudsNote: Equatable, Sendable {
+    let notYet: Bool, unavailable: Bool, usual: Bool, bare: Bool
+    init?(_ nights: [Night]) {
+        let shown=nights.filter { $0.basis == .usual }
+        guard !shown.isEmpty else { return nil }
+        notYet=shown.contains { $0.beyondForecast }; unavailable=shown.contains { !$0.beyondForecast }
+        usual=shown.contains { $0.usualCloud != nil }; bare=shown.contains { $0.usualCloud == nil }
+    }
+    /// "cloud forecast unavailable", "no cloud forecast yet", or both.
+    var label: String {
+        switch (notYet, unavailable) {
+        case (true, true): String(localized:"no cloud forecast yet, or unavailable")
+        case (true, false): String(localized:"no cloud forecast yet")
+        default: String(localized:"cloud forecast unavailable")
+        }
+    }
+    /// Under a list of places' scores (Tonight, Parks, the map).
+    var estimate: String {
+        switch (usual, bare) {
+        case (true, true): String(localized:"Scores marked Estimate: \(label). They use each park's usual clouds, or the Moon and darkness only where those are not known.")
+        case (true, false): String(localized:"Scores marked Estimate: \(label). They use each park's usual clouds.")
+        default: String(localized:"Scores marked Estimate: \(label). They count the Moon and darkness only.")
+        }
+    }
+    /// One place's nights drawn hollow (the calendar's key, the river's tip).
+    var hollow: String {
+        switch (usual, bare) {
+        case (true, true): String(localized:"Hollow: \(label), so the park's usual clouds, or the Moon and darkness only where those are not known.")
+        case (true, false): String(localized:"Hollow: \(label), so the park's usual clouds.")
+        default: String(localized:"Hollow: \(label), so the Moon and darkness only.")
+        }
+    }
+}
 #endif

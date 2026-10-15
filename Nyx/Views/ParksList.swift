@@ -105,8 +105,8 @@ struct ParksView: View {
                 // Waiting for the world, no count yet: "63 places" would describe only the US parks.
                 if !waiting { Eyebrow(text:eyebrow) }
                 if typeSize.isAccessibilitySize { InlineSearchField(text:$search,prompt:searchPrompt,focus:$searchFocused) }
-                // Only worth saying when a row actually reads "Estimate".
-                if !waiting, estimateShown(shown:shown,own:own) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+                // Only worth saying when a row actually reads "Estimate", in the rows' own words.
+                if !waiting, let note=estimateNote(shown:shown,own:own) { Text(note.estimate).font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if stepFreeOnly { Text("Parks with at least one viewing spot that nps.gov describes as step-free or partly step-free. Check with the park before you go.").font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if DebugScenario.state=="loading" || waiting { ForEach(0..<5,id:\.self) { _ in SkeletonRow() } }
                 else if nothing || DebugScenario.state=="empty" { CalmState(symbol:"sparkle.magnifyingglass",title:"No parks in this sky",message:"Try another name or widen your filters.") }
@@ -244,8 +244,8 @@ struct ParksView: View {
     }
     /// "Estimate" is explained when a row on screen reads it: the parks as before, or abroad the first
     /// rows of the person's own country (already scored, being the first on screen; never the whole country).
-    private func estimateShown(shown:[Park],own:CountryGroup?)->Bool {
-        shown.contains { model.night($0).basis == .usual } || (own?.places.prefix(6).contains { model.night($0).basis == .usual } ?? false)
+    private func estimateNote(shown:[Park],own:CountryGroup?)->UsualCloudsNote? {
+        UsualCloudsNote((shown+(own?.places.prefix(6) ?? [])).map { model.night($0) })
     }
     /// The eyebrow over the list: "63 places to look up", or "12 of 63 parks" while a filter narrows it.
     nonisolated static func countLine(shown:Int,of total:Int,narrowed:Bool)->String {

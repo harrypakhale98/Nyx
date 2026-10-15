@@ -217,7 +217,7 @@ struct CalendarView: View {
                 VStack(alignment:.leading,spacing:24) {
                     heading(park); monthBar(park,shown)
                     if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
-                    windowPanel(park,shown); legend
+                    windowPanel(park,shown); legend(shown)
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
             }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
@@ -498,8 +498,13 @@ struct CalendarView: View {
             }
         } }
     }
-    @ViewBuilder private var legend: some View {
-        Text("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds. Hollow: no cloud forecast yet, so the park's usual clouds. Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.").font(.caption).foregroundStyle(palette.muted)
+    nonisolated static func legend(_ ahead:[Night])->String {
+        Sentences.join([String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."),UsualCloudsNote(ahead)?.hollow ?? "",
+                        String(localized:"Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.")])
+    }
+    /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights are faint dots, not hollow.
+    @ViewBuilder private func legend(_ data:Month)->some View {
+        Text(Self.legend(data.nights.filter { $0.id>=data.tonight })).font(.caption).foregroundStyle(palette.muted)
         if access.differentiate { Text(Sentences.join([NightMark.legend,String(localized:"A line through the date marks a night that has passed.")])).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
     }
     /// The chosen night beside the month: its breakdown, and the ways into that night (the park's
