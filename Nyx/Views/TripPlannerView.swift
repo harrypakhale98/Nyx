@@ -214,7 +214,7 @@ struct TripPlannerView: View {
                     }
                 }
                 VStack(alignment:.leading,spacing:6) {
-                    if plan.unforecastNights>0 { Text("Nights marked \"No cloud forecast yet\" or \"Early look\" count each park's usual clouds for the month, in full or in part.").fixedSize(horizontal:false,vertical:true) }
+                    if let note=UsualCloudsNote.trip(TripStay.marked(plan.stops)) { Text(note).fixedSize(horizontal:false,vertical:true) }
                     Text("Distances are straight lines, not roads. Scores are estimates; a closure in the last park update counts against a park. Check closures and the forecast before you go.").fixedSize(horizontal:false,vertical:true)
                 }.font(.caption).foregroundStyle(palette.muted)
                 ShareLink(item:TripPlanner.shareText(plan,distance:Self.miles)) { Label("Share plan",systemImage:"square.and.arrow.up") }.buttonStyle(.bordered)
@@ -287,6 +287,9 @@ nonisolated struct TripStay: Identifiable, Sendable {
     var isBest:Bool { stops.contains(where:\.isBest) }
     /// The stay's darkest night, whose score leads the row.
     var best:TripStop? { stops.first(where:\.isBest) ?? stops.max { NightPlanner.better($1.night,$0.night) } }
+    /// The nights whose marks the rows show ("Early look", "Cloud forecast unavailable"): each
+    /// stay's leading night, so the note under the plan names no mark that no row shows.
+    static func marked(_ stops:[TripStop])->[Night] { TripPlanner.stays(stops).compactMap { TripStay($0)?.best?.night } }
 }
 /// One stay of the plan: the dates, the park, the score, why, and what to check. A stay of several
 /// nights reads "3 nights at Death Valley" with each night's score beneath it.

@@ -342,5 +342,31 @@ nonisolated struct UsualCloudsNote: Equatable, Sendable {
         default: String(localized:"Hollow: \(label), so the Moon and darkness only.")
         }
     }
+    /// The rows' own marks (`basisLabel`), quoted as the language quotes: "No cloud forecast yet",
+    /// "Cloud forecast unavailable", or both.
+    var marks: String {
+        let yet=Self.quoted(String(localized:"No cloud forecast yet")), unavailable=Self.quoted(String(localized:"Cloud forecast unavailable"))
+        switch (notYet, self.unavailable) {
+        case (true, true): return String(localized:"\(yet) or \(unavailable)")
+        case (true, false): return yet
+        default: return unavailable
+        }
+    }
+    private static func quoted(_ mark: String) -> String { String(localized:"\"\(mark)\"") }
+    /// Under a list whose rows name each night's mark (the trip planner's stays).
+    var marked: String {
+        switch (usual, bare) {
+        case (true, true): String(localized:"Nights marked \(marks) count each park's usual clouds for the month, or the Moon and darkness only where those are not known.")
+        case (true, false): String(localized:"Nights marked \(marks) count each park's usual clouds for the month.")
+        default: String(localized:"Nights marked \(marks) count the Moon and darkness only.")
+        }
+    }
+    /// The trip planner's note: each mark its stays show (`basisLabel`, "Early look" included) and
+    /// what those nights count; nil when every night has a full forecast.
+    static func trip(_ nights: [Night]) -> String? {
+        let early=nights.contains { $0.basis.isEarlyLook } ? String(localized:"Nights marked \(quoted(String(localized:"Early look"))) ease the forecast toward each park's usual clouds for the month.") : nil
+        let parts=[UsualCloudsNote(nights)?.marked, early].compactMap { $0 }
+        return parts.isEmpty ? nil : Sentences.join(parts)
+    }
 }
 #endif
