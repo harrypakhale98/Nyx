@@ -184,4 +184,55 @@ import Testing
         #expect(!FieldActivities.changed(old, scored(heading, 94, "Pristine", nil, at: attributes.dusk.addingTimeInterval(-3*86400+3600)), attributes: attributes))
         #expect(FieldActivities.changed(a, scored(heading, 94, "Pristine", "Park Boulevard closed", at: attributes.dusk.addingTimeInterval(-3600)), attributes: attributes))
     }
+
+    // MARK: Field mode's night
+
+    /// Field mode opens its Live Activity with the park's closure, as Tonight and the park page show it.
+    @Test func fieldActivityStartsWithTheClosure() throws {
+        let model=PlanModel(weather: WeatherService(transport: StubHTTP([:]), persist: false), parkStore: ParkStore(transport: StubHTTP([:]), persist: false),
+                            detail: ForecastDetailService(transport: StubHTTP([:]), persist: false), defaults: isolatedDefaults())
+        let jotr=try park("jotr")
+        model.enrichments[jotr.id]=ParkEnrichment(updated: .now, alerts: [ParkAlert(id: "c", title: "Keys View Road closed", description: "", category: "Park Closure")],
+                                                  programs: [], description: nil, programsUpdated: nil)
+        let session=FieldSession(park: jotr, model: model, changesPhone: false)
+        let closure=try #require(model.closure(jotr))
+        #expect(session.closure == closure)
+        let now=Date.now
+        let scored=FieldActivities.fieldScored(session.score, closure: session.closure, now: now)
+        let attributes=FieldActivityAttributes(night: session.night, score: scored.score, band: scored.band, closure: session.closure)
+        let state=attributes.content(at: now, nightVision: true, scored: scored).state
+        #expect(attributes.closure(state) == closure && attributes.score(state) == session.score.value)
+        #expect(attributes.band(state) == session.score.bandWithBasis)
+    }
+
+    /// While field mode is open its night keeps the score the field screen shows: a later publish
+    /// with new clouds changes nothing on the face, a new closure still reaches it. Once field mode
+    /// closes, the night follows the forecast again.
+    @Test func fieldActivityKeepsTheFieldScreensScore() throws {
+        let (jotr, sky, attributes, _)=try followed()
+        let open=attributes.dusk.addingTimeInterval(3600)
+        let field=attributes.content(at: open, nightVision: true, scored: Scored(score: 94, band: "Pristine", closure: "Keys View Road closed", at: open)).state
+        let later=open.addingTimeInterval(1800)
+        let hours=(0..<(16*24)).map { floor(later.timeIntervalSince1970/86400)*86400-86400+Double($0)*3600 }
+        let cloudy=NightPlanner(forecasts: ["jotr": Forecast(updated: later, times: hours, clouds: hours.map { _ in 80 })]).night(jotr, on: sky.evening, now: later)
+        try #require(cloudy.score.value != 94)
+        let publish=FieldActivities.Now(night: cloudy, closure: "Keys View Road closed", closureKnown: true)
+        func action(_ scored: Scored?) -> FieldActivities.Action {
+            FieldActivities.action(pending: false, canRequest: true, attributes: attributes, previous: field, scored: scored)
+        }
+        let held=FieldActivities.scored(publish, attributes: attributes, previous: field, now: later, held: true)
+        #expect(held?.score == 94 && held?.band == "Pristine" && action(held) == .keep)
+        let posted=FieldActivities.scored(FieldActivities.Now(night: cloudy, closure: "Park Boulevard closed", closureKnown: true), attributes: attributes, previous: field, now: later, held: true)
+        #expect(posted?.score == 94 && posted?.closure == "Park Boulevard closed" && action(posted) == .update)
+        // Not held (field mode closed): the night takes the new clouds.
+        let free=FieldActivities.scored(publish, attributes: attributes, previous: field, now: later)
+        #expect(free?.score == cloudy.score.value && action(free) == .update)
+        // Only field mode's own park and night are held, and only until it closes.
+        FieldActivities.hold(parkID: jotr.id, night: sky.evening)
+        #expect(FieldActivities.holds(attributes))
+        FieldActivities.release(parkID: "deva")
+        #expect(FieldActivities.holds(attributes))
+        FieldActivities.release(parkID: jotr.id)
+        #expect(!FieldActivities.holds(attributes))
+    }
 }

@@ -63,23 +63,42 @@ extension FieldActivityAttributes {
     nonisolated static func isFollowing(park: Park, night: Date) -> Bool { live.contains { $0.attributes.covers(parkID: park.id, night: night) } }
     /// Field mode for tonight. A night already followed at this park becomes the field face (no
     /// longer "heading out"); other running activities end, while nights followed for later stay.
+    /// Either way it shows the field screen's score and the park's closure (`fieldScored`), and keeps
+    /// that score while field mode is open (`held`).
     static func start(night: FieldNight, score: DarknessScore, nightVision: Bool, closure: String?=nil, now: Date = .now) async {
         guard enabled, !night.isOver(at: now) else { return }
         let evening=night.sky.evening
+        let scored=fieldScored(score, closure: closure, now: now)
+        hold(parkID: night.park.id, night: evening)
         for activity in live {
             let same=activity.attributes.covers(parkID: night.park.id, night: evening)
             if same, activity.activityState != .pending {
-                await activity.update(activity.attributes.content(at: now, nightVision: nightVision, heading: false))
+                await activity.update(activity.attributes.content(at: now, nightVision: nightVision, heading: false, scored: scored))
                 NightFollowing.shared.reload()
                 return
             }
             if same || activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
         }
-        // The band carries its basis ("Excellent, usual clouds"): the Lock Screen has no room for the caption.
         let attributes=FieldActivityAttributes(night: night, score: score.value, band: score.bandWithBasis, closure: closure)
-        let scored=FieldActivityAttributes.Scored(score: score.value, band: score.bandWithBasis, closure: closure, at: now)
         _=try? Item.request(attributes: attributes, content: attributes.content(at: now, nightVision: nightVision, scored: scored))
         NightFollowing.shared.reload()
+    }
+    /// What field mode's night shows: the session's score, read once when field mode opened, and the
+    /// park's closure. The band carries its basis ("Excellent, usual clouds"): the Lock Screen has no
+    /// room for the caption.
+    static func fieldScored(_ score: DarknessScore, closure: String?, now: Date) -> FieldActivityAttributes.Scored {
+        .init(score: score.value, band: score.bandWithBasis, closure: closure, at: now)
+    }
+    /// The park and night of the field screen now open. The field screen keeps one score for the
+    /// session (`FieldSession.score`), so its activity does too: a refresh with new forecasts leaves
+    /// its score alone and brings only the closure up to date (`scored(_:attributes:previous:now:held:)`).
+    /// Let go when field mode closes; the night's activity then follows the forecast like any other.
+    private(set) static var held: (parkID: String, night: Date)?
+    static func hold(parkID: String, night: Date) { held=(parkID, night) }
+    /// Field mode at this park closed (its activity may run on to dawn).
+    static func release(parkID: String) { if held?.parkID == parkID { held=nil } }
+    static func holds(_ attributes: FieldActivityAttributes) -> Bool {
+        held.map { attributes.covers(parkID: $0.parkID, night: $0.night) } ?? false
     }
     /// What a followed night is now, handed to `refresh` by whoever holds fresh forecasts and park
     /// alerts: its night as Nyx scores it, and the park's closure line once its alerts have been
@@ -96,10 +115,13 @@ extension FieldActivityAttributes {
         min(now, night.forecastUpdated ?? now)
     }
     /// The score, band and closure a followed night should carry, from what it is now. Nil `now`
-    /// keeps what the state already carries.
-    nonisolated static func scored(_ current: Now?, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState, now: Date) -> FieldActivityAttributes.Scored? {
+    /// keeps what the state already carries. `held`: field mode's open night, which keeps the score
+    /// its field screen shows and takes only the closure.
+    nonisolated static func scored(_ current: Now?, attributes: FieldActivityAttributes, previous: FieldActivityAttributes.ContentState, now: Date,
+                                   held: Bool=false) -> FieldActivityAttributes.Scored? {
         guard let current else { return previous.scored }
         let closure=current.closureKnown ? current.closure : attributes.closure(previous)
+        if held { return .init(score: attributes.score(previous), band: attributes.band(previous), closure: closure, at: previous.scoredAt ?? now) }
         return .init(score: current.night.score.value, band: current.night.bandWithBasis, closure: closure, at: scoredAt(current.night, now: now))
     }
     /// What a refresh does to a followed night.
@@ -179,7 +201,7 @@ extension FieldActivityAttributes {
         for activity in Item.activities {
             let attributes=activity.attributes, previous=activity.content.state
             let found=current?(attributes)
-            let scored=Self.scored(found, attributes: attributes, previous: previous, now: now)
+            let scored=Self.scored(found, attributes: attributes, previous: previous, now: now, held: holds(attributes))
             switch activity.activityState {
             case .pending:
                 if now>=attributes.dawn { await activity.end(nil, dismissalPolicy: .immediate) }
@@ -207,6 +229,7 @@ extension FieldActivityAttributes {
     }
     /// Leaves field mode's night: ends what is running; nights followed for later stay scheduled.
     static func stop() async {
+        held=nil
         for activity in Item.activities where activity.activityState != .pending { await activity.end(nil, dismissalPolicy: .immediate) }
         NightFollowing.shared.reload()
     }
