@@ -100,7 +100,8 @@ import WidgetKit
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
         // Reminders too: a pending one names the closure (or stops naming it) before it fires.
         if again == nil, Self.closures(model) != closures {
-            let snapshot=await writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model)
+            // What is published is what the snapshot was built from: a change landing during the write is still seen as new.
+            let data=followedData(model), snapshot=await writeSnapshot(model,parks); pushWatch(model); published=data; await Self.refreshFollowed(model)
             await remind(model,snapshot)
         }
         Self.scheduleRefresh()
@@ -358,11 +359,14 @@ import WidgetKit
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
         let moonsDrawn=await renderWidgetMoons(model,parks)
+        // Taken as the snapshot is built (before its write suspends), so a change that lands during
+        // the write still differs from `published` and is republished when this run ends.
+        let data=followedData(model)
         let snapshot=await writeSnapshot(model,parks,moonsDrawn:moonsDrawn)
         // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
         NyxShortcuts.updateAppShortcutParameters()
         pushWatch(model)
-        published=followedData(model)
+        published=data
         // A followed night's Live Activity says what the widget now says, on every path that publishes.
         await Self.refreshFollowed(model)
         await remind(model,snapshot)
