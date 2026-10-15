@@ -356,8 +356,8 @@ struct TonightView: View {
         if best.count>1 {
             Eyebrow(text:"More skies within reach")
             ForEach(Array(best.dropFirst())) { park in NavigationLink(value:ZoomRoute.row(park)) { ParkRow(night:model.night(park),closure:model.closure(park),week:model.nights(park,from:model.tonight(park),count:7)) }.buttonStyle(.plain).matchedTransitionSource(id:ZoomRoute.row(park).source,in:zoom).parkRowActions(park) { saveFailed=true };Divider().overlay(palette.line) }
-            // Only worth saying when a row actually reads "Estimate", as on Parks.
-            if best.dropFirst().contains(where:{ model.night($0).basis == .usual }) { Text("Scores marked Estimate have no cloud forecast yet and use each park's usual clouds.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
+            // Only worth saying when a row actually reads "Estimate", in the rows' own words, as on Parks.
+            if let note=UsualCloudsNote(best.dropFirst().map { model.night($0) }) { Text(note.estimate).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
         }
     }
     /// The sky over the starting point itself, for anyone not travelling tonight: the device's
