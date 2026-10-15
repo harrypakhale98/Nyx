@@ -1770,6 +1770,41 @@
         }
       }
     },
+    "%@ · observers judged Bortle %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Beobachter schätzten Bortle %lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · observers judged Bortle %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · los observadores estimaron Bortle %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Bortle %lld selon les observateurs"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · 観測者の判定はボートル%lld"
+          }
+        }
+      }
+    },
     "%@ – %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3729,6 +3764,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@：%@"
+          }
+        }
+      }
+    },
+    "%@: %@ magnitudes per square arcsecond in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ Größenklassen pro Quadratbogensekunde, %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ magnitudes per square arcsecond in %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ magnitudes por segundo de arco cuadrado en %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%3$@年、1平方秒角あたり%2$@等級。"
+          }
+        }
+      }
+    },
+    "%@: %@ magnitudes per square arcsecond in %@; observers judged Bortle %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ Größenklassen pro Quadratbogensekunde, %3$@; Beobachter schätzten Bortle %4$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ magnitudes per square arcsecond in %@; observers judged Bortle %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ magnitudes por segundo de arco cuadrado en %3$@; los observadores estimaron Bortle %4$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@ ; Bortle %4$lld selon les observateurs."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%3$@年、1平方秒角あたり%2$@等級。観測者の判定はボートル%4$lld。"
           }
         }
       }
@@ -9614,37 +9719,37 @@
         }
       }
     },
-    "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the hours of true darkness: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy.": {
+    "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the hours of true darkness: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. The same service's dust forecast tells dust from smoke: where at least 50 µg/m³ of dust outweighs all fine particles, the park's air details say dust instead of smoke. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die aerosoloptische Dicke bei 550 nm aus der globalen CAMS-Vorhersage (Copernicus Atmosphere Monitoring Service), über den Luftqualitätsdienst von Open-Meteo, reicht etwa fünf Tage weit. Sie wird über die Stunden echter Dunkelheit gemittelt: unter 0,1 ist klare Luft, 0,1 bis 0,25 leichter Dunst, 0,25 bis 0,5 Dunst oder Rauch, der die Milchstraße blass wirken lässt, und ab 0,5 dichter Rauch oder Dunst, der schwache Sterne verbirgt. Ab 0,25 erscheint neben dem Wert ein Hinweis, und Rauch begrenzt ihn: höchstens 74 ab 0,25, höchstens 59 ab 0,5. Reicht keine Rauchvorhersage bis zu einer Nacht, wird nichts begrenzt. Luftqualitätsdaten: enthalten veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo, von Nyx über die echte Dunkelheit der Nacht gemittelt. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten. Du kannst diese Anfrage unter „Deine Privatsphäre“ ausschalten."
+            "value": "Die aerosoloptische Dicke bei 550 nm aus der globalen CAMS-Vorhersage (Copernicus Atmosphere Monitoring Service), über den Luftqualitätsdienst von Open-Meteo, reicht etwa fünf Tage weit. Sie wird über die Stunden echter Dunkelheit gemittelt: unter 0,1 ist klare Luft, 0,1 bis 0,25 leichter Dunst, 0,25 bis 0,5 Dunst oder Rauch, der die Milchstraße blass wirken lässt, und ab 0,5 dichter Rauch oder Dunst, der schwache Sterne verbirgt. Ab 0,25 erscheint neben dem Wert ein Hinweis, und Rauch begrenzt ihn: höchstens 74 ab 0,25, höchstens 59 ab 0,5. Reicht keine Rauchvorhersage bis zu einer Nacht, wird nichts begrenzt. Die Staubvorhersage desselben Dienstes unterscheidet Staub von Rauch: Wo mindestens 50 µg/m³ Staub alle Feinpartikel übertreffen, nennen die Luftangaben des Parks Staub statt Rauch. Luftqualitätsdaten: enthalten veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo, von Nyx über die echte Dunkelheit der Nacht gemittelt. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten. Du kannst diese Anfrage unter „Deine Privatsphäre“ ausschalten."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the hours of true darkness: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy."
+            "value": "Aerosol optical depth at 550 nm, from the CAMS global forecast (Copernicus Atmosphere Monitoring Service) through Open-Meteo's air-quality service, covers about five days. It is averaged over the hours of true darkness: below 0.1 is clear air, 0.1 to 0.25 light haze, 0.25 to 0.5 haze or smoke that makes the Milky Way look faint, and 0.5 or more heavy smoke or haze that hides faint stars. From 0.25 a caveat appears beside the score, and smoke caps it: at most 74 from 0.25, at most 59 from 0.5. When no smoke forecast reaches a night, nothing is capped. The same service's dust forecast tells dust from smoke: where at least 50 µg/m³ of dust outweighs all fine particles, the park's air details say dust instead of smoke. Air-quality data: Contains modified Copernicus Atmosphere Monitoring Service information (2026), through Open-Meteo, averaged over the night's true darkness by Nyx. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. You can switch this request off in Your privacy."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La profundidad óptica de aerosoles a 550 nm, del pronóstico global CAMS (Copernicus Atmosphere Monitoring Service) a través del servicio de calidad del aire de Open-Meteo, cubre unos cinco días. Se promedia sobre las horas de oscuridad total: menos de 0.1 es aire limpio; de 0.1 a 0.25, bruma ligera; de 0.25 a 0.5, bruma o humo que hacen ver tenue la Vía Láctea, y 0.5 o más, humo o bruma densos que ocultan las estrellas débiles. A partir de 0.25 aparece una advertencia junto al índice, y el humo lo limita: como máximo 74 desde 0.25 y como máximo 59 desde 0.5. Cuando ningún pronóstico de humo llega a una noche, no se limita nada. Datos de calidad del aire: contienen información modificada del Copernicus Atmosphere Monitoring Service (2026), a través de Open-Meteo, promediados por Nyx sobre la oscuridad total de la noche. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene. Puedes desactivar esta solicitud en Tu privacidad."
+            "value": "La profundidad óptica de aerosoles a 550 nm, del pronóstico global CAMS (Copernicus Atmosphere Monitoring Service) a través del servicio de calidad del aire de Open-Meteo, cubre unos cinco días. Se promedia sobre las horas de oscuridad total: menos de 0.1 es aire limpio; de 0.1 a 0.25, bruma ligera; de 0.25 a 0.5, bruma o humo que hacen ver tenue la Vía Láctea, y 0.5 o más, humo o bruma densos que ocultan las estrellas débiles. A partir de 0.25 aparece una advertencia junto al índice, y el humo lo limita: como máximo 74 desde 0.25 y como máximo 59 desde 0.5. Cuando ningún pronóstico de humo llega a una noche, no se limita nada. El pronóstico de polvo del mismo servicio distingue el polvo del humo: donde al menos 50 µg/m³ de polvo superan a todas las partículas finas, los detalles del aire del parque dicen polvo en lugar de humo. Datos de calidad del aire: contienen información modificada del Copernicus Atmosphere Monitoring Service (2026), a través de Open-Meteo, promediados por Nyx sobre la oscuridad total de la noche. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene. Puedes desactivar esta solicitud en Tu privacidad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur les heures d’obscurité totale : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. Données de qualité de l’air : contiennent des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
+            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur les heures d’obscurité totale : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. La prévision de poussière du même service distingue la poussière de la fumée : là où au moins 50 µg/m³ de poussière l’emportent sur l’ensemble des particules fines, les détails de l’air du parc parlent de poussière plutôt que de fumée. Données de qualité de l’air : contiennent des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "550 nmのエアロゾル光学的厚さは、Open-Meteoの大気質サービスを通じたCAMS全球予報（コペルニクス大気監視サービス）によるもので、約5日先までをカバーします。完全に暗い時間帯で平均し、0.1未満は澄んだ空気、0.1〜0.25は薄いもや、0.25〜0.5は天の川がかすんで見えるもやや煙、0.5以上は暗い星を隠す濃い煙やもやです。0.25以上になるとスコアの横に注意書きが表示され、煙によってスコアに上限がかかります。0.25以上では最大74、0.5以上では最大59です。煙の予報が届いていない夜には、上限はかかりません。大気質データ：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含みます。Open-Meteo経由。Nyxがその夜の完全に暗い時間で平均しています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。このリクエストは「あなたのプライバシー」でオフにできます。"
+            "value": "550 nmのエアロゾル光学的厚さは、Open-Meteoの大気質サービスを通じたCAMS全球予報（コペルニクス大気監視サービス）によるもので、約5日先までをカバーします。完全に暗い時間帯で平均し、0.1未満は澄んだ空気、0.1〜0.25は薄いもや、0.25〜0.5は天の川がかすんで見えるもやや煙、0.5以上は暗い星を隠す濃い煙やもやです。0.25以上になるとスコアの横に注意書きが表示され、煙によってスコアに上限がかかります。0.25以上では最大74、0.5以上では最大59です。煙の予報が届いていない夜には、上限はかかりません。同じサービスの砂じん予報で、砂じんと煙を区別します。砂じんが50 µg/m³以上あり、微小粒子全体を上回る場合、公園の大気の詳細では煙ではなく砂じんと表示します。大気質データ：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含みます。Open-Meteo経由。Nyxがその夜の完全に暗い時間で平均しています。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。このリクエストは「あなたのプライバシー」でオフにできます。"
           }
         }
       }
@@ -20789,6 +20894,76 @@
         }
       }
     },
+    "Dust in the air: the Milky Way will look faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staub in der Luft: Die Milchstraße wird blass wirken."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dust in the air: the Milky Way will look faint."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo en el aire: la Vía Láctea se verá tenue."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空気中の砂じん：天の川がかすんで見えます。"
+          }
+        }
+      }
+    },
+    "Dust or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staub oder Dunst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dust or haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo o bruma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière ou brume"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "砂じんまたはもや"
+          }
+        }
+      }
+    },
     "Dynamic Island": {
       "extractionState": "manual",
       "localizations": {
@@ -23614,6 +23789,41 @@
         }
       }
     },
+    "Fog possible, mostly in low ground": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebel möglich, vor allem in Senken"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fog possible, mostly in low ground"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible niebla, sobre todo en zonas bajas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brouillard possible, surtout dans les creux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "霧の可能性あり（特に低い土地）"
+          }
+        }
+      }
+    },
     "Follow": {
       "extractionState": "manual",
       "localizations": {
@@ -24329,6 +24539,41 @@
         }
       }
     },
+    "For %lld of the %lld parks, the park page also shows what the National Park Service's Night Skies Program measured on the ground: the brightness of the sky overhead, from the Park Service's calibrated all-sky camera, in magnitudes per square arcsecond (higher is darker; the darkest natural skies read about 22), with the observers' Bortle class where they gave one. Each night is the middle value of that night's sets of images. Most sites were measured on one night or a few, between 2001 and 2025 and mostly before 2013, and sky glow has grown since, so these readings are context beside the estimate, not part of the score. A viewing spot shows a reading when a measured site lies within 1 km of it. The data is the Park Service's public night-sky data map, a U.S. Government work in the public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für %1$lld der %2$lld Parks zeigt die Parkseite auch, was das Night Skies Program des National Park Service vor Ort gemessen hat: die Himmelshelligkeit im Zenit, mit der kalibrierten Ganzhimmelskamera des National Park Service, in Größenklassen pro Quadratbogensekunde (höher ist dunkler; die dunkelsten natürlichen Himmel erreichen etwa 22), dazu die Bortle-Klasse der Beobachter, wo sie eine angaben. Jede Nacht ist der mittlere Wert der Bildserien dieser Nacht. Die meisten Orte wurden in einer oder wenigen Nächten gemessen, zwischen 2001 und 2025 und überwiegend vor 2013, und die Himmelsaufhellung hat seitdem zugenommen; diese Messungen sind daher Kontext neben der Schätzung, nicht Teil des Werts. Ein Beobachtungsplatz zeigt eine Messung, wenn ein gemessener Ort weniger als 1 km entfernt liegt. Die Daten stammen aus der öffentlichen Nachthimmel-Datenkarte des National Park Service, einem gemeinfreien Werk der US-Regierung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For %lld of the %lld parks, the park page also shows what the National Park Service's Night Skies Program measured on the ground: the brightness of the sky overhead, from the Park Service's calibrated all-sky camera, in magnitudes per square arcsecond (higher is darker; the darkest natural skies read about 22), with the observers' Bortle class where they gave one. Each night is the middle value of that night's sets of images. Most sites were measured on one night or a few, between 2001 and 2025 and mostly before 2013, and sky glow has grown since, so these readings are context beside the estimate, not part of the score. A viewing spot shows a reading when a measured site lies within 1 km of it. The data is the Park Service's public night-sky data map, a U.S. Government work in the public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %1$lld de los %2$lld parques, la página del parque también muestra lo que midió sobre el terreno el Night Skies Program del National Park Service: el brillo del cielo en el cenit, con la cámara calibrada de cielo completo del National Park Service, en magnitudes por segundo de arco cuadrado (cuanto más alto, más oscuro; los cielos naturales más oscuros marcan unos 22), con la clase Bortle de los observadores cuando la indicaron. Cada noche es el valor central de las series de imágenes de esa noche. La mayoría de los sitios se midieron una noche o pocas, entre 2001 y 2025 y sobre todo antes de 2013, y el resplandor del cielo ha aumentado desde entonces, así que estas mediciones son contexto junto a la estimación, no parte del índice. Un punto de observación muestra una medición cuando un sitio medido está a menos de 1 km. Los datos son el mapa público de datos del cielo nocturno del National Park Service, una obra del Gobierno de EE. UU. de dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour %1$lld des %2$lld parcs, la page du parc montre aussi ce que le Night Skies Program du National Park Service a mesuré sur le terrain : la luminosité du ciel au zénith, prise par la caméra plein ciel étalonnée du National Park Service, en magnitudes par seconde d’arc carrée (plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22), avec la classe de Bortle des observateurs quand ils en ont donné une. Chaque nuit est la valeur médiane des séries d’images de cette nuit. La plupart des sites ont été mesurés une nuit ou quelques-unes, entre 2001 et 2025 et surtout avant 2013, et le halo lumineux a augmenté depuis : ces mesures sont donc un contexte à côté de l’estimation, pas une part de l’indice. Un point d’observation affiche une mesure quand un site mesuré se trouve à moins de 1 km. Les données viennent de la carte publique des données du ciel nocturne du National Park Service, une œuvre du gouvernement des États-Unis dans le domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$lldか所の公園のうち%1$lldか所では、公園のページにNational Park ServiceのNight Skies Programが現地で測定した値も表示します。National Park Serviceの較正済み全天カメラによる天頂の空の明るさで、単位は1平方秒角あたりの等級です（数値が高いほど暗く、最も暗い自然の空で約22）。観測者がボートルクラスを記録している場合はそれも示します。各夜の値は、その夜に撮影した画像セットの中央値です。ほとんどの地点の測定は1夜か数夜で、2001年から2025年まで、多くは2013年より前のものです。その後、夜空の明るさは増しているため、これらの測定値は推定値の横に添える参考情報で、スコアには含まれません。観察スポットから1 km以内に測定地点がある場合、そのスポットにも測定値を表示します。データはNational Park Serviceが公開している夜空データマップで、米国政府の著作物としてパブリックドメインです。"
+          }
+        }
+      }
+    },
     "For a place that is not one of the U.S. national parks, such as your starting city, a spot you save or a park or dark-sky place in another country, Nyx reads two grids that come with the app. Sky brightness comes from the same 2025 NASA night lights, summed within 300 km of every point and checked against 77 published measurements from dark sites to city centres: typically within half a magnitude, closer in dark places. It is shown as an estimate with its Bortle class. Usual clouds come from the same ten years of ERA5, averaged over each month's night on a quarter-degree grid; how often nights are mostly clear is estimated from that average, so it reads \"about\". The U.S. national parks keep their own checked values. Contains modified Copernicus Climate Change Service information (2026), from ERA5, 2015 to 2024.": {
       "extractionState": "manual",
       "localizations": {
@@ -24504,37 +24749,37 @@
         }
       }
     },
-    "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same hours of true darkness. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself uses Open-Meteo's best-match forecast; on a tie, closer model agreement ranks first. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score.": {
+    "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same hours of true darkness. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself uses Open-Meteo's best-match forecast; on a tie, closer model agreement ranks first. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. So do rain and snow (named when some hour's chance reaches 25%), thunderstorms and fog (from the forecast's weather codes; fog in particular is hard to forecast, so it reads \"possible\"), and the water vapour above a place: under 10 kg/m², with no haze and a cloudless sky, the air is called very dry, which usually means faint stars stand out well. Visibility is a coarse model value and appears only as a haze hint. None of these change the score.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Für die nächsten sieben Tage fragt Nyx außerdem drei unabhängige Vorhersagemodelle (GFS der NOAA, IFS des ECMWF und ICON des DWD) für dieselben Stunden echter Dunkelheit ab. Liegen ihre Mittelwerte innerhalb von 15 Prozentpunkten Bewölkung, stimmen sie überein; innerhalb von 35 stimmen sie ungefähr überein; darüber hinaus weichen sie voneinander ab, und der Zeitstrom zeigt die Spanne der Werte, die sie zulassen. Der Wert selbst nutzt die Best-Match-Vorhersage von Open-Meteo; bei Gleichstand steht die engere Übereinstimmung der Modelle vorn. Wolkenschichten, die kälteste Stunde, Taugefahr (Luft innerhalb von 2 °C ihres Taupunkts) und die stärkste Böe stammen aus derselben Siebentagesvorhersage. Die Sichtweite ist ein grober Modellwert und erscheint nur als Hinweis auf Dunst. Nichts davon ändert den Wert."
+            "value": "Für die nächsten sieben Tage fragt Nyx außerdem drei unabhängige Vorhersagemodelle (GFS der NOAA, IFS des ECMWF und ICON des DWD) für dieselben Stunden echter Dunkelheit ab. Liegen ihre Mittelwerte innerhalb von 15 Prozentpunkten Bewölkung, stimmen sie überein; innerhalb von 35 stimmen sie ungefähr überein; darüber hinaus weichen sie voneinander ab, und der Zeitstrom zeigt die Spanne der Werte, die sie zulassen. Der Wert selbst nutzt die Best-Match-Vorhersage von Open-Meteo; bei Gleichstand steht die engere Übereinstimmung der Modelle vorn. Wolkenschichten, die kälteste Stunde, Taugefahr (Luft innerhalb von 2 °C ihres Taupunkts) und die stärkste Böe stammen aus derselben Siebentagesvorhersage. Ebenso Regen und Schnee (genannt, sobald die Wahrscheinlichkeit einer Stunde 25 % erreicht), Gewitter und Nebel (aus den Wettercodes der Vorhersage; Nebel ist besonders schwer vorherzusagen und heißt daher „möglich“) sowie der Wasserdampf über einem Ort: Unter 10 kg/m², ohne Dunst und bei wolkenlosem Himmel gilt die Luft als sehr trocken, was meist bedeutet, dass schwache Sterne gut hervortreten. Die Sichtweite ist ein grober Modellwert und erscheint nur als Hinweis auf Dunst. Nichts davon ändert den Wert."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same hours of true darkness. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself uses Open-Meteo's best-match forecast; on a tie, closer model agreement ranks first. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. Visibility is a coarse model value and appears only as a haze hint. None of these change the score."
+            "value": "For the next seven days, Nyx also asks three independent forecast models (NOAA's GFS, ECMWF's IFS and DWD's ICON) for the same hours of true darkness. When their averages are within 15 points of cloud cover they agree; within 35 they roughly agree; beyond that they disagree, and the time river draws the range of scores they allow. The score itself uses Open-Meteo's best-match forecast; on a tie, closer model agreement ranks first. Cloud layers, the coldest hour, dew risk (air within 2 °C of its dew point) and the strongest gust come from the same seven-day forecast. So do rain and snow (named when some hour's chance reaches 25%), thunderstorms and fog (from the forecast's weather codes; fog in particular is hard to forecast, so it reads \"possible\"), and the water vapour above a place: under 10 kg/m², with no haze and a cloudless sky, the air is called very dry, which usually means faint stars stand out well. Visibility is a coarse model value and appears only as a haze hint. None of these change the score."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Durante los próximos siete días, Nyx también consulta tres modelos de pronóstico independientes (GFS de NOAA, IFS de ECMWF e ICON de DWD) para las mismas horas de oscuridad total. Si sus promedios están a 15 puntos de nubosidad o menos, coinciden; a 35 o menos, casi coinciden; con más diferencia, discrepan, y el río del tiempo dibuja el rango de índices que permiten. El índice usa el pronóstico de mejor ajuste de Open-Meteo; en caso de empate, queda primero la mayor coincidencia entre modelos. Las capas de nubes, la hora más fría, el riesgo de rocío (aire a menos de 2 °C de su punto de rocío) y la ráfaga más fuerte provienen del mismo pronóstico de siete días. La visibilidad es un valor aproximado del modelo y solo aparece como indicio de bruma. Nada de esto cambia el índice."
+            "value": "Durante los próximos siete días, Nyx también consulta tres modelos de pronóstico independientes (GFS de NOAA, IFS de ECMWF e ICON de DWD) para las mismas horas de oscuridad total. Si sus promedios están a 15 puntos de nubosidad o menos, coinciden; a 35 o menos, casi coinciden; con más diferencia, discrepan, y el río del tiempo dibuja el rango de índices que permiten. El índice usa el pronóstico de mejor ajuste de Open-Meteo; en caso de empate, queda primero la mayor coincidencia entre modelos. Las capas de nubes, la hora más fría, el riesgo de rocío (aire a menos de 2 °C de su punto de rocío) y la ráfaga más fuerte provienen del mismo pronóstico de siete días. También la lluvia y la nieve (se nombran cuando la probabilidad de alguna hora llega al 25 %), las tormentas eléctricas y la niebla (según los códigos de tiempo del pronóstico; la niebla es especialmente difícil de pronosticar, por eso se indica como \"posible\") y el vapor de agua sobre el lugar: por debajo de 10 kg/m², sin bruma y con el cielo despejado, el aire se considera muy seco, lo que suele significar que las estrellas débiles se ven bien. La visibilidad es un valor aproximado del modelo y solo aparece como indicio de bruma. Nada de esto cambia el índice."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
+            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. Il en va de même pour la pluie et la neige (signalées quand le risque d’une heure atteint 25 %), les orages et le brouillard (d’après les codes météo de la prévision ; le brouillard est particulièrement difficile à prévoir, il est donc dit « possible »), et la vapeur d’eau au-dessus d’un lieu : sous 10 kg/m², sans brume et par ciel dégagé, l’air est dit très sec, ce qui signifie en général que les étoiles faibles ressortent bien. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この先7日間については、3つの独立した予報モデル（NOAAのGFS、ECMWFのIFS、DWDのICON）にも同じ完全に暗い時間帯について問い合わせます。雲量の平均の差が15ポイント以内なら一致、35以内ならほぼ一致、それを超えると不一致とし、時の川にはモデルから考えられるスコアの幅を描きます。スコア自体にはOpen-Meteoの最適予報を使い、同点の場合はモデルの一致度が高い夜を上位にします。雲の層、最も冷え込む時刻、夜露のリスク（気温と露点の差が2 °C以内）、最大瞬間風速も同じ7日間の予報によります。視程は粗いモデル値で、もやの目安としてだけ表示します。これらはどれもスコアを変えません。"
+            "value": "この先7日間については、3つの独立した予報モデル（NOAAのGFS、ECMWFのIFS、DWDのICON）にも同じ完全に暗い時間帯について問い合わせます。雲量の平均の差が15ポイント以内なら一致、35以内ならほぼ一致、それを超えると不一致とし、時の川にはモデルから考えられるスコアの幅を描きます。スコア自体にはOpen-Meteoの最適予報を使い、同点の場合はモデルの一致度が高い夜を上位にします。雲の層、最も冷え込む時刻、夜露のリスク（気温と露点の差が2 °C以内）、最大瞬間風速も同じ7日間の予報によります。雨と雪（ある時刻の確率が25%に達したときに表示）、雷雨と霧（予報の天気コードによる。霧は特に予報が難しいため「可能性あり」と表示）、その場所の上空の水蒸気量も同じ予報によります。水蒸気量が10 kg/m²未満で、もやがなく雲もない場合は「とても乾いた空気」とし、暗い星がよく見えることが多い状態です。視程は粗いモデル値で、もやの目安としてだけ表示します。これらはどれもスコアを変えません。"
           }
         }
       }
@@ -26280,6 +26525,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "夜を音で聞き、月の満ち欠けを触覚で感じてみてください。NyxがVoiceOver、音声コントロール、画面表示の設定にどう対応するかも確認できます。"
+          }
+        }
+      }
+    },
+    "Heavy dust in the air: faint stars hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dichter Staub in der Luft: schwache Sterne verborgen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy dust in the air: faint stars hidden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo denso en el aire: estrellas débiles ocultas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "濃い砂じん：暗い星は隠れます。"
+          }
+        }
+      }
+    },
+    "Heavy dust or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dichter Staub oder Dunst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy dust or haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo o bruma densos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière ou brume épaisse"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "濃い砂じんまたはもや"
           }
         }
       }
@@ -31394,6 +31709,181 @@
           "stringUnit": {
             "state": "translated",
             "value": "iPhoneと同じ"
+          }
+        }
+      }
+    },
+    "Measured %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemessen: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medido en %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesures : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@年に測定。"
+          }
+        }
+      }
+    },
+    "Measured by the Park Service": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemessen vom National Park Service"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured by the Park Service"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medido por el National Park Service"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesuré par le National Park Service"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceによる測定"
+          }
+        }
+      }
+    },
+    "Measured by the Park Service at its darkest site here, %@: %@ in %@ (higher is darker). Context only; not part of the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vom National Park Service an seinem dunkelsten Ort hier gemessen, %1$@: %2$@ (%3$@; höher ist dunkler). Nur Kontext; nicht Teil des Werts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured by the Park Service at its darkest site here, %@: %@ in %@ (higher is darker). Context only; not part of the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medido por el National Park Service en su sitio más oscuro aquí, %1$@: %2$@ en %3$@ (cuanto más alto, más oscuro). Solo es contexto; no forma parte del índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesuré par le National Park Service à son site le plus sombre ici, %1$@ : %2$@ en %3$@ (plus c’est élevé, plus c’est sombre). Simple contexte ; ne compte pas dans l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがここで最も暗い地点%1$@で測定：%3$@年に%2$@（数値が高いほど暗い）。参考情報で、スコアには含まれません。"
+          }
+        }
+      }
+    },
+    "Measured night skies": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemessene Nachthimmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured night skies"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielos nocturnos medidos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciels nocturnes mesurés"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "測定された夜空"
+          }
+        }
+      }
+    },
+    "Measured night skies: the National Park Service Night Skies Program, public domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemessene Nachthimmel: das Night Skies Program des National Park Service, gemeinfrei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured night skies: the National Park Service Night Skies Program, public domain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielos nocturnos medidos: Night Skies Program del National Park Service, dominio público."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciels nocturnes mesurés : Night Skies Program du National Park Service, domaine public."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "測定された夜空：National Park Service Night Skies Program、パブリックドメイン。"
           }
         }
       }
@@ -43910,6 +44400,76 @@
         }
       }
     },
+    "Park Service measured %@ here in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vom National Park Service hier gemessen: %1$@ (%2$@)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park Service measured %@ here in %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service midió %1$@ aquí en %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service a mesuré %1$@ ici en %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceがここで%2$@年に%1$@を測定"
+          }
+        }
+      }
+    },
+    "Park Service measured the sky here in %@: %@ magnitudes per square arcsecond, higher is darker.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der National Park Service hat den Himmel hier %1$@ gemessen: %2$@ Größenklassen pro Quadratbogensekunde, höher ist dunkler."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park Service measured the sky here in %@: %@ magnitudes per square arcsecond, higher is darker."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El National Park Service midió el cielo aquí en %1$@: %2$@ magnitudes por segundo de arco cuadrado; cuanto más alto, más oscuro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le National Park Service a mesuré le ciel ici en %1$@ : %2$@ magnitudes par seconde d’arc carrée ; plus c’est élevé, plus c’est sombre."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National Park Serviceが%1$@年にここで空を測定：1平方秒角あたり%2$@等級。数値が高いほど暗い空です。"
+          }
+        }
+      }
+    },
     "Park alerts and programs": {
       "extractionState": "manual",
       "localizations": {
@@ -46735,6 +47295,76 @@
         }
       }
     },
+    "Rain possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regen möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible lluvia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie possible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雨の可能性あり"
+          }
+        }
+      }
+    },
+    "Rain possible, up to %lld%% chance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regen möglich, Wahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain possible, up to %lld%% chance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible lluvia, hasta %lld%% de probabilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie possible, jusqu’à %lld %% de risque"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雨の可能性あり（最大%lld%%）"
+          }
+        }
+      }
+    },
     "Ranger night-sky programs": {
       "extractionState": "manual",
       "localizations": {
@@ -48020,72 +48650,72 @@
         }
       }
     },
-    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. Nothing is asked about smoke at other places or saved spots. The service receives network information such as your IP address.": {
+    "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at other places or saved spots. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Er liefert die CAMS-Aerosolvorhersage, die warnt, wenn Rauch oder Dunst schwache Sterne verbergen werden. Für andere Orte oder gespeicherte Plätze wird kein Rauch abgefragt. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Er liefert die CAMS-Vorhersage für Aerosole und Staub, die warnt, wenn Rauch, Staub oder Dunst schwache Sterne verbergen werden. Für andere Orte oder gespeicherte Plätze wird kein Rauch abgefragt. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. Nothing is asked about smoke at other places or saved spots. The service receives network information such as your IP address."
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld U.S. national parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol and dust forecast that warns when smoke, dust or haze will hide faint stars. Nothing is asked about smoke at other places or saved spots. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles de CAMS, que avisa cuando el humo o la bruma ocultarán las estrellas débiles. No se pregunta por el humo en otros lugares ni en los sitios guardados. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a air-quality-api.open-meteo.com, el servicio de calidad del aire del mismo proveedor, para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud y solo con las mismas coordenadas de los puntos de observación. Devuelve el pronóstico de aerosoles y polvo de CAMS, que avisa cuando el humo, el polvo o la bruma ocultarán las estrellas débiles. No se pregunta por el humo en otros lugares ni en los sitios guardados. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Il renvoie la prévision d’aérosols CAMS, qui avertit quand la fumée ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les autres lieux ni pour les lieux enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à air-quality-api.open-meteo.com, le service de qualité de l’air du même fournisseur, pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête, avec uniquement les mêmes coordonnées de points d’observation. Il renvoie la prévision d’aérosols et de poussière CAMS, qui avertit quand la fumée, la poussière ou la brume masqueront les étoiles faibles. Rien n’est demandé sur la fumée pour les autres lieux ni pour les lieux enregistrés. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含め、同じ観察スポットの座標だけを使います。返ってくるのはCAMSのエアロゾル予報で、煙やもやが暗い星を隠しそうなときに注意を表示します。ほかの場所や保存したスポットの煙について問い合わせることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "リクエストは、同じ提供元の大気質サービスであるair-quality-api.open-meteo.comに、米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含め、同じ観察スポットの座標だけを使います。返ってくるのはCAMSのエアロゾルと砂じんの予報で、煙や砂じん、もやが暗い星を隠しそうなときに注意を表示します。ほかの場所や保存したスポットの煙について問い合わせることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
     },
-    "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
+    "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anfragen gehen an api.open-meteo.com, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage: Wolken, drei Vorhersagemodelle zum Vergleich, Wolkenschichten, Temperatur, Taupunkt, Wind und Sichtweite. Sie nutzen nur die Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks und verraten daher nie deinen Standort oder welche Parks in deiner Nähe liegen. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+            "value": "Anfragen gehen an api.open-meteo.com, für alle %lld US-Nationalparks gemeinsam, bis zu 50 pro Anfrage: Wolken, drei Vorhersagemodelle zum Vergleich, Wolkenschichten, Temperatur, Taupunkt, Wind, Sichtweite, Regenwahrscheinlichkeit, das Wetter (etwa Nebel oder Gewitter) und Wasserdampf. Sie nutzen nur die Koordinaten des wichtigsten Beobachtungsplatzes jedes Parks und verraten daher nie deinen Standort oder welche Parks in deiner Nähe liegen. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind and visibility. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
+            "value": "Requests go to api.open-meteo.com for all %lld U.S. national parks together, up to 50 in each request: clouds, three forecast models for comparison, cloud layers, temperature, dew point, wind, visibility, the chance of rain, the weather (such as fog or thunderstorms) and water vapour. They use the coordinates of each park's main viewing spot only, so they never reveal your location or which parks are near you. The service receives network information such as your IP address."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las solicitudes van a api.open-meteo.com para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento y visibilidad. Solo usan las coordenadas del punto de observación principal de cada parque, así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
+            "value": "Las solicitudes van a api.open-meteo.com para los %lld parques nacionales de EE. UU. juntos, hasta 50 en cada solicitud: nubes, tres modelos de pronóstico para comparar, capas de nubes, temperatura, punto de rocío, viento, visibilidad, probabilidad de lluvia, el tiempo (como niebla o tormentas eléctricas) y vapor de agua. Solo usan las coordenadas del punto de observación principal de cada parque, así que nunca revelan tu ubicación ni qué parques tienes cerca. El servicio recibe información de red, como tu dirección IP."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les requêtes vont à api.open-meteo.com pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête : nuages, trois modèles de prévision à comparer, couches nuageuses, température, point de rosée, vent et visibilité. Elles n’utilisent que les coordonnées du principal point d’observation de chaque parc, et ne révèlent donc jamais votre position ni les parcs proches de vous. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Les requêtes vont à api.open-meteo.com pour les %lld parcs nationaux des États-Unis ensemble, jusqu’à 50 par requête : nuages, trois modèles de prévision à comparer, couches nuageuses, température, point de rosée, vent, visibilité, risque de pluie, temps (comme le brouillard ou les orages) et vapeur d’eau. Elles n’utilisent que les coordonnées du principal point d’observation de chaque parc, et ne révèlent donc jamais votre position ni les parcs proches de vous. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "リクエストは、api.open-meteo.comに米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含めます。内容は、雲量、比較用の3つの予報モデル、雲の層、気温、露点、風、視程です。使うのは各公園の主な観察スポットの座標だけなので、あなたの位置や、近くにある公園がどれかが伝わることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+            "value": "リクエストは、api.open-meteo.comに米国の全%lldか所の国立公園についてまとめて送ります。1回のリクエストには最大50か所を含めます。内容は、雲量、比較用の3つの予報モデル、雲の層、気温、露点、風、視程、降水確率、天気（霧や雷雨など）、水蒸気量です。使うのは各公園の主な観察スポットの座標だけなので、あなたの位置や、近くにある公園がどれかが伝わることはありません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
           }
         }
       }
@@ -52818,6 +53448,41 @@
         }
       }
     },
+    "Sky brightness overhead, in magnitudes per square arcsecond: higher is darker, and the darkest natural skies read about 22. Sky glow may have grown since; the score uses the estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Himmelshelligkeit im Zenit, in Größenklassen pro Quadratbogensekunde: Höher ist dunkler, und die dunkelsten natürlichen Himmel erreichen etwa 22. Die Himmelsaufhellung kann seitdem zugenommen haben; der Wert nutzt die Schätzung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sky brightness overhead, in magnitudes per square arcsecond: higher is darker, and the darkest natural skies read about 22. Sky glow may have grown since; the score uses the estimate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brillo del cielo en el cenit, en magnitudes por segundo de arco cuadrado: cuanto más alto, más oscuro; los cielos naturales más oscuros marcan unos 22. El resplandor del cielo puede haber aumentado desde entonces; el índice usa la estimación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luminosité du ciel au zénith, en magnitudes par seconde d’arc carrée : plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22. Le halo lumineux a pu augmenter depuis ; l’indice utilise l’estimation."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天頂の空の明るさ（1平方秒角あたりの等級）。数値が高いほど暗く、最も暗い自然の空で約22です。その後、夜空の明るさが増している可能性があります。スコアには推定値を使います。"
+          }
+        }
+      }
+    },
     "Sky brightness: %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -53238,41 +53903,6 @@
         }
       }
     },
-    "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rauch- und Dunstvorhersage von Copernicus (CAMS), dem europäischen Atmosphärendienst. Dichter Rauch oder Dunst begrenzt den Wert."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronóstico de humo y bruma de Copernicus (CAMS), el servicio atmosférico europeo. El humo o la bruma densos limitan el índice."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prévision de fumée et de brume de Copernicus (CAMS), le service européen de surveillance de l’atmosphère. Une fumée ou une brume épaisse plafonne l’indice."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "煙ともやの予報は、ヨーロッパの大気サービスCopernicus（CAMS）によるものです。濃い煙やもやがあると、スコアに上限がかかります。"
-          }
-        }
-      }
-    },
     "Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.": {
       "extractionState": "manual",
       "localizations": {
@@ -53413,6 +54043,41 @@
         }
       }
     },
+    "Smoke, dust and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke, dust or haze caps the score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch-, Staub- und Dunstvorhersage von Copernicus (CAMS), dem europäischen Atmosphärendienst. Dichter Rauch, Staub oder Dunst begrenzt den Wert."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke, dust and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke, dust or haze caps the score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de humo, polvo y bruma de Copernicus (CAMS), el servicio atmosférico europeo. El humo, el polvo o la bruma densos limitan el índice."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de fumée, de poussière et de brume de Copernicus (CAMS), le service européen de surveillance de l’atmosphère. Une fumée, une poussière ou une brume épaisse plafonne l’indice."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "煙、砂じん、もやの予報は、ヨーロッパの大気サービスCopernicus（CAMS）によるものです。濃い煙や砂じん、もやがあると、スコアに上限がかかります。"
+          }
+        }
+      }
+    },
     "Snippet review": {
       "extractionState": "manual",
       "localizations": {
@@ -53549,6 +54214,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "スヌーズ中"
+          }
+        }
+      }
+    },
+    "Snow possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnee möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snow possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible nieve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neige possible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪の可能性あり"
+          }
+        }
+      }
+    },
+    "Snow possible, up to %lld%% chance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnee möglich, Wahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snow possible, up to %lld%% chance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible nieve, hasta %lld%% de probabilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neige possible, jusqu’à %lld %% de risque"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪の可能性あり（最大%lld%%）"
           }
         }
       }
@@ -60776,6 +61511,41 @@
         }
       }
     },
+    "The three darkest of %lld sites measured, %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die drei dunkelsten von %1$lld gemessenen Orten, %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The three darkest of %lld sites measured, %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los tres sitios más oscuros de los %1$lld medidos, %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les trois sites les plus sombres sur %1$lld mesurés, %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "測定された%1$lldか所のうち最も暗い3か所（%2$@年）。"
+          }
+        }
+      }
+    },
     "The time river, each calendar month and the shape of the night offer an audio graph: choose Audio Graph in the rotor to hear the nights rise and fall as a tone.": {
       "extractionState": "manual",
       "localizations": {
@@ -61742,6 +62512,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "その時刻から3時間後、Nyxが更新する前"
+          }
+        }
+      }
+    },
+    "Thunderstorms possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewitter möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thunderstorms possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posibles tormentas eléctricas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orages possibles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雷雨の可能性あり"
+          }
+        }
+      }
+    },
+    "Thunderstorms possible, up to %lld%% chance of rain": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewitter möglich, Regenwahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thunderstorms possible, up to %lld%% chance of rain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posibles tormentas eléctricas, hasta %lld%% de probabilidad de lluvia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orages possibles, jusqu’à %lld %% de risque de pluie"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雷雨の可能性あり（降水確率最大%lld%%）"
           }
         }
       }
@@ -65912,6 +66752,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "バージョン"
+          }
+        }
+      }
+    },
+    "Very dry air: good for faint stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehr trockene Luft: gut für schwache Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very dry air: good for faint stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aire muy seco: bueno para las estrellas débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air très sec : bon pour les étoiles faibles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても乾いた空気：暗い星がよく見えます。"
+          }
+        }
+      }
+    },
+    "Very dry, clean air: good for faint stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehr trockene, saubere Luft: gut für schwache Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very dry, clean air: good for faint stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aire muy seco y limpio: bueno para las estrellas débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air très sec et pur : bon pour les étoiles faibles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても乾いた澄んだ空気：暗い星がよく見えます。"
           }
         }
       }

@@ -228,7 +228,7 @@ nonisolated struct SkyMoment: Sendable {
         self.parks = (parks ?? (try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         self.weather = weather ?? WeatherService()
         self.summits = summits ?? SummitLayerService()
-        self.detailService = detailService ?? ForecastDetailService()
+        self.detailService = detailService ?? ForecastDetailService(extras: false)
         self.parkStore = parkStore ?? ParkStore()
         nightVision = VisionDebug.isEnabled("night-vision")
         // The park chosen last time; previews and DEBUG captures (a pinned clock) always open Joshua Tree.

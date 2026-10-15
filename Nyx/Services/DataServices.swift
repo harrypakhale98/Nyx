@@ -20,7 +20,8 @@ nonisolated protocol DetailProviding: Sendable {
     func forgetAir() async
 }
 /// The forecast's context, beside the score's own clouds: three models' clouds, cloud layers,
-/// cold, dew, wind and visibility (seven days), and the aerosol forecast that warns of smoke.
+/// cold, dew, wind, visibility, rain, weather and water vapour (seven days), and the aerosol and
+/// dust forecast that warns of smoke.
 /// Like clouds, every park shares each request, so a refresh is three more requests (two chunks
 /// each for 63 parks), never one per park, and none of them hints at where someone is. Each part
 /// keeps its own twelve-hour freshness (`ForecastReuse`); a failed request keeps the last good
@@ -43,6 +44,9 @@ actor ForecastDetailService: DetailProviding {
     private let ledger: CallLedger
     private let budget: CallBudget
     private let clock: @Sendable () -> Date
+    /// Whether to ask for the context the park page reads beyond the score (`ForecastDetail.layerExtras`,
+    /// `airExtras`); Vision Pro asks for smoke only, exactly as its privacy screen says.
+    private let extras: Bool
     private var memory: [String: ForecastDetail] = [:]
     private var loaded=Set<String>()
     private var lowData=false
@@ -57,8 +61,8 @@ actor ForecastDetailService: DetailProviding {
     /// Callers waiting for a refresh to end, the one that started it included (tests read it).
     private(set) var waiting=0
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
-         budget: CallBudget = .standard, clock: @escaping @Sendable () -> Date = { .now }) {
-        self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget
+         budget: CallBudget = .standard, extras: Bool = true, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget; self.extras=extras
         self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
         self.ledger=ledger ?? (persist ? .shared : CallLedger(file: nil))
     }
@@ -183,17 +187,18 @@ actor ForecastDetailService: DetailProviding {
         var items=[URLQueryItem(name: "latitude", value: parks.map { String($0.forecastPoint.latitude) }.joined(separator: ",")),
                    URLQueryItem(name: "longitude", value: parks.map { String($0.forecastPoint.longitude) }.joined(separator: ","))]
         let keys: [String]
+        var context: [String]=[]
         switch kind {
         case .models:
             parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.modelKeys
             items+=[URLQueryItem(name: "hourly", value: "cloud_cover"), URLQueryItem(name: "models", value: "gfs_seamless,ecmwf_ifs025,icon_seamless")]
         case .layers:
-            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.layerKeys
-            items.append(URLQueryItem(name: "hourly", value: keys.joined(separator: ",")))
+            parts.host="api.open-meteo.com"; parts.path="/v1/forecast"; keys=ForecastDetail.layerKeys; context=extras ? ForecastDetail.layerExtras : []
+            items.append(URLQueryItem(name: "hourly", value: (keys+context).joined(separator: ",")))
         case .air:
             // CAMS global covers every park, Alaska and American Samoa included.
-            parts.host="air-quality-api.open-meteo.com"; parts.path="/v1/air-quality"; keys=ForecastDetail.airKeys
-            items+=[URLQueryItem(name: "hourly", value: keys.joined(separator: ",")), URLQueryItem(name: "domains", value: "cams_global")]
+            parts.host="air-quality-api.open-meteo.com"; parts.path="/v1/air-quality"; keys=ForecastDetail.airKeys; context=extras ? ForecastDetail.airExtras : []
+            items+=[URLQueryItem(name: "hourly", value: (keys+context).joined(separator: ",")), URLQueryItem(name: "domains", value: "cams_global")]
         }
         parts.queryItems=items+[URLQueryItem(name: "forecast_days", value: "7"), URLQueryItem(name: "past_days", value: "1"),
                                 URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
@@ -202,7 +207,7 @@ actor ForecastDetailService: DetailProviding {
         do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
             return Backoff.constrained(error) ? nil : []
         }
-        return OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: keys, now: clock())
+        return OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: keys, extras: context, now: clock())
     }
 }
 nonisolated struct ParkEnrichment: Codable, Sendable {

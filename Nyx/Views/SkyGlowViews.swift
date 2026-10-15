@@ -48,6 +48,7 @@ struct LightPollution: View {
                 else if !park.curated { Text("Estimated from satellite data, not measured here. Conditions vary across the area.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 else { Text("Lower classes mean less artificial light. Conditions vary across the park.").font(.caption).foregroundStyle(palette.muted) }
             }
+            if park.curated, !park.isSavedSpot { MeasuredSkyRows(park:park).padding(.top,4) }
             if let site {
                 let level=SkyGlow.shared.level(site.glow)
                 VStack(alignment:.leading,spacing:6) {
@@ -68,6 +69,48 @@ struct LightPollution: View {
                 Text("From NASA satellite night lights: a comparison between parks, not a measurement of sky brightness. The score uses the estimate.").font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
             }
         }
+    }
+}
+
+/// What the Park Service measured on the ground: up to three sites, darkest latest reading first,
+/// each with its year and the observers' Bortle class when they gave one, then what the number means
+/// and how old it is. Nothing for a park the Park Service has not measured.
+struct MeasuredSkyRows: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let park: Park
+    var body: some View {
+        let sites=MeasuredSky.shared.sites(park.id)
+        if !sites.isEmpty, let years=MeasuredSky.shared.years(park.id) {
+            VStack(alignment:.leading,spacing:8) {
+                Text("Measured by the Park Service").font(.subheadline.weight(.medium)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader)
+                ForEach(sites.prefix(3),id:\.name) { site in
+                    if let night=site.latest { row(site.name,night) }
+                }
+                let which=sites.count>3 ? String(localized:"The three darkest of \(sites.count) sites measured, \(MeasuredSky.span(years)).") : String(localized:"Measured \(MeasuredSky.span(years)).")
+                Text(Sentences.join([which,String(localized:"Sky brightness overhead, in magnitudes per square arcsecond: higher is darker, and the darkest natural skies read about 22. Sky glow may have grown since; the score uses the estimate.")]))
+                    .font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+            }
+        }
+    }
+    /// Name and year beside the reading; at accessibility sizes the reading moves under the name,
+    /// so a long name keeps the width.
+    private func row(_ name:String,_ night:MeasuredSky.Night)->some View {
+        let year=night.year.map { MeasuredSky.span($0...$0) } ?? ""
+        let detail=night.bortle.map { String(localized:"\(year) · observers judged Bortle \($0)") } ?? year
+        let reading=Text(MeasuredSky.reading(night.sqm)).font(.subheadline.monospacedDigit()).foregroundStyle(palette.ink)
+        let label=VStack(alignment:.leading,spacing:2) {
+            Text(name).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
+            if typeSize.isAccessibilitySize { reading }
+            Text(detail).font(.caption).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true)
+        }
+        return Group {
+            if typeSize.isAccessibilitySize { label.frame(maxWidth:.infinity,alignment:.leading) }
+            else { LabeledContent { reading } label: { label } }
+        }
+        .accessibilityElement(children:.ignore)
+        .accessibilityLabel(night.bortle.map { String(localized:"\(name): \(MeasuredSky.reading(night.sqm)) magnitudes per square arcsecond in \(year); observers judged Bortle \($0).") }
+                            ?? String(localized:"\(name): \(MeasuredSky.reading(night.sqm)) magnitudes per square arcsecond in \(year)."))
     }
 }
 
@@ -139,6 +182,13 @@ struct ViewingSpotRow: View {
                 GlowLine(level:level,text:words,font:.footnote)
                     .accessibilityElement(children:.ignore)
                     .accessibilityLabel(String(localized:"Sky glow here: \(words). Level \(level) of 5 on the national parks' scale.")).accessibilityAddTraits(.isStaticText)
+            }
+            if let measured=MeasuredSky.shared.site(near:spot.latitude,spot.longitude,park:park.id), let night=measured.latest, let year=night.year {
+                Label { Text("Park Service measured \(MeasuredSky.reading(night.sqm)) here in \(MeasuredSky.span(year...year))").fixedSize(horizontal:false,vertical:true) }
+                    icon:{ Image(systemName:"camera.aperture").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    .font(.footnote).foregroundStyle(palette.ink)
+                    .accessibilityElement(children:.ignore)
+                    .accessibilityLabel(String(localized:"Park Service measured the sky here in \(MeasuredSky.span(year...year)): \(MeasuredSky.reading(night.sqm)) magnitudes per square arcsecond, higher is darker."))
             }
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
@@ -310,3 +360,9 @@ struct GlobeAtNightLink: View {
 #Preview("Spots · AX5") { if let p=try? ParkData.load().first(where:{$0.id=="grca"}) { ScrollView { Panel { ViewingSpots(park:p) }.padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }
 #Preview("Protect · Night vision") { if let p=try? ParkData.load().first(where:{$0.id=="grte"}) { NavigationStack { Panel { ProtectThisSky(park:p) }.padding() }.environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).background(.black).preferredColorScheme(.dark) } }
 #Preview("Globe at Night") { GlobeAtNightLink().padding().background(.black).preferredColorScheme(.dark) }
+#Preview("Measured skies · Death Valley (many sites)") { if let p=try? ParkData.load().first(where:{$0.id=="deva"}) { Panel { MeasuredSkyRows(park:p) }.padding().background(.black).preferredColorScheme(.dark) } }
+#Preview("Measured skies · Wind Cave (two sites, no Bortle)") { if let p=try? ParkData.load().first(where:{$0.id=="wica"}) { Panel { MeasuredSkyRows(park:p) }.padding().background(.black).preferredColorScheme(.dark) } }
+#Preview("Measured skies · Congaree (none)") { if let p=try? ParkData.load().first(where:{$0.id=="cong"}) { Panel { LightPollution(park:p) }.padding().background(.black).preferredColorScheme(.dark) } }
+#Preview("Measured skies · AX5") { if let p=try? ParkData.load().first(where:{$0.id=="jotr"}) { ScrollView { Panel { MeasuredSkyRows(park:p) }.padding() }.background(.black).dynamicTypeSize(.accessibility5).preferredColorScheme(.dark) } }
+#Preview("Measured skies · night vision") { if let p=try? ParkData.load().first(where:{$0.id=="glac"}) { Panel { MeasuredSkyRows(park:p) }.padding().background(.black).environment(\.nyx,NyxPalette(nightVision:true,highContrast:false)).modifier(NightVisionFilter(enabled:true)).preferredColorScheme(.dark) } }
+#Preview("Viewing spot · measured here") { if let p=try? ParkData.load().first(where:{$0.id=="glac"}), let s=p.viewingSpots.first { Panel { ViewingSpotRow(park:p,spot:s) }.padding().background(.black).preferredColorScheme(.dark) } }

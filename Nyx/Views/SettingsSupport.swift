@@ -45,6 +45,7 @@ struct CreditsView: View {
             }.listRowBackground(palette.panel)
             Section("Parks and places") {
                 credit("Parks, alerts and ranger programs: the National Park Service.")
+                credit("Measured night skies: the National Park Service Night Skies Program, public domain.")
                 credit("Starting points in the United States and its outline: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.")
                 credit("Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.")
                 credit("World parks and dark-sky places: Wikidata, CC0.")
