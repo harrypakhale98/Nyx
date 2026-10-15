@@ -46,6 +46,7 @@
 		3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */; };
 		3F06B201A3F3771922AA4458 /* AstronomyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DF3215BCDCD989648E8040E /* AstronomyEngine.swift */; };
 		40435812B77530EC31184150 /* Campground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F2E16F6D3215FAA0CDD1BF /* Campground.swift */; };
+		43FBDE5B2A4AFA4C6E748740 /* Campground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F2E16F6D3215FAA0CDD1BF /* Campground.swift */; };
 		44CEAEA71452256B4DF00524 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
 		46245A719A6B8E0DDD128627 /* SkyGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BFB122086DAA75F561950E /* SkyGrid.swift */; };
 		465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4FA83F19CA3A305D8FD7A607 /* Moon.metal */; };
@@ -66,9 +67,9 @@
 		6021307ED0000EC6CCB5784A /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2191569D624FE860CBED2833 /* WatchContext.swift */; };
 		604E8E80F1487290DF7A6303 /* NyxWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D52EE9A1B53CBDD17FE1A6EF /* NyxWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		624E3F8E72FF10BBC1A0D68B /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD91CF4EA894B5C78DA9C0C1 /* Starfield.swift */; };
+		6476564CC6F5BC84A677EA65 /* ParkAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904C5045244EA1AE821655A1 /* ParkAlerts.swift */; };
 		67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8417DA2D50522530C270A095 /* RealSky.swift */; };
 		692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF37B2E55E007D52451E0295 /* SkyAlmanac.swift */; };
-		6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E6518B28E70FF389F8A687 /* SearchRadius.swift */; };
 		6AC003053CD1F414C992EA97 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CE8F62A781211AEED0D40D /* NightPlanner.swift */; };
 		6C2C5B0C4A6B492E9CC64511 /* MoonWidgetFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4F9FD3096BFB38EFD1C5C7 /* MoonWidgetFace.swift */; };
 		6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */; };
@@ -89,6 +90,7 @@
 		7FC8F631FA91104DFF34CE90 /* MoonShading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6725AD36BAD3B91469F544E7 /* MoonShading.swift */; };
 		814C38B8175ACF135E7F65EB /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
 		8273604C4AEF5A111AC145AB /* parks.json in Resources */ = {isa = PBXBuildFile; fileRef = 72998C6FAFE92D4C7CE0351B /* parks.json */; };
+		82752C0E82916E54CBA7A3EE /* ScoreInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = E822862323C550490CF4A848 /* ScoreInputs.swift */; };
 		828E44ADCB0DD0EA998F69B4 /* MoonSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871EBD10E9E6E21E24FE3CE /* MoonSymbol.swift */; };
 		852479972C7FF2847453F45F /* NyxPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */; };
 		85E89DD448272AE1C8D3A14D /* stars.json in Resources */ = {isa = PBXBuildFile; fileRef = BEA896A970D4E216C36A98A0 /* stars.json */; };
@@ -123,6 +125,7 @@
 		CBB9FF180E3F92412AA8C512 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
 		CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804E5BD1D8D8159594420977 /* ConstellationTrace.swift */; };
 		CFF0FD048B75ED80BA523F43 /* WhatsUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9C38C2E731E834DC100FC /* WhatsUp.swift */; };
+		D304FCD449631C93AD0BE21C /* DataServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D319BAF3907884E43F8316F /* DataServices.swift */; };
 		D3E217DBC6AF8C81B0341403 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 04228A0B7EC87B023F8C2239 /* Localizable.xcstrings */; };
 		D76D8AEF6E83CE9D27949264 /* Sentences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352775EE2B5D179F008BA853 /* Sentences.swift */; };
 		D8249FF7E498630CFFEA5576 /* sky-events.json in Resources */ = {isa = PBXBuildFile; fileRef = 504FC2DA615C646B33B4F0E3 /* sky-events.json */; };
@@ -267,7 +270,6 @@
 		4FA83F19CA3A305D8FD7A607 /* Moon.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = Moon.metal; path = Nyx/DesignSystem/Moon.metal; sourceTree = "<group>"; };
 		504FC2DA615C646B33B4F0E3 /* sky-events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "sky-events.json"; path = "Nyx/Resources/sky-events.json"; sourceTree = "<group>"; };
 		53D0C95B34F3513BFD765F3B /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
-		57E6518B28E70FF389F8A687 /* SearchRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchRadius.swift; path = Nyx/Services/SearchRadius.swift; sourceTree = "<group>"; };
 		595283380B56E24389ECC7ED /* MotionTilt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MotionTilt.swift; path = Nyx/DesignSystem/MotionTilt.swift; sourceTree = "<group>"; };
 		5C41B8315DF5E8ACB61DB077 /* WidgetParkIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetParkIntent.swift; path = Nyx/Intents/WidgetParkIntent.swift; sourceTree = "<group>"; };
 		5C65FC6A4D1EC6134F16FE8F /* WristSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristSky.swift; path = Nyx/Services/WristSky.swift; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 		828535E0682831644E0634EA /* constellations.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = constellations.json; path = Nyx/Resources/constellations.json; sourceTree = "<group>"; };
 		8417DA2D50522530C270A095 /* RealSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RealSky.swift; path = Nyx/DesignSystem/RealSky.swift; sourceTree = "<group>"; };
 		8CB2BDEA245D7723B6687D4C /* PlaceIDText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaceIDText.swift; path = Nyx/Models/PlaceIDText.swift; sourceTree = "<group>"; };
+		904C5045244EA1AE821655A1 /* ParkAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParkAlerts.swift; path = Nyx/Services/ParkAlerts.swift; sourceTree = "<group>"; };
 		98F2E16F6D3215FAA0CDD1BF /* Campground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Campground.swift; path = Nyx/Models/Campground.swift; sourceTree = "<group>"; };
 		991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NyxPalette.swift; path = Nyx/DesignSystem/NyxPalette.swift; sourceTree = "<group>"; };
 		9998D8250D17F15D09BC11C4 /* ForecastDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ForecastDetail.swift; path = Nyx/Services/ForecastDetail.swift; sourceTree = "<group>"; };
@@ -307,6 +310,7 @@
 		D7CE8F62A781211AEED0D40D /* NightPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightPlanner.swift; path = Nyx/Services/NightPlanner.swift; sourceTree = "<group>"; };
 		E0BFB122086DAA75F561950E /* SkyGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkyGrid.swift; path = Nyx/Services/SkyGrid.swift; sourceTree = "<group>"; };
 		E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScoreEngine.swift; path = Nyx/Services/ScoreEngine.swift; sourceTree = "<group>"; };
+		E822862323C550490CF4A848 /* ScoreInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScoreInputs.swift; path = Nyx/Services/ScoreInputs.swift; sourceTree = "<group>"; };
 		E99C40D2450289A5AC5A4BAE /* NightsAhead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightsAhead.swift; path = Nyx/Services/NightsAhead.swift; sourceTree = "<group>"; };
 		EA23E26EDC0F14F8EC6BE0A0 /* TonightWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TonightWidgetView.swift; path = Nyx/DesignSystem/TonightWidgetView.swift; sourceTree = "<group>"; };
 		EA5A568EF73F9A672CDDF3C3 /* NyxWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NyxWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -506,13 +510,14 @@
 				991EB2B6CDC79AB48D899E67 /* NyxPalette.swift */,
 				1B776FE36AE984FB59B76D77 /* NyxTheme.swift */,
 				FA04AD08C23877FD64760052 /* Park.swift */,
+				904C5045244EA1AE821655A1 /* ParkAlerts.swift */,
 				9C2F1D1E3D52DA0E3424C92C /* ParkEntity.swift */,
 				33AD5D34292CFC28A3F97A49 /* ParkHandoff.swift */,
 				72998C6FAFE92D4C7CE0351B /* parks.json */,
 				8CB2BDEA245D7723B6687D4C /* PlaceIDText.swift */,
 				8417DA2D50522530C270A095 /* RealSky.swift */,
 				E740BD818FFFBC42B994D3B0 /* ScoreEngine.swift */,
-				57E6518B28E70FF389F8A687 /* SearchRadius.swift */,
+				E822862323C550490CF4A848 /* ScoreInputs.swift */,
 				352775EE2B5D179F008BA853 /* Sentences.swift */,
 				D6D04D625F5F18ACF2F82496 /* SharedAssets.xcassets */,
 				20EB09DA695F3C836EBD27CA /* SharedSettings.swift */,
@@ -885,9 +890,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C1211C364C7B8A2D326E7B7 /* AstronomyEngine.swift in Sources */,
+				43FBDE5B2A4AFA4C6E748740 /* Campground.swift in Sources */,
 				AA62C904D4214D3E8E186221 /* CloudClimate.swift in Sources */,
 				7D88F9519780E4CDFD39EAF8 /* CloudForecastClient.swift in Sources */,
 				CD9429A1AABFB8923D920B6F /* ConstellationTrace.swift in Sources */,
+				D304FCD449631C93AD0BE21C /* DataServices.swift in Sources */,
 				9C670B8420ADE24EEEB7D5EE /* Forecast.swift in Sources */,
 				3C46A1DA1B1D353EA7719F6A /* ForecastDetail.swift in Sources */,
 				465EA9F6564ECF7E6F127A99 /* Moon.metal in Sources */,
@@ -898,9 +905,11 @@
 				475A7C46B31CDA3DD8F5DAFB /* NightsAhead.swift in Sources */,
 				5035B8168A34B07A9A70C8FD /* NyxPalette.swift in Sources */,
 				486C85C7FF840FB7A75834E8 /* Park.swift in Sources */,
+				6476564CC6F5BC84A677EA65 /* ParkAlerts.swift in Sources */,
 				F939755DADB0474A00ABF833 /* ParkHandoff.swift in Sources */,
 				5A7146BD3AC2B403F8534F91 /* PlaceIDText.swift in Sources */,
 				FB9F568367F1DFEC6B114E9D /* ScoreEngine.swift in Sources */,
+				82752C0E82916E54CBA7A3EE /* ScoreInputs.swift in Sources */,
 				E6439445EFAF13C7898A290E /* Sentences.swift in Sources */,
 				692A69AAFECED4C5EFBC49C7 /* SkyAlmanac.swift in Sources */,
 				C2ADDC2ECAC3B8E9DEB41A48 /* SkyConditions.swift in Sources */,
@@ -985,7 +994,6 @@
 				3E7E4C6C4336CA9450570CD6 /* ParkEntity.swift in Sources */,
 				67953F0A8C9FC6B9C70C711A /* RealSky.swift in Sources */,
 				6F8F2CF6CAB1CBF08EF5BA22 /* ScoreEngine.swift in Sources */,
-				6A503237E60709BF062ACFCF /* SearchRadius.swift in Sources */,
 				D76D8AEF6E83CE9D27949264 /* Sentences.swift in Sources */,
 				1D536123B0A86756062C2086 /* SharedSettings.swift in Sources */,
 				48F2BA8F07944391BD20D1AA /* SkyAlmanac.swift in Sources */,
@@ -1190,6 +1198,7 @@
 		};
 		60C27F2F0F4FEDA85CF21D52 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1510,6 +1519,7 @@
 		};
 		EF3D960694E3A07D7B83D8F9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2B255D63E873FD4422C672B /* Nyx.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

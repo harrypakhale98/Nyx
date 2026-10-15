@@ -15604,6 +15604,41 @@
         }
       }
     },
+    "Closures not checked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closures not checked."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sperrungen nicht geprüft."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cierres sin verificar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermetures non vérifiées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉鎖は未確認です。"
+          }
+        }
+      }
+    },
     "Cloud forecast": {
       "extractionState": "manual",
       "localizations": {
@@ -37648,6 +37683,41 @@
         }
       }
     },
+    "No smoke forecast on this device yet, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device yet, so smoke is not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Rauchvorhersage auf diesem Gerät, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay pronóstico de humo en este dispositivo, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de prévision de fumée sur cet appareil : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにはまだ煙の予報がないため、煙は考慮していません。"
+          }
+        }
+      }
+    },
     "No sunset, darkness or moonrise tonight.": {
       "extractionState": "manual",
       "localizations": {
@@ -43521,6 +43591,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "公園のアラートが混み合っています。nps.govで現在の状況を確認してください。"
+          }
+        }
+      }
+    },
+    "Park alerts are off in Your privacy, so closures are not checked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are off in Your privacy, so closures are not checked."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parkhinweise sind unter „Deine Privatsphäre“ ausgeschaltet, daher werden Sperrungen nicht geprüft."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las alertas del parque están desactivadas en Tu privacidad, así que no se verifican los cierres."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les alertes du parc sont désactivées dans Votre vie privée : les fermetures ne sont donc pas vérifiées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で公園のアラートがオフになっているため、閉鎖は確認していません。"
           }
         }
       }
@@ -52643,6 +52748,41 @@
         }
       }
     },
+    "Smoke and haze are off in Your privacy, so smoke is not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze are off in Your privacy, so smoke is not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch und Dunst ist unter „Deine Privatsphäre“ ausgeschaltet, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo y bruma está desactivado en Tu privacidad, así que no se cuenta el humo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fumée et brume est désactivé dans Votre vie privée : la fumée n’est donc pas comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「あなたのプライバシー」で煙ともやがオフになっているため、煙は考慮していません。"
+          }
+        }
+      }
+    },
     "Smoke and haze forecast from Copernicus (CAMS), the European atmosphere service. Thick smoke or haze caps the score.": {
       "extractionState": "manual",
       "localizations": {
@@ -52709,6 +52849,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "煙ともや：Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含んでいます。Open-Meteo経由。"
+          }
+        }
+      }
+    },
+    "Smoke not counted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke not counted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rauch nicht berücksichtigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Humo sin contar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fumée non comptée."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "煙は考慮していません。"
           }
         }
       }

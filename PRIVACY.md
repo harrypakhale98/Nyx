@@ -36,7 +36,7 @@ Links to nps.gov, recreation.gov, Wikidata, Globe at Night and similar sites ope
 
 The watch makes no network requests; the network code isn't compiled into the watch targets. The iPhone sends it saved places, night vision and cached forecasts over WatchConnectivity.
 
-The Vision Pro app only contains the Open-Meteo client and only reaches `api.open-meteo.com`, behind its own switch. It requests no permissions.
+The Vision Pro app reaches the same three hosts as the iPhone, with the same requests and pacing, each behind its own switch in its Your privacy screen: `api.open-meteo.com` (clouds), `air-quality-api.open-meteo.com` (smoke and haze) and `developer.nps.gov` (park alerts, all 63 park codes in one request). They carry only the parks' public coordinates and codes. It requests no permissions.
 
 ## Privacy manifests
 

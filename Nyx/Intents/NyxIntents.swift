@@ -101,10 +101,7 @@ nonisolated struct DarknessAnswer:Sendable {
             : String(localized:"Nyx has no alerts for this place. Check access, local rules and closures before you go.")
     }
     /// "Closure alert: …" before any answer about a park, when it has one. Shared by every spoken answer.
-    static func closureFirst(_ body:String,closure:String?)->String {
-        guard let closure=closure?.trimmingCharacters(in:.whitespacesAndNewlines), !closure.isEmpty else { return body }
-        return Sentences.join([sentence(String(localized:"Closure alert: \(closure)")), body])
-    }
+    static func closureFirst(_ body:String,closure:String?)->String { ClosureLine.first(body,closure:closure) }
     /// An NPS headline usually ends without a full stop; one is added so the score reads as its own sentence.
     static func sentence(_ text:String)->String { Sentences.end(text) }
 }

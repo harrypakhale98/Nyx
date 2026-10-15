@@ -785,13 +785,9 @@ import CoreLocation
         if let fresh, fresh != campgrounds { campgrounds=fresh }
     }
     func alertSummary(_ park:Park)->String {
-        guard let data=enrichments[park.id] else {
-            return alertsBusy ? String(localized:"Park alerts are busy. Check current conditions on nps.gov.") : String(localized:"Access not checked. Confirm closures with the park.")
-        }
-        if let closure=closure(park) { return closure }
-        if let danger=data.alerts.first(where:{ $0.kind == .danger }) { return danger.displayTitle(park:park) }
-        if data.alerts.isEmpty { return String(localized:"No alerts in the last park update. Confirm access before travel.") }
-        return String(localized:"No closures in the last park update. Check all park alerts before you go.")
+        // The same words Vision Pro says beside its scores (`AlertRanking.summary`).
+        guard let data=enrichments[park.id] else { return AlertRanking.unchecked(busy:alertsBusy) }
+        return AlertRanking.summary(data.alerts,park:park)
     }
     /// Where a place's access stands for Ask Nyx, in Nyx's own fixed words only. A closure is a flag
     /// (`OnDeviceGuide.closureRecord`), never the Park Service's title or text: that is free text,

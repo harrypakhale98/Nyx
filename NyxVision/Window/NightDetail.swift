@@ -53,8 +53,15 @@ struct NightDetail: View {
         .accessibilityLabel(Text("\(park.name), night of \(park.dateLabel(plan.sky.evening))"))
     }
     private func scoreBlock(_ plan: NightPlan) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            VisionEyebrow(text: "\(plan.park.region.replacingOccurrences(of: ",", with: ", ")) · \(model.nightOffset == 0 ? String(localized: "Tonight") : plan.park.dayLabel(plan.sky.evening))")
+        let inputs = model.inputs, park = plan.park
+        return VStack(alignment: .leading, spacing: 10) {
+            VisionEyebrow(text: "\(park.region.replacingOccurrences(of: ",", with: ", ")) · \(model.nightOffset == 0 ? String(localized: "Tonight") : park.dayLabel(plan.sky.evening))")
+            // The closure is the one line that must never be lost: beside the score, in the accent, as on the iPhone.
+            if let closure = inputs.closure(park) {
+                Label(closure, systemImage: "exclamationmark.triangle").font(.headline).foregroundStyle(palette.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text(ClosureLine.spoken(closure)))
+            }
             Text(plan.score.value, format: .number)
                 .font(.system(size: numeral, weight: .light, design: .serif)).kerning(3).monospacedDigit()
                 .foregroundStyle(palette.accent)
@@ -70,9 +77,11 @@ struct NightDetail: View {
             // What the clouds rest on, in the iPhone's words.
             Text(model.cloudCaption(plan.night))
                 .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
-            // Smoke is not scored here (no air-quality request is made on this headset), so say so.
-            Text("Smoke and haze are not counted on Vision Pro. On smoky days, check the iPhone app.")
-                .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+            // What the score could not count (smoke switched off or not here yet), and where the
+            // park's access stands when no closure does, in the iPhone's words.
+            ForEach([inputs.smokeNote(park), inputs.accessNote(park)].compactMap { $0 }, id: \.self) { note in
+                Text(note).font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: 380, alignment: .leading)
         // A new score rolls in on the shared spring; under Reduce Motion it simply changes.

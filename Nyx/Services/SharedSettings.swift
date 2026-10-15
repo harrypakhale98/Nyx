@@ -78,8 +78,3 @@ nonisolated extension SavedSkySnapshot {
         closuresUpdated=(try? container.decodeIfPresent(Date.self,forKey:.closuresUpdated)) ?? nil
     }
 }
-/// A value that decodes to nil instead of failing the whole document.
-nonisolated struct Lenient<T:Decodable>:Decodable {
-    let value:T?
-    init(from decoder:any Decoder) throws { value=try? T(from:decoder) }
-}

@@ -64,7 +64,7 @@ NPS_API_KEY = your_key
 ### Other targets
 
 - **NyxWatch** – watchOS 26. It's embedded in the iOS app, so the Nyx scheme builds it too. The watch never uses the network; it gets saved parks and forecasts from the iPhone.
-- **NyxVision** – visionOS 26. Its only network request is the optional cloud forecast.
+- **NyxVision** – visionOS 26. It makes the iPhone's optional requests (clouds, smoke, park alerts), each behind its own switch, and reads `NPS_API_KEY` from the same xcconfig.
 
 ### Tests
 
