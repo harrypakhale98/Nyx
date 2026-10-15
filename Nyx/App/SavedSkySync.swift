@@ -29,6 +29,8 @@ import WidgetKit
     private var settling:Task<Void,Never>?
     /// Something changed in the model while a run was under way (`noteChange`).
     private var changedDuringRun=false
+    /// Writes the widgets' snapshot off the main actor, in the order asked.
+    private let writer=SnapshotWriter()
     /// The watch session is set up at launch, as WatchConnectivity asks, so a watch's request that
     /// launched Nyx in the background is heard; it is answered once a run knows the model.
     init() { if DebugScenario.screen == nil, WatchBridge.isAvailable { WatchBridge.shared.activate() } }
@@ -98,7 +100,7 @@ import WidgetKit
         // A new closure reaches the widget's snapshot (and the watch) without waiting for the next refresh.
         // Reminders too: a pending one names the closure (or stops naming it) before it fires.
         if again == nil, Self.closures(model) != closures {
-            let snapshot=writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model)
+            let snapshot=await writeSnapshot(model,parks); pushWatch(model); published=followedData(model); await Self.refreshFollowed(model)
             await remind(model,snapshot)
         }
         Self.scheduleRefresh()
@@ -221,11 +223,12 @@ import WidgetKit
     private static func closures(_ model:PlanModel)->[String:String] {
         Dictionary(model.parks.compactMap { park in model.closure(park).map { (park.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
-    /// Writes the snapshot and, only when it says something new (or new Moon pictures were drawn),
-    /// reloads the widgets and the Tonight control once and refreshes the Smart Stack's hints.
-    @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false)->SavedSkySnapshot {
+    /// Writes the snapshot (off the main actor, in order: `SnapshotWriter`) and, once written and only
+    /// when it says something new (or new Moon pictures were drawn), reloads the widgets and the
+    /// Tonight control once and refreshes the Smart Stack's hints.
+    @discardableResult private func writeSnapshot(_ model:PlanModel,_ parks:[Park],moonsDrawn:Bool=false) async -> SavedSkySnapshot {
         let snapshot=Self.snapshot(parks:parks,followed:followed(model),bundled:model.parks,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),closuresUpdated:model.alertsUpdated)
-        if SharedSettings.write(snapshot) || moonsDrawn {
+        if await writer.write(snapshot) || moonsDrawn {
             WidgetCenter.shared.reloadAllTimelines()
             ControlCenter.shared.reloadControls(ofKind:WidgetSelection.controlKind)
             // The Smart Stack's dusk hints come from the same snapshot; a timeline reload alone may not refresh them.
@@ -355,7 +358,7 @@ import WidgetKit
     }
     private func publish(_ model:PlanModel,_ parks:[Park]) async {
         let moonsDrawn=await renderWidgetMoons(model,parks)
-        let snapshot=writeSnapshot(model,parks,moonsDrawn:moonsDrawn)
+        let snapshot=await writeSnapshot(model,parks,moonsDrawn:moonsDrawn)
         // Siri's suggested parks for the App Shortcuts phrases start with the saved ones.
         NyxShortcuts.updateAppShortcutParameters()
         pushWatch(model)

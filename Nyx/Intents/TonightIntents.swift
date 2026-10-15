@@ -17,9 +17,9 @@ enum IntentPark {
         return first
     }
     /// From the device's own state: the activity running now, and the starting park.
-    static func resolve(_ entity: ParkEntity?) throws -> Park {
-        try resolve(entity, library:ParkLibrary.places(), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"),
-                    place:{ ParkLibrary.place($0) })
+    static func resolve(_ entity: ParkEntity?, snapshot: SavedSkySnapshot?=SharedSettings.read()) throws -> Park {
+        try resolve(entity, library:ParkLibrary.places(snapshot:snapshot), inProgress:FieldActivities.current?.attributes.parkID, home:UserDefaults.standard.string(forKey:"homePark"),
+                    place:{ ParkLibrary.place($0,snapshot:snapshot) })
     }
 }
 
@@ -36,12 +36,13 @@ struct DarkTonightIntent: AppIntent {
     init() {}
     // The night under way is read from the app's Live Activities, on the main actor.
     @MainActor func perform() async throws -> some IntentResult & ReturnsValue<Date> & ProvidesDialog {
-        let selected=try IntentPark.resolve(park)
+        let shared=await SharedSettings.load()
+        let selected=try IntentPark.resolve(park,snapshot:shared)
         let now=Date.now
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:now))
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        let closure=IntentClosure.closure(selected,shared:SharedSettings.read())
+        let closure=IntentClosure.closure(selected,shared:shared)
         let dialog=DarkWindowAnswer.dialog(park:selected,sky:sky,closure:closure,voiceOnly:voiceOnly)
         return .result(value:sky.darkStart ?? sky.sunset ?? sky.evening,dialog:IntentDialog(stringLiteral:dialog))
     }
@@ -93,13 +94,14 @@ struct WhatsUpTonightIntent: AppIntent {
     init() {}
     // The night under way is read from the app's Live Activities, on the main actor.
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
-        let selected=try IntentPark.resolve(park)
+        let shared=await SharedSettings.load()
+        let selected=try IntentPark.resolve(park,snapshot:shared)
         let now=Date.now
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:now))
         let whatsUp=WhatsUp(park:selected,sky:sky,isTonight:true)
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
-        let closure=IntentClosure.closure(selected,shared:SharedSettings.read())
+        let closure=IntentClosure.closure(selected,shared:shared)
         let dialog=WhatsUpAnswer.dialog(whatsUp,park:selected,closure:closure,voiceOnly:voiceOnly)
         return .result(dialog:IntentDialog(stringLiteral:dialog))
     }

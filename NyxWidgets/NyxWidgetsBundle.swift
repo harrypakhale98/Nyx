@@ -109,7 +109,7 @@ struct TonightWidget:Widget {
 // MARK: The Moon
 
 struct MoonProvider:AppIntentTimelineProvider {
-    func placeholder(in context:Context)->MoonEntry { MoonEntry(date:.now,park:Self.park(nil,snapshot:SharedSettings.read()),nightVision:false) }
+    func placeholder(in context:Context)->MoonEntry { .placeholder() }
     func snapshot(for configuration:MoonWidgetIntent,in context:Context) async -> MoonEntry {
         let snapshot=SharedSettings.read()
         return MoonEntry(date:.now,park:Self.park(configuration.park,snapshot:snapshot),nightVision:SharedSettings.defaults.bool(forKey:"nightVision"),

@@ -38,10 +38,10 @@ struct DarknessIntent:AppIntent {
     @Parameter(title:"Park") var park:ParkEntity
     static var parameterSummary:some ParameterSummary { Summary("Darkness at \(\.$park) tonight") }
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog & ShowsSnippetView {
+        // Saved parks share their forecast with the widget; the app's own cache may be newer. Read once.
+        let shared=await SharedSettings.load()
         // A park or followed place, else any world catalogue place by its id (one found by search, not followed).
-        guard let selected=try ParkLibrary.places().first(where:{$0.id==park.id}) ?? ParkLibrary.place(park.id) else { throw NyxIntentError.parkNotFound }
-        // Saved parks share their forecast with the widget; the app's own cache may be newer.
-        let shared=SharedSettings.read()
+        guard let selected=try ParkLibrary.places(snapshot:shared).first(where:{$0.id==park.id}) ?? ParkLibrary.place(park.id,snapshot:shared) else { throw NyxIntentError.parkNotFound }
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
         // The park's closure from the app's last park update, said before the score.
