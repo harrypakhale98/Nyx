@@ -1,8 +1,8 @@
 import Foundation
 import Synchronization
 
-/// The bundled world grids: the usual clouds and the night sky's
-/// brightness for any point on land, read on this device from 10-degree tiles
+/// The bundled world grids: the usual clouds, the night sky's brightness and the usual night
+/// temperatures for any point on land, read on this device from 10-degree tiles
 /// (format 1: raw DEFLATE, a 16-byte header, one byte a cell, 255 for
 /// no data). Nothing is fetched: a coordinate never leaves the device for this.
 ///
@@ -22,10 +22,10 @@ import Synchronization
 /// caller's thread (about a millisecond); `prepare` decodes it off the caller's actor first.
 nonisolated final class SkyGrid: Sendable {
     nonisolated enum Layer: String, CaseIterable, Hashable, Sendable {
-        case clouds, sky
+        case clouds, sky, temps
         /// The header's layer byte.
-        var code: UInt8 { self == .clouds ? 1 : 2 }
-        var bands: Int { self == .clouds ? 24 : 1 }
+        var code: UInt8 { switch self { case .clouds: 1; case .sky: 2; case .temps: 3 } }
+        var bands: Int { switch self { case .clouds: 24; case .sky: 1; case .temps: 37 } }
     }
     nonisolated struct Key: Hashable, Sendable {
         let layer: Layer
@@ -206,6 +206,26 @@ nonisolated final class SkyGrid: Sendable {
         guard let mean = tile.value(band: month-1, row: at.row, col: at.col), let clear = tile.value(band: 11+month, row: at.row, col: at.col),
               mean <= 100, clear <= 100 else { return nil }
         return (Double(mean), Double(clear))
+    }
+    /// The usual night for a month (1–12) from ERA5 2015–2024 at 0.5° (`build_night_climate.py`): °C
+    /// before dawn (the coldest of the two hours before sunrise) and two hours after sunset, and the
+    /// dawn temperature's distance from its dew point. Bands 0–11 dawn and 12–23 evening as b/2 − 80,
+    /// 24–35 the dew spread as b/5, 36 the cell's model terrain as b·25 − 400 m. With `elevation`
+    /// (metres) the temperatures are moved to that height at 6.5 °C a kilometre; without it they
+    /// stand for the cell's terrain. Nil at sea or without the layer.
+    func nightTemperatures(latitude: Double, longitude: Double, month: Int, elevation: Double? = nil) -> (dawn: Double, evening: Double, dewSpread: Double)? {
+        guard (1...12).contains(month), let point = Self.normalized(latitude: latitude, longitude: longitude),
+              let tile = tile(.temps, latitude: point.latitude, longitude: point.longitude) else { return nil }
+        let at = tile.cell(latitude: point.latitude, longitude: point.longitude)
+        guard let dawn = tile.value(band: month-1, row: at.row, col: at.col), let evening = tile.value(band: 11+month, row: at.row, col: at.col),
+              let dew = tile.value(band: 23+month, row: at.row, col: at.col) else { return nil }
+        var shift = 0.0
+        if let place = elevation, let terrain = tile.value(band: 36, row: at.row, col: at.col) {
+            let cellMetres: Double = Double(terrain)*25-400
+            shift = 6.5*(cellMetres-place)/1000
+        }
+        let dawnC: Double = Double(dawn)/2-80+shift, eveningC: Double = Double(evening)/2-80+shift
+        return (dawnC, eveningC, Double(dew)/5)
     }
     /// The night sky's brightness at the zenith, mag/arcsec² (about 22 is pristine), modelled from
     /// satellite night lights; nil at sea or without the sky layer.

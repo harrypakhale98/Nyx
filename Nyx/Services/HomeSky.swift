@@ -71,7 +71,7 @@ nonisolated struct HomeSky: Sendable {
         climate.grid=grid
         usualClouds=origin.park == nil ? climate.typical(place, on: sky.evening) : nil
         estimate=light == .assumed ? nil : NightPlanner.night(park: place, sky: sky, forecast: nil, detail: nil, now: now, climate: climate)
-        let whatsUp=WhatsUp(park: place, sky: sky, isTonight: true, table: table)
+        let whatsUp=WhatsUp(park: place, sky: sky, isTonight: true, table: table, highlights: false)
         planets=whatsUp.planets
         eclipse=whatsUp.events.eclipse?.visible == nil ? nil : whatsUp.eclipse
         let showerNight=whatsUp.events.shower.flatMap { night in night.hourlyRate>=5 || (night.isPeakNight && WhatsUp.Events.isMajor(night.shower)) ? night : nil }

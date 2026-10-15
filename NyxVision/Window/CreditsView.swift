@@ -13,7 +13,14 @@ struct CreditsView: View {
         ("Constellation figures", "Drawn for Nyx between catalog stars."),
         ("Cloud forecasts", "Weather data by Open-Meteo.com (CC BY 4.0), as averaged by Nyx."),
         ("Usual clouds", "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."),
+        ("Usual night temperatures", "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0."),
+        ("Smoke and haze", "Contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."),
         ("Park data", "National Park Service."),
+        ("Aurora forecast", "The planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work."),
+        ("Aurora latitude", "Computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI)."),
+        ("Terrain", "USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."),
+        ("Deep sky", "Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."),
+        ("Moon names", "IAU Gazetteer of Planetary Nomenclature, USGS (public domain)."),
     ]
     var body: some View {
         NavigationStack {

@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// Park detail's "What's up" card, by what the night is worth looking up for: the Milky Way's bright
-/// center, the planets (brightest first), then a meteor shower of ten or more an hour and a
-/// partial eclipse. A total lunar eclipse the park can see leads, being rare. Weak showers, a
-/// penumbral eclipse and one the park cannot see are a line each at the foot. Each row is a
+/// Park detail's "What's up" card, by what the night is worth looking up for, in the order the
+/// watch shows it too (`WhatsUp.layout`): the Milky Way's bright center, the planets (brightest
+/// first), then a meteor shower of ten or more an hour, a partial eclipse and the night's
+/// highlights. A total lunar eclipse the park can see leads, being rare. Weak showers, a
+/// penumbral eclipse, one the park cannot see, a planet at its best and a solstice are a line each. Each row is a
 /// glyph, a name, the figure to read at a glance and one plain sentence; VoiceOver reads each row
 /// as those sentences.
 struct WhatsUpPanel: View {
@@ -67,7 +68,7 @@ struct WhatsUpPanel: View {
     }
     /// Events and a timed core get the amber figure; a state ("Out of the night sky") stays in starlight.
     private func row(_ item:WhatsUp.Item)->some View {
-        let event=item.kind == .meteors || item.kind == .eclipse
+        let event=[.meteors,.eclipse,.aurora,.pairing].contains(item.kind)
         return glyphed(SkyGlyph.Kind(item.kind),color:palette.accent) {
             ViewThatFits(in:.horizontal) {
                 HStack(alignment:.firstTextBaseline,spacing:8) { heading(item,event:event).layoutPriority(1); Spacer(minLength:8); figure(item,event:event) }
@@ -92,22 +93,9 @@ struct WhatsUpPanel: View {
         // Text to read, not a control: one line tall, it would otherwise be taken for a too-small target.
         .accessibilityAddTraits(.isStaticText)
     }
-    /// Where each row goes: `first` above the planets, `after` below them, `mentions` a line each.
-    struct Layout: Equatable { var first:[WhatsUp.Item]; var after:[WhatsUp.Item]; var mentions:[WhatsUp.Item] }
-    /// Showers under this many an hour are a mention, not a row.
-    static let showerRow=10
-    static func layout(_ whatsUp:WhatsUp)->Layout {
-        var layout=Layout(first:[whatsUp.core],after:[],mentions:[])
-        if let shower=whatsUp.shower {
-            if (whatsUp.events.shower?.hourlyRate ?? 0)>=showerRow { layout.after.append(shower) } else { layout.mentions.append(shower) }
-        }
-        if let eclipse=whatsUp.eclipse, let night=whatsUp.events.eclipse {
-            if night.visible == nil || night.eclipse.type == "penumbral" { layout.mentions.append(eclipse) }
-            else if night.eclipse.type == "total" { layout.first.insert(eclipse,at:0) }
-            else { layout.after.append(eclipse) }
-        }
-        return layout
-    }
+    /// The shared rule (`WhatsUp.layout`), as the watch page uses it.
+    static func layout(_ whatsUp:WhatsUp)->WhatsUp.Layout { whatsUp.layout }
+    static let showerRow=WhatsUp.showerRow
     /// One plain line for the eclipse words a newcomer may not know.
     static func gloss(_ whatsUp:WhatsUp,item:WhatsUp.Item)->String? {
         guard item.kind == .eclipse, let night=whatsUp.events.eclipse, night.visible != nil else { return nil }

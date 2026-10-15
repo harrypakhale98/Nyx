@@ -159,11 +159,23 @@ targets:
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
+      # The binocular sights What's up reads (type only: the file is not bundled, so it offers none here).
+      - path: Nyx/Services/DeepSky.swift
+        group: Shared
+      # The terrain horizon What's up reads (type only: no profiles bundled here).
+      - path: Nyx/Services/Horizon.swift
+        group: Shared
       - path: Nyx/Resources/sky-events.json
         group: Shared
       - path: Nyx/Services/ScoreEngine.swift
         group: Shared
       - path: Nyx/Services/DataServices.swift
+        group: Shared
+      # The aurora forecast types `AuroraService` caches (the widget never asks for it or shows it);
+      # without the grid the geomagnetic latitude falls back to the dipole, which nothing here reads.
+      - path: Nyx/Services/Aurora.swift
+        group: Shared
+      - path: Nyx/Services/Geomagnetic.swift
         group: Shared
       # The campground types `ParkStore` reads and caches (the widget never asks for them).
       - path: Nyx/Models/Campground.swift
@@ -293,6 +305,24 @@ targets:
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
+      # Tonight's binocular sights in What's up, from the same bundled list as the iPhone.
+      - path: Nyx/Services/DeepSky.swift
+        group: Shared
+      - path: Nyx/Resources/deep-sky.json
+        group: Shared
+      # The real terrain at each park's main viewing spot, for the core's line in What's up, as on the iPhone.
+      - path: Nyx/Services/Horizon.swift
+        group: Shared
+      - path: Nyx/Resources/horizons.json
+        group: Shared
+      # Aurora in reach tonight from the Kp forecast the iPhone hands over (`WatchContext.aurora`),
+      # by the same corrected geomagnetic latitude grid as the iPhone, so both say the same.
+      - path: Nyx/Services/Aurora.swift
+        group: Shared
+      - path: Nyx/Services/Geomagnetic.swift
+        group: Shared
+      - path: Nyx/Resources/geomagnetic.bin
+        group: Shared
       - path: Nyx/Resources/sky-events.json
         group: Shared
       - path: Nyx/DesignSystem/MotionTilt.swift
@@ -364,6 +394,11 @@ targets:
         group: Shared
       - path: Nyx/Services/WatchContext.swift
         group: Shared
+      # The aurora forecast the context carries (its type only; complications do not show aurora).
+      - path: Nyx/Services/Aurora.swift
+        group: Shared
+      - path: Nyx/Services/Geomagnetic.swift
+        group: Shared
       - path: Nyx/DesignSystem/MoonSymbol.swift
         group: Shared
       - path: Nyx/Services/WristSky.swift
@@ -377,6 +412,12 @@ targets:
       - path: Nyx/Services/SkyAlmanac.swift
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
+        group: Shared
+      # The binocular sights What's up reads (type only: the file is not bundled, so it offers none here).
+      - path: Nyx/Services/DeepSky.swift
+        group: Shared
+      # The terrain horizon What's up reads (type only: no profiles bundled here).
+      - path: Nyx/Services/Horizon.swift
         group: Shared
       - path: Nyx/Resources/sky-events.json
         group: Shared
@@ -403,9 +444,10 @@ targets:
         # The same isolation as every other target, so shared files compile identically everywhere.
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
   # Nyx for Apple Vision Pro: the planner's window and "Stand under the sky". Shares the engine and
-  # bundled data by listing files. Its requests are the iPhone's, to the same three hosts, each behind
+  # bundled data by listing files. Its requests are the iPhone's, to the same four hosts, each behind
   # its own switch in Your privacy: the cloud forecast (CloudForecastClient.swift), and the smoke
-  # forecast and park alerts (DataServices.swift), so its scores and closures match (see PRIVACY.md).
+  # forecast, park alerts and aurora forecast (DataServices.swift), so its scores, closures and
+  # What's up match (see PRIVACY.md).
   NyxVision:
     type: application
     platform: visionOS
@@ -413,6 +455,13 @@ targets:
       - path: NyxVision
       # Smoke (`ForecastDetailService`, air only) and park alerts (`ParkStore`), with the types they cache.
       - path: Nyx/Services/DataServices.swift
+        group: Shared
+      # NOAA's aurora forecast (`AuroraService`, behind its own switch) and the grid that places it, as on the iPhone.
+      - path: Nyx/Services/Aurora.swift
+        group: Shared
+      - path: Nyx/Services/Geomagnetic.swift
+        group: Shared
+      - path: Nyx/Resources/geomagnetic.bin
         group: Shared
       - path: Nyx/Models/Campground.swift
         group: Shared
@@ -444,6 +493,11 @@ targets:
         group: Shared
       - path: Nyx/Models/CloudClimate.swift
         group: Shared
+      # The usual night temperatures (ERA5), the curated parks' file; the world grid is iPhone-only, as the clouds grid is.
+      - path: Nyx/Models/NightClimate.swift
+        group: Shared
+      - path: Nyx/Resources/night-climate.json
+        group: Shared
       - path: Nyx/Services/SkyGrid.swift
         group: Shared
       - path: Nyx/Models/Forecast.swift
@@ -459,12 +513,27 @@ targets:
         group: Shared
       - path: Nyx/Services/WhatsUp.swift
         group: Shared
+      # Tonight's binocular sights in What's up, from the same bundled list as the iPhone.
+      - path: Nyx/Services/DeepSky.swift
+        group: Shared
+      - path: Nyx/Resources/deep-sky.json
+        group: Shared
+      # The real terrain: the core's line in What's up and the immersive skyline.
+      - path: Nyx/Services/Horizon.swift
+        group: Shared
+      - path: Nyx/Resources/horizons.json
+        group: Shared
       - path: Nyx/Services/SkyDome.swift
         group: Shared
       - path: Nyx/DesignSystem/Moon.metal
         group: Shared
       # The Moon's shared size and relief rules, and the globe's grid (window Moon and Moon volume).
       - path: Nyx/DesignSystem/MoonShading.swift
+        group: Shared
+      # The Moon's named seas and craters over the window's Moon, as on the iPhone.
+      - path: Nyx/DesignSystem/MoonFeatures.swift
+        group: Shared
+      - path: Nyx/Resources/moon-features.json
         group: Shared
       # The palette, night-vision red and spring every Nyx target shares (`VisionPalette` derives from them).
       - path: Nyx/DesignSystem/NyxPalette.swift

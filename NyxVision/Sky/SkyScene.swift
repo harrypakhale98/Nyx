@@ -255,11 +255,13 @@ import UIKit
         let milkyWayLight = 0.4*SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude)*washed*dark*boost
         tint(milkyWay, texture: milkyWayTexture, level: SRGB.encoded(milkyWayLight), color: Self.ink(palette))
 
-        // The skyline, seeded by the park (built before its colour is set below).
+        // The skyline: the real terrain at the park's main viewing spot where Nyx has it
+        // (`Horizon`), else one seeded by the park (built before its colour is set below).
         if ridgePark != park.id {
             ridgePark = park.id
+            let real = Horizon.Table.shared.main(park)?.horizon
             for (entity, far) in [(farRidge, true), (nearRidge, false)] {
-                let heights = SkyTextures.skyline(seed: park.id, far: far)
+                let heights = real.map { SkyTextures.skyline(real: $0, far: far) } ?? SkyTextures.skyline(seed: park.id, far: far)
                 if let mesh = try? Self.ridgeMesh(heights, facing: facing, radius: far ? Self.farRidgeRadius : Self.nearRidgeRadius) {
                     let materials = entity.model?.materials ?? []
                     entity.model = ModelComponent(mesh: mesh, materials: materials)

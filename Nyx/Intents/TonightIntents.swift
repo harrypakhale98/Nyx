@@ -98,7 +98,9 @@ struct WhatsUpTonightIntent: AppIntent {
         let selected=try IntentPark.resolve(park,snapshot:shared)
         let now=Date.now
         let sky=AstronomyEngine().conditions(for:selected,on:selected.currentNight(at:now))
-        let whatsUp=WhatsUp(park:selected,sky:sky,isTonight:true)
+        // NOAA's aurora forecast as the app last kept it (no request from Siri), unless switched off.
+        let outlook=UserDefaults.standard.object(forKey:AuroraService.key) as? Bool == false ? nil : await AuroraService().cached()
+        let whatsUp=WhatsUp(park:selected,sky:sky,isTonight:true,aurora:AuroraForecast.item(outlook,park:selected,sky:sky,now:now))
         var voiceOnly=false
         if #available(iOS 27.0,*) { voiceOnly=systemContext.isVoiceOnly }
         let closure=IntentClosure.closure(selected,shared:shared)
@@ -129,7 +131,7 @@ nonisolated enum WhatsUpAnswer {
         case .planet:
             guard voiceOnly, let note=item.note, let value=item.value else { return item.spoken }
             return String(localized:"\(item.title), \(note): \(value).")
-        case .eclipse:
+        case .eclipse, .aurora, .pairing, .moon, .planetBest, .season, .gegenschein, .deepSky:
             return item.spoken
         }
     }

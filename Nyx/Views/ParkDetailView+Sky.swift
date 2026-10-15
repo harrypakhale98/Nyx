@@ -86,7 +86,12 @@ extension ParkDetailView {
     /// What to expect and bring, one short line each: rain, snow or storms, fog, the coldest hour,
     /// dew on optics, and wind. Lines with no data are left out; with none, the section is not shown.
     private var nightItself:[(symbol:String,text:String)] {
-        guard let outlook=model.outlook(skyNight) else { return [] }
+        // Past the forecast's hourly detail: the month's usual night (ERA5), said as usual, never as a forecast.
+        guard let outlook=model.outlook(skyNight), outlook.coldest != nil else {
+            let month=park.calendar.component(.month,from:skyNight.id)
+            guard let usual=NightClimate.shared.lines(park,month:month) else { return [] }
+            return [("thermometer.low",usual.temperatures)]+(usual.dew.map { [("drop",$0)] } ?? [])
+        }
         let cold=outlook.coldest.map { cold in
             outlook.coldestAt.map { String(localized:"Down to \(NightOutlook.temperature(cold)) around \(park.time($0))") } ?? String(localized:"Down to \(NightOutlook.temperature(cold))")
         }

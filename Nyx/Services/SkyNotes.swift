@@ -73,9 +73,9 @@ nonisolated enum SkyNotes {
     /// How far below the horizon the Sun can be with that shell overhead still sunlit: arccos(R/(R+h)), about 23°.
     static var shellDepression: Double { acos(6371/(6371+shellKilometres))*180/Double.pi }
 
-    static func notes(park: Park, sky: SkyConditions, core: SkyAlmanac.CoreNight?, aerosol: Double?, glow: SkyGlow = .shared) -> [SkyNote] {
+    static func notes(park: Park, sky: SkyConditions, core: SkyAlmanac.CoreNight?, aerosol: Double?, auroraForecast: Bool = false, glow: SkyGlow = .shared) -> [SkyNote] {
         var notes: [SkyNote] = []
-        if let text = aurora(park: park, evening: sky.evening) { notes.append(SkyNote(kind: .aurora, text: text)) }
+        if let text = aurora(park: park, evening: sky.evening, forecast: auroraForecast) { notes.append(SkyNote(kind: .aurora, text: text)) }
         if let text = coreGlow(park: park, sky: sky, core: core, glow: glow) { notes.append(SkyNote(kind: .glow, text: text)) }
         if let text = zodiacal(park: park, sky: sky) { notes.append(SkyNote(kind: .zodiacal, text: text)) }
         if let text = satellites(park: park, sky: sky) { notes.append(SkyNote(kind: .satellites, text: text)) }
@@ -90,15 +90,20 @@ nonisolated enum SkyNotes {
 
     /// Where aurora reaches, by geomagnetic latitude (`Geomagnetic.AuroraReach`), in either
     /// hemisphere, on nights when the Sun gets at least 12° below the horizon (for Alaska, about
-    /// late August to mid-April). Static: Nyx does not forecast aurora (that would need another service).
-    static func aurora(park: Park, evening: Date, engine: AstronomyEngine = AstronomyEngine()) -> String? {
+    /// late August to mid-April). Standing guidance; tonight's forecast, when it reaches here, is a What's up item (`AuroraForecast`).
+    /// `forecast`: NOAA's forecast is switched on and in hand, so What's up names aurora when it
+    /// reaches here; without it the note says only what the aurora depends on.
+    static func aurora(park: Park, evening: Date, forecast: Bool = false, engine: AstronomyEngine = AstronomyEngine()) -> String? {
         let reach = Geomagnetic.auroraReach(park)
         guard reach != .none, lowestSun(park: park, evening: evening, engine: engine) <= -12 else { return nil }
         let poleward = park.southern ? String(localized: "south") : String(localized: "north")
         switch reach {
-        case .often: return String(localized: "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.")
-        case .active: return String(localized: "Aurora reaches here on active nights, usually low toward the \(poleward). When it shows, it also brightens the sky. It depends on the Sun's activity, and Nyx does not forecast aurora.")
-        case .storms: return String(localized: "Aurora reaches here only during strong solar storms, low toward the \(poleward). It depends on the Sun's activity, and Nyx does not forecast aurora.")
+        case .often: return forecast ? String(localized: "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity; when NOAA's forecast for the next three nights reaches here, What's up says so.")
+            : String(localized: "Aurora is often seen here on dark nights, sometimes overhead. When it shows, it also brightens the sky. It depends on the Sun's activity.")
+        case .active: return forecast ? String(localized: "Aurora reaches here on active nights, usually low toward the \(poleward). When it shows, it also brightens the sky. It depends on the Sun's activity; when NOAA's forecast for the next three nights reaches here, What's up says so.")
+            : String(localized: "Aurora reaches here on active nights, usually low toward the \(poleward). When it shows, it also brightens the sky. It depends on the Sun's activity.")
+        case .storms: return forecast ? String(localized: "Aurora reaches here only during strong solar storms, low toward the \(poleward). It depends on the Sun's activity; when NOAA's forecast for the next three nights reaches here, What's up says so.")
+            : String(localized: "Aurora reaches here only during strong solar storms, low toward the \(poleward). It depends on the Sun's activity.")
         case .none: return nil
         }
     }

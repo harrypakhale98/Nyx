@@ -1,6 +1,6 @@
 import Foundation
 
-/// Cloud forecasts, smoke and park alerts on Vision Pro: the network requests this app makes, the
+/// Cloud forecasts, smoke, park alerts and the aurora forecast on Vision Pro: the network requests this app makes, the
 /// iPhone's own clients, hosts and pacing, each behind its own switch in Your privacy.
 /// Clouds (`WeatherService`): all 63 parks' public viewing-spot coordinates in one request to
 /// api.open-meteo.com (two, 50 and 13 parks), kept in this headset's Application Support so the
@@ -8,7 +8,8 @@ import Foundation
 /// cloud layers (`SummitLayerService`) at most every twelve hours. Smoke (`ForecastDetailService`,
 /// air only): the same coordinates to air-quality-api.open-meteo.com at most every twelve hours.
 /// Park alerts (`ParkStore`): one request for all 63 park codes to developer.nps.gov at most every
-/// six hours, with the iPhone's shared key, and none without one. A refused request waits
+/// six hours, with the iPhone's shared key, and none without one. Aurora (`AuroraService`): NOAA's
+/// Kp forecast from services.swpc.noaa.gov, one global file at most every three hours. A refused request waits
 /// (`HostBackoff`). With a switch off nothing is requested for it: cached clouds keep fading toward
 /// the usual clouds, cached smoke is dropped, cached closures still stand, as on the iPhone.
 extension VisionModel {
@@ -30,13 +31,16 @@ extension VisionModel {
         let layers = await summits.layers(for: parks, network: asking)
         merge(fresh, layers: layers)
         // Smoke and the park update side by side: two other hosts, each paced on its own.
-        let smokeOn = smokeOn, parks = parks, details = detailService, store = parkStore, key = Self.npsKey
+        let smokeOn = smokeOn, parks = parks, details = detailService, store = parkStore, key = Self.npsKey, auroraOn = auroraOn, kp = auroraService
         let smokeNetwork = network && live, alertsNetwork = network && live && alertsOn
         if !smokeOn { await details.forgetAir() }
         async let air = smokeOn ? details.details(for: parks, weather: false, smoke: smokeNetwork, force: false).compactMapValues(\.air) : [:]
         async let update = store.alerts(for: parks, key: key, network: alertsNetwork, force: false)
-        let (smoke, alertsUpdate) = await (air, update)
+        async let outlook = auroraOn ? kp.outlook(network: network && live) : nil
+        let (smoke, alertsUpdate, auroraOutlook) = await (air, update, outlook)
         take(alertsUpdate)
+        // Switched off while the request was out: what arrived is not used.
+        if self.auroraOn, auroraOutlook != aurora { aurora = auroraOutlook }
         // Switched off while the request was out: what arrived is not counted.
         merge([:], layers: [:], smoke: self.smokeOn ? smoke : [:])
     }
@@ -105,8 +109,13 @@ extension VisionModel {
     }
 
     /// What the window and the plaque in the sky say about what is computed, and about clouds.
-    /// `inSky` also owns up to the plaque's illustrative skyline.
+    /// `inSky` also says what the skyline is: the real terrain, or illustrative.
     nonisolated static func honesty(_ plan: NightPlan, inSky: Bool = false) -> String {
+        // The sky draws the real terrain where Nyx has it: said plainly, in place of "illustrative".
+        if inSky, let real = Horizon.Table.shared.main(plan.park) {
+            let place = real.spot ?? plan.park.shortName
+            return Sentences.join([honesty(plan), String(localized: "The skyline is the real terrain around \(place), from elevation data.")])
+        }
         let park = plan.park, night = park.dayLabel(plan.sky.evening)
         // Without forecast clouds, why: beyond the forecast's reach, or a forecast this night should
         // have but does not (switched off in Your privacy, never fetched): never "no forecast reaches" for that.

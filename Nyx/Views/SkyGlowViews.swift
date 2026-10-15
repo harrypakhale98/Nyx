@@ -72,6 +72,24 @@ struct LightPollution: View {
     }
 }
 
+/// A viewing spot's ground and skyline in one line: its elevation (feet where the reader's units
+/// are U.S., rounded to ten; metres elsewhere) and how high the terrain stands, from the bundled
+/// profile (`Horizon`). Terrain only, so trees near the spot are not counted; the About the data
+/// screen says so.
+nonisolated enum SpotTerrain {
+    static func elevation(_ metres:Double,locale:Locale = .current)->String {
+        let feet=locale.measurementSystem == .us
+        let value=feet ? (metres*3.28084/10).rounded()*10 : metres.rounded()
+        return Measurement(value:value,unit:feet ? UnitLength.feet : UnitLength.meters)
+            .formatted(.measurement(width:.abbreviated,usage:.asProvided,numberFormatStyle:.number.precision(.fractionLength(0))).locale(locale))
+    }
+    static func line(_ horizon:Horizon,locale:Locale = .current)->String {
+        let height=elevation(horizon.elevation,locale:locale), top=horizon.highest
+        if top.altitude<Horizon.open { return String(localized:"Elevation \(height). Open horizon: terrain under \(Int(Horizon.open))° all round.") }
+        return String(localized:"Elevation \(height). Terrain up to \(Int(top.altitude.rounded()))° high to the \(Compass.name(top.azimuth)).")
+    }
+}
+
 /// What the Park Service measured on the ground: up to three sites, darkest latest reading first,
 /// each with its year and the observers' Bortle class when they gave one, then what the number means
 /// and how old it is. Nothing for a park the Park Service has not measured.
@@ -189,6 +207,16 @@ struct ViewingSpotRow: View {
                     .font(.footnote).foregroundStyle(palette.ink)
                     .accessibilityElement(children:.ignore)
                     .accessibilityLabel(String(localized:"Park Service measured the sky here in \(MeasuredSky.span(year...year)): \(MeasuredSky.reading(night.sqm)) magnitudes per square arcsecond, higher is darker."))
+            }
+            if let horizon=Horizon.Table.shared.spot(spot.name,park:park.id) {
+                Label { Text(SpotTerrain.line(horizon)).fixedSize(horizontal:false,vertical:true) }
+                    icon:{ Image(systemName:"mountain.2").foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    .font(.footnote).foregroundStyle(palette.ink)
+            }
+            // The Park Service's night or seasonal rules that name this spot (the park's After dark panel has the details).
+            ForEach(NightAccess.shared.rules(park.id,spot:spot.name)) { rule in
+                Label { Text(rule.title).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:rule.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }
+                    .font(.footnote).foregroundStyle(palette.ink)
             }
             if let access, let summary=access.summary {
                 Label { Text(summary).fixedSize(horizontal:false,vertical:true) } icon:{ Image(systemName:access.symbol).foregroundStyle(palette.accent).accessibilityHidden(true) }

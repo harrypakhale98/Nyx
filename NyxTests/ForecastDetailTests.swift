@@ -177,7 +177,7 @@ struct ForecastDetailTests {
         let defaults=try #require(UserDefaults(suiteName:suite))
         defaults.set(false,forKey:"smokeEnabled")
         defer { defaults.removePersistentDomain(forName:suite) }
-        #expect(SafeHTTP.hosts==["developer.nps.gov","api.open-meteo.com","air-quality-api.open-meteo.com"])
+        #expect(SafeHTTP.hosts==["developer.nps.gov","api.open-meteo.com","air-quality-api.open-meteo.com","services.swpc.noaa.gov"])
         let air=try #require(URL(string:"https://air-quality-api.open-meteo.com/v1/air-quality?latitude=0&longitude=0"))
         do { _=try await SafeHTTP(suite:suite).get(air); Issue.record("Smoke request was not blocked") }
         catch let error as URLError { #expect(error.code == .cancelled) }
@@ -185,11 +185,12 @@ struct ForecastDetailTests {
         do { _=try await SafeHTTP(suite:suite).get(other); Issue.record("Unknown host was not rejected") }
         catch let error as URLError { #expect(error.code == .unsupportedURL) }
     }
-    /// Each of the three hosts has its own switch: turning one off refuses that host before any
-    /// connection and leaves the other two allowed. No other host, and nothing but HTTPS, is ever allowed.
+    /// Each of the four hosts has its own switch: turning one off refuses that host before any
+    /// connection and leaves the others allowed. No other host, and nothing but HTTPS, is ever allowed.
     @Test func eachHostHasItsOwnSwitch() async throws {
-        #expect(SafeHTTP.hosts == ["developer.nps.gov", "api.open-meteo.com", "air-quality-api.open-meteo.com"])
-        #expect(SafeHTTP.preferences == ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": "weatherEnabled", "air-quality-api.open-meteo.com": "smokeEnabled"])
+        #expect(SafeHTTP.hosts == ["developer.nps.gov", "api.open-meteo.com", "air-quality-api.open-meteo.com", "services.swpc.noaa.gov"])
+        #expect(SafeHTTP.preferences == ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": "weatherEnabled", "air-quality-api.open-meteo.com": "smokeEnabled",
+                                         "services.swpc.noaa.gov": "auroraEnabled"])
         let urls=try SafeHTTP.hosts.sorted().map { try #require(URL(string: "https://\($0)/v1/test")) }
         for off in SafeHTTP.hosts.sorted() {
             let suite="nyx-switch-test-\(UUID().uuidString)"

@@ -33,6 +33,7 @@ struct CreditsView: View {
                 credit("Cloud forecasts and the three forecast models: Open-Meteo, CC BY 4.0.")
                 credit("Smoke and haze: contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo.")
                 credit("Usual clouds: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, Hersbach et al. 2020, CC BY 4.0.")
+                credit("Usual night temperatures: contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024, CC BY 4.0.")
             }.listRowBackground(palette.panel)
             Section("Sky and light") {
                 credit("The Moon: NASA's Scientific Visualization Studio, CGI Moon Kit, with the LRO LROC (Hapke Normalized WAC Mosaic) and LOLA teams.")
@@ -42,14 +43,20 @@ struct CreditsView: View {
                 credit("Lunar eclipses: NASA eclipse predictions by Fred Espenak (NASA/GSFC).")
                 credit("Meteor showers: the International Meteor Organization (IMO) calendar.")
                 credit("Aurora latitude: computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI, U.S. Government work).")
+                credit("Aurora forecast: the planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work.")
+                credit("Deep-sky positions and magnitudes: Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.")
+                credit("Moon names and positions: the IAU Gazetteer of Planetary Nomenclature, USGS (public domain).")
             }.listRowBackground(palette.panel)
             Section("Parks and places") {
                 credit("Parks, alerts and ranger programs: the National Park Service.")
                 credit("Measured night skies: the National Park Service Night Skies Program, public domain.")
+                credit("Night and seasonal access: National Park Service, nps.gov, public domain.")
+                credit("Busy and quiet months: National Park Service Visitor Use Statistics, 2021 to 2025 monthly averages, CC0.")
                 credit("Starting points in the United States and its outline: U.S. Census Bureau Gazetteer Files, population estimates and cartographic boundaries, public domain.")
                 credit("Starting points outside the United States: GeoNames (geonames.org), CC BY 4.0.")
                 credit("World parks and dark-sky places: Wikidata, CC0.")
                 credit("World map: Natural Earth, public domain.")
+                credit("Terrain horizons: USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90.")
             }.listRowBackground(palette.panel)
             Section {
                 credit("Nyx is not affiliated with or endorsed by the National Park Service, NASA or DarkSky International.")

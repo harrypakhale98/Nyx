@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Nyx
 
-/// Vision Pro's smoke and park alerts (since 2026-10-14): the same three hosts and switches as the
+/// Vision Pro's smoke and park alerts (since 2026-10-14) and aurora forecast (since 2026-10-15): the same hosts and switches as the
 /// iPhone, smoke counted in the score through the iPhone's own service and engine, the closure
 /// beside every score, and plain words when a switch is off or nothing has arrived (`ScoreInputs`).
 struct VisionSmokeAlertsTests {
@@ -25,7 +25,8 @@ struct VisionSmokeAlertsTests {
     /// Vision Pro compiles the same host table as the iPhone (no visionOS branch any more), and its
     /// target carries both network files and the iPhone's NPS key setting, nothing else that can ask.
     @Test func visionReachesTheSameThreeHostsBehindTheSameSwitches() throws {
-        #expect(SafeHTTP.preferences == ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": CloudForecastSwitch.key, "air-quality-api.open-meteo.com": "smokeEnabled"])
+        #expect(SafeHTTP.preferences == ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": CloudForecastSwitch.key, "air-quality-api.open-meteo.com": "smokeEnabled",
+                                         "services.swpc.noaa.gov": AuroraService.key])
         let client = try Self.source("Nyx/Services/CloudForecastClient.swift")
         #expect(!client.contains("#if os(visionOS)"))
         let hosts = Set((client+(try Self.source("Nyx/Services/DataServices.swift"))).matches(of: /host="([^"]+)"/).map { String($0.output.1) })
@@ -34,7 +35,7 @@ struct VisionSmokeAlertsTests {
         let vision = try #require(spec.firstRange(of: "\n  NyxVision:\n").map { String(spec[$0.upperBound...]) }?.components(separatedBy: "\n  NyxVisionWidgets:\n").first)
         for file in ["CloudForecastClient.swift", "DataServices.swift", "ParkAlerts.swift", "ScoreInputs.swift"] { #expect(vision.contains("Nyx/Services/\(file)")) }
         #expect(vision.contains("NPS_API_KEY: \"$(NPS_API_KEY)\"") && vision.contains("Config/Nyx.xcconfig"))
-        // The privacy manifest's comment names the three hosts and nothing else.
+        // The privacy manifest's comment names the four hosts and nothing else.
         let manifest = try Self.source("NyxVision/Resources/PrivacyInfo.xcprivacy")
         let comments = manifest.matches(of: /<!--(.*?)-->/.dotMatchesNewlines()).map { String($0.output.1) }.joined(separator: " ")
         let named = Set(comments.matches(of: /[a-z-]+(?:\.[a-z-]+)*\.(?:gov|com)/).map { String($0.output) })

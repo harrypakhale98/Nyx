@@ -227,6 +227,22 @@ nonisolated enum SkyTextures {
         return heights
     }
 
+    /// The real terrain around a place (`Horizon`), every half degree of azimuth (721 values, the
+    /// last equal to the first), between the centres of its 5° bins. `far` sits a hair below it,
+    /// hidden: a real skyline has no illustrative range behind it.
+    static func skyline(real horizon: Horizon, far: Bool) -> [Double] {
+        let bins = horizon.bins, count = bins.count
+        guard count > 0 else { return Array(repeating: 0, count: 721) }
+        let width = 360/Double(count)
+        return (0...720).map { i in
+            let position = Double(i)*0.5/width-0.5
+            let a = Int(floor(position)), t = position-floor(position)
+            let low = bins[(a%count+count)%count], high = bins[((a+1)%count+count)%count]
+            // Down to 1.5° below the horizon at most: a summit's view past the curve of the Earth.
+            return max(-1.5, low*(1-t)+high*t)-(far ? 0.05 : 0)
+        }
+    }
+
     /// A hard-edged white disc for alpha testing.
     static func disc(size: Int = 64) -> CGImage? {
         image(width: size, height: size) { x, y in

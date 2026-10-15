@@ -69,5 +69,10 @@ struct DebugForecasts {
         }
         self.forecasts=forecasts; self.details=details
     }
+    /// NOAA's Kp forecast holding `kp` from a day ago to three days ahead, issued now.
+    static func aurora(kp: Double, now: Date) -> AuroraOutlook {
+        let first=(floor(now.timeIntervalSince1970/10800)-8)*10800
+        return AuroraOutlook(updated: now, periods: (0..<40).map { AuroraOutlook.Period(start: Date(timeIntervalSince1970: first+Double($0)*10800), kp: kp, predicted: $0>8) })
+    }
 }
 #endif

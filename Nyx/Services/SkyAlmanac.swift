@@ -11,8 +11,8 @@ import Foundation
 /// and refined to under a minute, so rise and set times carry the same ±few-minute horizon caveats as
 /// the rest of the app (no terrain, standard refraction).
 nonisolated struct SkyAlmanac: Sendable {
-    private let engine = AstronomyEngine()
-    private static let rad = Double.pi/180
+    let engine = AstronomyEngine()
+    static let rad = Double.pi/180
 
     // MARK: The Milky Way's bright center
 
@@ -391,7 +391,7 @@ nonisolated struct SkyAlmanac: Sendable {
         let window = sky.cloudWindow
         return DateInterval(start: window.start, end: max(window.start, window.end))
     }
-    private func sample(_ window: DateInterval, step: TimeInterval = 300, _ body: (Date) -> Void) {
+    func sample(_ window: DateInterval, step: TimeInterval = 300, _ body: (Date) -> Void) {
         var t = window.start
         while t < window.end { body(t); t = t.addingTimeInterval(step) }
         body(window.end)
@@ -448,7 +448,142 @@ nonisolated struct SkyAlmanac: Sendable {
     }
     private func sinD(_ a: Double) -> Double { sin(a*Self.rad) }
     private func cosD(_ a: Double) -> Double { cos(a*Self.rad) }
-    private static func normalizedRadians(_ a: Double) -> Double { let t = 2*Double.pi; return a - floor(a/t)*t }
+    static func normalizedRadians(_ a: Double) -> Double { let t = 2*Double.pi; return a - floor(a/t)*t }
+}
+
+// MARK: Highlights: close pairs, a near Full Moon, Mercury and Venus at their best, the solstices,
+// the gegenschein. All from the positions above; none of it changes the score.
+
+nonisolated extension SkyAlmanac {
+    /// Two bodies close together in a park's sky, as seen from the park: the Moon (its position
+    /// corrected for parallax, up to about 1°) beside a planet, or two planets. Planet positions are
+    /// good to about 1°, so a separation is only ever said as "about".
+    struct Pairing: Sendable, Equatable, Identifiable {
+        /// The Moon beside `planet`, or `other` beside `planet` (`other` the brighter of the two).
+        let other: Planet?
+        let planet: Planet
+        /// Degrees, the closest while both are seen (8° up, the sky dark enough for each).
+        let separation: Double
+        let at: Date
+        let altitude: Double
+        let azimuth: Double
+        var withMoon: Bool { other == nil }
+        var id: String { (other?.rawValue ?? "moon")+"-"+planet.rawValue }
+    }
+    /// The Moon within 4° of a planet, or two planets within 3°: close enough to catch the eye
+    /// together, and wide enough that the models' error (about 1°) cannot turn a pairing into a miss.
+    static let moonPairing = 4.0, planetPairing = 3.0
+    /// A Moon less lit than this is lost in the twilight beside a planet.
+    static let pairingMoonLit = 0.02
+
+    func pairings(planets nights: [PlanetNight], park: Park, sky: SkyConditions) -> [Pairing] {
+        func planetSky(_ planet: Planet, _ date: Date) -> (altitude: Double, azimuth: Double) {
+            let p = position(of: planet, at: date)
+            return engine.horizontal(date: date, park: park, ra: p.ra, dec: p.dec)
+        }
+        var found: [Pairing] = []
+        if sky.moon.illumination >= Self.pairingMoonLit {
+            for night in nights {
+                var best: Pairing?
+                sample(night.visible, step: 600) { date in
+                    let moon = engine.lunarHorizontal(at: date, park: park)
+                    guard moon.altitude >= Self.planetMinimumAltitude else { return }
+                    let planet = planetSky(night.planet, date)
+                    let separation = Self.separation(moon, planet)
+                    if separation <= Self.moonPairing, separation < (best?.separation ?? .infinity) {
+                        best = Pairing(other: nil, planet: night.planet, separation: separation, at: date, altitude: planet.altitude, azimuth: planet.azimuth)
+                    }
+                }
+                if let best { found.append(best) }
+            }
+        }
+        // Planet pairs: `nights` is brightest first, so `first` is the brighter of each pair.
+        for (i, first) in nights.enumerated() {
+            for second in nights.dropFirst(i+1) {
+                guard let both = first.visible.intersection(with: second.visible), both.duration > 0 else { continue }
+                var best: Pairing?
+                sample(both, step: 600) { date in
+                    let a = planetSky(first.planet, date), b = planetSky(second.planet, date)
+                    let separation = Self.separation(a, b)
+                    if separation <= Self.planetPairing, separation < (best?.separation ?? .infinity) {
+                        best = Pairing(other: first.planet, planet: second.planet, separation: separation, at: date, altitude: b.altitude, azimuth: b.azimuth)
+                    }
+                }
+                if let best { found.append(best) }
+            }
+        }
+        return found.sorted { $0.separation < $1.separation }
+    }
+    /// Angle between two directions in the sky given as altitude and azimuth, degrees.
+    static func separation(_ a: (altitude: Double, azimuth: Double), _ b: (altitude: Double, azimuth: Double)) -> Double {
+        let c = sin(a.altitude*rad)*sin(b.altitude*rad) + cos(a.altitude*rad)*cos(b.altitude*rad)*cos((a.azimuth-b.azimuth)*rad)
+        return acos(max(-1, min(1, c)))/rad
+    }
+
+    /// A Full Moon nearer than 360,000 km (it ranges from about 356,500 to 406,700): a "supermoon",
+    /// about 14% larger and 30% brighter than the farthest Full Moon. The night's distance, km, at
+    /// the middle of the night, when the Moon is at least 97% lit; nil otherwise.
+    static let nearFullMoon = 360_000.0
+    func nearFullMoon(sky: SkyConditions) -> Double? {
+        guard sky.moon.illumination >= 0.97 else { return nil }
+        let window = Self.nightWindow(sky)
+        let distance = engine.lunarDistance(at: window.start.addingTimeInterval(window.duration/2))
+        return distance < Self.nearFullMoon ? distance : nil
+    }
+
+    /// Mercury or Venus within three days of its greatest elongation, the farthest it swings from the
+    /// Sun: the best time to see it. The day of the maximum (found to the day), or nil.
+    func greatestElongation(of planet: Planet, near date: Date) -> Date? {
+        guard planet == .mercury || planet == .venus else { return nil }
+        let days = (-6...6).map { date.addingTimeInterval(Double($0)*86400) }
+        let values = days.map { position(of: planet, at: $0).elongation }
+        guard let i = values.indices.dropFirst().dropLast().first(where: { values[$0] >= values[$0-1] && values[$0] > values[$0+1] }),
+              abs(i-6) <= 3 else { return nil }
+        return days[i]
+    }
+
+    /// The June or December solstice falling within this night (local noon to noon): the year's
+    /// longest or shortest night for the park's hemisphere. Nil near the equator (within 10°), where
+    /// nights hardly change through the year.
+    enum Solstice: Sendable, Equatable { case longestNight, shortestNight }
+    func solstice(park: Park, sky: SkyConditions) -> Solstice? {
+        guard abs(park.latitude) >= 10, sky.end > sky.evening else { return nil }
+        let dec = { (date: Date) in engine.equatorial(of: .sun, at: date).dec }
+        let slope = { (date: Date) in dec(date.addingTimeInterval(1800)) - dec(date.addingTimeInterval(-1800)) }
+        let a = slope(sky.evening), b = slope(sky.end)
+        guard (a > 0) != (b > 0) else { return nil }
+        // Sun farthest north (June): the north's shortest night and the south's longest.
+        let june = dec(sky.evening) > 0
+        return (june == (park.latitude > 0)) ? .shortestNight : .longestNight
+    }
+
+    /// The gegenschein: a very faint, broad glow at the point opposite the Sun, sunlight scattered
+    /// back by dust along Earth's orbit. Only under the darkest skies (Bortle 3 or darker), with the
+    /// Moon down, that point at least 35° up and at least 25° from the Milky Way's plane. The moment
+    /// it stands highest under those conditions during true darkness, or nil.
+    struct Gegenschein: Sendable, Equatable { let at: Date; let altitude: Double; let azimuth: Double }
+    static let gegenscheinAltitude = 35.0, gegenscheinGalactic = 25.0
+    func gegenschein(park: Park, sky: SkyConditions) -> Gegenschein? {
+        guard park.bortleEstimate <= 3, let start = sky.darkStart, let end = sky.darkEnd, end > start else { return nil }
+        var best: Gegenschein?
+        sample(DateInterval(start: start, end: end), step: 600) { date in
+            guard sky.moon.illumination < 0.05 || engine.lunarAltitude(at: date, park: park) < -0.833 else { return }
+            let sun = engine.equatorial(of: .sun, at: date)
+            let ra = Self.normalizedRadians(sun.ra + Double.pi), dec = -sun.dec
+            guard abs(Self.galacticLatitude(ra: ra, dec: dec)) >= Self.gegenscheinGalactic else { return }
+            let point = engine.horizontal(date: date, park: park, ra: ra, dec: dec)
+            if point.altitude >= Self.gegenscheinAltitude, point.altitude > (best?.altitude ?? -90) {
+                best = Gegenschein(at: date, altitude: point.altitude, azimuth: point.azimuth)
+            }
+        }
+        return best
+    }
+    /// Galactic latitude, degrees, of an equatorial position (radians; the north galactic pole at
+    /// RA 192.85948°, Dec 27.12825°, J2000). Precession since 2000 moves it far less than the 25° margin.
+    static func galacticLatitude(ra: Double, dec: Double) -> Double {
+        let poleRA = 192.85948*rad, poleDec = 27.12825*rad
+        return asin(max(-1, min(1, sin(dec)*sin(poleDec) + cos(dec)*cos(poleDec)*cos(ra-poleRA))))/rad
+    }
 }
 
 /// The bundled table of meteor showers and lunar eclipses.
