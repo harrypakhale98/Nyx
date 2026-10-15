@@ -22,6 +22,8 @@ nonisolated struct NightLookup: Sendable {
     /// Where "tonight" is judged from: the app's `today`, so Ask Nyx's tonight is the Tonight tab's even
     /// in the minutes after sunrise before it moves on. `now` stays the clock a forecast's age is read by.
     var today: Date?
+    /// NOAA's aurora forecast as the app holds it, so Ask Nyx's What's up names aurora as the park page does.
+    var aurora: AuroraOutlook?
     private var tonightClock: Date { today ?? now }
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
@@ -105,7 +107,8 @@ nonisolated struct NightLookup: Sendable {
     func whatsUp(park name: String, on day: String) -> [String] {
         guard let park=park(named: name) else { return [Self.noMatch(name)] }
         let night=planner.night(park, on: night(day, at: park), now: now)
-        let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: tonightClock), table: table)
+        let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: tonightClock), table: table,
+                        aurora: AuroraForecast.item(aurora, park: park, sky: night.sky, now: now))
         return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
     }
     /// Where "near" is measured from: a park by its exact name, then a city or town from the

@@ -230,6 +230,14 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
     }
     enum Body { case sun, moon }
     func lunarAltitude(at date: Date, park: Park) -> Double { lunarAltitude(at: date, park: park, moon: lunarPosition(at: date)) }
+    /// The Moon's distance from Earth's centre, km (Meeus ch. 47, main terms; within about 300 km).
+    func lunarDistance(at date: Date) -> Double { lunarPosition(at: date).distance }
+    /// The Moon's altitude (parallax-corrected, as seen from the park) and azimuth, degrees. Parallax
+    /// moves the Moon up to about 1° against the stars, which matters beside a planet.
+    func lunarHorizontal(at date: Date, park: Park) -> (altitude: Double, azimuth: Double) {
+        let moon = lunarPosition(at: date)
+        return (lunarAltitude(at: date, park: park, moon: moon), horizontal(date: date, park: park, ra: moon.ra, dec: moon.dec).azimuth)
+    }
     private func lunarAltitude(at date: Date, park: Park, moon: (lon: Double, lat: Double, ra: Double, dec: Double, distance: Double, f: Double, t: Double)) -> Double {
         let geo = altitude(date: date, park: park, ra: moon.ra, dec: moon.dec)
         return geo - asin(6378.14/moon.distance)/rad * cosD(geo)

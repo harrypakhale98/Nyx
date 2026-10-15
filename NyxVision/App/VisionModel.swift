@@ -25,14 +25,15 @@ nonisolated struct NightPlan: Sendable {
     var span: DateInterval { SkyDome.span(for: sky) }
     /// `layers`: the summit's mid and high cloud (`SummitLayerService`), for parks above the inversion;
     /// `air`: the park's aerosol forecast (`ForecastDetailService`, smoke only).
-    init(park: Park, night: Date, isTonight: Bool, forecast: Forecast?, layers: HourlySeries?, air: HourlySeries?, now: Date) {
+    init(park: Park, night: Date, isTonight: Bool, forecast: Forecast?, layers: HourlySeries?, air: HourlySeries?, now: Date, aurora: AuroraOutlook? = nil) {
         let engine = AstronomyEngine()
         self.park = park
         sky = engine.conditions(for: park, on: night)
         let scored = NightPlanner.night(park: park, sky: sky, forecast: forecast, detail: ForecastDetail.vision(layers: layers, air: air), now: now)
         self.night = scored
         self.forecast = scored.upperCloudOnly ? layers?.upperCloud ?? forecast : forecast
-        whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight)
+        // Aurora within reach by NOAA's forecast, in the iPhone's words and by its rule (`AuroraForecast`).
+        whatsUp = WhatsUp(park: park, sky: sky, isTonight: isTonight, aurora: AuroraForecast.item(aurora, park: park, sky: sky, now: now))
         moonMoment = engine.moonViewTime(for: sky, park: park)
         moon = engine.moonGeometry(for: park, at: moonMoment)
         moonAltitude = engine.lunarAltitude(at: moonMoment, park: park)
@@ -159,6 +160,9 @@ nonisolated struct SkyMoment: Sendable {
     /// The last park update (NPS alerts for every park), from this headset's cache or
     /// developer.nps.gov (`ParkStore`): the closure beside each score.
     var alerts: ParkAlertsCache?
+    /// NOAA's Kp forecast, from this headset's cache or services.swpc.noaa.gov (`AuroraService`):
+    /// aurora under What's up, as on the iPhone. A change redoes the night.
+    var aurora: AuroraOutlook? { didSet { if settled, aurora != oldValue { refresh(resetTime: false) } } }
     /// The Park Service refused the last request, or is being left alone after one.
     var alertsBusy = false
     /// "Cloud forecasts (Open-Meteo)" in Your privacy: on unless turned off. The transport reads
@@ -188,6 +192,15 @@ nonisolated struct SkyMoment: Sendable {
             if alertsOn { Task { await refreshForecasts() } }
         }
     }
+    /// "Aurora forecast" in Your privacy, the iPhone's preference. Off, the copy here is dropped and
+    /// nothing more is asked.
+    var auroraOn = UserDefaults.standard.object(forKey: AuroraService.key) as? Bool ?? true {
+        didSet {
+            guard auroraOn != oldValue else { return }
+            UserDefaults.standard.set(auroraOn, forKey: AuroraService.key)
+            if auroraOn { Task { await refreshForecasts() } } else { aurora = nil; Task { await auroraService.forget() } }
+        }
+    }
     nonisolated static let smokeKey = "smokeEnabled", alertsKey = "npsEnabled"
     /// What every score here counts, and what it says it does not (`ScoreInputs`).
     var inputs: ScoreInputs {
@@ -197,6 +210,7 @@ nonisolated struct SkyMoment: Sendable {
     let summits: SummitLayerService
     let detailService: ForecastDetailService
     let parkStore: ParkStore
+    let auroraService: AuroraService
     private var planTask: Task<Void, Never>?
     private var listTask: Task<Void, Never>?
     private var aheadTask: Task<Void, Never>?
@@ -221,7 +235,7 @@ nonisolated struct SkyMoment: Sendable {
     private let pinned: Bool
 
     init(now: Date? = nil, parks: [Park]? = nil, weather: (any WeatherProviding)? = nil, summits: SummitLayerService? = nil,
-         detailService: ForecastDetailService? = nil, parkStore: ParkStore? = nil) {
+         detailService: ForecastDetailService? = nil, parkStore: ParkStore? = nil, auroraService: AuroraService? = nil) {
         let start = now ?? VisionDebug.date ?? .now
         self.now = start
         pinned = now != nil || VisionDebug.date != nil
@@ -230,6 +244,7 @@ nonisolated struct SkyMoment: Sendable {
         self.summits = summits ?? SummitLayerService()
         self.detailService = detailService ?? ForecastDetailService(extras: false)
         self.parkStore = parkStore ?? ParkStore()
+        self.auroraService = auroraService ?? AuroraService()
         nightVision = VisionDebug.isEnabled("night-vision")
         // The park chosen last time; previews and DEBUG captures (a pinned clock) always open Joshua Tree.
         selectedID = VisionDebug.park ?? (pinned ? Self.defaultPark : Self.rememberedPark(in: self.parks))
@@ -251,7 +266,7 @@ nonisolated struct SkyMoment: Sendable {
                 alerts = ParkStore.stored(self.parks)
             }
             let first = NightPlan(park: park, night: night(for: park), isTonight: nightOffset == 0,
-                                  forecast: forecasts[park.id], layers: summitLayers[park.id], air: smoke[park.id], now: start)
+                                  forecast: forecasts[park.id], layers: summitLayers[park.id], air: smoke[park.id], now: start, aurora: aurora)
             fraction = Self.opening(of: first)
             plan = first
         }
@@ -362,10 +377,10 @@ nonisolated struct SkyMoment: Sendable {
     /// Recomputes the chosen night off the main thread; the sky opens at the middle of true darkness.
     private func refresh(resetTime: Bool) {
         guard let park else { plan = nil; return }
-        let night = night(for: park), tonight = nightOffset == 0, forecast = forecasts[park.id], layers = summitLayers[park.id], air = smoke[park.id], now = now
+        let night = night(for: park), tonight = nightOffset == 0, forecast = forecasts[park.id], layers = summitLayers[park.id], air = smoke[park.id], now = now, aurora = aurora
         planTask?.cancel()
         // Started at once, off the main actor; only handing the result over waits for it.
-        let work = Task.detached(priority: .userInitiated) { NightPlan(park: park, night: night, isTonight: tonight, forecast: forecast, layers: layers, air: air, now: now) }
+        let work = Task.detached(priority: .userInitiated) { NightPlan(park: park, night: night, isTonight: tonight, forecast: forecast, layers: layers, air: air, now: now, aurora: aurora) }
         planTask = Task {
             let plan = await work.value
             guard !Task.isCancelled else { return }

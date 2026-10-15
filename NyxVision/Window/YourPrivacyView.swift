@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Your privacy on Vision Pro: what leaves the headset, the iPhone's three optional services (cloud
-/// forecasts with Haleakalā's summit cloud layers, smoke and haze, park alerts), each with its
+/// Your privacy on Vision Pro: what leaves the headset, the iPhone's four optional services (cloud
+/// forecasts with Haleakalā's summit cloud layers, smoke and haze, park alerts, the aurora forecast), each with its
 /// switch, and that nothing else does. Each switch is the preference the transport checks before
 /// any connection (`SafeHTTP`), so off means no request at all.
 struct YourPrivacyView: View {
@@ -15,7 +15,7 @@ struct YourPrivacyView: View {
                 Section {
                     Text("Nyx has no account, no ads, no tracking.").font(.system(.title3, design: .serif))
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Only the three optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
+                    Text("Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Section {
@@ -40,11 +40,15 @@ struct YourPrivacyView: View {
                     Text("Alerts for all \(model.parks.count) U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                     Text(alertsStatus).font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    Toggle("Aurora forecast", isOn: $model.auroraOn)
+                        .accessibilityHint(Text("Shows when aurora may reach a park, in What's up"))
+                    Text("Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.")
+                        .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 } header: {
                     Text("Optional data updates")
                 }
                 Section {
-                    Text("Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. The Moon, the stars and every score still work offline.")
+                    Text("Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. Turning the aurora forecast off removes it from this device. The Moon, the stars and every score still work offline.")
                         .font(.callout).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
                 }
             }

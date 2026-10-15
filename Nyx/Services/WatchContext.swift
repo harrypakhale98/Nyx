@@ -66,6 +66,11 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// differs, its scores can differ from the iPhone's and it says so (`dataDiffers`). Nil from an
     /// iPhone before 2.3; an older watch ignores it.
     let dataVersion: String?
+    /// NOAA's Kp forecast as the iPhone holds it, from the last twelve hours on (about 30 small
+    /// periods), so the wrist names aurora in What's up exactly as the iPhone does
+    /// (`AuroraForecast.item`). Nil with "Aurora forecast" off or none fetched, and from an iPhone
+    /// before 2.4; an older watch ignores it.
+    let aurora: AuroraOutlook?
     /// The forecasts in the shape the score engine and the widgets already read, expanded once when
     /// the context is made or received, never per score. Not sent: rebuilt from `forecasts`.
     let cloudForecasts: [String: Forecast]
@@ -75,7 +80,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     let climate: CloudClimate
     /// Only what travels; the expanded forecasts above are rebuilt on arrival.
     enum CodingKeys: String, CodingKey {
-        case version, sent, sequence, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion
+        case version, sent, sequence, savedParkIDs, homeParkID, nightVision, brighterRed, forecasts, details, closures, ranges, places, usualClouds, tonightParkID, watchParkIDs, droppedParkIDs, dataVersion, aurora
     }
     /// What was sent; the expanded forecasts follow from it.
     static func == (a: WatchContext, b: WatchContext) -> Bool {
@@ -83,13 +88,15 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             && a.nightVision == b.nightVision && a.brighterRed == b.brighterRed && a.forecasts == b.forecasts && a.details == b.details && a.closures == b.closures
             && a.ranges == b.ranges && a.places == b.places && a.usualClouds == b.usualClouds
             && a.tonightParkID == b.tonightParkID && a.watchParkIDs == b.watchParkIDs && a.droppedParkIDs == b.droppedParkIDs && a.dataVersion == b.dataVersion
+            && a.aurora == b.aurora
     }
 
     init(sent: Date, savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: CompactForecast],
          details: [String: CompactDetail] = [:], closures: [String: String] = [:], ranges: [String: [String: [Int]]] = [:], places: [Place] = [],
          usualClouds: [String: CloudClimate.Months] = [:], tonightParkID: String? = nil, watchParkIDs: [String] = [], droppedParkIDs: [String] = [],
-         dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil) {
+         dataVersion: String? = WatchContext.bundledData, sequence: Int64? = nil, aurora: AuroraOutlook? = nil) {
         self.version = Self.currentVersion
+        self.aurora = aurora
         self.sequence = sequence
         self.dataVersion = dataVersion
         self.sent = sent; self.savedParkIDs = savedParkIDs; self.homeParkID = homeParkID
@@ -118,7 +125,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     static func make(savedParkIDs: [String], homeParkID: String, nightVision: Bool, brighterRed: Bool = false, forecasts: [String: Forecast],
                      details: [String: ForecastDetail] = [:], closures: [String: String] = [:], aboveInversion: Set<String> = [],
                      ranges: [String: [String: ClosedRange<Int>]] = [:], places: [Place] = [], climate: CloudClimate = .shared,
-                     tonightParkID: String? = nil, watchParkIDs: [String] = [], now: Date = .now) -> WatchContext {
+                     tonightParkID: String? = nil, watchParkIDs: [String] = [], aurora: AuroraOutlook? = nil, now: Date = .now) -> WatchContext {
         var compact: [String: CompactForecast] = [:], compactDetails: [String: CompactDetail] = [:], sentClosures: [String: String] = [:]
         var sentRanges: [String: [String: [Int]]] = [:]
         let ids = followed(saved: savedParkIDs, home: homeParkID, tonight: tonightParkID, watch: watchParkIDs)
@@ -171,10 +178,16 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             let pairs = nights.mapValues { [$0.lowerBound, $0.upperBound] }
             if fits(pairs, id) { sentRanges[id] = pairs }
         }
+        // The aurora forecast, about 1.5 KB, after every followed place's clouds (a score outranks a
+        // possible aurora): only the periods still ahead or within the last twelve hours.
+        let sentAurora = aurora.flatMap { outlook -> AuroraOutlook? in
+            let kept = AuroraOutlook(updated: outlook.updated, periods: outlook.periods.filter { $0.end > now.addingTimeInterval(-12*3600) })
+            return kept.periods.isEmpty || !fits(kept, "aurora") ? nil : kept
+        }
         pack(closures.filter { !followed.contains($0.key) }.sorted { $0.key < $1.key })
         return WatchContext(sent: now, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: compact,
                             details: compactDetails, closures: sentClosures, ranges: sentRanges, places: sentPlaces, usualClouds: sentUsual,
-                            tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, droppedParkIDs: ids.filter(dropped.contains))
+                            tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, droppedParkIDs: ids.filter(dropped.contains), aurora: sentAurora)
     }
     /// The places the watch is handed, in the order their clouds are packed, once each: the saved
     /// places, the starting park, the iPhone's Tonight answer, then the places the watch asked for.
@@ -201,7 +214,7 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     private func stamped(sent date: Date, sequence: Int64?) -> WatchContext {
         WatchContext(sent: date, savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts, details: details,
                      closures: closures, ranges: ranges, places: places, usualClouds: usualClouds, tonightParkID: tonightParkID, watchParkIDs: watchParkIDs,
-                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence)
+                     droppedParkIDs: droppedParkIDs, dataVersion: dataVersion, sequence: sequence, aurora: aurora)
     }
     /// The number for the next hand-over: one past the last, or the clock in milliseconds when that
     /// is higher. A clock set back never lowers it, and a reinstall that forgot the last number still
@@ -296,6 +309,8 @@ nonisolated extension WatchContext {
         // Absent before 2.2: no Tonight answer, nothing asked for by the watch, nothing known to be left out.
         tonightParkID = (try? container.decodeIfPresent(String.self, forKey: .tonightParkID)) ?? nil
         watchParkIDs = (try? container.decodeIfPresent([String].self, forKey: .watchParkIDs)) ?? []
+        // Absent before 2.4 or with the forecast off; a malformed one costs only the aurora item.
+        aurora = (try? container.decodeIfPresent(AuroraOutlook.self, forKey: .aurora)) ?? nil
         droppedParkIDs = (try? container.decodeIfPresent([String].self, forKey: .droppedParkIDs)) ?? []
         // Absent before 2.3: nothing to compare, so nothing is said.
         dataVersion = (try? container.decodeIfPresent(String.self, forKey: .dataVersion)) ?? nil

@@ -123,7 +123,9 @@ struct ScienceTests {
 
     @Test func auroraSeasonInAlaskaOnly() throws {
         let dena = try park("dena"), jotr = try park("jotr")
-        #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-10-15"))?.contains("Nyx does not forecast aurora") == true)
+        #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-10-15"), forecast: true)?.contains("NOAA's forecast for the next three nights") == true)
+        // Without NOAA's forecast in hand, the note promises nothing about it.
+        #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-10-15"))?.hasSuffix("It depends on the Sun's activity.") == true)
         #expect(SkyNotes.aurora(park: dena, evening: try evening(dena, "2026-06-15")) == nil)
         #expect(SkyNotes.aurora(park: jotr, evening: try evening(jotr, "2026-10-15")) == nil)
         // 18 on the corrected-latitude grid: every park in the three tiers, all dark enough on Dec 1.

@@ -10,6 +10,8 @@ struct NightDetail: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .largeTitle) private var numeral = 108
     @ScaledMetric(relativeTo: .largeTitle) private var moonSide = 190
+    /// The Moon's named seas and craters over the disc, as on the iPhone (`MoonLabels`).
+    @AppStorage("moonNames") private var names = false
     var body: some View {
         if let plan = model.plan, let moment = model.skyMoment {
             ScrollView {
@@ -98,8 +100,10 @@ struct NightDetail: View {
         let lit = Int((plan.sky.moon.illumination*100).rounded())
         return VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit, as seen at \(plan.park.time(plan.moonMoment))"))
+                       label: Sentences.join([String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit, as seen at \(plan.park.time(plan.moonMoment))"),
+                                              names ? MoonFeatures.shared.spoken(geometry: plan.moon, side: moonSide) ?? "" : ""]))
                 .frame(width: moonSide, height: moonSide)
+                .overlay { if names { MoonLabels(geometry: plan.moon, side: moonSide, ink: palette.ink).transition(.opacity) } }
                 .background {
                     // A piece of night behind the Moon, so even a new moon reads as a disc against the sky.
                     Circle().fill(RadialGradient(colors: [NyxPalette.nebula.opacity(palette.nightVision ? 0.3 : 0.75), NyxPalette.indigo.opacity(0.5), .clear],
@@ -110,6 +114,10 @@ struct NightDetail: View {
                 .shadow(color: palette.ink.opacity(0.12*plan.moon.illumination), radius: 30)
             Text(plan.sky.moon.name).font(.system(.headline, design: .serif))
             Text("\(lit)% lit").font(.subheadline).foregroundStyle(palette.muted)
+            if !MoonFeatures.shared.features.isEmpty {
+                Button { names.toggle() } label: { Label(names ? "Hide names" : "Show names", systemImage: names ? "tag.slash" : "tag") }
+                    .accessibilityHint(Text("Shows or hides the names of the Moon's seas and craters in sunlight."))
+            }
         }
     }
 
@@ -133,7 +141,16 @@ struct NightDetail: View {
         // Without true darkness there is nothing for the Moon to stay out of, so say that instead.
         let moonNote = sky.darkHours > 0 ? String(localized: "Down for \(Int((sky.moonBelowFraction*100).rounded()))% of true darkness")
             : String(localized: "The Moon counts only in true darkness, and this night has none.")
-        return layout { factCells(darkness, hours, moonLine, moonNote, park) }
+        // The month's usual night (ERA5), in the iPhone's words: there is no hourly forecast detail here.
+        let month = park.calendar.component(.month, from: plan.sky.evening)
+        let usual = NightClimate.shared.lines(park, month: month)
+        return VStack(alignment: .leading, spacing: 12) {
+            layout { factCells(darkness, hours, moonLine, moonNote, park) }
+            if let usual {
+                Text(Sentences.join([usual.temperatures, usual.dew ?? ""])).font(.callout).foregroundStyle(palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
     @ViewBuilder private func factCells(_ darkness: String, _ hours: String?, _ moonLine: String, _ moonNote: String, _ park: Park) -> some View {
         Fact(title: "True darkness", value: darkness, note: hours.map { "\($0) · \(park.timeZoneName)" } ?? park.timeZoneName)
@@ -147,7 +164,9 @@ struct NightDetail: View {
     private func whatsUp(_ plan: NightPlan) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             VisionEyebrow(text: model.nightOffset == 0 ? "What's up tonight" : "What's up this night")
-            ForEach(plan.whatsUp.items) { item in
+            // The iPhone's and the watch's order (`WhatsUp.layout`): rows, then a line each for the quieter things.
+            let layout = plan.whatsUp.layout
+            ForEach(layout.first + plan.whatsUp.planets + layout.after) { item in
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(item.title).font(.system(.title3, design: .serif))
@@ -160,6 +179,11 @@ struct NightDetail: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(item.spoken))
+            }
+            ForEach(layout.mentions) { item in
+                Text(verbatim: [item.title, item.value ?? item.note].compactMap { $0 }.joined(separator: " · "))
+                    .font(.subheadline).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text(item.spoken))
             }
         }
     }

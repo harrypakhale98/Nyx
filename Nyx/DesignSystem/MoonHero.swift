@@ -27,6 +27,8 @@ struct MoonHero: View {
     @State private var detents=0
     /// Whether the current drag is a sideways scrub, decided once per drag; reset by the system even when a drag is cancelled.
     @GestureState private var scrubbing: Bool?=nil
+    /// The Moon's named maria and craters over the disc (`MoonLabels`); remembered on this device.
+    @AppStorage("moonNames") private var names=false
     private var target: (geometry:MoonGeometry,moment:Date) { MoonMoments.moon(for:night) }
     var body: some View {
         let target=target
@@ -34,7 +36,7 @@ struct MoonHero: View {
                                librationLongitude:target.geometry.librationLongitude,librationLatitude:target.geometry.librationLatitude)
         let layout=beside ? AnyLayout(HStackLayout(spacing:28)) : AnyLayout(VStackLayout(spacing:18))
         layout {
-            MorphingMoon(geometry:shown)
+            MorphingMoon(geometry:shown,names:names && scrubbing != true)
                 // Relief while still; a smooth sphere while scrubbed, so the drag holds 120 Hz.
                 .environment(\.moonRelief,relief && scrubbing != true)
                 .frame(width:beside ? 200 : nil,height:beside ? 200 : nil)
@@ -55,6 +57,14 @@ struct MoonHero: View {
                     VStack(spacing:10) { times }
                 }
                 Text(Self.tiltLine(night:night,moment:target.moment)).font(.caption).foregroundStyle(palette.muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                if !MoonFeatures.shared.features.isEmpty {
+                    Button { names.toggle() } label: {
+                        Label(names ? "Hide names" : "Show names",systemImage:names ? "tag.slash" : "tag")
+                            .font(.subheadline).frame(minHeight:44).contentShape(Rectangle())
+                    }
+                    .foregroundStyle(palette.accent)
+                    .accessibilityHint("Shows or hides the names of the Moon's seas and craters in sunlight.")
+                }
             }
             .frame(maxWidth:beside ? .infinity : nil)
         }
@@ -62,7 +72,8 @@ struct MoonHero: View {
         .accessibilityElement(children:.ignore)
         // A fixed name and the night as its value, so adjusting it says which night it now shows.
         .accessibilityLabel("Moon")
-        .accessibilityValue(night.park.dayLabel(night.id)+". "+Self.spoken(night:night,geometry:target.geometry))
+        .accessibilityValue(Sentences.join([night.park.dayLabel(night.id)+".",Self.spoken(night:night,geometry:target.geometry),
+                                            names ? MoonFeatures.shared.spoken(geometry:target.geometry,side:beside ? 200 : 280) ?? "" : ""]))
         .accessibilityAdjustableAction { direction in
             guard let step else { return }
             switch direction {
@@ -72,6 +83,8 @@ struct MoonHero: View {
             }
         }
         .accessibilityHint(step == nil ? "" : String(localized:"Swipe up or down to move one night at a time."))
+        // The names button sits inside this one element; VoiceOver reaches it as an action.
+        .accessibilityAction(named:names ? Text("Hide names") : Text("Show names")) { names.toggle() }
         .sensoryFeedback(.selection,trigger:detents)
         // The page holds still during a sideways scrub, as it does for the river's.
         .preference(key:RiverScrubbingKey.self,value:scrubbing==true)
@@ -131,12 +144,24 @@ struct MoonHero: View {
 }
 /// MoonView whose phase and tilt interpolate, so the terminator sweeps between two nights.
 private struct MorphingMoon: View, Animatable {
+    @Environment(\.nyx) private var palette
     var geometry: MoonGeometry
+    var names=false
     var animatableData: AnimatablePair<Double,AnimatablePair<Double,Double>> {
         get { AnimatablePair(geometry.phaseAngle,AnimatablePair(geometry.brightLimb,geometry.north)) }
         set { geometry=MoonGeometry(phaseAngle:newValue.first,brightLimb:newValue.second.first,north:newValue.second.second,librationLongitude:geometry.librationLongitude,librationLatitude:geometry.librationLatitude) }
     }
-    var body: some View { MoonView(geometry:geometry) }
+    var body: some View {
+        MoonView(geometry:geometry)
+            .overlay {
+                if names {
+                    GeometryReader { proxy in
+                        MoonLabels(geometry:geometry,side:min(proxy.size.width,proxy.size.height),ink:palette.ink)
+                    }
+                    .transition(.opacity)
+                }
+            }
+    }
 }
 #Preview("Moon hero") {
     let m=PlanModel()

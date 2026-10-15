@@ -1,24 +1,29 @@
 import SwiftUI
 
 /// Tonight beyond the score, on the wrist: the Milky Way's bright center, the planets, a meteor
-/// shower and a lunar eclipse, in the iPhone's own words (`WhatsUp`) and park-local times. Like
+/// shower, a lunar eclipse, aurora within reach by the forecast the iPhone handed over, and the
+/// night's highlights, in the iPhone's own words (`WhatsUp`) and park-local times. Like
 /// Milestones it is tonight's page; the Crown's later nights stay on the dial. Worked out on the
 /// watch, off the main thread, from the bundled sky events; none of it changes the score.
 struct WhatsUpPage: View {
     @Environment(\.nyx) private var palette
     @Environment(\.watchNow) private var now
+    @Environment(WatchStore.self) private var store
     let night: Night
     /// False only in the loading preview, which holds the spinner.
     var computes = true
     /// What's up with the park and night it was worked out for (`key`): another park's sky is never
     /// shown while this one's is being worked out.
     @State private var worked: (key: String, value: WhatsUp)?
-    private static func key(_ night: Night) -> String { "\(night.park.id)-\(Int(night.id.timeIntervalSince1970))" }
+    /// The park, the night and the aurora forecast it was worked out with: a new forecast redoes it.
+    private func key(_ night: Night) -> String {
+        "\(night.park.id)-\(Int(night.id.timeIntervalSince1970))-\(Int(store.context?.aurora?.updated.timeIntervalSince1970 ?? 0))"
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 9) {
                 WatchEyebrow(text: "What's up tonight")
-                if let worked, worked.key == Self.key(night) { content(worked.value) }
+                if let worked, worked.key == key(night) { content(worked.value) }
                 else {
                     ProgressView().frame(maxWidth: .infinity).padding(.vertical, 12)
                         .accessibilityLabel(Text("Working out tonight's sky"))
@@ -27,11 +32,13 @@ struct WhatsUpPage: View {
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .task(id: Self.key(night)) {
-            guard computes, worked?.key != Self.key(night) else { return }
-            let park = night.park, sky = night.sky, key = Self.key(night)
-            let value = await Task.detached(priority: .userInitiated) { WhatsUp(park: park, sky: sky, isTonight: true) }.value
-            if !Task.isCancelled { worked = (key: key, value: value) }
+        .task(id: key(night)) {
+            guard computes, worked?.key != key(night) else { return }
+            let park = night.park, sky = night.sky, id = key(night), outlook = store.context?.aurora, moment = now
+            let value = await Task.detached(priority: .userInitiated) {
+                WhatsUp(park: park, sky: sky, isTonight: true, aurora: AuroraForecast.item(outlook, park: park, sky: sky, now: moment))
+            }.value
+            if !Task.isCancelled { worked = (key: id, value: value) }
         }
     }
     @ViewBuilder private func content(_ whatsUp: WhatsUp) -> some View {
@@ -82,29 +89,18 @@ struct WhatsUpPage: View {
     }
 }
 
-/// Which of tonight's items are rows and which a line at the foot, by the iPhone card's rule
-/// (`WhatsUpPanel.layout`): a total eclipse the park can see leads, then the core and the planets,
-/// then a shower of ten or more an hour and a partial eclipse; weaker showers, a penumbral eclipse
-/// and one the park cannot see are mentions.
+/// Which of tonight's items are rows and which a line at the foot: the iPhone card's own rule
+/// (`WhatsUp.layout`), so both list the same things in the same order.
 struct WristWhatsUp {
     var rows: [WhatsUp.Item]
-    var mentions: [WhatsUp.Item] = []
-    /// Nothing worth timing tonight: no planets, no timed core, no shower or eclipse worth a row.
+    var mentions: [WhatsUp.Item]
+    /// Nothing worth timing tonight: no planets, no timed core, nothing worth a row after them.
     var quiet: Bool
-    /// Showers under this many an hour are a mention, as on the iPhone.
-    static let showerRow = 10
     init(_ whatsUp: WhatsUp) {
-        var first = [whatsUp.core], after: [WhatsUp.Item] = []
-        if let shower = whatsUp.shower {
-            if (whatsUp.events.shower?.hourlyRate ?? 0) >= Self.showerRow { after.append(shower) } else { mentions.append(shower) }
-        }
-        if let eclipse = whatsUp.eclipse, let night = whatsUp.events.eclipse {
-            if night.visible == nil || night.eclipse.type == "penumbral" { mentions.append(eclipse) }
-            else if night.eclipse.type == "total" { first.insert(eclipse, at: 0) }
-            else { after.append(eclipse) }
-        }
-        rows = first + whatsUp.planets + after
-        quiet = whatsUp.planets.isEmpty && after.isEmpty && first.count == 1 && !whatsUp.core.timed
+        let layout = whatsUp.layout
+        rows = layout.first + whatsUp.planets + layout.after
+        mentions = layout.mentions
+        quiet = whatsUp.planets.isEmpty && layout.after.isEmpty && layout.first.count == 1 && !whatsUp.core.timed
     }
 }
 

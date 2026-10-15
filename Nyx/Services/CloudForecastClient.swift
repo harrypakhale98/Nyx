@@ -3,9 +3,9 @@ import Synchronization
 
 // The guarded transport and the cloud forecast client, shared by Nyx on iPhone and iPad (with the
 // widgets, which read the cache) and by Nyx on Vision Pro. Park updates, forecast detail and the
-// smoke forecast live in DataServices.swift, which Vision Pro compiles too: it asks for this file's
+// smoke and aurora forecasts live in DataServices.swift, which Vision Pro compiles too: it asks for this file's
 // cloud forecast and Haleakalā's summit cloud layers (`SummitLayerService`), the smoke forecast and
-// the park alerts, the same three hosts as the iPhone, each behind its own switch.
+// the park alerts, and the aurora forecast: the same four hosts as the iPhone, each behind its own switch.
 
 /// The cloud forecast's switch in Your privacy (on unless turned off), read by the transport
 /// before any request to the forecast host.
@@ -504,10 +504,10 @@ nonisolated enum ForecastRequest {
         }
     }
 }
-/// A redirect is never followed. Runtime requests can reach exactly three hosts, each behind its
-/// own switch in Your privacy: park updates, forecasts, and (since 2026-10-05)
-/// the aerosol forecast that warns of smoke. Nyx on Vision Pro reaches the same three, behind the
-/// same switches (`SafeHTTP.preferences`).
+/// A redirect is never followed. Runtime requests can reach exactly four hosts, each behind its
+/// own switch in Your privacy: park updates, forecasts, (since 2026-10-05) the aerosol forecast
+/// that warns of smoke, and (since 2026-10-15) NOAA's aurora forecast. Nyx on Vision Pro reaches
+/// the same four, behind the same switches (`SafeHTTP.preferences`).
 nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
@@ -517,9 +517,9 @@ nonisolated final class HostGuard: NSObject, URLSessionTaskDelegate, Sendable {
 nonisolated struct SafeHTTP: HTTPTransport {
     /// Each host and the preference that must not be off before it is contacted, on iPhone, iPad
     /// and Vision Pro alike (since 2026-10-14 the headset asks for smoke and park alerts too, so its
-    /// scores and closures match the iPhone's).
+    /// scores and closures match the iPhone's; since 2026-10-15 both ask NOAA for the aurora forecast).
     static let preferences: [String: String] = ["developer.nps.gov": "npsEnabled", "api.open-meteo.com": CloudForecastSwitch.key,
-                                                 "air-quality-api.open-meteo.com": "smokeEnabled"]
+                                                 "air-quality-api.open-meteo.com": "smokeEnabled", "services.swpc.noaa.gov": "auroraEnabled"]
     static var hosts: Set<String> { Set(preferences.keys) }
     /// Where the switches live; tests use their own suite.
     let suite: String?

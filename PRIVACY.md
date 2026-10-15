@@ -6,13 +6,14 @@ Nyx has no account, no server, no analytics or crash SDK, no ads and no tracking
 
 ## Network
 
-All requests go through `SafeHTTP`. It only allows HTTPS to these three hosts and rejects redirects:
+All requests go through `SafeHTTP`. It only allows HTTPS to these four hosts and rejects redirects:
 
 | Host | Used for | What's sent |
 |---|---|---|
 | `developer.nps.gov` | Alerts, ranger programs, campgrounds | Alerts and campgrounds: all 63 park codes in one request, so it says nothing about which park you care about. Programs: the code of the park page you have open. |
 | `api.open-meteo.com` | Cloud forecasts | Public coordinates of all 63 parks together. For saved spots, a separate request with coordinates rounded to 0.1° (about 11 km). For world places, every place in a 10°×10° tile. |
 | `air-quality-api.open-meteo.com` | Smoke and haze | Public coordinates of the 63 parks. |
+| `services.swpc.noaa.gov` | Aurora forecast (NOAA's Kp index for the next three days) | Nothing: one global file, at most every three hours. |
 
 Each host has its own switch in Settings › Your privacy, and saved-spot forecasts have a separate switch. Sessions are ephemeral with cookies and caching off. The device's location is never sent, except when you save where you're standing as a spot, and then only rounded.
 
@@ -34,9 +35,9 @@ Links to nps.gov, recreation.gov, Wikidata, Globe at Night and similar sites ope
 
 ## Apple Watch and Vision Pro
 
-The watch makes no network requests; the network code isn't compiled into the watch targets. The iPhone sends it saved places, night vision and cached forecasts over WatchConnectivity.
+The watch makes no network requests; the network code isn't compiled into the watch targets. The iPhone sends it saved places, night vision, cached forecasts and the aurora forecast over WatchConnectivity.
 
-The Vision Pro app reaches the same three hosts as the iPhone, with the same requests and pacing, each behind its own switch in its Your privacy screen: `api.open-meteo.com` (clouds), `air-quality-api.open-meteo.com` (smoke and haze) and `developer.nps.gov` (park alerts, all 63 park codes in one request). They carry only the parks' public coordinates and codes. It requests no permissions.
+The Vision Pro app reaches the same four hosts as the iPhone, with the same requests and pacing, each behind its own switch in its Your privacy screen: `api.open-meteo.com` (clouds), `air-quality-api.open-meteo.com` (smoke and haze), `developer.nps.gov` (park alerts, all 63 park codes in one request) and `services.swpc.noaa.gov` (the aurora forecast, one global file). They carry only the parks' public coordinates and codes, or nothing at all. It requests no permissions.
 
 ## Privacy manifests
 

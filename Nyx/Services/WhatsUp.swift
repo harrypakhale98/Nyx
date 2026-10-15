@@ -1,11 +1,13 @@
 import Foundation
 
 /// The night's sky beyond the score, in calm sentences: the Milky Way's bright center, the
-/// planets, a meteor shower and a lunar eclipse. Built from `SkyAlmanac`; which items show, in
+/// planets, a meteor shower and a lunar eclipse, and the night's highlights (the Moon or two planets
+/// close together, a Full Moon at its nearest, Mercury or Venus at their best, a solstice, the
+/// gegenschein). Built from `SkyAlmanac`; which items show, in
 /// what order and in what words is decided here so it can be tested without a screen. None of it
 /// changes the Darkness Score: these are reasons to go, never points.
 nonisolated struct WhatsUp: Sendable {
-    enum Kind: String, Sendable { case core, planet, meteors, eclipse }
+    enum Kind: String, Sendable { case core, planet, meteors, eclipse, aurora, pairing, moon, planetBest, season, gegenschein, deepSky }
     struct Item: Sendable, Identifiable, Equatable {
         let id: String
         let kind: Kind
@@ -28,20 +30,61 @@ nonisolated struct WhatsUp: Sendable {
     let planets: [Item]
     let shower: Item?
     let eclipse: Item?
+    /// Aurora within reach tonight by NOAA's Kp forecast (`AuroraForecast.item`), passed in by the
+    /// surfaces that have the forecast; nil otherwise.
+    let aurora: Item?
+    /// Pairings (closest first), a Full Moon at its nearest, Mercury or Venus at its best, a
+    /// solstice, the gegenschein: the order `Layout` and every surface show them in.
+    let highlights: [Item]
     let events: Events
-    /// Rare things first (an eclipse, a shower), then the core and the planets, brightest first.
-    var items: [Item] { [eclipse, shower].compactMap { $0 } + [core] + planets }
+    /// Rare things first (an eclipse, a shower), then the core, the planets, brightest first, and
+    /// the night's highlights.
+    var items: [Item] { [eclipse, aurora, shower].compactMap { $0 } + [core] + planets + highlights }
     /// The rows above the planets, which the panel groups under one heading.
     var leading: [Item] { [eclipse, shower].compactMap { $0 } + [core] }
 
-    init(park: Park, sky: SkyConditions, isTonight: Bool, table: SkyEvents = .shared, almanac: SkyAlmanac = SkyAlmanac()) {
+    /// `highlights` false skips the pairings, binocular sights and the rest, for a reader that shows none of them.
+    init(park: Park, sky: SkyConditions, isTonight: Bool, table: SkyEvents = .shared, almanac: SkyAlmanac = SkyAlmanac(), aurora: Item? = nil, highlights: Bool = true) {
+        self.aurora=aurora
         let events=Events(park: park, sky: sky, table: table, almanac: almanac)
         self.events=events
         coreNight=almanac.core(for: park, sky: sky)
         core=Self.coreItem(coreNight, park: park, sky: sky, almanac: almanac)
-        planets=almanac.planets(for: park, sky: sky).map { Self.planetItem($0, park: park, sky: sky) }
+        let planetNights=almanac.planets(for: park, sky: sky)
+        planets=planetNights.map { Self.planetItem($0, park: park, sky: sky) }
         shower=events.shower.map { Self.showerItem($0, park: park, sky: sky, isTonight: isTonight) }
         eclipse=events.eclipse.map { Self.eclipseItem($0, park: park) }
+        self.highlights=highlights ? Self.highlightItems(park: park, sky: sky, planets: planetNights, almanac: almanac) : []
+    }
+
+    // MARK: Layout: the one rule for the iPhone card, the watch page and every list
+
+    /// Where each item goes: `first` above the planets, `after` below them, `mentions` a line each.
+    /// A total lunar eclipse the park can see leads, then aurora in reach; then the core; the planets; then a shower of
+    /// ten or more an hour, a partial eclipse, pairings, a Full Moon at its nearest and the
+    /// gegenschein. Weaker showers, a penumbral eclipse or one the park cannot see, Mercury or Venus
+    /// at its best (the planet already has its row) and a solstice are mentions.
+    struct Layout: Equatable { var first: [Item]; var after: [Item]; var mentions: [Item] }
+    /// Showers under this many an hour are a mention, not a row.
+    static let showerRow=10
+    var layout: Layout {
+        var layout=Layout(first: [core], after: [], mentions: [])
+        if let shower {
+            if (events.shower?.hourlyRate ?? 0)>=Self.showerRow { layout.after.append(shower) } else { layout.mentions.append(shower) }
+        }
+        if let eclipse, let night=events.eclipse {
+            if night.visible == nil || night.eclipse.type == "penumbral" { layout.mentions.append(eclipse) }
+            else if night.eclipse.type == "total" { layout.first.insert(eclipse, at: 0) }
+            else { layout.after.append(eclipse) }
+        }
+        if let aurora { layout.first.insert(aurora, at: layout.first.count-1) }
+        for item in highlights {
+            switch item.kind {
+            case .planetBest, .season: layout.mentions.append(item)
+            default: layout.after.append(item)
+            }
+        }
+        return layout
     }
 
     // MARK: Events: what earns a glyph, a reminder or a line on Tonight
@@ -136,8 +179,32 @@ nonisolated struct WhatsUp: Sendable {
             : String(localized: "Highest at \(park.time(peak.date)), \(degrees)° up in the \(direction).")
         if peak.altitude<20 { detail=Sentences.join([detail, String(localized: "Low: an open view toward the horizon matters.")]) }
         detail=Sentences.join([detail, moonSentence(dark: dark, free: core.moonFree, sky: sky, park: park)])
+        if let terrain=terrainSentence(dark: dark, park: park, almanac: almanac) { detail=Sentences.join([detail, terrain]) }
         let spokenRange=String(localized: "up in true darkness from \(park.time(dark.start)) to \(park.time(dark.end))")
         return Item(id: "core", kind: .core, title: title, value: range, detail: detail, spoken: "\(title): \(spokenRange). \(detail)", timed: true)
+    }
+    /// When the real terrain at the park's main viewing spot (`Horizon.Table.main`) changes when the
+    /// core can be seen: it must stand a degree above the skyline as well as 10° up. Said only when
+    /// that moves a time by 15 minutes or more, rounded to ten minutes (the profile's 5° bins and the
+    /// terrain model's metre-scale elevations make anything finer false precision). Nil where the
+    /// terrain changes nothing, or no profile exists.
+    static func terrainSentence(dark: DateInterval, park: Park, almanac: SkyAlmanac, table: Horizon.Table = .shared) -> String? {
+        guard let (horizon, spot)=table.main(park) else { return nil }
+        let place=spot ?? park.shortName
+        let clear={ (date: Date) -> Bool in
+            let p=almanac.engine.horizontal(date: date, park: park, ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec)
+            return p.altitude>=max(SkyAlmanac.coreMinimumAltitude, horizon.altitude(toward: p.azimuth)+Horizon.clearance)
+        }
+        guard let seen=almanac.longest(in: dark, where: clear) else {
+            return String(localized: "From \(place), the terrain hides it all through true darkness.")
+        }
+        let later=seen.start.timeIntervalSince(dark.start)>=900, earlier=dark.end.timeIntervalSince(seen.end)>=900
+        switch (later, earlier) {
+        case (true, true): return String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park)) and drops behind it around \(around(seen.end, park: park)).")
+        case (true, false): return String(localized: "From \(place), it clears the terrain around \(around(seen.start, park: park)).")
+        case (false, true): return String(localized: "From \(place), it drops behind the terrain around \(around(seen.end, park: park)).")
+        case (false, false): return nil
+        }
     }
     /// How the Moon shares the core's dark hours.
     static func moonSentence(dark: DateInterval, free: DateInterval?, sky: SkyConditions, park: Park) -> String {
@@ -307,6 +374,85 @@ nonisolated struct WhatsUp: Sendable {
         if eclipse.type=="penumbral" { extras.append(String(localized: "Subtle: the Moon's edge darkens slightly.")) }
         detail=Sentences.join([detail]+extras)
         return Item(id: "eclipse", kind: .eclipse, title: title, value: range, detail: detail, spoken: "\(title). \(Sentences.join([spokenStage]+extras))", timed: true)
+    }
+
+    // MARK: Highlights
+
+    static func highlightItems(park: Park, sky: SkyConditions, planets: [SkyAlmanac.PlanetNight], almanac: SkyAlmanac) -> [Item] {
+        var items: [Item]=[]
+        // Two pairings at most: the closest are the ones worth stepping out for.
+        items+=almanac.pairings(planets: planets, park: park, sky: sky).prefix(2).map { pairingItem($0, park: park) }
+        if let distance=almanac.nearFullMoon(sky: sky) { items.append(nearFullMoonItem(distance: distance)) }
+        for night in planets {
+            if let day=almanac.greatestElongation(of: night.planet, near: SkyAlmanac.nightWindow(sky).start) {
+                items.append(planetBestItem(night, day: day, park: park, sky: sky))
+            }
+        }
+        if let solstice=almanac.solstice(park: park, sky: sky) { items.append(solsticeItem(solstice, sky: sky)) }
+        if let point=almanac.gegenschein(park: park, sky: sky) { items.append(gegenscheinItem(point, park: park)) }
+        let sights=DeepSky.shared.sights(park: park, sky: sky)
+        if !sights.isEmpty { items.append(deepSkyItem(sights, park: park)) }
+        return items
+    }
+    /// "about 2° apart": whole degrees, never under one, since the planets are placed within about a degree.
+    static func apart(_ degrees: Double) -> String { String(localized: "about \(max(1, Int(degrees.rounded())))° apart") }
+    /// Where something stands, in the planets' words: high, low or simply in a direction.
+    static func placed(altitude: Double, azimuth: Double) -> String {
+        let direction=Compass.name(azimuth)
+        return altitude>=30 ? String(localized: "high in the \(direction)") : altitude<15 ? String(localized: "low in the \(direction)") : String(localized: "in the \(direction)")
+    }
+    static func pairingItem(_ pairing: SkyAlmanac.Pairing, park: Park) -> Item {
+        let title=pairing.other.map { String(localized: "\($0.name) and \(pairing.planet.name)") } ?? String(localized: "The Moon and \(pairing.planet.name)")
+        let note=apart(pairing.separation), when=around(pairing.at, park: park)
+        // The time is the figure; the sentence says where to look, so nothing is said twice.
+        let place=placed(altitude: pairing.altitude, azimuth: pairing.azimuth)
+        let detail=String(localized: "Closest then, \(place). A fine sight by eye or in binoculars.")
+        return Item(id: "pairing-\(pairing.id)", kind: .pairing, title: title, note: note, value: when, detail: detail,
+            spoken: "\(title), \(note). "+String(localized: "Closest around \(when), \(place). A fine sight by eye or in binoculars."), timed: true)
+    }
+    static func nearFullMoonItem(distance: Double) -> Item {
+        let title=String(localized: "Full Moon at its nearest")
+        let km=Measurement(value: (distance/1000).rounded()*1000, unit: UnitLength.kilometers)
+            .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0))))
+        let detail=String(localized: "About \(km) away, so a little larger and brighter than most Full Moons. Its light hides all but the brightest stars.")
+        return Item(id: "moon-near", kind: .moon, title: title, detail: detail, spoken: "\(title). \(detail)")
+    }
+    static func planetBestItem(_ night: SkyAlmanac.PlanetNight, day: Date, park: Park, sky: SkyConditions) -> Item {
+        let window=SkyAlmanac.nightWindow(sky)
+        // An evening planet is best soon after sunset; a morning one before dawn.
+        let evening=night.best<window.start.addingTimeInterval(window.duration/2)
+        let title=String(localized: "\(night.planet.name) at its best")
+        var format=Date.FormatStyle.dateTime.month(.abbreviated).day()
+        format.timeZone=park.timeZone
+        let place=placed(altitude: night.bestAltitude, azimuth: night.bestAzimuth)
+        let detail=evening ? String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best evenings to find it, \(place) after sunset.")
+            : String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best mornings to find it, \(place) before sunrise.")
+        return Item(id: "best-\(night.planet.rawValue)", kind: .planetBest, title: title, note: String(localized: "this week"), detail: detail, spoken: "\(title), this week. \(detail)")
+    }
+    static func solsticeItem(_ solstice: SkyAlmanac.Solstice, sky: SkyConditions) -> Item {
+        let title=solstice == .longestNight ? String(localized: "The longest night of the year") : String(localized: "The shortest night of the year")
+        let hours=Duration.seconds(sky.darkHours*3600).formatted(.units(allowed: [.hours, .minutes], width: .wide))
+        let detail=sky.darkHours>0 ? String(localized: "The solstice falls this night. True darkness lasts \(hours).")
+            : String(localized: "The solstice falls this night. At this latitude there is no true darkness.")
+        return Item(id: "solstice", kind: .season, title: title, detail: detail, spoken: "\(title). \(detail)")
+    }
+    static func gegenscheinItem(_ point: SkyAlmanac.Gegenschein, park: Park) -> Item {
+        let title=String(localized: "Gegenschein"), when=around(point.at, park: park)
+        let detail=String(localized: "A very faint, broad glow opposite the Sun, around \(when), \(Int(point.altitude.rounded()))° up in the \(Compass.name(point.azimuth)). Only from the darkest skies, with eyes fully adapted; easy to miss.")
+        return Item(id: "gegenschein", kind: .gegenschein, title: title, note: String(localized: "very faint"), value: when, detail: detail,
+            spoken: "\(title), very faint. \(detail)", timed: true)
+    }
+
+    /// Tonight's best-placed binocular sights (`DeepSky.sights`), one sentence each.
+    static func deepSkyItem(_ sights: [DeepSky.Sight], park: Park) -> Item {
+        let title=String(localized: "Through binoculars")
+        let lines=sights.map { sight in
+            let place=placed(altitude: sight.altitude, azimuth: sight.azimuth), when=around(sight.at, park: park)
+            return sight.toTheEye ? String(localized: "\(sight.object.label): \(place) around \(when), visible to the eye too.")
+                : String(localized: "\(sight.object.label): \(place) around \(when).")
+        }
+        let detail=Sentences.join(lines)
+        return Item(id: "deepsky", kind: .deepSky, title: title, detail: detail, spoken: "\(title). \(detail)")
     }
 
     /// A time rounded to ten minutes, for moments that are only ever "around".

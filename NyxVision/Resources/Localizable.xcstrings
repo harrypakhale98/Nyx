@@ -36,6 +36,76 @@
         }
       }
     },
+    "%@ and %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ und %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ and %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ y %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ et %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@と%2$@"
+          }
+        }
+      }
+    },
+    "%@ at its best": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ am besten zu sehen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at its best"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ en su mejor momento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ au mieux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@が見ごろ"
+          }
+        }
+      }
+    },
     "%@ from %@ to %@, %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -389,16 +459,16 @@
     "%@, Moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, Moon and darkness only"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "%@, nur Mond und Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Moon and darkness only"
           }
         },
         "es": {
@@ -459,16 +529,16 @@
     "%@, haze or smoke": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@, haze or smoke"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "%@, Dunst oder Rauch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, haze or smoke"
           }
         },
         "es": {
@@ -592,6 +662,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@、平年の雲量"
+          }
+        }
+      }
+    },
+    "%@: %@ around %@, visible to the eye too.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ gegen %3$@, auch mit bloßem Auge sichtbar."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ around %@, visible to the eye too."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ hacia las %3$@; también visible a simple vista."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@ vers %3$@, visible aussi à l’œil nu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%3$@ごろ、%2$@。肉眼でも見えます。"
+          }
+        }
+      }
+    },
+    "%@: %@ around %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ gegen %3$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ around %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ hacia las %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@ vers %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：%3$@ごろ、%2$@。"
           }
         }
       }
@@ -1121,6 +1261,41 @@
         }
       }
     },
+    "A very faint, broad glow opposite the Sun, around %@, %lld° up in the %@. Only from the darkest skies, with eyes fully adapted; easy to miss.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein sehr schwacher, breiter Schein gegenüber der Sonne, gegen %1$@, %2$lld° hoch im %3$@. Nur unter den dunkelsten Himmeln, mit voll angepassten Augen; leicht zu übersehen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A very faint, broad glow opposite the Sun, around %@, %lld° up in the %@. Only from the darkest skies, with eyes fully adapted; easy to miss."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un resplandor muy tenue y amplio en el lado opuesto al Sol, hacia las %1$@, a %2$lld° de altura en el %3$@. Solo desde los cielos más oscuros, con la vista totalmente adaptada; fácil de pasar por alto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une lueur très faible et étendue à l’opposé du Soleil, vers %1$@, à %2$lld° de hauteur direction %3$@. Seulement sous les ciels les plus sombres, les yeux bien adaptés ; facile à manquer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太陽と反対側に見える、ごく淡く広がった光。%1$@ごろ、%3$@の空、高度%2$lld°。最も暗い空で、目が十分に慣れたときだけ。見落としやすい光です。"
+          }
+        }
+      }
+    },
     "A weak return from this park; a rough guide.": {
       "extractionState": "manual",
       "localizations": {
@@ -1152,6 +1327,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "この公園からは少ししか見えません。目安です。"
+          }
+        }
+      }
+    },
+    "About %@ away, so a little larger and brighter than most Full Moons. Its light hides all but the brightest stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwa %@ entfernt, also etwas größer und heller als die meisten Vollmonde. Sein Licht verbirgt alle außer den hellsten Sternen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %@ away, so a little larger and brighter than most Full Moons. Its light hides all but the brightest stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A unos %@, así que algo más grande y brillante que la mayoría de las lunas llenas. Su luz oculta todas las estrellas salvo las más brillantes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À environ %@, donc un peu plus grande et plus lumineuse que la plupart des pleines lunes. Sa lumière masque toutes les étoiles sauf les plus brillantes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地球から約%@と近く、ふつうの満月より少し大きく明るく見えます。その光で、明るい星以外は見えなくなります。"
           }
         }
       }
@@ -1264,16 +1474,16 @@
     "Access not checked. Confirm closures with the park.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Access not checked. Confirm closures with the park."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Zugang nicht geprüft. Erkundige dich beim Park nach Sperrungen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access not checked. Confirm closures with the park."
           }
         },
         "es": {
@@ -1334,16 +1544,16 @@
     "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Die Hinweise für alle %lld US-Nationalparks kommen in einer einzigen Anfrage an developer.nps.gov, höchstens alle sechs Stunden, sodass sie nie verrät, welche Parks dich interessieren. Deine Koordinaten werden nie gesendet. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts for all %lld U.S. national parks arrive in one request to developer.nps.gov, at most every six hours, so it never reveals which parks interest you. Your coordinates are never sent. The service receives network information such as your IP address."
           }
         },
         "es": {
@@ -1646,6 +1856,146 @@
         }
       }
     },
+    "Aurora comes and goes within a night, and forecasts a day or more ahead often miss.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polarlichter kommen und gehen im Lauf einer Nacht, und Vorhersagen für einen Tag oder mehr im Voraus liegen oft daneben."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora comes and goes within a night, and forecasts a day or more ahead often miss."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La aurora aparece y desaparece durante la noche, y los pronósticos con un día o más de antelación a menudo fallan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les aurores vont et viennent au cours d’une nuit, et les prévisions à un jour ou plus se trompent souvent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラは一晩のうちに現れたり消えたりし、1日以上先の予報はよく外れます。"
+          }
+        }
+      }
+    },
+    "Aurora forecast": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polarlichtvorhersage"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora forecast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronóstico de auroras"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision d’aurores"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラ予報"
+          }
+        }
+      }
+    },
+    "Aurora latitude": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polarlicht-Breite"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora latitude"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitud de las auroras"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitude des aurores"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラの緯度"
+          }
+        }
+      }
+    },
+    "Aurora possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polarlicht möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurora posible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aurore possible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラの可能性"
+          }
+        }
+      }
+    },
     "Back to tonight": {
       "extractionState": "manual",
       "localizations": {
@@ -1891,19 +2241,124 @@
         }
       }
     },
-    "Closure alert": {
+    "Clear nights, the ones worth going out on, are often several degrees colder.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klare Nächte, die sich für einen Ausflug lohnen, sind oft einige Grad kälter."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Closure alert"
+            "value": "Clear nights, the ones worth going out on, are often several degrees colder."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las noches despejadas, las que merecen la salida, suelen ser varios grados más frías."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nuits claires, celles qui valent la sortie, sont souvent plus froides de plusieurs degrés."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出かける価値のある晴れた夜は、これより数度冷えることがよくあります。"
+          }
+        }
+      }
+    },
+    "Closest around %@, %@. A fine sight by eye or in binoculars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am nächsten gegen %1$@, %2$@. Ein schöner Anblick mit bloßem Auge oder im Fernglas."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closest around %@, %@. A fine sight by eye or in binoculars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más cerca hacia las %1$@, %2$@. Un bello espectáculo a simple vista o con prismáticos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au plus près vers %1$@, %2$@. Un beau spectacle à l’œil nu ou aux jumelles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ごろ最も近づき、%2$@に見えます。肉眼でも双眼鏡でも美しい眺めです。"
+          }
+        }
+      }
+    },
+    "Closest then, %@. A fine sight by eye or in binoculars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dann am nächsten, %@. Ein schöner Anblick mit bloßem Auge oder im Fernglas."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closest then, %@. A fine sight by eye or in binoculars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En ese momento, más cerca, %@. Un bello espectáculo a simple vista o con prismáticos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au plus près à ce moment-là, %@. Un beau spectacle à l’œil nu ou aux jumelles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "そのころ最も近づき、%@に見えます。肉眼でも双眼鏡でも美しい眺めです。"
+          }
+        }
+      }
+    },
+    "Closure alert": {
+      "extractionState": "manual",
+      "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Sperrungshinweis"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure alert"
           }
         },
         "es": {
@@ -1929,16 +2384,16 @@
     "Closure alert: %@": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closure alert: %@"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Sperrungshinweis: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure alert: %@"
           }
         },
         "es": {
@@ -1964,16 +2419,16 @@
     "Closures not checked.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closures not checked."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Sperrungen nicht geprüft."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closures not checked."
           }
         },
         "es": {
@@ -1999,16 +2454,16 @@
     "Cloud forecast unavailable": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloud forecast unavailable"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Wolkenvorhersage nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable"
           }
         },
         "es": {
@@ -2034,16 +2489,16 @@
     "Cloud forecast unavailable · Moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloud forecast unavailable · Moon and darkness only"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Wolkenvorhersage nicht verfügbar · nur Mond und Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · Moon and darkness only"
           }
         },
         "es": {
@@ -2069,16 +2524,16 @@
     "Cloud forecast unavailable · usual clouds for the month": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloud forecast unavailable · usual clouds for the month"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Wolkenvorhersage nicht verfügbar · übliche Bewölkung des Monats"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud forecast unavailable · usual clouds for the month"
           }
         },
         "es": {
@@ -2626,6 +3081,41 @@
         }
       }
     },
+    "Computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechnet mit dem International Geomagnetic Reference Field (IGRF-14, IAGA; Koeffizienten von NOAA NCEI)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Computed from the International Geomagnetic Reference Field (IGRF-14, IAGA; coefficients from NOAA NCEI)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculada con el Campo Geomagnético Internacional de Referencia (IGRF-14, IAGA; coeficientes de NOAA NCEI)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculée avec l’International Geomagnetic Reference Field (IGRF-14, AIGA ; coefficients de NOAA NCEI)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国際標準地球磁場（IGRF-14、IAGA。係数はNOAA NCEIによる）から計算しています。"
+          }
+        }
+      }
+    },
     "Computing": {
       "extractionState": "manual",
       "localizations": {
@@ -2731,6 +3221,76 @@
         }
       }
     },
+    "Contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enthält veränderte Informationen des Copernicus Atmosphere Monitoring Service (2026), über Open-Meteo. Weder die Europäische Kommission noch das ECMWF haften für die Verwendung der Copernicus-Informationen oder der darin enthaltenen Daten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contains modified Copernicus Atmosphere Monitoring Service information (2026), via Open-Meteo. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contiene información modificada del Copernicus Atmosphere Monitoring Service (2026), a través de Open-Meteo. Ni la Comisión Europea ni el ECMWF son responsables del uso que pueda hacerse de la información o los datos de Copernicus que contiene."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contient des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copernicus Atmosphere Monitoring Serviceの情報（2026）を加工して含みます。Open-Meteo経由。欧州委員会およびECMWFは、Copernicusの情報やそこに含まれるデータの利用について一切の責任を負いません。"
+          }
+        }
+      }
+    },
+    "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enthält veränderte Informationen des Copernicus Climate Change Service (2026): ERA5, 2015 bis 2024. Lizenziert unter CC BY 4.0."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contiene información modificada del Copernicus Climate Change Service (2026): ERA5, de 2015 a 2024. Con licencia CC BY 4.0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024. Sous licence CC BY 4.0."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copernicus Climate Change Serviceの情報（2026）を加工して含みます。ERA5、2015〜2024年。CC BY 4.0ライセンス。"
+          }
+        }
+      }
+    },
     "Contains modified Copernicus Climate Change Service information (2026): ERA5, 2015 to 2024. Licensed under CC BY 4.0. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.": {
       "extractionState": "manual",
       "localizations": {
@@ -2769,16 +3329,16 @@
     "Counts forecast smoke and haze in every score": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Counts forecast smoke and haze in every score"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Berücksichtigt vorhergesagten Rauch und Dunst in jedem Wert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts forecast smoke and haze in every score"
           }
         },
         "es": {
@@ -2941,6 +3501,41 @@
         }
       }
     },
+    "Deep sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Sky"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cielo profundo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciel profond"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星雲・星団"
+          }
+        }
+      }
+    },
     "Done": {
       "extractionState": "manual",
       "localizations": {
@@ -3081,6 +3676,76 @@
         }
       }
     },
+    "Dust in the air: the Milky Way will look faint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staub in der Luft: Die Milchstraße wird blass wirken."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dust in the air: the Milky Way will look faint."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo en el aire: la Vía Láctea se verá tenue."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空気中の砂じん：天の川がかすんで見えます。"
+          }
+        }
+      }
+    },
+    "Dust or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staub oder Dunst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dust or haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo o bruma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière ou brume"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "砂じんまたはもや"
+          }
+        }
+      }
+    },
     "E": {
       "extractionState": "manual",
       "localizations": {
@@ -3154,16 +3819,16 @@
     "Early look · forecast eased toward usual clouds": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Early look · forecast eased toward usual clouds"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Erste Einschätzung · Vorhersage an die übliche Bewölkung angenähert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Early look · forecast eased toward usual clouds"
           }
         },
         "es": {
@@ -3326,6 +3991,76 @@
         }
       }
     },
+    "Farthest from the Sun's glare around %@: the best evenings to find it, %@ after sunset.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um den %1$@ am weitesten vom Glanz der Sonne entfernt: die besten Abende, um ihn zu finden, %2$@ nach Sonnenuntergang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farthest from the Sun's glare around %@: the best evenings to find it, %@ after sunset."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más alejado del resplandor del Sol hacia el %1$@: las mejores tardes para encontrarlo, %2$@ tras la puesta del Sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs soirs pour la trouver, %2$@ après le coucher du Soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ごろ太陽のまぶしさから最も離れます。見つけるのに最適な夕方で、日没後の%2$@に見えます。"
+          }
+        }
+      }
+    },
+    "Farthest from the Sun's glare around %@: the best mornings to find it, %@ before sunrise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um den %1$@ am weitesten vom Glanz der Sonne entfernt: die besten Morgen, um ihn zu finden, %2$@ vor Sonnenaufgang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farthest from the Sun's glare around %@: the best mornings to find it, %@ before sunrise."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más alejado del resplandor del Sol hacia el %1$@: las mejores mañanas para encontrarlo, %2$@ antes del amanecer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs matins pour la trouver, %2$@ avant le lever du Soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ごろ太陽のまぶしさから最も離れます。見つけるのに最適な明け方で、日の出前の%2$@に見えます。"
+          }
+        }
+      }
+    },
     "Find the on-device darkness estimate for a national park. Returns the score, 0 to 100.": {
       "extractionState": "manual",
       "localizations": {
@@ -3392,6 +4127,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "上弦の月"
+          }
+        }
+      }
+    },
+    "Fog possible, mostly in low ground": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebel möglich, vor allem in Senken"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fog possible, mostly in low ground"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible niebla, sobre todo en zonas bajas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brouillard possible, surtout dans les creux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "霧の可能性あり（特に低い土地）"
           }
         }
       }
@@ -3571,6 +4341,181 @@
         }
       }
     },
+    "From %@, it clears the terrain around %@ and drops behind it around %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände und sinkt gegen %3$@ dahinter."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@, it clears the terrain around %@ and drops behind it around %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desde %1$@ supera el relieve hacia las %2$@ y se oculta tras él hacia las %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis %1$@, il dépasse le relief vers %2$@ et passe derrière vers %3$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@からは、%2$@ごろ地形の上に出て、%3$@ごろ地形の陰に入ります。"
+          }
+        }
+      }
+    },
+    "From %@, it clears the terrain around %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von %1$@ aus steigt es gegen %2$@ über das Gelände."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@, it clears the terrain around %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desde %1$@ supera el relieve hacia las %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis %1$@, il dépasse le relief vers %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@からは、%2$@ごろ地形の上に出ます。"
+          }
+        }
+      }
+    },
+    "From %@, it drops behind the terrain around %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von %1$@ aus sinkt es gegen %2$@ hinter das Gelände."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@, it drops behind the terrain around %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desde %1$@ se oculta tras el relieve hacia las %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis %1$@, il passe derrière le relief vers %2$@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@からは、%2$@ごろ地形の陰に入ります。"
+          }
+        }
+      }
+    },
+    "From %@, the terrain hides it all through true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von %@ aus verdeckt das Gelände es während der ganzen echten Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@, the terrain hides it all through true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desde %@, el relieve lo oculta durante toda la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis %@, le relief le cache pendant toute l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@からは、完全に暗い時間帯のあいだずっと地形に隠れます。"
+          }
+        }
+      }
+    },
+    "Full Moon at its nearest": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vollmond in Erdnähe"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Moon at its nearest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luna llena en su punto más cercano"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pleine Lune au plus près"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最も近い満月"
+          }
+        }
+      }
+    },
     "Full moon": {
       "extractionState": "manual",
       "localizations": {
@@ -3602,6 +4547,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "満月"
+          }
+        }
+      }
+    },
+    "Gegenschein": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegenschein"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegenschein"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegenschein"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegenschein"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "対日照"
           }
         }
       }
@@ -3746,6 +4726,76 @@
         }
       }
     },
+    "Heavy dust in the air: faint stars hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dichter Staub in der Luft: schwache Sterne verborgen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy dust in the air: faint stars hidden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo denso en el aire: estrellas débiles ocultas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "濃い砂じん：暗い星は隠れます。"
+          }
+        }
+      }
+    },
+    "Heavy dust or haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dichter Staub oder Dunst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy dust or haze"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polvo o bruma densos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poussière ou brume épaisse"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "濃い砂じんまたはもや"
+          }
+        }
+      }
+    },
     "Heavy smoke or haze": {
       "extractionState": "manual",
       "localizations": {
@@ -3816,6 +4866,41 @@
         }
       }
     },
+    "Hide names": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namen ausblenden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide names"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar nombres"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer les noms"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前を隠す"
+          }
+        }
+      }
+    },
     "Highest at %@, %lld° up in the %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -3847,6 +4932,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@に最も高くなり、%3$@の空、高度%2$lld°。"
+          }
+        }
+      }
+    },
+    "IAU Gazetteer of Planetary Nomenclature, USGS (public domain).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (gemeinfrei)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (public domain)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (dominio público)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Gazetteer of Planetary Nomenclature, USGS (domaine public)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IAU Gazetteer of Planetary Nomenclature、USGS（パブリックドメイン）。"
           }
         }
       }
@@ -4131,6 +5251,41 @@
         }
       }
     },
+    "Kp %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kp %lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kp %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kp %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kp %lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kp %lld"
+          }
+        }
+      }
+    },
     "Last forecast: %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -4169,16 +5324,16 @@
     "Last park update: %@.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last park update: %@."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Letzte Parkmeldung: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last park update: %@."
           }
         },
         "es": {
@@ -4239,16 +5394,16 @@
     "Last smoke forecast: %@.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last smoke forecast: %@."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Letzte Rauchvorhersage: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last smoke forecast: %@."
           }
         },
         "es": {
@@ -5286,6 +6441,41 @@
         }
       }
     },
+    "Moon names": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namen auf dem Mond"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon names"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombres de la Luna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noms de la Lune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月の地名"
+          }
+        }
+      }
+    },
     "Moon up, %lld%% lit": {
       "extractionState": "manual",
       "localizations": {
@@ -5741,6 +6931,181 @@
         }
       }
     },
+    "NOAA estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA-Schätzung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA estimate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "estimación de la NOAA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "estimation de la NOAA"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAAの推定"
+          }
+        }
+      }
+    },
+    "NOAA estimates geomagnetic activity up to Kp %lld on its 0 to 9 scale during true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die NOAA schätzt die geomagnetische Aktivität während der echten Dunkelheit auf bis zu Kp %lld auf ihrer Skala von 0 bis 9."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA estimates geomagnetic activity up to Kp %lld on its 0 to 9 scale during true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La NOAA estima una actividad geomagnética de hasta Kp %lld, en su escala de 0 a 9, durante la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La NOAA estime l’activité géomagnétique jusqu’à Kp %lld, sur son échelle de 0 à 9, pendant l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAAは、完全に暗い時間帯の地磁気活動を0〜9の尺度で最大Kp %lldと推定しています。"
+          }
+        }
+      }
+    },
+    "NOAA forecast": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA-Vorhersage"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA forecast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pronóstico de la NOAA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prévision de la NOAA"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAAの予報"
+          }
+        }
+      }
+    },
+    "NOAA forecasts geomagnetic activity up to Kp %lld on its 0 to 9 scale during true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die NOAA sagt für die echte Dunkelheit geomagnetische Aktivität bis Kp %lld auf ihrer Skala von 0 bis 9 vorher."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAA forecasts geomagnetic activity up to Kp %lld on its 0 to 9 scale during true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La NOAA pronostica una actividad geomagnética de hasta Kp %lld, en su escala de 0 a 9, durante la oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La NOAA prévoit une activité géomagnétique jusqu’à Kp %lld, sur son échelle de 0 à 9, pendant l’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAAは、完全に暗い時間帯の地磁気活動を0〜9の尺度で最大Kp %lldと予報しています。"
+          }
+        }
+      }
+    },
+    "Named in sunlight: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benannt im Sonnenlicht: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Named in sunlight: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con nombre a la luz del Sol: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nommés au soleil : %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の当たっている地名：%@。"
+          }
+        }
+      }
+    },
     "National Park Service.": {
       "extractionState": "manual",
       "localizations": {
@@ -6164,16 +7529,16 @@
     "No alerts in the last park update. Confirm access before travel.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No alerts in the last park update. Confirm access before travel."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Keine Hinweise in der letzten Meldung des Parks. Prüfe vor der Fahrt den Zugang."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts in the last park update. Confirm access before travel."
           }
         },
         "es": {
@@ -6199,16 +7564,16 @@
     "No closures in the last park update. Check all park alerts before you go.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No closures in the last park update. Check all park alerts before you go."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Keine Sperrungen in der letzten Meldung des Parks. Prüfe vor der Fahrt alle Parkhinweise."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No closures in the last park update. Check all park alerts before you go."
           }
         },
         "es": {
@@ -6269,16 +7634,16 @@
     "No cloud forecast yet · Moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cloud forecast yet · Moon and darkness only"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Noch keine Wolkenvorhersage · nur Mond und Dunkelheit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet · Moon and darkness only"
           }
         },
         "es": {
@@ -6304,16 +7669,16 @@
     "No cloud forecast yet · usual clouds for the month": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cloud forecast yet · usual clouds for the month"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Noch keine Wolkenvorhersage · übliche Bewölkung des Monats"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cloud forecast yet · usual clouds for the month"
           }
         },
         "es": {
@@ -6479,16 +7844,16 @@
     "No park update on this device yet.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No park update on this device yet."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Noch keine Parkmeldung auf diesem Gerät."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No park update on this device yet."
           }
         },
         "es": {
@@ -6549,16 +7914,16 @@
     "No smoke forecast on this device yet, so smoke is not counted.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No smoke forecast on this device yet, so smoke is not counted."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Noch keine Rauchvorhersage auf diesem Gerät, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device yet, so smoke is not counted."
           }
         },
         "es": {
@@ -6584,16 +7949,16 @@
     "No smoke forecast on this device yet.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No smoke forecast on this device yet."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Noch keine Rauchvorhersage auf diesem Gerät."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No smoke forecast on this device yet."
           }
         },
         "es": {
@@ -6966,6 +8331,41 @@
         }
       }
     },
+    "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx fragt services.swpc.noaa.gov, das Space Weather Prediction Center der US-Behörde NOAA, nach seiner Vorhersage der geomagnetischen Aktivität (des Kp-Index) für die nächsten drei Tage: eine Datei für die ganze Welt, höchstens alle drei Stunden. Die Anfrage nennt keinen Ort und nichts über dich. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx asks services.swpc.noaa.gov, the U.S. Space Weather Prediction Center at NOAA, for its forecast of geomagnetic activity (the Kp index) for the next three days: one file for the whole world, at most every three hours. The request names no place and nothing about you. The service receives network information such as your IP address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx pide a services.swpc.noaa.gov, el Space Weather Prediction Center de la NOAA de EE. UU., su pronóstico de actividad geomagnética (el índice Kp) para los próximos tres días: un solo archivo para todo el mundo, como máximo cada tres horas. La solicitud no nombra ningún lugar ni nada sobre ti. El servicio recibe información de red, como tu dirección IP."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyxは、米国NOAAのSpace Weather Prediction Center（services.swpc.noaa.gov）に、この先3日間の地磁気活動（Kp指数）の予報を問い合わせます。世界全体で1つのファイルを、最短でも3時間おきに取得します。リクエストには場所もあなたに関する情報も含まれません。サービス側には、IPアドレスなどのネットワーク情報が届きます。"
+          }
+        }
+      }
+    },
     "Nyx could not read the park list that ships inside the app. Reinstalling Nyx restores it.": {
       "extractionState": "manual",
       "localizations": {
@@ -7176,37 +8576,37 @@
         }
       }
     },
-    "Only the three optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.": {
+    "Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Only the three optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nur die drei optionalen Aktualisierungen unten verlassen diese Apple Vision Pro, jede mit einem eigenen Schalter. Dein Standort wird hier nie abgefragt, und nichts wird gemessen oder geteilt."
+            "value": "Nur die vier optionalen Aktualisierungen unten verlassen diese Apple Vision Pro, jede mit einem eigenen Schalter. Dein Standort wird hier nie abgefragt, und nichts wird gemessen oder geteilt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Solo las tres actualizaciones opcionales de abajo salen de este Apple Vision Pro, cada una con su propio interruptor. Aquí nunca se pide tu ubicación, y nada se mide ni se comparte."
+            "value": "Solo las cuatro actualizaciones opcionales de abajo salen de este Apple Vision Pro, cada una con su propio interruptor. Aquí nunca se pide tu ubicación, y nada se mide ni se comparte."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seules les trois mises à jour facultatives ci-dessous quittent cet Apple Vision Pro, chacune avec son propre interrupteur. Votre position n’est jamais demandée ici, et rien n’est mesuré ni partagé."
+            "value": "Seules les quatre mises à jour facultatives ci-dessous quittent cet Apple Vision Pro, chacune avec son propre interrupteur. Votre position n’est jamais demandée ici, et rien n’est mesuré ni partagé."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このApple Vision Proから外に出るのは、下にある3つのオプションの更新だけで、それぞれに個別のスイッチがあります。ここでは位置情報を要求することはなく、何も測定したり共有したりしません。"
+            "value": "このApple Vision Proから外に出るのは、下にある4つのオプションの更新だけで、それぞれに個別のスイッチがあります。ここでは位置情報を要求することはなく、何も測定したり共有したりしません。"
           }
         }
       }
@@ -7389,16 +8789,16 @@
     "Optional data updates": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional data updates"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Optionale Datenaktualisierungen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional data updates"
           }
         },
         "es": {
@@ -7494,16 +8894,16 @@
     "Park alerts": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park alerts"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Parkhinweise"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts"
           }
         },
         "es": {
@@ -7529,16 +8929,16 @@
     "Park alerts are busy. Check current conditions on nps.gov.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park alerts are busy. Check current conditions on nps.gov."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Die Parkhinweise sind gerade überlastet. Sieh die aktuellen Bedingungen auf nps.gov nach."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are busy. Check current conditions on nps.gov."
           }
         },
         "es": {
@@ -7564,16 +8964,16 @@
     "Park alerts are off in Your privacy, so closures are not checked.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Park alerts are off in Your privacy, so closures are not checked."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Parkhinweise sind unter „Deine Privatsphäre“ ausgeschaltet, daher werden Sperrungen nicht geprüft."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Park alerts are off in Your privacy, so closures are not checked."
           }
         },
         "es": {
@@ -7841,6 +9241,76 @@
         }
       }
     },
+    "Rain possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regen möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible lluvia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie possible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雨の可能性あり"
+          }
+        }
+      }
+    },
+    "Rain possible, up to %lld%% chance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regen möglich, Wahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain possible, up to %lld%% chance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible lluvia, hasta %lld%% de probabilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie possible, jusqu’à %lld %% de risque"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雨の可能性あり（最大%lld%%）"
+          }
+        }
+      }
+    },
     "Reading the night": {
       "extractionState": "manual",
       "localizations": {
@@ -7879,16 +9349,16 @@
     "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Anfragen gehen an air-quality-api.open-meteo.com, den Luftqualitätsdienst desselben Anbieters, für alle %lld Parks gemeinsam, bis zu 50 pro Anfrage, nur mit denselben Koordinaten der Beobachtungsplätze. Er liefert die CAMS-Aerosolvorhersage, die warnt, wenn Rauch oder Dunst schwache Sterne verbergen werden. Der Dienst erhält Netzwerkinformationen wie deine IP-Adresse."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests go to air-quality-api.open-meteo.com, the same provider's air-quality service, for all %lld parks together, up to 50 in each request, using the same viewing-spot coordinates only. It returns the CAMS aerosol forecast that warns when smoke or haze will hide faint stars. The service receives network information such as your IP address."
           }
         },
         "es": {
@@ -8681,6 +10151,41 @@
         }
       }
     },
+    "Show names": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namen einblenden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show names"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar nombres"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher les noms"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前を表示"
+          }
+        }
+      }
+    },
     "Shows each night's forecast clouds in the score and the sky": {
       "extractionState": "manual",
       "localizations": {
@@ -8751,19 +10256,54 @@
         }
       }
     },
-    "Shows park closures beside every score": {
+    "Shows or hides the names of the Moon's seas and craters in sunlight.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blendet die Namen der sonnenbeschienenen Meere und Krater des Mondes ein oder aus."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shows park closures beside every score"
+            "value": "Shows or hides the names of the Moon's seas and craters in sunlight."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra u oculta los nombres de los mares y cráteres de la Luna iluminados por el Sol."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche ou masque les noms des mers et cratères de la Lune éclairés par le Soleil."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日の当たっている月の海とクレーターの名前を表示または非表示にします。"
+          }
+        }
+      }
+    },
+    "Shows park closures beside every score": {
+      "extractionState": "manual",
+      "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Zeigt Sperrungen im Park neben jedem Wert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows park closures beside every score"
           }
         },
         "es": {
@@ -8817,6 +10357,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "この夜をプランナーに表示します"
+          }
+        }
+      }
+    },
+    "Shows when aurora may reach a park, in What's up": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt in „Am Himmel“, wann Polarlichter einen Park erreichen können"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows when aurora may reach a park, in What's up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indica en En el cielo cuándo la aurora puede llegar a un parque"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indique dans « Dans le ciel » quand une aurore peut atteindre un parc"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オーロラが公園の空に届きそうなときに「空に見えるもの」に表示します"
           }
         }
       }
@@ -8964,16 +10539,16 @@
     "Smoke and haze": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smoke and haze"
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Rauch und Dunst"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze"
           }
         },
         "es": {
@@ -8999,16 +10574,16 @@
     "Smoke and haze are off in Your privacy, so smoke is not counted.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smoke and haze are off in Your privacy, so smoke is not counted."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Rauch und Dunst ist unter „Deine Privatsphäre“ ausgeschaltet, daher wird Rauch nicht berücksichtigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke and haze are off in Your privacy, so smoke is not counted."
           }
         },
         "es": {
@@ -9034,16 +10609,16 @@
     "Smoke not counted.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smoke not counted."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Rauch nicht berücksichtigt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoke not counted."
           }
         },
         "es": {
@@ -9132,6 +10707,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "煙やもやのため、今夜は最大%lld点です。"
+          }
+        }
+      }
+    },
+    "Snow possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnee möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snow possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible nieve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neige possible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪の可能性あり"
+          }
+        }
+      }
+    },
+    "Snow possible, up to %lld%% chance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnee möglich, Wahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snow possible, up to %lld%% chance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posible nieve, hasta %lld%% de probabilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neige possible, jusqu’à %lld %% de risque"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪の可能性あり（最大%lld%%）"
           }
         }
       }
@@ -9556,6 +11201,41 @@
         }
       }
     },
+    "Terrain": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelände"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terrain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relieve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relief"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地形"
+          }
+        }
+      }
+    },
     "That park could not be found in the bundled library.": {
       "extractionState": "manual",
       "localizations": {
@@ -9591,6 +11271,146 @@
         }
       }
     },
+    "That usually brings aurora low into the northern sky here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das bringt Polarlichter hier meist tief an den Nordhimmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That usually brings aurora low into the northern sky here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eso suele traer la aurora baja al cielo del norte aquí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela amène généralement l’aurore bas dans le ciel nord ici."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その場合、ここではたいてい北の低い空にオーロラが現れます。"
+          }
+        }
+      }
+    },
+    "That usually brings aurora low into the southern sky here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das bringt Polarlichter hier meist tief an den Südhimmel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That usually brings aurora low into the southern sky here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eso suele traer la aurora baja al cielo del sur aquí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela amène généralement l’aurore bas dans le ciel sud ici."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その場合、ここではたいてい南の低い空にオーロラが現れます。"
+          }
+        }
+      }
+    },
+    "That usually brings aurora well into the northern sky here, sometimes higher.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das bringt Polarlichter hier meist weit in den Nordhimmel, manchmal höher."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That usually brings aurora well into the northern sky here, sometimes higher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eso suele traer la aurora bien dentro del cielo del norte aquí, a veces más alto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela amène généralement l’aurore bien haut dans le ciel nord ici, parfois plus haut encore."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その場合、ここではたいてい北の空の高めまでオーロラが広がり、さらに高くなることもあります。"
+          }
+        }
+      }
+    },
+    "That usually brings aurora well into the southern sky here, sometimes higher.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das bringt Polarlichter hier meist weit in den Südhimmel, manchmal höher."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That usually brings aurora well into the southern sky here, sometimes higher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eso suele traer la aurora bien dentro del cielo del sur aquí, a veces más alto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela amène généralement l’aurore bien haut dans le ciel sud ici, parfois plus haut encore."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その場合、ここではたいてい南の空の高めまでオーロラが広がり、さらに高くなることもあります。"
+          }
+        }
+      }
+    },
     "The Milky Way's bright center stays at or below the horizon this far north. Its fainter band still crosses dark skies.": {
       "extractionState": "manual",
       "localizations": {
@@ -9622,6 +11442,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "これほど北では、天の川の明るい中心部は地平線の上に出ません。より淡い天の川の帯は、暗い空を横切ります。"
+          }
+        }
+      }
+    },
+    "The Moon and %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Mond und %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Moon and %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Luna y %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Lune et %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月と%@"
           }
         }
       }
@@ -9839,6 +11694,12 @@
     "The Moon's phase and the next new moon, when the darkest nights begin.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Mondphase und der nächste Neumond, wenn die dunkelsten Nächte beginnen."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -9849,12 +11710,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "La fase de la Luna y la próxima luna nueva, cuando empiezan las noches más oscuras."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Mondphase und der nächste Neumond, wenn die dunkelsten Nächte beginnen."
           }
         },
         "fr": {
@@ -9937,6 +11792,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "太陽が出ています"
+          }
+        }
+      }
+    },
+    "The air is usually near its dew point before dawn this month: expect dew on lenses.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diesem Monat ist die Luft vor der Morgendämmerung meist nahe ihrem Taupunkt: Rechne mit Tau auf den Linsen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The air is usually near its dew point before dawn this month: expect dew on lenses."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este mes, antes del amanecer, el aire suele estar cerca de su punto de rocío: es probable que se forme rocío en los lentes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce mois-ci, avant l’aube, l’air est en général proche de son point de rosée : attendez-vous à de la rosée sur les optiques."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この月は夜明け前の空気がたいてい露点に近く、レンズに夜露がつきやすくなります。"
           }
         }
       }
@@ -10186,6 +12076,41 @@
         }
       }
     },
+    "The longest night of the year": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die längste Nacht des Jahres"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The longest night of the year"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La noche más larga del año"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nuit la plus longue de l’année"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一年で最も長い夜"
+          }
+        }
+      }
+    },
     "The next seven nights": {
       "extractionState": "manual",
       "localizations": {
@@ -10326,19 +12251,54 @@
         }
       }
     },
-    "The public coordinates and park codes of the %lld national parks. Nothing about you.": {
+    "The planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work.": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorhersage des planetaren K-Index des Space Weather Prediction Center der NOAA, Werk der US-Regierung."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The public coordinates and park codes of the %lld national parks. Nothing about you."
+            "value": "The planetary K-index forecast of NOAA's Space Weather Prediction Center, U.S. Government work."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El pronóstico del índice K planetario del Space Weather Prediction Center de la NOAA, obra del Gobierno de EE. UU."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prévision de l’indice K planétaire du Space Weather Prediction Center de la NOAA, œuvre du gouvernement des États-Unis."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOAAのSpace Weather Prediction Centerによる惑星K指数の予報、米国政府の著作物。"
+          }
+        }
+      }
+    },
+    "The public coordinates and park codes of the %lld national parks. Nothing about you.": {
+      "extractionState": "manual",
+      "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Die öffentlichen Koordinaten und Parkcodes der %lld Nationalparks. Nichts über dich."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The public coordinates and park codes of the %lld national parks. Nothing about you."
           }
         },
         "es": {
@@ -10431,6 +12391,41 @@
         }
       }
     },
+    "The shortest night of the year": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die kürzeste Nacht des Jahres"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The shortest night of the year"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La noche más corta del año"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nuit la plus courte de l’année"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一年で最も短い夜"
+          }
+        }
+      }
+    },
     "The sky at %@": {
       "extractionState": "manual",
       "localizations": {
@@ -10462,6 +12457,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@の空"
+          }
+        }
+      }
+    },
+    "The skyline is the real terrain around %@, from elevation data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Horizont ist das echte Gelände um %@, aus Höhendaten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The skyline is the real terrain around %@, from elevation data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El horizonte es el relieve real alrededor de %@, según datos de elevación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ligne d’horizon est le relief réel autour de %@, d’après des données d’altitude."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地平線は、標高データによる%@周辺の実際の地形です。"
+          }
+        }
+      }
+    },
+    "The solstice falls this night. At this latitude there is no true darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diese Nacht fällt die Sonnenwende. In dieser Breite gibt es keine echte Dunkelheit."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The solstice falls this night. At this latitude there is no true darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El solsticio cae esta noche. A esta latitud no hay oscuridad total."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le solstice tombe cette nuit. À cette latitude, il n’y a pas d’obscurité totale."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜に至点を迎えます。この緯度では完全に暗くなりません。"
+          }
+        }
+      }
+    },
+    "The solstice falls this night. True darkness lasts %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diese Nacht fällt die Sonnenwende. Echte Dunkelheit dauert %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The solstice falls this night. True darkness lasts %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El solsticio cae esta noche. La oscuridad total dura %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le solstice tombe cette nuit. L’obscurité totale dure %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この夜に至点を迎えます。完全に暗い時間は%@です。"
           }
         }
       }
@@ -10539,16 +12639,16 @@
     "This copy of Nyx has no park service key, so park alerts are not requested.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This copy of Nyx has no park service key, so park alerts are not requested."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Diese Nyx-Kopie hat keinen Schlüssel des Park Service, daher werden keine Parkhinweise abgefragt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This copy of Nyx has no park service key, so park alerts are not requested."
           }
         },
         "es": {
@@ -10637,6 +12737,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "このスコアには、%2$@の%1$@の平年の雲量を使っています。"
+          }
+        }
+      }
+    },
+    "Through binoculars": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Fernglas"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Through binoculars"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con prismáticos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aux jumelles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双眼鏡で"
+          }
+        }
+      }
+    },
+    "Thunderstorms possible": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewitter möglich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thunderstorms possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posibles tormentas eléctricas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orages possibles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雷雨の可能性あり"
+          }
+        }
+      }
+    },
+    "Thunderstorms possible, up to %lld%% chance of rain": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewitter möglich, Regenwahrscheinlichkeit bis %lld %%"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thunderstorms possible, up to %lld%% chance of rain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posibles tormentas eléctricas, hasta %lld%% de probabilidad de lluvia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orages possibles, jusqu’à %lld %% de risque de pluie"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雷雨の可能性あり（降水確率最大%lld%%）"
           }
         }
       }
@@ -10956,37 +13161,37 @@
         }
       }
     },
-    "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. The Moon, the stars and every score still work offline.": {
+    "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. Turning the aurora forecast off removes it from this device. The Moon, the stars and every score still work offline.": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. The Moon, the stars and every score still work offline."
-          }
-        },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wenn du Vorhersagen ausschaltest, werden keine neuen Anfragen gestellt. Die letzte Vorhersage bleibt auf diesem Gerät und zählt mit zunehmendem Alter weniger, dann übernimmt die übliche Bewölkung des Parks. Wenn du Rauch und Dunst ausschaltest, wird die Rauchvorhersage entfernt, und die Werte sagen, dass Rauch nicht berücksichtigt wird. Wenn du Parkhinweise ausschaltest, werden keine neuen Anfragen gestellt; bereits vorhandene Sperrungen bleiben neben dem Wert. Mond, Sterne und jeder Wert funktionieren weiterhin offline."
+            "value": "Wenn du Vorhersagen ausschaltest, werden keine neuen Anfragen gestellt. Die letzte Vorhersage bleibt auf diesem Gerät und zählt mit zunehmendem Alter weniger, dann übernimmt die übliche Bewölkung des Parks. Wenn du Rauch und Dunst ausschaltest, wird die Rauchvorhersage entfernt, und die Werte sagen, dass Rauch nicht berücksichtigt wird. Wenn du Parkhinweise ausschaltest, werden keine neuen Anfragen gestellt; bereits vorhandene Sperrungen bleiben neben dem Wert. Wenn du die Polarlichtvorhersage ausschaltest, wird sie von diesem Gerät entfernt. Mond, Sterne und jeder Wert funktionieren weiterhin offline."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning forecasts off stops new requests. The last forecast stays on this device and counts less as it ages, then the park's usual clouds take over. Turning smoke and haze off removes the smoke forecast, and scores say smoke is not counted. Turning park alerts off stops new requests; closures already here stay beside the score. Turning the aurora forecast off removes it from this device. The Moon, the stars and every score still work offline."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Al desactivar los pronósticos se detienen las solicitudes nuevas. El último pronóstico se queda en este dispositivo y cuenta menos con el tiempo; después rige la nubosidad habitual del parque. Al desactivar humo y bruma se borra el pronóstico de humo, y los índices indican que no se cuenta el humo. Al desactivar las alertas del parque se detienen las solicitudes nuevas; los cierres que ya están aquí siguen junto al índice. La Luna, las estrellas y todos los índices siguen funcionando sin conexión."
+            "value": "Al desactivar los pronósticos se detienen las solicitudes nuevas. El último pronóstico se queda en este dispositivo y cuenta menos con el tiempo; después rige la nubosidad habitual del parque. Al desactivar humo y bruma se borra el pronóstico de humo, y los índices indican que no se cuenta el humo. Al desactivar las alertas del parque se detienen las solicitudes nuevas; los cierres que ya están aquí siguen junto al índice. Al desactivar el pronóstico de auroras se borra de este dispositivo. La Luna, las estrellas y todos los índices siguen funcionando sin conexión."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. Désactiver la fumée et la brume supprime la prévision de fumée, et les indices précisent que la fumée n’est pas comptée. Désactiver les alertes du parc arrête les nouvelles requêtes ; les fermetures déjà présentes restent à côté de l’indice. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
+            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. Désactiver la fumée et la brume supprime la prévision de fumée, et les indices précisent que la fumée n’est pas comptée. Désactiver les alertes du parc arrête les nouvelles requêtes ; les fermetures déjà présentes restent à côté de l’indice. Désactiver la prévision d’aurores la supprime de cet appareil. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "予報をオフにすると、新しいリクエストは止まります。最後の予報はこのデバイスに残り、古くなるにつれて影響が小さくなり、その後は公園の平年の雲量に切り替わります。煙ともやをオフにすると煙の予報は削除され、スコアには煙を考慮していないと表示されます。公園のアラートをオフにすると新しいリクエストは止まりますが、すでにある閉鎖情報はスコアの横に残ります。月、星、すべてのスコアはオフラインでも使えます。"
+            "value": "予報をオフにすると、新しいリクエストは止まります。最後の予報はこのデバイスに残り、古くなるにつれて影響が小さくなり、その後は公園の平年の雲量に切り替わります。煙ともやをオフにすると煙の予報は削除され、スコアには煙を考慮していないと表示されます。公園のアラートをオフにすると新しいリクエストは止まりますが、すでにある閉鎖情報はスコアの横に残ります。オーロラ予報をオフにすると、このデバイスから削除されます。月、星、すべてのスコアはオフラインでも使えます。"
           }
         }
       }
@@ -11057,6 +13262,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "薄明"
+          }
+        }
+      }
+    },
+    "USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D Elevation Program des USGS (gemeinfrei); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USGS 3D Elevation Program (public domain); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D Elevation Program del USGS (dominio público); produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USGS 3D Elevation Program（パブリックドメイン）。 produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         }
       }
@@ -11236,6 +13476,76 @@
         }
       }
     },
+    "Usual night temperatures": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übliche Nachttemperaturen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usual night temperatures"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperaturas habituales de noche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Températures nocturnes habituelles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夜のふだんの気温"
+          }
+        }
+      }
+    },
+    "Usually about %@ two hours after dark and %@ before dawn in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im %3$@ meist etwa %1$@ zwei Stunden nach Einbruch der Dunkelheit und %2$@ vor der Morgendämmerung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usually about %@ two hours after dark and %@ before dawn in %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %3$@, suele haber unos %1$@ dos horas después de anochecer y %2$@ antes del amanecer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %3$@, en général environ %1$@ deux heures après la tombée de la nuit et %2$@ avant l’aube."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%3$@は、暗くなって2時間後にふだん約%1$@、夜明け前に約%2$@です。"
+          }
+        }
+      }
+    },
     "Venus": {
       "extractionState": "manual",
       "localizations": {
@@ -11267,6 +13577,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "金星"
+          }
+        }
+      }
+    },
+    "Very dry air: good for faint stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehr trockene Luft: gut für schwache Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very dry air: good for faint stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aire muy seco: bueno para las estrellas débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air très sec : bon pour les étoiles faibles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても乾いた空気：暗い星がよく見えます。"
+          }
+        }
+      }
+    },
+    "Very dry, clean air: good for faint stars.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehr trockene, saubere Luft: gut für schwache Sterne."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very dry, clean air: good for faint stars."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aire muy seco y limpio: bueno para las estrellas débiles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air très sec et pur : bon pour les étoiles faibles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても乾いた澄んだ空気：暗い星がよく見えます。"
           }
         }
       }
@@ -11621,6 +14001,41 @@
         }
       }
     },
+    "Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikidata (CC0), die Datenbank SIMBAD (CDS, Straßburg) und der Harris-Katalog der Kugelsternhaufen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikidata (CC0), the SIMBAD database (CDS, Strasbourg) and the Harris globular cluster catalogue."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikidata (CC0), la base de datos SIMBAD (CDS, Estrasburgo) y el catálogo de cúmulos globulares de Harris."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikidata (CC0), la base de données SIMBAD (CDS, Strasbourg) et le catalogue des amas globulaires de Harris."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikidata（CC0）、SIMBADデータベース（CDS、ストラスブール）、Harrisの球状星団カタログ。"
+          }
+        }
+      }
+    },
     "Without true darkness at this latitude, few meteors will show.": {
       "extractionState": "manual",
       "localizations": {
@@ -11862,6 +14277,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "約%lld%%"
+          }
+        }
+      }
+    },
+    "about %lld° apart": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "etwa %lld° auseinander"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "about %lld° apart"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a unos %lld° de distancia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à environ %lld° l’un de l’autre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "約%lld°離れて"
           }
         }
       }
@@ -13406,6 +15856,1266 @@
         }
       }
     },
+    "dso.Coalsack": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kohlensack"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coalsack Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saco de Carbón"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sac de Charbon"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コールサック"
+          }
+        }
+      }
+    },
+    "dso.Cr 399": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleiderbügel-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coathanger"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Percha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas du Cintre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コートハンガー星団"
+          }
+        }
+      }
+    },
+    "dso.IC 2391": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omikron-Velorum-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omicron Velorum Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo de Omicron Velorum"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas d’Omicron Velorum"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ほ座オミクロン星団"
+          }
+        }
+      }
+    },
+    "dso.IC 2602": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Südliche Plejaden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Southern Pleiades"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pléyades del Sur"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pléiades du Sud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "南のプレアデス"
+          }
+        }
+      }
+    },
+    "dso.LMC": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Große Magellansche Wolke"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large Magellanic Cloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gran Nube de Magallanes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grand Nuage de Magellan"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大マゼラン雲"
+          }
+        }
+      }
+    },
+    "dso.M11": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wildentenhaufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wild Duck Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo del Pato Salvaje"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas du Canard sauvage"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "野鴨星団"
+          }
+        }
+      }
+    },
+    "dso.M13": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herkuleshaufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hercules Globular Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo de Hércules"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas d’Hercule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルクレス座球状星団"
+          }
+        }
+      }
+    },
+    "dso.M20": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trifidnebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trifid Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa Trífida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse Trifide"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "三裂星雲"
+          }
+        }
+      }
+    },
+    "dso.M24": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagittarius-Sternwolke"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sagittarius Star Cloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nube Estelar de Sagitario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuage stellaire du Sagittaire"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いて座スタークラウド"
+          }
+        }
+      }
+    },
+    "dso.M27": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hantelnebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dumbbell Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa Dumbbell"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse de l’Haltère"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "亜鈴状星雲"
+          }
+        }
+      }
+    },
+    "dso.M31": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andromedagalaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andromeda Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia de Andrómeda"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie d’Andromède"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アンドロメダ銀河"
+          }
+        }
+      }
+    },
+    "dso.M33": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dreiecksgalaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triangulum Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia del Triángulo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie du Triangle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "さんかく座銀河"
+          }
+        }
+      }
+    },
+    "dso.M42": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orionnebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orion Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa de Orión"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse d’Orion"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オリオン大星雲"
+          }
+        }
+      }
+    },
+    "dso.M44": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praesepe"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beehive Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Pesebre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas de la Ruche"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレセペ星団"
+          }
+        }
+      }
+    },
+    "dso.M45": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plejaden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pleiades"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pléyades"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pléiades"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレアデス星団"
+          }
+        }
+      }
+    },
+    "dso.M51": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whirlpool-Galaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whirlpool Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia Remolino"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie du Tourbillon"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "子持ち銀河"
+          }
+        }
+      }
+    },
+    "dso.M57": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ringnebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ring Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa del Anillo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse de la Lyre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "環状星雲"
+          }
+        }
+      }
+    },
+    "dso.M6": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schmetterlingshaufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Butterfly Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo de la Mariposa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas du Papillon"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バタフライ星団"
+          }
+        }
+      }
+    },
+    "dso.M7": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ptolemäus-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ptolemy Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo de Ptolomeo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas de Ptolémée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トレミー星団"
+          }
+        }
+      }
+    },
+    "dso.M8": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagunennebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagoon Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa de la Laguna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse de la Lagune"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "干潟星雲"
+          }
+        }
+      }
+    },
+    "dso.M81": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bodes Galaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bode's Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia de Bode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie de Bode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボーデの銀河"
+          }
+        }
+      }
+    },
+    "dso.M82": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zigarrengalaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cigar Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia del Cigarro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie du Cigare"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "葉巻銀河"
+          }
+        }
+      }
+    },
+    "dso.M83": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Südliche Feuerradgalaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Southern Pinwheel Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Molinillo Austral"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie du Moulinet austral"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "南の回転花火銀河"
+          }
+        }
+      }
+    },
+    "dso.Mel 111": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coma-Berenices-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coma Star Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo estelar de Coma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas de la Chevelure de Bérénice"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かみのけ座星団"
+          }
+        }
+      }
+    },
+    "dso.Mel 20": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alpha-Persei-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alpha Persei Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo de Alfa Persei"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas d’Alpha Persei"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ペルセウス座アルファ星団"
+          }
+        }
+      }
+    },
+    "dso.Mel 25": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hyaden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hyades"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Híades"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hyades"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヒアデス星団"
+          }
+        }
+      }
+    },
+    "dso.NGC 104": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "47 Tucanae"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "47 Tucanae"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "47 Tucanae"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "47 Tucanae"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "きょしちょう座47"
+          }
+        }
+      }
+    },
+    "dso.NGC 2070": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarantelnebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarantula Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa de la Tarántula"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse de la Tarentule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タランチュラ星雲"
+          }
+        }
+      }
+    },
+    "dso.NGC 253": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sculptor-Galaxie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sculptor Galaxy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxia del Escultor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galaxie du Sculpteur"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちょうこくしつ座銀河"
+          }
+        }
+      }
+    },
+    "dso.NGC 3372": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carinanebel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carina Nebula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebulosa de la Quilla"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nébuleuse de la Carène"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "イータカリーナ星雲"
+          }
+        }
+      }
+    },
+    "dso.NGC 3532": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wunschbrunnen-Haufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishing Well Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúmulo del Pozo de los Deseos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amas du Puits aux souhaits"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ウィッシング・ウェル星団"
+          }
+        }
+      }
+    },
+    "dso.NGC 4755": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herschels Schmuckkästchen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jewel Box"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Joyero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boîte à bijoux"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宝石箱星団"
+          }
+        }
+      }
+    },
+    "dso.NGC 5139": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omega Centauri"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omega Centauri"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omega Centauri"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omega Centauri"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ω星団"
+          }
+        }
+      }
+    },
+    "dso.NGC 869": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doppelsternhaufen h und χ Persei"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doble Cúmulo de Perseo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double amas de Persée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ペルセウス座二重星団"
+          }
+        }
+      }
+    },
+    "dso.NGC 884": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doppelsternhaufen h und χ Persei"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double Cluster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doble Cúmulo de Perseo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double amas de Persée"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ペルセウス座二重星団"
+          }
+        }
+      }
+    },
+    "dso.SMC": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleine Magellansche Wolke"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small Magellanic Cloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pequeña Nube de Magallanes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petit Nuage de Magellan"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小マゼラン雲"
+          }
+        }
+      }
+    },
     "east": {
       "extractionState": "manual",
       "localizations": {
@@ -14736,6 +18446,41 @@
         }
       }
     },
+    "this week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "diese Woche"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "this week"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "esta semana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette semaine"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週"
+          }
+        }
+      }
+    },
     "up in true darkness from %@ to %@": {
       "extractionState": "manual",
       "localizations": {
@@ -14802,6 +18547,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "とても明るい"
+          }
+        }
+      }
+    },
+    "very faint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sehr schwach"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "very faint"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muy tenue"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "très faible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ごく淡い"
           }
         }
       }

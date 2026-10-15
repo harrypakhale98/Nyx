@@ -59,7 +59,7 @@ struct AuroraTests {
         #expect(Set(reach.filter { $0.value == .storms }.keys) == ["glac", "thro", "noca", "olym", "mora", "badl", "wica", "yell"])
         for park in nps where park.region == "AK" {
             #expect(SkyNotes.aurora(park: park, evening: try evening(park, "2026-12-01")) != nil, "\(park.id)")
-            #expect(SkyNotes.aurora(park: park, evening: try evening(park, "2026-10-15"))?.contains("Nyx does not forecast aurora") == true, "\(park.id)")
+            #expect(SkyNotes.aurora(park: park, evening: try evening(park, "2026-10-15"), forecast: true)?.contains("NOAA's forecast for the next three nights") == true, "\(park.id)")
         }
         for id in ["npsa", "havo", "hale", "viis", "jotr", "acad"] {
             let p = try park(id)

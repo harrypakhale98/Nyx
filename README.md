@@ -36,11 +36,12 @@ The astronomy runs on the device: NOAA solar equations for sunrise, sunset and t
 
 ## Privacy
 
-Nyx only talks to three hosts, each with its own switch in Settings › Your privacy:
+Nyx only talks to four hosts, each with its own switch in Settings › Your privacy:
 
 - `developer.nps.gov` – park alerts, events and campgrounds
 - `api.open-meteo.com` – cloud forecasts
 - `air-quality-api.open-meteo.com` – smoke and haze
+- `services.swpc.noaa.gov` – NOAA's aurora (Kp) forecast, one global file
 
 Your location isn't sent anywhere. A saved spot's coordinates are rounded to 0.1° (about 11 km) before its forecast is requested. Notifications are local. The App Store privacy label is "Data Not Collected". Full details in [PRIVACY.md](PRIVACY.md).
 

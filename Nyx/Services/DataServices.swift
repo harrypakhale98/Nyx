@@ -256,6 +256,82 @@ extension ParkProviding {
     /// A provider without campgrounds (a test double) has none to show.
     nonisolated func campgrounds(for parks: [Park], key: String, network: Bool, force: Bool) async -> CampgroundsCache? { nil }
 }
+/// NOAA's Kp forecast (`AuroraOutlook`) from the Space Weather Prediction Center: one small global
+/// file (about 7 KB), asked for whole, so the request names no place and nothing about anyone. Fresh
+/// for three hours (NOAA reissues it several times a day); one request at a time; none while the
+/// service is refusing (`HostBackoff`); none at all with "Aurora forecast" off in Your privacy
+/// (`auroraEnabled`, enforced by `SafeHTTP` before any connection). The last good copy is kept on
+/// disk and used for a day.
+actor AuroraService {
+    static let host="services.swpc.noaa.gov"
+    static let path="/products/noaa-planetary-k-index-forecast.json"
+    /// The switch in Your privacy, on iPhone, iPad and Vision Pro (`SafeHTTP.preferences`).
+    static let key="auroraEnabled"
+    static let freshFor: TimeInterval=3*3600
+    /// Pulling to refresh asks again after an hour at the soonest.
+    static let forcedAfter: TimeInterval=3600
+    private let transport: any HTTPTransport
+    private let persist: Bool
+    private let backoff: HostBackoff
+    private let clock: @Sendable () -> Date
+    private var memory: AuroraOutlook?
+    private var loaded=false
+    private var running: Task<AuroraOutlook?, Never>?
+    /// Bumped by `forget`: a request that was out when the switch went off is dropped on arrival,
+    /// never kept or written to disk.
+    private var generation=0
+    /// When a request last went out: after one that failed or brought nothing readable, the next
+    /// waits an hour, however often the screens refresh.
+    private var attempted: Date?
+    init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, clock: @escaping @Sendable () -> Date = { .now }) {
+        self.transport=transport; self.persist=persist; self.clock=clock
+        self.backoff=backoff ?? (persist ? .shared : HostBackoff(file: nil))
+    }
+    /// The last forecast on this device, read from disk once; nil when there is none or it is over a day old.
+    func cached() -> AuroraOutlook? {
+        if !loaded { loaded=true; if persist, memory == nil { memory=CacheDirectory.read(AuroraOutlook.self, name: "aurora") } }
+        return memory.flatMap { $0.usable(now: clock()) ? $0 : nil }
+    }
+    /// The forecast, asking NOAA when the copy here is stale and `network` allows it. A failed or
+    /// refused request keeps the last good copy.
+    func outlook(network: Bool, force: Bool=false) async -> AuroraOutlook? {
+        let current=cached()
+        let age=current.map { clock().timeIntervalSince($0.updated) } ?? .infinity
+        guard network, age>=Self.freshFor || (force && age>=Self.forcedAfter), backoff.allows(Self.host, now: clock()),
+              attempted.map({ clock().timeIntervalSince($0)>=Self.forcedAfter }) ?? true else { return current }
+        if let running { return await running.value ?? current }
+        var parts=URLComponents(); parts.scheme="https"; parts.host=Self.host; parts.path=Self.path
+        guard let url=parts.url else { return current }
+        let transport=self.transport, clock=self.clock, backoff=self.backoff
+        let task=Task<AuroraOutlook?, Never> {
+            do {
+                let data=try await transport.get(url, headers: [:], constrained: true)
+                backoff.succeeded(Self.host)
+                return AuroraOutlook.parse(data, now: clock())
+            } catch {
+                backoff.record(error, host: Self.host, now: clock())
+                return nil
+            }
+        }
+        running=task; attempted=clock()
+        let asked=generation
+        let fresh=await task.value
+        running=nil
+        // Switched off while the request was out: nothing that arrived is kept.
+        guard asked == generation else { return nil }
+        guard let fresh else { return current }
+        memory=fresh
+        if persist { CacheDirectory.write(fresh, name: "aurora") }
+        return fresh
+    }
+    /// "Aurora forecast" was switched off: the copy here is dropped, in memory and on disk.
+    func forget() {
+        generation+=1
+        running?.cancel(); running=nil
+        memory=nil; loaded=true
+        if persist { CacheDirectory.remove(name: "aurora") }
+    }
+}
 /// Every install shares one NPS key and its hourly quota (1,000 requests), so requests are spent
 /// carefully. Alerts for all 63 parks arrive in one request every six hours, whichever screen asks
 /// first, so a request never reveals which parks are near someone. Ranger programs are asked for

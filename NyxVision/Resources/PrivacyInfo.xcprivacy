@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<!-- Nyx for Vision Pro contacts the iPhone's three optional hosts, each behind its own switch kept in UserDefaults (which also remembers the chosen park on this device): api.open-meteo.com (cloud forecasts), air-quality-api.open-meteo.com (smoke and haze) and developer.nps.gov (park alerts), for the parks' public coordinates and codes only. None is a tracking domain. No data collected. -->
+<!-- Nyx for Vision Pro contacts the iPhone's four optional hosts, each behind its own switch kept in UserDefaults (which also remembers the chosen park on this device): api.open-meteo.com (cloud forecasts), air-quality-api.open-meteo.com (smoke and haze), developer.nps.gov (park alerts), for the parks' public coordinates and codes only, and services.swpc.noaa.gov (the aurora forecast, one global file that names no place). None is a tracking domain. No data collected. -->
 <dict>
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>

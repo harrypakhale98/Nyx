@@ -188,7 +188,7 @@ import WidgetKit
     }
     func followed(_ model:PlanModel)->[Park] { followedIDs(model).compactMap { model.park($0) } }
     func followedData(_ model:PlanModel)->FollowedData {
-        FollowedData(ids:followedIDs(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model))
+        FollowedData(ids:followedIDs(model),forecasts:model.forecasts,details:model.details,closures:Self.closures(model),aurora:model.aurora?.updated)
     }
     /// The parks the Tonight's sky widgets and the Tonight control are set to; empty when none is
     /// set or the system cannot say (a "darkest saved park" widget follows the saved parks anyway).
@@ -311,7 +311,7 @@ import WidgetKit
         if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,tonightParkID:tonight,watchParkIDs:watchIDs,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
-                    places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },complete:complete)
+                    places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,complete:complete)
     }
     /// A launch with no window yet (a background refresh, a watch's request, Control Center) has had
     /// no window hand the model its saved spots (`RootView`): they are read from the store here, so a
@@ -433,7 +433,8 @@ import WidgetKit
 }
 
 /// What the widget, the watch and reminders show of each followed place, reduced to when each part
-/// was issued: the clouds, the models, the cloud layers, the smoke, and the closure. Two moments
+/// was issued: the clouds, the models, the cloud layers, the smoke, and the closure, and when the
+/// aurora forecast the watch's What's up reads was received. Two moments
 /// with the same value would hand over the same thing; any new forecast or detail, a closure, or a
 /// change in which places are followed makes it differ.
 nonisolated struct FollowedData:Equatable,Sendable {
@@ -446,8 +447,9 @@ nonisolated struct FollowedData:Equatable,Sendable {
     }
     let ids:[String]
     let stamps:[Stamp]
-    init(ids:[String],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String]) {
-        self.ids=ids
+    var aurora:Date?=nil
+    init(ids:[String],forecasts:[String:Forecast],details:[String:ForecastDetail],closures:[String:String],aurora:Date?=nil) {
+        self.ids=ids; self.aurora=aurora
         stamps=ids.map { id in
             let detail=details[id]
             return Stamp(clouds:forecasts[id]?.updated,models:detail?.models?.updated,layers:detail?.layers?.updated,air:detail?.air?.updated,closure:closures[id])

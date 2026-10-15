@@ -12,6 +12,12 @@ extension ParkDetailView {
         SkyGlowPanel(park:park,comparison:DebugScenario.text("-nyx-glow-compare") == "city" ? .city : .here).id("glow")
         // Viewing spots are hand-checked from nps.gov: the curated parks only (none for a place abroad yet).
         if !park.isSavedSpot, !park.isCatalogPlace { Panel { ViewingSpots(park:park) }.id("spots") }
+        // The Park Service's night and seasonal access, and its busy and quiet months: the curated parks only.
+        if park.curated, !park.isSavedSpot, !park.isCatalogPlace {
+            let month=park.calendar.component(.month,from:skyNight.id)
+            AfterDarkPanel(park:park,month:month).id("afterdark")
+            BusyMonthsPanel(park:park,month:month)
+        }
         // Campgrounds and ranger programs are the National Park Service's: only where it runs the place.
         if park.nps != nil {
             // Where to stay draws its own panel; campgrounds come from the same all-parks NPS data, kept a week.

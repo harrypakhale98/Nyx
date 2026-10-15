@@ -32,6 +32,17 @@ import CoreLocation
     private let weather: any WeatherProviding
     private let parkStore: any ParkProviding
     private let detailService: any DetailProviding
+    private let auroraService: AuroraService
+    /// NOAA's Kp forecast, for aurora under What's up (`AuroraForecast.item`); nil with "Aurora
+    /// forecast" off, offline with no copy, or a copy over a day old. A new one redoes What's up.
+    var aurora: AuroraOutlook? {
+        didSet {
+            guard aurora != oldValue else { return }
+            skyCache.removeAll()
+            // The watch's What's up reads the same forecast: hand it over once things settle.
+            savedSync.noteChange(self)
+        }
+    }
     @ObservationIgnored private var conditions: [String: [Date:SkyConditions]] = [:]
     var forecasts: [String:Forecast] = [:] { didSet { forecastsChanged() } }
     /// Model agreement, cloud layers, cold, dew, wind and smoke. Context only; never in the score.
@@ -70,7 +81,9 @@ import CoreLocation
     @ObservationIgnored private var skyCache: [SkyKey:WhatsUp] = [:]
     @ObservationIgnored private var eventCache: [SkyKey:WhatsUp.Events] = [:]
     /// A park's night, worded for tonight or not (events ignore the wording: always false).
-    nonisolated private struct SkyKey: Hashable, Sendable { let park:String; let night:Date; let isTonight:Bool }
+    /// `aurora`: whether a usable aurora forecast was in hand, so What's up kept from before a
+    /// forecast turned a day old is never shown with it.
+    nonisolated private struct SkyKey: Hashable, Sendable { let park:String; let night:Date; let isTonight:Bool; var aurora=false }
     /// Parks whose forecast could not be updated on the last attempt, so the UI can say so calmly.
     var staleForecasts: Set<String> = []
     /// Shared by Tonight and Ask Nyx, so both reason from the same starting point.
@@ -147,6 +160,20 @@ import CoreLocation
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
     var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
+    /// NOAA's aurora forecast (services.swpc.noaa.gov): one global file, nothing about the person.
+    /// Off, the copy here is dropped and nothing is asked.
+    var auroraEnabled: Bool {
+        didSet {
+            if DebugScenario.screen == nil { defaults.set(auroraEnabled,forKey:AuroraService.key) }
+            guard !auroraEnabled, oldValue else { return }
+            aurora=nil
+            let service=auroraService
+            Task { [weak self] in
+                await service.forget()
+                if let self { await savedSync.republish(self) }
+            }
+        }
+    }
     var smokeEnabled: Bool {
         didSet {
             if DebugScenario.screen == nil { defaults.set(smokeEnabled,forKey:"smokeEnabled") }
@@ -211,12 +238,12 @@ import CoreLocation
     }
     init(astronomy: any AstronomyProviding = AstronomyEngine(), scoring: any ScoreProviding = ScoreEngine(),
          weather: any WeatherProviding = WeatherService(), parkStore: any ParkProviding = ParkStore(),
-         detail: any DetailProviding = ForecastDetailService(), preload: CachePreload?=nil, defaults: UserDefaults = .standard) {
+         detail: any DetailProviding = ForecastDetailService(), aurora: AuroraService = AuroraService(), preload: CachePreload?=nil, defaults: UserDefaults = .standard) {
         let loaded:[Park]
         do { loaded=try ParkData.load(); loadError=false } catch { loaded=[]; loadError=true }
         parks=loaded
         parkIndex=Dictionary(loaded.indices.map { (loaded[$0].id,$0) },uniquingKeysWith:{ first,_ in first })
-        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail
+        self.astronomy=astronomy; self.scoring=scoring; self.weather=weather; self.parkStore=parkStore; self.detailService=detail; self.auroraService=aurora
         self.defaults=defaults
         // Parks opens darkest tonight first: the list answers the app's question before it is asked.
         // (A registered default: anyone who chose Name keeps it.)
@@ -233,6 +260,7 @@ import CoreLocation
         npsEnabled=defaults.object(forKey:"npsEnabled") as? Bool ?? true
         spotForecastsEnabled=SpotForecast.isOn(defaults)
         smokeEnabled=defaults.object(forKey:"smokeEnabled") as? Bool ?? true
+        auroraEnabled=defaults.object(forKey:AuroraService.key) as? Bool ?? true
         // The world catalogue is read in the background from the first moment; nothing waits for it.
         prepareCatalog()
         // The last forecasts and park updates are read by the services, off the main actor, while
@@ -500,17 +528,19 @@ import CoreLocation
     /// The core, planets, a meteor shower and an eclipse for one night, worded for that night
     /// ("peak tonight" only on tonight). Kept per park and night: scrubbing recomputes nothing.
     func whatsUp(_ night:Night)->WhatsUp {
-        let isTonight=night.id==tonight(night.park), key=Self.skyKey(night,isTonight:isTonight)
+        let isTonight=night.id==tonight(night.park), key=skyKey(night,isTonight:isTonight)
         if let cached=skyCache[key] { return cached }
-        let value=WhatsUp(park:night.park,sky:night.sky,isTonight:isTonight)
+        let value=WhatsUp(park:night.park,sky:night.sky,isTonight:isTonight,aurora:auroraItem(night))
         skyCache[key]=value
         return value
     }
+    /// Aurora in reach this night by NOAA's forecast, or nil (`AuroraForecast.item`).
+    func auroraItem(_ night:Night)->WhatsUp.Item? { AuroraForecast.item(aurora,park:night.park,sky:night.sky,now:present) }
     /// Only the shower and eclipse: cheap enough for every night of a calendar month.
     func events(_ night:Night)->WhatsUp.Events {
         let key=SkyKey(park:night.park.id,night:night.id,isTonight:false)
         if let cached=eventCache[key] { return cached }
-        let value=skyCache[Self.skyKey(night,isTonight:night.id==tonight(night.park))]?.events ?? WhatsUp.Events(park:night.park,sky:night.sky)
+        let value=skyCache[skyKey(night,isTonight:night.id==tonight(night.park))]?.events ?? WhatsUp.Events(park:night.park,sky:night.sky)
         eventCache[key]=value
         return value
     }
@@ -520,10 +550,10 @@ import CoreLocation
     }
     /// Works out the river's nights off the main thread, so a scrub finds each one ready.
     func prepareWhatsUp(_ nights:[Night]) async {
-        let missing=nights.map { ($0,$0.id==tonight($0.park)) }.filter { skyCache[Self.skyKey($0.0,isTonight:$0.1)] == nil }
+        let missing=nights.map { ($0,$0.id==tonight($0.park)) }.filter { skyCache[skyKey($0.0,isTonight:$0.1)] == nil }
         guard !missing.isEmpty else { return }
-        let inputs=missing.map { (key:Self.skyKey($0.0,isTonight:$0.1),park:$0.0.park,sky:$0.0.sky,isTonight:$0.1) }
-        let computed=await Task.detached(priority:.utility) { inputs.map { ($0.key,WhatsUp(park:$0.park,sky:$0.sky,isTonight:$0.isTonight)) } }.value
+        let inputs=missing.map { (key:skyKey($0.0,isTonight:$0.1),park:$0.0.park,sky:$0.0.sky,isTonight:$0.1,aurora:auroraItem($0.0)) }
+        let computed=await Task.detached(priority:.utility) { inputs.map { ($0.key,WhatsUp(park:$0.park,sky:$0.sky,isTonight:$0.isTonight,aurora:$0.aurora)) } }.value
         for (key,value) in computed where skyCache[key] == nil { skyCache[key]=value }
     }
     /// Works out the astronomy of these parks' next `count` nights off the main thread, so a
@@ -547,7 +577,9 @@ import CoreLocation
         guard astronomy is AstronomyEngine else { return }
         for (id,nights) in prepared { conditions[id,default:[:]].merge(nights) { kept,_ in kept } }
     }
-    private static func skyKey(_ night:Night,isTonight:Bool)->SkyKey { SkyKey(park:night.park.id,night:night.id,isTonight:isTonight) }
+    private func skyKey(_ night:Night,isTonight:Bool)->SkyKey {
+        SkyKey(park:night.park.id,night:night.id,isTonight:isTonight,aurora:aurora?.usable(now:present) == true)
+    }
     func outlooks(_ nights:[Night])->[Date:NightOutlook] {
         Dictionary(nights.compactMap { night in outlook(night).map { (night.id,$0) } },uniquingKeysWith:{ first,_ in first })
     }
@@ -567,7 +599,8 @@ import CoreLocation
     }
     /// Aurora season, satellites, zodiacal light, the faintest stars and the core's light dome.
     func skyNotes(_ night:Night)->[SkyNote] {
-        SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:night.aerosol)
+        SkyNotes.notes(park:night.park,sky:night.sky,core:whatsUp(night).coreNight,aerosol:night.aerosol,
+                       auroraForecast:auroraEnabled && aurora?.usable(now:present) == true)
     }
     /// The amber caveat beside a score: haze or smoke thick enough to hide the Milky Way.
     func smokeCaveat(_ night:Night)->String? {
@@ -653,14 +686,16 @@ import CoreLocation
     /// Reads every cache once, in the services, and shows what they hold where nothing newer is.
     func hydrate() async {
         let interval=LaunchSignposts.begin("Hydrate caches")
-        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore
+        let parks=self.parks, weather=self.weather, detailService=self.detailService, parkStore=self.parkStore, auroraService=self.auroraService
         async let cachedForecasts=weather.hydrate(parks)
         async let cachedDetails=detailService.hydrate(parks)
         async let cachedAlerts=parkStore.hydrate(parks)
-        let (f,d,a)=await (cachedForecasts,cachedDetails,cachedAlerts)
+        async let cachedAurora=auroraService.cached()
+        let (f,d,a,k)=await (cachedForecasts,cachedDetails,cachedAlerts,cachedAurora)
         for (id,forecast) in f where forecasts[id] == nil { forecasts[id]=forecast }
         for (id,detail) in d where details[id] == nil { details[id]=detail }
         if alertsCache == nil { apply(a) }
+        if auroraEnabled, aurora == nil { aurora=k }
         LaunchSignposts.end(interval)
         LaunchSignposts.note("Caches ready")
     }
@@ -683,6 +718,8 @@ import CoreLocation
         let live=DebugScenario.screen == nil || DebugScenario.state == "live"
         if DebugScenario.state=="no-forecast" { for park in parks { forecasts[park.id]=nil; details[park.id]=nil }; return }
         #if DEBUG
+        // `-nyx-aurora 6`: NOAA's forecast holding that Kp for three days, for captures of the aurora item.
+        if let kp=DebugScenario.number("-nyx-aurora") { aurora=DebugForecasts.aurora(kp:kp,now:today) }
         if let state=DebugScenario.state, let fixture=DebugForecasts(state:state,parks:self.parks,now:today) {
             forecasts=fixture.forecasts; details=fixture.details; return
         }
@@ -728,6 +765,12 @@ import CoreLocation
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
         let paused=await detailService.pausedForLowData()
         if paused != detailPausedForLowData { detailPausedForLowData=paused }
+        // NOAA's aurora forecast: one global file, at most every three hours.
+        if auroraEnabled {
+            let fresh=await auroraService.outlook(network:live,force:force)
+            // Switched off while it was asked for: the switch's own `didSet` already cleared it.
+            if auroraEnabled, fresh != aurora { aurora=fresh }
+        }
         #if DEBUG
         exportWatchContext()
         #endif

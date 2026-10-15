@@ -33,7 +33,7 @@ struct GuideView:View {
     /// Forecast ages on the app's clock (`present`), so model spread, "not yet" and ties agree with the park
     /// page; tonight itself on `today`, so it is the Tonight tab's night even just after sunrise.
     static func lookup(_ model:PlanModel)->NightLookup {
-        NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.present,details:model.details,others:model.spots+model.catalog,closed:model.closedParks,today:model.today)
+        NightLookup(parks:model.parks,forecasts:model.forecasts,now:model.present,details:model.details,others:model.spots+model.catalog,closed:model.closedParks,today:model.today,aurora:model.aurora)
     }
     /// The places in reach, weighed as Tonight weighs them (`TonightReach`): from a US starting point with
     /// only US places in range, the national parks; otherwise every place in range, a shortlist of the
