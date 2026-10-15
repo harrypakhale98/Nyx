@@ -84,6 +84,17 @@ import Testing
         model.presentOverride = later
         #expect(GuideView.lookup(model).now == later)
         #expect(GuideView.lookup(model).now == model.present)
+        #expect(GuideView.lookup(model).today == model.today)
+    }
+    /// Just after sunrise at Joshua Tree, before the app's `today` has moved on: Ask Nyx's tonight is
+    /// still the Tonight tab's night, while forecasts' age is read on the real clock.
+    @Test func askNyxsTonightIsTheTonightTabs() throws {
+        let jotr = try park("jotr")
+        let beforeSunrise = Date(timeIntervalSince1970: 1_792_180_800-7*3600), afterSunrise = beforeSunrise.addingTimeInterval(90*60)
+        #expect(jotr.currentNight(at: beforeSunrise) != jotr.currentNight(at: afterSunrise))
+        let lookup = NightLookup(parks: [jotr], forecasts: [:], now: afterSunrise, today: beforeSunrise)
+        #expect(lookup.night("tonight", at: jotr) == jotr.currentNight(at: beforeSunrise))
+        #expect(NightLookup(parks: [jotr], forecasts: [:], now: afterSunrise).night("tonight", at: jotr) == jotr.currentNight(at: afterSunrise))
     }
 
     // MARK: Smoke that ends before the night
@@ -144,6 +155,21 @@ import Testing
         let zion = try park("zion")
         let elsewhere = NotificationScheduler.showerIdentifier(park: zion, night: zion.evening(jotr.id))
         #expect(scheduler.showerPlans(nights: [jotr], now: now, delivered: [elsewhere]).isEmpty)
+    }
+
+    /// A removed place's delivered shower reminder blocks its own local day: Haleakalā's noon and a
+    /// spot in Tonga's fall in the same UTC hours a day apart, so each is read in its own time zone.
+    @Test func deliveredShowerDayIsThePlacesOwn() throws {
+        func noon(_ zone: String) throws -> Date {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = try #require(TimeZone(identifier: zone))
+            return try #require(calendar.date(from: DateComponents(year: 2026, month: 12, day: 13, hour: 12)))
+        }
+        let hawaii = "nyx-night-hale-meteors-\(Int(try noon("Pacific/Honolulu").timeIntervalSince1970))"
+        #expect(NotificationScheduler.showerDays([hawaii], nights: []) == ["2026-12-13"])
+        let tonga = "nyx-night-pin:5C1A-77E2-meteors-\(Int(try noon("Pacific/Tongatapu").timeIntervalSince1970))"
+        #expect(NotificationScheduler.showerDays([tonga], nights: [], zone: { _ in TimeZone(identifier: "Pacific/Tongatapu") }) == ["2026-12-13"])
+        #expect(NotificationScheduler.showerDays([tonga], nights: [], zone: { _ in nil }) == ["2026-12-12"])
     }
 
     // MARK: A pending reminder keeps its night on a tie
