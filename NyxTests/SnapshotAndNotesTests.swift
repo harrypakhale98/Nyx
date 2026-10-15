@@ -144,6 +144,8 @@ import Testing
         #expect(UsualCloudsNote.trip([full], unmarked: [early]) == lean)
         #expect(UsualCloudsNote.trip([full], unmarked: [notYet]) == lean)
         #expect(UsualCloudsNote.trip([full], unmarked: [full]) == nil)
+        // A night with no usual clouds counts the Moon and darkness only: it leans on no usual clouds.
+        #expect(UsualCloudsNote.trip([full], unmarked: [bare]) == nil)
         // Each mark a row shows is named in the note.
         for nights in [[unavailable], [notYet], [early], [unavailable, notYet, early]] {
             let note = try #require(UsualCloudsNote.trip(nights))

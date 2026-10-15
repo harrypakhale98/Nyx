@@ -96,7 +96,9 @@ nonisolated struct NightLookup: Sendable {
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
         guard let park=park(named: name) else { return [Self.noMatch(name)] }
         // A named day is that day's night (never one already past); anything else is tonight.
-        let ranked=day(first, at: park).map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
+        // Tonight named by its date goes the tonight way, so just after sunrise it is still the Tonight tab's night.
+        let tonight=TripDay(park.currentNight(at: tonightClock), calendar: park.calendar)
+        let ranked=day(first, at: park).flatMap { $0 == tonight ? nil : $0 }.map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
             ?? planner.bestNights([park], from: tonightClock, count: min(30, max(1, nights)), now: now, limit: limit)
         return ranked.map(describe)
     }

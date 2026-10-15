@@ -95,6 +95,9 @@ import Testing
         let lookup = NightLookup(parks: [jotr], forecasts: [:], now: afterSunrise, today: beforeSunrise)
         #expect(lookup.night("tonight", at: jotr) == jotr.currentNight(at: beforeSunrise))
         #expect(NightLookup(parks: [jotr], forecasts: [:], now: afterSunrise).night("tonight", at: jotr) == jotr.currentNight(at: afterSunrise))
+        // Tonight asked for by its date is the same night, not pushed to the next one.
+        let iso = jotr.isoDay(jotr.currentNight(at: beforeSunrise))
+        #expect(lookup.bestNights(park: "Joshua Tree", from: iso, nights: 1) == lookup.bestNights(park: "Joshua Tree", from: "tonight", nights: 1))
     }
 
     // MARK: Smoke that ends before the night
