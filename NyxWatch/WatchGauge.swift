@@ -103,8 +103,10 @@ struct WatchGauge: View {
         if let models { clouds += " " + String(localized: "Forecast models: \(models.lowerBound) to \(models.upperBound).") }
         let day = nightLabel.map { $0 + ", " } ?? "", lit = Int((night.sky.moon.illumination*100).rounded())
         let spoken = String(localized: "\(day)\(night.score.value) out of 100, \(night.score.band.label). \(clouds) \(night.sky.moon.name), \(lit) percent lit.")
+        // Haze or smoke, as the iPhone's dial says it beside the score.
+        let withSmoke = night.smokeCaveat.map { spoken + " " + $0 } ?? spoken
         // The words under the dial give park times; where the park's clock is not the watch's, say whose.
-        return night.park.spokenZone(at: night.sky.evening).map { spoken + " " + $0 } ?? spoken
+        return night.park.spokenZone(at: night.sky.evening).map { withSmoke + " " + $0 } ?? withSmoke
     }
 }
 

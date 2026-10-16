@@ -217,3 +217,47 @@ import SwiftUI
 }
 /// A class in the test bundle, whose bundle has no parks file.
 private final class BundleMarker {}
+
+/// A kept forecast belongs to the point it was asked for (`ForecastPoints`).
+struct ForecastPointsTests {
+    func folder() throws -> URL {
+        let url=FileManager.default.temporaryDirectory.appendingPathComponent("nyx-points-\(UUID().uuidString)",isDirectory:true)
+        try FileManager.default.createDirectory(at:url,withIntermediateDirectories:true)
+        return url
+    }
+    func keep(_ names:[String],in folder:URL) throws { for name in names { try Data("{}".utf8).write(to:folder.appendingPathComponent("nyx-\(name).json")) } }
+    func kept(_ name:String,in folder:URL)->Bool { FileManager.default.fileExists(atPath:folder.appendingPathComponent("nyx-\(name).json").path) }
+    /// The park with its first viewing spot moved north by `metres`.
+    func moved(_ park:Park,metres:Double) throws -> Park {
+        var json=try #require(try JSONSerialization.jsonObject(with:JSONEncoder().encode(park)) as? [String:Any])
+        var spots=try #require(json["viewingSpots"] as? [[String:Any]])
+        let latitude=try #require(spots[0]["latitude"] as? Double)
+        spots[0]["latitude"]=latitude+metres/111_195
+        json["viewingSpots"]=spots
+        return try JSONDecoder().decode(Park.self,from:JSONSerialization.data(withJSONObject:json))
+    }
+    @Test func firstRunDropsOnlyTheParksMovedBefore() throws {
+        let parks=try ParkData.load(), dir=try folder(), old=try folder()
+        try keep(["weather-grba","detail-grba","summit-grba","weather-jotr","detail-jotr","alerts"],in:dir)
+        try keep(["weather-grba"],in:old)
+        #expect(ForecastPoints.reconcile(parks:parks,folders:[dir,old])==["grba"])
+        #expect(!kept("weather-grba",in:dir) && !kept("detail-grba",in:dir) && !kept("summit-grba",in:dir) && !kept("weather-grba",in:old))
+        #expect(kept("weather-jotr",in:dir) && kept("detail-jotr",in:dir) && kept("alerts",in:dir))
+        #expect(kept("points",in:dir))
+        // Kept points now: Great Basin's new forecasts stay.
+        try keep(["weather-grba"],in:dir)
+        #expect(ForecastPoints.reconcile(parks:parks,folders:[dir]).isEmpty && kept("weather-grba",in:dir))
+    }
+    @Test func aMovedSpotDropsItsParksForecastsOnly() throws {
+        let parks=try ParkData.load(), dir=try folder()
+        ForecastPoints.reconcile(parks:parks,folders:[dir])
+        try keep(["weather-jotr","detail-jotr","weather-zion"],in:dir)
+        // A few metres: the same point, kept.
+        let nudged=try parks.map { $0.id=="jotr" ? try moved($0,metres:40) : $0 }
+        #expect(ForecastPoints.reconcile(parks:nudged,folders:[dir]).isEmpty && kept("weather-jotr",in:dir))
+        // Five kilometres: somewhere else, dropped; Zion untouched.
+        let shifted=try parks.map { $0.id=="jotr" ? try moved($0,metres:5000) : $0 }
+        #expect(ForecastPoints.reconcile(parks:shifted,folders:[dir])==["jotr"])
+        #expect(!kept("weather-jotr",in:dir) && !kept("detail-jotr",in:dir) && kept("weather-zion",in:dir))
+    }
+}

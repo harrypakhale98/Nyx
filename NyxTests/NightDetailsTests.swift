@@ -198,3 +198,20 @@ struct MeasuredSkyTests {
         #expect(sky.years("x")==2005...2018)
     }
 }
+
+/// The smoke caveat beside a score is one rule on every device (`Night.smokeCaveat`): from the air
+/// the score counted, from 0.25, whether or not smoke is what holds the score down.
+struct SmokeCaveatTests {
+    @Test func oneRuleForEveryDevice() throws {
+        let jotr=try #require(try ParkData.load().first { $0.id=="jotr" })
+        let now=Date(timeIntervalSince1970: 1_797_000_000)
+        var night=NightPlanner(forecasts: [:]).night(jotr, on: jotr.evening(jotr.currentNight(at: now)), now: now)
+        #expect(night.smokeCaveat==nil)
+        night.aerosol=0.2
+        #expect(night.smokeCaveat==nil && night.smokeCaveatLabel==nil)
+        night.aerosol=0.3
+        #expect(night.smokeCaveat=="Haze or smoke: the Milky Way will look faint." && night.smokeCaveatLabel=="Haze or smoke")
+        night.aerosol=0.6
+        #expect(night.smokeCaveat=="Heavy smoke or haze: faint stars hidden." && night.smokeCaveatLabel=="Heavy smoke or haze")
+    }
+}
