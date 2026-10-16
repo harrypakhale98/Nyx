@@ -17,10 +17,10 @@ struct SkyGlowTests {
             #expect(site.spots?.count==park.viewingSpots.count,"\(park.id)")
             for spot in park.viewingSpots { #expect(glow.spot(spot.name,park:park.id) != nil,"\(park.id) \(spot.name)") }
         }
-        #expect(parks.flatMap(\.viewingSpots).count==85)
+        #expect(parks.flatMap(\.viewingSpots).count==87)
     }
     @Test func everySpotHasAnAccessRecord() throws {
-        #expect(access.spots.count==85)
+        #expect(access.spots.count==87)
         for park in parks { for spot in park.viewingSpots {
             let record=try #require(access.access(park:park.id,spot:spot.name),"\(park.id) \(spot.name)")
             // A claim is never made without the official page it rests on.

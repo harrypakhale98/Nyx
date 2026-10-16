@@ -46045,6 +46045,41 @@
         }
       }
     },
+    "Outside the park, on Bureau of Land Management land north of Baker.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Außerhalb des Parks, auf Land des Bureau of Land Management nördlich von Baker."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outside the park, on Bureau of Land Management land north of Baker."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuera del parque, en terrenos de la Oficina de Administración de Tierras (BLM) al norte de Baker."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hors du parc, sur des terres du Bureau of Land Management, au nord de Baker."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公園の外、Bakerの北にある土地管理局（BLM）の管理地です。"
+          }
+        }
+      }
+    },
     "Page %lld of 3": {
       "extractionState": "manual",
       "localizations": {

@@ -723,11 +723,25 @@
     "sourceNote": "NPS park inventory, retrieved 2026-10-02. Bortle is a conservative planning estimate, not a measurement; park lighting, terrain, smoke and skyglow vary. Certification cross-checked against NPS International Dark Sky Places list (2025-04-16).",
     "viewingSpots": [
       {
-        "name": "Baker Archaeological Site",
-        "latitude": 39.014,
-        "longitude": -114.306,
+        "name": "Astronomy Amphitheater (Lehman Caves Visitor Center)",
+        "latitude": 39.0087,
+        "longitude": -114.2182,
         "sourceURL": "https://www.nps.gov/grba/planyourvisit/great-basin-stargazing.htm",
         "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Mather Overlook",
+        "latitude": 39.0204,
+        "longitude": -114.2748,
+        "sourceURL": "https://www.nps.gov/grba/planyourvisit/great-basin-stargazing.htm",
+        "note": "Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
+      },
+      {
+        "name": "Baker Archaeological Site",
+        "latitude": 39.0362,
+        "longitude": -114.1244,
+        "sourceURL": "https://www.nps.gov/grba/planyourvisit/great-basin-stargazing.htm",
+        "note": "Outside the park, on Bureau of Land Management land north of Baker. Approximate coordinates. Check current access, opening hours and closures with a ranger. This is not a navigation guide."
       }
     ]
   },

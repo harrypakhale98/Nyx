@@ -376,6 +376,23 @@ struct HorizonTests {
             }
         }
     }
+    /// Great Basin's spots where the agencies put them (NPS Public POIs, BLM recreation points), the park's
+    /// own amphitheater first, and every bundled dataset covering each one.
+    @Test func greatBasinSpotsAreWhereTheAgenciesPutThem() throws {
+        let grba=try park("grba")
+        let official=[("Astronomy Amphitheater (Lehman Caves Visitor Center)", 39.008653, -114.218176),
+                      ("Mather Overlook", 39.020359, -114.274754), ("Baker Archaeological Site", 39.036158, -114.124409)]
+        #expect(grba.viewingSpots.map(\.name)==official.map(\.0))
+        for (spot, (_, lat, lon)) in zip(grba.viewingSpots, official) {
+            #expect(Park.distance(spot.latitude, spot.longitude, lat, lon)<100, "\(spot.name)")
+            let horizon=try #require(Horizon.Table.shared.spot(spot.name, park: "grba"), "\(spot.name)")
+            #expect((1500...2900).contains(horizon.elevation), "\(spot.name)")
+            #expect(SkyGlow.shared.spot(spot.name, park: "grba") != nil && AccessData.shared.access(park: "grba", spot: spot.name) != nil)
+        }
+        #expect(NightClimate.shared.parks["grba"] != nil)
+        #expect(NightAccess.shared.rules("grba", spot: "Mather Overlook").count==1)
+        #expect(grba.viewingSpots[2].localizedNote.hasPrefix("Outside the park"))
+    }
     @Test func canyonAgainstRim() throws {
         let table=try #require(Horizon.Table.load())
         let canyon=try #require(table.spot("Checkerboard Mesa Pullout", park: "zion"))
