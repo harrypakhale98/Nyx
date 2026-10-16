@@ -273,26 +273,12 @@ nonisolated final class SkyGrid: Sendable {
                  atMostBortle: Int = 4, spacingMeters: Double? = nil) -> [DarkArea] {
         guard limit > 0, radiusMeters.isFinite, radiusMeters > 0, let here = Self.normalized(latitude: origin.latitude, longitude: origin.longitude) else { return [] }
         let spacing = spacingMeters ?? max(10_000, radiusMeters/6)
-        let reach = radiusMeters/111_194.93 // degrees of latitude (a 6,371,008.8 m sphere)
-        let south = max(-90, here.latitude-reach), north = min(90, here.latitude+reach)
-        let widest = max(abs(south), abs(north))
-        let spanLon = widest >= 89.999 ? 180 : reach/max(cos(widest*Double.pi/180), 1e-6)
-        var lonRanges: [ClosedRange<Double>] = []
-        if spanLon >= 180 { lonRanges = [-180...180] } else {
-            let lo = here.longitude-spanLon, hi = here.longitude+spanLon
-            if lo < -180 { lonRanges = [(lo+360)...180, -180...hi] } else if hi > 180 { lonRanges = [lo...180, -180...(hi-360)] } else { lonRanges = [lo...hi] }
-        }
+        let box = Self.searchBox(around: here, radiusMeters: radiusMeters)
+        let south = box.south, north = box.north, lonRanges = box.lonRanges
         // The darkest cell of each quarter-degree block, then a spaced pick from the darkest blocks.
         struct Candidate { var value: UInt8; var latitude: Double; var longitude: Double; var distance: Double }
         var blocks: [Int: Candidate] = [:]
-        var tileCorners: Set<Key> = []
-        for range in lonRanges {
-            let s0 = Self.corner(latitude: south, longitude: range.lowerBound), s1 = Self.corner(latitude: north, longitude: range.upperBound)
-            for s in stride(from: s0.south, through: s1.south, by: Self.tileDegrees) {
-                for w in stride(from: s0.west, through: s1.west, by: Self.tileDegrees) { tileCorners.insert(Key(layer: .sky, south: s, west: w)) }
-            }
-        }
-        for key in tileCorners.sorted(by: { ($0.south, $0.west) < ($1.south, $1.west) }) {
+        for key in box.tiles {
             guard let tile = tile(key) else { continue }
             let cpd = Double(tile.cellsPerDegree), side = tile.side, block = max(1, tile.cellsPerDegree/4)
             let iLow = max(0, Int(((south-Double(key.south))*cpd).rounded(.down))), iHigh = min(side-1, Int(((north-Double(key.south))*cpd).rounded(.down)))
@@ -325,5 +311,79 @@ nonisolated final class SkyGrid: Sendable {
                                    bortle: Self.bortle(fromMagnitude: magnitude), distanceMeters: candidate.distance))
         }
         return picked
+    }
+
+    /// The nearest dark sky: the cell of Bortle `atMostBortle` or darker nearest to `origin` within
+    /// `radiusMeters` that `onLand` accepts, then, so the answer is the dark area rather than its
+    /// edge, the darkest accepted cell no more than a quarter farther (and 20 km) than that one, the
+    /// nearer of equals. The sky layer gives coastal sea a value (a beach's sky is real), so a caller
+    /// pointing someone somewhere passes a land test. Cells are weighed per 1/12° block (about 9 km):
+    /// each block's nearest, then each block's darkest, so the land test runs a few hundred times at
+    /// most, never per cell. Nil without the sky layer or when nothing accepted is dark enough. Reads
+    /// every cell in the search box twice: call it off the main thread.
+    func nearestDark(to origin: (latitude: Double, longitude: Double), radiusMeters: Double, atMostBortle: Int = 4,
+                     onLand: (Double, Double) -> Bool = { _, _ in true }) -> DarkArea? {
+        guard radiusMeters.isFinite, radiusMeters > 0, let here = Self.normalized(latitude: origin.latitude, longitude: origin.longitude) else { return nil }
+        let box = Self.searchBox(around: here, radiusMeters: radiusMeters)
+        struct Cell { var value: UInt8; var latitude: Double; var longitude: Double; var distance: Double }
+        /// One cell per block within `limit`: the one `keep` prefers of any two.
+        func blocks(within limit: Double, keep: (Cell, Cell) -> Bool) -> [Cell] {
+            var kept: [Int: Cell] = [:]
+            for key in box.tiles {
+                guard let tile = tile(key) else { continue }
+                let cpd = Double(tile.cellsPerDegree), side = tile.side, block = max(1, tile.cellsPerDegree/12)
+                let iLow = max(0, Int(((box.south-Double(key.south))*cpd).rounded(.down))), iHigh = min(side-1, Int(((box.north-Double(key.south))*cpd).rounded(.down)))
+                guard iLow <= iHigh else { continue }
+                for range in box.lonRanges {
+                    let cLow = max(0, Int(((range.lowerBound-Double(key.west))*cpd).rounded(.down))), cHigh = min(side-1, Int(((range.upperBound-Double(key.west))*cpd).rounded(.down)))
+                    guard cLow <= cHigh else { continue }
+                    for i in iLow...iHigh {
+                        let row = side-1-i
+                        for col in cLow...cHigh {
+                            let value = tile.cells[row*side+col]
+                            guard value != Self.noData, Self.bortleByValue[Int(value)] <= atMostBortle else { continue }
+                            let centre = tile.centre(row: row, col: col)
+                            let distance = Park.distance(here.latitude, here.longitude, centre.latitude, centre.longitude)
+                            guard distance <= limit else { continue }
+                            let cell = Cell(value: value, latitude: centre.latitude, longitude: centre.longitude, distance: distance)
+                            let id = ((key.south+90)*1000+(key.west+180))*1_000_000+(row/block)*1000+col/block
+                            if let old = kept[id], !keep(cell, old) { continue }
+                            kept[id] = cell
+                        }
+                    }
+                }
+            }
+            return Array(kept.values)
+        }
+        func order(_ a: Cell, _ b: Cell) -> Bool { (a.distance, a.latitude, a.longitude) < (b.distance, b.latitude, b.longitude) }
+        guard let nearest = blocks(within: radiusMeters, keep: order).sorted(by: order).first(where: { onLand($0.latitude, $0.longitude) }) else { return nil }
+        func darker(_ a: Cell, _ b: Cell) -> Bool { a.value != b.value ? a.value > b.value : order(a, b) }
+        let window = min(radiusMeters, nearest.distance*1.25+20_000)
+        let best = blocks(within: window, keep: darker).sorted(by: darker).first { onLand($0.latitude, $0.longitude) } ?? nearest
+        let magnitude = Self.magnitude(best.value)
+        return DarkArea(latitude: best.latitude, longitude: best.longitude, magnitude: magnitude,
+                        bortle: Self.bortle(fromMagnitude: magnitude), distanceMeters: best.distance)
+    }
+
+    /// The latitudes, longitude ranges (two across the antimeridian) and sky tiles a great-circle
+    /// radius around a point can reach.
+    private static func searchBox(around here: (latitude: Double, longitude: Double), radiusMeters: Double) -> (south: Double, north: Double, lonRanges: [ClosedRange<Double>], tiles: [Key]) {
+        let reach = radiusMeters/111_194.93 // degrees of latitude (a 6,371,008.8 m sphere)
+        let south = max(-90, here.latitude-reach), north = min(90, here.latitude+reach)
+        let widest = max(abs(south), abs(north))
+        let spanLon = widest >= 89.999 ? 180 : reach/max(cos(widest*Double.pi/180), 1e-6)
+        var lonRanges: [ClosedRange<Double>] = []
+        if spanLon >= 180 { lonRanges = [-180...180] } else {
+            let lo = here.longitude-spanLon, hi = here.longitude+spanLon
+            if lo < -180 { lonRanges = [(lo+360)...180, -180...hi] } else if hi > 180 { lonRanges = [lo...180, -180...(hi-360)] } else { lonRanges = [lo...hi] }
+        }
+        var tileCorners: Set<Key> = []
+        for range in lonRanges {
+            let s0 = corner(latitude: south, longitude: range.lowerBound), s1 = corner(latitude: north, longitude: range.upperBound)
+            for s in stride(from: s0.south, through: s1.south, by: tileDegrees) {
+                for w in stride(from: s0.west, through: s1.west, by: tileDegrees) { tileCorners.insert(Key(layer: .sky, south: s, west: w)) }
+            }
+        }
+        return (south, north, lonRanges, tileCorners.sorted { ($0.south, $0.west) < ($1.south, $1.west) })
     }
 }

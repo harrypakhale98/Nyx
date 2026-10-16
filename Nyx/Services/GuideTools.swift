@@ -24,6 +24,10 @@ nonisolated struct NightLookup: Sendable {
     var today: Date?
     /// NOAA's aurora forecast as the app holds it, so Ask Nyx's What's up names aurora as the park page does.
     var aurora: AuroraOutlook?
+    /// The bundled light map, for the nearest dark sky when what is in reach is bright (`DarkerSky`).
+    var grid: SkyGrid = .shared
+    /// Where a dark area may lie: the bundled land, 5 km inland (`DarkerSky.offer`).
+    var onLand: @Sendable (Double, Double) -> Bool = { WorldLand.bundled?.inland(latitude: $0, longitude: $1) ?? false }
     private var tonightClock: Date { today ?? now }
     private var planner: NightPlanner { NightPlanner(forecasts: forecasts, details: details) }
 
@@ -147,9 +151,13 @@ nonisolated struct NightLookup: Sendable {
             guard let x=tonight[a.0.id], let y=tonight[b.0.id] else { return a.1<b.1 }
             return NightPlanner.better(x, y)
         }.prefix(limit)
+        // The nearest dark sky on the light map when what is in reach is bright or absent (`DarkerSky`,
+        // Tonight's rule and words), as one more record: no name, no score, said as an estimate.
+        let darker=DarkerSky.offer(from: (origin.latitude, origin.longitude), radiusMeters: radius*system.meters,
+                                   darkestInReach: near.map(\.0.bortleEstimate).min(), system: system, grid: grid, onLand: onLand).map { DarkerSky.record($0, from: origin.label, system: system) }
         guard !ranked.isEmpty else {
             return [system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
-                                     : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line.")]
+                                     : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line.")]+[darker].compactMap { $0 }
         }
         return ranked.map { park, distance in
             let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
@@ -158,7 +166,7 @@ nonisolated struct NightLookup: Sendable {
                                       : String(localized: "\(park.shortName), \(region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
             let record=line+(basis.isEmpty ? "" : "; "+basis)+access(park)
             return closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record
-        }
+        }+[darker].compactMap { $0 }
     }
     /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.
     static func toolRadius(_ asked: Int, _ system: SearchRadius.System) -> Double { Double(min(system == .miles ? 1500 : 2500, max(10, asked))) }

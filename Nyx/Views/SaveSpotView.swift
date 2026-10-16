@@ -34,8 +34,11 @@ struct SaveSpotView: View {
     /// Told the new spot's id once it is saved.
     var onSaved: ((String)->Void)?=nil
 
-    init(source: Source = .here, place: StartingPlace?=nil, search: String="", locator: SpotLocator?=nil, onSaved: ((String)->Void)?=nil) {
-        _source=State(initialValue:place == nil ? source : .place)
+    /// `coordinate`: opens on Coordinates with both fields filled (a dark area Tonight found).
+    init(source: Source = .here, place: StartingPlace?=nil, coordinate: (latitude: Double, longitude: Double)?=nil, search: String="", locator: SpotLocator?=nil, onSaved: ((String)->Void)?=nil) {
+        _source=State(initialValue:place != nil ? .place : coordinate != nil ? .coordinates : source)
+        _latitudeText=State(initialValue:coordinate.map { CoordinateText.field($0.latitude) } ?? "")
+        _longitudeText=State(initialValue:coordinate.map { CoordinateText.field($0.longitude) } ?? "")
         _chosen=State(initialValue:place)
         _search=State(initialValue:place?.name ?? search)
         _locator=State(initialValue:locator ?? SpotLocator())

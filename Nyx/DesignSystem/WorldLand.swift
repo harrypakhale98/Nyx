@@ -21,6 +21,8 @@ nonisolated final class WorldLand: Sendable {
     var pointCount: Int { rings.reduce(0) { $0+$1.units.count } }
     init(rings: [Ring]) { self.rings=rings }
 
+    /// The app's land, decoded once per process on first use (maps and the nearest dark sky share it).
+    static let bundled: WorldLand? = load(Bundle.main.url(forResource:"world-land",withExtension:"json"))
     static func load(_ url: URL?) -> WorldLand? {
         guard let url, let data=try? Data(contentsOf:url) else { return nil }
         return decode(data)
@@ -58,6 +60,17 @@ nonisolated final class WorldLand: Sendable {
     /// On land: inside an odd number of rings (land, less its lakes).
     func contains(_ point: GeoPoint) -> Bool {
         rings.reduce(false) { $0 != Self.contains($1,latitude:point.latitude,longitude:point.longitude) }
+    }
+    /// On land and at least `margin` metres inland by this outline: the point and four points that far
+    /// north, south, east and west of it. The outline is good to about 10 km, so a point Nyx sends
+    /// someone to keeps clear of the coast rather than resting on it.
+    func inland(latitude: Double, longitude: Double, margin: Double=5_000) -> Bool {
+        let dLat=margin/Park.earthRadius/GeoPoint.radian, dLon=dLat/max(cos(latitude*GeoPoint.radian),0.01)
+        return [(0.0,0.0),(dLat,0),(-dLat,0),(0,dLon),(0,-dLon)].allSatisfy { offset in
+            var lon=longitude+offset.1
+            if lon>180 { lon-=360 } else if lon < -180 { lon+=360 }
+            return contains(GeoPoint(latitude:min(90,max(-90,latitude+offset.0)),longitude:lon))
+        }
     }
 
     /// The land as drawn: `fill` (even-odd: land less its lakes), `coast` (the shoreline only: never
@@ -187,7 +200,7 @@ nonisolated final class WorldLand: Sendable {
     /// Decodes `world-land.json` off the main thread the first time any map asks.
     @discardableResult func load() async -> WorldLand? {
         if let land { return land }
-        let task=loading ?? Task.detached(priority:.userInitiated) { WorldLand.load(Bundle.main.url(forResource:"world-land",withExtension:"json")) }
+        let task=loading ?? Task.detached(priority:.userInitiated) { WorldLand.bundled }
         loading=task
         let loaded=await task.value
         if land == nil { land=loaded }

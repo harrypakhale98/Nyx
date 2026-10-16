@@ -40,6 +40,13 @@ nonisolated enum MapsHandOff {
         return components.url
     }
     static func directions(_ spot:ViewingSpot)->URL? { directions(latitude:spot.latitude,longitude:spot.longitude) }
+    /// A pin, not a route (`maps://?ll=…&q=…`): for a dark area, where nobody has checked for a road.
+    static func pin(latitude:Double,longitude:Double,label:String)->URL? {
+        var components=URLComponents()
+        components.scheme="maps"
+        components.queryItems=[URLQueryItem(name:"ll",value:"\(latitude),\(longitude)"),URLQueryItem(name:"q",value:label)]
+        return components.url
+    }
     /// The viewing spot a park's chosen night offers directions to: the first nps.gov describes as
     /// step-free, else the first partly step-free one, else the park's first spot. Nil without spots.
     static func spot(for park:Park,access:AccessData = .shared)->(spot:ViewingSpot,stepFree:SpotAccess.Level?)? {

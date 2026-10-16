@@ -194,6 +194,12 @@ struct ParkList: View {
                     if let note = inputs.listNote(model.parks, nights: model.listNights) {
                         Text(note).font(.caption).foregroundStyle(palette.muted).textCase(nil).fixedSize(horizontal: false, vertical: true)
                     }
+                    // Outside the US, said before anyone looks for a park near them: the iPhone and iPad
+                    // app covers the world; the headset, the U.S. national parks.
+                    if Self.showsScope {
+                        Text("Nyx on Apple Vision Pro covers the U.S. national parks. Saved spots and places abroad stay on your iPhone and iPad.")
+                            .font(.caption).foregroundStyle(palette.muted).textCase(nil).fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
         }
@@ -202,6 +208,8 @@ struct ParkList: View {
             else if parks.isEmpty { ContentUnavailableView.search(text: query) }
         }
     }
+    /// Where the device's region is not the US (as the iPhone's onboarding decides its first sentence).
+    static var showsScope: Bool { VisionDebug.isEnabled("vision-abroad") || Locale.current.region?.identifier != "US" }
     private var nightName: String {
         guard let park = model.park else { return "" }
         return park.dayLabel(model.night(for: park))
