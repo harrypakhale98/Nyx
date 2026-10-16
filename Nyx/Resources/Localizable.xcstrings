@@ -3138,6 +3138,41 @@
         }
       }
     },
+    "%@, Bortle %lld, estimated from satellite data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Bortle %lld, aus Satellitendaten geschätzt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Bortle %lld, estimated from satellite data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Bortle %lld, estimado con datos satelitales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Bortle %lld, estimé à partir de données satellite."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、ボートル%lld（衛星データからの推定）。"
+          }
+        }
+      }
+    },
     "%@, Moon and darkness only": {
       "extractionState": "manual",
       "localizations": {
@@ -27474,6 +27509,41 @@
         }
       }
     },
+    "Gives it nights and a score, and lets Nyx follow it on your widgets, Apple Watch and reminders.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gibt ihm Nächte und einen Wert, und Nyx folgt ihm in deinen Widgets, auf der Apple Watch und in Erinnerungen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gives it nights and a score, and lets Nyx follow it on your widgets, Apple Watch and reminders."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le da noches y un índice, y Nyx lo sigue en tus widgets, el Apple Watch y los recordatorios."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lui donne des nuits et un indice, et permet à Nyx de le suivre sur vos widgets, l’Apple Watch et dans les rappels."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この場所に夜ごとのスコアが付き、ウィジェット、Apple Watch、リマインダーでNyxが追えるようになります。"
+          }
+        }
+      }
+    },
     "Glow on the horizon: %@. About %@ of the city light around this park lies in that direction.": {
       "extractionState": "manual",
       "localizations": {
@@ -30050,6 +30120,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@の空で高度10°より下がります。"
+          }
+        }
+      }
+    },
+    "It has no name and no score: it is a patch on a light map that nobody has checked. See what is there, and whether you may go, before you set out.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie hat keinen Namen und keinen Wert: Sie ist ein Fleck auf einer Lichtkarte, den niemand geprüft hat. Sieh nach, was dort ist und ob du dorthin darfst, bevor du losfährst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It has no name and no score: it is a patch on a light map that nobody has checked. See what is there, and whether you may go, before you set out."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tiene nombre ni índice: es una mancha en un mapa de luz que nadie ha comprobado. Mira qué hay allí, y si puedes ir, antes de salir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle n’a ni nom ni indice : c’est une tache sur une carte de la lumière que personne n’a vérifiée. Regardez ce qui s’y trouve, et si vous pouvez y aller, avant de partir."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前もスコアもありません。誰も確かめていない、光の地図上の一区画です。出かける前に、そこに何があるか、立ち入れるかを確かめてください。"
           }
         }
       }
@@ -36873,6 +36978,41 @@
         }
       }
     },
+    "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ as the crow flies, Bortle %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächste dunkle Gegend auf der Satelliten-Lichtkarte (kein Name, kein Wert, vor Ort nicht geprüft): %1$@ Richtung %2$@ von %3$@, Luftlinie, Bortle %4$lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearest dark area on the satellite light map (no name, no score, not checked on the ground): %@ %@ of %@ as the crow flies, Bortle %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona oscura más cercana en el mapa satelital de luz (sin nombre, sin índice, sin comprobar sobre el terreno): %1$@ al %2$@ de %3$@ en línea recta, Bortle %4$lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone sombre la plus proche sur la carte satellite de la lumière (sans nom, sans indice, non vérifiée sur le terrain) : à %1$@ depuis %3$@, direction %2$@, à vol d’oiseau, Bortle %4$lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "衛星の光の地図で最も近い暗い地域（名前なし、スコアなし、現地未確認）：%3$@から%2$@へ直線距離で%1$@、ボートル%4$lld。"
+          }
+        }
+      }
+    },
     "Nearly adapted": {
       "extractionState": "manual",
       "localizations": {
@@ -40758,6 +40898,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "最新情報に予定されているプログラムはありません。ビジターセンターで尋ねてください。"
+          }
+        }
+      }
+    },
+    "Nobody has checked it. See what is there before you go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niemand hat sie geprüft. Sieh nach, was dort ist, bevor du hinfährst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nobody has checked it. See what is there before you go."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nadie la ha comprobado. Mira qué hay allí antes de ir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personne ne l’a vérifiée. Regardez ce qui s’y trouve avant d’y aller."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "誰も確かめていません。出かける前に、そこに何があるか確かめてください。"
           }
         }
       }
@@ -44921,6 +45096,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open-Meteoの予報は最大16日先までをカバーします。米国の国立公園はまとめて問い合わせ、1回のリクエストには最大50か所を含めます。各リクエストに含まれるのは、各公園の主な観察スポットの公開された座標だけです。ほかの地域の公園や暗い空の場所は地域単位でまとめて、保存したスポットは別のリクエストで問い合わせます。雲量は完全に暗い時間全体で平均します。完全に暗い時間がない夜は日の入りから日の出まで、白夜のときは太陽が最も低くなる時刻の前後4時間で平均します。予報は、その夜の約3日前まではそのまま使います。そこから10日前までは公園のその月の平年の雲量に寄せ、これらの夜には早めの見通しと表示します。10日より先、または予報がない場合は、平年の雲量だけを使います。古い予報を捨てることはありません。影響を小さくして使うだけです。そのため、オフラインになっても、実際の雲より晴れているように見えることはありません。夜の一部しかカバーしていない予報は使いません。山頂が貿易風逆転層より上にあるHaleakalāでは、中層雲と上層雲の予報がある場合は、それを計算に入れます。Open-MeteoのデータはCC BY 4.0でライセンスされています。Nyxはこれに手を加えています。ここで説明しているように、各夜の雲量をその夜の完全に暗い時間で平均し、平年の雲量に寄せています。"
+          }
+        }
+      }
+    },
+    "Opens Apple Maps at this point, without directions. Nyx sends nothing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet Apple Karten an diesem Punkt, ohne Route. Nyx sendet nichts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Apple Maps at this point, without directions. Nyx sends nothing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Mapas en este punto, sin indicaciones. Nyx no envía nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre Plans à cet endroit, sans itinéraire. Nyx n’envoie rien."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appleのマップでこの地点を開きます（経路なし）。Nyxからは何も送信しません。"
           }
         }
       }
@@ -52140,6 +52350,41 @@
         }
       }
     },
+    "Saved as %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeichert als %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved as %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado como %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistré : %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」として保存済み"
+          }
+        }
+      }
+    },
     "Saved for later": {
       "extractionState": "manual",
       "localizations": {
@@ -54320,6 +54565,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "リストで表示"
+          }
+        }
+      }
+    },
+    "Show in Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Karten zeigen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Maps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver en Mapas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher dans Plans"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マップで表示"
           }
         }
       }
@@ -61766,6 +62046,41 @@
         }
       }
     },
+    "The darkest place in reach has a Bortle %lld sky.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der dunkelste Ort in Reichweite hat einen Himmel der Bortle-Klasse %lld."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The darkest place in reach has a Bortle %lld sky."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El lugar más oscuro a tu alcance tiene un cielo de Bortle %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le lieu le plus sombre à portée a un ciel de Bortle %lld."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "範囲内で最も暗い場所の空はボートル%lldです。"
+          }
+        }
+      }
+    },
     "The darkest sky among your saved parks, or one park you choose, with forecast limits and closures shown.": {
       "extractionState": "manual",
       "localizations": {
@@ -62532,6 +62847,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "月の海とクレーターの名前は、国際天文学連合（IAU）の惑星命名辞典（USGS）によるものです。月面図を描くのと同じ回転で描画した月の上に配置するので、その夜の傾きと秤動に合わせて、それぞれの名前が地形の上に来ます。名前を付けるのは日の当たっている地形だけで、月が大きいほど多く表示し、ほかの名前と重なる名前は省きます。"
+          }
+        }
+      }
+    },
+    "The nearest dark sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der nächste dunkle Himmel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The nearest dark sky"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cielo oscuro más cercano"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le ciel sombre le plus proche"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最も近い暗い空"
+          }
+        }
+      }
+    },
+    "The nearest dark sky is %@ %@, as the crow flies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der nächste dunkle Himmel liegt %1$@ Richtung %2$@, Luftlinie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The nearest dark sky is %@ %@, as the crow flies."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cielo oscuro más cercano está a %1$@ al %2$@, en línea recta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le ciel sombre le plus proche est à %1$@, direction %2$@, à vol d’oiseau."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最も近い暗い空は、%2$@へ直線距離で%1$@です。"
           }
         }
       }
@@ -70847,6 +71232,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "今夜Big Bendで中心部が昇るのはいつ？"
+          }
+        }
+      }
+    },
+    "When nothing is in reach, or the darkest place in reach has a suburban or brighter sky (Bortle 5 or more), Tonight points to the nearest land that the same sky-brightness grid puts at Bortle 4 or darker and at least two classes darker than what is in reach, within your radius or 500 miles (800 km), whichever is farther. It shows the darkest such stretch a little beyond the first one found, about 5 km inland by Natural Earth's coastline. It has no name and no score, and nobody has checked it for roads, access or safety. Saved as a spot, it gets nights like any other place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn nichts in Reichweite ist oder der dunkelste Ort in Reichweite einen Vorstadthimmel oder helleren Himmel hat (Bortle 5 oder mehr), zeigt Heute Nacht auf das nächste Land, das dasselbe Himmelshelligkeitsraster bei Bortle 4 oder dunkler einordnet und mindestens zwei Klassen dunkler als das, was in Reichweite ist, innerhalb deines Umkreises oder 800 km (500 Meilen), je nachdem, was weiter ist. Gezeigt wird der dunkelste solche Bereich ein wenig hinter dem ersten gefundenen, etwa 5 km landeinwärts nach der Küstenlinie von Natural Earth. Er hat keinen Namen und keinen Wert, und niemand hat Wege, Zugang oder Sicherheit dort geprüft. Als Platz gespeichert, bekommt er Nächte wie jeder andere Ort."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When nothing is in reach, or the darkest place in reach has a suburban or brighter sky (Bortle 5 or more), Tonight points to the nearest land that the same sky-brightness grid puts at Bortle 4 or darker and at least two classes darker than what is in reach, within your radius or 500 miles (800 km), whichever is farther. It shows the darkest such stretch a little beyond the first one found, about 5 km inland by Natural Earth's coastline. It has no name and no score, and nobody has checked it for roads, access or safety. Saved as a spot, it gets nights like any other place."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando no hay nada a tu alcance, o el lugar más oscuro a tu alcance tiene un cielo suburbano o más brillante (Bortle 5 o más), Esta noche señala la tierra más cercana que la misma cuadrícula de brillo del cielo sitúa en Bortle 4 o más oscuro, y al menos dos clases más oscura que lo que está a tu alcance, dentro de tu radio o de 800 km (500 millas), lo que sea mayor. Muestra la extensión más oscura un poco más allá de la primera encontrada, a unos 5 km tierra adentro según la costa de Natural Earth. No tiene nombre ni índice, y nadie ha comprobado sus caminos, su acceso ni su seguridad. Guardada como sitio, tiene noches como cualquier otro lugar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand rien n’est à portée, ou que le lieu le plus sombre à portée a un ciel de banlieue ou plus lumineux (Bortle 5 ou plus), Ce soir indique la terre la plus proche que la même grille de luminosité du ciel place en Bortle 4 ou plus sombre, et d’au moins deux classes plus sombre que ce qui est à portée, dans votre rayon ou à 800 km (500 milles), selon la plus grande distance. Il montre la zone la plus sombre un peu au-delà de la première trouvée, à environ 5 km à l’intérieur des terres selon le trait de côte de Natural Earth. Elle n’a ni nom ni indice, et personne n’en a vérifié les routes, l’accès ou la sécurité. Enregistrée comme lieu, elle a des nuits comme tout autre lieu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "範囲内に何もないとき、または範囲内で最も暗い場所の空が郊外並みかそれより明るい（ボートル5以上）とき、「今夜」は、同じ空の明るさのグリッドでボートル4以下、かつ範囲内の場所より2クラス以上暗いとされる最も近い陸地を示します。探す範囲は、設定した半径か800 km（500マイル）の広いほうです。最初に見つかった地点の少し先にある、そうした場所のうち最も暗いところを、Natural Earthの海岸線から約5 km内陸で示します。名前もスコアもなく、道や立ち入り、安全は誰も確かめていません。スポットとして保存すると、ほかの場所と同じように夜ごとの情報が付きます。"
           }
         }
       }

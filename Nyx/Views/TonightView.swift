@@ -54,6 +54,9 @@ struct TonightView: View {
     @State private var prepared:String?
     /// The same for the places a wider radius would add (`farther(than:shortlist:)`).
     @State private var widerPrepared:String?
+    /// The nearest dark sky when the places in reach are bright or absent (`DarkerSky`), for the
+    /// key it was worked out for; worked out off the main thread from the bundled light map.
+    @State private var darkerSky:(key:String,offer:DarkerSky.Offer?)?
     @State private var width=0.0
     /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
     @State private var riverNight:Date?
@@ -83,7 +86,7 @@ struct TonightView: View {
                     if !model.startChosen { firstRun }
                     // The two columns meet at iPhone Duo's fold on its inner display, half open or flat.
                     FoldColumns(narrow:.trailing,narrowMax:500,spacing:36) {
-                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); ahead(park) }.frame(maxWidth:.infinity)
+                        VStack(spacing:26) { hero(park,others:Array(best.dropFirst())); farther(than:park,shortlist:widerList); darkArea(all); ahead(park) }.frame(maxWidth:.infinity)
                         VStack(alignment:.leading,spacing:22) { startingPoint(heading:false); more(best); fromHome; extras }.frame(maxWidth:.infinity,alignment:.leading)
                     }
                     // Where, then when: the week at every park in reach fills the window's lower half.
@@ -93,10 +96,11 @@ struct TonightView: View {
                 VStack(alignment:.leading,spacing:22) {
                     if !model.startChosen { firstRun }
                     if loading { ConstellationLoader().frame(maxWidth:.infinity) }
-                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);startingPoint(heading:false);fromHome }
+                    else if empty { CalmState(symbol:"moon.stars",title:"A little farther from here",message:emptyMessage);farther(than:nil,shortlist:widerList);darkArea(all);startingPoint(heading:false);fromHome }
                     else if let park=best.first {
                         hero(park,others:Array(best.dropFirst()))
                         farther(than:park,shortlist:widerList)
+                        darkArea(all)
                         // The answer, then the alternatives; then where "within reach" is measured from.
                         more(best)
                         startingPoint(heading:best.count>1)
@@ -133,6 +137,12 @@ struct TonightView: View {
                 guard !list.isEmpty else { return }
                 await model.prepareNights(list,count:1)
                 if !Task.isCancelled { widerPrepared=TonightReach.key(list) }
+            }
+            .task(id:loading ? nil : darkerSkyKey(all)) {
+                guard let key=darkerSkyKey(all), let from else { return }
+                let radius=model.radiusMeters, darkest=all.map(\.bortleEstimate).min()
+                let offer=await Task.detached(priority:.utility) { DarkerSky.offer(from:from,radiusMeters:radius,darkestInReach:darkest) }.value
+                if !Task.isCancelled { darkerSky=(key,offer) }
             }
             .task(id:TonightReach.key(all)) {
                 // Hundreds of places in reach (abroad): tonight at each, worked out off the main thread, before ranking them all.
@@ -240,6 +250,19 @@ struct TonightView: View {
                 .accessibilityHint("Widens the radius to \(SearchRadius.label(wider)).")
             }
         }
+    }
+    /// What the nearest dark sky depends on: where from (to about 100 m), the radius, and the darkest
+    /// class in reach. Nil before there is a starting point or when a place in reach is dark already.
+    private func darkerSkyKey(_ all:[Park])->String? {
+        guard let from else { return nil }
+        let darkest=all.map(\.bortleEstimate).min()
+        guard DarkerSky.needed(darkestInReach:darkest) != nil else { return nil }
+        return String(format:"%.3f,%.3f,%.0f,%d",from.latitude,from.longitude,model.radiusMeters,darkest ?? 0)
+    }
+    /// The nearest dark sky (`DarkerSkyPanel`) once worked out for what is in reach now; nothing
+    /// while it is being worked out, so a stale pointer never shows beside a new answer.
+    @ViewBuilder private func darkArea(_ all:[Park])->some View {
+        if let darkerSky, darkerSky.key==darkerSkyKey(all), let offer=darkerSky.offer { DarkerSkyPanel(offer:offer) }
     }
     /// Wide iPad: where, then when. The best park's next thirty nights beside the answer, with the
     /// chosen night one tap away. (On iPhone the river lives on the park's page.)

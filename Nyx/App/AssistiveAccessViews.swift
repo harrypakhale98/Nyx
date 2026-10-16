@@ -79,30 +79,55 @@ struct AssistiveHome: View {
     }
 }
 
-/// The one park for tonight.
+/// The one park for tonight, and, when the places in reach are bright or absent, the nearest dark
+/// sky in one plain sentence (`DarkerSky`, the rule and words Tonight uses).
 struct AssistiveTonight: View {
     @Environment(PlanModel.self) private var model
-    /// The darkest place within the radius of the starting point (the first run's choice, or the
-    /// example park until one is chosen), weighed as Tonight weighs it (`TonightReach`): from a US
-    /// starting point with only US places in range, the national parks; anywhere else, every place in range.
-    static func best(_ model: PlanModel) -> Park? {
+    @State private var darker:DarkerSky.Offer?
+    /// The places within the radius of the starting point (the first run's choice, or the example
+    /// park until one is chosen), weighed as Tonight weighs them (`TonightReach`): from a US starting
+    /// point with only US places in range, the national parks; anywhere else, every place in range.
+    static func inReach(_ model: PlanModel) -> [Park] {
         let parks=model.nearby(latitude: nil, longitude: nil)
-        guard !model.catalog.isEmpty, let from=model.origin else { return model.ranked(parks).first }
+        guard !model.catalog.isEmpty, let from=model.origin else { return parks }
         let all=model.places(near: from.latitude, longitude: from.longitude, radiusMeters: model.radiusMeters)
         let chosen=TonightReach.candidates(parks: parks, places: all, originInUS: USOutline.contains(latitude: from.latitude, longitude: from.longitude))
-        let pool=chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: from.latitude, longitude: from.longitude) : chosen
-        return model.ranked(pool).first
+        return chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen, latitude: from.latitude, longitude: from.longitude) : chosen
     }
+    /// The darkest place in reach tonight.
+    static func best(_ model: PlanModel) -> Park? { model.ranked(inReach(model)).first }
     var body: some View {
+        let reach=Self.inReach(model)
         ScrollView {
-            if let park=Self.best(model) {
-                AssistiveParkCard(park: park, reminder: true).padding(20)
-            } else {
-                Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).padding(20)
-            }
+            VStack(alignment: .leading, spacing: 28) {
+                if let park=model.ranked(reach).first {
+                    AssistiveParkCard(park: park, reminder: true)
+                } else {
+                    Text("No park or dark-sky place is close enough tonight. Ask someone to choose a starting point in Nyx.").font(.title2).fixedSize(horizontal: false, vertical: true)
+                }
+                if let darker {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(DarkerSky.headline(darker)).font(.title2).fixedSize(horizontal: false, vertical: true)
+                        Text(DarkerSky.shortCaution).font(.title3).fixedSize(horizontal: false, vertical: true)
+                    }.accessibilityElement(children: .combine)
+                }
+            }.frame(maxWidth: .infinity, alignment: .leading).padding(20)
         }
         .navigationTitle("Tonight")
         .assistiveAccessNavigationIcon(systemImage: "moon.stars")
+        .task(id: Self.darkerKey(model, reach)) {
+            guard let from=model.origin, Self.darkerKey(model, reach) != nil else { darker=nil; return }
+            let radius=model.radiusMeters, darkest=reach.map(\.bortleEstimate).min()
+            let offer=await Task.detached(priority: .utility) { DarkerSky.offer(from: from, radiusMeters: radius, darkestInReach: darkest) }.value
+            if !Task.isCancelled { darker=offer }
+        }
+    }
+    /// What the nearest dark sky depends on; nil when a place in reach is dark already.
+    static func darkerKey(_ model: PlanModel, _ reach: [Park]) -> String? {
+        guard let from=model.origin else { return nil }
+        let darkest=reach.map(\.bortleEstimate).min()
+        guard DarkerSky.needed(darkestInReach: darkest) != nil else { return nil }
+        return String(format: "%.3f,%.3f,%.0f,%d", from.latitude, from.longitude, model.radiusMeters, darkest ?? 0)
     }
 }
 
