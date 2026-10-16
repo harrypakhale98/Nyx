@@ -46,7 +46,10 @@ import Testing
         #expect(up.planets.first?.title == "Venus")
         #expect(up.planets.allSatisfy { ["very bright", "bright", "faint"].contains($0.note ?? "") })
         #expect(WhatsUp.brightness(-4) == "very bright" && WhatsUp.brightness(0.5) == "bright" && WhatsUp.brightness(1.6) == "faint" && WhatsUp.brightness(1.5) == "bright")
-        #expect(up.items.map(\.kind).first == .meteors)
+        // Ranked as the screens rank it: the core leads, then the Geminids' row, then the planets.
+        let kinds=up.items.map(\.kind)
+        #expect(kinds.first == .core && kinds.dropFirst().first == .meteors)
+        #expect((kinds.firstIndex(of: .meteors) ?? .max) < (kinds.firstIndex(of: .planet) ?? -1))
     }
     /// Geminids 2026 from Joshua Tree: a glyph, a reminder, a rounded rate and the published ZHR beside it.
     @Test func geminidPeakAtJoshuaTree() throws {

@@ -248,6 +248,7 @@ struct TonightFace: View {
                 if typeSize.isAccessibilitySize { Text(shown.score.band.label).font(.system(.headline, design: .serif)) }
                 if looking { NightGlance(night: shown, isTonight: offset == 0, models: models) } else { NextMoment(night: night, now: now, models: models, wraps: true) }
                 if let closure { ClosureLine(text: closure) }
+                if let smoke = shown.smokeCaveat { SmokeLine(text: smoke, spoken: smoke) }
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
@@ -280,6 +281,11 @@ struct TonightFace: View {
         // A closure stands beside the score on every surface; here it costs the gauge up to two
         // lines, so the road or trail it names is never cut off (at the large sizes, the lines it needs).
         if let closure { ClosureLine(text: closure, lines: wraps ? nil : 2).layoutPriority(1) }
+        // Haze or smoke beside the score, as on the iPhone and Vision Pro (`Night.smokeCaveat`): the short
+        // words where a line is all there is, the whole sentence for VoiceOver and at the large sizes.
+        if let smoke = shown.smokeCaveat, let label = shown.smokeCaveatLabel {
+            SmokeLine(text: wraps ? smoke : label, spoken: smoke, lines: wraps ? nil : 1).layoutPriority(1)
+        }
     }
     private var gauge: some View {
         WatchGauge(night: shown, nightLabel: offset == 0 ? nil : shown.park.dayLabel(shown.id), models: models)
@@ -323,6 +329,23 @@ struct ClosureLine: View {
             .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(String(localized: "Closure alert: \(text)"))
+    }
+}
+
+/// Haze or smoke thick enough to wash out the Milky Way, in the accent with the iPhone's smoke mark.
+struct SmokeLine: View {
+    @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let text: String
+    let spoken: String
+    var lines: Int? = nil
+    var body: some View {
+        Label { Text(text) } icon: { Image(systemName: "smoke") }
+            .font(.caption2).foregroundStyle(palette.accent)
+            .lineLimit(typeSize.isAccessibilitySize ? nil : lines).minimumScaleFactor(0.8)
+            .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(spoken)
     }
 }
 

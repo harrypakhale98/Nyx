@@ -205,6 +205,17 @@ nonisolated enum AirClarity: String, Sendable, Equatable {
     }
 }
 
+/// The smoke caveat beside a score, one rule for every device (iPhone, iPad, Apple Watch, Vision Pro):
+/// from the air the score itself counted, haze or smoke from 0.25 (`AirClarity.isCaveat`), whether or
+/// not it is what holds the score down. Smoke's words; dust is named only in the park's air details.
+nonisolated extension Night {
+    var airClarity: AirClarity? { aerosol.map(AirClarity.band) }
+    /// "Haze or smoke: the Milky Way will look faint." or "Heavy smoke or haze: faint stars hidden."
+    var smokeCaveat: String? { airClarity.flatMap { $0.isCaveat ? $0.sentence() : nil } }
+    /// "Haze or smoke" or "Heavy smoke or haze", where a line is short.
+    var smokeCaveatLabel: String? { airClarity.flatMap { $0.isCaveat ? $0.label() : nil } }
+}
+
 /// What the forecast's hourly weather codes (WMO 4677, as Open-Meteo gives them) show in a window:
 /// 45 and 48 fog; 51–67 and 80–82 drizzle and rain; 71–77, 85 and 86 snow; 95–99 thunderstorms.
 nonisolated struct NightWeather: Sendable, Equatable {

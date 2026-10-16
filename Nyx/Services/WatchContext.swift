@@ -179,9 +179,11 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
             if fits(pairs, id) { sentRanges[id] = pairs }
         }
         // The aurora forecast, about 1.5 KB, after every followed place's clouds (a score outranks a
-        // possible aurora): only the periods still ahead or within the last twelve hours.
+        // possible aurora): only the periods still ahead or within the last day, the forecast's own
+        // useful age (`AuroraOutlook.maximumAge`), so a polar night that began yesterday evening and
+        // runs to noon is still covered from its start, as on the iPhone.
         let sentAurora = aurora.flatMap { outlook -> AuroraOutlook? in
-            let kept = AuroraOutlook(updated: outlook.updated, periods: outlook.periods.filter { $0.end > now.addingTimeInterval(-12*3600) })
+            let kept = AuroraOutlook(updated: outlook.updated, periods: outlook.periods.filter { $0.end > now.addingTimeInterval(-AuroraOutlook.maximumAge) })
             return kept.periods.isEmpty || !fits(kept, "aurora") ? nil : kept
         }
         pack(closures.filter { !followed.contains($0.key) }.sorted { $0.key < $1.key })

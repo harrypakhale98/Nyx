@@ -126,6 +126,18 @@ struct SkyHighlightTests {
 
 /// NOAA's Kp forecast: reading it, covering a night, and where it puts the aurora.
 struct AuroraForecastTests {
+    /// The watch is handed the periods of the last day, so a polar night that began yesterday evening
+    /// and runs to noon is still covered from its start, as on the iPhone.
+    @Test func watchKeepsTheWholeLongNight() throws {
+        let now=Date(timeIntervalSince1970: 1_797_000_000), start=now.addingTimeInterval(-21*3600)
+        let periods=(0..<12).map { AuroraOutlook.Period(start: start.addingTimeInterval(Double($0)*3*3600), kp: 5, predicted: $0>6) }
+        let outlook=AuroraOutlook(updated: now.addingTimeInterval(-3600), periods: periods)
+        let context=WatchContext.make(savedParkIDs: ["gaar"], homeParkID: "gaar", nightVision: false, forecasts: [:], aurora: outlook, now: now)
+        let sent=try #require(context.aurora)
+        #expect(sent.periods.first?.start==start)
+        let night=DateInterval(start: start.addingTimeInterval(1800), end: now.addingTimeInterval(3*3600))
+        #expect(sent.highest(in: night) != nil && outlook.highest(in: night)?.kp==sent.highest(in: night)?.kp)
+    }
     let t0=1_791_000_000.0
     func data(_ text: String) -> Data { Data(text.utf8) }
     @Test func readsBothShapesOfTheProduct() throws {

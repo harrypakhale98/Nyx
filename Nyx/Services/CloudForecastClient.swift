@@ -591,8 +591,11 @@ nonisolated enum CacheDirectory {
     private static var legacy: URL {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
     }
-    /// A file that is missing costs one existence check, not two failed reads.
+    static var legacyFolder: URL { legacy }
+    /// A file that is missing costs one existence check, not two failed reads. A park's forecast is
+    /// read only once `ForecastPoints` has dropped any kept for a point the park no longer uses.
     static func read<T: Decodable>(_ type: T.Type, name: String) -> T? {
+        if ForecastPoints.prefixes.contains(where: name.hasPrefix) { ForecastPoints.reconcileOnce() }
         let file="nyx-\(name).json", manager=FileManager.default
         let current=url.appendingPathComponent(file), old=legacy.appendingPathComponent(file)
         let source=manager.fileExists(atPath: current.path) ? current : manager.fileExists(atPath: old.path) ? old : nil
@@ -605,6 +608,51 @@ nonisolated enum CacheDirectory {
     }
     static func remove(name: String) {
         for folder in [url, legacy] { try? FileManager.default.removeItem(at: folder.appendingPathComponent("nyx-\(name).json")) }
+    }
+}
+/// A kept forecast belongs to the point it was asked for. When a park's forecast point moves (its
+/// first viewing spot corrected or replaced), the clouds, smoke and layers kept for the old point are
+/// for somewhere else, so they are dropped before anything reads them, and the park waits for a
+/// forecast of its own point (the usual clouds stand in until then, as for any park without one).
+/// The points last seen are kept beside the forecasts (`nyx-points.json`).
+nonisolated enum ForecastPoints {
+    /// The kept files that describe one park's point: clouds, smoke and cloud layers, summit layers.
+    static let prefixes=["weather-", "detail-", "summit-"]
+    /// Parks whose point moved before points were kept: their forecasts from earlier versions are
+    /// dropped once. Great Basin's first spot was corrected on 2026-10-15 (it sat on Wheeler Peak's flank).
+    static let movedBeforeLedger: Set<String>=["grba"]
+    /// A move smaller than this keeps the forecast (Open-Meteo answers on a grid of about 1 to 11 km).
+    static let tolerance=100.0
+    private static let once: Void = { reconcile(parks: (try? ParkData.load()) ?? [], folders: [CacheDirectory.url, CacheDirectory.legacyFolder]) }()
+    static func reconcileOnce() { once }
+    /// Compares each park's forecast point with the one kept, drops the moved parks' forecasts and
+    /// keeps the new points. Without kept points (the first run of this version) only the parks in
+    /// `movedBeforeLedger` count as moved. The points live in the first folder; forecasts are dropped
+    /// from every folder (earlier versions kept them elsewhere). Returns the parks whose forecasts were dropped.
+    @discardableResult
+    static func reconcile(parks: [Park], folders: [URL]) -> [String] {
+        guard !parks.isEmpty, let folder=folders.first else { return [] }
+        let file=folder.appendingPathComponent("nyx-points.json")
+        let kept=(try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode([String: [Double]].self, from: $0) }
+        var points: [String: [Double]]=[:], moved: [String]=[]
+        for park in parks {
+            let point=park.forecastPoint
+            points[park.id]=[point.latitude, point.longitude]
+            let wasMoved: Bool
+            if let kept {
+                wasMoved=kept[park.id].map { $0.count == 2 && Park.distance($0[0], $0[1], point.latitude, point.longitude) > tolerance } ?? false
+            } else {
+                wasMoved=movedBeforeLedger.contains(park.id)
+            }
+            if wasMoved {
+                moved.append(park.id)
+                for prefix in prefixes {
+                    for base in folders { try? FileManager.default.removeItem(at: base.appendingPathComponent("nyx-\(prefix)\(park.id).json")) }
+                }
+            }
+        }
+        if kept != points, let data=try? JSONEncoder().encode(points) { try? data.write(to: file, options: .atomic) }
+        return moved
     }
 }
 extension Park {

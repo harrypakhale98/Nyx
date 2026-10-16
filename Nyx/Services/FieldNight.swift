@@ -67,6 +67,7 @@ nonisolated struct FieldNight: Sendable {
         // The Milky Way's bright center, counted from 10° up in true darkness, as on park detail.
         let core=almanac.core(for: park, sky: sky)
         if let dark=core.dark, dark.duration>=600 {
+            let coreFrom=list.count
             let at={ (date: Date) in Compass.name(engine.horizontal(date: date, park: park, ra: SkyAlmanac.coreRA, dec: SkyAlmanac.coreDec).azimuth) }
             if let start=sky.darkStart, dark.start.timeIntervalSince(start)>120 {
                 list.append(Milestone(kind: .coreRises, date: dark.start, title: String(localized: "Milky Way core up"), detail: String(localized: "Its bright center clears 10° in the \(at(dark.start))."), symbol: "sparkle"))
@@ -78,6 +79,11 @@ nonisolated struct FieldNight: Sendable {
             }
             if let end=sky.darkEnd, end.timeIntervalSince(dark.end)>120 {
                 list.append(Milestone(kind: .coreSets, date: dark.end, title: String(localized: "Core sinking"), detail: String(localized: "It drops below 10° in the \(at(dark.end))."), symbol: "sparkle"))
+            }
+            // The terrain at the main viewing spot, in What's up's own sentence, on the first of these.
+            if list.count>coreFrom, let terrain=WhatsUp.terrainSentence(dark: dark, park: park, almanac: almanac) {
+                let first=list[coreFrom]
+                list[coreFrom]=Milestone(kind: first.kind, date: first.date, title: first.title, detail: Sentences.join([first.detail, terrain]), subject: first.subject, symbol: first.symbol)
             }
         }
         // A meteor shower's best moment, when one is worth looking for.

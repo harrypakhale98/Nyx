@@ -39,7 +39,15 @@ nonisolated struct WhatsUp: Sendable {
     let events: Events
     /// Rare things first (an eclipse, a shower), then the core, the planets, brightest first, and
     /// the night's highlights.
-    var items: [Item] { [eclipse, aurora, shower].compactMap { $0 } + [core] + planets + highlights }
+    /// Everything, ranked as every screen ranks it (`layout`), for Siri and Ask Nyx, which read the
+    /// first few: the rows that lead, then a shower or eclipse that earns a row of its own, the
+    /// planets, the other rows, and last what the screens give one line (a weak shower, an eclipse
+    /// the park cannot see). So a Geminid peak is said before the planets, a shower of two an hour after them.
+    var items: [Item] {
+        let layout=layout
+        let events=layout.after.filter { $0.kind == .meteors || $0.kind == .eclipse }
+        return layout.first + events + planets + layout.after.filter { item in !events.contains { $0.id == item.id } } + layout.mentions
+    }
     /// The rows above the planets, which the panel groups under one heading.
     var leading: [Item] { [eclipse, shower].compactMap { $0 } + [core] }
 
