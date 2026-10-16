@@ -349,12 +349,34 @@
     },
     {
       "park": "grba",
+      "spot": "Astronomy Amphitheater (Lehman Caves Visitor Center)",
+      "stepFree": "yes",
+      "features": [
+        "amphitheater",
+        "accessibleParking",
+        "accessibleRestroom"
+      ],
+      "sourceURL": "https://www.nps.gov/grba/planyourvisit/physical-mobility-impairments.htm",
+      "evidence": "The amphitheater is fully accessible down a short dirt path and has built-in benches with space for wheelchairs. Restrooms are nearby and fully accessible.",
+      "note": "Same page: accessible parking at the Astronomy Amphitheater picnic area."
+    },
+    {
+      "park": "grba",
+      "spot": "Mather Overlook",
+      "stepFree": "partial",
+      "features": [],
+      "sourceURL": "https://www.nps.gov/grba/planyourvisit/physical-mobility-impairments.htm",
+      "evidence": "Higher along the Wheeler Peak Scenic Drive, Mather Overlook and Wheeler Peak Overlook each feature short boardwalks with interpretive signage",
+      "note": "Listed under the page's accessible overlooks; it does not say the whole way is step-free."
+    },
+    {
+      "park": "grba",
       "spot": "Baker Archaeological Site",
       "stepFree": "unknown",
       "features": [],
       "sourceURL": null,
       "evidence": null,
-      "checked": "https://www.nps.gov/grba/planyourvisit/physical-mobility-impairments.htm"
+      "checked": "https://www.nps.gov/grba/planyourvisit/physical-mobility-impairments.htm; https://www.blm.gov/visit/baker-archaeological-viewing-site"
     },
     {
       "park": "grsa",

@@ -154,14 +154,14 @@ struct ViewingSpots: View {
     }
 }
 /// How a spot's sky glow compares with the park's other spots, or with the park's centre where it
-/// has none: only when the difference is worth saying. Never a ranking against all parks.
+/// has none: only when the difference is worth saying, and true of each other spot (an average
+/// would let one bright spot make two equal ones both "darker"). Never a ranking against all parks.
 nonisolated enum SpotGlow {
     static func comparison(_ glow:Double,others:[Double],parkCentre:Double?)->String? {
         let others=others.filter { $0>0 }
-        if !others.isEmpty {
-            let mean=others.reduce(0,+)/Double(others.count)
-            if glow>mean*1.25 { return others.count==1 ? String(localized:"Brighter than this park's other spot") : String(localized:"Brighter than this park's other spots") }
-            if glow<mean/1.25 { return others.count==1 ? String(localized:"Darker than this park's other spot") : String(localized:"Darker than this park's other spots") }
+        if let darkest=others.min(), let brightest=others.max() {
+            if glow>brightest*1.25 { return others.count==1 ? String(localized:"Brighter than this park's other spot") : String(localized:"Brighter than this park's other spots") }
+            if glow<darkest/1.25 { return others.count==1 ? String(localized:"Darker than this park's other spot") : String(localized:"Darker than this park's other spots") }
             return nil
         }
         return parkCentre.flatMap { SkyGlow.comparison(spot:glow,park:$0) }
