@@ -63,7 +63,11 @@ import CoreLocation
     private(set) var dataRevision=0
     /// Outlooks already derived, so a river scrub does not rescan every hour of 30 nights per frame.
     /// Kept with which of the detail's series were recent (`ages`): one that turns 36 hours old drops out on the next read.
-    @ObservationIgnored private var outlookCache: [String:[Date:(ages:UInt8,outlook:NightOutlook?)]] = [:]
+    /// And with what it read from its night (`OutlookKey`): a view can still hold a night scored before
+    /// the latest forecast or smoke (the toolbar's share menu, redrawn before the page hands it the new
+    /// night), and that night's outlook must never be the one the current night is shown with.
+    @ObservationIgnored private var outlookCache: [String:[Date:(key:OutlookKey,outlook:NightOutlook?)]] = [:]
+    nonisolated private struct OutlookKey: Equatable, Sendable { let ages:UInt8; let score:Int; let hasForecast:Bool; let upperCloudOnly:Bool; let aerosol:Double? }
     /// Nights already scored, by park and evening: the park list and a month ask for the same
     /// nights many times a pass. A night is a pure function of its park, sky, forecast, detail and
     /// scoring; "now" enters only as whether the model spread is recent (`HourlySeries.usable`),
@@ -514,10 +518,11 @@ import CoreLocation
     /// clearest and cloudiest model would give), cloud layers, cold, dew, wind and smoke. Agreement
     /// is shown only beside a score that includes clouds, so the two never contradict each other.
     func outlook(_ night:Night)->NightOutlook? {
-        let ages=Self.ages(details[night.park.id],now:present)
-        if let cached=outlookCache[night.park.id]?[night.id], cached.ages==ages { return cached.outlook }
+        let key=OutlookKey(ages:Self.ages(details[night.park.id],now:present),score:night.score.value,hasForecast:night.score.hasForecast,
+                           upperCloudOnly:night.upperCloudOnly,aerosol:night.aerosol)
+        if let cached=outlookCache[night.park.id]?[night.id], cached.key==key { return cached.outlook }
         let outlook=deriveOutlook(night)
-        outlookCache[night.park.id,default:[:]][night.id]=(ages,outlook)
+        outlookCache[night.park.id,default:[:]][night.id]=(key,outlook)
         return outlook
     }
     /// Which of a detail's series are recent enough to describe (models, layers, smoke), as bits.

@@ -441,6 +441,26 @@ import Testing
         #expect(model.details["deva"] == nil)
     }
 
+    /// A view can still hold a night scored before the smoke arrived (the park page's share menu,
+    /// redrawn before the page hands it the new night). Its outlook is worked out first, but the
+    /// page's current night must still get its own: the Air row once went missing this way.
+    @Test func anOlderNightNeverLendsItsOutlookToTheCurrentOne() throws {
+        let model = PlanModel(weather: WeatherService(persist: false), parkStore: ParkStore(persist: false),
+                              detail: ForecastDetailService(persist: false), defaults: isolatedDefaults())
+        model.smokeEnabled = true
+        let deva = try park("deva")
+        model.forecasts = [:]; model.details = [:]
+        let held = model.night(deva)
+        let air = series(model.today.addingTimeInterval(-3600), held.sky.cloudWindow, ["aerosol_optical_depth": 0.12])
+        model.details = ["deva": ForecastDetail(air: air)]
+        #expect(held.aerosol == nil && model.outlook(held)?.airLabel == nil)
+        let current = model.night(deva)
+        #expect(current.id == held.id && current.aerosol == 0.12)
+        #expect(model.outlook(current)?.airLabel != nil)
+        // Asked in either order, each night keeps the outlook of its own air.
+        #expect(model.outlook(held)?.airLabel == nil && model.outlook(current)?.airLabel != nil)
+    }
+
     // MARK: Background refresh (M)
 
     /// A model that last looked at the clock hours ago moves to the current night when asked, as
