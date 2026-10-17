@@ -12,7 +12,7 @@ All requests go through `SafeHTTP`. It only allows HTTPS to these four hosts and
 |---|---|---|
 | `developer.nps.gov` | Alerts, ranger programs, campgrounds | Alerts and campgrounds: all 63 park codes in one request, so it says nothing about which park you care about. Programs: the code of the park page you have open. |
 | `api.open-meteo.com` | Cloud forecasts | Public coordinates of all 63 parks together. For saved spots, a separate request with coordinates rounded to 0.1° (about 11 km). For world places, every place in a 10°×10° tile. |
-| `air-quality-api.open-meteo.com` | Smoke and haze | Public coordinates of the 63 parks. |
+| `air-quality-api.open-meteo.com` | Smoke and haze | Public coordinates of the 63 parks. For world places, once one of their pages has been opened, the same 10°×10° tiles as their clouds. Nothing for saved spots. |
 | `services.swpc.noaa.gov` | Aurora forecast (NOAA's Kp index for the next three days) | Nothing: one global file, at most every three hours. |
 
 Each host has its own switch in Settings › Your privacy, and saved-spot forecasts have a separate switch. Sessions are ephemeral with cookies and caching off. The device's location is never sent, except when you save where you're standing as a spot, and then only rounded.

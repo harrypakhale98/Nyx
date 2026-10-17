@@ -108,6 +108,9 @@ import CoreLocation
     /// in this session: Tonight and the park list need only clouds, apart from a summit above the
     /// inversion, whose clouds are its layers (`refreshForecasts`).
     @ObservationIgnored private var detailWanted=false
+    /// A world catalogue place's page has been opened in this session: from then on smoke is asked
+    /// for at catalogue places too, by their tiles, without starting the US parks' detail.
+    @ObservationIgnored private var catalogSmokeWanted=false
     @ObservationIgnored private var alertsCache: ParkAlertsCache?
     /// When the park alerts every closure here comes from were fetched; nil before any.
     var alertsUpdated: Date? { alertsCache?.updated }
@@ -696,9 +699,12 @@ import CoreLocation
     }
     /// Forecasts for every park arrive together (one or two requests); park updates (alerts, and
     /// ranger programs where they are shown) follow park by park, and only when asked for.
-    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true,programs:Bool=false) async {
+    /// `page`: asked from a place's own page.
+    func refresh(_ parks:[Park],force:Bool=false,parkUpdates:Bool=true,programs:Bool=false,page:Bool=false) async {
         // Programs are asked for only on a park's page: from then on its forecast detail is wanted too.
         if programs { detailWanted=true }
+        // A catalogue place's page: smoke at catalogue places is wanted from then on.
+        if page, parks.contains(where:\.isCatalogPlace) { catalogSmokeWanted=true }
         await refreshForecasts(watching:parks,force:force)
         // Cancelled (the question changed while it was asked): the next refresh says when it last happened.
         guard !Task.isCancelled else { return }
@@ -736,9 +742,11 @@ import CoreLocation
         // World catalogue places by whole tiles (`CatalogForecast.Regions`), the same switch and host
         // as the parks: never one place alone, never the device's position.
         var askedCatalog=Set<String>()
+        var catalogRequests:[[Park]]=[]
         if parks.contains(where:\.isCatalogPlace) {
             await catalogReady()
             let requests=placeCatalog.regions.plan(wanted:parks)
+            catalogRequests=requests
             askedCatalog=Set(requests.joined().map(\.id))
             let ofCatalog=await weather.catalogForecasts(requests,network:network,force:force)
             // One assignment for the whole tile, so the kept nights are let go once, not once a place.
@@ -758,6 +766,14 @@ import CoreLocation
         if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
         let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
         for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
+        // Smoke at catalogue places: the same whole tiles as their clouds, on the parks' terms (the
+        // switch, and asked for only once a page has been opened); what is kept counts offline too.
+        if smokeEnabled, !catalogRequests.isEmpty {
+            let air=await detailService.catalogAir(catalogRequests,network:live && (detailWanted || catalogSmokeWanted),force:force)
+            var updated=details, changed=false
+            for (id,value) in air where updated[id] != value { updated[id]=value; changed=true }
+            if changed { details=updated }
+        }
         let paused=await detailService.pausedForLowData()
         if paused != detailPausedForLowData { detailPausedForLowData=paused }
         // NOAA's aurora forecast: one global file, at most every three hours.

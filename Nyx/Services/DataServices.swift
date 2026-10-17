@@ -18,6 +18,13 @@ nonisolated protocol DetailProviding: Sendable {
     /// "Smoke and haze" was switched off: drop every cached aerosol series, in memory and on disk,
     /// so nothing (the app, Siri, the widgets) counts the air-quality host's data any more.
     func forgetAir() async
+    /// Smoke for world catalogue places, asked for by the same whole requests as their clouds
+    /// (`CatalogForecast.Regions`), never one place alone; with `network` false, only what is kept.
+    func catalogAir(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: ForecastDetail]
+}
+nonisolated extension DetailProviding {
+    /// A provider without catalogue smoke (a test double) has none to give.
+    func catalogAir(_ requests: [[Park]], network: Bool, force: Bool) async -> [String: ForecastDetail] { [:] }
 }
 /// The forecast's context, beside the score's own clouds: three models' clouds, cloud layers,
 /// cold, dew, wind, visibility, rain, weather and water vapour (seven days), and the aerosol and
@@ -38,6 +45,10 @@ actor ForecastDetailService: DetailProviding {
     }
     /// Detail is context for the week ahead; twice a day keeps it current at a quarter of the calls.
     static let freshFor: TimeInterval=ForecastReuse.detail
+    /// At most this many places in one catalogue smoke request. Three hourly series for eight days
+    /// make a whole 1,000-place tile about 8 MB, too slow on a weak connection; so a tile goes in
+    /// parts, each part of one tile's request, never two regions mixed.
+    static let catalogAirChunk=250
     private let transport: any HTTPTransport
     private let persist: Bool
     private let backoff: HostBackoff
@@ -60,6 +71,8 @@ actor ForecastDetailService: DetailProviding {
     private var running: (task: Task<Void, Never>, attempted: [Kind: Set<String>])?
     /// Callers waiting for a refresh to end, the one that started it included (tests read it).
     private(set) var waiting=0
+    /// The catalogue smoke request under way, if any; a later caller waits for it, then takes what is kept.
+    private var catalogAirRunning: Task<Void, Never>?
     init(transport: any HTTPTransport = SafeHTTP(), persist: Bool = true, backoff: HostBackoff? = nil, ledger: CallLedger? = nil,
          budget: CallBudget = .standard, extras: Bool = true, clock: @escaping @Sendable () -> Date = { .now }) {
         self.transport=transport; self.persist=persist; self.clock=clock; self.budget=budget; self.extras=extras
@@ -84,11 +97,20 @@ actor ForecastDetailService: DetailProviding {
         // Parks not read yet this launch: their files on disk, once until smoke is fetched again.
         guard persist, !airCleared else { return }
         airCleared=true
-        let all=(try? ParkData.load().map(\.id)) ?? []
+        let all=Set(((try? ParkData.load().map(\.id)) ?? [])+Self.keptCatalogueIDs())
         for id in all where memory[id] == nil {
             guard var cached=CacheDirectory.read(ForecastDetail.self, name: "detail-\(id)"), cached.air != nil else { continue }
             cached.air=nil
             CacheDirectory.write(cached, name: "detail-\(id)")
+        }
+    }
+    /// World catalogue places with a detail file kept (their smoke), read from the cache folders' file names.
+    private static func keptCatalogueIDs() -> [String] {
+        let prefix="nyx-detail-", suffix=".json"
+        return [CacheDirectory.url, CacheDirectory.legacyFolder].flatMap { folder in
+            ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
+                .filter { $0.hasPrefix(prefix+Park.catalogPrefix) && $0.hasSuffix(suffix) }
+                .map { String($0.dropFirst(prefix.count).dropLast(suffix.count)) }
         }
     }
     private func load(_ id: String) {
@@ -156,6 +178,47 @@ actor ForecastDetailService: DetailProviding {
         }
         return kept(parks)
     }
+    /// Smoke at world catalogue places: each request of `CatalogForecast.Regions` whole (in parts of
+    /// `catalogAirChunk`), with the same public coordinates as its clouds, to the air-quality host,
+    /// within the browsing budget, so looking around the world never leaves the parks' smoke without
+    /// room. A request is due as its places' clouds are: all of it, or none of it. Kept on disk.
+    func catalogAir(_ requests: [[Park]], network: Bool, force: Bool = false) async -> [String: ForecastDetail] {
+        let places=Array(requests.joined())
+        for place in places { load(place.id) }
+        if let current=catalogAirRunning {
+            waiting+=1
+            _=await SharedRequest.value(of: current)
+            waiting-=1
+            return kept(places)
+        }
+        let now=clock()
+        guard network, backoff.allows(Kind.air.host, now: now) else { return kept(places) }
+        let due=requests.filter { request in
+            !request.isEmpty && request.count <= CatalogForecast.maxPointsPerRequest
+                && ForecastReuse.due(request.compactMap { memory[$0.id]?.air?.updated }.max(), now: now, force: force, normal: Self.freshFor, forced: Kind.air.forced)
+        }
+        guard !due.isEmpty else { return kept(places) }
+        let generation=airGeneration
+        let task=Task {
+            var results: [(Kind, [(String, HourlySeries)]?)] = []
+            asking: for request in due {
+                for part in CatalogForecast.chunks(request, limit: Self.catalogAirChunk) {
+                    guard !Task.isCancelled else { break asking }
+                    let fetched=await self.fetch(.air, part, caps: self.budget.browsing)
+                    results.append((.air, fetched))
+                    // The host asks Nyx to wait, or the browsing budget is spent: the rest waits too.
+                    if fetched?.isEmpty == true && !self.backoff.allows(Kind.air.host, now: self.clock()) { break asking }
+                }
+            }
+            self.store(results, airGeneration: generation, notesLowData: false)
+            self.catalogAirRunning=nil
+        }
+        catalogAirRunning=task
+        waiting+=1
+        _=await SharedRequest.value(of: task)
+        waiting-=1
+        return kept(places)
+    }
     private func kept(_ parks: [Park]) -> [String: ForecastDetail] {
         var result: [String: ForecastDetail] = [:]
         for park in parks { if let detail=memory[park.id] { result[park.id]=detail } }
@@ -163,9 +226,10 @@ actor ForecastDetailService: DetailProviding {
     }
     /// A nil part was held back by Low Data Mode. Smoke asked for before the latest `forgetAir`
     /// is not stored: the switch went off while it was on its way.
-    private func store(_ results: [(Kind, [(String, HourlySeries)]?)], airGeneration generation: Int) {
+    /// `notesLowData` false: the catalogue's smoke, which says nothing about the parks' detail being paused.
+    private func store(_ results: [(Kind, [(String, HourlySeries)]?)], airGeneration generation: Int, notesLowData: Bool = true) {
         var changed=Set<String>()
-        lowData=results.contains { $0.1 == nil }
+        if notesLowData { lowData=results.contains { $0.1 == nil } }
         for (kind, fetched) in results {
             if kind == .air && generation != airGeneration { continue }
             for (id, series) in fetched ?? [] {
@@ -180,7 +244,8 @@ actor ForecastDetailService: DetailProviding {
         switch kind { case .models: detail?.models; case .layers: detail?.layers; case .air: detail?.air }
     }
     /// Nil when Low Data Mode held the request back; empty when it failed any other way.
-    private func fetch(_ kind: Kind, _ parks: [Park]) async -> [(String, HourlySeries)]? {
+    /// `caps`: the browsing budget for the catalogue's smoke; the essential one otherwise.
+    private func fetch(_ kind: Kind, _ parks: [Park], caps: CallBudget.Caps? = nil) async -> [(String, HourlySeries)]? {
         guard !parks.isEmpty else { return [] }
         var parts=URLComponents()
         parts.scheme="https"
@@ -204,7 +269,7 @@ actor ForecastDetailService: DetailProviding {
                                 URLQueryItem(name: "timeformat", value: "unixtime"), URLQueryItem(name: "timezone", value: "GMT")]
         guard let url=parts.url else { return [] }
         let data: Data
-        do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: budget.essential, clock: clock) } catch {
+        do { data=try await ForecastRequest.get(url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: caps ?? budget.essential, clock: clock) } catch {
             return Backoff.constrained(error) ? nil : []
         }
         return OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: keys, extras: context, now: clock())

@@ -6,7 +6,7 @@ Models disagree. At the U.S. national parks, Nyx compares three of them, from th
 
 High, thin cloud is hard to judge. A veil of ice crystals miles up can dim faint stars and spread moonlight across the sky while the forecast still looks mostly clear. Or it can be counted as cloud while bright stars shine straight through it. A percentage says how much of the sky is covered, not how thick the cover is.
 
-Smoke and haze are not clouds. Wildfire smoke can travel a thousand miles (1,600 km) and dull the Milky Way on a cloudless night. At the U.S. national parks, Nyx also reads a separate smoke and haze forecast and caps the score when it is moderate or heavy, but smoke forecasts are rougher than cloud forecasts, and dust or damp air near the ground can wash out the horizon without showing up in either.
+Smoke and haze are not clouds. Wildfire smoke can travel a thousand miles (1,600 km) and dull the Milky Way on a cloudless night. For the parks and dark-sky places it lists, though not for saved spots, Nyx also reads a separate smoke and haze forecast and caps the score when it is moderate or heavy. Smoke forecasts are rougher than cloud forecasts, though, and dust or damp air near the ground can wash out the horizon without showing up in either.
 
 Far nights fade toward the usual clouds. A forecast for tomorrow is far better than a guess. A forecast for ten days from now is barely better than knowing what the weather here usually does in that month. So Nyx uses a cloud forecast in full for about three days, then eases it toward the place's usual clouds, and beyond ten days uses the usual clouds alone. Those nights are drawn half-filled or hollow, because their scores will change as the night comes closer. Check again a day or two before you go.
 
