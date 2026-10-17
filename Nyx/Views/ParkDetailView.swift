@@ -232,9 +232,9 @@ struct ParkDetailView: View {
             }
             .task(id:park.id) {
                 if park.isCatalogPlace { await SpotlightIndexer.remember(park,followed:Set(saved.map(\.parkID))) }
-                await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil)
+                await model.refresh([park],parkUpdates:park.nps != nil,programs:park.nps != nil,page:true)
             }
-            .refreshable { await model.refresh([park],force:true,parkUpdates:park.nps != nil,programs:park.nps != nil) }
+            .refreshable { await model.refresh([park],force:true,parkUpdates:park.nps != nil,programs:park.nps != nil,page:true) }
     }
     /// Room for the breakdown beside the page (`WideLayout.inspector`).
     private var inspectorRoom:Bool { WideLayout.inspector(width:width,open:inspector,regular:sizeClass == .regular,largeText:typeSize.isAccessibilitySize) }
