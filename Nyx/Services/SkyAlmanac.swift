@@ -87,7 +87,8 @@ nonisolated struct SkyAlmanac: Sendable {
         let best: Date
         let bestAltitude: Double
         let bestAzimuth: Double
-        /// Rises or sets inside the night (nil when it is already up at dusk or still up at dawn).
+        /// The rise before `visible` and the set after it, inside the night (nil when it is already
+        /// up at dusk or still up at dawn), so "rise – set" always frames the stretch it is seen.
         let rises: Date?
         let sets: Date?
     }
@@ -120,10 +121,12 @@ nonisolated struct SkyAlmanac: Sendable {
             sample(visible) { date in let a = altitude(date); if a > bestAltitude { bestAltitude = a; best = date } }
             let p = position(of: planet, at: best)
             // Rise and set on the refracted horizon (34'), as almanacs give them; planets are points.
+            // The ones that bound the stretch it is seen: a planet up at dusk can set, then rise
+            // again before dawn, and its rise and set must frame the same stretch.
             let edges = transitions(in: window) { altitude($0) >= -0.567 }
             return PlanetNight(planet: planet, magnitude: p.magnitude, visible: visible, best: best, bestAltitude: bestAltitude,
                 bestAzimuth: engine.horizontal(date: best, park: park, ra: p.ra, dec: p.dec).azimuth,
-                rises: edges.rises.first, sets: edges.sets.first)
+                rises: edges.rises.last(where: { $0 <= visible.start }), sets: edges.sets.first(where: { $0 >= visible.end }))
         }.sorted { $0.magnitude < $1.magnitude }
     }
 
