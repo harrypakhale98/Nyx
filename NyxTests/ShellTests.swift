@@ -108,15 +108,18 @@ import Testing
     // MARK: Trip stays
 
     @Test func theLastNightStaysInsideWhatThePlannerOffers() {
+        // In UTC, where every calendar day is 86,400 seconds (the change of clocks: `NightEdgesTests`).
         let first=Date(timeIntervalSince1970:1_791_000_000), day=86400.0
-        #expect(TripPlanner.latestLast(first:first,weekendsOnly:false)==first.addingTimeInterval(13*day))
-        #expect(TripPlanner.latestLast(first:first,weekendsOnly:true)==first.addingTimeInterval(69*day))
+        var utc=Calendar(identifier:.gregorian)
+        utc.timeZone = .gmt
+        #expect(TripPlanner.latestLast(first:first,weekendsOnly:false,calendar:utc)==first.addingTimeInterval(13*day))
+        #expect(TripPlanner.latestLast(first:first,weekendsOnly:true,calendar:utc)==first.addingTimeInterval(69*day))
         // Weekends only turned off: seven weeks out comes back to two weeks.
-        #expect(TripPlanner.clampedLast(first.addingTimeInterval(49*day),first:first,weekendsOnly:false)==first.addingTimeInterval(13*day))
-        #expect(TripPlanner.clampedLast(first.addingTimeInterval(49*day),first:first,weekendsOnly:true)==first.addingTimeInterval(49*day))
+        #expect(TripPlanner.clampedLast(first.addingTimeInterval(49*day),first:first,weekendsOnly:false,calendar:utc)==first.addingTimeInterval(13*day))
+        #expect(TripPlanner.clampedLast(first.addingTimeInterval(49*day),first:first,weekendsOnly:true,calendar:utc)==first.addingTimeInterval(49*day))
         // Never before the first night; a week inside the range is left alone.
-        #expect(TripPlanner.clampedLast(first.addingTimeInterval(-day),first:first,weekendsOnly:false)==first)
-        #expect(TripPlanner.clampedLast(first.addingTimeInterval(6*day),first:first,weekendsOnly:false)==first.addingTimeInterval(6*day))
+        #expect(TripPlanner.clampedLast(first.addingTimeInterval(-day),first:first,weekendsOnly:false,calendar:utc)==first)
+        #expect(TripPlanner.clampedLast(first.addingTimeInterval(6*day),first:first,weekendsOnly:false,calendar:utc)==first.addingTimeInterval(6*day))
     }
     @Test func backToBackNightsAtOneParkAreOneStay() throws {
         let deva=try park("deva"), jotr=try park("jotr"), friday=TripDay(year:2026,month:10,day:9)

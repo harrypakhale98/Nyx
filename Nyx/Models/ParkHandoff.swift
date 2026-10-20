@@ -32,10 +32,10 @@ nonisolated struct ParkHandoff: Equatable, Sendable {
         let parts=park.calendar.dateComponents([.year, .month, .day], from: evening)
         return String(format: "%04d-%02d-%02d", parts.year ?? 2000, parts.month ?? 1, parts.day ?? 1)
     }
+    /// A real Gregorian day, read as a link reads it (`LinkDay`): never February 31, which a
+    /// calendar would quietly roll over to March 3.
     private static func components(_ iso: String) -> (year: Int, month: Int, day: Int)? {
-        let parts=iso.split(separator: "-", omittingEmptySubsequences: false)
-        guard parts.count==3, parts[0].count==4, parts[1].count==2, parts[2].count==2,
-              let y=Int(parts[0]), let m=Int(parts[1]), let d=Int(parts[2]), (1...12).contains(m), (1...31).contains(d) else { return nil }
+        guard let parts=LinkDay.components(iso), let y=parts.year, let m=parts.month, let d=parts.day else { return nil }
         return (y, m, d)
     }
 }
