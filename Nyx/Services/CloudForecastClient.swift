@@ -346,8 +346,9 @@ nonisolated final class HostBackoff: Sendable {
     }
 }
 /// Writes snapshots of one file's contents in the order they were taken. A snapshot is taken (and
-/// numbered with `ticket`) under its owner's lock, then written outside it, so the disk is never held
-/// under that lock; a snapshot older than one already written is dropped, so the file never goes back.
+/// numbered with `ticket`) under the lock of the type that keeps it, then written outside it, so the
+/// disk is never held under that lock; a snapshot older than one already written is dropped, so the
+/// file never goes back.
 nonisolated final class OrderedWriter: Sendable {
     private let file: URL?
     private let order=Mutex<(taken: Int, written: Int)>((0, 0))
