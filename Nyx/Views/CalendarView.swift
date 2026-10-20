@@ -169,7 +169,11 @@ struct CalendarView: View {
     /// The pager's own width: a change (the inspector opening, an iPad window resized) rebuilds it on
     /// the current month, since a paging scroll view keeps its old offset in points.
     @State private var pagerWidth=0
-    private var park:Park? { model.park(parkID) ?? model.home }
+    /// The window's place; the starting park only once the place is known not to be there. A place
+    /// abroad restored with the window waits for the world catalogue (`waiting`) rather than
+    /// showing the starting park's month first.
+    private var park:Park? { model.park(parkID) ?? (waiting ? nil : model.home) }
+    private var waiting:Bool { model.awaitsCatalog(parkID) }
     /// A wide iPad window shows the chosen night's breakdown in a trailing inspector beside a larger
     /// month, and a tap chooses the night; otherwise a tap opens the breakdown in a sheet.
     private var wide:Bool { inspector }
@@ -219,7 +223,7 @@ struct CalendarView: View {
                     if typeSize.isAccessibilitySize { list(park,data) } else { months(park,data,others:pages.others,scale:wide && width>=640 ? 1.3 : 1) }
                     windowPanel(park,shown); legend(shown)
                 }.padding(24).clipped().readableColumn(wide ? 760 : WideLayout.readableWidth)
-            }
+            } else if waiting { ConstellationLoader().frame(maxWidth:.infinity).padding(.top,80) }
         }.background(NightBackground(seed:park?.id ?? "nyx",park:park,veil:0.45))
             // The bar (Plan's picker) as wide as the month under it, so their edges line up.
             .safeAreaBar(edge:.top,spacing:0) { if let bar { bar.readableColumn(wide ? 760 : WideLayout.readableWidth) } }
@@ -276,7 +280,7 @@ struct CalendarView: View {
             .onChange(of:commands?.calendarRequest,initial:true) { _,request in if let request { show(request) } }
             .sheet(item:$calendarNight) { night in CalendarEditor(draft:CalendarDraft(night:night,closure:model.closure(night.park))) { calendarNight=nil }.ignoresSafeArea().nyxPresentation() }
             .sheet(item:$recording) { prefill in NavigationStack { JournalEditorView(prefill:prefill) }.nyxPresentation() }
-            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id) } else { ScoreBreakdownView(night:model.night(night.park,on:night.id),isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
+            .sheet(item:$chosen,onDismiss:{peeking=false}) { night in NavigationStack { if peeking { ParkDetailView(park:night.park,initialDate:night.id).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { chosen=nil } } } } else { ScoreBreakdownView(night:model.night(night.park,on:night.id),isTonight:night.id==model.tonight(night.park)) } }.nyxPresentation()
                 .onAppear { ReviewPrompt.noteNightViewed(score:night.score.value) } }
             // iPad keyboard: ⌘← and ⌘→ move the chosen night, turning the month at its edges.
             .nightKeys(enabled:wide && chosen == nil) { delta in step(delta) }
@@ -285,9 +289,9 @@ struct CalendarView: View {
     /// (data, not a slogan), and the name itself the menu that changes it.
     @ViewBuilder private func heading(_ park:Park)->some View {
         VStack(alignment:.leading,spacing:6) {
-            Eyebrow(text:"\(park.placeEyebrow)")
+            Eyebrow(text:"\(park.pageEyebrow)")
             Menu {
-                PlacePickerOptions(title:"Park",selection:Binding(get:{park.id},set:{parkID=$0}))
+                PlacePickerOptions(title:"Park",selection:Binding(get:{park.id},set:{parkID=$0}),current:park)
             } label: {
                 HStack(alignment:.firstTextBaseline,spacing:10) {
                     Text(park.shortName).font(.system(typeSize.isAccessibilitySize ? .title2 : .largeTitle,design:.serif)).foregroundStyle(palette.ink).multilineTextAlignment(.leading).fixedSize(horizontal:false,vertical:true)

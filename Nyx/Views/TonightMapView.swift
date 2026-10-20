@@ -421,7 +421,7 @@ struct ParksMapView: View {
         let chevron=Image(systemName:"chevron.forward").font(.caption.weight(.semibold)).foregroundStyle(palette.muted).accessibilityHidden(true)
         let words=VStack(alignment:.leading,spacing:3) {
             Text(park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink)
-            Text("\(park.region.replacingOccurrences(of:",",with:", ")) · \(model.night(park).bandWithBasis)").font(.subheadline).foregroundStyle(palette.muted)
+            Text("\(park.rowLocality) · \(model.night(park).bandWithBasis)").font(.subheadline).foregroundStyle(palette.muted)
             if let closure=mark.closure { Label(closure,systemImage:"exclamationmark.triangle").font(.subheadline).foregroundStyle(palette.accent) }
         }.multilineTextAlignment(.leading).frame(maxWidth:.infinity,alignment:.leading)
         return Group {

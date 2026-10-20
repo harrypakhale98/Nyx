@@ -177,7 +177,7 @@ struct SkiesSeenSection: View {
         }.tint(palette.muted)
     }
     private func detail(_ place:SkiesSeen.Place)->some View {
-        Text(place.nights==1 ? String(localized:"Bortle \(place.darkestBortle) · one night") : String(localized:"Bortle \(place.darkestBortle) · \(place.nights) nights"))
+        Text(String(localized:"Bortle \(place.darkestBortle) · \(place.nights) nights"))
             .font(.caption.monospacedDigit()).foregroundStyle(palette.muted)
     }
 }

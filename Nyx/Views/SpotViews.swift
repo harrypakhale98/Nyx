@@ -34,6 +34,9 @@ extension Place {
         let states=region.replacingOccurrences(of:",",with:" · ")
         return darkSkyDesignated ? String(localized:"\(states) · International Dark Sky Park") : states
     }
+    /// The eyebrow above a place's name on its page and its month: a place abroad says what it is and
+    /// where ("Dark Sky Reserve · Kerry, Ireland"); a park its states, a spot its own words.
+    var pageEyebrow: String { isCatalogPlace ? worldEyebrow : placeEyebrow }
 }
 
 /// Hands the store's saved spots to the model whenever they change (`PlanModel.setSpots`), for a
@@ -42,9 +45,11 @@ extension Place {
 struct SavedSpotsFeed: View {
     @Environment(PlanModel.self) private var model
     @Query private var spots: [SavedSpot]
+    /// Set once the model has the spots, for a window that waits for them (`ParkWindowRoot`).
+    var fed: Binding<Bool>?=nil
     var body: some View {
         Color.clear.frame(width:0,height:0).accessibilityHidden(true)
-            .onAppear { model.setSpots(spots) }
+            .onAppear { model.setSpots(spots); fed?.wrappedValue=true }
             .onChange(of:SavedSpotsFeed.signature(spots)) { _,_ in model.setSpots(spots) }
     }
     /// Everything about the spots that the model shows: a rename or a move is a change, an untouched store is not.
@@ -158,12 +163,19 @@ enum SpotPreview {
 
 /// The choices of a park menu (Plan's month, a journal entry): the person's spots first when there
 /// are any, then the national parks, each under its heading; the parks alone otherwise, as before.
+/// A place shown now that is neither (a place abroad, opened from a link or its page) leads the
+/// menu, so the menu names it and it stays chosen.
 struct PlacePickerOptions: View {
     @Environment(PlanModel.self) private var model
     let title: LocalizedStringKey
     @Binding var selection: String
+    var current: Park?=nil
+    private var other: Park? {
+        current.flatMap { place in model.parks.contains { $0.id==place.id } || model.spots.contains { $0.id==place.id } ? nil : place }
+    }
     var body: some View {
         Picker(title,selection:$selection) {
+            if let other { Section { Text(other.shortName).tag(other.id) } }
             if model.spots.isEmpty {
                 ForEach(model.parks) { Text($0.shortName).tag($0.id) }
             } else {

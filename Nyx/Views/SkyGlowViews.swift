@@ -184,7 +184,8 @@ struct ViewingSpotRow: View {
     let park: Park
     let spot: ViewingSpot
     private var access: SpotAccess? { AccessData.shared.access(park:park.id,spot:spot.name) }
-    private var coordinates: String { "\(spot.latitude.formatted(.number.precision(.fractionLength(4)))), \(spot.longitude.formatted(.number.precision(.fractionLength(4))))" }
+    /// A point for the decimal mark whatever the region, as copied and as the spot panel shows them.
+    private var coordinates: String { "\(CoordinateText.field((spot.latitude*10_000).rounded()/10_000)), \(CoordinateText.field((spot.longitude*10_000).rounded()/10_000))" }
     var body: some View {
         VStack(alignment:.leading,spacing:10) {
             Text(spot.name).font(.system(.title3,design:.serif)).fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)

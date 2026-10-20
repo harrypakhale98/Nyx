@@ -84,6 +84,8 @@ struct ParksTab: View {
                 } detail: {
                     NavigationStack {
                         if let park=selection.flatMap({ model.park($0) }) { ParkDetailView(park:park).id(park.id) }
+                        // A place abroad restored with the window, before the world catalogue is read.
+                        else if let selection, model.awaitsCatalog(selection) { ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground()) }
                         else { CalmState(symbol:"mountain.2",title:"Choose a park",message:"Its sky tonight, and the nights ahead, will open here.").frame(maxHeight:.infinity).background(NightBackground()) }
                     }
                     // The list ends at the fold's near edge; the park starts past its far edge, so its margin,
