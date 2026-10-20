@@ -97,7 +97,9 @@ struct MomentsWatcher: View {
         Color.clear.frame(width:0,height:0).accessibilityHidden(true)
             .onChange(of:saved.count) { old,new in
                 // A park saved just now (not a store loading), by someone never asked about reminders.
+                // Offered in the window the person is using.
                 guard new>old, DebugScenario.screen == nil, !offerShown, !notificationsEnabled, !Self.claimed,
+                      commands?.windowScene.map({ $0.activationState == .foregroundActive }) ?? true,
                       saved.contains(where:{ Date.now.timeIntervalSince($0.savedAt)<30 }) else { return }
                 Self.claimed=true
                 Task {

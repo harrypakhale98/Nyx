@@ -15,7 +15,7 @@ struct YourPrivacyView: View {
                 Section {
                     Text("Nyx has no account, no ads, no tracking.").font(.system(.title3, design: .serif))
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
+                    Text("Only the four optional updates below go out to the internet from this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
                         .fixedSize(horizontal: false, vertical: true)
                     // The one other thing that leaves: Handoff (`VisionHandoff`), to the person's own devices.
                     Text("Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there.")

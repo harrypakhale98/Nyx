@@ -57,7 +57,7 @@ struct SkyLabel: View {
 
 private extension Font.Weight {
     /// One step heavier, for Increase Contrast or Bold Text.
-    var bolder: Font.Weight { self == .medium ? .semibold : self == .semibold ? .bold : self }
+    var bolder: Font.Weight { self == .medium ? .semibold : self == .semibold ? .bold : self == .bold ? .heavy : self }
 }
 
 #Preview("Sky labels") {

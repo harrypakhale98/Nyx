@@ -21,7 +21,7 @@ struct OnboardingView:View {
     /// The first page names the US national parks where the device is set to the United States, as it
     /// always has; anywhere else, the parks and dark-sky places of every country that Nyx now scores.
     private var messages:[LocalizedStringKey] {[
-        ["US","PR","VI","GU","AS","MP","UM"].contains(Locale.current.region?.identifier ?? "")
+        HomeRegion.isUS(Locale.current.region?.identifier)
             ? "Nyx compares the \(model.parks.isEmpty ? 63 : model.parks.count) national parks night by night, so you know which park to drive to and which night to take off."
             : "Nyx compares national parks and dark-sky places around the world, night by night, so you know where to go and which night to take off.",
         "Moonlight, clouds, sky glow and true darkness become one score. Every estimate tells you what is still unknown.",

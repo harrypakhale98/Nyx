@@ -527,3 +527,10 @@ nonisolated struct Lenient<T:Decodable>:Decodable {
     let value:T?
     init(from decoder:any Decoder) throws { value=try? T(from:decoder) }
 }
+
+/// The United States and its territories (Puerto Rico, the U.S. Virgin Islands, Guam, American Samoa,
+/// the Northern Mariana Islands, the minor outlying islands): home to the national parks Nyx was made
+/// for, so a device set to any of them is never told the parks are abroad.
+nonisolated enum HomeRegion {
+    static func isUS(_ region: String?) -> Bool { ["US", "PR", "VI", "GU", "AS", "MP", "UM"].contains(region?.uppercased() ?? "") }
+}

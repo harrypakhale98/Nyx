@@ -54,7 +54,6 @@ struct RootView:View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.horizontalSizeClass) private var horizontalSize
     @Environment(\.verticalSizeClass) private var verticalSize
-    @Environment(\.supportsMultipleWindows) private var multipleWindows
     /// This window's place among the windows a tapped reminder may open in (`NotificationRouter`).
     @State private var routerID=UUID()
     /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
@@ -84,7 +83,7 @@ struct RootView:View {
                         // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
-                        .springLoadingBehavior(NightDragPolicy.drags(multipleWindows:multipleWindows,horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
+                        .springLoadingBehavior(NightDragPolicy.drags(horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)

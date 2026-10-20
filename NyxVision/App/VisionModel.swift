@@ -495,13 +495,18 @@ nonisolated struct SkyMoment: Sendable {
     private struct ClockSweep { let start: Double; let goal: Double; let began: Date; let duration: Double; let immersive: Bool }
     /// The clock following a hand, as of the last frame.
     private struct ClockChase { var goal: Double; var last: Date }
-    @ObservationIgnored private var sweeping: ClockSweep?
-    @ObservationIgnored private var chasing: ClockChase?
+    @ObservationIgnored private var sweeping: ClockSweep? { didSet { noteMotion() } }
+    @ObservationIgnored private var chasing: ClockChase? { didSet { noteMotion() } }
     /// Drives the motion while only the window shows it; the immersive sky drives it from its own
     /// frames (`SceneEvents.Update`, `SkySpace`), in step with what is drawn.
     @ObservationIgnored private var driver: Task<Void, Never>?
-    /// Whether the clock is moving on its own (a sweep, or a chase after the hand).
-    var clockMoving: Bool { sweeping != nil || chasing != nil }
+    /// Whether the clock is moving on its own (a sweep, or a chase after the hand). Observed, so the
+    /// sky draws its words once more at rest even when a cancelled sweep leaves the clock unchanged.
+    private(set) var clockMoving = false
+    private func noteMotion() {
+        let moving = sweeping != nil || chasing != nil
+        if moving != clockMoving { clockMoving = moving }
+    }
     /// One frame of the clock's motion at `now`, from whichever display is drawing it. Time-based, so
     /// a frame from the sky and one from the window in the same instant agree. False once at rest.
     @discardableResult func advance(to now: Date) -> Bool {
