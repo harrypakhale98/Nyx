@@ -2532,7 +2532,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@, %@ : %lld sur 100, %@. %@"
+            "value": "%@, %@ : %lld sur 100, %@. %@"
           }
         },
         "ja": {
@@ -3961,13 +3961,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@: %2$@ hacia las %3$@; también visible a simple vista."
+            "value": "%1$@: %2$@, aprox. %3$@; también visible a simple vista."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ vers %3$@, visible aussi à l’œil nu."
+            "value": "%1$@ : %2$@ vers %3$@, visible aussi à l’œil nu."
           }
         },
         "ja": {
@@ -3996,13 +3996,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@: %2$@ hacia las %3$@."
+            "value": "%1$@: %2$@, aprox. %3$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ vers %3$@."
+            "value": "%1$@ : %2$@ vers %3$@."
           }
         },
         "ja": {
@@ -4037,7 +4037,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@."
+            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@."
           }
         },
         "ja": {
@@ -4072,7 +4072,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@ ; Bortle %4$lld selon les observateurs."
+            "value": "%1$@ : %2$@ magnitudes par seconde d’arc carrée en %3$@ ; Bortle %4$lld selon les observateurs."
           }
         },
         "ja": {
@@ -4247,7 +4247,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ ; %@"
+            "value": "%@ ; %@"
           }
         },
         "ja": {
@@ -8875,13 +8875,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un resplandor muy tenue y amplio en el lado opuesto al Sol, hacia las %1$@, a %2$lld° de altura en el %3$@. Solo desde los cielos más oscuros, con la vista totalmente adaptada; fácil de pasar por alto."
+            "value": "Un resplandor muy tenue y amplio en el lado opuesto al Sol (aprox. %1$@), a %2$lld° de altura en el %3$@. Solo desde los cielos más oscuros, con la vista totalmente adaptada; fácil de pasar por alto."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une lueur très faible et étendue à l’opposé du Soleil, vers %1$@, à %2$lld° de hauteur direction %3$@. Seulement sous les ciels les plus sombres, les yeux bien adaptés ; facile à manquer."
+            "value": "Une lueur très faible et étendue à l’opposé du Soleil, vers %1$@, à %2$lld° de hauteur direction %3$@. Seulement sous les ciels les plus sombres, les yeux bien adaptés ; facile à manquer."
           }
         },
         "ja": {
@@ -10058,7 +10058,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur les heures d’obscurité totale : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. La prévision de poussière du même service distingue la poussière de la fumée : là où au moins 50 µg/m³ de poussière l’emportent sur l’ensemble des particules fines, les détails de l’air du parc parlent de poussière plutôt que de fumée. Données de qualité de l’air : contiennent des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
+            "value": "L’épaisseur optique des aérosols à 550 nm, issue de la prévision mondiale CAMS (Copernicus Atmosphere Monitoring Service) via le service de qualité de l’air d’Open-Meteo, couvre environ cinq jours. Elle est moyennée sur les heures d’obscurité totale : moins de 0,1, l’air est pur ; de 0,1 à 0,25, légère brume ; de 0,25 à 0,5, brume ou fumée qui rend la Voie lactée pâle ; à partir de 0,5, fumée ou brume épaisse qui masque les étoiles faibles. À partir de 0,25, une réserve apparaît à côté de l’indice, et la fumée le plafonne : 74 au plus à partir de 0,25, 59 au plus à partir de 0,5. Quand aucune prévision de fumée ne couvre une nuit, rien n’est plafonné. La prévision de poussière du même service distingue la poussière de la fumée : là où au moins 50 µg/m³ de poussière l’emportent sur l’ensemble des particules fines, les détails de l’air du parc parlent de poussière plutôt que de fumée. Données de qualité de l’air : contiennent des informations modifiées du Copernicus Atmosphere Monitoring Service (2026), via Open-Meteo, moyennées par Nyx sur l’obscurité totale de la nuit. Ni la Commission européenne ni l’ECMWF ne sont responsables de l’usage qui pourrait être fait des informations ou données Copernicus qu’elles contiennent. Vous pouvez désactiver cette requête dans Votre vie privée."
           }
         },
         "ja": {
@@ -12372,7 +12372,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prévision d’aurores : la prévision de l’indice K planétaire du Space Weather Prediction Center de la NOAA, œuvre du gouvernement des États-Unis."
+            "value": "Prévision d’aurores : la prévision de l’indice K planétaire du Space Weather Prediction Center de la NOAA, œuvre du gouvernement des États-Unis."
           }
         },
         "ja": {
@@ -12442,7 +12442,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les aurores sont souvent visibles ici par nuit noire, parfois au zénith. Quand elles apparaissent, elles éclairent aussi le ciel. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
+            "value": "Les aurores sont souvent visibles ici par nuit noire, parfois au zénith. Quand elles apparaissent, elles éclairent aussi le ciel. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
           }
         },
         "ja": {
@@ -12582,7 +12582,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les aurores atteignent cette latitude les nuits d’activité, en général basses, direction %@. Quand elles apparaissent, elles éclairent aussi le ciel. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
+            "value": "Les aurores atteignent cette latitude les nuits d’activité, en général basses, direction %@. Quand elles apparaissent, elles éclairent aussi le ciel. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
           }
         },
         "ja": {
@@ -12652,7 +12652,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les aurores n’atteignent cette latitude que lors de fortes tempêtes solaires, basses, direction %@. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
+            "value": "Les aurores n’atteignent cette latitude que lors de fortes tempêtes solaires, basses, direction %@. Elles dépendent de l’activité du Soleil ; quand la prévision de la NOAA pour les trois prochaines nuits atteint ce lieu, « Dans le ciel » l’indique."
           }
         },
         "ja": {
@@ -14703,7 +14703,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plus fréquenté en %1$@ ; plus calme en %2$@."
+            "value": "Plus fréquenté en %1$@ ; plus calme en %2$@."
           }
         },
         "ja": {
@@ -14773,7 +14773,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mois fréquentés et calmes : statistiques de fréquentation du National Park Service, moyennes mensuelles de 2021 à 2025, CC0."
+            "value": "Mois fréquentés et calmes : statistiques de fréquentation du National Park Service, moyennes mensuelles de 2021 à 2025, CC0."
           }
         },
         "ja": {
@@ -16427,7 +16427,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más cerca hacia las %1$@, %2$@. Un bello espectáculo a simple vista o con prismáticos."
+            "value": "Más cerca: aprox. %1$@, %2$@. Un bello espectáculo a simple vista o con prismáticos."
           }
         },
         "fr": {
@@ -20508,7 +20508,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Positions et magnitudes du ciel profond : Wikidata (CC0), la base de données SIMBAD (CDS, Strasbourg) et le catalogue des amas globulaires de Harris."
+            "value": "Positions et magnitudes du ciel profond : Wikidata (CC0), la base de données SIMBAD (CDS, Strasbourg) et le catalogue des amas globulaires de Harris."
           }
         },
         "ja": {
@@ -21243,7 +21243,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supprimer cette nuit ?"
+            "value": "Supprimer cette nuit ?"
           }
         },
         "ja": {
@@ -21278,7 +21278,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supprimer vos modifications ?"
+            "value": "Supprimer vos modifications ?"
           }
         },
         "ja": {
@@ -21488,7 +21488,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La taille du point suit l’indice ; un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
+            "value": "La taille du point suit l’indice ; un nuage marque un ciel couvert. Les nuits passées ne gardent qu’un point pâle. Un petit trait marque le maximum d’une pluie de météores, une Lune ombrée une éclipse de Lune visible ; ni l’un ni l’autre ne modifie l’indice."
           }
         },
         "ja": {
@@ -21828,7 +21828,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
+            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
           }
         },
         "ja": {
@@ -22518,7 +22518,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Altitude %1$@. Horizon dégagé : relief sous %2$lld° tout autour."
+            "value": "Altitude %1$@. Horizon dégagé : relief sous %2$lld° tout autour."
           }
         },
         "ja": {
@@ -23743,7 +23743,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs soirs pour la trouver, %2$@ après le coucher du Soleil."
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs soirs pour la trouver, %2$@ après le coucher du Soleil."
           }
         },
         "ja": {
@@ -23778,7 +23778,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs matins pour la trouver, %2$@ avant le lever du Soleil."
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs matins pour la trouver, %2$@ avant le lever du Soleil."
           }
         },
         "ja": {
@@ -25613,7 +25613,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour %1$lld des %2$lld parcs, la page du parc montre aussi ce que le Night Skies Program du National Park Service a mesuré sur le terrain : la luminosité du ciel au zénith, prise par la caméra plein ciel étalonnée du National Park Service, en magnitudes par seconde d’arc carrée (plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22), avec la classe de Bortle des observateurs quand ils en ont donné une. Chaque nuit est la valeur médiane des séries d’images de cette nuit. La plupart des sites ont été mesurés une nuit ou quelques-unes, entre 2001 et 2025 et surtout avant 2013, et le halo lumineux a augmenté depuis : ces mesures sont donc un contexte à côté de l’estimation, pas une part de l’indice. Un point d’observation affiche une mesure quand un site mesuré se trouve à moins de 1 km. Les données viennent de la carte publique des données du ciel nocturne du National Park Service, une œuvre du gouvernement des États-Unis dans le domaine public."
+            "value": "Pour %1$lld des %2$lld parcs, la page du parc montre aussi ce que le Night Skies Program du National Park Service a mesuré sur le terrain : la luminosité du ciel au zénith, prise par la caméra plein ciel étalonnée du National Park Service, en magnitudes par seconde d’arc carrée (plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22), avec la classe de Bortle des observateurs quand ils en ont donné une. Chaque nuit est la valeur médiane des séries d’images de cette nuit. La plupart des sites ont été mesurés une nuit ou quelques-unes, entre 2001 et 2025 et surtout avant 2013, et le halo lumineux a augmenté depuis : ces mesures sont donc un contexte à côté de l’estimation, pas une part de l’indice. Un point d’observation affiche une mesure quand un site mesuré se trouve à moins de 1 km. Les données viennent de la carte publique des données du ciel nocturne du National Park Service, une œuvre du gouvernement des États-Unis dans le domaine public."
           }
         },
         "ja": {
@@ -25823,7 +25823,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour les points d’observation des parcs nationaux des États-Unis, Nyx connaît le véritable horizon du relief : l’altitude du sol et la terre la plus haute dans chaque direction de 5° jusqu’à 100 km, vue à hauteur d’yeux, avec la courbure de la Terre et la réfraction normale. Il provient du 3D Elevation Program de l’US Geological Survey (terrain nu, 1 seconde d’arc), vérifié avec le WorldDEM de Copernicus ; un point où les deux ne concordaient pas est omis. Chaque point indique son altitude et la hauteur du relief ; la ligne du cœur de la Voie lactée dans « Dans le ciel » dit, à dix minutes près, quand le relief du principal point d’observation du parc le cache, et Vision Pro dessine ce relief comme ligne d’horizon. Les arbres, les bâtiments et tout ce qui se trouve à moins de 300 m ne sont pas inclus : une lisière de forêt peut donc être plus haute qu’indiqué. L’indice n’utilise pas le relief."
+            "value": "Pour les points d’observation des parcs nationaux des États-Unis, Nyx connaît le véritable horizon du relief : l’altitude du sol et la terre la plus haute dans chaque direction de 5° jusqu’à 100 km, vue à hauteur d’yeux, avec la courbure de la Terre et la réfraction normale. Il provient du 3D Elevation Program de l’US Geological Survey (terrain nu, 1 seconde d’arc), vérifié avec le WorldDEM de Copernicus ; un point où les deux ne concordaient pas est omis. Chaque point indique son altitude et la hauteur du relief ; la ligne du cœur de la Voie lactée dans « Dans le ciel » dit, à dix minutes près, quand le relief du principal point d’observation du parc le cache, et Vision Pro dessine ce relief comme ligne d’horizon. Les arbres, les bâtiments et tout ce qui se trouve à moins de 300 m ne sont pas inclus : une lisière de forêt peut donc être plus haute qu’indiqué. L’indice n’utilise pas le relief."
           }
         },
         "ja": {
@@ -25858,7 +25858,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour les parcs nationaux des États-Unis, le panneau « Après la tombée de la nuit » reprend ce que dit le National Park Service sur l’accès aux ciels noirs la nuit et au fil de l’année : portails et routes fermés la nuit, fermetures saisonnières de routes qui coupent l’accès à un point d’observation, et réservations qui concernent une arrivée de nuit. Chaque règle a été lue sur sa page nps.gov le 15 octobre 2026, la phrase sur laquelle elle repose vérifiée sur la page, et renvoie à cette page. Une règle habituellement en vigueur le mois de la nuit affichée le signale. Ce sont des habitudes, pas l’état des routes en direct : les fermetures en vigueur ce soir viennent des alertes du parc. Les mois fréquentés et calmes sont les visites de loisirs comptées par le National Park Service, moyennées mois par mois de 2021 à 2025 ; le comptage a changé dans quelques parcs pendant ces années, seul le profil est donc montré."
+            "value": "Pour les parcs nationaux des États-Unis, le panneau « Après la tombée de la nuit » reprend ce que dit le National Park Service sur l’accès aux ciels noirs la nuit et au fil de l’année : portails et routes fermés la nuit, fermetures saisonnières de routes qui coupent l’accès à un point d’observation, et réservations qui concernent une arrivée de nuit. Chaque règle a été lue sur sa page nps.gov le 15 octobre 2026, la phrase sur laquelle elle repose vérifiée sur la page, et renvoie à cette page. Une règle habituellement en vigueur le mois de la nuit affichée le signale. Ce sont des habitudes, pas l’état des routes en direct : les fermetures en vigueur ce soir viennent des alertes du parc. Les mois fréquentés et calmes sont les visites de loisirs comptées par le National Park Service, moyennées mois par mois de 2021 à 2025 ; le comptage a changé dans quelques parcs pendant ces années, seul le profil est donc montré."
           }
         },
         "ja": {
@@ -25893,7 +25893,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. Il en va de même pour la pluie et la neige (signalées quand le risque d’une heure atteint 25 %), les orages et le brouillard (d’après les codes météo de la prévision ; le brouillard est particulièrement difficile à prévoir, il est donc dit « possible »), et la vapeur d’eau au-dessus d’un lieu : sous 10 kg/m², sans brume et par ciel dégagé, l’air est dit très sec, ce qui signifie en général que les étoiles faibles ressortent bien. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
+            "value": "Pour les sept prochains jours, Nyx interroge aussi trois modèles de prévision indépendants (GFS de la NOAA, IFS de l’ECMWF et ICON du DWD) sur les mêmes heures d’obscurité totale. Quand leurs moyennes sont à moins de 15 points de couverture nuageuse, ils concordent ; à moins de 35, ils concordent à peu près ; au-delà, ils divergent, et la rivière du temps dessine la fourchette d’indices qu’ils permettent. L’indice lui-même utilise la prévision best match d’Open-Meteo ; en cas d’égalité, la meilleure concordance entre modèles passe en premier. Les couches nuageuses, l’heure la plus froide, le risque de rosée (air à moins de 2 °C de son point de rosée) et la plus forte rafale viennent de la même prévision à sept jours. Il en va de même pour la pluie et la neige (signalées quand le risque d’une heure atteint 25 %), les orages et le brouillard (d’après les codes météo de la prévision ; le brouillard est particulièrement difficile à prévoir, il est donc dit « possible »), et la vapeur d’eau au-dessus d’un lieu : sous 10 kg/m², sans brume et par ciel dégagé, l’air est dit très sec, ce qui signifie en général que les étoiles faibles ressortent bien. La visibilité est une valeur grossière du modèle et n’apparaît que comme indice de brume. Rien de tout cela ne modifie l’indice."
           }
         },
         "ja": {
@@ -26682,7 +26682,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve hacia las %2$@ y se oculta tras él hacia las %3$@."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@) y se oculta tras él (aprox. %3$@)."
           }
         },
         "fr": {
@@ -26717,7 +26717,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve hacia las %2$@."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@)."
           }
         },
         "fr": {
@@ -26752,7 +26752,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ se oculta tras el relieve hacia las %2$@."
+            "value": "Desde %1$@ se oculta tras el relieve (aprox. %2$@)."
           }
         },
         "fr": {
@@ -27024,13 +27024,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPad envió a las %@."
+                  "value": "Según el pronóstico de nubes que tu iPad envió (%@)."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPhone envió a las %@."
+                  "value": "Según el pronóstico de nubes que tu iPhone envió (%@)."
                 }
               }
             }
@@ -27119,13 +27119,13 @@
               "ipad": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPad envió el %1$@ a las %2$@."
+                  "value": "Según el pronóstico de nubes que tu iPad envió el %1$@ (%2$@)."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Según el pronóstico de nubes que tu iPhone envió el %1$@ a las %2$@."
+                  "value": "Según el pronóstico de nubes que tu iPhone envió el %1$@ (%2$@)."
                 }
               }
             }
@@ -27918,7 +27918,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
+            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
           }
         },
         "ja": {
@@ -28608,7 +28608,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc seulement la Lune et l’obscurité."
+            "value": "Vide : %@, donc seulement la Lune et l’obscurité."
           }
         },
         "ja": {
@@ -28643,7 +28643,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+            "value": "Vide : %@, donc la nébulosité habituelle du parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
           }
         },
         "ja": {
@@ -28678,7 +28678,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vide : %@, donc la nébulosité habituelle du parc."
+            "value": "Vide : %@, donc la nébulosité habituelle du parc."
           }
         },
         "ja": {
@@ -29098,7 +29098,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importer ce journal ?"
+            "value": "Importer ce journal ?"
           }
         },
         "ja": {
@@ -33242,7 +33242,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mesures : %@."
+            "value": "Mesures : %@."
           }
         },
         "ja": {
@@ -33312,7 +33312,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mesuré par le National Park Service à son site le plus sombre ici, %1$@ : %2$@ en %3$@ (plus c’est élevé, plus c’est sombre). Simple contexte ; ne compte pas dans l’indice."
+            "value": "Mesuré par le National Park Service à son site le plus sombre ici, %1$@ : %2$@ en %3$@ (plus c’est élevé, plus c’est sombre). Simple contexte ; ne compte pas dans l’indice."
           }
         },
         "ja": {
@@ -33382,7 +33382,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ciels nocturnes mesurés : Night Skies Program du National Park Service, domaine public."
+            "value": "Ciels nocturnes mesurés : Night Skies Program du National Park Service, domaine public."
           }
         },
         "ja": {
@@ -33961,7 +33961,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Núcleo de la Vía Láctea: visible en oscuridad total de %@ a %@."
+            "value": "Núcleo de la Vía Láctea: visible en oscuridad total de %@ a %@"
           }
         },
         "fr": {
@@ -34702,7 +34702,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noms et positions sur la Lune : l’IAU Gazetteer of Planetary Nomenclature, USGS (domaine public)."
+            "value": "Noms et positions sur la Lune : l’IAU Gazetteer of Planetary Nomenclature, USGS (domaine public)."
           }
         },
         "ja": {
@@ -35559,7 +35559,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mondaufgang %@, Monduntergang %@."
+            "value": "Mondaufgang %@, Monduntergang %@"
           }
         },
         "en": {
@@ -35571,7 +35571,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Salida de la Luna: %@; puesta de la Luna: %@."
+            "value": "Salida de la Luna: %@; puesta de la Luna: %@"
           }
         },
         "fr": {
@@ -35594,7 +35594,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mondaufgang %@."
+            "value": "Mondaufgang %@"
           }
         },
         "en": {
@@ -35606,7 +35606,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Salida de la Luna: %@."
+            "value": "Salida de la Luna: %@"
           }
         },
         "fr": {
@@ -35734,7 +35734,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Monduntergang %@."
+            "value": "Monduntergang %@"
           }
         },
         "en": {
@@ -35746,7 +35746,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Puesta de la Luna: %@."
+            "value": "Puesta de la Luna: %@"
           }
         },
         "fr": {
@@ -36792,7 +36792,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nommés au soleil : %@."
+            "value": "Nommés au soleil : %@."
           }
         },
         "ja": {
@@ -37807,7 +37807,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Accès de nuit et selon la saison : National Park Service, nps.gov, domaine public."
+            "value": "Accès de nuit et selon la saison : National Park Service, nps.gov, domaine public."
           }
         },
         "ja": {
@@ -40332,7 +40332,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
+            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
           }
         },
         "ja": {
@@ -41720,7 +41720,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
@@ -44974,96 +44974,37 @@
     "Open your iPhone flat to point it at the sky.": {
       "localizations": {
         "de": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Klappe dein iPad ganz auf, um es auf den Himmel zu richten."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Klappe dein iPhone ganz auf, um es auf den Himmel zu richten."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klappe dein iPhone ganz auf, um es auf den Himmel zu richten."
           }
         },
         "en": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Open your iPad flat to point it at the sky."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Open your iPhone flat to point it at the sky."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open your iPhone flat to point it at the sky."
           }
         },
         "es": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Abre el iPad del todo para apuntarlo al cielo."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Abre el iPhone del todo para apuntarlo al cielo."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el iPhone del todo para apuntarlo al cielo."
           }
         },
         "fr": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Dépliez entièrement votre iPad pour le pointer vers le ciel."
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Dépliez entièrement votre iPhone pour le pointer vers le ciel."
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépliez entièrement votre iPhone pour le pointer vers le ciel."
           }
         },
         "ja": {
-          "variations": {
-            "device": {
-              "ipad": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "空に向けるには、iPadを完全に開いてください。"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "空に向けるには、iPhoneを完全に開いてください。"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "空に向けるには、iPhoneを完全に開いてください。"
           }
         }
-      }
+      },
+      "extractionState": "manual"
     },
     "Open-Meteo forecasts cover up to 16 days. The U.S. national parks are asked for together, up to 50 in each request, and each request carries only the public coordinates of each park's main viewing spot; parks and dark-sky places elsewhere are asked for by whole regions, and saved spots in a request of their own. Clouds are averaged over the complete window of true darkness; on nights without it, over sunset to sunrise, or the four hours around the Sun's lowest point under the midnight sun. A forecast counts in full up to about three days ahead of a night. From there to ten days it is eased toward the park's usual clouds for the month, and these nights are marked as an early look; past ten days, or with no forecast, the usual clouds count alone. An old forecast is never dropped; it simply counts for less, so going offline cannot make a night look clearer than its clouds allow. A forecast with incomplete coverage of a night is not used. At Haleakalā, whose summit sits above the trade-wind inversion, the score counts mid and high cloud when that forecast is available. Open-Meteo's data is licensed under CC BY 4.0. Nyx changes it: each night's clouds are averaged over that night's true darkness and eased toward the usual clouds, as described here.": {
       "extractionState": "manual",
@@ -46419,7 +46360,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le National Park Service a mesuré le ciel ici en %1$@ : %2$@ magnitudes par seconde d’arc carrée ; plus c’est élevé, plus c’est sombre."
+            "value": "Le National Park Service a mesuré le ciel ici en %1$@ : %2$@ magnitudes par seconde d’arc carrée ; plus c’est élevé, plus c’est sombre."
           }
         },
         "ja": {
@@ -47469,7 +47410,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au-delà des sept jours de prévision horaire, les températures de la nuit sont les températures habituelles du mois : ERA5, un historique du temps passé reconstitué à partir d’observations, moyenné heure par heure de 2015 à 2024. « Avant l’aube » est la plus froide des deux heures précédant le lever du Soleil, une valeur habituelle plus douce de 1 à 3 °C que la minimale nocturne moyenne : Nyx ne l’appelle donc jamais minimale. Pour les parcs nationaux des États-Unis, elle correspond à l’altitude du principal point d’observation, ramenée à 6,5 °C par kilomètre ; ailleurs, elle provient d’une grille mondiale d’un demi-degré. Vérifiée avec les normales 1991–2020 de la NOAA à 31 stations proches des parcs, elle concorde à environ 1,4 °C pour la même définition, mais un fond de vallée peut être 2 à 4 °C plus froid par nuit claire d’hiver. Les nuits claires, celles qui valent la sortie, sont souvent plus froides de plusieurs degrés que la nuit habituelle, et l’app le dit. La rosée est mentionnée quand l’air est en général à moins de 2 °C de son point de rosée avant l’aube."
+            "value": "Au-delà des sept jours de prévision horaire, les températures de la nuit sont les températures habituelles du mois : ERA5, un historique du temps passé reconstitué à partir d’observations, moyenné heure par heure de 2015 à 2024. « Avant l’aube » est la plus froide des deux heures précédant le lever du Soleil, une valeur habituelle plus douce de 1 à 3 °C que la minimale nocturne moyenne : Nyx ne l’appelle donc jamais minimale. Pour les parcs nationaux des États-Unis, elle correspond à l’altitude du principal point d’observation, ramenée à 6,5 °C par kilomètre ; ailleurs, elle provient d’une grille mondiale d’un demi-degré. Vérifiée avec les normales 1991–2020 de la NOAA à 31 stations proches des parcs, elle concorde à environ 1,4 °C pour la même définition, mais un fond de vallée peut être 2 à 4 °C plus froid par nuit claire d’hiver. Les nuits claires, celles qui valent la sortie, sont souvent plus froides de plusieurs degrés que la nuit habituelle, et l’app le dit. La rosée est mentionnée quand l’air est en général à moins de 2 °C de son point de rosée avant l’aube."
           }
         },
         "ja": {
@@ -53044,7 +52985,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indices marqués Estimation : %@. Ils ne comptent que la Lune et l’obscurité."
+            "value": "Indices marqués Estimation : %@. Ils ne comptent que la Lune et l’obscurité."
           }
         },
         "ja": {
@@ -53079,7 +53020,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
+            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc, ou seulement la Lune et l’obscurité là où elle est inconnue."
           }
         },
         "ja": {
@@ -53114,7 +53055,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc."
+            "value": "Indices marqués Estimation : %@. Ils utilisent la nébulosité habituelle de chaque parc."
           }
         },
         "ja": {
@@ -55677,7 +55618,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luminosité du ciel au zénith, en magnitudes par seconde d’arc carrée : plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22. Le halo lumineux a pu augmenter depuis ; l’indice utilise l’estimation."
+            "value": "Luminosité du ciel au zénith, en magnitudes par seconde d’arc carrée : plus la valeur est élevée, plus le ciel est sombre ; les ciels naturels les plus sombres atteignent environ 22. Le halo lumineux a pu augmenter depuis ; l’indice utilise l’estimation."
           }
         },
         "ja": {
@@ -56587,7 +56528,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision rapprochée de la nébulosité habituelle."
+            "value": "Plein : prévision complète. À moitié plein : tendance, la prévision rapprochée de la nébulosité habituelle."
           }
         },
         "ja": {
@@ -57561,7 +57502,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iniciado a las %@"
+            "value": "Inicio: %@"
           }
         },
         "fr": {
@@ -59301,7 +59242,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Puesta del sol: %@."
+            "value": "Puesta del sol: %@"
           }
         },
         "fr": {
@@ -59371,7 +59312,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La puesta de sol es a las %@."
+            "value": "Puesta del sol: %@"
           }
         },
         "fr": {
@@ -59622,7 +59563,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Horizons du relief : 3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+            "value": "Horizons du relief : 3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "ja": {
@@ -60216,7 +60157,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le centre brillant de la Voie lactée est pris comme la direction de Sagittarius A*, considéré comme levé dès qu’il dépasse l’horizon de 10°. Les planètes utilisent les éléments orbitaux de faible précision de Paul Schlyter et concordent avec une éphéméride professionnelle à environ un degré près de 2026 à 2032 ; leur éclat est donné en mots, car celui de Mercure peut s’écarter de plus d’une demi-magnitude. Une planète est listée dès qu’elle est à 8° de hauteur dans un ciel assez sombre pour son éclat : le crépuscule civil pour Vénus et Jupiter à leur plus brillant, le Soleil 9° sous l’horizon pour les planètes plus brillantes que la magnitude 0, 12° pour les autres ; Mercure plus faible que la magnitude 1,5 est omis. Les heures de lever, de coucher et du meilleur moment sont calculées à une minute près selon le modèle, mais les collines, les arbres et la brume peuvent décaler ce que vous voyez de quelques minutes ou plus. Les pluies de météores viennent du Meteor Shower Calendar 2026 de l’International Meteor Organization (IMO, sous la direction de Jürgen Rendtel) : dates, radiants et taux maximaux publiés. Nyx estime un taux horaire pour un observateur à partir de la hauteur du radiant, de la Lune et de la luminosité estimée du ciel du parc, affiché comme une fourchette : le chiffre haut est ce qu’un observateur entraîné pourrait compter, et un observateur occasionnel en voit environ la moitié. C’est une indication grossière, et les pluies réelles varient d’une année à l’autre. Heures des éclipses de Lune : Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx vérifie la hauteur de la Lune au parc même et nomme la phase la plus profonde que vous pouvez voir : une Lune qui se lève pendant la phase partielle est donc montrée, pas masquée. Les satellites sont comptés comme éclairés tant que le Soleil est à moins d’environ 23° sous l’horizon, pour une orbite de 550 km au zénith. L’étoile la plus faible visible est estimée à partir de la classe de Bortle du parc, du clair de lune, du crépuscule et de la brume. Les notes sur les aurores dépendent de la distance entre un lieu et le pôle magnétique terrestre, suivie le long du champ magnétique lui-même avec l’International Geomagnetic Reference Field (IGRF-14), et n’apparaissent que les nuits assez sombres pour en voir une . Pour les trois prochaines nuits, le Space Weather Prediction Center de la NOAA prévoit l’activité géomagnétique sous la forme de l’indice Kp (de 0 à 9) : quand le Kp le plus élevé pendant l’obscurité totale place le bord habituel de l’aurore, vers 66° moins deux fois le Kp de latitude magnétique (Kp 5 vers 56°), sur un lieu ou au-delà, « Dans le ciel » indique qu’une aurore y est possible. Les prévisions de Kp à un jour ou plus se trompent souvent, et l’aurore va et vient au cours d’une nuit. Les temps forts sont calculés comme les planètes : la Lune à moins de 4° d’une planète ou deux planètes à moins de 3° (au degré près, jamais moins d’environ 1°, puisque les planètes sont placées à un degré près), une pleine Lune à moins de 360 000 km, Mercure ou Vénus à moins de trois jours de leur plus grande distance au Soleil, les solstices et le Gegenschein, une faible lueur à l’opposé du Soleil, sous un ciel de Bortle 3 ou plus sombre, la Lune couchée, à au moins 35° de hauteur et à 25° de la Voie lactée. Vérifié avec Horizons du JPL de la NASA pour 2026 à 2028. Rien de tout cela ne modifie l’indice."
+            "value": "Le centre brillant de la Voie lactée est pris comme la direction de Sagittarius A*, considéré comme levé dès qu’il dépasse l’horizon de 10°. Les planètes utilisent les éléments orbitaux de faible précision de Paul Schlyter et concordent avec une éphéméride professionnelle à environ un degré près de 2026 à 2032 ; leur éclat est donné en mots, car celui de Mercure peut s’écarter de plus d’une demi-magnitude. Une planète est listée dès qu’elle est à 8° de hauteur dans un ciel assez sombre pour son éclat : le crépuscule civil pour Vénus et Jupiter à leur plus brillant, le Soleil 9° sous l’horizon pour les planètes plus brillantes que la magnitude 0, 12° pour les autres ; Mercure plus faible que la magnitude 1,5 est omis. Les heures de lever, de coucher et du meilleur moment sont calculées à une minute près selon le modèle, mais les collines, les arbres et la brume peuvent décaler ce que vous voyez de quelques minutes ou plus. Les pluies de météores viennent du Meteor Shower Calendar 2026 de l’International Meteor Organization (IMO, sous la direction de Jürgen Rendtel) : dates, radiants et taux maximaux publiés. Nyx estime un taux horaire pour un observateur à partir de la hauteur du radiant, de la Lune et de la luminosité estimée du ciel du parc, affiché comme une fourchette : le chiffre haut est ce qu’un observateur entraîné pourrait compter, et un observateur occasionnel en voit environ la moitié. C’est une indication grossière, et les pluies réelles varient d’une année à l’autre. Heures des éclipses de Lune : Eclipse Predictions de Fred Espenak, GSFC de la NASA. Nyx vérifie la hauteur de la Lune au parc même et nomme la phase la plus profonde que vous pouvez voir : une Lune qui se lève pendant la phase partielle est donc montrée, pas masquée. Les satellites sont comptés comme éclairés tant que le Soleil est à moins d’environ 23° sous l’horizon, pour une orbite de 550 km au zénith. L’étoile la plus faible visible est estimée à partir de la classe de Bortle du parc, du clair de lune, du crépuscule et de la brume. Les notes sur les aurores dépendent de la distance entre un lieu et le pôle magnétique terrestre, suivie le long du champ magnétique lui-même avec l’International Geomagnetic Reference Field (IGRF-14), et n’apparaissent que les nuits assez sombres pour en voir une . Pour les trois prochaines nuits, le Space Weather Prediction Center de la NOAA prévoit l’activité géomagnétique sous la forme de l’indice Kp (de 0 à 9) : quand le Kp le plus élevé pendant l’obscurité totale place le bord habituel de l’aurore, vers 66° moins deux fois le Kp de latitude magnétique (Kp 5 vers 56°), sur un lieu ou au-delà, « Dans le ciel » indique qu’une aurore y est possible. Les prévisions de Kp à un jour ou plus se trompent souvent, et l’aurore va et vient au cours d’une nuit. Les temps forts sont calculés comme les planètes : la Lune à moins de 4° d’une planète ou deux planètes à moins de 3° (au degré près, jamais moins d’environ 1°, puisque les planètes sont placées à un degré près), une pleine Lune à moins de 360 000 km, Mercure ou Vénus à moins de trois jours de leur plus grande distance au Soleil, les solstices et le Gegenschein, une faible lueur à l’opposé du Soleil, sous un ciel de Bortle 3 ou plus sombre, la Lune couchée, à au moins 35° de hauteur et à 25° de la Voie lactée. Vérifié avec Horizons du JPL de la NASA pour 2026 à 2028. Rien de tout cela ne modifie l’indice."
           }
         },
         "ja": {
@@ -61301,7 +61242,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce mois-ci, avant l’aube, l’air est en général proche de son point de rosée : attendez-vous à de la rosée sur les optiques."
+            "value": "Ce mois-ci, avant l’aube, l’air est en général proche de son point de rosée : attendez-vous à de la rosée sur les optiques."
           }
         },
         "ja": {
@@ -62840,7 +62781,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les noms des mers et cratères de la Lune viennent du Gazetteer of Planetary Nomenclature de l’UAI (USGS) et sont placés sur la Lune dessinée par la même rotation qui dessine sa carte : chaque nom se trouve ainsi sur son relief, avec l’inclinaison et la libration de la nuit. Seuls les reliefs éclairés par le Soleil sont nommés, davantage sur une Lune plus grande, et un nom qui en chevaucherait un autre est omis."
+            "value": "Les noms des mers et cratères de la Lune viennent du Gazetteer of Planetary Nomenclature de l’UAI (USGS) et sont placés sur la Lune dessinée par la même rotation qui dessine sa carte : chaque nom se trouve ainsi sur son relief, avec l’inclinaison et la libration de la nuit. Seuls les reliefs éclairés par le Soleil sont nommés, davantage sur une Lune plus grande, et un nom qui en chevaucherait un autre est omis."
           }
         },
         "ja": {
@@ -64119,7 +64060,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El cielo sigue en crepúsculo desde la puesta de sol, a las %@, hasta el amanecer, a las %@."
+            "value": "El cielo sigue en crepúsculo desde la puesta del sol (%@) hasta el amanecer (%@)."
           }
         },
         "fr": {
@@ -65964,7 +65905,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta noche en %@: oscuridad total de %@ a %@."
+            "value": "Esta noche en %@: oscuridad total de %@ a %@"
           }
         },
         "fr": {
@@ -67224,7 +67165,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oscuridad total esta noche en %@: de %@ a %@."
+            "value": "Oscuridad total esta noche en %@: de %@ a %@"
           }
         },
         "fr": {
@@ -69387,7 +69328,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übliche Bewölkung hier in diesem Monat: %lld %%."
+            "value": "Übliche Bewölkung hier in diesem Monat: %lld %%."
           }
         },
         "en": {
@@ -69405,7 +69346,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nébulosité habituelle ici ce mois-ci : %lld %%."
+            "value": "Nébulosité habituelle ici ce mois-ci : %lld %%."
           }
         },
         "ja": {
@@ -69545,7 +69486,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Températures nocturnes habituelles : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024, CC BY 4.0."
+            "value": "Températures nocturnes habituelles : contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024, CC BY 4.0."
           }
         },
         "ja": {
@@ -69790,7 +69731,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Air très sec : bon pour les étoiles faibles."
+            "value": "Air très sec : bon pour les étoiles faibles."
           }
         },
         "ja": {
@@ -69825,7 +69766,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Air très sec et pur : bon pour les étoiles faibles."
+            "value": "Air très sec et pur : bon pour les étoiles faibles."
           }
         },
         "ja": {
@@ -70484,13 +70425,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Weather data by Open-Meteo.com"
+            "value": "Datos meteorológicos de Open-Meteo.com"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Weather data by Open-Meteo.com"
+            "value": "Données météo par Open-Meteo.com"
           }
         },
         "ja": {
@@ -70910,7 +70851,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "« Dans le ciel » nomme jusqu’à trois objets du ciel profond les mieux placés cette nuit-là, à au moins 30° de hauteur pendant l’obscurité totale, parmi une liste de 44 objets visibles à l’œil nu ou aux jumelles des deux hémisphères : positions et magnitudes de Wikidata, vérifiées avec SIMBAD, le catalogue des amas globulaires de Harris et les pages Messier de SEDS. Les galaxies et nébuleuses faibles ne sont proposées que sous un ciel de Bortle 4 ou plus sombre, Lune couchée, et sous une Lune éclairée à plus d’un quart, seulement les objets plus brillants que la magnitude 4 (amas d’étoiles 5,5). « Visible aussi à l’œil nu » suit la classe de ciel la plus sombre que J. E. Bortle a donnée pour chaque objet (classe 4 quand il n’en a pas donné), Lune couchée."
+            "value": "« Dans le ciel » nomme jusqu’à trois objets du ciel profond les mieux placés cette nuit-là, à au moins 30° de hauteur pendant l’obscurité totale, parmi une liste de 44 objets visibles à l’œil nu ou aux jumelles des deux hémisphères : positions et magnitudes de Wikidata, vérifiées avec SIMBAD, le catalogue des amas globulaires de Harris et les pages Messier de SEDS. Les galaxies et nébuleuses faibles ne sont proposées que sous un ciel de Bortle 4 ou plus sombre, Lune couchée, et sous une Lune éclairée à plus d’un quart, seulement les objets plus brillants que la magnitude 4 (amas d’étoiles 5,5). « Visible aussi à l’œil nu » suit la classe de ciel la plus sombre que J. E. Bortle a donnée pour chaque objet (classe 4 quand il n’en a pas donné), Lune couchée."
           }
         },
         "ja": {
@@ -76208,7 +76149,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "a las %1$@, y luego %2$@ de duración"
+            "value": "%1$@, y luego %2$@ de duración"
           }
         },
         "fr": {
@@ -76791,7 +76732,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wolkenvorhersage nicht verfügbar, üblicherweise %lld %% Bewölkung"
+            "value": "Wolkenvorhersage nicht verfügbar, üblicherweise %lld %% Bewölkung"
           }
         },
         "en": {
@@ -76809,7 +76750,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "prévision de nuages indisponible, en général %lld %% de nuages"
+            "value": "prévision de nuages indisponible, en général %lld %% de nuages"
           }
         },
         "ja": {
@@ -76844,7 +76785,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "prévision de nuages indisponible ; noté sur la Lune et l’obscurité seules"
+            "value": "prévision de nuages indisponible ; noté sur la Lune et l’obscurité seules"
           }
         },
         "ja": {
@@ -76879,7 +76820,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "prévision de nuages indisponible ; noté avec la nébulosité habituelle du parc pour le mois"
+            "value": "prévision de nuages indisponible ; noté avec la nébulosité habituelle du parc pour le mois"
           }
         },
         "ja": {
@@ -78576,7 +78517,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ein Himmel, der Schutz verdient\n\nEin dunkler Himmel ist mehr als ein Ort, um Sterne zu sehen. Er ist ein Lebensraum. Lange vor dem elektrischen Licht lebten Pflanzen und Tiere mit einem steten Rhythmus aus hellen Tagen und dunklen Nächten, und sie tun es noch immer.\n\nLicht, das in der Atmosphäre gestreut wird, erzeugt Himmelsaufhellung. Das schwache Band der Milchstraße verschwindet als Erstes; die hellsten Sterne bleiben. Ein 2016 veröffentlichter Weltatlas der Nachthimmelshelligkeit benannte das Ausmaß nüchtern: Die Milchstraße ist für mehr als ein Drittel der Menschheit verborgen, darunter 60 % der Menschen in Europa und fast 80 % in Nordamerika. Ein Nationalpark kann der erste Ort sein, an dem jemand sieht, was fehlt.\n\nDie Veränderung ist auch schnell. Von 2011 bis 2022 haben Menschen auf der ganzen Welt die Sterne, die sie sehen konnten, mit Sternkarten verglichen und ihre Beobachtungen an Globe at Night gemeldet, ein Bürgerwissenschaftsprojekt. Eine 2023 veröffentlichte Studie über 51.351 dieser Beobachtungen ergab, dass die Zahl der sichtbaren Sterne so stark sank, wie es eine Zunahme der Himmelshelligkeit um 7 bis 10 % pro Jahr im für Menschen sichtbaren Bereich erklären würde. Das ist schneller, als Satelliten zeigen, auch weil sich die Farbe des Außenlichts verändert hat.\n\nDie meisten Parkseiten in Nyx nennen die Orte, deren Licht über ihrem Horizont aufsteigt, nach den NASA-Satellitendaten der Nachtlichter. Vom Death Valley aus liegt der hellste Schein im Osten, Richtung Las Vegas. Für jeden Park, der dunkler ist als eine Stadt, zeichnet dieselbe Seite seinen Himmel zweimal, in seiner geschätzten Klasse und in der einer Stadt, damit man den Unterschied sehen kann, statt ihn sich vorzustellen.\n\nDunkelheit heißt nicht, gar kein Licht zu nutzen. Sie heißt Licht, wo es hilft, wann es gebraucht wird, nicht heller als nötig. Eine abgeschirmte Leuchte, die auf den Boden zielt, dient einem Weg besser als eine, die in den Himmel strahlt.\n\nDie Mitarbeitenden der Parks schützen den Nachthimmel, indem sie die Außenbeleuchtung verbessern und die Himmelshelligkeit messen, und die International-Dark-Sky-Zertifizierung würdigt diese Arbeit. Sie ist kein Versprechen, dass jeder Winkel gleich dunkel ist. Deshalb nennt Nyx die Bortle-Klasse jedes Parks eine Schätzung: An einem Besucherzentrum gibt es mehr Licht als an einem abgelegenen Aussichtspunkt.\n\nIm Park reicht ein schwaches rotes Licht, um dich zu bewegen. Die Scheinwerfer können aus, sobald du sicher geparkt hast, und ein tief gehaltener Lichtstrahl bleibt aus den Augen anderer Beobachtender. Ein Ranger kann dir sagen, wo du nach Einbruch der Dunkelheit bleiben darfst.\n\nWenn du etwas zu den Aufzeichnungen beitragen möchtest, vergleiche in einer klaren Nacht die Sterne, die du sehen kannst, mit den Karten von Globe at Night und melde, was du findest. Es dauert ein paar Minuten, in einem Park oder in deiner eigenen Straße, und jede Beobachtung zeigt etwas mehr davon, wie sich die Nacht verändert.\n\nQuellen: F. Falchi und andere, „The new world atlas of artificial night sky brightness“, Science Advances 2, e1600377 (2016). C. C. M. Kyba und andere, „Citizen scientists report global rapid reductions in the visibility of stars from 2011 to 2022“, Science 379, 265–268 (2023). Lichtglocken: NASA-Black-Marble-Nachtlichter (VNP46A4), 2025."
+            "value": "Ein Himmel, der Schutz verdient\n\nEin dunkler Himmel ist mehr als ein Ort, um Sterne zu sehen. Er ist ein Lebensraum. Lange vor dem elektrischen Licht lebten Pflanzen und Tiere mit einem steten Rhythmus aus hellen Tagen und dunklen Nächten, und sie tun es noch immer.\n\nLicht, das in der Atmosphäre gestreut wird, erzeugt Himmelsaufhellung. Das schwache Band der Milchstraße verschwindet als Erstes; die hellsten Sterne bleiben. Ein 2016 veröffentlichter Weltatlas der Nachthimmelshelligkeit benannte das Ausmaß nüchtern: Die Milchstraße ist für mehr als ein Drittel der Menschheit verborgen, darunter 60 % der Menschen in Europa und fast 80 % in Nordamerika. Ein Nationalpark kann der erste Ort sein, an dem jemand sieht, was fehlt.\n\nDie Veränderung ist auch schnell. Von 2011 bis 2022 haben Menschen auf der ganzen Welt die Sterne, die sie sehen konnten, mit Sternkarten verglichen und ihre Beobachtungen an Globe at Night gemeldet, ein Bürgerwissenschaftsprojekt. Eine 2023 veröffentlichte Studie über 51.351 dieser Beobachtungen ergab, dass die Zahl der sichtbaren Sterne so stark sank, wie es eine Zunahme der Himmelshelligkeit um 7 bis 10 % pro Jahr im für Menschen sichtbaren Bereich erklären würde. Das ist schneller, als Satelliten zeigen, auch weil sich die Farbe des Außenlichts verändert hat.\n\nDie meisten Parkseiten in Nyx nennen die Orte, deren Licht über ihrem Horizont aufsteigt, nach den NASA-Satellitendaten der Nachtlichter. Vom Death Valley aus liegt der hellste Schein im Osten, Richtung Las Vegas. Für jeden Park, der dunkler ist als eine Stadt, zeichnet dieselbe Seite seinen Himmel zweimal, in seiner geschätzten Klasse und in der einer Stadt, damit man den Unterschied sehen kann, statt ihn sich vorzustellen.\n\nDunkelheit heißt nicht, gar kein Licht zu nutzen. Sie heißt Licht, wo es hilft, wann es gebraucht wird, nicht heller als nötig. Eine abgeschirmte Leuchte, die auf den Boden zielt, dient einem Weg besser als eine, die in den Himmel strahlt.\n\nDie Mitarbeitenden der Parks schützen den Nachthimmel, indem sie die Außenbeleuchtung verbessern und die Himmelshelligkeit messen, und die International-Dark-Sky-Zertifizierung würdigt diese Arbeit. Sie ist kein Versprechen, dass jeder Winkel gleich dunkel ist. Deshalb nennt Nyx die Bortle-Klasse jedes Parks eine Schätzung: An einem Besucherzentrum gibt es mehr Licht als an einem abgelegenen Aussichtspunkt.\n\nIm Park reicht ein schwaches rotes Licht, um dich zu bewegen. Die Scheinwerfer können aus, sobald du sicher geparkt hast, und ein tief gehaltener Lichtstrahl bleibt aus den Augen anderer Beobachtender. Ein Ranger kann dir sagen, wo du nach Einbruch der Dunkelheit bleiben darfst.\n\nWenn du etwas zu den Aufzeichnungen beitragen möchtest, vergleiche in einer klaren Nacht die Sterne, die du sehen kannst, mit den Karten von Globe at Night und melde, was du findest. Es dauert ein paar Minuten, in einem Park oder in deiner eigenen Straße, und jede Beobachtung zeigt etwas mehr davon, wie sich die Nacht verändert.\n\nQuellen: F. Falchi und andere, „The new world atlas of artificial night sky brightness“, Science Advances 2, e1600377 (2016). C. C. M. Kyba und andere, „Citizen scientists report global rapid reductions in the visibility of stars from 2011 to 2022“, Science 379, 265–268 (2023). Lichtglocken: NASA-Black-Marble-Nachtlichter (VNP46A4), 2025."
           }
         },
         "en": {
@@ -78821,7 +78762,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Den Dunkelheitswert verstehen\n\nDer Dunkelheitswert beantwortet eine Frage: Wie dunkel und klar wird der Himmel in diesem Park in dieser Nacht sein? Er reicht von 0 bis 100. Nyx setzt ihn aus vier Teilen zusammen und prüft ihn dann am schwächsten Glied.\n\nDie vier Teile haben feste Gewichte. Der Mond zählt 40 Punkte: Eine Nacht ohne Mondlicht während der echten Dunkelheit erhält alle 40, ein Vollmond, der die ganze Nacht hoch am Himmel steht, keinen. Wolken zählen 25, gemittelt über die Stunden echter Dunkelheit. Die Himmelsaufhellung zählt 20, nach der geschätzten Bortle-Klasse des Parks. Die Länge der echten Dunkelheit zählt 15, und zehn Stunden oder mehr ergeben die volle Punktzahl. Echte Dunkelheit ist die Zeit, in der die Sonne mehr als 18 Grad unter dem Horizont steht und die Dämmerung den Himmel verlassen hat.\n\nNur zu addieren würde täuschen: Eine mondlose Nacht unter dichten Wolken käme trotzdem auf eine ansehnliche Zahl. Deshalb steigt der Wert nie über sein schwächstes Glied. Wolken begrenzen ihn: Halbe Bewölkung hält eine Nacht bei 55, volle Bedeckung bei 10. Die Himmelsaufhellung begrenzt ihn: Ein Park der Bortle-Klasse 3 kann höchstens 89 erreichen, sodass nur die dunkelsten Himmel „Makellos“ erreichen. Rauch oder Dunst in der Vorhersage begrenzt ihn auf 74, bei dichtem Rauch oder Dunst auf 59. Eine Nacht mit weniger als drei Stunden echter Dunkelheit wird ebenfalls begrenzt, und eine ganz ohne bleibt unter 40.\n\nEin Beispiel. Ein Park der Bortle-Klasse 2, eine schmale Mondsichel, die in der Abenddämmerung untergeht, neun Stunden echte Dunkelheit und eine Vorhersage von 40 % Bewölkung. Die Teile ergeben zusammen 86: 40 für den Mond, 15 für die Wolken, 17,5 für die Himmelsaufhellung und 13,5 für die Länge. Aber 40 % Bewölkung begrenzen die Nacht auf 64, also ist der Wert 64, „Gut“, und die Aufschlüsselung sagt, dass Wolken die Nacht auf 64 begrenzen.\n\nWolken sind der unsicherste Teil. Bis etwa drei Tage im Voraus nutzt Nyx die Wolkenvorhersage voll. Von dort bis zu zehn Tagen nähert es die Vorhersage an die übliche Bewölkung des Parks in diesem Monat an und nennt die Nacht eine erste Einschätzung, unter „Planen“ halb gefüllt gezeichnet. Nach zehn Tagen trägt eine Vorhersage wenig bei, daher beruht der Wert allein auf der üblichen Bewölkung, und die Nacht wird leer gezeichnet. Diese Werte ändern sich, je näher die Nacht rückt.\n\nDie Stufen sind einfach: Ab 90 ist „Makellos“, ab 75 „Sehr gut“, ab 60 „Gut“, ab 40 „Mäßig“, und alles darunter ist „Schlecht“.\n\nManches kann der Wert nicht wissen. Er weiß nicht, ob die Straße zu deinem Beobachtungsplatz offen ist: In den US-Nationalparks zeigt Nyx die Hinweise des Park Service neben dem Wert, aber sie können Stunden alt sein, und anderswo gibt es keine. Er sieht keinen beleuchteten Parkplatz, keine Laterne auf einem Campingplatz und keinen Bergkamm, der genau den Teil des Himmels verdeckt, für den du gekommen bist. Und er kennt deine Augen nicht: wie lange sie Zeit hatten, sich anzupassen, oder wie viel ein heller Bildschirm zunichtegemacht hat. Eine gut geplante Nacht mit „Gut“ kann besser sein als eine gehetzte mit „Sehr gut“."
+            "value": "Den Dunkelheitswert verstehen\n\nDer Dunkelheitswert beantwortet eine Frage: Wie dunkel und klar wird der Himmel in diesem Park in dieser Nacht sein? Er reicht von 0 bis 100. Nyx setzt ihn aus vier Teilen zusammen und prüft ihn dann am schwächsten Glied.\n\nDie vier Teile haben feste Gewichte. Der Mond zählt 40 Punkte: Eine Nacht ohne Mondlicht während der echten Dunkelheit erhält alle 40, ein Vollmond, der die ganze Nacht hoch am Himmel steht, keinen. Wolken zählen 25, gemittelt über die Stunden echter Dunkelheit. Die Himmelsaufhellung zählt 20, nach der geschätzten Bortle-Klasse des Parks. Die Länge der echten Dunkelheit zählt 15, und zehn Stunden oder mehr ergeben die volle Punktzahl. Echte Dunkelheit ist die Zeit, in der die Sonne mehr als 18 Grad unter dem Horizont steht und die Dämmerung den Himmel verlassen hat.\n\nNur zu addieren würde täuschen: Eine mondlose Nacht unter dichten Wolken käme trotzdem auf eine ansehnliche Zahl. Deshalb steigt der Wert nie über sein schwächstes Glied. Wolken begrenzen ihn: Halbe Bewölkung hält eine Nacht bei 55, volle Bedeckung bei 10. Die Himmelsaufhellung begrenzt ihn: Ein Park der Bortle-Klasse 3 kann höchstens 89 erreichen, sodass nur die dunkelsten Himmel „Makellos“ erreichen. Rauch oder Dunst in der Vorhersage begrenzt ihn auf 74, bei dichtem Rauch oder Dunst auf 59. Eine Nacht mit weniger als drei Stunden echter Dunkelheit wird ebenfalls begrenzt, und eine ganz ohne bleibt unter 40.\n\nEin Beispiel. Ein Park der Bortle-Klasse 2, eine schmale Mondsichel, die in der Abenddämmerung untergeht, neun Stunden echte Dunkelheit und eine Vorhersage von 40 % Bewölkung. Die Teile ergeben zusammen 86: 40 für den Mond, 15 für die Wolken, 17,5 für die Himmelsaufhellung und 13,5 für die Länge. Aber 40 % Bewölkung begrenzen die Nacht auf 64, also ist der Wert 64, „Gut“, und die Aufschlüsselung sagt, dass Wolken die Nacht auf 64 begrenzen.\n\nWolken sind der unsicherste Teil. Bis etwa drei Tage im Voraus nutzt Nyx die Wolkenvorhersage voll. Von dort bis zu zehn Tagen nähert es die Vorhersage an die übliche Bewölkung des Parks in diesem Monat an und nennt die Nacht eine erste Einschätzung, unter „Planen“ halb gefüllt gezeichnet. Nach zehn Tagen trägt eine Vorhersage wenig bei, daher beruht der Wert allein auf der üblichen Bewölkung, und die Nacht wird leer gezeichnet. Diese Werte ändern sich, je näher die Nacht rückt.\n\nDie Stufen sind einfach: Ab 90 ist „Makellos“, ab 75 „Sehr gut“, ab 60 „Gut“, ab 40 „Mäßig“, und alles darunter ist „Schlecht“.\n\nManches kann der Wert nicht wissen. Er weiß nicht, ob die Straße zu deinem Beobachtungsplatz offen ist: In den US-Nationalparks zeigt Nyx die Hinweise des Park Service neben dem Wert, aber sie können Stunden alt sein, und anderswo gibt es keine. Er sieht keinen beleuchteten Parkplatz, keine Laterne auf einem Campingplatz und keinen Bergkamm, der genau den Teil des Himmels verdeckt, für den du gekommen bist. Und er kennt deine Augen nicht: wie lange sie Zeit hatten, sich anzupassen, oder wie viel ein heller Bildschirm zunichtegemacht hat. Eine gut geplante Nacht mit „Gut“ kann besser sein als eine gehetzte mit „Sehr gut“."
           }
         },
         "en": {
@@ -80254,7 +80195,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "pas encore de prévision de nuages ; noté sur la Lune et l’obscurité seules"
+            "value": "pas encore de prévision de nuages ; noté sur la Lune et l’obscurité seules"
           }
         },
         "ja": {
