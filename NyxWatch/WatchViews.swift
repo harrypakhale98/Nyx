@@ -100,13 +100,14 @@ private struct WatchRoutes: ViewModifier {
         }
     }
 }
-/// A place's page whose place the iPhone stopped sending while it was open (a saved spot removed):
+/// A place's page whose place the iPhone stopped sending while it was open (a saved spot removed,
+/// or a place that was only Tonight's answer):
 /// one calm line, and back to where it came from rather than a blank page.
 private struct GoneNight: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nyx) private var palette
     var body: some View {
-        Text("This place is no longer saved in Nyx.").font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+        Text("Nyx on iPhone no longer sends this place.").font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true).padding()
             // Long enough to read the line, then back.
             .task {

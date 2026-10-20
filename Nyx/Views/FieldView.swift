@@ -48,10 +48,8 @@ struct FieldView: View {
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     /// Field mode is tonight, always within a forecast's reach: without one, it is unavailable, never "not yet".
     private var basisNote: String? {
-        // The night's month at the park, from its sunset (field mode is one night): with no usual clouds
-        // for it, an early look counts the forecast as it stands.
-        let evening=session.night.milestones.first { $0.kind == .sunset }?.date ?? session.now
-        return Self.basisNote(session.score,usualClouds:CloudClimate.shared.typical(session.park,on:evening) != nil)
+        // With no usual clouds for the night's month, an early look counts the forecast as it stands.
+        return Self.basisNote(session.score,usualClouds:session.usualClouds)
     }
     /// What the score's clouds rest on, said as the park page says it (`CloudBasis.earlyLookCaption`); nil with a full forecast.
     nonisolated static func basisNote(_ score:DarknessScore,usualClouds:Bool)->String? {
