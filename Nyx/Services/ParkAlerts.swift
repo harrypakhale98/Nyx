@@ -12,15 +12,18 @@ extension ParkAlert {
     /// worst outcome is a long drive to a closed road, so anything that reads as a closure of a
     /// place counts, and so does anything NPS files as "Park Closure" unless it is only about an
     /// amenity ("No Water or Bathrooms at Kīpahulu", "Gas Pumps … Closed at Night").
-    /// A reopening is not a closure ("Road Reopened After Closure", even filed as "Park Closure"),
-    /// unless the headline says something is shut now ("Road Reopens; Upper Loop Remains Closed",
-    /// "Road Reopened, Trail Closed"); a closure it only looks back on ("After Being Closed") is over.
+    /// A reopening is not a closure only when the headline says it has already happened ("Tioga Road
+    /// Has Reopened", "Kolob Canyons Road Now Open", "Road Reopened After Closure"), with nothing to
+    /// say it is still to come or only in part ("Reopens May 30", "Expected to Reopen", "Reopening
+    /// Delayed", "Partial Reopening", "Will Reopen When Safe", "Open Until Dusk") and nothing still
+    /// shut ("Road Reopened, Trail Closed"). When in doubt, a closure: a missed one is the worst
+    /// outcome, a closure shown that has just ended only costs a check.
     nonisolated var kind: AlertKind {
         let text = " " + Park.folded(title) + " "
         func has(_ words: [String]) -> Bool { words.contains { text.contains(" \($0) ") } }
         let shutNow=has(["remains closed","remain closed","still closed","stays closed","remains shut","still shut","remains inaccessible","remains impassable"])
-            || has(["closed","closes","closing","shut"]) && !has(["after being closed","was closed","had been closed","has been closed","been closed"])
-        let reopened=has(["reopened","reopens","reopen","reopening"]) && !shutNow
+            || has(["closed","closes","closing","shut"]) && !has(["after being closed","was closed","had been closed"])
+        let reopened=has(["reopened","now open","is open","are open"]) && !has(Self.notYetWords) && !shutNow
         let closing = !reopened && has(Self.closureWords)
         let amenityOnly=has(Self.amenityWords) && !has(Self.placeWords)
         let category=category.lowercased()
@@ -29,6 +32,15 @@ extension ParkAlert {
         if category.contains("caution") { return .caution }
         return .notice
     }
+    /// Words that make a reopening still to come, uncertain or partial ("to reopen", "until", a date).
+    /// "Sun" is left out: "Going-to-the-Sun Road Has Reopened" is a reopening.
+    private nonisolated static let notYetWords=["reopens","reopen","reopening","to open","will","would","may","might","could","expected","expects",
+        "anticipated","scheduled","planned","tentative","tentatively","pending","delayed","delay","delays","postponed","soon","later","next","until",
+        "tomorrow","tonight","partial","partially","part","portion","only","limited","restricted","restrictions","except","but","weather","conditions",
+        "when","if","seasonal","season","hours","daytime","day use","weekends","weekend",
+        "january","february","march","april","june","july","august","september","october","november","december",
+        "jan","feb","mar","apr","jun","jul","aug","sep","sept","oct","nov","dec",
+        "monday","tuesday","wednesday","thursday","friday","saturday","sunday","mon","tue","tues","wed","thu","thur","thurs","fri","sat"]
     private nonisolated static let closureWords=["closed","closure","closures","closes","closing","shut","shutdown","inaccessible","impassable",
         "no access","out of service","washed out","not accessible"]
     private nonisolated static let amenityWords=["gas","fuel","pump","pumps","store","shop","gift","restaurant","cafe","dining","food","lodging","lodge",

@@ -81,8 +81,9 @@ actor ForecastDetailService: DetailProviding {
     /// waits for it, then decides again what is due.
     private var catalogAirRunning: (task: Task<Void, Never>, attempted: Set<String>)?
     /// Catalogue smoke parts this device's own budget held back, sent once its minute has passed
-    /// (`followUp`), by their first places; a refresh meanwhile leaves them to it.
-    private var catalogAirFollowUp: (task: Task<Void, Never>, parts: Set<String>)?
+    /// (`followUp`), by their first places; a refresh meanwhile leaves them to it. Let go when smoke
+    /// is switched off (`forgetAir`), with the smoke generation it was made for.
+    private var catalogAirFollowUp: (task: Task<Void, Never>, parts: Set<String>, generation: Int)?
     /// When each place was last sent and answered with nothing usable for it, by kind
     /// (`ForecastReuse.retryable`); cleared by a usable answer.
     private var tried: [Kind: [String: Date]] = [:]
@@ -107,6 +108,8 @@ actor ForecastDetailService: DetailProviding {
     func pausedForLowData() -> Bool { lowData }
     func forgetAir() {
         airGeneration+=1
+        // Parts held back for a follow-up are let go, so smoke switched on again asks for them at once.
+        catalogAirFollowUp?.task.cancel(); catalogAirFollowUp=nil
         for (id, detail) in memory where detail.air != nil {
             var kept=detail; kept.air=nil
             memory[id]=kept
@@ -270,7 +273,9 @@ actor ForecastDetailService: DetailProviding {
     }
     /// Parts the browsing budget held back go once its minute has passed (a few seconds on, so devices
     /// held together do not return together), round by round while each round sends some; never
-    /// while the hour's or the day's budget is what holds them: the next refresh asks then.
+    /// while the hour's or the day's budget is what holds them: the next refresh asks then. Each round
+    /// is the catalogue's request under way (`catalogAirRunning`), after any already on its way, so the
+    /// host still has one request from Nyx at a time.
     private func followUp(_ held: [[Park]], generation: Int) {
         guard !held.isEmpty, catalogAirFollowUp == nil, generation == airGeneration else { return }
         let task=Task {
@@ -280,16 +285,24 @@ actor ForecastDetailService: DetailProviding {
                 let minute=CallLedger.windowStart(now, length: 60).addingTimeInterval(60)
                 guard self.fits(next, at: minute) else { break }
                 await self.pause(minute.timeIntervalSince(now)+Double.random(in: 1..<10))
-                guard !Task.isCancelled else { break }
+                while let current=self.catalogAirRunning, !Task.isCancelled { _=await SharedRequest.value(of: current.task) }
+                guard !Task.isCancelled, generation == self.airGeneration else { break }
                 // A part kept meanwhile (a refresh got there first) is no longer due.
                 let still=left.filter { self.airDue($0, now: self.clock(), force: false) }
-                let again=await self.sendAir(still, generation: generation)
+                // Clears itself before it ends, as a refresh's request does, so a waiter never finds it finished.
+                let send=Task { () -> [[Park]] in
+                    let again=await self.sendAir(still, generation: generation)
+                    self.catalogAirRunning=nil
+                    return again
+                }
+                self.catalogAirRunning=(Task { _=await send.value }, Set(still.joined().map(\.id)))
+                let again=await send.value
                 guard again.count<still.count else { break }
                 left=again
             }
-            self.catalogAirFollowUp=nil
+            if self.catalogAirFollowUp?.generation == generation { self.catalogAirFollowUp=nil }
         }
-        catalogAirFollowUp=(task, Set(held.compactMap(\.first?.id)))
+        catalogAirFollowUp=(task, Set(held.compactMap(\.first?.id)), generation)
     }
     /// Lets the catalogue smoke held back by the budget finish (tests).
     func followUpFinished() async { await catalogAirFollowUp?.task.value }
@@ -346,13 +359,15 @@ actor ForecastDetailService: DetailProviding {
     }
     /// Nil when Low Data Mode held the request back; empty when it failed any other way.
     /// `caps`: the browsing budget for the catalogue's smoke; the essential one otherwise.
-    /// A place the service answered for without what the score needs (or refused) is noted in
-    /// `tried`, so it is not asked again on every refresh.
+    /// A place the service answered for without what the score needs (or whose request it refused
+    /// as such, `HTTPStatusError.refusesRequest`) is noted in `tried`, so it is not asked again on
+    /// every refresh. A 429 or 5xx is left to `HostBackoff`, a 3xx to the next refresh: once the
+    /// service or the network recovers, the places are asked at once.
     private func fetch(_ kind: Kind, _ parks: [Park], caps: CallBudget.Caps? = nil) async -> [(String, HourlySeries)]? {
         guard !parks.isEmpty, let request=request(kind, parks) else { return [] }
         let data: Data
         do { data=try await ForecastRequest.get(request.url, transport: transport, constrained: false, backoff: backoff, ledger: ledger, caps: caps ?? budget.essential, clock: clock) } catch {
-            if error is HTTPStatusError { note(kind, parks.map(\.id), kept: []) }
+            if (error as? HTTPStatusError)?.refusesRequest == true { note(kind, parks.map(\.id), kept: []) }
             return Backoff.constrained(error) ? nil : []
         }
         let series=OpenMeteoAnswer.series(data, ids: parks.map(\.id), keys: request.required, extras: request.context, now: clock())
@@ -506,7 +521,11 @@ actor ParkStore: ParkProviding {
     private let clock: @Sendable () -> Date
     private var alertCache: ParkAlertsCache?
     private var alertsLoaded=false
-    private var alertsTask: Task<Bool, Never>?
+    /// The alerts request under way, with how many pages it may read.
+    private var alertsTask: (task: Task<AlertsFetch, Never>, pages: Int)?
+    /// How an alerts request ended: kept, failed, or stopped at its page cap before the set was whole
+    /// (a background refresh), which keeps the last complete set.
+    private nonisolated enum AlertsFetch: Sendable { case kept, failed, partial }
     /// Callers waiting on `alertsTask`; when the last one is cancelled, so is the request.
     private var alertWaiters=0
     /// The last alerts request was refused (the quota spent, a refused key, a server error); a
@@ -563,32 +582,35 @@ actor ParkStore: ParkProviding {
         guard network, Self.usable(key) else { return AlertsUpdate(cache: alertCache, busy: false) }
         // Another screen's request is on its way: wait for it and take what it brought, never sending
         // it again: one that failed without a backoff (a timeout) is not repeated once per waiter.
-        // The task clears itself before it finishes, so a waiter never sees a request that has
-        // already ended. A cancelled caller stops waiting and returns what is cached.
-        if let running=alertsTask {
-            _=await wait(for: running)
-            return AlertsUpdate(cache: alertCache, busy: busy)
+        // Only one allowed fewer pages than this caller (a background refresh) that stopped before the
+        // set was whole is followed by this caller's own. The task clears itself before it finishes,
+        // so a waiter never sees a request that has already ended. A cancelled caller stops waiting
+        // and returns what is cached. After an alerts request, only its own refusal is busy.
+        while let running=alertsTask {
+            let outcome=await wait(for: running.task)
+            guard outcome == .partial, running.pages<pages else { return AlertsUpdate(cache: alertCache, busy: refused) }
         }
-        guard Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: busy) }
+        // Fresh alerts are not busy because another request (programs, say) made the host wait.
+        guard Self.stale(alertCache?.updated, maxAge: 6*3600, force: force, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: refused) }
         guard backoff.allows(Self.host, now: clock()) else { return AlertsUpdate(cache: alertCache, busy: true) }
         let codes=Array(Set(parks.compactMap(\.nps))).sorted(), ids=parks.map(\.id)
-        let task=Task { () -> Bool in
-            let ok=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
+        let task=Task { () -> AlertsFetch in
+            let outcome=await self.fetchAlerts(codes: codes, parkIDs: ids, key: key, pages: pages)
             self.alertsTask=nil
-            return ok
+            return outcome
         }
-        alertsTask=task
+        alertsTask=(task, pages)
         _=await wait(for: task)
-        return AlertsUpdate(cache: alertCache, busy: busy)
+        return AlertsUpdate(cache: alertCache, busy: refused)
     }
-    /// Waits for the alerts request; false when the caller was cancelled first. The request is
+    /// Waits for the alerts request; nil when the caller was cancelled first. The request is
     /// cancelled too once nobody is waiting for it.
-    private func wait(for task: Task<Bool, Never>) async -> Bool {
+    private func wait(for task: Task<AlertsFetch, Never>) async -> AlertsFetch? {
         alertWaiters+=1
-        let finished=await SharedRequest.value(of: task) != nil
+        let outcome=await SharedRequest.value(of: task)
         alertWaiters-=1
-        if !finished, alertWaiters == 0 { task.cancel() }
-        return finished
+        if outcome == nil, alertWaiters == 0 { task.cancel() }
+        return outcome
     }
     func programs(for park: Park, key: String, network: Bool, force: Bool = false) async -> ProgramsCache? {
         if persist, programsLoaded.insert(park.id).inserted, programCache[park.id] == nil {
@@ -694,7 +716,7 @@ actor ParkStore: ParkProviding {
     static func refuses(_ status: Int) -> Bool { status == 429 || status == 401 || status == 403 || (500..<600).contains(status) }
     /// Pages with `start` while NPS reports more than one page holds (it allows up to 500 a page).
     /// A request that fails part-way keeps the last complete set.
-    private func fetchAlerts(codes: [String], parkIDs: [String], key: String, pages: Int) async -> Bool {
+    private func fetchAlerts(codes: [String], parkIDs: [String], key: String, pages: Int) async -> AlertsFetch {
         // Only an alert's id, title and parks are needed to show it; a missing description or category
         // reads as empty, and a record that still cannot be read costs only itself, never the page.
         struct Record: Decodable {
@@ -721,14 +743,14 @@ actor ParkStore: ParkProviding {
         for _ in 0..<max(1, min(pages, Self.alertPages)) {
             let reply=await get(Page.self, url("alerts", [("parkCode", codes.joined(separator: ",")), ("limit", "500"), ("start", String(read))]), key: key)
             if let status=reply.refusal?.status, Self.refuses(status) { refused=true } else if reply.value != nil { refused=false }
-            guard let page=reply.value else { return false }
+            guard let page=reply.value else { return .failed }
             // `start` counts every record on the page, read or not, so the next page follows on.
             read+=page.data.count
             records+=page.data.compactMap(\.value)
             guard let total=page.total.flatMap(Int.init), read<total, !page.data.isEmpty else { complete=true; break }
         }
         // Allowed fewer pages than there are (a background refresh): the last complete set stays.
-        if !complete, pages<Self.alertPages { return false }
+        if !complete, pages<Self.alertPages { return .partial }
         var alerts=Dictionary(uniqueKeysWithValues: codes.map { ($0, [ParkAlert]()) })
         for record in records {
             // One alert can name several parks ("acad,ever"); each gets it.
@@ -743,12 +765,13 @@ actor ParkStore: ParkProviding {
             // The per-park files of earlier versions are now superseded.
             for id in parkIDs { CacheDirectory.remove(name: "park-\(id)") }
         }
-        return true
+        return .kept
     }
     private func fetchPrograms(_ park: Park, key: String) async {
         struct Time: Decodable { let timestart: String?; let timeend: String? }
         // Only an event's id and title are needed to list it; anything else missing or of another
-        // type reads as absent, and an event that still cannot be read costs only itself.
+        // type reads as absent, and an event that still cannot be read costs only itself. In a list
+        // (dates, tags, times) an entry that cannot be read costs only itself too.
         struct Event: Decodable {
             let id: String, title: String, datestart: String?, description: String, tags: [String]?, dates: [String]?, times: [Time]?, location: String?
             enum CodingKeys: String, CodingKey { case id, title, datestart, description, tags, dates, times, location }
@@ -757,8 +780,12 @@ actor ParkStore: ParkProviding {
                 id=try c.decode(String.self, forKey: .id); title=try c.decode(String.self, forKey: .title)
                 datestart=try? c.decodeIfPresent(String.self, forKey: .datestart)
                 description=(try? c.decodeIfPresent(String.self, forKey: .description)) ?? ""
-                tags=try? c.decodeIfPresent([String].self, forKey: .tags); dates=try? c.decodeIfPresent([String].self, forKey: .dates)
-                times=try? c.decodeIfPresent([Time].self, forKey: .times); location=try? c.decodeIfPresent(String.self, forKey: .location)
+                func list<T: Decodable>(_ key: CodingKeys) -> [T]? {
+                    let read=(try? c.decodeIfPresent([Lenient<T>].self, forKey: key))?.compactMap(\.value)
+                    return read?.isEmpty == false ? read : nil
+                }
+                tags=list(.tags); dates=list(.dates); times=list(.times)
+                location=try? c.decodeIfPresent(String.self, forKey: .location)
             }
         }
         struct Page: Decodable {
@@ -773,20 +800,33 @@ actor ParkStore: ParkProviding {
         // Ranger programs are the National Park Service's: a place it does not run has none to ask for.
         guard let code=park.nps else { return }
         let today=park.isoDay(clock())
-        func page(_ number: Int) async -> Page? {
+        // A page's events; `lasting` when NPS answered with nothing usable (a body Nyx cannot read,
+        // every event unreadable, or a refusal of the request itself), rather than failing for now
+        // (offline, a Wi-Fi sign-in page, a 429 or 5xx that `HostBackoff` waits out).
+        func page(_ number: Int) async -> (events: [Event]?, total: String?, lasting: Bool) {
             // Events page with pageSize, which the server caps at 50 whatever is asked for.
             let reply=await get(Page.self, url("events", [("parkCode", code), ("dateStart", today), ("pageSize", String(Self.eventsPage)), ("pageNumber", String(number))]), key: key)
-            // Answered, but not with programs: not asked again on every visit to the page.
-            if reply.value == nil, reply.answered { programsTried[park.id]=clock() }
-            return reply.value
+            guard let value=reply.value else { return (nil, nil, reply.answered && (reply.refusal?.refusesRequest ?? true)) }
+            let events=value.data.compactMap(\.value)
+            // Events there but none readable: NPS has changed how it writes them, not "no programs".
+            guard !events.isEmpty || value.data.isEmpty else { return (nil, nil, true) }
+            return (events, value.total, false)
         }
-        guard let first=await page(1) else { return }
-        var events=first.data.compactMap(\.value)
+        let first=await page(1)
+        guard var events=first.events else {
+            // Answered, but not with programs: not asked again on every visit to the page.
+            if first.lasting { programsTried[park.id]=clock() }
+            return
+        }
         let pages=Self.eventPages(total: first.total)
         if pages>1 {
             for number in 2...pages {
-                guard let more=await page(number) else { return }
-                events+=more.data.compactMap(\.value)
+                let more=await page(number)
+                if let found=more.events { events+=found; continue }
+                // A later page failing for now: nothing kept, and the next visit asks again. One NPS
+                // answered with nothing usable keeps the pages before it, rather than asking on every visit.
+                guard more.lasting else { return }
+                break
             }
         }
         let programs=events.filter { Self.isNightSky(title: $0.title, tags: $0.tags ?? []) }.flatMap { event in

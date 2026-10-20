@@ -17,7 +17,8 @@ actor PathHTTP {
     init(_ replies: [String: Reply], gateForecastHost: Bool = false, delay: Duration? = nil) {
         self.replies=replies; gated=gateForecastHost; self.delay=delay
     }
-    func set(_ path: String, _ reply: Reply) { replies[path]=reply }
+    /// nil answers as Open-Meteo would again (`OpenMeteoEcho`).
+    func set(_ path: String, _ reply: Reply?) { replies[path]=reply }
     func release() { gated=false; for waiter in held { waiter.resume() }; held=[] }
     func get(_ url: URL) async throws -> Data {
         urls.append(url)
@@ -31,6 +32,25 @@ actor PathHTTP {
         }
     }
     func count(_ path: String) -> Int { urls.filter { $0.path == path }.count }
+}
+
+/// Answers NPS's events by page number, and counts the requests.
+final class PagedEvents: HTTPTransport {
+    private let pages: Mutex<[Int: PathHTTP.Reply]>
+    private let count=Mutex(0)
+    init(_ pages: [Int: PathHTTP.Reply]) { self.pages=Mutex(pages) }
+    func set(_ number: Int, _ reply: PathHTTP.Reply) { pages.withLock { $0[number]=reply } }
+    var asked: Int { count.withLock { $0 } }
+    func get(_ url: URL) async throws -> Data {
+        count.withLock { $0+=1 }
+        let number=URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "pageNumber" }?.value.flatMap { Int($0) } ?? 1
+        switch pages.withLock({ $0[number] }) {
+        case .body(let text): return Data(text.utf8)
+        case .status(let code): throw HTTPStatusError(status: code)
+        case .failure(let code): throw URLError(code)
+        case nil: throw URLError(.badServerResponse)
+        }
+    }
 }
 
 /// Collects what a service hands on (`observe`), so a test can wait for a delivery.
@@ -109,7 +129,44 @@ struct DataServiceDeliveryTests {
         #expect(await http.urls.count == 2)
     }
 
+    /// Smoke switched off lets go of parts held back for the next minute, so switched on again
+    /// nothing waits for a follow-up that will never send.
+    @Test func smokeSwitchedOffLetsGoOfHeldParts() async throws {
+        let sparse=try #require(CatalogForecast.Regions(try TestData.catalog()).requests.last)
+        let clock=BudgetClock(Self.monday), http=PathHTTP([:])
+        let service=ForecastDetailService(transport: http, persist: false, clock: { clock.now }, pause: { _ in try? await Task.sleep(for: .seconds(3600)) })
+        _=await service.catalogAir(sparse, network: true)
+        #expect(await http.urls.count == 1)
+        await service.forgetAir()
+        let done=Deliveries<Bool>()
+        Task { await service.followUpFinished(); done.add(true) }
+        #expect(await done.wait { !$0.isEmpty })
+    }
+
     // MARK: Forecast detail
+
+    /// A busy or struggling service (429, 5xx) is waited out by the host's backoff alone: once it
+    /// has passed, the places are asked again, not an hour later. A refusal of the request itself waits.
+    @Test func aStrugglingServiceIsNotAnUnusableAnswer() async throws {
+        let summit=try #require(TestData.parks.first { $0.aboveInversion == true })
+        let clock=BudgetClock(Self.monday)
+        let http=PathHTTP(["/v1/air-quality": .status(503)])
+        let service=ForecastDetailService(transport: http, persist: false, backoff: HostBackoff(file: nil, random: { 0 }), clock: { clock.now })
+        _=await service.details(for: [summit], weather: false, smoke: true, force: false)
+        #expect(await http.count("/v1/air-quality") == 1)
+        await http.set("/v1/air-quality", nil)
+        clock.advance(901)
+        let later=await service.details(for: [summit], weather: false, smoke: true, force: false)
+        #expect(await http.count("/v1/air-quality") == 2)
+        #expect(later[summit.id]?.air != nil)
+
+        let refused=PathHTTP(["/v1/air-quality": .status(400)])
+        let other=ForecastDetailService(transport: refused, persist: false, backoff: HostBackoff(file: nil, random: { 0 }), clock: { clock.now })
+        _=await other.details(for: [summit], weather: false, smoke: true, force: false)
+        clock.advance(901)
+        _=await other.details(for: [summit], weather: false, smoke: true, force: false)
+        #expect(await refused.count("/v1/air-quality") == 1)
+    }
 
     /// Smoke is kept, and handed on, as soon as it lands: never held back by the forecast host's
     /// longer queue of requests.
@@ -199,6 +256,42 @@ struct DataServiceDeliveryTests {
         _=await broken.programs(for: jotr, key: "k", network: true, force: false)
         #expect(await http.count("/api/v1/events") == 3)
     }
+    /// Events NPS writes in a way Nyx cannot read at all are not "no programs": nothing is kept,
+    /// and the page is not asked for again at once. A null among an event's dates costs only itself.
+    @Test func unreadableEventsAreNotNoPrograms() async throws {
+        let jotr=try park("jotr")
+        let now=Date(timeIntervalSince1970: 1_792_094_400)
+        let http=PathHTTP(["/api/v1/events": .body("{\"total\":\"2\",\"data\":[{\"eventId\":\"a\",\"name\":\"Astronomy night\"},{\"eventId\":\"b\",\"name\":\"Star party\"}]}")])
+        let store=ParkStore(transport: http, persist: false, clock: { now })
+        #expect(await store.programs(for: jotr, key: "k", network: true, force: true) == nil)
+        #expect(await store.programs(for: jotr, key: "k", network: true, force: true) == nil)
+        #expect(await http.count("/api/v1/events") == 1)
+
+        await http.set("/api/v1/events", .body("{\"total\":\"1\",\"data\":[{\"id\":\"a\",\"title\":\"Evening program\",\"dates\":[null,\"2099-10-16\"],"
+            + "\"tags\":[null,\"Astronomy\"],\"times\":[null,{\"timestart\":\"8:00 PM\",\"timeend\":\"9:00 PM\"}]}]}"))
+        let fresh=ParkStore(transport: http, persist: false, clock: { now })
+        #expect(await fresh.programs(for: jotr, key: "k", network: true, force: true)?.programs.map(\.date) == ["2099-10-16"])
+    }
+    /// A Wi-Fi sign-in page, or a later page failing for now, blocks nothing: the next visit asks
+    /// again. A later page NPS answers with nothing usable keeps the pages before it.
+    @Test func programsAreAskedAgainAfterPassingFailures() async throws {
+        let jotr=try park("jotr")
+        let now=Date(timeIntervalSince1970: 1_792_094_400)
+        let portal=PathHTTP(["/api/v1/events": .status(302)])
+        let store=ParkStore(transport: portal, persist: false, clock: { now })
+        _=await store.programs(for: jotr, key: "k", network: true, force: false)
+        _=await store.programs(for: jotr, key: "k", network: true, force: false)
+        #expect(await portal.count("/api/v1/events") == 2)
+
+        let first="{\"total\":\"60\",\"data\":[{\"id\":\"a\",\"title\":\"Astronomy night\",\"datestart\":\"2099-10-16\"}]}"
+        let paged=PagedEvents([1: .body(first), 2: .status(302)])
+        let later=ParkStore(transport: paged, persist: false, clock: { now })
+        #expect(await later.programs(for: jotr, key: "k", network: true, force: false) == nil)
+        #expect(paged.asked == 2)
+        paged.set(2, .body("not json"))
+        #expect(await later.programs(for: jotr, key: "k", network: true, force: false)?.programs.map(\.title) == ["Astronomy night"])
+        #expect(paged.asked == 4)
+    }
     /// NPS's event count is a string: anything that is not a whole number reads as one page.
     @Test func eventPagesNeverTrap() {
         #expect(ParkStore.eventPages(total: nil) == 0)
@@ -232,6 +325,29 @@ struct DataServiceDeliveryTests {
         await http.set("/api/v1/alerts", .body("{\"data\":[]}"))
         clock.advance(601)
         #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).busy == false)
+    }
+    /// Fresh alerts are not called busy because another request (programs) made the Park Service's host wait.
+    @Test func anotherRequestsRefusalLeavesFreshAlertsCalm() async throws {
+        let jotr=try park("jotr")
+        let http=PathHTTP(["/api/v1/alerts": .body("{\"data\":[]}"), "/api/v1/events": .status(503)])
+        let store=ParkStore(transport: http, persist: false)
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: true).busy == false)
+        _=await store.programs(for: jotr, key: "k", network: true, force: true)
+        #expect(await store.alerts(for: [jotr], key: "k", network: true, force: false).busy == false)
+    }
+    /// A full refresh that finds a background one (one page) on its way, which stops before the set
+    /// is whole, asks for the rest itself rather than keep the old alerts.
+    @Test func aFullRefreshFollowsABackgroundOneThatStoppedShort() async throws {
+        let jotr=try park("jotr")
+        let body="{\"total\":\"600\",\"data\":[{\"id\":\"a\",\"title\":\"Road Closed\",\"parkCode\":\"jotr\"}]}"
+        let http=PathHTTP(["/api/v1/alerts": .body(body)], delay: .milliseconds(100))
+        let store=ParkStore(transport: http, persist: false)
+        let background=Task { await store.alerts(for: [jotr], key: "k", network: true, force: true, pages: 1) }
+        while await http.count("/api/v1/alerts") == 0 { try? await Task.sleep(for: .milliseconds(5)) }
+        let full=await store.alerts(for: [jotr], key: "k", network: true, force: true)
+        #expect(await background.value.cache == nil)
+        #expect(full.cache?.alerts["jotr"]?.isEmpty == false)
+        #expect(await http.count("/api/v1/alerts") == 1+ParkStore.alertPages)
     }
     /// A request that fails without a backoff (a timeout) is not sent again by each caller that waited for it.
     @Test func waitersDoNotRepeatAFailedRequest() async throws {
@@ -280,6 +396,22 @@ struct DataServiceDeliveryTests {
         #expect(model.dataRevision == before+1)
     }
 
+    /// Detail handed on chunk by chunk, as a refresh's requests land, is one change.
+    @MainActor @Test func chunksThatLandTogetherAreOneChange() async throws {
+        let model=PlanModel(weather: WeatherService(transport: PathHTTP([:]), persist: false), parkStore: ParkStore(transport: PathHTTP([:]), persist: false),
+                            detail: ForecastDetailService(transport: PathHTTP([:]), persist: false), defaults: isolatedDefaults())
+        await model.cachesReady()
+        let before=model.dataRevision
+        let series=HourlySeries(updated: .now, times: [1790000000], values: ["aerosol_optical_depth": [0.1]])
+        for start in stride(from: 0, to: model.parks.count, by: 10) {
+            model.receiveDetails(Dictionary(uniqueKeysWithValues: model.parks[start..<min(start+10, model.parks.count)].map { ($0.id, ForecastDetail(air: series)) }))
+        }
+        let clock=ContinuousClock(), end=clock.now.advanced(by: .seconds(5))
+        while model.details.count<model.parks.count && clock.now<end { try? await Task.sleep(for: .milliseconds(10)) }
+        #expect(model.details.count == model.parks.count)
+        #expect(model.dataRevision == before+1)
+    }
+
     // MARK: Ordered files
 
     /// A snapshot taken earlier never overwrites one taken later, whichever is written last.
@@ -295,12 +427,23 @@ struct DataServiceDeliveryTests {
 
     // MARK: Alert meaning
 
-    /// A reopening is not a closure, unless something is still shut.
+    /// Only a reopening that has already happened is not a closure: one still to come, delayed,
+    /// partial or uncertain is, and so is anything with something still shut.
     @Test func reopeningsAreNotClosures() {
         func kind(_ title: String, _ category: String) -> AlertKind { ParkAlert(id: "x", title: title, description: "", category: category).kind }
         #expect(kind("Road Reopened After Closure", "Information") == .notice)
         #expect(kind("Road Reopened After Closure", "Park Closure") == .notice)
-        #expect(kind("Scenic Drive Reopens Following Winter Closure", "Information") == .notice)
+        #expect(kind("Tioga Road Has Reopened", "Park Closure") == .notice)
+        #expect(kind("Kolob Canyons Road Now Open", "Park Closure") == .notice)
+        #expect(kind("Going-to-the-Sun Road Has Reopened", "Park Closure") == .notice)
+        for title in ["Tioga Road Reopens May 30", "Going-to-the-Sun Road Expected to Reopen June 15", "Generals Highway Reopening Delayed",
+                      "Partial Reopening of Kolob Canyons Road", "Road Has Been Closed Due to Snow; Will Reopen When Safe",
+                      "Road Reopens Friday After Weeklong Closure", "Scenic Drive Reopens Following Winter Closure",
+                      "Road Reopened to Vehicles Until October 31", "Road Is Open Only to High-Clearance Vehicles"] {
+            #expect(kind(title, "Park Closure") == .closure, "\(title)")
+        }
+        #expect(kind("Road Has Been Closed Due to Snow; Will Reopen When Safe", "Information") == .closure)
+        #expect(kind("Road Reopens Friday After Weeklong Closure", "Information") == .closure)
         #expect(kind("Trail Reopened After Being Closed for Repairs", "Information") == .notice)
         #expect(kind("Lower Road Reopens; Upper Road Remains Closed", "Park Closure") == .closure)
         #expect(kind("Road Reopened, Trail Closed", "Information") == .closure)
