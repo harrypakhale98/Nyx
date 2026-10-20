@@ -41,4 +41,4 @@ The Vision Pro app reaches the same four hosts as the iPhone, with the same requ
 
 ## Privacy manifests
 
-Every target bundles `PrivacyInfo.xcprivacy`: tracking off, no tracking domains, no collected data. Required-reason APIs: UserDefaults (CA92.1, and 1C8F.1 where an App Group is shared) and, in the app only, disk space (E174.1, checked before moving journal photos).
+Every target bundles `PrivacyInfo.xcprivacy`: tracking off, no tracking domains, no collected data. Required-reason APIs, where a target uses them: UserDefaults (CA92.1, and 1C8F.1 where an App Group is shared) and, in the app only, disk space (E174.1, checked before moving journal photos).
