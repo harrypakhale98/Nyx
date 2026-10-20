@@ -22,7 +22,7 @@ struct GuideView:View {
     @State private var answeredID=0
     /// The records as the model saw them for the question on screen, so the citations keep
     /// pointing at the rows they cite while forecasts and the starting point move on.
-    @State private var sent:[String]?
+    @State private var sent:[GuideFact]?
     /// The record a citation chip pointed to, briefly lit.
     @State private var lit:Int?
     /// The uncited records under a checked answer, folded until opened.
@@ -47,12 +47,11 @@ struct GuideView:View {
         let chosen=TonightReach.candidates(parks:parks,places:all,originInUS:USOutline.contains(latitude:from.latitude,longitude:from.longitude))
         return chosen.count>TonightReach.shortlistSize ? TonightReach.shortlist(chosen,latitude:from.latitude,longitude:from.longitude) : chosen
     }
-    /// Every place a record may name, so a record about a place abroad or a spot finds its page.
-    private var recordPlaces:[Park] { model.parks+model.spots+model.catalog }
     /// Where a record's access stands, in Nyx's own fixed words (`PlanModel.guideAccess`); a closure
     /// is already flagged in the night's own line (`NightLookup.describe`).
     private func closures(_ park:Park,lookup:NightLookup)->String? { lookup.closed.contains(park.id) ? nil : model.guideAccess(park) }
-    private var records:[String] {
+    /// The records the model is given, each with what its row shows kept as data (`GuideFact`).
+    private var records:[GuideFact] {
         switch mode {
         case .planning:
             guard let home=model.home else { return [] }
@@ -61,8 +60,12 @@ struct GuideView:View {
             let start=model.location.latitude != nil ? String(localized:"Starting point: the device location. Distances are straight-line estimates.")
                 : model.homePlace.map { String(localized:"Starting point: \($0.label). Distances are straight-line estimates.") }
                 ?? String(localized:"Starting park: \(home.shortName). Distances are straight-line estimates.")
-            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in Phrase.sentences([lookup.describe(night)]+[closures(park,lookup:lookup)].compactMap { $0 }) } }+[start]
-        case .learn(let essay): return [String(essay.content.prefix(6500))]
+            return best.flatMap { park in model.nights(park,from:model.tonight(park),count:3).map { night in
+                var fact=lookup.fact(night)
+                fact.text=Phrase.sentences([fact.text]+[closures(park,lookup:lookup)].compactMap { $0 })
+                return fact
+            } }+[GuideFact(text:start)]
+        case .learn(let essay): return [GuideFact(text:String(essay.content.prefix(6500)))]
         }
     }
     /// Whether `records` has anything in it, without ranking parks again to find out: it is empty
@@ -96,15 +99,14 @@ struct GuideView:View {
                 if !guide.lookups.isEmpty { GuideLookups(lines:guide.lookups) }
                 // The streaming words live in their own view, so each new part redraws only the
                 // answer, never the records below it.
-                GuideAnswerBlock(guide:guide,shown:shown,places:recordPlaces,lit:$lit)
+                GuideAnswerBlock(guide:guide,shown:shown,lit:$lit)
                 if let error=guide.error { Text(error).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
                 if asked.isEmpty && !guide.loading { suggestionChips }
                 if case .learn = mode {
                     // The source is the essay the reader just left; don't print it twice.
                     Text("Source: the essay you were reading.").font(.caption).foregroundStyle(palette.muted)
                 } else {
-                    let all=(shown+guide.lookedUp.map(\.text)).map { GuideRecord($0,parks:recordPlaces,tonight:{ model.tonight($0) }) }
-                    GuideRecords(all:all,citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
+                    GuideRecords(all:(shown+guide.lookedUp.map(\.fact)).map { GuideRecord($0) },citations:checkedCitations,lit:lit,othersOpen:$othersOpen)
                 }
             }.padding(24).readableColumn() }
             .scrollDismissesKeyboard(.interactively)
@@ -135,7 +137,7 @@ struct GuideView:View {
                 #endif
                 return
             }
-            await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:sent ?? records,lookup:tools)
+            await guide.answer(question:asked.isEmpty ? defaultPrompt : asked,context:(sent ?? records).map(\.text),lookup:tools)
             guard !Task.isCancelled else { return }
             answeredID=requestID
             // Said once, at the end: nothing is announced while the answer streams.
@@ -150,11 +152,11 @@ struct GuideView:View {
         // The park's own tonight, as a question about tonight reaches the tools: never the device's
         // calendar day, which can be a day past the park's night and would date the lookups wrongly.
         let today="tonight"
-        let best=lookup.bestNights(park:"Arches",from:today,nights:30,limit:3)
-        let tonight=lookup.whatsUp(park:"Arches",on:today).prefix(1)
+        let best=lookup.bestNightFacts(park:"Arches",from:today,nights:30,limit:3)
+        let tonight=lookup.whatsUpFacts(park:"Arches",on:today).prefix(1)
         let found=best+tonight
         let records=records
-        guard let first=found.first.map({ GuideRecord($0,parks:recordPlaces,tonight:{ model.tonight($0) }) }), let park=first.park, let night=first.night, let score=first.score else { return }
+        guard let first=found.first.map({ GuideRecord($0) }), let park=first.park, let night=first.night, let score=first.score else { return }
         let words="The best of the next 30 nights at Arches is \(park.dayLabel(night)), at \(score) out of 100, \(first.band ?? ""). Check the clouds and park alerts again closer to the night."
         let shown=checked ? words : String(words.prefix(words.count*3/5))
         asked=suggestions[0]; sent=records
@@ -318,13 +320,10 @@ nonisolated private struct StreamingRule: Shape {
 /// cited record. It reads the guide's streaming text itself, so only this view redraws with each
 /// new part, never the records.
 private struct GuideAnswerBlock: View {
-    @Environment(PlanModel.self) private var model
     @Environment(\.nyx) private var palette
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     let guide:OnDeviceGuide
-    let shown:[String]
-    /// Every place a record may name (`GuideView.recordPlaces`), so a chip names a spot or a place abroad too.
-    let places:[Park]
+    let shown:[GuideFact]
     @Binding var lit:Int?
     var body: some View {
         if guide.loading && guide.text.isEmpty { ConstellationLoader().frame(maxWidth:.infinity) }
@@ -369,12 +368,12 @@ private struct GuideAnswerBlock: View {
     }
     /// One chip per cited record: "1 · Arches, Fri, Oct 9". A tap finds the record below.
     private var citationChips:some View {
-        let all=shown+guide.lookedUp.map(\.text)
+        let all=shown+guide.lookedUp.map(\.fact)
         return VStack(alignment:.leading,spacing:8) {
             Text("Sources").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
             FlowLayout(spacing:8) {
                 ForEach(guide.citations,id:\.self) { id in
-                    let record=all.indices.contains(id) ? GuideRecord(all[id],parks:places,tonight:{ model.tonight($0) }) : nil
+                    let record=all.indices.contains(id) ? GuideRecord(all[id]) : nil
                     Button { lit=id; Task { try? await Task.sleep(for:.seconds(2)); if lit==id { lit=nil } } } label:{ GuideChip(text:Text(record?.chip(number:id+1) ?? String(localized:"Record \(id+1)"))) }
                         .buttonStyle(.plain)
                         .accessibilityHint("Shows this record below.")
@@ -394,17 +393,26 @@ private struct GuideChip: View {
             .contentShape(Capsule())
     }
 }
-/// A record as the model saw it ("Arches; Fri, Oct 9 (2026-10-09); score 94/100 Pristine; …"),
-/// read back into Nyx's own row: the park, the night, the score, and one line for the rest.
+/// A record as Nyx's own row shows it: the park, the night, the score, and one line for the rest.
 struct GuideRecord: Equatable {
     let park:Park?
     let night:Date?
     let score:Int?
     let band:String?
     let line:String
-    /// A "parks near" record's distance ("220 miles straight-line from Denver, CO"): its second
-    /// part, after "Arches, UT". Nil for every other record.
+    /// A "parks near" record's distance ("220 miles straight-line from Denver, CO"). Nil for every
+    /// other record.
     let detail:String?
+    /// From the record's data, kept beside its words (`GuideFact`), so the row is the same in every
+    /// language: the words are the line only for a record with no place (a starting point, no match).
+    init(_ fact:GuideFact) {
+        park=fact.place; night=fact.night; score=fact.score
+        band=fact.band.flatMap { $0.isEmpty ? nil : $0 }
+        detail=fact.detail
+        line=fact.line ?? (fact.place == nil ? fact.text : "")
+    }
+    /// Read back from English words alone ("Arches; Fri, Oct 9 (2026-10-09); score 94/100 Pristine; …"),
+    /// for a record that carries no data of its own.
     init(_ text:String,parks:[Park],tonight:(Park)->Date) {
         let parts=text.components(separatedBy:"; ").map { $0.trimmingCharacters(in:.whitespaces) }
         // The longest name the record starts with, so "Sequoia" never claims "Sequoia and Kings Canyon".

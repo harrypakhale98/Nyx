@@ -7,7 +7,7 @@ import Vision
 /// It is never saved by itself and it says it was suggested on this iPhone. Where the on-device
 /// model is ready, can see images (iOS 27) and speaks the person's language, it writes a sentence,
 /// told not to name sky facts it cannot know from a photo (stars, planets, how dark it was).
-/// Otherwise (iOS 26, or no Apple Intelligence) Vision's image classification gives a starting
+/// Otherwise (iOS 26, no Apple Intelligence, or the model writes nothing usable) Vision's image classification gives a starting
 /// line of what it is sure of, "Night sky, mountains, tent" (`PhotoLabels`), in Nyx's own words,
 /// offered only where those words are the person's language. Without either, the button isn't there.
 enum PhotoDescriber {
@@ -29,7 +29,9 @@ enum PhotoDescriber {
         #endif
         guard available else { return nil }
         guard let image=await Task.detached(priority: .userInitiated, operation: { PhotoScaling.image(data, maxPixels: 1024) }).value else { return nil }
-        if modelAvailable, #available(iOS 27.0, *) { return await VisionDescriber.describe(image).flatMap(clean) }
+        if modelAvailable, #available(iOS 27.0, *), let line=await VisionDescriber.describe(image).flatMap(clean) { return line }
+        // The model declined, timed out or wrote nothing usable: Vision's labels, where they are the person's language.
+        guard PhotoLabels.available else { return nil }
         return await PhotoLabels.line(for: image)
     }
     /// One sentence, trimmed, without quotes; nil when nothing usable came back.
