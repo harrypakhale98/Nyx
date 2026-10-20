@@ -22,8 +22,14 @@ extension ParkAlert {
     nonisolated var kind: AlertKind {
         let text = " " + Park.folded(title) + " "
         func has(_ words: [String]) -> Bool { words.contains { text.contains(" \($0) ") } }
+        // Something still shut, in any of the closure words, except a closure named as over ("Road
+        // Reopened After Closure", "Trail Reopened After Being Closed for Repairs").
+        let over=["after being closed","was closed","had been closed","after closure","after a closure","after the closure","following closure",
+                  "following a closure","following the closure","after weeklong closure","following winter closure","after winter closure"]
+        var rest=text
+        for phrase in over { rest=rest.replacingOccurrences(of: " \(phrase) ", with: " ") }
         let shutNow=has(["remains closed","remain closed","still closed","stays closed","remains shut","still shut","remains inaccessible","remains impassable"])
-            || has(["closed","closes","closing","shut"]) && !has(["after being closed","was closed","had been closed"])
+            || Self.closureWords.contains { rest.contains(" \($0) ") }
         let settled = !has(Self.notYetWords) && !shutNow
         // Only a reopening in the past tense lifts what NPS files as a closure: "Road Is Open to
         // High-Clearance Vehicles" under "Park Closure" still stands beside the score.
@@ -42,6 +48,7 @@ extension ParkAlert {
     private nonisolated static let notYetWords=["reopens","reopen","reopening","to open","will","would","may","might","could","expected","expects",
         "anticipated","scheduled","planned","tentative","tentatively","pending","delayed","delay","delays","postponed","soon","later","next","until",
         "tomorrow","tonight","partial","partially","part","portion","only","limited","restricted","restrictions","except","but","weather","conditions",
+        "pedestrians","pedestrian","hikers","hiker","bikes","bicycles","bicyclists","cyclists","foot","walkers","mile","miles","between",
         "when","if","seasonal","season","hours","daytime","day use","weekends","weekend",
         "january","february","march","april","june","july","august","september","october","november","december",
         "jan","feb","mar","apr","jun","jul","aug","sep","sept","oct","nov","dec",
