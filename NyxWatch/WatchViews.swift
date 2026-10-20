@@ -10,8 +10,9 @@ struct WatchRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     /// When Nyx last became active: between two minute marks, "now" is never earlier than this.
     @State private var woke = Date.now
-    /// A park and night opened from a complication or the Smart Stack, above Tonight.
-    @State private var path: [WatchLink] = []
+    /// Every page above Tonight, as values (`WatchRoute`), so a complication's tap can return to
+    /// Tonight or replace what is open.
+    @State private var path: [WatchRoute] = []
     var body: some View {
         // The app's one clock, read once a minute: Automatic turns red at civil dusk with the app
         // open, and every page below reads the same minute (`\.watchNow`).
@@ -22,6 +23,7 @@ struct WatchRootView: View {
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             store.reloadSettings()
+            store.tellIPhoneIfNeeded()
             woke = .now
         }
     }
@@ -38,9 +40,7 @@ struct WatchRootView: View {
                 home
                 #endif
             }
-            .navigationDestination(for: WatchLink.self) { link in
-                if let park = store.park(link.parkID) { ParkNightView(park: park, startNight: link.offset(in: park, now: .now, limit: 6)) }
-            }
+            .watchRoutes()
         }
         .onOpenURL { open($0) }
         .environment(\.nyx, palette)
@@ -64,7 +64,7 @@ struct WatchRootView: View {
         guard let link = WatchLink(url), let park = store.park(link.parkID) else { return }
         let now = Date.now
         if link.offset(in: park, now: now, limit: 6) == 0, store.featured(at: now)?.id == park.id { path = []; return }
-        path = [link]
+        path = [.night(link)]
     }
     @ViewBuilder private var home: some View {
         HomeNight()
@@ -79,6 +79,29 @@ private struct HomeNight: View {
         if let park = store.featured(at: now) { ParkNightView(park: park, isHome: true) }
         else { ParkChooser() }
     }
+}
+/// The pages the watch's navigation stack opens: Parks, Credits, and a park's night (a row, a
+/// complication's or the Smart Stack's tap).
+enum WatchRoute: Hashable {
+    case parks, credits
+    case night(WatchLink)
+}
+private struct WatchRoutes: ViewModifier {
+    @Environment(WatchStore.self) private var store
+    func body(content: Content) -> some View {
+        content.navigationDestination(for: WatchRoute.self) { route in
+            switch route {
+            case .parks: ParksList()
+            case .credits: WatchCredits()
+            case .night(let link):
+                if let park = store.park(link.parkID) { ParkNightView(park: park, startNight: link.offset(in: park, now: .now, limit: 6)) }
+            }
+        }
+    }
+}
+extension View {
+    /// Where `WatchRoute` values lead, once at the root of the stack.
+    func watchRoutes() -> some View { modifier(WatchRoutes()) }
 }
 extension EnvironmentValues {
     /// The minute every watch page is drawn for, from `WatchRootView`'s single timeline.
@@ -133,7 +156,7 @@ struct ParkNightView: View {
         .toolbar {
             if isHome {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink { ParksList() } label: { Label("Parks", systemImage: "list.bullet") }.tint(palette.toolbarTint)
+                    NavigationLink(value: WatchRoute.parks) { Label("Parks", systemImage: "list.bullet") }.tint(palette.toolbarTint)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -201,13 +224,16 @@ struct TonightFace: View {
     private var models: ClosedRange<Int>? { context?.modelRange(for: shown) }
     /// Up to this size the face is fixed as designed: the watch's default text size.
     private var standardSizes: DynamicTypeSize { WatchTonightLayout.largestStandard(screenHeight: WKInterfaceDevice.current().screenBounds.height) }
+    /// Fixed as designed, one line each, without measuring: at the standard sizes, unless a closure
+    /// is shown, whose words are never cut (`WatchTonightLayout.designed`).
+    private var designed: Bool { WatchTonightLayout.designed(standardSize: typeSize <= standardSizes, closure: closure != nil) }
     private var measured: WatchTonightLayout {
-        WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: typeSize <= standardSizes, accessibilitySize: typeSize.isAccessibilitySize)
+        WatchTonightLayout.choose(room: room, words: wordsHeight, standardSize: designed, accessibilitySize: typeSize.isAccessibilitySize)
     }
     var body: some View {
         if typeSize.isAccessibilitySize {
             scrolling
-        } else if typeSize <= standardSizes {
+        } else if designed {
             fixed(wraps: false)
         } else {
             Group {
@@ -252,7 +278,7 @@ struct TonightFace: View {
                 ForEach(cloudLines(shown, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.faint).multilineTextAlignment(.center).nonEssential()
                 }
-                AskIPhoneRow(source: CloudSource.of(context: context, park: night.park, now: now))
+                AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
             }.frame(maxWidth: .infinity)
         }
     }
@@ -278,9 +304,9 @@ struct TonightFace: View {
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: wraps).layoutPriority(1).nonEssential()
             }
         }
-        // A closure stands beside the score on every surface; here it costs the gauge up to two
-        // lines, so the road or trail it names is never cut off (at the large sizes, the lines it needs).
-        if let closure { ClosureLine(text: closure, lines: wraps ? nil : 2).layoutPriority(1) }
+        // A closure stands beside the score on every surface, whole, so the road or trail it names is
+        // never cut off: it wraps, and the face scrolls where it would leave the gauge too small.
+        if let closure { ClosureLine(text: closure).layoutPriority(1) }
         // Haze or smoke beside the score, as on the iPhone and Vision Pro (`Night.smokeCaveat`): the short
         // words where a line is all there is, the whole sentence for VoiceOver and at the large sizes.
         if let smoke = shown.smokeCaveat, let label = shown.smokeCaveatLabel {
@@ -316,16 +342,14 @@ struct TonightFace: View {
     }
 }
 
-/// A park's closure, in the accent with a warning mark, as the iPhone shows it beside the score.
+/// A park's closure, in the accent with a warning mark, as the iPhone shows it beside the score:
+/// whole, wrapped, never shrunk or cut.
 struct ClosureLine: View {
     @Environment(\.nyx) private var palette
-    @Environment(\.dynamicTypeSize) private var typeSize
     let text: String
-    var lines: Int? = nil
     var body: some View {
         Label { Text(text) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
             .font(.caption2).foregroundStyle(palette.accent)
-            .lineLimit(typeSize.isAccessibilitySize ? nil : lines).minimumScaleFactor(0.8)
             .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(String(localized: "Closure alert: \(text)"))
@@ -405,9 +429,9 @@ struct NightGlance: View {
 
 /// Where the clouds came from and how old they are, after any line saying the score has none.
 func cloudLines(_ night: Night, context: WatchContext?, now: Date) -> [String] {
-    let source = CloudSource.of(context: context, park: night.park, now: now)
+    let source = WatchSky.cloudSource(night.park, context: context, now: now)
     // A forecast the iPhone could refresh says so plainly, never "no forecast for this night".
-    let refreshable = source.isStale || source == .missing(followed: false) || source == .dropped
+    let refreshable = source.isStale || source == .missing(followed: false) || source == .dropped || source == .spotsOff
     var lines: [String] = []
     if let note = WatchSky.forecastNote(night, context: context, short: refreshable) { lines.append(note) }
     if let line = source.line(for: night.park) { lines.append(line) }
@@ -519,7 +543,7 @@ struct MilestonesPage: View {
                 ForEach(cloudLines(night, context: context, now: now), id: \.self) {
                     Text($0).font(.caption2).foregroundStyle(palette.muted).nonEssential()
                 }
-                AskIPhoneRow(source: CloudSource.of(context: context, park: night.park, now: now))
+                AskIPhoneRow(source: WatchSky.cloudSource(night.park, context: context, now: now))
                 // No score stands on this page, so the line says what the range is of: under "Clouds
                 // from …" a bare "Forecast models: 59–89" read as cloud cover.
                 if let models = context?.modelRange(for: night) {
@@ -596,15 +620,15 @@ struct WeekPage: View {
                 }
                 Group {
                     // Why Tonight shows this place, where nothing on screen says so: nothing is saved on iPhone.
-                    if isHome, let line = WatchSky.caption(store.rule) { Text(line) }
+                    if isHome, let line = WatchSky.caption(store.rule(at: now)) { Text(line) }
                     if !typeSize.isAccessibilitySize, nights.contains(where: { !$0.score.hasForecast }) {
                         Text("Hollow nights have no full cloud forecast yet.")
                     }
-                    if let line = CloudSource.of(context: store.context, park: park, now: now).line(for: park) { Text(line) }
+                    if let line = WatchSky.cloudSource(park, context: store.context, now: now).line(for: park) { Text(line) }
                     if let line = store.context?.dataNote { Text(line) }
                 }
                 .font(.caption2).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true).nonEssential()
-                AskIPhoneRow(source: CloudSource.of(context: store.context, park: park, now: now))
+                AskIPhoneRow(source: WatchSky.cloudSource(park, context: store.context, now: now))
                 if !isHome || store.pinned == park.id {
                     let kept = store.pinned == park.id
                     Button { store.pin(kept ? nil : park) } label: {
@@ -669,14 +693,14 @@ struct ParksList: View {
                     Picker("Colors", selection: $store.palette) { ForEach(PaletteChoice.allCases) { Text($0.title).tag($0) } }
                 } footer: { Text("Automatic turns red from dusk to dawn at the park on Tonight. Red light keeps your eyes adapted to the dark.") }
                 Section {
-                    NavigationLink { WatchCredits() } label: { Label("Credits", systemImage: "text.book.closed") }
+                    NavigationLink(value: WatchRoute.credits) { Label("Credits", systemImage: "text.book.closed") }
                 } footer: { Text("Nyx on Apple Watch makes no network requests. Clouds come from Nyx on your iPhone.") }
             }
         }
         .nyxTitle(String(localized: "Parks"))
     }
     private func row(_ park: Park, now: Date, scored: Bool) -> some View {
-        NavigationLink { ParkNightView(park: park) } label: {
+        NavigationLink(value: WatchRoute.night(WatchLink(park: park, evening: nil))) {
             HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(park.wristName).font(.system(.body, design: .serif)).lineLimit(2)
@@ -818,7 +842,7 @@ private struct ModelsPreview<Content: View>: View {
         .dynamicTypeSize(.accessibility5)
 }
 #Preview("Parks") {
-    WatchPreviewHost(nightVision: false) { _, _ in NavigationStack { ParksList() } }
+    WatchPreviewHost(nightVision: false) { _, _ in NavigationStack { ParksList().watchRoutes() } }
 }
 
 /// Previews: Joshua Tree from the real engine, in either palette.

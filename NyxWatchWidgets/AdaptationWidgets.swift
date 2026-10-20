@@ -45,9 +45,9 @@ nonisolated enum AdaptationTimeline {
     /// Automatic, wherever it changes colour at the snapshot's parks or the followed park may change
     /// over the next day; the park is picked again at each entry, as on every Nyx face.
     static func entries(from now: Date, start: Date?, look: WristLook, snapshot: SavedSkySnapshot?) -> [AdaptationEntry] {
-        var cache: [String: SkyConditions] = [:]
+        var cache: [String: SkyConditions] = [:], scored: [String: Night] = [:]
         func idle(_ date: Date) -> AdaptationEntry {
-            AdaptationEntry(date: date, start: nil, nightVision: look.nightVision(park: WristTimeline.park(at: date, snapshot: snapshot, cache: &cache), at: date))
+            AdaptationEntry(date: date, start: nil, nightVision: look.nightVision(park: WristTimeline.park(at: date, snapshot: snapshot, cache: &cache, scored: &scored), at: date))
         }
         guard let clock = AdaptationRequest.running(at: now, start: start) else {
             guard look.choice == .automatic else { return [idle(now)] }
@@ -76,7 +76,7 @@ struct AdaptationProvider: TimelineProvider {
         completion(Timeline(entries: entries, policy: .after(max(entries.last?.date ?? now, now.addingTimeInterval(3600)))))
     }
     static func entries(from now: Date) -> [AdaptationEntry] {
-        AdaptationTimeline.entries(from: now, start: WatchSky.adaptationStart, look: .current, snapshot: SharedSettings.read())
+        AdaptationTimeline.entries(from: now, start: WatchSky.adaptationStart, look: .current, snapshot: WatchSky.faces(at: now).snapshot)
     }
 }
 
