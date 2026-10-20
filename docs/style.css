@@ -231,7 +231,7 @@ html:has(#nv:checked) .scale li { border-color: var(--amber); }
 .card { border: 1px solid var(--line); border-radius: 20px; background: var(--panel); padding: 24px; }
 .card .k { font-family: var(--serif); font-size: 22px; color: var(--ink); margin: 0 0 8px; line-height: 1.25; }
 .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
-/* New in 1.3: five short cards in one row on wide screens */
+/* Five short cards in one row on wide screens */
 .cards.five { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .cards.five .card .k { font-size: 20px; }
 
