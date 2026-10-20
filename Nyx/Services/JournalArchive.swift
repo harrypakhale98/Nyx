@@ -455,16 +455,18 @@ nonisolated enum JournalInbox {
         }
     }
 }
-/// Where an export is gathered on disk before the person chooses where it goes. One at a time: a
-/// new export clears the last, and the Journal tab clears it once the exporter closes.
+/// Where an export is gathered on disk before the person chooses where it goes. The Journal tab
+/// clears each package once its exporter closes.
 nonisolated enum JournalExport {
     static var folder: URL { FileManager.default.temporaryDirectory.appendingPathComponent("nyx-export", isDirectory: true) }
     /// Writes the journal in `container` to a new package in `folder` and returns it; nothing is
     /// left behind when it fails. Each export has its own package, so two windows exporting at once
-    /// never remove each other's; packages an earlier run left behind are swept after an hour.
+    /// never remove each other's; packages an earlier run left behind are swept after an hour. A
+    /// package's name starts with when it was staged, so no file dates are read.
     static func stage(_ container: ModelContainer, now: Date = .now) throws -> URL {
-        sweep(before: Date.now.addingTimeInterval(-3600))
-        let package=folder.appendingPathComponent("\(UUID().uuidString).\(JournalArchive.fileExtension)", isDirectory: true)
+        let staged=Date.now
+        sweep(before: staged.addingTimeInterval(-3600))
+        let package=folder.appendingPathComponent("\(Int(staged.timeIntervalSince1970))-\(UUID().uuidString).\(JournalArchive.fileExtension)", isDirectory: true)
         do { try JournalArchive.write(container, to: package, now: now) } catch { clear(package); throw error }
         return package
     }
@@ -473,17 +475,17 @@ nonisolated enum JournalExport {
         guard let package, package.deletingLastPathComponent().standardizedFileURL == folder.standardizedFileURL else { return }
         try? FileManager.default.removeItem(at: package)
     }
-    /// Removes packages last changed before `date`.
+    /// Removes packages staged before `date` (or with a name that does not say when).
     static func sweep(before date: Date) {
         let manager=FileManager.default
-        guard let packages=try? manager.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey]) else { return }
-        for package in packages where ((try? package.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast) < date {
-            try? manager.removeItem(at: package)
-        }
+        guard let packages=try? manager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) else { return }
+        for package in packages where stagedAt(package).map({ $0 < date }) ?? true { try? manager.removeItem(at: package) }
+    }
+    /// When a package was staged, from its name.
+    static func stagedAt(_ package: URL) -> Date? {
+        package.lastPathComponent.split(separator: "-").first.flatMap { Double($0) }.map { Date(timeIntervalSince1970: $0) }
     }
 }
-/// A package gathered on disk (`JournalExport`) as a document for `fileExporter`. Its files are
-/// read only as the exporter copies them, so the photos never gather in memory.
 nonisolated struct JournalDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.nyxJournal] }
     let package: URL
