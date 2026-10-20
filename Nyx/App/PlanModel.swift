@@ -195,6 +195,8 @@ import CoreLocation
             guard !smokeEnabled, oldValue else { return }
             // Switched off: cached smoke stops counting at once, here and in the cache Siri reads.
             details=Self.withoutAir(details)
+            // Smoke that landed in the last moments, waiting to be applied, is dropped too.
+            landedDetails=Self.withoutAir(landedDetails)
             let service=detailService
             Task { [weak self] in
                 await service.forgetAir()

@@ -20,6 +20,8 @@ import WidgetKit
     var scoredAt: Date
     /// The park's closure when field mode opened, for the Live Activity it starts (later park alerts update it there).
     let closure: String?
+    /// Whether the night's month has usual clouds at the park, as the park page reads it (`Night.usualCloud`).
+    let usualClouds: Bool
     var adaptation: DarkAdaptation
     /// Set when the eye's clock started over on return, until acknowledged.
     var reset: DarkAdaptation.Reset?
@@ -65,7 +67,7 @@ import WidgetKit
     init(park: Park, model: PlanModel, changesPhone: Bool=true, offset: TimeInterval=0, adaptedFor: TimeInterval=0) {
         let tonight=model.night(park)
         self.park=park; self.score=tonight.score; scoredAt=FieldActivities.scoredAt(tonight)
-        self.night=FieldNight(park: park, sky: tonight.sky); closure=model.closure(park)
+        self.night=FieldNight(park: park, sky: tonight.sky); closure=model.closure(park); usualClouds=tonight.usualCloud != nil
         self.changesPhone=changesPhone; self.offset=offset
         adaptation=DarkAdaptation(start: Date.now.addingTimeInterval(offset-adaptedFor))
         following=FieldActivities.isFollowing(park)
