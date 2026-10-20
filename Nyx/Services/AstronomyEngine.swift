@@ -86,11 +86,17 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
             below /= b.timeIntervalSince(a)
         }
         let light = darkStart.flatMap { a in darkEnd.map { b in moonlight(park: park, from: a, to: b) } } ?? 0
-        // Nights run from local noon to noon, but in western Alaska's winter solar noon falls after
-        // 13:00, so the Sun can rise after the window closes: look up to six hours further.
-        let sunset = sun.down.first
-        let sunrise = sun.up.first(where: { $0 > (sunset ?? start) })
-            ?? sunset.flatMap { _ in crossings(start: end, end: end.addingTimeInterval(6*3600)) { solarAltitude(at: $0, park: park) + 0.833 }.up.first }
+        // The night's sunset is the last before solar midnight and its sunrise the first after it.
+        // Nights run from local noon to noon, but solar noon can fall hours from 12:00: in western
+        // Alaska's winter the Sun can rise after the window closes, and east of a zone's meridian on
+        // a short Arctic day (Baffin Island, Svalbard) it sets before the window opens. Either way,
+        // look up to six hours beyond the window, never at the next day's sunset.
+        let midnight = solarMidnight(start: start, end: end, park: park)
+        let horizon = { (t: Date) in solarAltitude(at: t, park: park) + 0.833 }
+        let sunset = sun.down.last(where: { $0 < midnight })
+            ?? (sun.up.isEmpty && sun.down.isEmpty ? nil : crossings(start: start.addingTimeInterval(-6*3600), end: start, value: horizon).down.last)
+        let sunrise = sun.up.first(where: { $0 > midnight })
+            ?? sunset.flatMap { _ in crossings(start: end, end: end.addingTimeInterval(6*3600), value: horizon).up.first }
         // Under the midnight sun, the clouds that matter are those around the Sun's lowest point.
         let lowestSun = sunAlwaysUp ? lowestSolarMoment(start: start, end: end, park: park) : nil
         return SkyConditions(evening: start, end: end, sunset: sunset, sunrise: sunrise,
@@ -149,6 +155,17 @@ nonisolated struct AstronomyEngine: AstronomyProviding {
         var fine = best.addingTimeInterval(-600)
         while fine <= best.addingTimeInterval(600) { let a = solarAltitude(at: fine, park: park); if a < lowest { lowest = a; best = fine }; fine = fine.addingTimeInterval(60) }
         return best
+    }
+    /// Solar midnight: the Sun's lower culmination (hour angle 180°) nearest the middle of
+    /// `start`…`end`, which falls between a night's sunset and its sunrise wherever the Sun sets.
+    /// Newton steps on the hour angle, which turns once a solar day; three bring it within seconds.
+    private func solarMidnight(start: Date, end: Date, park: Park) -> Date {
+        var t = start.addingTimeInterval(end.timeIntervalSince(start)/2)
+        for _ in 0..<3 {
+            let h = hourAngle(date: t, park: park, ra: solarPosition(at: t).ra) - Double.pi
+            t = t.addingTimeInterval(-atan2(sin(h), cos(h))/(2*Double.pi)*86400)
+        }
+        return t
     }
     private func julian(_ date: Date) -> Double { date.timeIntervalSince1970/86400 + 2440587.5 }
     private func normalized(_ value: Double) -> Double { value - floor(value/360)*360 }
