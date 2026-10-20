@@ -360,16 +360,21 @@ nonisolated struct NotificationScheduler {
     }
 }
 
-/// Opens the night a reminder is about, and shows reminders while Nyx is open.
+/// Opens the night a reminder is about, and shows reminders while Nyx is open. Each main window
+/// connects as it opens and again whenever it becomes active, and leaves as it closes: a tapped
+/// reminder opens in the window used last that is still open.
 @MainActor final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
     static let shared=NotificationRouter()
-    private var open:((ReminderRoute)->Void)?
+    /// The windows' handlers, the one used last at the end.
+    private var windows:[(id:UUID,open:(ReminderRoute)->Void)]=[]
     private var pending:ReminderRoute?
-    func connect(_ handler:@escaping (ReminderRoute)->Void) {
-        open=handler
+    func connect(_ id:UUID,_ handler:@escaping (ReminderRoute)->Void) {
+        windows.removeAll { $0.id==id }
+        windows.append((id,handler))
         if let pending { self.pending=nil; handler(pending) }
     }
-    private func deliver(_ route:ReminderRoute) { if let open { open(route) } else { pending=route } }
+    func disconnect(_ id:UUID) { windows.removeAll { $0.id==id } }
+    func deliver(_ route:ReminderRoute) { if let open=windows.last?.open { open(route) } else { pending=route } }
     nonisolated func userNotificationCenter(_ center:UNUserNotificationCenter,didReceive response:UNNotificationResponse) async {
         guard let route=ReminderRoute(userInfo:response.notification.request.content.userInfo) else { return }
         await deliver(route)

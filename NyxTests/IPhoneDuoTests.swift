@@ -167,11 +167,11 @@ import Testing
 
     @Test func nightsDragWhereThereIsRoomToDrop() {
         // iPad in any window, and iPhone Duo's open inner display (regular both ways).
-        #expect(NightDragPolicy.drags(pad:true,horizontal:.compact,vertical:.regular))
-        #expect(NightDragPolicy.drags(pad:false,horizontal:.regular,vertical:.regular))
+        #expect(NightDragPolicy.drags(multipleWindows:true,horizontal:.compact,vertical:.regular))
+        #expect(NightDragPolicy.drags(multipleWindows:false,horizontal:.regular,vertical:.regular))
         // An iPhone's single screen, a large iPhone in landscape (regular by compact) and the outer display.
-        #expect(!NightDragPolicy.drags(pad:false,horizontal:.compact,vertical:.regular))
-        #expect(!NightDragPolicy.drags(pad:false,horizontal:.regular,vertical:.compact))
-        #expect(!NightDragPolicy.drags(pad:false,horizontal:.compact,vertical:.compact))
+        #expect(!NightDragPolicy.drags(multipleWindows:false,horizontal:.compact,vertical:.regular))
+        #expect(!NightDragPolicy.drags(multipleWindows:false,horizontal:.regular,vertical:.compact))
+        #expect(!NightDragPolicy.drags(multipleWindows:false,horizontal:.compact,vertical:.compact))
     }
 }

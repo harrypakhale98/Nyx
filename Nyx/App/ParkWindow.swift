@@ -23,6 +23,11 @@ struct ParkWindowRoot: View {
     /// The night last chosen in this window, as seconds since 1970 (0: none yet).
     @SceneStorage("windowNight") private var chosenNight=0.0
     @State private var commands=SceneCommands(parkWindow:true)
+    /// The saved spots have reached the model (`SavedSpotsFeed`): until then a spot's window waits.
+    @State private var spotsFed=false
+    /// A restored window's place is not known yet: a place abroad before the world catalogue is
+    /// read, a saved spot before the spots reach the model. The loader shows, never "not in Nyx".
+    private func waits(_ id:String)->Bool { model.awaitsCatalog(id) || (id.hasPrefix(SavedSpots.prefix) && !spotsFed) }
     var body: some View {
         // The same palette as the main window, brighter red included (`RootView`).
         let palette=NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)
@@ -30,6 +35,10 @@ struct ParkWindowRoot: View {
             if let value, let park=model.park(value.parkID) {
                 ParkDetailView(park:park,initialDate:ParkWindowRoot.night(stored:chosenNight,opened:value.night,tonight:model.tonight(park)),nightChanged:{ night in chosenNight=night.timeIntervalSince1970 })
                     .id(park.id)
+                    // Night vision one tap away here too, as in every tab of the main window.
+                    .toolbar { ToolbarItem(placement:.topBarLeading) { NightVisionToggle() } }
+            } else if let value, waits(value.parkID) {
+                ConstellationLoader().frame(maxWidth:.infinity,maxHeight:.infinity).background(NightBackground())
             } else {
                 CalmState(symbol:"mountain.2",title:"This park is not in Nyx",message:"Close this window and choose a park from the list.")
                     .frame(maxHeight:.infinity).background(NightBackground())
@@ -37,13 +46,21 @@ struct ParkWindowRoot: View {
         }
         .environment(\.nyxTab,0)
         // A spot's page in its own window resolves the spot through the model, which this scene keeps fed.
-        .background(SavedSpotsFeed())
+        .background(SavedSpotsFeed(fed:$spotsFed))
         .environment(commands).focusedSceneValue(commands)
         .background(WindowSceneReader(commands:commands).frame(width:0,height:0).accessibilityHidden(true))
         .environment(\.nyx,palette).environment(\.skyHome,model.home)
         .foregroundStyle(palette.ink,palette.muted,palette.muted).tint(palette.accent).preferredColorScheme(.dark).statusBarHidden(palette.nightVision)
         .modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red))
         .animation(reduceMotion ? nil : NyxMotion.spring,value:palette.nightVision)
+        // The switch asks the window for the lamp (`SceneCommands.requestNightVision`); a park's window
+        // has no lamp cover of its own, so it turns at once and crossfades on the shared spring.
+        .onChange(of:commands.lampRequest) { _,request in
+            guard let request else { return }
+            nightVision=request.on
+            if request.announce { NightVisionLamp.announce(request.on) }
+            commands.lampTarget=nil
+        }
         .nyxAccessibility()
     }
     /// The night a window opens on: the one last chosen in it, else the one it was opened with.

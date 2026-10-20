@@ -91,14 +91,17 @@ struct MomentsWatcher: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled=false
     @AppStorage("reminderOfferShown") private var offerShown=false
     @State private var offering=false
+    /// One offer for the whole app: every main window's watcher sees the same save.
+    private static var claimed=false
     var body: some View {
         Color.clear.frame(width:0,height:0).accessibilityHidden(true)
             .onChange(of:saved.count) { old,new in
                 // A park saved just now (not a store loading), by someone never asked about reminders.
-                guard new>old, DebugScenario.screen == nil, !offerShown, !notificationsEnabled,
+                guard new>old, DebugScenario.screen == nil, !offerShown, !notificationsEnabled, !Self.claimed,
                       saved.contains(where:{ Date.now.timeIntervalSince($0.savedAt)<30 }) else { return }
+                Self.claimed=true
                 Task {
-                    guard await Self.undecided() else { return }
+                    guard await Self.undecided() else { Self.claimed=false; return }
                     offerShown=true
                     offer()
                 }

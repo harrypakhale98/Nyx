@@ -90,25 +90,24 @@ struct RecordableNight: ViewModifier {
         }
     }
 }
-/// The drag itself, where there is room to drag to: on iPad, and on iPhone Duo's open inner display
-/// (regular in both directions, where Split View can sit another app beside Nyx). On an iPhone's
-/// single screen a long press stays the night's menu alone.
+/// The drag itself, where there is room to drag to: wherever the system can set another window
+/// beside this one (iPad, at any window size), and on iPhone Duo's open inner display (regular in
+/// both directions, where Split View can sit another app beside Nyx). On an iPhone's single screen
+/// a long press stays the night's menu alone.
 private struct NightDragSource: ViewModifier {
     let night: Night
     @Environment(\.horizontalSizeClass) private var horizontal
     @Environment(\.verticalSizeClass) private var vertical
+    @Environment(\.supportsMultipleWindows) private var multipleWindows
     func body(content: Content) -> some View {
-        if NightDragPolicy.drags(horizontal:horizontal,vertical:vertical) { content.draggable(NightTransfer(night)) }
+        if NightDragPolicy.drags(multipleWindows:multipleWindows,horizontal:horizontal,vertical:vertical) { content.draggable(NightTransfer(night)) }
         else { content }
     }
 }
 /// Where a night (or a park, held over the Journal's tab) is dragged rather than only long-pressed.
+/// Decided by what the window can do and its size classes, never by the kind of device.
 nonisolated enum NightDragPolicy {
-    static func drags(pad:Bool,horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
-        pad || (horizontal == .regular && vertical == .regular)
-    }
-    /// On this device.
-    @MainActor static func drags(horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
-        drags(pad:UIDevice.current.userInterfaceIdiom == .pad,horizontal:horizontal,vertical:vertical)
+    static func drags(multipleWindows:Bool,horizontal:UserInterfaceSizeClass?,vertical:UserInterfaceSizeClass?)->Bool {
+        multipleWindows || (horizontal == .regular && vertical == .regular)
     }
 }
