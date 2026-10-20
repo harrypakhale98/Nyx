@@ -57,9 +57,11 @@ nonisolated struct NightPlanner: Sendable {
         let middle = window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2)
         let lead = issued.map { middle.timeIntervalSince($0)/86400 } ?? .infinity
         let weight = predicted == nil ? 0 : CloudBasis.forecastWeight(leadDays: lead)
+        // With no usual clouds to ease toward, a forecast counts as it stands while it counts at all;
+        // once its weight reaches 0 the cloud term is dropped and the other parts renormalised.
         let counted: Double? = switch (predicted, usual) {
         case let (f?, u?): weight*f + (1-weight)*u
-        case let (f?, nil): f
+        case let (f?, nil): weight > 0 ? f : nil
         case let (nil, u): u
         }
         let aerosol = detail?.air?.mean("aerosol_optical_depth", from: window.start, to: window.end, valid: 0...10)
@@ -137,19 +139,28 @@ nonisolated struct NightPlanner: Sendable {
     /// must still outrank a gibbous one), then the longer true darkness, then the forecast models
     /// that agree more closely, then the surer cloud basis, then the earlier night and the park's
     /// name. The numbers shown never change.
+    ///
+    /// Near-equal sums, darkness and spreads tie: each is first rounded to its grid (`tieGrid`:
+    /// half a point, a minute, half a percent) and then compared exactly. A tolerance instead
+    /// ("within half a point") is not transitive, so a sort could name a different best night
+    /// for the same nights given in another order.
     static func better(_ a: Night, _ b: Night) -> Bool {
         if a.score.value != b.score.value { return a.score.value > b.score.value }
         let ga = glowRank(a.park.id), gb = glowRank(b.park.id)
         if ga != gb { return ga < gb }
-        let ra = partsSum(a.score), rb = partsSum(b.score)
-        if abs(ra-rb) >= 0.5 { return ra > rb }
-        if abs(a.sky.darkHours-b.sky.darkHours) >= 1.0/60 { return a.sky.darkHours > b.sky.darkHours }
-        let sa = a.modelSpread ?? .infinity, sb = b.modelSpread ?? .infinity
-        if abs(sa-sb) >= 0.5 { return sa < sb }
+        let ra = tieGrid(partsSum(a.score), 0.5), rb = tieGrid(partsSum(b.score), 0.5)
+        if ra != rb { return ra > rb }
+        let da = tieGrid(a.sky.darkHours, 1.0/60), db = tieGrid(b.sky.darkHours, 1.0/60)
+        if da != db { return da > db }
+        let sa = tieGrid(a.modelSpread ?? .infinity, 0.5), sb = tieGrid(b.modelSpread ?? .infinity, 0.5)
+        if sa != sb { return sa < sb }
         if certainty(a.basis) != certainty(b.basis) { return certainty(a.basis) > certainty(b.basis) }
         if a.id != b.id { return a.id < b.id }
         return a.park.name < b.park.name
     }
+    /// `value` rounded to the nearest multiple of `step`, as a count of steps: two values tie
+    /// exactly when they share a step. Infinity stays infinite.
+    static func tieGrid(_ value: Double, _ step: Double) -> Double { value.isFinite ? (value/step).rounded() : value }
     /// The score's parts before any cap: what the night would score if nothing held it down.
     static func partsSum(_ score: DarknessScore) -> Double {
         score.moonPoints+(score.cloudPoints ?? 0)+score.bortlePoints+score.lengthPoints

@@ -107,26 +107,31 @@ nonisolated enum TripPlanner {
         private init(glow: Double, parts: Double, dark: Double, spread: Double, certainty: Double) {
             self.glow=glow; self.parts=parts; self.dark=dark; self.spread=spread; self.certainty=certainty
         }
-        /// Whether this side wins, term by term; nil when every term ties.
+        /// Whether this side wins, term by term; nil when every term ties. Each term is rounded to
+        /// its grid first and compared exactly (`NightPlanner.tieGrid`), so ties stay transitive.
         func beats(_ o: Tie) -> Bool? {
-            if abs(glow-o.glow)>1e-9 { return glow<o.glow }
-            if abs(parts-o.parts)>=0.5 { return parts>o.parts }
-            if abs(dark-o.dark)>=1.0/60 { return dark>o.dark }
-            if abs(spread-o.spread)>=0.5 { return spread<o.spread }
-            if abs(certainty-o.certainty)>1e-9 { return certainty>o.certainty }
+            func grid(_ a: Double, _ b: Double, _ step: Double) -> (Double, Double) { (NightPlanner.tieGrid(a, step), NightPlanner.tieGrid(b, step)) }
+            let g=grid(glow,o.glow,1e-9), p=grid(parts,o.parts,0.5), d=grid(dark,o.dark,1.0/60), s=grid(spread,o.spread,0.5), c=grid(certainty,o.certainty,1e-9)
+            if g.0 != g.1 { return g.0<g.1 }
+            if p.0 != p.1 { return p.0>p.1 }
+            if d.0 != d.1 { return d.0>d.1 }
+            if s.0 != s.1 { return s.0<s.1 }
+            if c.0 != c.1 { return c.0>c.1 }
             return nil
         }
     }
     static let maxNights = 14
     /// The latest last night the planner offers: 13 nights after the first, or 69 for weekends
-    /// only, whose filter keeps about one night in five (seven weekends' worth).
-    static func latestLast(first: Date, weekendsOnly: Bool) -> Date {
-        first.addingTimeInterval(Double(weekendsOnly ? 69 : 13)*86400)
+    /// only, whose filter keeps about one night in five (seven weekends' worth). Calendar days, so a
+    /// change of clocks in between never lands the limit a day short.
+    static func latestLast(first: Date, weekendsOnly: Bool, calendar: Calendar = .current) -> Date {
+        let days = weekendsOnly ? 69 : 13
+        return calendar.date(byAdding: .day, value: days, to: first) ?? first.addingTimeInterval(Double(days)*86400)
     }
     /// A last night kept inside what the planner offers: never before the first, never past `latestLast`
     /// (turning weekends only off, or moving the first night earlier, brings it back in).
-    static func clampedLast(_ last: Date, first: Date, weekendsOnly: Bool) -> Date {
-        min(max(last, first), latestLast(first: first, weekendsOnly: weekendsOnly))
+    static func clampedLast(_ last: Date, first: Date, weekendsOnly: Bool, calendar: Calendar = .current) -> Date {
+        min(max(last, first), latestLast(first: first, weekendsOnly: weekendsOnly, calendar: calendar))
     }
     /// A closure in the last park update costs a park this many points in the assignment only; the
     /// score shown is never changed. The same penalty every best night uses (`NightPlanner.closurePenalty`).

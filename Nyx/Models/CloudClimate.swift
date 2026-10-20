@@ -181,7 +181,10 @@ extension Night {
     nonisolated var basisLine: String? {
         switch basis {
         case .forecast: return nil
-        case .blended: return String(localized: "Early look · forecast eased toward usual clouds")
+        case .blended:
+            // With no usual clouds for the place there is nothing to ease toward (`NightPlanner.night`).
+            return usualCloud == nil ? String(localized: "Early look · forecast counted as it stands")
+                : String(localized: "Early look · forecast eased toward usual clouds")
         case .usual:
             switch (beyondForecast, usualCloud == nil) {
             case (true, false): return String(localized: "No cloud forecast yet · usual clouds for the month")
@@ -198,7 +201,9 @@ extension Night {
         switch basis {
         case .forecast: return nil
         case .blended(_, let lead):
-            return String(localized: "Early look: forecast \(max(1, Int(lead.rounded()))) days out, eased toward usual clouds.")
+            let days = max(1, Int(lead.rounded()))
+            return usualCloud == nil ? String(localized: "Early look: forecast \(days) days out, counted as it stands. There are no usual clouds for this place.")
+                : String(localized: "Early look: forecast \(days) days out, eased toward usual clouds.")
         case .usual:
             var format = Date.FormatStyle().month(.wide)
             format.timeZone = park.timeZone
