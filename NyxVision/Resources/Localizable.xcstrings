@@ -684,13 +684,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@: %2$@ hacia las %3$@; también visible a simple vista."
+            "value": "%1$@: %2$@, aprox. %3$@; también visible a simple vista."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ vers %3$@, visible aussi à l’œil nu."
+            "value": "%1$@ : %2$@ vers %3$@, visible aussi à l’œil nu."
           }
         },
         "ja": {
@@ -719,13 +719,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@: %2$@ hacia las %3$@."
+            "value": "%1$@: %2$@, aprox. %3$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ : %2$@ vers %3$@."
+            "value": "%1$@ : %2$@ vers %3$@."
           }
         },
         "ja": {
@@ -952,7 +952,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% mittlere Bewölkung während der echten Dunkelheit."
+            "value": "%lld %% mittlere Bewölkung während der echten Dunkelheit."
           }
         },
         "en": {
@@ -970,7 +970,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %% de couverture moyenne pendant l’obscurité totale."
+            "value": "%lld %% de couverture moyenne pendant l’obscurité totale."
           }
         },
         "ja": {
@@ -1279,13 +1279,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un resplandor muy tenue y amplio en el lado opuesto al Sol, hacia las %1$@, a %2$lld° de altura en el %3$@. Solo desde los cielos más oscuros, con la vista totalmente adaptada; fácil de pasar por alto."
+            "value": "Un resplandor muy tenue y amplio en el lado opuesto al Sol (aprox. %1$@), a %2$lld° de altura en el %3$@. Solo desde los cielos más oscuros, con la vista totalmente adaptada; fácil de pasar por alto."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une lueur très faible et étendue à l’opposé du Soleil, vers %1$@, à %2$lld° de hauteur direction %3$@. Seulement sous les ciels les plus sombres, les yeux bien adaptés ; facile à manquer."
+            "value": "Une lueur très faible et étendue à l’opposé du Soleil, vers %1$@, à %2$lld° de hauteur direction %3$@. Seulement sous les ciels les plus sombres, les yeux bien adaptés ; facile à manquer."
           }
         },
         "ja": {
@@ -2294,7 +2294,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Más cerca hacia las %1$@, %2$@. Un bello espectáculo a simple vista o con prismáticos."
+            "value": "Más cerca: aprox. %1$@, %2$@. Un bello espectáculo a simple vista o con prismáticos."
           }
         },
         "fr": {
@@ -3105,7 +3105,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calculée avec l’International Geomagnetic Reference Field (IGRF-14, AIGA ; coefficients de NOAA NCEI)."
+            "value": "Calculée avec l’International Geomagnetic Reference Field (IGRF-14, AIGA ; coefficients de NOAA NCEI)."
           }
         },
         "ja": {
@@ -3280,7 +3280,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024. Sous licence CC BY 4.0."
+            "value": "Contient des informations modifiées du Copernicus Climate Change Service (2026) : ERA5, de 2015 à 2024. Sous licence CC BY 4.0."
           }
         },
         "ja": {
@@ -3700,7 +3700,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
+            "value": "Poussière dans l’air : la Voie lactée paraîtra pâle."
           }
         },
         "ja": {
@@ -4015,7 +4015,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs soirs pour la trouver, %2$@ après le coucher du Soleil."
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs soirs pour la trouver, %2$@ après le coucher du Soleil."
           }
         },
         "ja": {
@@ -4050,7 +4050,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs matins pour la trouver, %2$@ avant le lever du Soleil."
+            "value": "Au plus loin de l’éclat du Soleil vers le %1$@ : les meilleurs matins pour la trouver, %2$@ avant le lever du Soleil."
           }
         },
         "ja": {
@@ -4359,7 +4359,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve hacia las %2$@ y se oculta tras él hacia las %3$@."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@) y se oculta tras él (aprox. %3$@)."
           }
         },
         "fr": {
@@ -4394,7 +4394,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ supera el relieve hacia las %2$@."
+            "value": "Desde %1$@ supera el relieve (aprox. %2$@)."
           }
         },
         "fr": {
@@ -4429,7 +4429,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desde %1$@ se oculta tras el relieve hacia las %2$@."
+            "value": "Desde %1$@ se oculta tras el relieve (aprox. %2$@)."
           }
         },
         "fr": {
@@ -4750,7 +4750,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
+            "value": "Poussière épaisse dans l’air : étoiles faibles masquées."
           }
         },
         "ja": {
@@ -5292,7 +5292,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letzte Vorhersage: %@."
+            "value": "Letzte Vorhersage: %@"
           }
         },
         "en": {
@@ -5304,7 +5304,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Último pronóstico: %@."
+            "value": "Último pronóstico: %@"
           }
         },
         "fr": {
@@ -5327,7 +5327,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letzte Parkmeldung: %@."
+            "value": "Letzte Parkmeldung: %@"
           }
         },
         "en": {
@@ -5339,7 +5339,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Última actualización de los parques: %@."
+            "value": "Última actualización de los parques: %@"
           }
         },
         "fr": {
@@ -5397,7 +5397,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Letzte Rauchvorhersage: %@."
+            "value": "Letzte Rauchvorhersage: %@"
           }
         },
         "en": {
@@ -5409,7 +5409,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Último pronóstico de humo: %@."
+            "value": "Último pronóstico de humo: %@"
           }
         },
         "fr": {
@@ -6634,7 +6634,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin Luna de %@ a %@."
+            "value": "Sin Luna de %@ a %@"
           }
         },
         "fr": {
@@ -7095,7 +7095,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nommés au soleil : %@."
+            "value": "Nommés au soleil : %@."
           }
         },
         "ja": {
@@ -7900,7 +7900,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
+            "value": "Aucune prévision de fumée sur cet appareil n’atteint cette nuit : la fumée n’est donc pas comptée."
           }
         },
         "ja": {
@@ -8180,7 +8180,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun dessiné : prévision de nuages indisponible"
+            "value": "Aucun dessiné : prévision de nuages indisponible"
           }
         },
         "ja": {
@@ -8355,7 +8355,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
+            "value": "Nyx demande à services.swpc.noaa.gov, le Space Weather Prediction Center de la NOAA américaine, sa prévision de l’activité géomagnétique (l’indice Kp) pour les trois prochains jours : un seul fichier pour le monde entier, au plus toutes les trois heures. La requête ne nomme aucun lieu et rien sur vous. Le service reçoit des informations réseau, comme votre adresse IP."
           }
         },
         "ja": {
@@ -9994,7 +9994,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se pone %@"
+            "value": "Se pone: %@"
           }
         },
         "fr": {
@@ -10420,7 +10420,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Indique dans « Dans le ciel » quand une aurore peut atteindre un parc"
+            "value": "Indique dans « Dans le ciel » quand une aurore peut atteindre un parc"
           }
         },
         "ja": {
@@ -11855,7 +11855,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce mois-ci, avant l’aube, l’air est en général proche de son point de rosée : attendez-vous à de la rosée sur les optiques."
+            "value": "Ce mois-ci, avant l’aube, l’air est en général proche de son point de rosée : attendez-vous à de la rosée sur les optiques."
           }
         },
         "ja": {
@@ -13220,7 +13220,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. Désactiver la fumée et la brume supprime la prévision de fumée, et les indices précisent que la fumée n’est pas comptée. Désactiver les alertes du parc arrête les nouvelles requêtes ; les fermetures déjà présentes restent à côté de l’indice. Désactiver la prévision d’aurores la supprime de cet appareil. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
+            "value": "Désactiver les prévisions arrête les nouvelles requêtes. La dernière prévision reste sur cet appareil et compte de moins en moins en vieillissant, puis la nébulosité habituelle du parc prend le relais. Désactiver la fumée et la brume supprime la prévision de fumée, et les indices précisent que la fumée n’est pas comptée. Désactiver les alertes du parc arrête les nouvelles requêtes ; les fermetures déjà présentes restent à côté de l’indice. Désactiver la prévision d’aurores la supprime de cet appareil. La Lune, les étoiles et tous les indices fonctionnent toujours hors ligne."
           }
         },
         "ja": {
@@ -13325,7 +13325,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
+            "value": "3D Elevation Program de l’USGS (domaine public) ; produced using Copernicus WorldDEM-30 and WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30 and WorldDEM-90."
           }
         },
         "ja": {
@@ -13494,7 +13494,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nubosidad habitual"
+            "value": "Nubes habituales"
           }
         },
         "fr": {
@@ -13640,7 +13640,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Air très sec : bon pour les étoiles faibles."
+            "value": "Air très sec : bon pour les étoiles faibles."
           }
         },
         "ja": {
@@ -13675,7 +13675,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Air très sec et pur : bon pour les étoiles faibles."
+            "value": "Air très sec et pur : bon pour les étoiles faibles."
           }
         },
         "ja": {
