@@ -274,7 +274,7 @@ import UIKit
         }
         // The dome and the skyline's colour, redrawn only when the light has changed visibly. Below
         // the night floor the sky's colour no longer depends on the Sun, so its height is clamped
-        // there first and a sweep through true darkness redraws nothing.
+        // there first; in true darkness only a change in moonlight or sky glow redraws it.
         let domeKey = SkyTextures.Light(sunAltitude: max(SkyTextures.nightFloor, light.sunAltitude), skyGlow: light.skyGlow, moonGlare: light.moonGlare)
         if Self.domeChanged(from: domeLight, to: domeKey) || domePark != park.id {
             domePark = park.id; domeLight = domeKey

@@ -31,7 +31,8 @@ struct OpenSkyIntent: LiveActivityIntent {
     init(parkID: String) { self.parkID=parkID }
     func perform() async throws -> some IntentResult {
         // What night vision was before this tap, so leaving field mode puts it back (`FieldSession`).
-        OpenSkyPrior.store()
+        // Field mode already open set it itself, and keeps what it was before.
+        if await MainActor.run(body:{ !FieldPresenter.isOpen(in:nil) }) { OpenSkyPrior.store() }
         SharedSettings.defaults.set(true,forKey:"nightVision")
         FieldModeRequest.post(parkID:parkID)
         return .result()

@@ -210,10 +210,8 @@ struct ParkList: View {
     }
     /// Where the device's region is not the US (as the iPhone's onboarding decides its first sentence).
     static var showsScope: Bool { VisionDebug.isEnabled("vision-abroad") || !inUS(Locale.current.region?.identifier) }
-    /// The United States and its territories (Puerto Rico, the U.S. Virgin Islands, Guam, American
-    /// Samoa, the Northern Mariana Islands, the minor outlying islands): home to the national parks
-    /// here, so never "abroad".
-    nonisolated static func inUS(_ region: String?) -> Bool { ["US", "PR", "VI", "GU", "AS", "MP", "UM"].contains(region ?? "") }
+    /// The United States and its territories, as on iPhone (`HomeRegion`).
+    nonisolated static func inUS(_ region: String?) -> Bool { HomeRegion.isUS(region) }
     private var nightName: String {
         guard let park = model.park else { return "" }
         return park.dayLabel(model.night(for: park))

@@ -129,6 +129,8 @@ import WidgetKit
     }
     func end() {
         ended=true
+        // A kept "Open sky" value belongs to the session that tap opened, never to a later one.
+        SharedSettings.defaults.removeObject(forKey: OpenSkyPrior.key)
         ticker?.cancel(); ticker=nil
         idleWatch?.cancel(); idleWatch=nil
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
