@@ -59,8 +59,8 @@ private func jpeg(_ color: UIColor) throws -> Data {
         let staged=try await Task.detached { try JournalExport.stage(container, now: moment) }.value
         #expect(staged.deletingLastPathComponent().path == JournalExport.folder.path)
         #expect(FileManager.default.fileExists(atPath: staged.appendingPathComponent("entries.json").path))
-        JournalExport.clear()
-        #expect(!FileManager.default.fileExists(atPath: JournalExport.folder.path))
+        JournalExport.clear(staged)
+        #expect(!FileManager.default.fileExists(atPath: staged.path))
     }
     /// Clearing the picker after a load changes it to an empty pick: that pick loads nothing and
     /// leaves the last load's message ("This photo is too large…") on screen.

@@ -460,14 +460,27 @@ nonisolated enum JournalInbox {
 nonisolated enum JournalExport {
     static var folder: URL { FileManager.default.temporaryDirectory.appendingPathComponent("nyx-export", isDirectory: true) }
     /// Writes the journal in `container` to a new package in `folder` and returns it; nothing is
-    /// left behind when it fails.
+    /// left behind when it fails. Each export has its own package, so two windows exporting at once
+    /// never remove each other's; packages an earlier run left behind are swept after an hour.
     static func stage(_ container: ModelContainer, now: Date = .now) throws -> URL {
-        clear()
+        sweep(before: Date.now.addingTimeInterval(-3600))
         let package=folder.appendingPathComponent("\(UUID().uuidString).\(JournalArchive.fileExtension)", isDirectory: true)
-        do { try JournalArchive.write(container, to: package, now: now) } catch { clear(); throw error }
+        do { try JournalArchive.write(container, to: package, now: now) } catch { clear(package); throw error }
         return package
     }
-    static func clear() { try? FileManager.default.removeItem(at: folder) }
+    /// Removes one staged package, once the exporter has copied it or was cancelled.
+    static func clear(_ package: URL?) {
+        guard let package, package.deletingLastPathComponent().standardizedFileURL == folder.standardizedFileURL else { return }
+        try? FileManager.default.removeItem(at: package)
+    }
+    /// Removes packages last changed before `date`.
+    static func sweep(before date: Date) {
+        let manager=FileManager.default
+        guard let packages=try? manager.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey]) else { return }
+        for package in packages where ((try? package.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast) < date {
+            try? manager.removeItem(at: package)
+        }
+    }
 }
 /// A package gathered on disk (`JournalExport`) as a document for `fileExporter`. Its files are
 /// read only as the exporter copies them, so the photos never gather in memory.
