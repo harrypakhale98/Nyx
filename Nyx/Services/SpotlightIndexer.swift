@@ -77,6 +77,9 @@ import UniformTypeIdentifiers
             // Dark Sky Parks rank a little higher: they are what Nyx is for.
             attributes.associateAppEntity(entity,priority:park.darkSkyDesignated ? 1 : 0)
             let item=CSSearchableItem(uniqueIdentifier:park.id,domainIdentifier:domain,attributeSet:attributes)
+            // Spotlight drops an item after a month by default; Nyx indexes again only when its marker
+            // changes, so the parks would quietly leave search. They stay until Nyx removes them.
+            item.expirationDate = .distantFuture
             if #available(iOS 27.0,*) { item.relatedAppEntityIdentifier=EntityIdentifier(for:entity) }
             return item
         }

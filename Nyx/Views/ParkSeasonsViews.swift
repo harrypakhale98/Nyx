@@ -66,6 +66,7 @@ struct AfterDarkPanel: View {
 /// sentence is what VoiceOver reads.
 struct BusyMonthsPanel: View {
     @Environment(\.nyx) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .caption) private var barHeight = 40.0
     let park: Park
     let month: Int
@@ -80,12 +81,14 @@ struct BusyMonthsPanel: View {
                             VStack(spacing: 4) {
                                 Capsule().fill(i == month-1 ? palette.accent : palette.line)
                                     .frame(height: max(3, barHeight*Double(months.visits[i])/Double(top)))
-                                Text(gregorian.veryShortStandaloneMonthSymbols[i]).font(.caption2).foregroundStyle(i == month-1 ? palette.accent : palette.muted)
+                                // Twelve letters do not fit at accessibility sizes; the sentence below says the pattern.
+                                if !typeSize.isAccessibilitySize {
+                                    Text(gregorian.veryShortStandaloneMonthSymbols[i]).font(.caption2).foregroundStyle(i == month-1 ? palette.accent : palette.muted)
+                                }
                             }
                             .frame(maxWidth: .infinity)
                         }
                     }
-                    .frame(height: barHeight+18, alignment: .bottom)
                     .accessibilityHidden(true)
                     Text(Self.summary(months, month: month)).font(.subheadline).foregroundStyle(palette.ink).fixedSize(horizontal: false, vertical: true)
                     Text("Recreation visits counted by the Park Service, monthly averages for 2021 to 2025. Counting changed at a few parks in those years, so only the pattern is shown.")

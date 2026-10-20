@@ -353,7 +353,7 @@ struct TripStayRow: View {
         return VStack(alignment:.leading,spacing:4) {
             // At accessibility sizes the badge goes under the dates rather than squeezing them.
             dateRow {
-                Text(several ? "\(park.dayLabel(first.night.id)) – \(park.dayLabel(last.night.id))" : LocalizedStringKey(park.dayLabel(night.id))).font(.caption.weight(.medium)).foregroundStyle(palette.muted)
+                (several ? Text("\(park.dayLabel(first.night.id)) – \(park.dayLabel(last.night.id))") : Text(verbatim:park.dayLabel(night.id))).font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                 if stay.isBest { Text("Best night").font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,3).foregroundStyle(palette.nightVision ? palette.ink : Color.black).background(Capsule().fill(palette.accent.opacity(palette.nightVision ? 0.35 : 1))) }
             }
             Text(several ? String(localized:"\(stay.stops.count) nights at \(park.shortName)") : park.shortName).font(.system(.title3,design:.serif)).foregroundStyle(palette.ink).fixedSize(horizontal:false,vertical:true)
