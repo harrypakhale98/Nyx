@@ -43,10 +43,8 @@ struct ScoreBreakdownView: View {
                 }
             }
             row("Moonlight",points:Double(shown.moon),of:40,fact:moonFact,detail:String(localized:"How bright the Moon is by phase and how high it stands, through true darkness. A low Moon counts for less than a high one."))
-            row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:cloudFact,
-                context:cloudContext,
-                detail:cloudContext.isEmpty ? String(localized:"The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
-                    : String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score."))
+            row("Clouds",points:shown.cloud.map(Double.init),of:25,fact:Self.cloudFact(night),
+                context:cloudContext,detail:Self.cloudDetail(usualClouds:night.usualCloud != nil,context:!cloudContext.isEmpty))
             row("Sky glow",points:Double(shown.glow),of:20,fact:String(localized:"Bortle class \(night.park.bortleEstimate) of 9, estimated."),context:lightContext,detail:String(localized:"Artificial light in the sky, as a conservative Bortle estimate. It is not a measurement."))
             row("True darkness",points:Double(shown.length),of:15,fact:night.sky.darkHours>0 ? String(localized:"\(darkness) of true darkness.") : String(localized:"No true darkness."),detail:String(localized:"True darkness: the Sun more than 18° below the horizon. Ten hours earn full credit."))
             if let caption=night.basisCaption(typical:true) { Text(Sentences.join([caption,String(localized:"The score will change as a forecast arrives.")])).foregroundStyle(palette.muted).fixedSize(horizontal:false,vertical:true) }
@@ -76,12 +74,26 @@ struct ScoreBreakdownView: View {
     private var partsSum:Int { night.score.partsSum }
     /// Whole points that add up to `partsSum`, so the rows make the sum the caption names.
     private var shown:(moon:Int,cloud:Int?,glow:Int,length:Int) { night.score.displayedParts }
-    private var cloudFact:String {
+    /// How the clouds are scored. Where the place has no usual clouds for the month there is nothing
+    /// to ease toward: an early look counts its forecast as it stands (`NightPlanner.night`).
+    nonisolated static func cloudDetail(usualClouds:Bool,context:Bool)->String {
+        switch (usualClouds,context) {
+        case (true,false): String(localized:"The hourly forecast averaged over true darkness. Beyond about three days it is eased toward the park's usual clouds for the month; with no forecast, the usual clouds count alone.")
+        case (true,true): String(localized:"The hourly forecast averaged over true darkness, eased toward the park's usual clouds beyond about three days. Model agreement and cloud layers are context; smoke or haze can cap the score.")
+        case (false,false): String(localized:"The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. With no forecast, the score counts the Moon and darkness only.")
+        case (false,true): String(localized:"The hourly forecast averaged over true darkness, counted as it stands: there are no usual clouds for this place. Model agreement and cloud layers are context; smoke or haze can cap the score.")
+        }
+    }
+    /// The fact the clouds were scored from, in the words every surface uses for the night's basis.
+    nonisolated static func cloudFact(_ night:Night)->String {
         switch night.basis {
         case .forecast: return night.cloudCover.map { String(localized:"\(Int($0.rounded()))% average cover through true darkness.") } ?? String(localized:"No cloud forecast yet.")
         case .blended(_, let lead):
             guard let forecast=night.cloudCover, let counted=night.score.cloudUsed else { return String(localized:"An early look at the clouds.") }
-            return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(max(1,Int(lead.rounded()))) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%.")
+            let days=max(1,Int(lead.rounded()))
+            // Nothing to ease toward: the forecast is what counts, said once.
+            guard night.usualCloud != nil else { return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(days) days out, counted as it stands.") }
+            return String(localized:"Early look: a forecast of \(Int(forecast.rounded()))% from \(days) days out, eased toward the usual clouds. Counted as \(Int(counted.rounded()))%.")
         case .usual:
             // "No cloud forecast yet." or "Cloud forecast unavailable.", as every surface says it.
             guard let usual=night.usualCloud else { return Sentences.join([night.noForecastSentence ?? "",String(localized:"This score counts the Moon and darkness only.")]) }

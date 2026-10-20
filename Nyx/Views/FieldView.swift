@@ -48,9 +48,16 @@ struct FieldView: View {
     /// What the score's clouds rest on, without a full cloud forecast (offline with nothing cached, or a stale one).
     /// Field mode is tonight, always within a forecast's reach: without one, it is unavailable, never "not yet".
     private var basisNote: String? {
-        guard !session.score.hasForecast else { return nil }
-        if session.score.basis.isEarlyLook { return String(localized:"Early look: the forecast is eased toward usual clouds.") }
-        return Sentences.join([String(localized:"Cloud forecast unavailable."),session.score.cloudPoints == nil ? String(localized:"This score counts the Moon and darkness only.") : String(localized:"This score uses the park's usual clouds.")])
+        // The night's month at the park, from its sunset (field mode is one night): with no usual clouds
+        // for it, an early look counts the forecast as it stands.
+        let evening=session.night.milestones.first { $0.kind == .sunset }?.date ?? session.now
+        return Self.basisNote(session.score,usualClouds:CloudClimate.shared.typical(session.park,on:evening) != nil)
+    }
+    /// What the score's clouds rest on, said as the park page says it (`CloudBasis.earlyLookCaption`); nil with a full forecast.
+    nonisolated static func basisNote(_ score:DarknessScore,usualClouds:Bool)->String? {
+        guard !score.hasForecast else { return nil }
+        if let early=score.basis.earlyLookCaption(usualClouds:usualClouds) { return early }
+        return Sentences.join([String(localized:"Cloud forecast unavailable."),score.cloudPoints == nil ? String(localized:"This score counts the Moon and darkness only.") : String(localized:"This score uses the park's usual clouds.")])
     }
     var body: some View {
         let palette=NyxPalette(nightVision:true,highContrast:contrast == .increased,brighterRed:brighterRed || DebugScenario.isEnabled("brighter-red"))

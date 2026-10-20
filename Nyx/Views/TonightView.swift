@@ -455,10 +455,10 @@ struct TonightView: View {
         return nil
     }
     /// Tonight answers where; this answers when. The darkest of the next six nights across every
-    /// park in reach, shown only when it is clearly better than tonight's best.
+    /// park in reach, shown only when it is clearly better than tonight's best. Ties are broken as
+    /// everywhere (`NightPlanner.best`), so the night named is the one its park page ranks first.
     @ViewBuilder private func darkerAhead(than tonight:Night)->some View {
-        let ahead=aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) }
-            .reduce(nil as Night?) { best,night in best.map { night.score.value>$0.score.value ? night : $0 } ?? night }
+        let ahead=NightPlanner.best(aheadPool.flatMap { park in model.nights(park,from:park.date(model.tonight(park),addingDays:1),count:6) })
         if let ahead, ahead.score.value>=tonight.score.value+5 {
             capsule(text:String(localized:"Darker on \(ahead.park.dayLabel(ahead.id)): \(ahead.score.value) at \(ahead.park.shortName)"),hint:"Opens that night at the park.") {
                 ParkDetailView(park:ahead.park,initialDate:ahead.id)

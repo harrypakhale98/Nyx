@@ -240,9 +240,11 @@ private struct SkyNow: View {
     /// "Forecast clouds": the hour's cover the sky draws, or why none is drawn.
     private func clouds(_ plan: NightPlan, _ moment: SkyMoment) -> some View {
         let cloud = plan.cloud(at: moment.date)
+        // An early look where the place has no usual clouds draws the hour as forecast (`SkyDome.cloud`).
         let value: String = if let cloud {
-            plan.night.basis.isEarlyLook ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look eased toward usual clouds")
-                : String(localized: "About \(Int((cloud*100).rounded()))% of the sky this hour")
+            !plan.night.basis.isEarlyLook ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky this hour")
+                : plan.night.usualCloud == nil ? String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look counted as it stands")
+                : String(localized: "About \(Int((cloud*100).rounded()))% of the sky, an early look eased toward usual clouds")
         } else if plan.night.basis == .usual {
             plan.beyondForecast ? String(localized: "None drawn: no cloud forecast reaches this night") : String(localized: "None drawn: cloud forecast unavailable")
         } else {

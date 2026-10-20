@@ -95,8 +95,24 @@ private struct WatchRoutes: ViewModifier {
             case .credits: WatchCredits()
             case .night(let link):
                 if let park = store.park(link.parkID) { ParkNightView(park: park, startNight: link.offset(in: park, now: .now, limit: 6)) }
+                else { GoneNight() }
             }
         }
+    }
+}
+/// A place's page whose place the iPhone stopped sending while it was open (a saved spot removed):
+/// one calm line, and back to where it came from rather than a blank page.
+private struct GoneNight: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.nyx) private var palette
+    var body: some View {
+        Text("This place is no longer saved in Nyx.").font(.footnote).foregroundStyle(palette.muted).multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true).padding()
+            // Long enough to read the line, then back.
+            .task {
+                try? await Task.sleep(for: .seconds(2))
+                if !Task.isCancelled { dismiss() }
+            }
     }
 }
 extension View {

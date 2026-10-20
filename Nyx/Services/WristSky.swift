@@ -170,7 +170,8 @@ nonisolated enum CloudSource: Equatable, Sendable {
     case unsynced
     /// A forecast fetched at this moment, still in use.
     case fresh(Date)
-    /// The iPhone's last forecast for this park is old: still scored (eased toward usual clouds), but worth refreshing.
+    /// The iPhone's last forecast for this park is old: still scored (eased toward usual clouds, or as it
+    /// stands where the place has none, until ten days out), but worth refreshing.
     case expired(Date)
     /// The iPhone sent a context without a forecast for this park; `followed` says whether it
     /// is one the iPhone sends clouds for (saved, the starting park, Tonight's answer on the

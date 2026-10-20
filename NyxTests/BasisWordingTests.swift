@@ -49,6 +49,35 @@ import Testing
         #expect(NightLookup.basis(bare).hasPrefix("cloud forecast unavailable; scored on the Moon and darkness only"))
         for words in [bare.bandWithBasis, bare.spokenSummary(.scoreWithBasis), ShareCard(night: bare).basis] { #expect(!words.contains("usual clouds"), "\(words)") }
     }
+    /// An early look where the place has no usual clouds counts the forecast as it stands, and no
+    /// surface says it was eased toward clouds nobody knows.
+    @Test func anEarlyLookWithoutUsualCloudsIsCountedAsItStandsEverywhere() throws {
+        let jotr = try park("jotr")
+        let first = (floor(now.timeIntervalSince1970/3600)-24)*3600
+        let hours = (0..<(17*24)).map { first+Double($0)*3600 }
+        let forecast = Forecast(updated: now, times: hours, clouds: hours.map { _ in 80 })
+        let bare = night(jotr, daysAhead: 6, forecast: forecast, climate: CloudClimate(parks: [:])), eased = night(jotr, daysAhead: 6, forecast: forecast)
+        try #require(bare.basis.isEarlyLook && bare.usualCloud == nil && eased.basis.isEarlyLook && eased.usualCloud != nil)
+        let words = [bare.basisCaption() ?? "", ScoreBreakdownView.cloudFact(bare), ScoreBreakdownView.cloudDetail(usualClouds: false, context: false),
+                     ScoreBreakdownView.cloudDetail(usualClouds: false, context: true), NightLookup.basis(bare), FieldView.basisNote(bare.score, usualClouds: false) ?? "",
+                     CalendarView.legend([bare]), UsualCloudsNote.trip([bare]) ?? ""]
+        for line in words {
+            #expect(line.contains("as it stands"), "\(line)")
+            #expect(!line.contains("eased") && !line.contains(" ease "), "\(line)")
+        }
+        let fact = ScoreBreakdownView.cloudFact(bare)
+        #expect(fact.hasPrefix("Early look: a forecast of 80% from ") && fact.hasSuffix(" days out, counted as it stands.") && !fact.contains("Counted as"))
+        #expect(FieldView.basisNote(bare.score, usualClouds: false) == bare.basisCaption())
+        // With usual clouds, the words are as before.
+        #expect(FieldView.basisNote(eased.score, usualClouds: true) == eased.basisCaption() && eased.basisCaption()?.contains("eased toward usual clouds") == true)
+        #expect(ScoreBreakdownView.cloudFact(eased).contains("eased toward the usual clouds") && NightLookup.basis(eased).contains("eased toward usual clouds"))
+        #expect(CalendarView.legend([eased]).hasPrefix("Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."))
+        #expect(CalendarView.legend([eased, bare]).contains("eased toward the usual clouds, or counted as it stands where those are not known."))
+        #expect(UsualCloudsNote.trip([eased, bare]) == "Nights marked \"Early look\" ease the forecast toward each park's usual clouds for the month, or count it as it stands where those are not known.")
+        // A stay's unmarked early look with no usual clouds leans on none.
+        #expect(UsualCloudsNote.trip([night(jotr, daysAhead: 1, forecast: forecast)], unmarked: [bare]) == nil)
+        #expect(CloudBasis.forecast.earlyLookCaption(usualClouds: false) == nil && CloudBasis.usual.earlyLookCaption(usualClouds: true) == nil)
+    }
     @Test func smokeThatLimitsTheScoreIsSaidEverywhere() throws {
         let jotr = try park("jotr")
         let first = (floor(now.timeIntervalSince1970/3600)-24)*3600
