@@ -12,7 +12,8 @@ nonisolated struct WatchSkyEntry: TimelineEntry, Sendable {
     /// The shown park's closure from the iPhone's last park update, worded as on the iPhone.
     var closure: String? = nil
     /// The shown park's clouds come from a forecast at least 36 hours old at this entry
-    /// (`CloudSource.lifetime`): still scored, eased toward usual clouds, but worth refreshing.
+    /// (`CloudSource.lifetime`): still scored (eased toward usual clouds, or as it stands where the
+    /// place has none), but worth refreshing.
     var cloudsOld = false
     /// The face is set to a saved spot or world place the iPhone no longer sends: it says so, rather
     /// than showing another place.
@@ -148,10 +149,12 @@ nonisolated enum WatchTimeline {
         Timeline(entries: entries, policy: .after(max(entries.last?.date ?? now, now.addingTimeInterval(3600))))
     }
     /// The same, ending at `until` when it comes first: what the face follows changes then
-    /// (`WatchSky.faces`), so the timeline is made again there rather than running on.
+    /// (`WatchSky.faces`), so the timeline is made again there rather than running on, even when
+    /// the hour's floor would otherwise ask later.
     static func timeline<Entry: TimelineEntry>(_ entries: [Entry], now: Date, until end: Date?) -> Timeline<Entry> {
-        guard let end, end > now, let last = entries.last, last.date >= end else { return timeline(entries, now: now) }
-        return Timeline(entries: entries.filter { $0.date < end }, policy: .after(end))
+        guard let end, end > now else { return timeline(entries, now: now) }
+        let after = max(entries.last?.date ?? now, now.addingTimeInterval(3600))
+        return Timeline(entries: entries.filter { $0.date < end }, policy: .after(min(after, end)))
     }
     /// Entries now, at every milestone of the next day (so "next" turns over on time), whenever the
     /// followed park may change (`followMoments`), and hourly. Countdown text updates itself in between.

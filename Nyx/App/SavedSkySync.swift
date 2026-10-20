@@ -307,8 +307,9 @@ import WidgetKit
         let all=WatchContext.followed(saved:ids,home:model.homeID,tonight:tonight,watch:watchIDs)
         let bridge=WatchBridge.shared, watch=watchSeen || bridge.hasWatchApp
         let ranges:[String:[String:ClosedRange<Int>]]?=watch ? Self.modelRanges(model,ids:all) : nil
-        var complete:(@MainActor @Sendable ()->Void)?=nil
-        if !watch { complete={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } } }
+        // Always handed over: the bridge keeps it only when it cannot send now (no ranges yet, or the
+        // watch turned out unpaired after all), and runs it once a watch with Nyx is there.
+        let complete:@MainActor @Sendable ()->Void={ [weak self, weak model] in if let self, let model { self.pushWatch(model,watchSeen:true) } }
         bridge.push(savedParkIDs:ids,homeParkID:model.homeID,tonightParkID:tonight,tonightNight:tonight == nil ? nil : model.tonightPickNight,watchParkIDs:watchIDs,forecasts:model.forecasts,details:model.details,closures:Self.closures(model),
                     aboveInversion:Set(model.parks.filter { $0.aboveInversion == true }.map(\.id)),ranges:ranges,
                     places:all.compactMap { model.park($0) }.filter { $0.isSavedSpot || $0.isCatalogPlace },aurora:model.aurora,complete:complete)

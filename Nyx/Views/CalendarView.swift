@@ -502,8 +502,17 @@ struct CalendarView: View {
             }
         } }
     }
+    /// The key says how this month's early looks treat their forecast (`EarlyLookNote`), from the
+    /// half-filled nights shown, else from any night ahead: eased toward the usual clouds, or counted
+    /// as it stands where the place has none for the month.
     nonisolated static func legend(_ ahead:[Night])->String {
-        Sentences.join([String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds."),UsualCloudsNote(ahead)?.hollow ?? "",
+        let early=ahead.filter { $0.basis.isEarlyLook }, note=EarlyLookNote(early.isEmpty ? ahead : early)
+        let half=switch (note?.eased ?? true,note?.asItStands ?? false) {
+        case (true,true): String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds, or counted as it stands where those are not known.")
+        case (false,true): String(localized:"Solid: full forecast. Half-filled: an early look, the forecast counted as it stands.")
+        default: String(localized:"Solid: full forecast. Half-filled: an early look, the forecast eased toward the usual clouds.")
+        }
+        return Sentences.join([half,UsualCloudsNote(ahead)?.hollow ?? "",
                         String(localized:"Dot size follows the score; a cloud marks overcast skies. Past nights keep only a faint dot. A small streak marks a meteor shower's peak, a shaded Moon a lunar eclipse you can see; neither changes the score.")])
     }
     /// The marks, with what this month's hollow nights rest on in their own words (`UsualCloudsNote`); past nights are faint dots, not hollow.

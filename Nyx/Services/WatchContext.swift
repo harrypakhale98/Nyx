@@ -227,11 +227,24 @@ nonisolated struct WatchContext: Codable, Sendable, Equatable {
     /// (`wanted`: the one kept on Tonight, then those its faces are set to): when `context` follows
     /// another list (a place kept while the iPhone was out of reach, a face set to a park it does not
     /// follow), unless that same list was told within `retell`, so a place the iPhone cannot follow
-    /// (a spot it no longer has) is not asked for at every wake.
+    /// (a spot it no longer has) is not asked for at every wake. Lists are compared as sets: faces
+    /// reordered ask nothing new. The iPhone's answer does not say which places it cannot follow, so
+    /// such a place is asked for again only after `retell`.
     static func shouldTell(_ wanted: [String], context: WatchContext?, told: [String]?, toldAt: Date?, now: Date) -> Bool {
-        guard Set(wanted) != Set(context?.watchParkIDs ?? []) else { return false }
-        guard let told, let toldAt, told == wanted else { return true }
+        let wanted = Set(wanted.prefix(maxWatchPlaces))
+        guard wanted != Set(context?.watchParkIDs ?? []) else { return false }
+        guard let told, let toldAt, Set(told.prefix(maxWatchPlaces)) == wanted else { return true }
         return now.timeIntervalSince(toldAt) >= retell || toldAt > now
+    }
+    /// The most places a watch asks the iPhone to follow (`WatchRequest.maxPlaces`): more than a
+    /// watch could show at once. The watch asks for no more (`WatchSky.wantedPlaces`), so the lists compare.
+    static let maxWatchPlaces = 8
+    /// The places a watch asks for, once each and at most `maxWatchPlaces`: the one kept on Tonight,
+    /// then those its faces are set to (`WatchSky.wantedPlaces`). The iPhone cuts a longer list
+    /// (`WatchRequest.places`), so asking for more would only ask again and again.
+    static func wanted(pinned: String?, faces: [String]) -> [String] {
+        var seen = Set<String>()
+        return Array(((pinned.map { [$0] } ?? []) + faces).filter { seen.insert($0).inserted }.prefix(maxWatchPlaces))
     }
     static let retell: TimeInterval = 12*3600
     var data: Data? { try? JSONEncoder().encode(self) }

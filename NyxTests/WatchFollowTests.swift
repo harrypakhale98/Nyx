@@ -32,6 +32,23 @@ import UIKit
         #expect(WatchContext.shouldTell(["grca"], context: following, told: ["zion"], toldAt: now, now: now))
         #expect(WatchContext.shouldTell(["grca"], context: following, told: ["grca"], toldAt: now.addingTimeInterval(600), now: now))
     }
+    /// Lists compare as sets, and the watch never asks for more than the iPhone follows: faces
+    /// reordered, or a ninth place the iPhone would cut, ask nothing new until `retell`.
+    @Test func reorderedOrLongListsAreNotToldAgain() {
+        let following = WatchContext(sent: now, savedParkIDs: ["deva"], homeParkID: "jotr", nightVision: false, forecasts: [:], watchParkIDs: ["yell"])
+        #expect(!WatchContext.shouldTell(["grca", "zion"], context: following, told: ["zion", "grca"], toldAt: now.addingTimeInterval(-60), now: now))
+        let many = (1...10).map { "p\($0)" }
+        let wanted = WatchContext.wanted(pinned: "p1", faces: many)
+        #expect(wanted == Array(many.prefix(WatchContext.maxWatchPlaces)) && WatchContext.maxWatchPlaces == WatchRequest.maxPlaces)
+        #expect(WatchContext.wanted(pinned: "zion", faces: ["grca", "zion"]) == ["zion", "grca"])
+        // The iPhone follows the eight it was handed: nothing to tell.
+        let eight = WatchContext(sent: now, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], watchParkIDs: wanted)
+        #expect(!WatchContext.shouldTell(many, context: eight, told: nil, toldAt: nil, now: now))
+        // One of them it cannot follow (a spot removed): told once, then not again for a while.
+        let seven = WatchContext(sent: now, savedParkIDs: [], homeParkID: "jotr", nightVision: false, forecasts: [:], watchParkIDs: Array(wanted.dropFirst()))
+        #expect(!WatchContext.shouldTell(wanted, context: seven, told: wanted.reversed(), toldAt: now.addingTimeInterval(-3600), now: now))
+        #expect(WatchContext.shouldTell(wanted, context: seven, told: wanted, toldAt: now.addingTimeInterval(-WatchContext.retell), now: now))
+    }
 
     /// A place the watch wants but the iPhone does not follow yet offers to ask, in words that say
     /// so; a park merely browsed still says to save it.

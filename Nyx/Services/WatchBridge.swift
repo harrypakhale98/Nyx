@@ -58,8 +58,10 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
         let session = WCSession.default
         // No watch with Nyx paired: nothing is worked out for one, and `complete` hands over once there
         // is (`sessionWatchStateDidChange`). Still activating, it is made as before, ready to go at once.
+        // A push with no `complete` of its own (its caller believed a watch was there) keeps the one
+        // already armed, so a watch paired later is never left waiting for the next publish.
         if session.activationState == .activated, !(session.isPaired && session.isWatchAppInstalled) {
-            lock.withLock { latest = nil; self.complete = complete }
+            lock.withLock { latest = nil; self.complete = complete ?? self.complete }
             return
         }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision"), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
@@ -161,8 +163,9 @@ nonisolated enum WatchRequest {
     static let context = "context"
     static let replyKey = "reply"
     static let placesKey = "places"
-    /// More than a watch could show at once; a longer list is cut, never refused.
-    static let maxPlaces = 8
+    /// More than a watch could show at once; a longer list is cut, never refused. The watch asks for
+    /// no more than this (`WatchContext.maxWatchPlaces`).
+    static let maxPlaces = WatchContext.maxWatchPlaces
     /// The places a request names, each a valid place id (`PlaceIDText`), once, in order; nil from a
     /// watch before 2.2, which names none.
     static func places(in message: [String: Any]) -> [String]? {

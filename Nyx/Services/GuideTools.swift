@@ -101,7 +101,11 @@ nonisolated struct NightLookup: Sendable {
     static func basis(_ night: Night) -> String {
         switch night.basis {
         case .forecast: return String(localized: "cloud forecast included, \(Int((night.cloudCover ?? 0).rounded()))% cloud")+smoke(night)
-        case .blended(_, let lead): return String(localized: "early look: a \(Int((night.cloudCover ?? 0).rounded()))% cloud forecast \(max(1, Int(lead.rounded()))) days out, eased toward usual clouds")+smoke(night)
+        case .blended(_, let lead):
+            let cover=Int((night.cloudCover ?? 0).rounded()), days=max(1, Int(lead.rounded()))
+            // With no usual clouds for the place, the forecast counts as it stands (`Night.basisCaption`).
+            return (night.usualCloud == nil ? String(localized: "early look: a \(cover)% cloud forecast \(days) days out, counted as it stands; no usual clouds are known for this place")
+                : String(localized: "early look: a \(cover)% cloud forecast \(days) days out, eased toward usual clouds"))+smoke(night)
         case .usual:
             // "Not yet" beyond the forecast's reach, "unavailable" within it, and never "usual clouds"
             // where none are known, as every surface says it (`Night.basisLine`).

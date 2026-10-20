@@ -121,11 +121,8 @@ nonisolated enum WatchSky {
         }
     }
     /// The places this watch asks the iPhone to carry clouds for, once each: the one kept on Tonight,
-    /// then those its complications are set to.
-    static func wantedPlaces(pinned: String?) -> [String] {
-        var seen = Set<String>()
-        return ((pinned.map { [$0] } ?? []) + facePlaces).filter { seen.insert($0).inserted }
-    }
+    /// then those its complications are set to, no more than the iPhone follows (`WatchContext.wanted`).
+    static func wantedPlaces(pinned: String?) -> [String] { WatchContext.wanted(pinned: pinned, faces: facePlaces) }
     /// Where a place's clouds came from (`CloudSource.of`), counting the places this watch asks the
     /// iPhone for, so a place kept or on a face that it does not follow yet offers to ask.
     static func cloudSource(_ park: Park, context: WatchContext?, now: Date) -> CloudSource {
