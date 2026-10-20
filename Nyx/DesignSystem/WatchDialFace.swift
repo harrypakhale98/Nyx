@@ -132,6 +132,10 @@ nonisolated enum WatchTonightLayout: Equatable, Sendable {
     static let scrollingDial = 96.0
     /// The gap between the dial and the words under it.
     static let spacing = 3.0
+    /// Whether the face keeps its designed layout, one line each, without measuring: only at the
+    /// standard sizes and without a closure. A closure's words are never cut (they name the road or
+    /// trail that is closed): they wrap, and the face scrolls where they leave the dial too small.
+    static func designed(standardSize: Bool, closure: Bool) -> Bool { standardSize && !closure }
     /// `room`: the face's height; `words`: the height of the words under the dial with every line
     /// whole. Either still 0 means not yet measured, and the face stays fixed until it is.
     static func choose(room: Double, words: Double, standardSize: Bool, accessibilitySize: Bool) -> Self {

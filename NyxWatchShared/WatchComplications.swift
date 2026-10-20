@@ -75,17 +75,37 @@ nonisolated enum WatchTimeline {
     /// The park Tonight would show at `date`: the darkest of the snapshot's parks, ties broken as
     /// on the iPhone (`NightPlanner.best`).
     static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions]) -> Night? {
+        var scored: [String: Night] = [:]
+        return best(at: date, snapshot: snapshot, cache: &cache, scored: &scored)
+    }
+    /// The same, for a timeline: each park's night is scored once (`scored`, by park and evening) and
+    /// reused at every entry, since the snapshot holds still. Only whether a night lies beyond the
+    /// forecast depends on the moment (`NightPlanner.beyondForecast`), so that is worked out again;
+    /// a night whose models' spread is known (also read against the moment) is scored afresh.
+    static func best(at date: Date, snapshot: SavedSkySnapshot?, cache: inout [String: SkyConditions], scored: inout [String: Night]) -> Night? {
         var nights: [Night] = []
-        let climate = snapshot?.climate ?? .shared
         for park in snapshot?.parks ?? [] {
-            let evening = park.currentNight(at: date)
-            nights.append(WatchSky.night(park, evening: evening, forecast: snapshot?.forecasts[park.id], detail: snapshot?.details?[park.id], now: date,
-                                         sky: sky(park, evening: evening, cache: &cache), climate: climate))
+            let evening = park.currentNight(at: date), forecast = snapshot?.forecasts[park.id], detail = snapshot?.details?[park.id]
+            let key = "\(park.id)-\(Int(evening.timeIntervalSince1970))"
+            if var night = scored[key], detail?.models == nil {
+                night.beyondForecast = NightPlanner.beyondForecast(night, forecast: forecast, detail: detail, now: date)
+                nights.append(night)
+                continue
+            }
+            let night = WatchSky.night(park, evening: evening, forecast: forecast, detail: detail, now: date, sky: sky(park, evening: evening, cache: &cache),
+                                       climate: snapshot?.climate ?? .shared)
+            scored[key] = night
+            nights.append(night)
         }
         return NightPlanner.best(nights)
     }
     static func entry(at date: Date, snapshot: SavedSkySnapshot?, look: WristLook, dataDiffers: Bool = false, cache: inout [String: SkyConditions]) -> WatchSkyEntry {
-        let best = best(at: date, snapshot: snapshot, cache: &cache)
+        var scored: [String: Night] = [:]
+        return entry(at: date, snapshot: snapshot, look: look, dataDiffers: dataDiffers, cache: &cache, scored: &scored)
+    }
+    static func entry(at date: Date, snapshot: SavedSkySnapshot?, look: WristLook, dataDiffers: Bool = false, cache: inout [String: SkyConditions],
+                      scored: inout [String: Night]) -> WatchSkyEntry {
+        let best = best(at: date, snapshot: snapshot, cache: &cache, scored: &scored)
         let next = best.flatMap { NightMilestone.next(after: date, in: $0.sky) }
         return WatchSkyEntry(date: date, night: best, next: next, nightVision: look.nightVision(park: best?.park, at: date), rank: best.map { rank(for: $0, at: date) },
                              closure: best.flatMap { snapshot?.closures[$0.park.id] },
@@ -127,11 +147,17 @@ nonisolated enum WatchTimeline {
     static func timeline<Entry: TimelineEntry>(_ entries: [Entry], now: Date) -> Timeline<Entry> {
         Timeline(entries: entries, policy: .after(max(entries.last?.date ?? now, now.addingTimeInterval(3600))))
     }
+    /// The same, ending at `until` when it comes first: what the face follows changes then
+    /// (`WatchSky.faces`), so the timeline is made again there rather than running on.
+    static func timeline<Entry: TimelineEntry>(_ entries: [Entry], now: Date, until end: Date?) -> Timeline<Entry> {
+        guard let end, end > now, let last = entries.last, last.date >= end else { return timeline(entries, now: now) }
+        return Timeline(entries: entries.filter { $0.date < end }, policy: .after(end))
+    }
     /// Entries now, at every milestone of the next day (so "next" turns over on time), whenever the
     /// followed park may change (`followMoments`), and hourly. Countdown text updates itself in between.
     static func entries(from now: Date, snapshot: SavedSkySnapshot?, look: WristLook, dataDiffers: Bool = false) -> [WatchSkyEntry] {
-        var cache: [String: SkyConditions] = [:]
-        let first = entry(at: now, snapshot: snapshot, look: look, dataDiffers: dataDiffers, cache: &cache)
+        var cache: [String: SkyConditions] = [:], scored: [String: Night] = [:]
+        let first = entry(at: now, snapshot: snapshot, look: look, dataDiffers: dataDiffers, cache: &cache, scored: &scored)
         var moments = followMoments(from: now, snapshot: snapshot)
         moments.formUnion(paletteMoments(from: now, snapshot: snapshot, look: look))
         moments.formUnion(ageMoments(from: now, snapshot: snapshot))
@@ -144,7 +170,7 @@ nonisolated enum WatchTimeline {
                 if let start = duskWindow(sky: sky)?.start, start > now, start < now.addingTimeInterval(86400) { moments.insert(start) }
             }
         }
-        return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, look: look, dataDiffers: dataDiffers, cache: &cache) }
+        return [first] + moments.sorted().map { entry(at: $0, snapshot: snapshot, look: look, dataDiffers: dataDiffers, cache: &cache, scored: &scored) }
     }
     /// From 45 minutes before sunset to the end of true darkness: when a stargazer wants Nyx on the wrist.
     /// Deliberately not `NightPlanner.duskWindow` (the iPhone's: 90 minutes before sunset to an hour
@@ -262,7 +288,8 @@ struct WatchComplicationView: View {
         // A closure outranks it.
         Group {
             if entry.closure != nil { Text("\(Image(systemName: WristClosure.symbol)) \(WristClosure.inline(score: night.score.value))") }
-            else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.time(next.date))") }
+            // The park's clock, with its zone where it is not this watch's (`wristTime`).
+            else if let next = entry.next { Text("\(night.score.value) · \(next.shortTitle) at \(night.park.wristTime(next.date))") }
             else { Text("\(night.score.value) \(night.score.band.label) · \(night.park.wristName)") }
         }.foregroundStyle(ink)
     }

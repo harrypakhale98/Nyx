@@ -27,6 +27,8 @@ import WidgetKit
     private(set) var ask: IPhoneAsk?
     @ObservationIgnored private var skies: [String: SkyConditions] = [:]
     @ObservationIgnored private let receiver = WatchReceiver()
+    /// When the places were last sent unasked (`tellIPhone`), so two wakes a moment apart send them once.
+    @ObservationIgnored private var lastTell: Date?
 
     init() {
         parks = ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -39,6 +41,7 @@ import WidgetKit
         #endif
         // Awaited by the receiver, so a background wake knows when the context is stored and the face reloaded.
         receiver.onContext = { [weak self] context in await self?.apply(context) }
+        receiver.onReachable = { [weak self] in await self?.tellIPhoneIfNeeded() }
         receiver.activate()
         // An update may change what the faces read (the bundled parks, the snapshot's shape) while
         // the stored context is unchanged, and an unchanged context is never applied again: write
@@ -68,9 +71,13 @@ import WidgetKit
             return
         }
         ask = IPhoneAsk(.asking, at: now)
-        session.sendMessage(IPhoneAsk.message(places: WatchSky.wantedPlaces(pinned: pinned)), replyHandler: { @Sendable reply in
+        let places = WatchSky.wantedPlaces(pinned: pinned)
+        session.sendMessage(IPhoneAsk.message(places: places), replyHandler: { @Sendable reply in
             let state = IPhoneAsk.state(reply: reply[IPhoneAsk.replyKey] as? String)
-            Task { @MainActor in self.answered(state) }
+            Task { @MainActor in
+                if state != .unreachable { WatchSky.told = (places, .now) }
+                self.answered(state)
+            }
         }, errorHandler: { @Sendable _ in
             Task { @MainActor in self.answered(.unreachable) }
         })
@@ -108,10 +115,10 @@ import WidgetKit
     /// The park on Tonight: the one kept on the watch, else the darkest saved park tonight (ties
     /// broken as everywhere, `NightPlanner.best`), else Tonight's answer on the iPhone, else its starting park.
     func featured(at now: Date) -> Park? {
-        NightPlanner.best(WatchSky.candidates(in: parks, context: context, pinned: pinned).map { tonight($0, at: now) })?.park
+        NightPlanner.best(WatchSky.candidates(in: parks, context: context, pinned: pinned, now: now).map { tonight($0, at: now) })?.park
     }
     /// Which rule Tonight follows (`WatchSky.choice`), for its caption.
-    var rule: WatchSky.Rule? { WatchSky.choice(in: parks, context: context, pinned: pinned).rule }
+    func rule(at now: Date) -> WatchSky.Rule? { WatchSky.choice(in: parks, context: context, pinned: pinned, now: now).rule }
     func pin(_ park: Park?) {
         guard park?.id != pinned else { return }
         pinned = park?.id
@@ -120,10 +127,25 @@ import WidgetKit
         tellIPhone()
     }
     /// A newly kept place has clouds only once the iPhone follows it: when it can be reached, it is
-    /// told at once, quietly, as "Update from iPhone" would tell it. Otherwise the next request does.
-    private func tellIPhone() {
+    /// told at once, quietly, as "Update from iPhone" would tell it. Otherwise it is told the next
+    /// time Nyx opens or the iPhone comes within reach (`tellIPhoneIfNeeded`).
+    private func tellIPhone(at now: Date = .now) {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated, WCSession.default.isReachable else { return }
-        WCSession.default.sendMessage(IPhoneAsk.message(places: WatchSky.wantedPlaces(pinned: pinned)), replyHandler: { @Sendable _ in }, errorHandler: { @Sendable _ in })
+        let places = WatchSky.wantedPlaces(pinned: pinned)
+        lastTell = now
+        WCSession.default.sendMessage(IPhoneAsk.message(places: places), replyHandler: { @Sendable _ in
+            Task { @MainActor in WatchSky.told = (places, .now) }
+        }, errorHandler: { @Sendable _ in })
+    }
+    /// As Nyx opens and when the iPhone comes within reach: tells it the places this watch wants
+    /// clouds for (the one kept on Tonight, those its faces are set to) when its last context follows
+    /// others: a place kept while it was out of reach, a face set to a park it does not follow. Once
+    /// per list (`WatchContext.shouldTell`), and never twice within a few seconds.
+    func tellIPhoneIfNeeded(at now: Date = .now) {
+        let told = WatchSky.told
+        guard WatchContext.shouldTell(WatchSky.wantedPlaces(pinned: pinned), context: context, told: told?.places, toldAt: told?.at, now: now),
+              lastTell.map({ abs(now.timeIntervalSince($0)) >= 30 }) ?? true else { return }
+        tellIPhone(at: now)
     }
     func tonight(_ park: Park, at now: Date) -> Night { night(park, offset: 0, at: now) }
     func night(_ park: Park, offset: Int, at now: Date) -> Night {
@@ -138,7 +160,7 @@ import WidgetKit
     /// always when `force` (the palette, the pin or the context's contents changed), else only when
     /// what they read was rewritten.
     func publish(force: Bool = true) {
-        let written = WatchSky.publish(parks: WatchSky.candidates(in: parks, context: context, pinned: pinned), context: context)
+        let written = WatchSky.publish(parks: WatchSky.candidates(in: parks, context: context, pinned: pinned, now: .now), context: context)
         guard force || written else { return }
         WidgetCenter.shared.reloadAllTimelines()
         WidgetCenter.shared.invalidateRelevance(ofKind: "NyxDusk")
@@ -183,10 +205,20 @@ nonisolated final class WatchReceiver: NSObject, WCSessionDelegate, @unchecked S
         session.delegate = self
         session.activate()
     }
+    /// Runs when the iPhone comes within reach, and when activation finds it in reach.
+    var onReachable: (@Sendable () async -> Void)?
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
         // Counted before activation reads as finished, so a background wake never sees a gap between the two.
         if state == .activated { receive(session.receivedApplicationContext) }
         self.state.withLock { $0.activated = true }
+        if state == .activated, session.isReachable { reachable() }
+    }
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        if session.isReachable { reachable() }
+    }
+    private func reachable() {
+        guard let onReachable else { return }
+        Task { await onReachable() }
     }
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) { receive(applicationContext) }
     /// Complication transfers carry the same context, sent when a Nyx complication is on the face.

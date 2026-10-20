@@ -9,7 +9,8 @@ import WidgetKit
 
 /// Complications and Smart Stack: tonight's score at a park, the Moon, and the next moment of the
 /// night. Built on the watch from the snapshot the watch app wrote. The park is a setting:
-/// "Darkest saved place" (the default, what Tonight shows) or one park.
+/// "Same as Tonight" (the default: the place kept on the watch, else the darkest saved place, else
+/// Tonight's pick or the starting park on iPhone, `WatchSky.choice`) or one place.
 struct TonightComplication: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "NyxTonight", intent: TonightParkIntent.self, provider: TonightComplicationProvider()) { entry in WatchComplicationView(entry: entry) }
@@ -19,10 +20,10 @@ struct TonightComplication: Widget {
     }
 }
 struct TonightComplicationProvider: AppIntentTimelineProvider {
-    /// The darkest saved park first (today's behaviour), then each park saved on iPhone.
+    /// What Tonight shows first (today's behaviour), then each park saved on iPhone.
     func recommendations() -> [AppIntentRecommendation<TonightParkIntent>] {
         let saved = WristParkQuery.savedParks().prefix(8)
-        return [AppIntentRecommendation(intent: TonightParkIntent(), description: Text("Darkest saved place"))]
+        return [AppIntentRecommendation(intent: TonightParkIntent(), description: Text("Same as Tonight"))]
             + saved.map { AppIntentRecommendation(intent: TonightParkIntent(park: WristParkEntity($0)), description: Text(verbatim: $0.wristName)) }
     }
     /// The gallery's sample sky, so the system's redacted placeholder has the complication's real shape.
@@ -31,7 +32,7 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
         return WatchTimeline.entry(at: .now, snapshot: WatchTimeline.sample, look: .red, cache: &cache)
     }
     func snapshot(for configuration: TonightParkIntent, in context: Context) async -> WatchSkyEntry {
-        let choice = Self.snapshot(for: configuration)
+        let choice = Self.snapshot(for: configuration, at: .now)
         if choice.unsaved { return WatchSkyEntry(date: .now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: .now), unsaved: true) }
         var snapshot = choice.snapshot
         // The face gallery shows a real sky (Joshua Tree tonight, with its usual clouds), not an empty state.
@@ -41,12 +42,12 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     }
     func timeline(for configuration: TonightParkIntent, in context: Context) async -> Timeline<WatchSkyEntry> {
         await Self.noteFacePlaces()
-        let now = Date.now, choice = Self.snapshot(for: configuration)
+        let now = Date.now, choice = Self.snapshot(for: configuration, at: now)
         if choice.unsaved {
             // Until the face is set to another place (or the place is saved again, which reloads every timeline).
             return Timeline(entries: [WatchSkyEntry(date: now, night: nil, next: nil, nightVision: WristLook.current.nightVision(park: nil, at: now), unsaved: true)], policy: .never)
         }
-        return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current, dataDiffers: WatchSky.dataDiffers), now: now)
+        return WatchTimeline.timeline(WatchTimeline.entries(from: now, snapshot: choice.snapshot, look: .current, dataDiffers: WatchSky.dataDiffers), now: now, until: choice.until)
     }
     /// Notes the places the Tonight complications on the faces are set to (`WatchSky.facePlaces`), so
     /// the watch names them the next time it asks the iPhone for clouds. Left as it was when the
@@ -60,25 +61,30 @@ struct TonightComplicationProvider: AppIntentTimelineProvider {
     /// The parks this complication weighs: the watch app's choice, or the one place set (a park, or a
     /// saved spot or world place the iPhone sent whole), with the clouds, the usual clouds and the
     /// closure the iPhone last sent for it. `unsaved`: the place set is no longer among those the
-    /// iPhone sends, so the face says so rather than quietly showing another place.
-    static func snapshot(for configuration: TonightParkIntent) -> (snapshot: SavedSkySnapshot?, unsaved: Bool) {
-        guard let id = configuration.park?.id, id != WristParkEntity.darkestID else { return (SharedSettings.read(), false) }
+    /// iPhone sends, so the face says so rather than quietly showing another place. `until`: when
+    /// what Tonight follows changes on its own (`WatchSky.faces`).
+    static func snapshot(for configuration: TonightParkIntent, at now: Date) -> (snapshot: SavedSkySnapshot?, unsaved: Bool, until: Date?) {
+        guard let id = configuration.park?.id, id != WristParkEntity.darkestID else { let faces = WatchSky.faces(at: now); return (faces.snapshot, false, faces.until) }
         let context = WatchSky.readContext()
         // Before anything has come from the iPhone, nothing is known about what is saved: the default holds.
-        guard let park = WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: context) else { return context == nil ? (SharedSettings.read(), false) : (nil, true) }
-        return (WatchSky.snapshot(parks: [park], context: context), false)
+        guard let park = WatchSky.place(id, in: (try? ParkData.load()) ?? [], context: context) else {
+            if context == nil { let faces = WatchSky.faces(at: now); return (faces.snapshot, false, faces.until) }
+            return (nil, true, nil)
+        }
+        return (WatchSky.snapshot(parks: [park], context: context), false, nil)
     }
 }
 
 /// The score complication's setting: which park it shows.
 struct TonightParkIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Tonight's sky"
-    static let description = IntentDescription("The darkness score at a place, or at your darkest saved place.")
+    static let description = IntentDescription("The darkness score at a place you choose, or at the place Tonight shows.")
     @Parameter(title: "Place") var park: WristParkEntity?
     init() {}
     init(park: WristParkEntity) { self.park = park }
 }
-/// A park as the watch's settings list it. "Darkest saved place" is an entry of its own, the default.
+/// A park as the watch's settings list it. "Same as Tonight" is an entry of its own, the default
+/// (its id stays "darkest", so faces set before keep their setting).
 struct WristParkEntity: AppEntity {
     static let darkestID = "darkest"
     static let typeDisplayRepresentation: TypeDisplayRepresentation = "Place"
@@ -88,7 +94,7 @@ struct WristParkEntity: AppEntity {
     var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: LocalizedStringResource(stringLiteral: name)) }
     init(_ park: Park) { id = park.id; name = park.wristName }
     init(id: String, name: String) { self.id = id; self.name = name }
-    static var darkest: WristParkEntity { WristParkEntity(id: darkestID, name: String(localized: "Darkest saved place")) }
+    static var darkest: WristParkEntity { WristParkEntity(id: darkestID, name: String(localized: "Same as Tonight")) }
 }
 struct WristParkQuery: EntityQuery {
     static func allParks() -> [Park] { ((try? ParkData.load()) ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending } }
@@ -98,7 +104,7 @@ struct WristParkQuery: EntityQuery {
         return (context?.savedParkIDs ?? []).compactMap { id in WatchSky.place(id, in: parks, context: context) }
     }
     /// A spot or world place the iPhone no longer sends stays the face's setting, named "No longer
-    /// saved", so the face can say so instead of falling back to the darkest saved park unnoticed.
+    /// saved", so the face can say so instead of falling back to what Tonight shows unnoticed.
     func entities(for identifiers: [String]) async throws -> [WristParkEntity] {
         let parks = Self.allParks(), context = WatchSky.readContext()
         return identifiers.compactMap { id in
@@ -107,7 +113,7 @@ struct WristParkQuery: EntityQuery {
             return PlaceIDText.validated(id) == id && id.contains(":") ? WristParkEntity(id: id, name: String(localized: "No longer saved")) : nil
         }
     }
-    /// Darkest saved park, then the saved parks, then every park.
+    /// What Tonight shows, then the saved parks, then every park.
     func suggestedEntities() async throws -> [WristParkEntity] {
         let saved = Self.savedParks()
         return [.darkest] + saved.map(WristParkEntity.init) + Self.allParks().filter { park in !saved.contains { $0.id == park.id } }.map(WristParkEntity.init)
@@ -129,13 +135,13 @@ struct MoonProvider: TimelineProvider {
         MoonEntry(date: .now, park: WatchTimeline.sample?.parks.first, moon: MoonNow(at: .now, park: WatchTimeline.sample?.parks.first), nightVision: true)
     }
     func getSnapshot(in context: Context, completion: @escaping (MoonEntry) -> Void) {
-        var snapshot = SharedSettings.read()
+        var snapshot = WatchSky.faces(at: .now).snapshot
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         completion(WristTimeline.moonEntries(from: .now, snapshot: snapshot, look: .current).first ?? placeholder(in: context))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<MoonEntry>) -> Void) {
-        let now = Date.now
-        completion(WatchTimeline.timeline(WristTimeline.moonEntries(from: now, snapshot: SharedSettings.read(), look: .current), now: now))
+        let now = Date.now, faces = WatchSky.faces(at: now)
+        completion(WatchTimeline.timeline(WristTimeline.moonEntries(from: now, snapshot: faces.snapshot, look: .current), now: now, until: faces.until))
     }
 }
 
@@ -154,13 +160,13 @@ struct NextDarkProvider: TimelineProvider {
         return NextDarkEntry(date: .now, park: park, moment: park.map { DarkMoment.next(at: $0, now: .now) } ?? .none, nightVision: true)
     }
     func getSnapshot(in context: Context, completion: @escaping (NextDarkEntry) -> Void) {
-        var snapshot = SharedSettings.read()
+        var snapshot = WatchSky.faces(at: .now).snapshot
         if context.isPreview, snapshot?.parks.isEmpty ?? true { snapshot = WatchTimeline.sample }
         completion(WristTimeline.nextDarkEntries(from: .now, snapshot: snapshot, look: .current).first ?? placeholder(in: context))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<NextDarkEntry>) -> Void) {
-        let now = Date.now
-        completion(WatchTimeline.timeline(WristTimeline.nextDarkEntries(from: now, snapshot: SharedSettings.read(), look: .current), now: now))
+        let now = Date.now, faces = WatchSky.faces(at: now)
+        completion(WatchTimeline.timeline(WristTimeline.nextDarkEntries(from: now, snapshot: faces.snapshot, look: .current), now: now, until: faces.until))
     }
 }
 
@@ -183,8 +189,9 @@ struct DuskProvider: RelevanceEntriesProvider {
     /// Around this far from a park's main viewing spot counts as being at the park.
     static let parkRadius: CLLocationDistance = 25_000
     func relevance() async -> WidgetRelevance<DuskNight> {
-        guard let snapshot = SharedSettings.read() else { return WidgetRelevance([]) }
-        let now = Date.now, climate = snapshot.climate
+        let now = Date.now
+        guard let snapshot = WatchSky.faces(at: now).snapshot else { return WidgetRelevance([]) }
+        let climate = snapshot.climate
         var attributes: [WidgetRelevanceAttribute<DuskNight>] = []
         for park in snapshot.parks {
             for offset in 0..<7 {

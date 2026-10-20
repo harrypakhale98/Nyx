@@ -64,20 +64,33 @@ nonisolated enum WatchSky {
         /// Nothing saved and no answer from Tonight on the iPhone: its starting park.
         case start
     }
-    /// The parks Tonight and the complications weigh, in order: a park kept on the watch; else the
-    /// parks saved on iPhone; else the place Tonight on the iPhone answered with; else the iPhone's
+    /// The parks Tonight and the complications weigh at `now`, in order: a park kept on the watch;
+    /// else the parks saved on iPhone; else the place Tonight on the iPhone answered with, while the
+    /// night it was picked for is still tonight there (`WatchContext.stillPicks`); else the iPhone's
     /// starting park. Empty until one of those exists. Saved spots and world catalogue places arrive
     /// whole in the context (`WatchContext.places`); a bundled park keeps its id.
-    static func choice(in parks: [Park], context: WatchContext?, pinned: String?) -> (parks: [Park], rule: Rule?) {
+    static func choice(in parks: [Park], context: WatchContext?, pinned: String?, now: Date) -> (parks: [Park], rule: Rule?) {
         let byID = Dictionary((parks + (context?.places ?? [])).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         if let pinned, let park = byID[pinned] { return ([park], .pinned) }
         let saved = (context?.savedParkIDs ?? []).compactMap { byID[$0] }
         if !saved.isEmpty { return (saved, .saved) }
-        if let park = context?.tonightParkID.flatMap({ byID[$0] }) { return ([park], .iPhoneTonight) }
+        if let park = context?.tonightParkID.flatMap({ byID[$0] }), context?.stillPicks(park, at: now) == true { return ([park], .iPhoneTonight) }
         if let park = context.flatMap({ byID[$0.homeParkID] }) { return ([park], .start) }
         return ([], nil)
     }
-    static func candidates(in parks: [Park], context: WatchContext?, pinned: String?) -> [Park] { choice(in: parks, context: context, pinned: pinned).parks }
+    static func candidates(in parks: [Park], context: WatchContext?, pinned: String?, now: Date) -> [Park] { choice(in: parks, context: context, pinned: pinned, now: now).parks }
+    /// What the faces that follow Tonight weigh from `now`: the snapshot the watch app last wrote,
+    /// unless what Tonight follows has changed since without the app running (Tonight's pick on the
+    /// iPhone whose night has passed): then rebuilt from the context. `until`: when the pick the
+    /// faces follow stops answering (its night turns over), so a timeline ends there and is made again.
+    static func faces(at now: Date) -> (snapshot: SavedSkySnapshot?, until: Date?) {
+        let written = SharedSettings.read()
+        guard let context = readContext(), context.tonightParkID != nil else { return (written, nil) }
+        let current = choice(in: (try? ParkData.load()) ?? [], context: context, pinned: pinnedPark, now: now)
+        let until = current.rule == .iPhoneTonight ? current.parks.first?.nightTurnovers(from: now, to: now.addingTimeInterval(86400)).first : nil
+        guard (written?.parks.map(\.id) ?? []) != current.parks.map(\.id) else { return (written, until) }
+        return (snapshot(parks: current.parks, context: context), until)
+    }
     /// One short line naming the rule where the screen does not already say it: Tonight's answer on
     /// the iPhone, or its starting park. Nil for a kept or saved place.
     static func caption(_ rule: Rule?) -> String? {
@@ -95,11 +108,28 @@ nonisolated enum WatchSky {
         get { defaults.stringArray(forKey: facesKey) ?? [] }
         set { defaults.set(newValue, forKey: facesKey) }
     }
+    static let toldKey = "watchToldPlaces", toldAtKey = "watchToldAt"
+    /// The places last told to the iPhone and when it answered (`WatchStore.tellIPhoneIfNeeded`).
+    static var told: (places: [String], at: Date)? {
+        get {
+            guard let places = defaults.stringArray(forKey: toldKey), let at = defaults.object(forKey: toldAtKey) as? Date else { return nil }
+            return (places, at)
+        }
+        set {
+            defaults.set(newValue?.places, forKey: toldKey)
+            defaults.set(newValue?.at, forKey: toldAtKey)
+        }
+    }
     /// The places this watch asks the iPhone to carry clouds for, once each: the one kept on Tonight,
     /// then those its complications are set to.
     static func wantedPlaces(pinned: String?) -> [String] {
         var seen = Set<String>()
         return ((pinned.map { [$0] } ?? []) + facePlaces).filter { seen.insert($0).inserted }
+    }
+    /// Where a place's clouds came from (`CloudSource.of`), counting the places this watch asks the
+    /// iPhone for, so a place kept or on a face that it does not follow yet offers to ask.
+    static func cloudSource(_ park: Park, context: WatchContext?, now: Date) -> CloudSource {
+        CloudSource.of(context: context, park: park, now: now, wanted: wantedPlaces(pinned: pinnedPark))
     }
     /// A place by id on the wrist: a bundled park, else a saved spot or catalogue place the iPhone
     /// sent whole (`WatchContext.places`). Nil for an id neither knows.

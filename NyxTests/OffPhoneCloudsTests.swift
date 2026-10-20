@@ -109,8 +109,8 @@ import Testing
         let forecasts = Dictionary(uniqueKeysWithValues: places.map { ($0.id, forecast(days: 16, cover: 30)) })
         let context = WatchContext.make(savedParkIDs: places.map(\.id), homeParkID: "jotr", nightVision: false, forecasts: forecasts, places: places, now: now)
         #expect((context.data?.count ?? .max) <= WatchContext.byteBudget)
-        // Each place that travels brings its usual clouds right behind it (the last one only if they fit too).
-        #expect(!context.places.isEmpty && context.places.dropLast().allSatisfy { context.usualClouds[$0.id] != nil })
+        // Each place that travels brings its usual clouds with it, the last one too.
+        #expect(!context.places.isEmpty && context.places.allSatisfy { context.usualClouds[$0.id] != nil })
     }
 
     @Test func aWidgetSetToAPlaceNoLongerSavedSaysSo() throws {

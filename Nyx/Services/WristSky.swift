@@ -179,18 +179,29 @@ nonisolated enum CloudSource: Equatable, Sendable {
     /// The iPhone follows this park but its clouds, smoke and summit layers did not fit what
     /// WatchConnectivity carries (`WatchContext.droppedParkIDs`): asking again would not help.
     case dropped
+    /// A place this watch wants clouds for (kept on Tonight, or set on a face) that the iPhone's last
+    /// context does not follow yet: asking tells it.
+    case wanted
+    /// A saved spot with no recent forecast while "Clouds at your saved spots" is off on the iPhone
+    /// (`WatchContext.spotForecastsOff`): asking would not help.
+    case spotsOff
 
     /// After this the watch asks for a fresh forecast; the score itself fades an old one by lead time.
     static let lifetime: TimeInterval = 36*3600
 
-    static func of(context: WatchContext?, park: Park, now: Date) -> CloudSource {
+    /// `wanted`: the places this watch asks the iPhone for (`WatchSky.wantedPlaces`).
+    static func of(context: WatchContext?, park: Park, now: Date, wanted: [String] = []) -> CloudSource {
         guard let context else { return .unsynced }
+        let spotsOff = context.spotForecastsOff && park.id.hasPrefix(WatchContext.spotPrefix)
         guard let updated = issued(park, forecast: context.forecasts[park.id]?.updated, layers: context.details[park.id]?.layers?.updated) else {
             // Left out for room: nothing of the place's forecast came, and asking again would not help.
             if context.droppedParkIDs.contains(park.id) { return .dropped }
-            return .missing(followed: context.followedParkIDs.contains(park.id))
+            if spotsOff { return .spotsOff }
+            let followed = context.followedParkIDs.contains(park.id)
+            return !followed && wanted.contains(park.id) ? .wanted : .missing(followed: followed)
         }
-        return now.timeIntervalSince(updated) < lifetime ? .fresh(updated) : .expired(updated)
+        if now.timeIntervalSince(updated) < lifetime { return .fresh(updated) }
+        return spotsOff ? .spotsOff : .expired(updated)
     }
     /// When the clouds a park's score counts were issued. A summit above the inversion counts its mid
     /// and high layers, never its total cloud (`NightPlanner.night`): without layers it has no cloud
@@ -202,10 +213,10 @@ nonisolated enum CloudSource: Equatable, Sendable {
         guard let updated = issued(park, forecast: forecast, layers: layers) else { return forecast != nil }
         return date.timeIntervalSince(updated) >= lifetime
     }
-    /// The forecast can no longer be used and the iPhone could fix that.
+    /// The forecast can no longer be used and the iPhone could fix that (`AskIPhoneRow` offers to ask).
     var isStale: Bool {
         switch self {
-        case .expired, .missing(followed: true): true
+        case .expired, .missing(followed: true), .wanted: true
         default: false
         }
     }
@@ -221,6 +232,8 @@ nonisolated enum CloudSource: Equatable, Sendable {
         case .missing(followed: false): return String(localized: "Save this park on iPhone for its clouds.")
         // Drops can come from Tonight's pick or the watch's own places, not only saved ones.
         case .dropped: return String(localized: "Too many places to send all their forecasts.")
+        case .wanted: return String(localized: "Open Nyx on iPhone for clouds.")
+        case .spotsOff: return String(localized: "Clouds at your saved spots is off in Nyx on iPhone.")
         }
     }
 }

@@ -46,18 +46,27 @@ nonisolated final class WatchBridge: NSObject, WCSessionDelegate, @unchecked Sen
     }
 
     /// Called wherever the widget snapshot is written, and when night vision or the starting park
-    /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch. `ranges` is nil when they
-    /// were not worked out (`hasWatchApp` was false); `complete` then hands over again, with them,
-    /// once a watch with Nyx turns out to be there.
-    func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast], details: [String: ForecastDetail],
-              closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
+    /// changes (`SavedSkySync.pushWatch`). Cheap when there is no watch: once the session knows no
+    /// watch with Nyx is paired, nothing is worked out, and `complete` hands over again when one is.
+    /// `ranges` is nil when they were not worked out (`hasWatchApp` was false); `complete` then hands
+    /// over again, with them, once a watch with Nyx turns out to be there. `tonightNight`: the
+    /// place-local night Tonight's answer was picked for (`PlanModel.tonightPickNight`).
+    func push(savedParkIDs: [String], homeParkID: String, tonightParkID: String? = nil, tonightNight: String? = nil, watchParkIDs: [String] = [], forecasts: [String: Forecast],
+              details: [String: ForecastDetail], closures: [String: String], aboveInversion: Set<String>, ranges: [String: [String: ClosedRange<Int>]]?, places: [Place] = [],
               aurora: AuroraOutlook? = nil, complete: (@MainActor @Sendable () -> Void)? = nil) {
         guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        // No watch with Nyx paired: nothing is worked out for one, and `complete` hands over once there
+        // is (`sessionWatchStateDidChange`). Still activating, it is made as before, ready to go at once.
+        if session.activationState == .activated, !(session.isPaired && session.isWatchAppInstalled) {
+            lock.withLock { latest = nil; self.complete = complete }
+            return
+        }
         let nightVision = SharedSettings.defaults.bool(forKey: "nightVision"), brighterRed = SharedSettings.defaults.bool(forKey: NightTint.key)
         let context = WatchContext.make(savedParkIDs: savedParkIDs, homeParkID: homeParkID, nightVision: nightVision, brighterRed: brighterRed, forecasts: forecasts,
                                         details: details, closures: closures, aboveInversion: aboveInversion, ranges: ranges ?? [:], places: places,
-                                        tonightParkID: tonightParkID, watchParkIDs: watchParkIDs, aurora: aurora)
-        let session = WCSession.default
+                                        tonightParkID: tonightParkID, tonightNight: tonightNight, watchParkIDs: watchParkIDs, aurora: aurora,
+                                        spotForecastsOff: !SpotForecast.isOn())
         lock.withLock { latest = context; self.complete = ranges == nil ? complete : nil }
         if session.activationState == .activated { send(session) } else { activate() }
     }
