@@ -450,5 +450,14 @@ struct DataServiceDeliveryTests {
         #expect(kind("Lower Road Reopens; Upper Road Remains Closed", "Park Closure") == .closure)
         #expect(kind("Road Reopened, Trail Closed", "Information") == .closure)
         #expect(kind("Road Closure", "Information") == .closure)
+        // Open in part, something else still shut, in any closure word.
+        for title in ["Park Is Open; Upper Road Impassable After Storm", "Lehman Caves Tours Are Open; Wheeler Peak Scenic Drive Closure in Effect",
+                      "Kolob Canyons Road Now Open; Lee Pass Trailhead Washed Out", "Visitor Center Reopened; Road Closure Continues"] {
+            #expect(kind(title, "Information") == .closure, "\(title)")
+            #expect(kind(title, "Park Closure") == .closure, "\(title)")
+        }
+        // Reopened only to some, or only so far.
+        #expect(kind("Road Reopened to Hikers and Bikers", "Park Closure") == .closure)
+        #expect(kind("Rim Drive Reopened to Mile 8", "Park Closure") == .closure)
     }
 }
