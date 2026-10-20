@@ -73,19 +73,26 @@ struct MoonView: View {
         // Fades out well inside its frame, so no container can clip it into a visible square.
         Circle().fill(RadialGradient(colors:[palette.ink.opacity(0.08+0.12*geometry.illumination),.clear],center:.center,startRadius:side*0.46,endRadius:side*0.68))
             .frame(width:side*1.4,height:side*1.4)
-            .opacity(geometry.illumination>0.02 ? 1 : 0)
+            .opacity(geometry.illumination>Self.litSideFrom ? 1 : 0)
             .allowsHitTesting(false)
     }
     private var label:String { MoonView.label(geometry,moment:moment) }
     /// "Waxing crescent, 34 percent lit, lit from the right": the phase first, as people name it.
+    /// Below `litSideFrom` there is no lit side to see, so none is named.
     static func label(_ geometry:MoonGeometry,moment:String?=nil)->String {
         let percent=Int((geometry.illumination*100).rounded())
+        let name=geometry.phase?.name ?? String(localized:"Moon")
+        guard geometry.illumination>=litSideFrom else {
+            if let moment { return String(localized:"\(name), \(percent) percent lit, as seen \(moment)") }
+            return String(localized:"\(name), \(percent) percent lit")
+        }
         let degrees=Int((geometry.brightLimb*180/Double.pi).rounded())
         let side=MoonView.side(ofDegrees:degrees)
-        let name=geometry.phase?.name ?? String(localized:"Moon")
         if let moment { return String(localized:"\(name), \(percent) percent lit, lit from the \(side), as seen \(moment)") }
         return String(localized:"\(name), \(percent) percent lit, lit from the \(side)")
     }
+    /// The illuminated fraction from which a lit side is named (and the halo drawn).
+    nonisolated static let litSideFrom=0.02
     /// Plain words for the direction of the lit side.
     static func side(ofDegrees value:Int)->String {
         let a=((value%360)+360)%360

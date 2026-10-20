@@ -21,6 +21,7 @@ struct JournalView: View {
     @State private var exporting:JournalDocument?
     @State private var importing=false
     @State private var importResult:String?
+    @State private var exportFailed=false
     /// A journal's manifest read and checked, waiting for the person to confirm the import. Its
     /// photos stay in the file until the merge reads them.
     @State private var pendingImport:PendingImport?
@@ -89,15 +90,18 @@ struct JournalView: View {
             .acceptsJournalDrop("Record a night at this park",systemImage:"book.closed") { drop in record(drop) }
             .confirmationDialog("Delete this night?",isPresented:Binding(get:{deleting != nil},set:{if !$0 { deleting=nil }}),titleVisibility:.visible) { Button("Delete entry",role:.destructive) { if let deleting { context.delete(deleting);do { try context.save() } catch { context.rollback();saveError=true } };deleting=nil } }
             .alert("Unable to delete",isPresented:$saveError) { Button("OK",role:.cancel) {} } message:{ Text("The entry is still here. Try again when space is available.") }
-            .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentType:.nyxJournal,
+            // The package gathered on disk is cleared once the exporter has copied it, or was cancelled.
+            .fileExporter(isPresented:Binding(get:{ exporting != nil },set:{ if !$0 { exporting=nil } }),document:exporting,contentTypes:[.nyxJournal],
                           defaultFilename:String(localized:"Nyx Journal \(Date.now.formatted(.iso8601.year().month().day()))")) { result in
-                if case .failure=result { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
-            }
+                Task.detached(priority:.utility) { JournalExport.clear() }
+                if case .failure=result { exportFailed=true }
+            } onCancellation:{ Task.detached(priority:.utility) { JournalExport.clear() } }
             .fileImporter(isPresented:$importing,allowedContentTypes:[.nyxJournal]) { result in
                 if case .success(let url)=result { Task { await importJournal(url) } }
             }
             .overlay { if let working { WorkingNote(title:working) } }
             .alert("Journal import",isPresented:Binding(get:{ importResult != nil },set:{ if !$0 { importResult=nil } })) { Button("OK",role:.cancel) {} } message:{ Text(importResult ?? "") }
+            .alert("Journal export",isPresented:$exportFailed) { Button("OK",role:.cancel) {} } message:{ Text("The journal could not be exported. Try again when space is available.") }
             // Nothing is merged until the person has seen what the file holds.
             .alert("Import this journal?",isPresented:Binding(get:{ pendingImport != nil },set:{ if !$0 { pendingImport=nil } }),presenting:pendingImport) { pending in
                 Button("Import") { Task { await confirmImport(pending) } }
@@ -123,19 +127,16 @@ struct JournalView: View {
         dropped=prefill
         return true
     }
-    /// Gathers every entry and its photos from the store on a background context, so the photos'
-    /// files are read off the main thread; the exporter opens once the archive is ready.
+    /// Writes every entry and its photos to a package on disk off the main thread, a few nights'
+    /// photos at a time (`JournalArchive.write`), so a long journal is never in memory whole; the
+    /// exporter opens once the package is ready and copies it from there.
     private func exportJournal() {
         let container=context.container
         working="Preparing your journal"
         Task {
-            let archive=await Task.detached(priority:.userInitiated) { () -> JournalArchive? in
-                let background=ModelContext(container)
-                return (try? background.fetch(FetchDescriptor<JournalEntry>())).map { JournalArchive.make(from:$0) }
-            }.value
+            let package=await Task.detached(priority:.userInitiated) { try? JournalExport.stage(container) }.value
             working=nil
-            if let archive { exporting=JournalDocument(archive:archive) }
-            else { importResult=String(localized:"The journal could not be exported. Try again when space is available.") }
+            if let package { exporting=JournalDocument(package:package) } else { exportFailed=true }
         }
     }
     /// Reads the package's manifest off the main thread (every count and file size checked, no
@@ -381,13 +382,18 @@ struct JournalThumbnail:View {
         // Observers do not run inside init: one description per photo from the start.
         descriptions=Self.aligned(descriptions,to:photos.count)
     }
+    /// Adds the photos picked. An empty pick (the picker cleared after a load) changes nothing, so
+    /// the last load's message stays on screen.
     func load(_ items:[PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
         loadingPhotos=true;error=nil;defer { loadingPhotos=false }
         for item in items.prefix(max(0,PhotoScaling.perEntry-photos.count)) {
             do {
                 if let data=try await item.loadTransferable(type:Data.self), data.count<=PhotoScaling.maxSourceBytes {
-                    // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded.
-                    photos.append(await Task.detached(priority:.userInitiated) { PhotoScaling.jpeg(data,maxPixels:2400) ?? data }.value)
+                    // Decode and shrink off the main thread: a 48 MP photo is hundreds of megabytes decoded. Only the
+                    // re-encoded JPEG is kept, never the original file and its metadata (location, camera, dates).
+                    if let kept=await Task.detached(priority:.userInitiated,operation:{ PhotoScaling.jpeg(data,maxPixels:2400) }).value { photos.append(kept) }
+                    else { error=String(localized:"The photo could not be loaded. Try choosing it again.") }
                 }
                 else { error=String(localized:"This photo is too large. Choose a smaller image.") }
             } catch { self.error=String(localized:"The photo could not be loaded. Try choosing it again.") }
@@ -519,7 +525,8 @@ struct JournalEditorView:View {
                 Button("Discard",role:.destructive) { dismiss() }
                 Button("Keep editing",role:.cancel) {}
             }
-            .onChange(of:picker) { _,items in Task { await editor.load(items);picker=[] } }
+            // Clearing the picker after a load changes it again; that empty pick loads nothing.
+            .onChange(of:picker) { _,items in guard !items.isEmpty else { return }; Task { await editor.load(items);picker=[] } }
             .sensoryFeedback(.success,trigger:editor.saved)
     }
 }
@@ -608,11 +615,14 @@ struct JournalDetailView:View {
         if let park=model.park(entry.parkID) {
             let night=model.night(park,on:entry.date)
             let moon=AstronomyEngine().moon(for:night)
+            // VoiceOver reads the Moon once: the line under "The Moon that night" speaks the disc's
+            // fuller description (its lit side and the moment it shows), and the disc itself is quiet.
             HStack(spacing:18) {
-                MoonView(geometry:moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")).frame(width:64,height:64)
+                MoonView(geometry:moon.geometry).frame(width:64,height:64).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:4) {
                     Text("The Moon that night").font(.caption.weight(.medium)).foregroundStyle(palette.muted)
                     Text("\(night.sky.moon.name), \(Int((night.sky.moon.illumination*100).rounded()))% lit").font(.system(.title3,design:.serif))
+                        .accessibilityLabel(MoonView.label(moon.geometry,moment:String(localized:"at \(park.time(moon.moment))")))
                     Text("Observed Bortle class \(entry.observedBortle)").font(.subheadline).foregroundStyle(palette.muted)
                 }
             }

@@ -55,25 +55,69 @@ nonisolated struct JournalArchive: Sendable, Equatable {
     /// Photo data by file name.
     var photos: [String: Data]
 
-    /// Reads every photo's data, so the journal view calls it from a background `ModelContext`.
-    /// `spots` nil reads the saved spots from the entries' own context.
+    /// Reads every photo's data into memory, so it suits a small journal (the tests); the Journal
+    /// tab writes its export straight to disk (`write`). `spots` nil reads the saved spots from the
+    /// entries' own context.
     static func make(from entries: [JournalEntry], spots: [Spot]?=nil, now: Date = .now) -> JournalArchive {
         var photos: [String: Data]=[:]
+        let manifest=layout(entries, spots: spots ?? entries.first?.modelContext.map(Self.spots(in:)) ?? [], now: now) { file, photo in photos[file]=photo.data }
+        return JournalArchive(manifest: manifest, photos: photos)
+    }
+    /// The manifest for `entries`, oldest first, its dates to the whole second; `named` is told each
+    /// photo file the manifest names, with its photo.
+    private static func layout(_ entries: [JournalEntry], spots: [Spot], now: Date, named: (String, JournalPhoto) -> Void = { _, _ in }) -> Manifest {
         // Whole seconds, as the ISO 8601 dates in entries.json keep them.
         func second(_ date: Date) -> Date { Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded(.down)) }
         let items=entries.sorted { $0.date<$1.date }.map { entry in
             Entry(id: entry.id, date: second(entry.date), parkID: entry.parkID, observedBortle: entry.observedBortle, notes: entry.notes,
                   photos: entry.orderedPhotos.enumerated().map { index, photo in
-                      let file="\(entry.id.uuidString)-\(index).jpg"
-                      photos[file]=photo.data
+                      let file=photoFile(entry.id, index)
+                      named(file, photo)
                       return Photo(file: file, altText: photo.altText)
                   })
         }
-        let places=(spots ?? entries.first?.modelContext.map(Self.spots(in:)) ?? []).sorted { ($0.created,$0.id)<($1.created,$1.id) }
+        let places=spots.sorted { ($0.created,$0.id)<($1.created,$1.id) }
         // Without spots, exactly what format 1 wrote.
-        let manifest=places.isEmpty ? Manifest(format: 1, exported: second(now), entries: items)
+        return places.isEmpty ? Manifest(format: 1, exported: second(now), entries: items)
             : Manifest(format: format, exported: second(now), entries: items, spots: places.map { $0.wholeSeconds })
-        return JournalArchive(manifest: manifest, photos: photos)
+    }
+    /// A photo's file in the package: its entry's id and its place in the entry.
+    private static func photoFile(_ entry: UUID, _ index: Int) -> String { "\(entry.uuidString)-\(index).jpg" }
+    /// Nights whose photos are read together while an export is written: only these nights' photos
+    /// are ever in memory at once.
+    static let exportBatch=8
+    /// Writes the journal in `container` as a `.nyxjournal` package at `url`: the same files, byte for
+    /// byte, that `make` and `fileWrapper` give. entries.json is written first, then the photos a few
+    /// nights at a time (`batch`), each batch read in a context of its own that is let go once its
+    /// photos are on disk, so a long journal's photos are never all in memory. A photo added after
+    /// the manifest was written is left out; one removed since is simply missing, as an import
+    /// allows. Call it off the main thread.
+    static func write(_ container: ModelContainer, to url: URL, now: Date = .now, batch: Int=exportBatch) throws {
+        let context=ModelContext(container)
+        let manifest=layout(try context.fetch(FetchDescriptor<JournalEntry>()), spots: spots(in: context), now: now)
+        let folder=url.appendingPathComponent("Photos", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try json(manifest).write(to: url.appendingPathComponent("entries.json", isDirectory: false))
+        let named=Set(manifest.entries.flatMap { $0.photos.map(\.file) })
+        let withPhotos=manifest.entries.filter { !$0.photos.isEmpty }.map(\.id)
+        for start in stride(from: 0, to: withPhotos.count, by: max(1, batch)) {
+            let ids=Array(withPhotos[start..<min(withPhotos.count, start+max(1, batch))])
+            try autoreleasepool {
+                let reader=ModelContext(container)
+                for entry in try reader.fetch(FetchDescriptor<JournalEntry>(predicate: #Predicate { ids.contains($0.id) })) {
+                    for (index, photo) in entry.orderedPhotos.enumerated() where named.contains(photoFile(entry.id, index)) {
+                        try autoreleasepool { try photo.data.write(to: folder.appendingPathComponent(photoFile(entry.id, index), isDirectory: false)) }
+                    }
+                }
+            }
+        }
+    }
+    /// entries.json as Nyx writes it.
+    private static func json(_ manifest: Manifest) throws -> Data {
+        let encoder=JSONEncoder()
+        encoder.outputFormatting=[.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return try encoder.encode(manifest)
     }
     /// Every saved spot in a store, with whether it is followed.
     static func spots(in context: ModelContext) -> [Spot] {
@@ -84,11 +128,8 @@ nonisolated struct JournalArchive: Sendable, Equatable {
         }
     }
     func fileWrapper() throws -> FileWrapper {
-        let encoder=JSONEncoder()
-        encoder.outputFormatting=[.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
         let folder=FileWrapper(directoryWithFileWrappers: [:])
-        folder.addRegularFile(withContents: try encoder.encode(manifest), preferredFilename: "entries.json")
+        folder.addRegularFile(withContents: try Self.json(manifest), preferredFilename: "entries.json")
         let pictures=FileWrapper(directoryWithFileWrappers: photos.mapValues { FileWrapper(regularFileWithContents: $0) })
         pictures.preferredFilename="Photos"
         folder.addFileWrapper(pictures)
@@ -414,11 +455,27 @@ nonisolated enum JournalInbox {
         }
     }
 }
-/// The archive as a document for `fileExporter`.
+/// Where an export is gathered on disk before the person chooses where it goes. One at a time: a
+/// new export clears the last, and the Journal tab clears it once the exporter closes.
+nonisolated enum JournalExport {
+    static var folder: URL { FileManager.default.temporaryDirectory.appendingPathComponent("nyx-export", isDirectory: true) }
+    /// Writes the journal in `container` to a new package in `folder` and returns it; nothing is
+    /// left behind when it fails.
+    static func stage(_ container: ModelContainer, now: Date = .now) throws -> URL {
+        clear()
+        let package=folder.appendingPathComponent("\(UUID().uuidString).\(JournalArchive.fileExtension)", isDirectory: true)
+        do { try JournalArchive.write(container, to: package, now: now) } catch { clear(); throw error }
+        return package
+    }
+    static func clear() { try? FileManager.default.removeItem(at: folder) }
+}
+/// A package gathered on disk (`JournalExport`) as a document for `fileExporter`. Its files are
+/// read only as the exporter copies them, so the photos never gather in memory.
 nonisolated struct JournalDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.nyxJournal] }
-    let archive: JournalArchive
-    init(archive: JournalArchive) { self.archive=archive }
-    init(configuration: ReadConfiguration) throws { archive=try JournalArchive(wrapper: configuration.file) }
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { try archive.fileWrapper() }
+    let package: URL
+    init(package: URL) { self.package=package }
+    /// Nyx never opens a journal as a document: an import reads it through `JournalImport`.
+    init(configuration: ReadConfiguration) throws { throw CocoaError(.featureUnsupported) }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { try FileWrapper(url: package, options: []) }
 }
