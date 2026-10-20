@@ -30,9 +30,9 @@ No account, no ads, no tracking, no backend. Everything is computed on the devic
 
 90+ Pristine, 75+ Excellent, 60+ Good, 40+ Fair, below that Poor.
 
-The weakest condition then caps the total, so a moonless night under heavy cloud or next to a city can't score well just because the other parts are good. No true darkness (Alaska in summer) caps a night at 39, and smoke caps it at Good or Fair. Past the ~16 day forecast, clouds come from each place's usual cover for the month (ERA5, 2015–2024) and the night is labelled that way. The details are in [`ScoreEngine.swift`](Nyx/Services/ScoreEngine.swift).
+The weakest condition then caps the total, so a moonless night under heavy cloud or next to a city can't score well just because the other parts are good. No true darkness (Alaska in summer) caps a night at 39, and smoke caps it at Good or Fair. A forecast counts in full for about three days; from there to ten days it is eased toward each place's usual cover for the month (ERA5, 2015–2024), and past that the usual cover counts alone. Each night is labelled with which it is. The details are in [`ScoreEngine.swift`](Nyx/Services/ScoreEngine.swift).
 
-The astronomy runs on the device: NOAA solar equations for sunrise, sunset and twilight, and a low-precision Meeus lunar model for the Moon. Moonrise and moonset are good to about ±15 minutes, more at difficult horizons. Results were checked against USNO data, including polar and tropical cases.
+The astronomy runs on the device: NOAA solar equations for sunrise, sunset and twilight, and a low-precision Meeus lunar model for the Moon. Moonrise and moonset agree with the U.S. Naval Observatory to within a few minutes (under 4 at mid-latitude parks); terrain can shift what you see. Results were checked against USNO data, including polar and tropical cases.
 
 ## Privacy
 
@@ -65,7 +65,7 @@ NPS_API_KEY = your_key
 ### Other targets
 
 - **NyxWatch** – watchOS 26. It's embedded in the iOS app, so the Nyx scheme builds it too. The watch never uses the network; it gets saved parks and forecasts from the iPhone.
-- **NyxVision** – visionOS 26. It makes the iPhone's optional requests (clouds, smoke, park alerts), each behind its own switch, and reads `NPS_API_KEY` from the same xcconfig.
+- **NyxVision** – visionOS 26. It makes the iPhone's optional requests (clouds, smoke, park alerts, the aurora forecast), each behind its own switch, and reads `NPS_API_KEY` from the same xcconfig.
 
 ### Tests
 

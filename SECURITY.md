@@ -15,8 +15,8 @@ You will get a reply within 7 days. If the report is valid, the fix ships in the
 - The Apple Vision Pro app and its widget.
 - The website at [get-nyx.com](https://get-nyx.com) and the files in `docs/`.
 
-Out of scope: the services Nyx reads from (the National Park Service API and Open-Meteo), and Apple's platforms. Report those to their owners.
+Out of scope: the services Nyx reads from (the National Park Service API, Open-Meteo and NOAA's Space Weather Prediction Center), and Apple's platforms. Report those to their owners.
 
 ## Security posture
 
-Nyx has no account, no server and no analytics. Your journal, saved places and photos stay on your device. The app makes requests to three HTTPS hosts only: `developer.nps.gov`, `api.open-meteo.com` and `air-quality-api.open-meteo.com`, each behind its own switch in Your privacy. The NPS API key that ships in the app is a free key for public park data; it opens no personal data. More detail in [PRIVACY.md](PRIVACY.md).
+Nyx has no account, no server and no analytics. Your journal, saved places and photos stay on your device. The app makes requests to four HTTPS hosts only: `developer.nps.gov`, `api.open-meteo.com`, `air-quality-api.open-meteo.com` and `services.swpc.noaa.gov`, each behind its own switch in Your privacy. The NPS API key that ships in the app is a free key for public park data; it opens no personal data. More detail in [PRIVACY.md](PRIVACY.md).
