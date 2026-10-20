@@ -108,6 +108,45 @@ import UniformTypeIdentifiers
         #expect(Set([plain.id,dated.id,whatsUp.id]).count==3)
         #expect(LaunchPark(park:jotr,night:night).id==dated.id)
     }
+    /// A link, reminder or Handoff for a night already past opens tonight (What's up kept when asked for).
+    @Test func aPastNightFromALinkOpensTonight() {
+        let tonight=Date(timeIntervalSince1970:1_791_400_000), later=tonight.addingTimeInterval(2*86_400), earlier=tonight.addingTimeInterval(-86_400)
+        #expect(LaunchPark.night(later,tonight:tonight,whatsUp:false)?.date==later)
+        #expect(LaunchPark.night(tonight,tonight:tonight,whatsUp:true).map { $0.date==tonight && $0.whatsUp }==true)
+        #expect(LaunchPark.night(earlier,tonight:tonight,whatsUp:false)==nil)
+        #expect(LaunchPark.night(earlier,tonight:tonight,whatsUp:true).map { $0.date==tonight && $0.whatsUp }==true)
+    }
+    /// A park presented over a window takes the keys while it is up: ⌘⇧N names its park, ⌘← ⌘→ its
+    /// night, never the tab's page under it; closing it gives them back.
+    @MainActor @Test func aParkOverTheWindowTakesTheKeys() {
+        let commands=SceneCommands()
+        commands.tab=1
+        commands.show(park:"jotr",tab:1)
+        let layer=SceneCommands.newLayer()
+        #expect(layer>=SceneCommands.tabs.count && SceneCommands.newLayer() != layer)
+        commands.layer(layer,shown:true)
+        commands.show(park:"deva",tab:layer)
+        #expect(commands.visiblePark=="deva")
+        commands.stepNight(1)
+        #expect(commands.step?.tab==layer)
+        commands.layer(layer,shown:false)
+        #expect(commands.visiblePark=="jotr")
+        commands.stepNight(1)
+        #expect(commands.step?.tab==1)
+    }
+    /// A tapped reminder opens in the window used last that is still open.
+    @MainActor @Test func aReminderOpensInTheWindowUsedLast() {
+        let router=NotificationRouter.shared
+        let one=UUID(), two=UUID()
+        var opened:[String]=[]
+        router.connect(one) { _ in opened.append("one") }
+        router.connect(two) { _ in opened.append("two") }
+        router.connect(one) { _ in opened.append("one") }
+        router.disconnect(one)
+        router.deliver(ReminderRoute(parkID:"jotr"))
+        #expect(opened==["two"])
+        router.disconnect(two)
+    }
     @Test func eachZoomSourceOnTonightIsUnique() throws {
         let jotr=try #require(park("jotr"))
         let sources=[ZoomRoute.pill(jotr),.pillList(jotr),.row(jotr)].map(\.source)

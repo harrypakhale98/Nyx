@@ -58,8 +58,10 @@ struct TonightView: View {
     /// key it was worked out for; worked out off the main thread from the bundled light map.
     @State private var darkerSky:(key:String,offer:DarkerSky.Offer?)?
     @State private var width=0.0
-    /// Wide iPad: the night chosen on the best park's river, and whether it is being dragged.
-    @State private var riverNight:Date?
+    /// Wide iPad: the night chosen on the best park's river, with that park, and whether it is being
+    /// dragged. Kept with its park, so a new best park (another radius or starting point) starts at
+    /// its own tonight rather than carrying the old park's date.
+    @State private var riverNight:RiverChoice?
     @State private var scrubbing=false
     /// A wide iPad: the answer on the left, the ways to change the question on the right.
     private var wide:Bool { WideLayout.columns(width:width,largeText:typeSize.isAccessibilitySize)==2 }
@@ -117,6 +119,8 @@ struct TonightView: View {
         .nightKeys(enabled:wide && !empty) { delta in stepRiver(delta) }
         .background(NightBackground(seed:model.homeID,score:best.first.map { model.night($0).score.value },park:best.first,night:best.first.map { model.tonight($0) })).navigationTitle("Tonight").navigationBarTitleDisplayMode(.inline)
             .tabRootToolbar()
+            // ⌘R's note says a forecast's time as the pull does, in the answer's own time.
+            .environment(\.refreshTimeZone,best.first?.timeZone)
             .navigationDestination(for:ZoomRoute.self) { route in ParkDetailView(park:route.park).modifier(ParkTransition(sourceID:route.source,namespace:zoom)).onAppear { ReviewPrompt.noteNightViewed(score:model.night(route.park).score.value) } }
             .sheet(isPresented:$chooseHome,onDismiss:{ if nearMeAfterPicker { nearMeAfterPicker=false; nearMe() } }) {
                 NavigationStack { StartingPointPicker(nearMe:{ nearMeAfterPicker=true },selectedParkID:model.homeID,selectedPlace:model.homePlace,locationOff:location.denied || DebugScenario.state=="no-location") { choice in
@@ -183,7 +187,8 @@ struct TonightView: View {
                 // Said as it is: new forecasts (or ones minutes old), one too recent to ask about again, or saved data and why.
                 let outcome=RefreshOutcome.of(model,before:before)
                 if outcome == .updated { refreshed+=1 }
-                let line=outcome.line
+                // In the answer's own time, as its "Forecast as of" caption.
+                let line=outcome.line(in:best.first?.timeZone ?? .current)
                 // The haptic is felt; this is heard, politely, after anything VoiceOver is already saying.
                 NightListener.announce(line,priority:.low)
             }
@@ -268,9 +273,9 @@ struct TonightView: View {
     /// chosen night one tap away. (On iPhone the river lives on the park's page.)
     private func ahead(_ park:Park)->some View {
         let tonight=model.tonight(park), nights=model.nights(park,from:tonight,count:30)
-        let chosen=riverNight.flatMap { id in nights.first { $0.id==id } }
+        let chosen=riverNight?.night(at:park).flatMap { id in nights.first { $0.id==id } }
         return Panel { VStack(alignment:.leading,spacing:14) {
-            TimeRiver(nights:nights,selected:Binding(get:{ chosen?.id ?? tonight },set:{ riverNight=$0 }),outlooks:model.outlooks(nights),markers:model.markers(nights))
+            TimeRiver(nights:nights,selected:Binding(get:{ chosen?.id ?? tonight },set:{ riverNight=RiverChoice(parkID:park.id,night:$0) }),outlooks:model.outlooks(nights),markers:model.markers(nights))
             if let chosen, chosen.id != tonight {
                 capsule(text:String(localized:"Open \(park.dayLabel(chosen.id)) at \(park.shortName)"),hint:"Opens that night at the park.") { ParkDetailView(park:park,initialDate:chosen.id) } icon:{ Image(systemName:"moon.stars").imageScale(.small) }
             }
@@ -300,10 +305,10 @@ struct TonightView: View {
     }
     private func stepRiver(_ delta:Int) {
         guard let park=best(candidates).first else { return }
-        let tonight=model.tonight(park), current=riverNight ?? tonight
+        let tonight=model.tonight(park), current=riverNight?.night(at:park) ?? tonight
         let next=park.date(current,addingDays:delta)
         guard next>=tonight, next<park.date(tonight,addingDays:30) else { return }
-        withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=next }
+        withAnimation(reduceMotion ? nil : NyxMotion.spring) { riverNight=RiverChoice(parkID:park.id,night:next) }
     }
     private func hero(_ park:Park,others:[Park])->some View {
         let night=model.night(park)
@@ -659,4 +664,11 @@ enum FoundNights {
         let list=(defaults.stringArray(forKey:key) ?? []).filter { $0 != night }+[night]
         defaults.set(Array(list.suffix(20)),forKey:key)
     }
+}
+/// The night chosen on Tonight's river (wide windows), with the park it was chosen at.
+struct RiverChoice: Equatable {
+    let parkID: String
+    let night: Date
+    /// The night, when it was chosen at this park; nil at any other.
+    func night(at park: Park) -> Date? { parkID==park.id ? night : nil }
 }

@@ -404,7 +404,7 @@ struct OpenMeteoBudgetTests {
     }
     /// A refresh says what it found: new forecasts, one too recent to ask about again, requests
     /// paused while the service asks Nyx to wait, or saved data.
-    @Test func refreshOutcomeSaysWhatHappened() {
+    @Test func refreshOutcomeSaysWhatHappened() throws {
         let now=Self.midnight.addingTimeInterval(20*3600)
         #expect(RefreshOutcome.of(forecastsOn: true, fetched: true, current: false, newest: now, heldBack: true, now: now) == .updated)
         let recent=now.addingTimeInterval(-20*60), old=now.addingTimeInterval(-5*3600)
@@ -418,7 +418,17 @@ struct OpenMeteoBudgetTests {
         #expect(RefreshOutcome.paused(old).line.hasSuffix(RefreshOutcome.when(old)))
         var utc=Calendar(identifier: .gregorian)
         utc.timeZone=TimeZone(identifier: "UTC") ?? .current
-        #expect(RefreshOutcome.when(recent, now: now, calendar: utc) == recent.formatted(date: .omitted, time: .shortened))
+        var utcTime=Date.FormatStyle(date: .omitted, time: .shortened)
+        utcTime.timeZone=utc.timeZone
+        #expect(RefreshOutcome.when(recent, now: now, calendar: utc) == recent.formatted(utcTime))
+        // In a place's own time, as Tonight's "Forecast as of" caption says it.
+        let denver=try #require(TimeZone(identifier: "America/Denver"))
+        var mountain=Calendar.current
+        mountain.timeZone=denver
+        #expect(RefreshOutcome.current(recent).line(in: denver).hasSuffix(RefreshOutcome.when(recent, calendar: mountain)))
+        var denverTime=Date.FormatStyle(date: .omitted, time: .shortened)
+        denverTime.timeZone=denver
+        #expect(RefreshOutcome.when(recent, now: recent, calendar: mountain) == recent.formatted(denverTime))
         #expect(RefreshOutcome.paused(nil).line == String(localized: "Forecast requests are paused for a while. Showing saved data."))
     }
 }

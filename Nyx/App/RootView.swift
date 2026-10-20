@@ -54,6 +54,9 @@ struct RootView:View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.horizontalSizeClass) private var horizontalSize
     @Environment(\.verticalSizeClass) private var verticalSize
+    @Environment(\.supportsMultipleWindows) private var multipleWindows
+    /// This window's place among the windows a tapped reminder may open in (`NotificationRouter`).
+    @State private var routerID=UUID()
     /// The tab bar recedes as a page scrolls down and returns on the way up, except where a bar that
     /// moves would cost someone their place: VoiceOver, Switch Control and accessibility text sizes.
     private var tabBarMinimize:TabBarMinimizeBehavior {
@@ -81,13 +84,13 @@ struct RootView:View {
                         // iPad and iPhone Duo's inner display: a night from Plan's month or a park held over the Journal's tab item or sidebar
                         // row opens the Journal, which takes the drop (`acceptsJournalDrop`). The tab item itself
                         // takes none: SwiftUI's tab drop destination did not fire on iPadOS 26 or 27.
-                        .springLoadingBehavior(NightDragPolicy.drags(horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
+                        .springLoadingBehavior(NightDragPolicy.drags(multipleWindows:multipleWindows,horizontal:horizontalSize,vertical:verticalSize) ? .enabled : .automatic)
                 }
                 // A tab bar on iPhone; on iPad a tab bar that opens into a sidebar.
                 .tabViewStyle(.sidebarAdaptable)
                 .tabBarMinimizeBehavior(tabBarMinimize)
                 // A followed night under way: a strip above the tabs that opens field mode (iOS 26.1).
-                .modifier(NightInProgressAccessory { id in if let park=model.park(id) { FieldPresenter.present(park:park,model:model,from:commands.topController) } })
+                .modifier(NightInProgressAccessory { id in withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) } })
                 .tint(commands.sidebar ? palette.controlTint : palette.accent)
                 .tabViewSidebarHeader { Text(verbatim:"Nyx").font(.system(.title2,design:.serif)).foregroundStyle(palette.ink).accessibilityAddTraits(.isHeader) }
                 .opacity(revealed ? 1 : 0).scaleEffect(revealed ? 1 : 0.97)
@@ -120,7 +123,7 @@ struct RootView:View {
         // many switches are loaded: each visited tab's toolbar and onboarding have one.
         .sensoryFeedback(.impact(flexibility:.soft,intensity:0.7),trigger:nightVision)
         .sheet(isPresented:$intro,onDismiss:{ onboarded=true }) { OnboardingView { onboarded=true;intro=false }.environment(\.nyx,palette).nyxPresentation() }
-        .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp) }
+        .sheet(item:$launch) { launch in ParkSheet(park:launch.park,initialDate:launch.night,whatsUp:launch.whatsUp,commands:commands) }
         .overlay { if let park=firstLight { FirstLightView(park:park,night:model.tonight(park),moment:DebugScenario.screen == nil ? .now : FirstLightDebug.moment(park:park,model:model)) { firstLight=nil }.environment(\.nyx,palette).modifier(DebugTypeSize()).modifier(NightVisionFilter(enabled:palette.nightVision,red:palette.red)) } }
         .onAppear { LaunchSignposts.firstFrame() }
         .onAppear { if DebugScenario.screen == nil, (0..<SceneCommands.tabs.count).contains(savedTab) { commands.tab=savedTab } }
@@ -133,7 +136,7 @@ struct RootView:View {
             model.setSpots(spots)
             moonIcon=RootView.currentMoonIcon()
             model.savedSync.palette=palette
-            NotificationRouter.shared.connect { route in openReminder(route) }
+            NotificationRouter.shared.connect(routerID) { route in openReminder(route) }
             // Control Center's night-vision switch reaches the Live Activity and the watch from Nyx's process.
             if DebugScenario.screen == nil { NightVisionFollowers.install(model) }
             if let screen=DebugScenario.screen { commands.tab=SceneCommands.tabIndex(screen) ?? 0 }
@@ -187,6 +190,8 @@ struct RootView:View {
                 Task.detached(priority:.utility) { JournalInbox.sweep(keeping:waiting) }
             }
             if phase == .active {
+            // The window used last opens a tapped reminder, never one closed since.
+            NotificationRouter.shared.connect(routerID) { route in openReminder(route) }
             model.tick(); moonIcon=RootView.currentMoonIcon()
             if launchPublished { Task { await model.savedSync.update(model,saved:saved,spots:spots) } }
             if firstLight == nil { Task { if let park=await FirstLightWatcher.check(model:model) { firstLight=park } } }
@@ -194,6 +199,7 @@ struct RootView:View {
             // The night's Live Activity catches up (or ends at dawn) whenever Nyx is opened.
             if DebugScenario.screen == nil { Task { await FieldActivities.refresh(nightVision:nightVision) } }
         } }
+        .onDisappear { NotificationRouter.shared.disconnect(routerID) }
         .onReceive(NotificationCenter.default.publisher(for:FieldModeRequest.notification)) { _ in openRequestedField() }
         .onReceive(NotificationCenter.default.publisher(for:ParkOpenRequest.notification)) { _ in openRequestedPark() }
         .task {
@@ -233,7 +239,7 @@ struct RootView:View {
             guard let handoff=ParkHandoff(userInfo:activity.userInfo) else { return }
             withPlace(handoff.parkID) { park in
                 // A night that has passed since it was handed off opens tonight instead.
-                open(park,night:handoff.evening(in:park).flatMap { $0>=model.tonight(park) ? ($0,false) : nil })
+                open(park,night:handoff.evening(in:park).flatMap { LaunchPark.night($0,tonight:model.tonight(park),whatsUp:false) })
             }
         }
         .onOpenURL { url in
@@ -278,10 +284,10 @@ struct RootView:View {
     private func handle(_ link:DeepLink?) {
         switch link {
         case .park(let id): withPlace(id) { open($0) }
-        case .parkNight(let id,let day): withPlace(id) { open($0,night:(day.evening(in:$0),false)) }
+        case .parkNight(let id,let day): withPlace(id) { open($0,night:LaunchPark.night(day.evening(in:$0),tonight:model.tonight($0),whatsUp:false)) }
         case .tonight: commands.tab=0
         case .field(let id): withPlace(id) { FieldPresenter.present(park:$0,model:model,from:commands.topController) }
-        case .whatsUp(let id,let day): withPlace(id) { open($0,night:(day.evening(in:$0),true)) }
+        case .whatsUp(let id,let day): withPlace(id) { open($0,night:LaunchPark.night(day.evening(in:$0),tonight:model.tonight($0),whatsUp:true)) }
         case .calendar(let id,let year,let month):
             withPlace(id) { _ in commands.tab=2; commands.calendarRequest=CalendarRequest(parkID:id,year:year,month:month) }
         case nil: break
@@ -375,7 +381,7 @@ struct RootView:View {
     private func open(_ park:Park,night:(date:Date,whatsUp:Bool)?=nil) {
         // This window's own stack: a link or reminder never opens over another iPad window.
         guard let top=commands.topController, top.presentingViewController != nil else { launch=LaunchPark(park:park,night:night?.date,whatsUp:night?.whatsUp ?? false); return }
-        let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false).environment(model).modelContainer(context.container)
+        let detail=ParkSheet(park:park,initialDate:night?.date,whatsUp:night?.whatsUp ?? false,commands:commands).environment(model).modelContainer(context.container)
         top.present(UIHostingController(rootView:detail),animated:true)
     }
     /// Opens field mode when Control Center, Siri or Shortcuts asked for it: the named place and no
@@ -390,7 +396,7 @@ struct RootView:View {
     }
     /// A tapped reminder opens the night it announced (a shower reminder at What's up).
     private func openReminder(_ route:ReminderRoute) {
-        withPlace(route.parkID) { park in open(park,night:route.day.map { ($0.evening(in:park),route.whatsUp) }) }
+        withPlace(route.parkID) { park in open(park,night:route.day.flatMap { LaunchPark.night($0.evening(in:park),tonight:model.tonight(park),whatsUp:route.whatsUp) }) }
     }
     /// Opens the park Spotlight, Siri or a snippet's "Open in Nyx" asked for (`OpenParkIntent`),
     /// or the Tonight tab when the Tonight control was tapped before any park was saved.
@@ -421,14 +427,24 @@ struct LaunchPark: Identifiable, Equatable {
     var night:Date?=nil
     var whatsUp=false
     var id:String { "\(park.id)|\(night?.timeIntervalSince1970 ?? 0)|\(whatsUp)" }
+    /// The night a link, reminder or Handoff names, while it is still ahead: one already past opens
+    /// tonight instead (at What's up, when that was asked for), as a restored park window does.
+    nonisolated static func night(_ evening:Date,tonight:Date,whatsUp:Bool)->(date:Date,whatsUp:Bool)? {
+        if evening>=tonight { return (evening,whatsUp) }
+        return whatsUp ? (tonight,true) : nil
+    }
 }
 /// A park opened from a reminder, Spotlight or a widget. It reads night vision and Increase
 /// Contrast itself, so it matches the app (and follows a Control Center switch) wherever it is
-/// presented, including above another sheet.
+/// presented, including above another sheet. It carries the window's commands as a layer of its
+/// own (`SceneCommands.layer`), so ⌘R, ⌘← ⌘→ and ⌘⇧N reach the page on top and never the one under it.
 private struct ParkSheet:View {
     let park:Park
     var initialDate:Date?=nil
     var whatsUp=false
+    let commands:SceneCommands
+    @State private var layer=SceneCommands.newLayer()
+    @Environment(PlanModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.legibilityWeight) private var legibility
@@ -438,6 +454,9 @@ private struct ParkSheet:View {
         NavigationStack {
             ParkDetailView(park:park,initialDate:initialDate,focusWhatsUp:whatsUp).toolbar { ToolbarItem(placement:.cancellationAction) { Button(role:.close) { dismiss() } } }
         }
+        .environment(\.nyxTab,layer).environment(commands).environment(\.skyHome,model.home)
+        .onAppear { commands.layer(layer,shown:true) }
+        .onDisappear { commands.layer(layer,shown:false) }
         .environment(\.nyx,NyxPalette(nightVision:nightVision,highContrast:contrast == .increased,brighterRed:brighterRed,boldText:legibility == .bold)).nyxPresentation().nyxAccessibility()
     }
 }

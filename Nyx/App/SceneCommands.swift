@@ -15,7 +15,19 @@ import SwiftUI
     /// The park whose page is on screen in each tab, for ⌘⇧N (`ReportsVisiblePark`).
     private(set) var visibleParks:[Int:String]=[:]
     /// The park on screen in this window's current tab, if any.
-    var visiblePark:String? { visibleParks[parkWindow ? 0 : tab] }
+    var visiblePark:String? { visibleParks[current] }
+    /// Park pages presented over this window (from a link or a reminder), the top one last. Each is
+    /// a layer with a tab number of its own (`newLayer`), so while one is up the keys reach its page
+    /// and never the tab's page under it.
+    private(set) var layers:[Int]=[]
+    func layer(_ id:Int,shown:Bool) {
+        var next=layers.filter { $0 != id }
+        if shown { next.append(id) }
+        if next != layers { layers=next }
+    }
+    /// A layer's number: past every tab's, and never the same twice.
+    static func newLayer()->Int { nextLayer+=1; return nextLayer }
+    private static var nextLayer=100
     func show(park id:String,tab:Int?) { if let tab { visibleParks[tab]=id } }
     func hide(park id:String,tab:Int?) { if let tab, visibleParks[tab]==id { visibleParks[tab]=nil } }
     /// A park's month asked of this window's Plan tab (a `nyx://calendar` link, "Show in Plan",
@@ -56,9 +68,10 @@ import SwiftUI
     func findPark() { tab=1; searchPending=true; searchRequest+=1 }
     /// True once per ⌘F, for the list that focuses its field.
     func takeSearch()->Bool { guard searchPending else { return false }; searchPending=false; return true }
-    func stepNight(_ delta:Int) { step=NightStep(id:(step?.id ?? 0)+1,delta:delta,tab:tab) }
-    /// The tab whose screens the keys reach: a park's window has one page, kept as tab 0.
-    private var current:Int { parkWindow ? 0 : tab }
+    func stepNight(_ delta:Int) { step=NightStep(id:(step?.id ?? 0)+1,delta:delta,tab:current) }
+    /// The tab whose screens the keys reach: a park's window has one page, kept as tab 0; a park
+    /// presented over the window is its own layer.
+    private var current:Int { parkWindow ? 0 : layers.last ?? tab }
     /// The night views on screen in each tab that ⌘← ⌘→ would move (`NightKeys`), so the menu
     /// enables the keys only where a night is there to move.
     private(set) var nightViews:[Int:Set<UUID>]=[:]
@@ -142,9 +155,13 @@ struct WindowSceneReader: View {
 }
 
 private struct TabKey: EnvironmentKey { static let defaultValue:Int?=nil }
+private struct RefreshZoneKey: EnvironmentKey { static let defaultValue:TimeZone?=nil }
 extension EnvironmentValues {
     /// The tab a view lives in, so a command meant for the Calendar never moves a park on Tonight.
     var nyxTab: Int? { get { self[TabKey.self] } set { self[TabKey.self]=newValue } }
+    /// The time zone ⌘R's note says a forecast's time in, where the screen shows a place's own
+    /// time (Tonight); nil for this device's.
+    var refreshTimeZone: TimeZone? { get { self[RefreshZoneKey.self] } set { self[RefreshZoneKey.self]=newValue } }
 }
 
 /// The menu bar and the ⌘-hold overlay on iPad: the four tabs, Find a Park, the night keys,
@@ -228,6 +245,7 @@ struct RefreshKey: ViewModifier {
     @Environment(PlanModel.self) private var model: PlanModel?
     @Environment(\.refresh) private var pull
     @Environment(\.nyxTab) private var tab
+    @Environment(\.refreshTimeZone) private var timeZone
     let speaks:Bool
     let action:(@MainActor ()async->Void)?
     @State private var id=UUID()
@@ -254,7 +272,7 @@ struct RefreshKey: ViewModifier {
         await perform()
         commands.refreshing=false
         guard let model else { withAnimation(.easeOut(duration:0.2)) { note=nil }; return }
-        let line=RefreshOutcome.of(model,before:before).line
+        let line=RefreshOutcome.of(model,before:before).line(in:timeZone ?? .current)
         // Heard, politely, after anything VoiceOver is already saying; seen for a few seconds.
         if !quiet { NightListener.announce(line,priority:.low) }
         withAnimation(.easeOut(duration:0.2)) { note = .said(line) }
@@ -285,19 +303,27 @@ nonisolated enum RefreshOutcome: Equatable {
         let newest=model.parks.compactMap { model.forecasts[$0.id]?.updated }.max()
         return of(forecastsOn:model.weatherEnabled,fetched:fetched,current:current,newest:newest,heldBack:model.forecastsHeldBack,now:now)
     }
-    var line:String {
+    var line:String { line(in:.current) }
+    /// The line with a forecast's time in `timeZone`: the place's own time where the screen shows
+    /// it that way (Tonight's "Forecast as of" caption), so what is heard matches what is read.
+    func line(in timeZone:TimeZone)->String {
+        var calendar=Calendar.current
+        calendar.timeZone=timeZone
         switch self {
-        case .updated: String(localized:"Updated")
-        case .forecastsOff: String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.")
-        case .unreachable: String(localized:"Could not reach the forecast. Showing saved data.")
-        case .current(let issued): String(localized:"Up to date. Forecast from \(Self.when(issued))")
-        case .paused(let issued?): String(localized:"Forecast requests are paused for a while. Showing the forecast from \(Self.when(issued))")
-        case .paused(nil): String(localized:"Forecast requests are paused for a while. Showing saved data.")
+        case .updated: return String(localized:"Updated")
+        case .forecastsOff: return String(localized:"Cloud forecasts are off in Your privacy. Showing saved data.")
+        case .unreachable: return String(localized:"Could not reach the forecast. Showing saved data.")
+        case .current(let issued): return String(localized:"Up to date. Forecast from \(Self.when(issued,calendar:calendar))")
+        case .paused(let issued?): return String(localized:"Forecast requests are paused for a while. Showing the forecast from \(Self.when(issued,calendar:calendar))")
+        case .paused(nil): return String(localized:"Forecast requests are paused for a while. Showing saved data.")
         }
     }
-    /// "9:41 PM" today, "Fri 9:41 PM" on an earlier day, in this device's own time and format.
+    /// "9:41 PM" today, "Fri 9:41 PM" on an earlier day, in this device's own format and the
+    /// calendar's time zone (this device's, unless a place's is asked for).
     static func when(_ date:Date,now:Date = .now,calendar:Calendar = .current)->String {
-        calendar.isDate(date,inSameDayAs:now) ? date.formatted(date:.omitted,time:.shortened) : date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+        var time=Date.FormatStyle(date:.omitted,time:.shortened), day=Date.FormatStyle.dateTime.weekday(.abbreviated).hour().minute()
+        time.timeZone=calendar.timeZone; day.timeZone=calendar.timeZone
+        return calendar.isDate(date,inSameDayAs:now) ? date.formatted(time) : date.formatted(day)
     }
 }
 /// ⌘R's note at the top of the page: the system spinner while it works, then one line. Solid
