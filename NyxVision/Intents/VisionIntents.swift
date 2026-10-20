@@ -85,7 +85,8 @@ nonisolated struct VisionDarknessAnswer: Sendable {
 }
 
 /// What Siri or Shortcuts asked the planner window for: a park on tonight (nil keeps the chosen
-/// park), and whether to stand under its sky. Each request is new, even for the same park.
+/// park), and whether to stand under its sky. Each request is new, even for the same park. With
+/// only the Moon volume open, the volume opens a planner window to answer it (`MoonVolume`).
 nonisolated struct VisionIntentRequest: Equatable, Sendable {
     let parkID: String?
     let sky: Bool

@@ -17,6 +17,9 @@ struct YourPrivacyView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Text("Only the four optional updates below leave this Apple Vision Pro, each with its own switch. Your location is never requested here, and nothing is measured or shared.")
                         .fixedSize(horizontal: false, vertical: true)
+                    // The one other thing that leaves: Handoff (`VisionHandoff`), to the person's own devices.
+                    Text("Handoff offers the park and night on screen to your own devices signed in to the same Apple Account, so you can continue there.")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Section {
                     VStack(alignment: .leading, spacing: 6) {

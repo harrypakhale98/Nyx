@@ -9,9 +9,12 @@ struct VisionPalette: Equatable {
     var highContrast = false
     /// Reduce Transparency: panels behind words become nearly opaque.
     var solid = false
+    /// Bold Text (`legibilityWeight == .bold`): the sky's words, rendered off screen where the
+    /// system's own weight never reaches, are set a step heavier.
+    var boldText = false
     /// The iPhone's palette with the same switches. Vision Pro has no "Brighter red" of its own and
     /// no channel to the iPhone's setting, so its red follows Increase Contrast, as the iPhone's does.
-    var base: NyxPalette { NyxPalette(nightVision: nightVision, highContrast: highContrast) }
+    var base: NyxPalette { NyxPalette(nightVision: nightVision, highContrast: highContrast, boldText: boldText) }
     /// Window colours. In night vision the window's red filter does the tinting, so ink stays
     /// white there (as on the iPhone): a red ink filtered again would turn a dim, unreadable red.
     var ink: Color { base.ink }

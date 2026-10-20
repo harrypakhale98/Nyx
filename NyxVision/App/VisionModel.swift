@@ -39,8 +39,12 @@ nonisolated struct NightPlan: Sendable {
         moonAltitude = engine.lunarAltitude(at: moonMoment, park: park)
     }
     /// The cloud cover the immersive sky draws at `moment` (0…1), or nil when no forecast hour
-    /// reaches it (`SkyDome.cloud`).
-    func cloud(at moment: Date) -> Double? { SkyDome.cloud(at: moment, forecast: forecast, basis: night.basis, usual: night.usualCloud) }
+    /// reaches it (`SkyDome.cloud`), eased toward the usual clouds by the same weight as the score.
+    func cloud(at moment: Date) -> Double? {
+        let window = sky.cloudWindow
+        return SkyDome.cloud(at: moment, forecast: forecast, basis: night.basis, usual: night.usualCloud,
+                             reference: window.start.addingTimeInterval(window.end.timeIntervalSince(window.start)/2))
+    }
     /// The Moon's line when it neither rises nor sets this night.
     var moonAllNight: String { moonAltitude > -0.833 ? String(localized: "Up all night") : String(localized: "Down all night") }
 }
@@ -102,6 +106,8 @@ nonisolated struct SkyMoment: Sendable {
         if sunAltitude > -18 { return String(localized: "Nearly dark") }
         return String(localized: "True darkness")
     }
+    /// Whether the galactic core is up in a sky dark enough to point to it (`SkyDome.coreVisible`).
+    var coreShown: Bool { SkyDome.coreVisible(altitude: core.altitude, sunAltitude: sunAltitude) }
     /// Planets worth showing: above the horizon in a sky dark enough to see them.
     var visiblePlanets: [Body] { sunAltitude <= -6 ? planets.filter { $0.altitude > 2 }.sorted { $0.magnitude < $1.magnitude } : [] }
 }
@@ -374,8 +380,14 @@ nonisolated struct SkyMoment: Sendable {
         }
     }
 
+    /// A new park or night asked the clock back to the middle of darkness, and no computed night has
+    /// taken it yet. Kept across refreshes: a forecast or cache merge that cancels the computation
+    /// a moment later must not drop the reset, or a park opened by Handoff or Siri at launch would
+    /// open at the previous park's clock.
+    @ObservationIgnored private var pendingReset = false
     /// Recomputes the chosen night off the main thread; the sky opens at the middle of true darkness.
     private func refresh(resetTime: Bool) {
+        if resetTime { pendingReset = true }
         guard let park else { plan = nil; return }
         let night = night(for: park), tonight = nightOffset == 0, forecast = forecasts[park.id], layers = summitLayers[park.id], air = smoke[park.id], now = now, aurora = aurora
         planTask?.cancel()
@@ -385,7 +397,10 @@ nonisolated struct SkyMoment: Sendable {
             let plan = await work.value
             guard !Task.isCancelled else { return }
             self.plan = plan
-            if resetTime { self.fraction = Self.opening(of: plan) }
+            if self.pendingReset {
+                self.pendingReset = false
+                self.fraction = Self.opening(of: plan)
+            }
         }
     }
     private func refreshList() {

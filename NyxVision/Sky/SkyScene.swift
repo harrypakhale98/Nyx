@@ -83,11 +83,13 @@ import UIKit
     // What was last applied, so each moment only redoes what changed.
     private var palette: VisionPalette?
     private var domeLight: SkyTextures.Light?
-    private var sunAzimuth = Double.nan
+    private var sunAzimuth = Double.nan, domeFacing = Double.nan
     private var moonKey = ""
     private var domePark = ""
     private var ridgePark = ""
     private var labelKeys: [ObjectIdentifier: String] = [:]
+    /// When each label was last rendered, for `throttle`.
+    private var labelDrawn: [ObjectIdentifier: Date] = [:]
     /// VoiceOver's activate on a body, kept alive with the scene.
     var activation: EventSubscription?
     /// VoiceOver's increment and decrement on the sky, kept alive with the scene.
@@ -223,8 +225,10 @@ import UIKit
     // MARK: Each moment
 
     /// `cloud` is the forecast's cover at this moment (0…1), nil when no forecast reaches it.
+    /// `moving`: the clock is sweeping or following a hand, so a name card's changing words are
+    /// redrawn a few times a second rather than at every degree (the last moment always is).
     func update(plan: NightPlan, moment: SkyMoment, cloud: Double? = nil, palette: VisionPalette, typeSize: DynamicTypeSize, selected: String?,
-                constellations: Bool = true, reduceMotion: Bool = false) {
+                constellations: Bool = true, reduceMotion: Bool = false, moving: Bool = false) {
         apply(palette: palette)
         let park = plan.park, facing = SkyDome.facing(for: park)
         let m = moment.rotation
@@ -268,21 +272,27 @@ import UIKit
                 }
             }
         }
-        // The dome and the skyline's colour, redrawn only when the light has changed visibly.
-        let changed = domeLight.map { abs($0.sunAltitude-light.sunAltitude) > 0.3 || abs($0.moonGlare-light.moonGlare) > 0.01 } ?? true
-        if changed || abs(moment.sunAzimuth-sunAzimuth) > 2 || self.palette != palette || domePark != park.id {
-            domePark = park.id; domeLight = light; sunAzimuth = moment.sunAzimuth
+        // The dome and the skyline's colour, redrawn only when the light has changed visibly. Below
+        // the night floor the sky's colour no longer depends on the Sun, so its height is clamped
+        // there first and a sweep through true darkness redraws nothing.
+        let domeKey = SkyTextures.Light(sunAltitude: max(SkyTextures.nightFloor, light.sunAltitude), skyGlow: light.skyGlow, moonGlare: light.moonGlare)
+        if Self.domeChanged(from: domeLight, to: domeKey) || domePark != park.id {
+            domePark = park.id; domeLight = domeKey
             let paint = palette.skyLinear
-            if let image = SkyTextures.dome(light, color: paint), let texture = try? TextureResource(image: image, options: .init(semantic: .color)) {
+            if let image = SkyTextures.dome(domeKey, color: paint), let texture = try? TextureResource(image: image, options: .init(semantic: .color)) {
                 dome.model?.materials = [Self.plain(texture)]
             }
-            // The mesh's u = 0.5 meridian points at the Sun.
-            dome.orientation = simd_quatf(angle: Float(-(moment.sunAzimuth-facing)*Double.pi/180), axis: [0, 1, 0])
             // Land is darker than any sky above it; the far range takes a little of the horizon's
             // colour, as distant hills do in haze.
-            let horizon = SkyTextures.skyColor(altitude: 1.5, fromSun: 100, light)
+            let horizon = SkyTextures.skyColor(altitude: 1.5, fromSun: 100, domeKey)
             solid(nearRidge, paint(Self.land))
             solid(farRidge, paint(Self.land+(horizon-Self.land)*0.32))
+        }
+        // The texture is drawn relative to the Sun, so the Sun's bearing only turns it: the mesh's
+        // u = 0.5 meridian points at the Sun.
+        if moment.sunAzimuth != sunAzimuth || domeFacing != facing {
+            sunAzimuth = moment.sunAzimuth; domeFacing = facing
+            dome.orientation = simd_quatf(angle: Float(-(moment.sunAzimuth-facing)*Double.pi/180), axis: [0, 1, 0])
         }
         var domeAccess = AccessibilityComponent()
         domeAccess.isAccessibilityElement = true
@@ -301,7 +311,7 @@ import UIKit
             tint(sun, texture: glowTexture, level: 1, color: palette.sky(SIMD3(1, 0.93, 0.8)))
         } else { sun.isEnabled = false }
 
-        let coreShown = moment.core.altitude > 0 && SkyDome.visibility(.milkyWay, sunAltitude: moment.sunAltitude) > 0.3
+        let coreShown = moment.coreShown
         // Moonlight can leave nothing of the band to point at: the label then says so instead of
         // naming a patch of empty, moonlit sky.
         let coreWashed = Self.coreWashedOut(moonUp: moment.moon.up, washed: washed)
@@ -327,7 +337,7 @@ import UIKit
         placeLines(moment: moment, palette: palette, glare: glare, clouded: clouded, on: constellations, reduceMotion: reduceMotion)
         placeClouds(cloud, light: light, palette: palette, reduceMotion: reduceMotion)
         placeCompass(facing: facing, palette: palette, typeSize: typeSize)
-        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize, coreWashed: coreWashed)
+        placeCard(selected: selected, moment: moment, plan: plan, facing: facing, palette: palette, typeSize: typeSize, coreWashed: coreWashed, moving: moving)
         let night = park.dayLabel(plan.sky.evening)
         let plaqueText = Sentences.join([VisionModel.honesty(plan, inSky: true), String(localized: "Ahead is \(Compass.name(facing)), not your room's real north.")])
         // Scaled by its distance from the eye, so it reads at the size it would at one metre.
@@ -362,11 +372,16 @@ import UIKit
         let low = max(0, min(1, moment.moon.altitude/5+0.5))
         tint(moonHalo, texture: glowTexture, level: (0.12+0.4*sqrt(light.moonGlare))*moment.moonIllumination.squareRoot()*low, color: moonColor)
         tint(moonAureole, texture: aureoleTexture, level: SRGB.encoded(0.1*light.moonGlare), color: palette.sky(SIMD3(0.75, 0.83, 1)))
-        // The disc is re-rendered when its look changes by more than a couple of degrees of tilt.
+        // The disc is drawn with lunar north up and turned on the sky by the Moon's tilt: the shader
+        // turns its sunlight and its map together, so the turned picture is the same one drawn at that
+        // tilt. It is re-rendered only when the phase, or the bright limb's angle from lunar north,
+        // changes by a degree or two, not as the Moon's tilt changes across the night.
         let geometry = AstronomyEngine().moonGeometry(for: plan.park, at: moment.date)
+        let upright = Self.upright(geometry)
+        moon.orientation = moon.orientation*simd_quatf(angle: Float(geometry.north), axis: [0, 0, 1])
         // Added light over the disc behind it: the lit limb and earthshine, nothing outside the limb.
-        let key = "\(plan.park.id)-\(Int(geometry.brightLimb*90/Double.pi))-\(Int(geometry.phaseAngle*180/Double.pi))"
-        if key != moonKey, let image = Self.moonImage(geometry), let texture = try? TextureResource(image: image, options: .init(semantic: .color)) {
+        let key = "\(plan.park.id)-\(Int((upright.brightLimb*90/Double.pi).rounded(.down)))-\(Int((upright.phaseAngle*180/Double.pi).rounded(.down)))"
+        if key != moonKey, let image = Self.moonImage(upright), let texture = try? TextureResource(image: image, options: .init(semantic: .color)) {
             moonKey = key
             moonTexture = texture
         }
@@ -503,16 +518,24 @@ import UIKit
         clouds.isEnabled = wanted.presence > 0.01
     }
 
+    /// Whether the dome's light (its Sun height already clamped to the night floor) differs enough
+    /// from the last one drawn to show: 0.3° of Sun or a hundredth of moon glare, or reaching the
+    /// floor itself, so the last twilight texture is never left standing in for true darkness.
+    nonisolated static func domeChanged(from old: SkyTextures.Light?, to new: SkyTextures.Light) -> Bool {
+        guard let old else { return true }
+        if abs(old.sunAltitude-new.sunAltitude) > 0.3 || abs(old.moonGlare-new.moonGlare) > 0.01 || old.skyGlow != new.skyGlow { return true }
+        return old.sunAltitude != new.sunAltitude && (old.sunAltitude == SkyTextures.nightFloor || new.sunAltitude == SkyTextures.nightFloor)
+    }
     /// True when moonlight has washed the band out enough that a label on the core would name nothing visible.
     nonisolated static func coreWashedOut(moonUp: Bool, washed: Double) -> Bool { moonUp && washed < 0.3 }
 
-    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize, coreWashed: Bool) {
+    private func placeCard(selected: String?, moment: SkyMoment, plan: NightPlan, facing: Double, palette: VisionPalette, typeSize: DynamicTypeSize, coreWashed: Bool, moving: Bool) {
         if let selected, let star = lore.stars.first(where: { $0.id == selected }) {
             guard let place = horizontal(row: star.row, moment: moment, facing: facing), namedStars[star.id]?.isEnabled == true else { card.isEnabled = false; return }
             card.isEnabled = true
             let detail = "\(String(localized: "\(Int(place.altitude.rounded()))° up in the \(Compass.name(place.azimuth))")) · \(star.constellation) · \(SkyLore.brightness(star.magnitude))"
             label(card, SkyLabel(title: star.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(star.id)\(detail)\(palette.nightVision)",
-                  altitude: place.altitude-(typeSize.isAccessibilitySize ? 3.4 : 2.4), azimuth: place.azimuth, facing: facing)
+                  altitude: place.altitude-(typeSize.isAccessibilitySize ? 3.4 : 2.4), azimuth: place.azimuth, facing: facing, throttle: moving)
             card.components.set(Self.access(star.name, detail, activatable: false))
             return
         }
@@ -524,7 +547,7 @@ import UIKit
         if body.kind == .moon { detail += " · " + String(localized: "\(Int((moment.moonIllumination*100).rounded()))% lit") }
         if body.kind == .core { detail += " · " + (coreWashed ? String(localized: "washed out by moonlight") : String(localized: "the bright center of our galaxy")) }
         label(card, SkyLabel(title: body.name, detail: detail, style: .card, palette: palette, typeSize: typeSize), key: "card\(body.id)\(detail)\(palette.nightVision)",
-              altitude: body.altitude-(body.kind == .moon ? 3.4 : 2.8), azimuth: body.azimuth, facing: facing)
+              altitude: body.altitude-(body.kind == .moon ? 3.4 : 2.8), azimuth: body.azimuth, facing: facing, throttle: moving)
         card.components.set(Self.access(body.name, detail, activatable: false))
     }
 
@@ -584,24 +607,28 @@ import UIKit
     }
     /// A SwiftUI label in the sky, scaled with distance so it reads at the size it would at one metre.
     @discardableResult
-    private func label(_ entity: Entity, _ view: SkyLabel, key: String, altitude: Double, azimuth: Double, facing: Double, radius: Float = SkyScene.labelRadius) -> ModelEntity? {
+    private func label(_ entity: Entity, _ view: SkyLabel, key: String, altitude: Double, azimuth: Double, facing: Double, radius: Float = SkyScene.labelRadius,
+                       throttle: Bool = false) -> ModelEntity? {
         let position = Self.point(altitude, azimuth, facing, radius)
-        return label(entity, view, key: key, position: position, scale: radius)
+        return label(entity, view, key: key, position: position, scale: radius, throttle: throttle)
     }
     /// Labels are SwiftUI views rendered once into a texture on a quad (re-rendered only when their
     /// words or the person's text size change): view attachments far out in an immersive sky
-    /// appeared late or not at all. Returns the quad that shows the words.
+    /// appeared late or not at all. Returns the quad that shows the words. `throttle` keeps a label
+    /// whose words change with the clock (a name card's "32° up") to a few renders a second.
     @discardableResult
-    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float) -> ModelEntity? {
+    private func label(_ entity: Entity, _ view: SkyLabel, key: String, position: SIMD3<Float>, scale: Float, throttle: Bool = false) -> ModelEntity? {
         entity.position = position
         entity.orientation = Self.facingViewer(position)
         entity.scale = [scale, scale, scale]
-        let id = ObjectIdentifier(entity), key = "\(key)|\(view.typeSize)|\(view.palette.highContrast)|\(view.palette.solid)"
+        let id = ObjectIdentifier(entity), key = "\(key)|\(view.typeSize)|\(view.palette.highContrast)|\(view.palette.solid)|\(view.palette.boldText)"
         guard labelKeys[id] != key else { return entity.children.first as? ModelEntity }
+        if throttle, labelKeys[id] != nil, let last = labelDrawn[id], Date.now.timeIntervalSince(last) < 0.25 { return entity.children.first as? ModelEntity }
         let renderer = ImageRenderer(content: view.environment(\.dynamicTypeSize, view.typeSize))
         renderer.scale = 3
         guard let image = renderer.cgImage, let texture = try? TextureResource(image: image, options: .init(semantic: .color)) else { return entity.children.first as? ModelEntity }
         labelKeys[id] = key
+        labelDrawn[id] = .now
         let face = entity.children.first as? ModelEntity ?? {
             let quad = ModelEntity(mesh: Self.quad(), materials: [])
             entity.addChild(quad)
@@ -813,8 +840,9 @@ import UIKit
         var parts = [moment.twilight]
         if let cloud { parts.append(String(localized: "Forecast clouds about \(Int((cloud*100).rounded()))% of the sky")) }
         parts.append(moment.moon.up ? String(localized: "Moon \(moment.moon.place), \(Int((moment.moonIllumination*100).rounded()))% lit") : String(localized: "Moon below the horizon"))
-        parts += moment.visiblePlanets.map { "\($0.name) \($0.place)" }
-        if moment.core.up && moment.sunAltitude < -15 { parts.append("\(moment.core.name) \(moment.core.place)") }
+        // "Jupiter 32° up in the southeast": one localized phrase, so a language can order it its own way.
+        parts += moment.visiblePlanets.map { String(localized: "\($0.name) \($0.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast") }
+        if moment.coreShown { parts.append(String(localized: "\(moment.core.name) \(moment.core.place)", comment: "A body in the sky and where it is: Jupiter 32° up in the southeast")) }
         return parts.joined(separator: ". ")
     }
     /// The Milky Way, drawn once by `nyxMilkyWay` (SkyShaders.metal): about 50 ms on the GPU.
@@ -834,6 +862,12 @@ import UIKit
         let renderer = ImageRenderer(content: view)
         renderer.scale = 1
         return renderer.cgImage
+    }
+    /// The same Moon with lunar north straight up: the bright limb measured from north, no tilt.
+    /// Turned counterclockwise by the original `north`, it is the picture the original geometry draws.
+    nonisolated static func upright(_ geometry: MoonGeometry) -> MoonGeometry {
+        MoonGeometry(phaseAngle: geometry.phaseAngle, brightLimb: geometry.brightLimb-geometry.north, north: 0,
+                     librationLongitude: geometry.librationLongitude, librationLatitude: geometry.librationLatitude, waxing: geometry.waxing)
     }
     /// The Moon disc for a moment, rendered from the same shader as the window and the iPhone.
     static func moonImage(_ geometry: MoonGeometry) -> CGImage? {

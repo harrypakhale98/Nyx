@@ -435,7 +435,8 @@ nonisolated struct WhatsUp: Sendable {
         let place=placed(altitude: night.bestAltitude, azimuth: night.bestAzimuth)
         let detail=evening ? String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best evenings to find it, \(place) after sunset.")
             : String(localized: "Farthest from the Sun's glare around \(day.formatted(format)): the best mornings to find it, \(place) before sunrise.")
-        return Item(id: "best-\(night.planet.rawValue)", kind: .planetBest, title: title, note: String(localized: "this week"), detail: detail, spoken: "\(title), this week. \(detail)")
+        let note=String(localized: "this week")
+        return Item(id: "best-\(night.planet.rawValue)", kind: .planetBest, title: title, note: note, detail: detail, spoken: "\(title), \(note). \(detail)")
     }
     static func solsticeItem(_ solstice: SkyAlmanac.Solstice, sky: SkyConditions) -> Item {
         let title=solstice == .longestNight ? String(localized: "The longest night of the year") : String(localized: "The shortest night of the year")
@@ -447,8 +448,9 @@ nonisolated struct WhatsUp: Sendable {
     static func gegenscheinItem(_ point: SkyAlmanac.Gegenschein, park: Park) -> Item {
         let title=String(localized: "Gegenschein"), when=around(point.at, park: park)
         let detail=String(localized: "A very faint, broad glow opposite the Sun, around \(when), \(Int(point.altitude.rounded()))° up in the \(Compass.name(point.azimuth)). Only from the darkest skies, with eyes fully adapted; easy to miss.")
-        return Item(id: "gegenschein", kind: .gegenschein, title: title, note: String(localized: "very faint"), value: when, detail: detail,
-            spoken: "\(title), very faint. \(detail)", timed: true)
+        let note=String(localized: "very faint")
+        return Item(id: "gegenschein", kind: .gegenschein, title: title, note: note, value: when, detail: detail,
+            spoken: "\(title), \(note). \(detail)", timed: true)
     }
 
     /// Tonight's best-placed binocular sights (`DeepSky.sights`), one sentence each.

@@ -185,20 +185,21 @@ nonisolated enum SkyTextures {
     }
     /// The sky straight up for a Sun altitude (degrees): blue by day, deep blue at sunset, indigo
     /// through nautical twilight, the night floor once the Sun is 18° down.
-    static func zenith(sunAltitude s: Double) -> SIMD3<Double> {
-        let stops: [(Double, SIMD3<Double>)] = [
-            (5, SIMD3(0.16, 0.28, 0.6)), (2, SIMD3(0.1, 0.18, 0.42)), (0, SIMD3(0.06, 0.11, 0.28)), (-3, SIMD3(0.028, 0.05, 0.15)),
-            (-6, SIMD3(0.009, 0.015, 0.055)), (-9, SIMD3(0.003, 0.0045, 0.016)), (-12, SIMD3(0.0012, 0.0016, 0.0045)),
-            (-15, SIMD3(0.0008, 0.001, 0.0022)), (-18, nightZenith),
-        ]
-        return interpolate(stops, s)
-    }
+    static func zenith(sunAltitude s: Double) -> SIMD3<Double> { interpolate(zenithStops, s) }
     static let nightZenith = SIMD3(0.0007, 0.0009, 0.0016)
-    static func glowStrength(sunAltitude s: Double) -> Double {
-        let stops: [(Double, SIMD3<Double>)] = [(5, SIMD3(repeating: 1.1)), (0, SIMD3(repeating: 0.9)), (-3, SIMD3(repeating: 0.55)), (-6, SIMD3(repeating: 0.22)),
-                                                (-9, SIMD3(repeating: 0.07)), (-12, SIMD3(repeating: 0.02)), (-15, SIMD3(repeating: 0.005)), (-18, .zero)]
-        return interpolate(stops, s).x
-    }
+    /// Built once: the dome asks for these tens of thousands of times a redraw.
+    private static let zenithStops: [(Double, SIMD3<Double>)] = [
+        (5, SIMD3(0.16, 0.28, 0.6)), (2, SIMD3(0.1, 0.18, 0.42)), (0, SIMD3(0.06, 0.11, 0.28)), (-3, SIMD3(0.028, 0.05, 0.15)),
+        (-6, SIMD3(0.009, 0.015, 0.055)), (-9, SIMD3(0.003, 0.0045, 0.016)), (-12, SIMD3(0.0012, 0.0016, 0.0045)),
+        (-15, SIMD3(0.0008, 0.001, 0.0022)), (-18, nightZenith),
+    ]
+    static func glowStrength(sunAltitude s: Double) -> Double { interpolate(glowStops, s).x }
+    private static let glowStops: [(Double, SIMD3<Double>)] = [(5, SIMD3(repeating: 1.1)), (0, SIMD3(repeating: 0.9)), (-3, SIMD3(repeating: 0.55)), (-6, SIMD3(repeating: 0.22)),
+                                                               (-9, SIMD3(repeating: 0.07)), (-12, SIMD3(repeating: 0.02)), (-15, SIMD3(repeating: 0.005)), (-18, .zero)]
+    /// The Sun's altitude below which the sky's colour no longer changes: zenith, glow and the
+    /// Earth's shadow have all reached their night values. The dome clamps to it, so a sweep through
+    /// true darkness redraws nothing.
+    static let nightFloor = -18.0
     private static func interpolate(_ stops: [(Double, SIMD3<Double>)], _ s: Double) -> SIMD3<Double> {
         guard s < stops[0].0 else { return stops[0].1 }
         guard s > stops[stops.count-1].0 else { return stops[stops.count-1].1 }

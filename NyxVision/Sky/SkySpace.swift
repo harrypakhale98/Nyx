@@ -11,6 +11,8 @@ struct SkySpace: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Bold Text: the sky's words are rendered off screen, which never sees it, so the palette carries it.
+    @Environment(\.legibilityWeight) private var legibilityWeight
     @State private var scene = SkyScene()
     /// The clock where the current drag began; nil between drags.
     @State private var dragStart: Double?
@@ -36,7 +38,7 @@ struct SkySpace: View {
         } update: { _ in
             guard let plan = model.plan, let moment = model.skyMoment else { return }
             scene.update(plan: plan, moment: moment, cloud: plan.cloud(at: moment.date), palette: palette, typeSize: typeSize, selected: model.selectedBody,
-                         constellations: model.constellations, reduceMotion: reduceMotion)
+                         constellations: model.constellations, reduceMotion: reduceMotion, moving: model.clockMoving)
         }
         .gesture(SpatialTapGesture().targetedToAnyEntity().onEnded { value in Self.toggle(value.entity.name, in: model) })
         .simultaneousGesture(turnGesture)
@@ -90,7 +92,9 @@ struct SkySpace: View {
         guard let plan = model.plan, plan.span.duration > 0 else { return }
         model.move(to: model.fraction+seconds/plan.span.duration, reduceMotion: true)
     }
-    private var palette: VisionPalette { VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency) }
+    private var palette: VisionPalette {
+        VisionPalette(nightVision: model.nightVision, highContrast: contrast == .increased, solid: reduceTransparency, boldText: legibilityWeight == .bold)
+    }
     /// The labels' text size: the person's, or DEBUG's `-nyx-ax5`.
     private var typeSize: DynamicTypeSize { VisionDebug.isEnabled("ax5") ? .accessibility3 : dynamicTypeSize }
 }
