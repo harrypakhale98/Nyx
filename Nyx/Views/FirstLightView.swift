@@ -21,6 +21,9 @@ struct FirstLightView: View {
     @State private var done=false
     /// Seconds for the stars to arrive; the name follows as the last of them do.
     private let reveal=7.0
+    /// The blooms' shared blur: the middle of the bright stars' diameters (2.6 to 4.7 pt), which
+    /// each bloom's own blur once matched.
+    private static let bloomBlur=3.6
     /// The words' viewport: they sit low on the screen and scroll when they do not fit it (an
     /// iPhone in landscape at accessibility sizes), so Continue is always reachable.
     @State private var viewport: CGFloat=0
@@ -89,27 +92,36 @@ struct FirstLightView: View {
             let t=min(1,max(0,(progress-start)/0.2))
             return t*t*(3-2*t)
         }
+        // Only what can reach the canvas is drawn, as the sky behind every screen does (`RealSky`).
+        func shows(_ p:CGPoint,_ margin:Double)->Bool { p.x > -margin && p.x<size.width+margin && p.y > -margin && p.y<size.height+margin }
         if sky.dark {
             let glow=min(1,max(0,(progress-0.7)/0.3))
             if glow>0 { context.drawLayer { layer in
                 layer.addFilter(.blur(radius:26))
                 for segment in sky.galaxy { for point in segment {
                     let p=SkyProjection.screen(point.position,size:size)
+                    guard shows(p,22+52) else { continue }
                     layer.fill(Path(ellipseIn:CGRect(x:p.x-22,y:p.y-22,width:44,height:44)),with:.color(palette.ink.opacity(0.05*point.brightness*glow)))
                 } }
             } }
         }
-        for star in sky.faint+sky.middle+sky.bright {
-            let a=arrival(star.brightness,star.seed)
-            guard a>0 else { continue }
-            let p=SkyProjection.screen(star.position,size:size), d=star.diameter
-            if star.diameter>2.6 {
-                // A soft bloom, not a disc: bright stars swell slightly as the eye finds them.
-                context.drawLayer { bloom in
-                    bloom.addFilter(.blur(radius:d))
-                    bloom.fill(Path(ellipseIn:CGRect(x:p.x-d*1.6,y:p.y-d*1.6,width:d*3.2,height:d*3.2)),with:.color(star.tint(palette.ink).opacity(0.3*a)))
-                }
+        // Each star that has begun to arrive, with where it lands.
+        let arrived=(sky.faint+sky.middle+sky.bright).compactMap { star -> (star:SkyProjection.Star,p:CGPoint,a:Double)? in
+            let a=arrival(star.brightness,star.seed), p=SkyProjection.screen(star.position,size:size)
+            return a>0 && shows(p,star.diameter*1.6+2*Self.bloomBlur) ? (star,p,a) : nil
+        }
+        // A soft bloom, not a disc: bright stars swell slightly as the eye finds them. Every bloom
+        // shares one blurred layer, one offscreen pass a frame rather than one a star.
+        let blooms=arrived.filter { $0.star.diameter>2.6 }
+        if !blooms.isEmpty { context.drawLayer { bloom in
+            bloom.addFilter(.blur(radius:Self.bloomBlur))
+            for (star,p,a) in blooms {
+                let d=star.diameter
+                bloom.fill(Path(ellipseIn:CGRect(x:p.x-d*1.6,y:p.y-d*1.6,width:d*3.2,height:d*3.2)),with:.color(star.tint(palette.ink).opacity(0.3*a)))
             }
+        } }
+        for (star,p,a) in arrived where shows(p,star.diameter) {
+            let d=star.diameter
             context.fill(Path(ellipseIn:CGRect(x:p.x-d/2,y:p.y-d/2,width:d,height:d)),with:.color(star.tint(palette.ink).opacity(star.brightness*a)))
         }
         for planet in sky.planets {
