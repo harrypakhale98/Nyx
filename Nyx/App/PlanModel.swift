@@ -167,7 +167,14 @@ import CoreLocation
     var npsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(npsEnabled,forKey:"npsEnabled") } } }
     /// Saved spots' cloud forecasts (`SpotForecast`): a request with each spot's coordinates rounded
     /// to 0.1°, only while Cloud forecasts is on too. Off, spots keep what is cached, then their usual clouds.
-    var spotForecastsEnabled: Bool { didSet { if DebugScenario.screen == nil { defaults.set(spotForecastsEnabled,forKey:SpotForecast.key) } } }
+    /// Apple Watch says why a spot's clouds stopped (`CloudSource.spotsOff`), so it hears the switch at once.
+    var spotForecastsEnabled: Bool {
+        didSet {
+            guard DebugScenario.screen == nil else { return }
+            defaults.set(spotForecastsEnabled,forKey:SpotForecast.key)
+            if spotForecastsEnabled != oldValue { savedSync.pushWatch(self) }
+        }
+    }
     /// NOAA's aurora forecast (services.swpc.noaa.gov): one global file, nothing about the person.
     /// Off, the copy here is dropped and nothing is asked.
     var auroraEnabled: Bool {
@@ -271,8 +278,8 @@ import CoreLocation
         auroraEnabled=defaults.object(forKey:AuroraService.key) as? Bool ?? true
         // What a request keeps after the screen that asked has moved on (it went back, or a background
         // refresh ran out of time) still reaches the screens, as it lands.
-        weather.observe { [weak self] fresh in await self?.takeForecasts(fresh) }
-        detail.observe { [weak self] fresh in await self?.takeDetails(fresh) }
+        weather.observe { [weak self] fresh in await self?.receiveForecasts(fresh) }
+        detail.observe { [weak self] fresh in await self?.receiveDetails(fresh) }
         parkStore.observePrograms { [weak self] update in await self?.takePrograms(update.0,update.1) }
         // The world catalogue is read in the background from the first moment; nothing waits for it.
         prepareCatalog()
@@ -730,6 +737,32 @@ import CoreLocation
             if updated[id] != merged { updated[id]=merged; changed=true }
         }
         if changed { details=updated }
+    }
+    /// What the services hand on as it lands (`StoreObserver`), gathered for a moment and taken
+    /// together: a refresh's requests land one after another, and each assignment lets go of every
+    /// night worked out, so a burst of them is one change, not one per request.
+    @ObservationIgnored private var landedForecasts:[String:Forecast]=[:]
+    @ObservationIgnored private var landedDetails:[String:ForecastDetail]=[:]
+    @ObservationIgnored private var landing:Task<Void,Never>?
+    static let landingWindow:Duration = .milliseconds(300)
+    func receiveForecasts(_ fresh:[String:Forecast]) {
+        for (id,forecast) in fresh where Forecast.replaces(forecast,landedForecasts[id]) { landedForecasts[id]=forecast }
+        scheduleLanding()
+    }
+    func receiveDetails(_ fresh:[String:ForecastDetail]) {
+        for (id,detail) in fresh { landedDetails[id]=landedDetails[id].map { $0.newer(detail) } ?? detail }
+        scheduleLanding()
+    }
+    private func scheduleLanding() {
+        guard landing == nil else { return }
+        landing=Task { [weak self] in
+            try? await Task.sleep(for:Self.landingWindow)
+            guard let self else { return }
+            let forecasts=landedForecasts, details=landedDetails
+            landedForecasts=[:]; landedDetails=[:]; landing=nil
+            if !forecasts.isEmpty { takeForecasts(forecasts) }
+            if !details.isEmpty { takeDetails(details) }
+        }
     }
     /// A park's programs as fetched, when newer than those here.
     func takePrograms(_ id:String,_ fresh:ProgramsCache) {

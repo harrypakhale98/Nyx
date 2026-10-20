@@ -212,6 +212,11 @@ nonisolated struct HTTPStatusError: Error, Sendable {
     /// The short reason in an error body (`{"error":true,"reason":"…"}`): Open-Meteo says there
     /// which of its limits was reached (`Backoff.Window`). Matched, never shown.
     var reason: String?=nil
+    /// The service refused this request itself (a 4xx other than 429: a refused key, a request it
+    /// cannot serve), so asking again at once would be refused the same way. A 429 or 5xx is about the
+    /// service's load (`HostBackoff` waits it out) and a 3xx about the network (a Wi-Fi sign-in page):
+    /// neither says anything lasting about the request.
+    var refusesRequest: Bool { (400..<500).contains(status) && status != 429 }
     /// `Retry-After` as seconds or as an HTTP date; nil when absent or unreadable.
     static func retryAfter(_ value: String?, now: Date) -> TimeInterval? {
         guard let value=value?.trimmingCharacters(in: .whitespaces), !value.isEmpty else { return nil }
@@ -493,8 +498,8 @@ nonisolated enum ForecastReuse {
         let age=now.timeIntervalSince(updated)
         return age>=normal || (force && age>=forced)
     }
-    /// After a request the service answered with nothing usable for a place (a refusal, or an answer
-    /// Nyx cannot read, such as a renamed field), that place is asked again an hour later, or ten
+    /// After a request the service answered with nothing usable for a place (a refusal of the request
+    /// itself, `HTTPStatusError.refusesRequest`, or an answer Nyx cannot read, such as a renamed field), that place is asked again an hour later, or ten
     /// minutes later when pulled to refresh: never on every refresh, however often the screens ask.
     static let retry: TimeInterval=3600
     static let retryForced: TimeInterval=600
