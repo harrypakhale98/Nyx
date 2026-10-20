@@ -2,6 +2,23 @@ import Foundation
 import FoundationModels
 import Synchronization
 
+/// One record: the words the model reads (`text`, in the person's language) and, kept beside them
+/// as data, what Nyx's own row shows of it: the place, the night, the score and its band, a "parks
+/// near" record's distance, and the row's line for a record about something else that night. A
+/// record of another shape (a starting point, no match) is its words alone. The row never reads
+/// these back out of the words, which differ in every language.
+nonisolated struct GuideFact: Sendable, Equatable {
+    var text: String
+    var place: Park?=nil
+    var night: Date?=nil
+    var score: Int?=nil
+    var band: String?=nil
+    /// A "parks near" record's distance ("220 miles straight-line from Denver, CO").
+    var detail: String?=nil
+    /// The row's line where it is not the words themselves (a sky event: "Milky Way core rises at 9:40 PM").
+    var line: String?=nil
+}
+
 /// What Ask Nyx's tools can look up: already-computed nights, sky events and nearby parks, from
 /// the engine and the cached forecasts. The model chooses what to ask for; it never computes a
 /// score, a moonrise or a distance itself, and every answer it gives cites these records' IDs.
@@ -76,6 +93,10 @@ nonisolated struct NightLookup: Sendable {
         let line=String(localized: "\(park.shortName); \(park.dayLabel(night.id)) (\(park.isoDay(night.id))); score \(night.score.value)/100 \(night.score.band.label); \(basis); \(night.sky.moon.name) \(Int((night.sky.moon.illumination*100).rounded()))% lit; \(dark)")+access(park)
         return closed.contains(park.id) ? Phrase.sentences([line, OnDeviceGuide.closureRecord]) : line
     }
+    /// A night's record (`describe`) with its place, night and score kept as data for the row.
+    func fact(_ night: Night) -> GuideFact {
+        GuideFact(text: describe(night), place: night.park, night: night.id, score: night.score.value, band: night.score.band.label)
+    }
     /// What a record's clouds rest on, in the app's words.
     static func basis(_ night: Night) -> String {
         switch night.basis {
@@ -100,20 +121,28 @@ nonisolated struct NightLookup: Sendable {
         park.accessNote.map { "; "+String(localized: "getting there: \($0)") } ?? ""
     }
     func bestNights(park name: String, from first: String, nights: Int, limit: Int = 5) -> [String] {
-        guard let park=park(named: name) else { return [Self.noMatch(name)] }
+        bestNightFacts(park: name, from: first, nights: nights, limit: limit).map(\.text)
+    }
+    func bestNightFacts(park name: String, from first: String, nights: Int, limit: Int = 5) -> [GuideFact] {
+        guard let park=park(named: name) else { return [GuideFact(text: Self.noMatch(name))] }
         // A named day is that day's night (never one already past); anything else is tonight.
         // Tonight named by its date goes the tonight way, so just after sunrise it is still the Tonight tab's night.
         let tonight=TripDay(park.currentNight(at: tonightClock), calendar: park.calendar)
         let ranked=day(first, at: park).flatMap { $0 == tonight ? nil : $0 }.map { planner.bestNights([park], day: DateComponents(year: $0.year, month: $0.month, day: $0.day), count: min(30, max(1, nights)), now: now, limit: limit) }
             ?? planner.bestNights([park], from: tonightClock, count: min(30, max(1, nights)), now: now, limit: limit)
-        return ranked.map(describe)
+        return ranked.map(fact)
     }
     func whatsUp(park name: String, on day: String) -> [String] {
-        guard let park=park(named: name) else { return [Self.noMatch(name)] }
+        whatsUpFacts(park: name, on: day).map(\.text)
+    }
+    func whatsUpFacts(park name: String, on day: String) -> [GuideFact] {
+        guard let park=park(named: name) else { return [GuideFact(text: Self.noMatch(name))] }
         let night=planner.night(park, on: night(day, at: park), now: now)
         let sky=WhatsUp(park: park, sky: night.sky, isTonight: night.id==park.currentNight(at: tonightClock), table: table,
                         aurora: AuroraForecast.item(aurora, park: park, sky: night.sky, now: now))
-        return [describe(night)]+sky.items.prefix(4).map { String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \($0.spoken)") }
+        return [fact(night)]+sky.items.prefix(4).map { item in
+            GuideFact(text: String(localized: "\(park.shortName); \(park.dayLabel(night.id)); \(item.spoken)"), place: park, night: night.id, line: item.spoken)
+        }
     }
     /// Where "near" is measured from: a park by its exact name, then a city or town from the
     /// bundled list ("Denver", "Denver, CO"), then any park the app's search finds.
@@ -126,7 +155,10 @@ nonisolated struct NightLookup: Sendable {
     /// Parks and places within a straight-line radius of a starting park or town, darkest tonight first,
     /// as on Tonight: a closure never moves a place down the list, its line says so. Never a drive time. The radius and distances are in `system`'s unit: miles, or kilometres.
     func parksNear(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [String] {
-        guard let origin=origin(named: name) else { return [String(localized: "No park, dark-sky place or town matched \"\(name.prefix(60))\".")] }
+        parksNearFacts(park: name, radius: asked, system: system, limit: limit).map(\.text)
+    }
+    func parksNearFacts(park name: String, radius asked: Int, system: SearchRadius.System = .init(), limit: Int = 6) -> [GuideFact] {
+        guard let origin=origin(named: name) else { return [GuideFact(text: String(localized: "No park, dark-sky place or town matched \"\(name.prefix(60))\"."))] }
         let radius=Self.toolRadius(asked, system)
         func inReach(_ places: [Park]) -> [(Park, Double)] {
             places.compactMap { park -> (Park, Double)? in
@@ -155,18 +187,21 @@ nonisolated struct NightLookup: Sendable {
         // Tonight's rule and words), as one more record: no name, no score, said as an estimate.
         let darker=DarkerSky.offer(from: (origin.latitude, origin.longitude), radiusMeters: radius*system.meters,
                                    darkestInReach: near.map(\.0.bortleEstimate).min(), system: system, grid: grid, onLand: onLand).map { DarkerSky.record($0, from: origin.label, system: system) }
+        let farther=[darker].compactMap { $0 }.map { GuideFact(text: $0) }
         guard !ranked.isEmpty else {
-            return [system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
-                                     : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line.")]+[darker].compactMap { $0 }
+            return [GuideFact(text: system == .miles ? String(localized: "No parks or dark-sky places within \(Int(radius)) miles of \(origin.label), straight-line.")
+                                                     : String(localized: "No parks or dark-sky places within \(Int(radius)) km of \(origin.label), straight-line."))]+farther
         }
         return ranked.map { park, distance in
             let night=tonight[park.id], basis=night.map(Self.basis) ?? "", whole=Int(distance.rounded()), score=night?.score.value ?? 0, band=night?.score.band.label ?? ""
             let region=Self.locality(park)
             let line=system == .miles ? String(localized: "\(park.shortName), \(region); \(whole) miles straight-line from \(origin.label); tonight \(score)/100 \(band)")
                                       : String(localized: "\(park.shortName), \(region); \(whole) km straight-line from \(origin.label); tonight \(score)/100 \(band)")
+            let detail=system == .miles ? String(localized: "\(whole) miles straight-line from \(origin.label)") : String(localized: "\(whole) km straight-line from \(origin.label)")
             let record=line+(basis.isEmpty ? "" : "; "+basis)+access(park)
-            return closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record
-        }+[darker].compactMap { $0 }
+            return GuideFact(text: closed.contains(park.id) ? Phrase.sentences([record, OnDeviceGuide.closureRecord]) : record,
+                             place: park, night: night?.id, score: night?.score.value, band: night?.score.band.label, detail: detail)
+        }+farther
     }
     /// The radius a tool may ask for, kept to 10–1,500 miles or 10–2,500 km.
     static func toolRadius(_ asked: Int, _ system: SearchRadius.System) -> Double { Double(min(system == .miles ? 1500 : 2500, max(10, asked))) }
@@ -181,7 +216,7 @@ nonisolated struct NightLookup: Sendable {
 nonisolated final class GuideLedger: Sendable {
     private struct State {
         var firstID: Int
-        var records: [String]=[]
+        var records: [GuideFact]=[]
         var lookups: [String]=[]
         var lookup: NightLookup?
         var onAdd: (@Sendable ([String]) -> Void)?
@@ -199,15 +234,21 @@ nonisolated final class GuideLedger: Sendable {
     /// Adds records and returns them as "ID n: …" lines for the model. `lookup` is what was looked
     /// up, in plain words ("Best nights · Arches · 30 nights from Oct 9"), for the person.
     func add(_ lines: [String], lookup: String?=nil) -> String {
+        add(lines.map { GuideFact(text: $0) }, lookup: lookup)
+    }
+    /// The same, keeping each record's place, night and score for its row (`facts`).
+    func add(_ facts: [GuideFact], lookup: String?=nil) -> String {
         let (numbered, lookups, onAdd)=state.withLock { state -> (String, [String], (@Sendable ([String]) -> Void)?) in
-            let numbered=lines.map { line in state.records.append(line); return "ID \(state.firstID+state.records.count-1): \(line)" }.joined(separator: "\n")
+            let numbered=facts.map { fact in state.records.append(fact); return "ID \(state.firstID+state.records.count-1): \(fact.text)" }.joined(separator: "\n")
             if let lookup { state.lookups.append(lookup) }
             return (numbered, state.lookups, lookup == nil ? nil : state.onAdd)
         }
         onAdd?(lookups)
         return numbered
     }
-    var all: [String] { state.withLock { $0.records } }
+    /// The records' words, as the model read them.
+    var all: [String] { state.withLock { $0.records.map(\.text) } }
+    var facts: [GuideFact] { state.withLock { $0.records } }
     var lookups: [String] { state.withLock { $0.lookups } }
     var ids: Set<Int> { state.withLock { Set($0.firstID..<($0.firstID+$0.records.count)) } }
 }
@@ -262,7 +303,7 @@ nonisolated struct BestNightsTool: Tool {
     let ledger: GuideLedger
     @concurrent func call(arguments: Arguments) async throws -> String {
         guard let lookup=ledger.lookup else { return "" }
-        return ledger.add(lookup.bestNights(park: arguments.park, from: arguments.firstNight, nights: arguments.nights),
+        return ledger.add(lookup.bestNightFacts(park: arguments.park, from: arguments.firstNight, nights: arguments.nights),
                           lookup: lookup.bestNightsLookup(park: arguments.park, from: arguments.firstNight, nights: arguments.nights))
     }
 }
@@ -278,7 +319,7 @@ nonisolated struct WhatsUpTool: Tool {
     let ledger: GuideLedger
     @concurrent func call(arguments: Arguments) async throws -> String {
         guard let lookup=ledger.lookup else { return "" }
-        return ledger.add(lookup.whatsUp(park: arguments.park, on: arguments.night), lookup: lookup.whatsUpLookup(park: arguments.park, on: arguments.night))
+        return ledger.add(lookup.whatsUpFacts(park: arguments.park, on: arguments.night), lookup: lookup.whatsUpLookup(park: arguments.park, on: arguments.night))
     }
 }
 nonisolated struct ParksNearTool: Tool {
@@ -297,7 +338,7 @@ nonisolated struct ParksNearTool: Tool {
     var system=SearchRadius.System()
     @concurrent func call(arguments: Arguments) async throws -> String {
         guard let lookup=ledger.lookup else { return "" }
-        return ledger.add(lookup.parksNear(park: arguments.park, radius: arguments.radius, system: system),
+        return ledger.add(lookup.parksNearFacts(park: arguments.park, radius: arguments.radius, system: system),
                           lookup: lookup.parksNearLookup(park: arguments.park, radius: arguments.radius, system: system))
     }
 }
