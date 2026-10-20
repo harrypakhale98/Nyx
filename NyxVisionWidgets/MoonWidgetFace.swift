@@ -15,9 +15,11 @@ nonisolated struct MoonFacts: Sendable, Equatable {
     let phaseAngle: Double
     let nextNewMoon: Date
 
-    init(at date: Date) {
-        // The phase and its lit fraction as the large face's week computes them (`MoonWeek`).
-        let glance = MoonWeek.Glance(at: date)
+    init(at date: Date, calendar: Calendar = .current) {
+        // Tonight's Moon at 10 PM, as the large face's week and the app draw each night's
+        // (`MoonWeek`): the same figure all evening, whenever the widget refreshes.
+        let tonight = MoonWeek.tonight(at: date, calendar: calendar)
+        let glance = MoonWeek.Glance(at: calendar.date(bySettingHour: MoonWeek.hour, minute: 0, second: 0, of: tonight) ?? date)
         self.date = date
         phaseName = glance.phaseName
         waxing = glance.waxing

@@ -42,7 +42,9 @@ struct SkyLabel: View {
         }
     }
     private func font(_ size: CGFloat, _ style: UIFont.TextStyle, weight: Font.Weight, serif: Bool = true) -> Font {
-        .system(size: size*scale(style), weight: palette.highContrast ? weight.bolder : weight, design: serif ? .serif : .default)
+        // A step heavier for Increase Contrast, and another for Bold Text, which this off-screen render never sees.
+        let contrasted = palette.highContrast ? weight.bolder : weight
+        return .system(size: size*scale(style), weight: palette.boldText ? contrasted.bolder : contrasted, design: serif ? .serif : .default)
     }
     /// How the system would scale a text style at the person's size, against its size at Large.
     private func scale(_ style: UIFont.TextStyle) -> CGFloat {
@@ -54,7 +56,7 @@ struct SkyLabel: View {
 }
 
 private extension Font.Weight {
-    /// One step heavier, for Increase Contrast.
+    /// One step heavier, for Increase Contrast or Bold Text.
     var bolder: Font.Weight { self == .medium ? .semibold : self == .semibold ? .bold : self }
 }
 
@@ -68,6 +70,7 @@ private extension Font.Weight {
         SkyLabel(title: "Milky Way core", detail: nil, style: .whisper, palette: palette)
         SkyLabel(title: "Jupiter", detail: "41° up in the southeast · very bright", style: .card, palette: palette)
         SkyLabel(title: "Moon", detail: "12° up in the west · 23% lit", style: .card, palette: VisionPalette(solid: true))
+        SkyLabel(title: "Saturn", detail: "28° up in the south · bright", style: .card, palette: VisionPalette(boldText: true))
         SkyLabel(title: "Joshua Tree", detail: "Computed for Joshua Tree, Fri, Jul 17. Not a live view; clouds not shown, and the skyline is illustrative. Ahead is south, not your room's real north.", style: .plaque, palette: palette)
     }
     .padding(40).background(.black)

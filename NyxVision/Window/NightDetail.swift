@@ -13,7 +13,9 @@ struct NightDetail: View {
     /// The Moon's named seas and craters over the disc, as on the iPhone (`MoonLabels`).
     @AppStorage("moonNames") private var names = false
     var body: some View {
-        if let plan = model.plan, let moment = model.skyMoment {
+        // Only the plan here: the clock's moment changes every frame of a sweep, and only the
+        // written sky below (`SkyNow`) reads it, so nothing else in the window re-evaluates.
+        if let plan = model.plan {
             ScrollView {
                 VStack(alignment: .leading, spacing: 34) {
                     header(plan)
@@ -21,7 +23,7 @@ struct NightDetail: View {
                     // The darkest nights from tonight on: a tap brings one here.
                     DarkestAhead(park: plan.park)
                     whatsUp(plan)
-                    skyNow(plan, moment)
+                    SkyNow(plan: plan)
                     honesty(plan)
                 }
                 .padding(.horizontal, 48).padding(.top, 8).padding(.bottom, 120)
@@ -101,11 +103,13 @@ struct NightDetail: View {
         return limit.cap < score.partsSum ? limit.sentence(tonight: model.nightOffset == 0) : nil
     }
     private func moon(_ plan: NightPlan) -> some View {
-        // One figure for the eye and VoiceOver: the night's, as the list and the iPhone give it.
+        // One figure for the eye and VoiceOver: the night's, as the list, the Moon volume and the
+        // iPhone give it. The picture is the Moon at its highest that night, and says so.
         let lit = Int((plan.sky.moon.illumination*100).rounded())
         return VStack(spacing: 10) {
             VisionMoon(geometry: plan.moon,
-                       label: Sentences.join([String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit, as seen at \(plan.park.time(plan.moonMoment))"),
+                       label: Sentences.join([Sentences.end(String(localized: "Moon, \(plan.sky.moon.name), \(lit) percent lit")),
+                                              Sentences.end(String(localized: "Drawn as seen at \(plan.park.time(plan.moonMoment))")),
                                               names ? MoonFeatures.shared.spoken(geometry: plan.moon, side: moonSide) ?? "" : ""]))
                 .frame(width: moonSide, height: moonSide)
                 .overlay { if names { MoonLabels(geometry: plan.moon, side: moonSide, ink: palette.ink).transition(.opacity) } }
@@ -193,10 +197,28 @@ struct NightDetail: View {
         }
     }
 
-    /// The sky at the clock's moment, written out.
+    private func honesty(_ plan: NightPlan) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(VisionModel.honesty(plan))
+            Text("Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
+        }
+        .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// The sky at the clock's moment, written out: the one part of the night that reads the clock, so
+/// a sweep re-evaluates this list and nothing else.
+private struct SkyNow: View {
+    @Environment(VisionModel.self) private var model
+    @Environment(\.visionPalette) private var palette
+    let plan: NightPlan
+    var body: some View {
+        if let moment = model.skyMoment { skyNow(plan, moment) }
+    }
     private func skyNow(_ plan: NightPlan, _ moment: SkyMoment) -> some View {
         let park = plan.park
-        let bodies = ([moment.moon] + moment.visiblePlanets + (moment.core.up && moment.sunAltitude < -12 ? [moment.core] : [])).filter(\.up)
+        // The core by the immersive sky's own rule (`SkyDome.coreVisible`), as it labels the core and VoiceOver hears it there.
+        let bodies = ([moment.moon] + moment.visiblePlanets + (moment.coreShown ? [moment.core] : [])).filter(\.up)
         return VStack(alignment: .leading, spacing: 18) {
             VisionEyebrow(text: "The sky at \(park.time(moment.date))")
             Text(moment.twilight).font(.system(.title3, design: .serif))
@@ -232,14 +254,6 @@ struct NightDetail: View {
             Text(value).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
-    }
-
-    private func honesty(_ plan: NightPlan) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(VisionModel.honesty(plan))
-            Text("Times are park-local. Moonrise and moonset are good to within a few minutes, planets to about a degree. In the sky, the Moon is drawn larger than life so its phase reads; its place is true.")
-        }
-        .font(.footnote).foregroundStyle(palette.muted).fixedSize(horizontal: false, vertical: true)
     }
 }
 

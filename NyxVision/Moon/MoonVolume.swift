@@ -16,6 +16,7 @@ struct MoonVolume: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openWindow) private var openWindow
     @State private var globe = MoonGlobe()
     /// Nights after tonight, park-local. The volume keeps its own night, so scrubbing the Moon
     /// does not move the planner.
@@ -63,6 +64,11 @@ struct MoonVolume: View {
             guard scenePhase == .active else { return }
             await model.keepClock()
         }
+        // Siri or Shortcuts asked for a park or its sky, which only a planner window answers: with
+        // none open, the Moon brings one back to take the request (`PlannerWindow.answerIntent`).
+        .onChange(of: model.intentRequest?.id) { _, id in
+            if id != nil, !model.plannerOpen { openWindow(id: PlannerWindow.id) }
+        }
     }
     /// The night on show: tonight at the planner's park, or a later one.
     private var evening: Date? { model.park.map { $0.date($0.currentNight(at: model.now), addingDays: nights) } }
@@ -83,11 +89,17 @@ nonisolated struct MoonView: Sendable, Equatable {
         self.park = park
         self.night = night
         self.isTonight = isTonight
-        moment = engine.moonViewTime(for: engine.conditions(for: park, on: night), park: park)
+        let sky = engine.conditions(for: park, on: night)
+        moment = engine.moonViewTime(for: sky, park: park)
         geometry = engine.moonGeometry(for: park, at: moment)
-        phaseName = engine.moonPhase(at: moment).name
+        // The night's phase and lit fraction, the one figure the planner and the iPhone give; the
+        // globe itself is turned and lit as at `moment`.
+        phaseName = sky.moon.name
+        illumination = sky.moon.illumination
     }
-    var percent: Int { Int((geometry.illumination*100).rounded()) }
+    /// The night's lit fraction (`SkyConditions.moon`).
+    let illumination: Double
+    var percent: Int { Int((illumination*100).rounded()) }
     /// "Moon, waxing crescent, 23 percent lit".
     var spoken: String { String(localized: "Moon, \(phaseName), \(percent) percent lit") }
     static func == (a: MoonView, b: MoonView) -> Bool { a.park.id == b.park.id && a.moment == b.moment }

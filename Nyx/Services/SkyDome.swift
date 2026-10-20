@@ -117,7 +117,10 @@ nonisolated enum SkyDome {
     /// toward the park's usual clouds by the forecast's lead exactly as the score eases a night
     /// (`CloudBasis.forecastWeight`). Nil, and nothing drawn, when the night has no forecast at all
     /// (`.usual`) or the forecast has no value for that hour: a sky never shows invented clouds.
-    static func cloud(at moment: Date, forecast: Forecast?, basis: CloudBasis, usual: Double?) -> Double? {
+    /// `reference` is where the score measures that lead, the middle of the night's cloud window
+    /// (`NightPlanner.night`), so every hour of a night is eased by the night's one weight and the
+    /// clouds drawn near the three- and ten-day edges are the clouds scored; without it, `moment`.
+    static func cloud(at moment: Date, forecast: Forecast?, basis: CloudBasis, usual: Double?, reference: Date? = nil) -> Double? {
         guard basis != .usual, let forecast else { return nil }
         let t = moment.timeIntervalSince1970
         let hour = zip(forecast.times, forecast.clouds)
@@ -127,7 +130,7 @@ nonisolated enum SkyDome {
             }
             .min { $0.gap < $1.gap }
         guard let hour else { return nil }
-        let weight = CloudBasis.forecastWeight(leadDays: moment.timeIntervalSince(forecast.updated)/86400)
+        let weight = CloudBasis.forecastWeight(leadDays: (reference ?? moment).timeIntervalSince(forecast.updated)/86400)
         guard weight > 0 else { return nil }
         let counted = usual.map { weight*hour.cloud + (1-weight)*$0 } ?? hour.cloud
         return min(1, max(0, counted/100))
@@ -152,6 +155,12 @@ nonisolated enum SkyDome {
         case .milkyWay: (-12, -18)
         }
         return smooth((from-sunAltitude)/(from-to))
+    }
+    /// Whether the Milky Way's core is worth pointing to: above the horizon, in a sky dark enough
+    /// that most of the band shows (`visibility(.milkyWay)` above 0.3, the Sun about 14° down). One
+    /// rule for the immersive sky's label on the core, its spoken summary and the window's written sky.
+    static func coreVisible(altitude: Double, sunAltitude: Double) -> Bool {
+        altitude > 0 && visibility(.milkyWay, sunAltitude: sunAltitude) > 0.3
     }
     /// The sky's colour away from the Sun (linear RGB, 0…1): deep blue at sunset, indigo through
     /// nautical twilight, black once the Sun is 18° down.
