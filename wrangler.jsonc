@@ -2,10 +2,14 @@
 // Workers Builds deploys it on every push to main with
 //   npx wrangler deploy --assets=./docs --name=nyx --compatibility-date=2026-10-01
 // The --assets flag replaces only the directory; the handling below still applies.
-// Custom domains (get-nyx.com, www) are attached in the Cloudflare dashboard, not here.
+// Custom domains (get-nyx.com, www) are attached in the Cloudflare dashboard, not here. The site is
+// served only there: no workers.dev address and no preview URLs, here as in the dashboard, so a deploy
+// does not turn them back on.
 {
   "name": "nyx",
   "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": "./docs",
     "not_found_handling": "404-page",
