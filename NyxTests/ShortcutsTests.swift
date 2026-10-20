@@ -141,6 +141,27 @@ import Testing
         #expect(FollowNightWords.unfollowed(nil, park: acad) == "You are not following a night at \(acad.shortName).")
         #expect(FollowNightWords.unfollowed(nil, park: nil) == "You are not following any nights.")
     }
+    /// Stop following finds a saved spot's night as it finds a park's: through every place a night
+    /// can be followed at, not the 63 parks alone. A night whose dawn has passed is left out unless named.
+    @Test func unfollowFindsASavedSpotsNight() throws {
+        let spot=Place(spotID: "pin:00000000-0000-4000-8000-0000000000aa", name: "Pullout off Pinto Basin Road", latitude: 33.92, longitude: -115.93,
+                       timeZoneID: "America/Los_Angeles", countryCode: "US", region: "California")
+        let jotr=try park("jotr")
+        let spotNight=FieldActivityAttributes(night: FieldNight(park: spot, sky: try sky(spot, "2026-10-16")), score: 90, band: "Pristine", closure: nil)
+        let parkNight=FieldActivityAttributes(night: FieldNight(park: jotr, sky: try sky(jotr, "2026-10-17")), score: 80, band: "Excellent", closure: nil)
+        let places=[spot, jotr]
+        let find: (String) -> Park? = { id in places.first { $0.id == id } }
+        let before=spotNight.dusk.addingTimeInterval(-3600)
+        let followed=FollowNightWords.followed([spotNight, parkNight], named: nil, now: before, find: find)
+        #expect(followed.map(\.park.id) == [spot.id, "jotr"])
+        #expect(FollowNightWords.target(followed, park: spot, night: nil)?.night == spotNight.nightID)
+        // The spot's dawn has passed: the soonest night still ahead is the park's, unless the spot's night is named.
+        let after=spotNight.dawn.addingTimeInterval(60)
+        #expect(FollowNightWords.followed([spotNight, parkNight], named: nil, now: after, find: find).map(\.park.id) == ["jotr"])
+        #expect(FollowNightWords.followed([spotNight, parkNight], named: before, now: after, find: find).count == 2)
+        // A place that can no longer be found is left out, never matched to another.
+        #expect(FollowNightWords.followed([spotNight], named: nil, now: before, find: { _ in nil }).isEmpty)
+    }
     @Test func aNightsOwnEveningIsKeptAndAPickedDayIsThePersonsDay() throws {
         let jotr=try park("jotr")
         let evening=jotr.evening(try #require(try? Date("2026-10-16T20:00:00Z", strategy: .iso8601)))

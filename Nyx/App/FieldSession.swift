@@ -77,7 +77,8 @@ import WidgetKit
     func begin() {
         guard changesPhone, prior == nil, !ended else { return }
         let defaults=SharedSettings.defaults
-        prior=(defaults.bool(forKey: "nightVision"), screen?.brightness, UIApplication.shared.isIdleTimerDisabled)
+        // Opened from an alarm's "Open sky", which turned night vision on first: what it was before that.
+        prior=(OpenSkyPrior.take() ?? defaults.bool(forKey: "nightVision"), screen?.brightness, UIApplication.shared.isIdleTimerDisabled)
         setNightVision(true)
         dim()
         UIApplication.shared.isIdleTimerDisabled=true
