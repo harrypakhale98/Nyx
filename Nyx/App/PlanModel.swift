@@ -118,7 +118,8 @@ import CoreLocation
     @ObservationIgnored private var alertsCache: ParkAlertsCache?
     /// When the park alerts every closure here comes from were fetched; nil before any.
     var alertsUpdated: Date? { alertsCache?.updated }
-    @ObservationIgnored private var programs: [String:ProgramsCache] = [:]
+    /// Each park's ranger programs as last fetched, alerts or no alerts (`rangerPrograms`).
+    private var programs: [String:ProgramsCache] = [:]
     /// The cached forecasts and alerts, read off the main actor once at launch.
     @ObservationIgnored private var hydration: Task<Void,Never>?
     /// Keeps the widget, the watch, Siri and reminders in step with the saved parks, once per process.
@@ -268,6 +269,11 @@ import CoreLocation
         spotForecastsEnabled=SpotForecast.isOn(defaults)
         smokeEnabled=defaults.object(forKey:"smokeEnabled") as? Bool ?? true
         auroraEnabled=defaults.object(forKey:AuroraService.key) as? Bool ?? true
+        // What a request keeps after the screen that asked has moved on (it went back, or a background
+        // refresh ran out of time) still reaches the screens, as it lands.
+        weather.observe { [weak self] fresh in await self?.takeForecasts(fresh) }
+        detail.observe { [weak self] fresh in await self?.takeDetails(fresh) }
+        parkStore.observePrograms { [weak self] update in await self?.takePrograms(update.0,update.1) }
         // The world catalogue is read in the background from the first moment; nothing waits for it.
         prepareCatalog()
         // The last forecasts and park updates are read by the services, off the main actor, while
@@ -332,10 +338,7 @@ import CoreLocation
     private func take(_ cached:CachePreload.Contents,replacing:Bool) {
         let details=smokeEnabled ? cached.details : Self.withoutAir(cached.details)
         if replacing { forecasts=cached.forecasts; self.details=details }
-        else {
-            for (id,forecast) in cached.forecasts where forecasts[id] == nil { forecasts[id]=forecast }
-            for (id,detail) in details where self.details[id] == nil { self.details[id]=detail }
-        }
+        else { fillIn(forecasts:cached.forecasts,details:details) }
         seed(cached.conditions)
         keep(cached.skies)
         if replacing || alertsCache == nil { apply(AlertsUpdate(cache:cached.alerts,busy:false)) }
@@ -695,12 +698,44 @@ import CoreLocation
         async let cachedAlerts=parkStore.hydrate(parks)
         async let cachedAurora=auroraService.cached()
         let (f,d,a,k)=await (cachedForecasts,cachedDetails,cachedAlerts,cachedAurora)
-        for (id,forecast) in f where forecasts[id] == nil { forecasts[id]=forecast }
-        for (id,detail) in d where details[id] == nil { details[id]=detail }
+        fillIn(forecasts:f,details:d)
         if alertsCache == nil { apply(a) }
         if auroraEnabled, aurora == nil { aurora=k }
         LaunchSignposts.end(interval)
         LaunchSignposts.note("Caches ready")
+    }
+    /// Cached forecasts and detail where nothing newer is here yet, each in one assignment.
+    private func fillIn(forecasts cachedForecasts:[String:Forecast],details cachedDetails:[String:ForecastDetail]) {
+        let newForecasts=cachedForecasts.filter { forecasts[$0.key] == nil }
+        if !newForecasts.isEmpty { forecasts.merge(newForecasts) { kept,_ in kept } }
+        let newDetails=cachedDetails.filter { details[$0.key] == nil }
+        if !newDetails.isEmpty { details.merge(newDetails) { kept,_ in kept } }
+    }
+    /// Forecasts a service has kept, wherever they came from (a refresh, or a request that outlived
+    /// it): only those newer than what is here (`Forecast.replaces`), never a deleted spot's, in one
+    /// assignment, so the kept nights are let go once.
+    func takeForecasts(_ fresh:[String:Forecast]) {
+        var updated=forecasts, changed=false
+        for (id,forecast) in fresh where (!id.hasPrefix(SavedSpots.prefix) || spotIndex[id] != nil) && Forecast.replaces(forecast,updated[id]) {
+            updated[id]=forecast; changed=true
+        }
+        if changed { forecasts=updated }
+    }
+    /// Forecast detail the service holds, part by part the newer (`ForecastDetail.newer`), so a late
+    /// delivery never puts an older part back; in one assignment.
+    func takeDetails(_ fresh:[String:ForecastDetail]) {
+        var updated=details, changed=false
+        for (id,detail) in fresh {
+            let merged=updated[id].map { $0.newer(detail) } ?? detail
+            if updated[id] != merged { updated[id]=merged; changed=true }
+        }
+        if changed { details=updated }
+    }
+    /// A park's programs as fetched, when newer than those here.
+    func takePrograms(_ id:String,_ fresh:ProgramsCache) {
+        guard programs[id].map({ $0.updated<fresh.updated }) ?? true, let park=park(id) else { return }
+        programs[id]=fresh
+        rebuild(park)
     }
     /// Forecasts for every park arrive together (one or two requests); park updates (alerts, and
     /// ranger programs where they are shown) follow park by park, and only when asked for.
@@ -733,7 +768,7 @@ import CoreLocation
         await hydration?.value
         let network=weatherEnabled && live
         var fresh=await weather.forecasts(for:self.parks,network:network,force:force)
-        for park in self.parks where Forecast.replaces(fresh[park.id],forecasts[park.id]) { forecasts[park.id]=fresh[park.id] }
+        takeForecasts(fresh)
         // Cancelled while asking: what arrived is kept, and nothing is called stale for a request cut short.
         guard !Task.isCancelled else { return }
         // Saved spots in a request of their own, rounded to 0.1°, never mixed into the parks' (`SpotForecast`).
@@ -741,7 +776,7 @@ import CoreLocation
         if !spots.isEmpty {
             let spotNetwork=network && spotForecastsEnabled
             let ofSpots=await weather.spotForecasts(for:spots,network:spotNetwork,force:force)
-            for spot in spots where spotIndex[spot.id] != nil && Forecast.replaces(ofSpots[spot.id],forecasts[spot.id]) { forecasts[spot.id]=ofSpots[spot.id] }
+            takeForecasts(ofSpots)
             if spotNetwork { fresh.merge(ofSpots) { park,_ in park } }
         }
         // World catalogue places by whole tiles (`CatalogForecast.Regions`), the same switch and host
@@ -754,10 +789,7 @@ import CoreLocation
             catalogRequests=requests
             askedCatalog=Set(requests.joined().map(\.id))
             let ofCatalog=await weather.catalogForecasts(requests,network:network,force:force)
-            // One assignment for the whole tile, so the kept nights are let go once, not once a place.
-            var updated=forecasts, changed=false
-            for (id,forecast) in ofCatalog where Forecast.replaces(forecast,updated[id]) { updated[id]=forecast; changed=true }
-            if changed { forecasts=updated }
+            takeForecasts(ofCatalog)
             if network { fresh.merge(ofCatalog) { park,_ in park } }
         }
         // Switched off, the air-quality host's cached data is dropped rather than merely not refreshed.
@@ -769,15 +801,11 @@ import CoreLocation
         // park whatever its whereabouts; once a page is open, the summit rides with every park.
         let summits=self.parks.filter { $0.aboveInversion == true }
         if network, !detailWanted, !summits.isEmpty { _=await detailService.details(for:summits,weather:true,smoke:false,force:force) }
-        let detail=await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force)
-        for park in self.parks where details[park.id] != detail[park.id] { details[park.id]=detail[park.id] }
+        takeDetails(await detailService.details(for:self.parks,weather:network && detailWanted,smoke:smokeEnabled && live && detailWanted,force:force))
         // Smoke at catalogue places: the same whole tiles as their clouds, on the parks' terms (the
         // switch, and asked for only once a page has been opened); what is kept counts offline too.
         if smokeEnabled, !catalogRequests.isEmpty {
-            let air=await detailService.catalogAir(catalogRequests,network:live && (detailWanted || catalogSmokeWanted),force:force)
-            var updated=details, changed=false
-            for (id,value) in air where updated[id] != value { updated[id]=value; changed=true }
-            if changed { details=updated }
+            takeDetails(await detailService.catalogAir(catalogRequests,network:live && (detailWanted || catalogSmokeWanted),force:force))
         }
         let paused=await detailService.pausedForLowData()
         if paused != detailPausedForLowData { detailPausedForLowData=paused }
@@ -827,7 +855,7 @@ import CoreLocation
         guard programs else { return }
         for park in parks {
             if Task.isCancelled { return }
-            if let fresh=await parkStore.programs(for:park,key:key,network:network,force:force) { self.programs[park.id]=fresh; rebuild(park) }
+            if let fresh=await parkStore.programs(for:park,key:key,network:network,force:force), fresh != self.programs[park.id] { takePrograms(park.id,fresh) }
         }
     }
     private func apply(_ update:AlertsUpdate) {
@@ -842,11 +870,21 @@ import CoreLocation
         savedSync.noteChange(self)
     }
     /// One park's update as the screens read it: its alerts from the shared request, ranked, and
-    /// its programs if its page has asked for them.
+    /// its programs if its page has asked for them. Without alerts for the park, no update is made
+    /// up (its page says access is not checked), and its programs still show (`rangerPrograms`).
     private func rebuild(_ park:Park) {
         guard let cache=alertsCache, let code=park.nps, let alerts=cache.alerts[code] else { return }
         let today=park.isoDay(Date.now), shown=programs[park.id]
         enrichments[park.id]=ParkEnrichment(updated:cache.updated,alerts:AlertRanking.ranked(alerts),programs:(shown?.programs ?? []).filter { $0.date>=today },description:nil,programsUpdated:shown?.updated)
+    }
+    /// A park's upcoming ranger programs as its page shows them, with when they were last checked (nil:
+    /// they could not be): from its park update, or on their own when the alerts could not be fetched
+    /// (the Park Service refusing them, say). Nil while neither has arrived.
+    func rangerPrograms(_ park:Park)->(programs:[RangerProgram],updated:Date?)? {
+        if let data=enrichments[park.id] { return (data.programs,data.programsUpdated) }
+        guard let shown=programs[park.id] else { return nil }
+        let today=park.isoDay(Date.now)
+        return (shown.programs.filter { $0.date>=today },shown.updated)
     }
     /// A closure from the last park update, if any: a road, trail, campground, area or the park
     /// itself, never an amenity notice. Shown beside every score for that park.
