@@ -107,17 +107,15 @@ struct UnfollowNightIntent: LiveActivityIntent {
     init(park: ParkEntity, night: Date) { self.park=park; self.night=night }
     // Live Activity intents run outside the main actor; following reads and changes the app's night list there.
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
-        let library=try ParkData.load()
+        // Every place a night can be followed at, as Follow a night finds them: the parks, saved
+        // spots and places abroad followed, then any catalogue place by id.
+        let shared=await SharedSettings.load()
+        let library=try ParkLibrary.places(snapshot:shared)
+        let find:(String)->Park?={ id in library.first(where:{ $0.id==id }) ?? ParkLibrary.place(id,snapshot:shared) }
         var named: Park?
-        if let park { guard let found=library.first(where:{ $0.id==park.id }) else { throw NyxIntentError.parkNotFound }; named=found }
+        if let park { guard let found=find(park.id) else { throw NyxIntentError.parkNotFound }; named=found }
         NightFollowing.shared.reload()
-        // Without a named night, one whose dawn has passed (a stale activity iOS has not ended yet) is
-        // not "the soonest": the night still ahead is the one to stop.
-        let now=Date.now
-        let followed=NightFollowing.shared.nights.filter { night != nil || $0.attributes.dawn>now }.compactMap { item -> (park: Park, night: Date)? in
-            guard let park=library.first(where:{ $0.id==item.attributes.parkID }) else { return nil }
-            return (park,item.attributes.nightID ?? park.evening(item.attributes.dusk))
-        }
+        let followed=FollowNightWords.followed(NightFollowing.shared.nights.map(\.attributes),named:night,now:.now,find:find)
         let target=FollowNightWords.target(followed,park:named,night:night)
         if let target { await FieldActivities.unfollow(park:target.park,night:target.night) }
         BestNightSnippetIntent.reload()
@@ -151,6 +149,15 @@ enum FollowNightWords {
             return String(localized:"The night of \(day) at \(name) is over, so there is nothing to follow.")
         case .unavailable:
             return String(localized:"Nyx could not put this night on your Lock Screen. Live Activities may be off for Nyx in Settings.")
+        }
+    }
+    /// The followed nights with their places, soonest first. Without a named night, one whose dawn
+    /// has passed (a stale activity iOS has not ended yet) is left out: the night still ahead is the
+    /// one to stop. A night whose place cannot be found any more is left out too.
+    static func followed(_ nights: [FieldActivityAttributes], named night: Date?, now: Date, find: (String) -> Park?) -> [(park: Park, night: Date)] {
+        nights.filter { night != nil || $0.dawn>now }.compactMap { item in
+            guard let park=find(item.parkID) else { return nil }
+            return (park,item.nightID ?? park.evening(item.dusk))
         }
     }
     /// The followed night to stop: the one named, else the park's soonest, else the soonest of all.

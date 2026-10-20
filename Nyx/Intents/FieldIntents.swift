@@ -30,9 +30,30 @@ struct OpenSkyIntent: LiveActivityIntent {
     init() {}
     init(parkID: String) { self.parkID=parkID }
     func perform() async throws -> some IntentResult {
+        // What night vision was before this tap, so leaving field mode puts it back (`FieldSession`).
+        OpenSkyPrior.store()
         SharedSettings.defaults.set(true,forKey:"nightVision")
         FieldModeRequest.post(parkID:parkID)
         return .result()
+    }
+}
+/// Night vision as it was before "Open sky" turned it on, kept for the field mode that tap opens:
+/// field mode records what it changed on entry, and by then night vision is already on. Held for
+/// five minutes (a cold launch from the alarm takes a moment), and a second tap within that time
+/// keeps the first one's value, which is the person's own.
+nonisolated enum OpenSkyPrior {
+    static let key="openSkyPriorNightVision"
+    static let lifetime: TimeInterval=300
+    static func store(now: Date = .now, defaults: UserDefaults = SharedSettings.defaults) {
+        if let kept=defaults.dictionary(forKey:key), let at=kept["at"] as? Double, abs(now.timeIntervalSince1970-at)<lifetime { return }
+        defaults.set(["on":defaults.bool(forKey:"nightVision"),"at":now.timeIntervalSince1970],forKey:key)
+    }
+    /// The value kept, once, if it is recent; nil otherwise.
+    static func take(now: Date = .now, defaults: UserDefaults = SharedSettings.defaults) -> Bool? {
+        guard let kept=defaults.dictionary(forKey:key) else { return nil }
+        defaults.removeObject(forKey:key)
+        guard let at=kept["at"] as? Double, abs(now.timeIntervalSince1970-at)<lifetime else { return nil }
+        return kept["on"] as? Bool
     }
 }
 

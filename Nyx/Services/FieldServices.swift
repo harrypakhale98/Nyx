@@ -250,6 +250,8 @@ extension FieldActivityAttributes {
     }
     private(set) var nights: [Followed]=[]
     @ObservationIgnored private var watching=false
+    /// The activities whose own state is watched (`observe`), by id.
+    @ObservationIgnored private var observed=Set<String>()
     func reload() {
         #if DEBUG
         if let fixture=DebugFollowing.fixture { nights=[fixture]; return }
@@ -265,12 +267,21 @@ extension FieldActivityAttributes {
     nonisolated static func inProgress(_ nights: [Followed], at now: Date) -> Followed? {
         nights.first { now<$0.attributes.dawn && ($0.started || now>=$0.attributes.dusk.addingTimeInterval(-3*3600)) }
     }
-    /// A scheduled activity starting, or one ending, refreshes the list while Nyx is open.
+    /// A scheduled activity starting, or one ending, refreshes the list while Nyx is open. iOS reports
+    /// only new activities in `activityUpdates`, so each one's own state is watched as well: a night
+    /// ended from the Lock Screen, or by iOS at its time limit, leaves the list at once.
     private func watch() {
+        for activity in FieldActivities.Item.activities { observe(activity) }
         guard !watching else { return }
         watching=true
         Task { [weak self] in
-            for await _ in FieldActivities.Item.activityUpdates { self?.reload() }
+            for await activity in FieldActivities.Item.activityUpdates { self?.observe(activity); self?.reload() }
+        }
+    }
+    private func observe(_ activity: FieldActivities.Item) {
+        guard observed.insert(activity.id).inserted else { return }
+        Task { [weak self] in
+            for await _ in activity.activityStateUpdates { self?.reload() }
         }
     }
 }

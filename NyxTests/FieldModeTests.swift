@@ -279,6 +279,27 @@ import simd
         #expect(FieldModeRequest.take(now: now, defaults: defaults) == FieldModeRequest.Pending(parkID: nil))
         defaults.removePersistentDomain(forName: "nyx-tests-field-request")
     }
+    /// "Open sky" turns night vision on before field mode opens; field mode restores what it was before the tap.
+    @Test func openSkyKeepsNightVisionFromBeforeTheTap() throws {
+        let suite = "nyx-tests-open-sky"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        defaults.set(false, forKey: "nightVision")
+        OpenSkyPrior.store(now: now, defaults: defaults)
+        defaults.set(true, forKey: "nightVision")
+        // A second tap while night vision is already on keeps the first tap's value.
+        OpenSkyPrior.store(now: now.addingTimeInterval(20), defaults: defaults)
+        #expect(OpenSkyPrior.take(now: now.addingTimeInterval(30), defaults: defaults) == false)
+        #expect(OpenSkyPrior.take(now: now.addingTimeInterval(31), defaults: defaults) == nil)
+        // An old value is never used.
+        OpenSkyPrior.store(now: now, defaults: defaults)
+        #expect(OpenSkyPrior.take(now: now.addingTimeInterval(OpenSkyPrior.lifetime+1), defaults: defaults) == nil)
+        // Night vision already on before the tap stays on.
+        OpenSkyPrior.store(now: now, defaults: defaults)
+        #expect(OpenSkyPrior.take(now: now, defaults: defaults) == true)
+        defaults.removePersistentDomain(forName: suite)
+    }
     @MainActor @Test func nearbyParkIsFoundOnlyWhenClose() {
         let model = PlanModel()
         #expect(model.fieldPark(latitude: 33.87, longitude: -115.90)?.id == "jotr")
