@@ -61,6 +61,10 @@ private func jpeg(_ color: UIColor) throws -> Data {
         #expect(FileManager.default.fileExists(atPath: staged.appendingPathComponent("entries.json").path))
         JournalExport.clear(staged)
         #expect(!FileManager.default.fileExists(atPath: staged.path))
+        // A package says when it was staged in its name; an hour on, the next export sweeps it.
+        let named=JournalExport.folder.appendingPathComponent("1700000000-\(UUID().uuidString).nyxjournal", isDirectory: true)
+        #expect(JournalExport.stagedAt(named) == Date(timeIntervalSince1970: 1_700_000_000))
+        #expect(JournalExport.stagedAt(JournalExport.folder.appendingPathComponent("leftover")) == nil)
     }
     /// Clearing the picker after a load changes it to an empty pick: that pick loads nothing and
     /// leaves the last load's message ("This photo is too large…") on screen.
