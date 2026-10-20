@@ -90,48 +90,65 @@ final class MoonHaptics {
     static let settingKey="moonHaptics"
     static var enabled: Bool { supported && (UserDefaults.standard.object(forKey:settingKey) as? Bool ?? true) }
     private var engine: CHHapticEngine?
-    /// "Feel tonight", while it plays.
-    private var night: CHHapticPatternPlayer?
+    /// "Feel tonight", while it plays: the hum and the moments marked over it.
+    private var night: [CHHapticPatternPlayer]=[]
+    /// Events and the parameter curves that shape them, played as one pattern.
+    struct Layer { var events:[CHHapticEvent]; var curves:[CHHapticParameterCurve]=[] }
 
     func play(_ texture: MoonTexture) {
-        var events=texture.taps.map { tap in
-            CHHapticEvent(eventType:.hapticTransient,parameters:[
-                CHHapticEventParameter(parameterID:.hapticIntensity,value:Float(tap.intensity)),
-                CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(tap.sharpness))],relativeTime:tap.time)
-        }
-        var curves:[CHHapticParameterCurve]=[]
+        _=start(Self.layers(texture))
+    }
+    /// The Moon's texture as layers started together: the taps at their own strength, and the hum
+    /// on a layer of its own, since a pattern's intensity curve (`hapticIntensityControl`) scales
+    /// every event in that pattern, taps included.
+    static func layers(_ texture: MoonTexture) -> [Layer] {
+        var layers=[Layer(events:texture.taps.map(transient))]
         if let hum=texture.hum {
-            events.append(CHHapticEvent(eventType:.hapticContinuous,parameters:[
+            layers.append(Layer(events:[CHHapticEvent(eventType:.hapticContinuous,parameters:[
                 CHHapticEventParameter(parameterID:.hapticIntensity,value:Float(hum.intensity)),
-                CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(hum.sharpness))],relativeTime:0,duration:hum.duration))
-            curves.append(CHHapticParameterCurve(parameterID:.hapticIntensityControl,controlPoints:[
-                CHHapticParameterCurve.ControlPoint(relativeTime:0,value:Float(hum.from)),
-                CHHapticParameterCurve.ControlPoint(relativeTime:hum.duration,value:Float(hum.to))],relativeTime:0))
+                CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(hum.sharpness))],relativeTime:0,duration:hum.duration)],
+                curves:[CHHapticParameterCurve(parameterID:.hapticIntensityControl,controlPoints:[
+                    CHHapticParameterCurve.ControlPoint(relativeTime:0,value:Float(hum.from)),
+                    CHHapticParameterCurve.ControlPoint(relativeTime:hum.duration,value:Float(hum.to))],relativeTime:0)]))
         }
-        play(events:events,curves:curves)
+        return layers.filter { !$0.events.isEmpty }
     }
     /// Plays "Feel tonight"; a second call, or `stop()`, ends the one playing.
     func play(_ touch: NightTouch) {
         stop()
-        var events=[CHHapticEvent(eventType:.hapticContinuous,parameters:[
+        night=start(Self.layers(touch))
+    }
+    /// "Feel tonight" as two layers started together: the hum, shaped by its strength curves, and
+    /// moonrise, moonset and the core's swells, which those curves must not dim (at dusk the hum is
+    /// at 12%, and a moonrise tap in the same pattern would be too).
+    static func layers(_ touch: NightTouch) -> [Layer] {
+        let hum=Layer(events:[CHHapticEvent(eventType:.hapticContinuous,parameters:[
             CHHapticEventParameter(parameterID:.hapticIntensity,value:1),
-            CHHapticEventParameter(parameterID:.hapticSharpness,value:0.12)],relativeTime:0,duration:touch.duration)]
-        for tap in touch.taps {
-            events.append(CHHapticEvent(eventType:.hapticTransient,parameters:[
-                CHHapticEventParameter(parameterID:.hapticIntensity,value:Float(tap.intensity)),
-                CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(tap.sharpness))],relativeTime:tap.time))
-        }
-        for swell in touch.swells {
-            events.append(CHHapticEvent(eventType:.hapticContinuous,parameters:[
+            CHHapticEventParameter(parameterID:.hapticSharpness,value:0.12)],relativeTime:0,duration:touch.duration)],curves:humCurves(touch))
+        let swells=touch.swells.map { swell in
+            CHHapticEvent(eventType:.hapticContinuous,parameters:[
                 CHHapticEventParameter(parameterID:.hapticIntensity,value:0.9),
                 CHHapticEventParameter(parameterID:.hapticSharpness,value:0.45),
                 CHHapticEventParameter(parameterID:.attackTime,value:1.4),
-                CHHapticEventParameter(parameterID:.releaseTime,value:1.4)],relativeTime:swell.time,duration:swell.duration))
+                CHHapticEventParameter(parameterID:.releaseTime,value:1.4)],relativeTime:swell.time,duration:swell.duration)
         }
-        guard Self.supported, let engine=ready(), let pattern=try? CHHapticPattern(events:events,parameterCurves:Self.humCurves(touch)),
-              let player=try? engine.makePlayer(with:pattern) else { return }
-        try? player.start(atTime:CHHapticTimeImmediate)
-        night=player
+        let marks=Layer(events:touch.taps.map(transient)+swells)
+        return [hum,marks].filter { !$0.events.isEmpty }
+    }
+    private static func transient(_ tap: MoonTexture.Tap) -> CHHapticEvent {
+        CHHapticEvent(eventType:.hapticTransient,parameters:[
+            CHHapticEventParameter(parameterID:.hapticIntensity,value:Float(tap.intensity)),
+            CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(tap.sharpness))],relativeTime:tap.time)
+    }
+    /// Starts every layer at one engine time, so their moments stay aligned; nothing when a layer
+    /// cannot be made (all or none).
+    private func start(_ layers: [Layer]) -> [CHHapticPatternPlayer] {
+        guard Self.supported, !layers.isEmpty, let engine=ready() else { return [] }
+        let players=layers.compactMap { layer in (try? CHHapticPattern(events:layer.events,parameterCurves:layer.curves)).flatMap { try? engine.makePlayer(with:$0) } }
+        guard players.count == layers.count else { return [] }
+        let at=engine.currentTime
+        for player in players { try? player.start(atTime:at) }
+        return players
     }
     /// The hum's strength as consecutive intensity curves of at most 16 points each (Core Haptics'
     /// limit per curve), sharing their joins.
@@ -148,8 +165,8 @@ final class MoonHaptics {
         return curves
     }
     func stop() {
-        try? night?.stop(atTime:CHHapticTimeImmediate)
-        night=nil
+        for player in night { try? player.stop(atTime:CHHapticTimeImmediate) }
+        night=[]
     }
     /// The sky arc under a finger (`ArcTouch`): one long, low hum whose strength follows the finger,
     /// with a firm, deep knock at true darkness's edges and, at moonrise and moonset, the same sharp
@@ -180,22 +197,14 @@ final class MoonHaptics {
                 CHHapticEventParameter(parameterID:.hapticIntensity,value:moment.firm ? 1 : 0.6),
                 CHHapticEventParameter(parameterID:.hapticSharpness,value:moment.firm ? 0.35 : 1)],relativeTime:Double(k)*0.04)
         }
-        if !events.isEmpty { play(events:events,curves:[]) }
+        if !events.isEmpty { _=start([Layer(events:events)]) }
     }
     func endArcTouch() {
         try? arc?.stop(atTime:CHHapticTimeImmediate)
         arc=nil
     }
     func detent(score: Int) {
-        let tap=MoonTexture.detent(score:score)
-        play(events:[CHHapticEvent(eventType:.hapticTransient,parameters:[
-            CHHapticEventParameter(parameterID:.hapticIntensity,value:Float(tap.intensity)),
-            CHHapticEventParameter(parameterID:.hapticSharpness,value:Float(tap.sharpness))],relativeTime:0)],curves:[])
-    }
-    private func play(events:[CHHapticEvent],curves:[CHHapticParameterCurve]) {
-        guard Self.supported, let engine=ready(), let pattern=try? CHHapticPattern(events:events,parameterCurves:curves),
-              let player=try? engine.makePlayer(with:pattern) else { return }
-        try? player.start(atTime:CHHapticTimeImmediate)
+        _=start([Layer(events:[Self.transient(MoonTexture.detent(score:score))])])
     }
     /// The engine, started; rebuilt if the system stopped it (a call, the app in the background).
     private func ready()->CHHapticEngine? {
