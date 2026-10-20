@@ -13,9 +13,10 @@ extension ParkAlert {
     /// place counts, and so does anything NPS files as "Park Closure" unless it is only about an
     /// amenity ("No Water or Bathrooms at Kīpahulu", "Gas Pumps … Closed at Night").
     /// A reopening is not a closure only when the headline says it has already happened ("Tioga Road
-    /// Has Reopened", "Kolob Canyons Road Now Open", "Road Reopened After Closure"), with nothing to
-    /// say it is still to come or only in part ("Reopens May 30", "Expected to Reopen", "Reopening
-    /// Delayed", "Partial Reopening", "Will Reopen When Safe", "Open Until Dusk") and nothing still
+    /// Has Reopened", "Road Reopened After Closure"; "Now Open" only when NPS did not file it as a
+    /// closure), with nothing to say it is still to come or only in part ("Reopens May 30", "Expected
+    /// to Reopen", "Reopening Delayed", "Partial Reopening", "Will Reopen When Safe", "Open Until
+    /// Dusk") and nothing still
     /// shut ("Road Reopened, Trail Closed"). When in doubt, a closure: a missed one is the worst
     /// outcome, a closure shown that has just ended only costs a check.
     nonisolated var kind: AlertKind {
@@ -23,8 +24,12 @@ extension ParkAlert {
         func has(_ words: [String]) -> Bool { words.contains { text.contains(" \($0) ") } }
         let shutNow=has(["remains closed","remain closed","still closed","stays closed","remains shut","still shut","remains inaccessible","remains impassable"])
             || has(["closed","closes","closing","shut"]) && !has(["after being closed","was closed","had been closed"])
-        let reopened=has(["reopened","now open","is open","are open"]) && !has(Self.notYetWords) && !shutNow
-        let closing = !reopened && has(Self.closureWords)
+        let settled = !has(Self.notYetWords) && !shutNow
+        // Only a reopening in the past tense lifts what NPS files as a closure: "Road Is Open to
+        // High-Clearance Vehicles" under "Park Closure" still stands beside the score.
+        let reopened=has(["reopened"]) && settled
+        let openNow=reopened || has(["now open","is open","are open"]) && settled
+        let closing = !openNow && has(Self.closureWords)
         let amenityOnly=has(Self.amenityWords) && !has(Self.placeWords)
         let category=category.lowercased()
         if (closing || category.contains("closure") && !reopened) && !amenityOnly { return .closure }
